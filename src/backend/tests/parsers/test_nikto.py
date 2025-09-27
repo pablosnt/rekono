@@ -1,7 +1,9 @@
+from django.test import TestCase
+
 from findings.enums import PathType, Severity
 from findings.models import Path, Vulnerability
-from tests.cases import ToolTestCase
-from tests.framework import ToolTest
+from tests.framework import ParserTest
+from tests.framework.cases import ParserTestCase
 
 expected = [
     {
@@ -99,9 +101,9 @@ expected = [
 ]
 
 
-class NiktoTest(ToolTest):
+class NiktoTest(ParserTest, TestCase):
     tool_name = "Nikto"
     cases = [
-        ToolTestCase("2022-default.xml", [{k: v for k, v in item.items() if k != "reference"} for item in expected]),
-        ToolTestCase("2025-default.xml", expected),
+        ParserTestCase("2022-default.xml", [{k: v for k, v in item.items() if k != "reference"} for item in expected]),
+        ParserTestCase("2025-default.xml", expected),
     ]

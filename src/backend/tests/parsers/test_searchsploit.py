@@ -1,12 +1,14 @@
+from django.test import TestCase
+
 from findings.models import Exploit
-from tests.cases import ToolTestCase
-from tests.framework import ToolTest
+from tests.framework import ParserTest
+from tests.framework.cases import ParserTestCase
 
 
-class SearchsploitTest(ToolTest):
+class SearchsploitTest(ParserTest, TestCase):
     tool_name = "SearchSploit"
     cases = [
-        ToolTestCase(
+        ParserTestCase(
             "exploits.json",
             [
                 {
@@ -145,5 +147,5 @@ class SearchsploitTest(ToolTest):
                 },
             ],
         ),
-        ToolTestCase("nothing.json"),
+        ParserTestCase("nothing.json"),
     ]

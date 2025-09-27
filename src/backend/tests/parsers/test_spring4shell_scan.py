@@ -1,30 +1,20 @@
+from django.test import TestCase
+
 from findings.models import Vulnerability
-from tests.cases import ToolTestCase
-from tests.framework import ToolTest
+from tests.framework import ParserTest
+from tests.framework.cases import ParserTestCase
 
 
-class Spring4shellscanTest(ToolTest):
+class Spring4shellscanTest(ParserTest, TestCase):
     tool_name = "Spring4Shell Scan"
     cases = [
-        ToolTestCase(
+        ParserTestCase(
             "cve_2022_22963.txt",
-            [
-                {
-                    "model": Vulnerability,
-                    "name": "Spring Cloud RCE",
-                    "cve": "CVE-2022-22963",
-                }
-            ],
+            [{"model": Vulnerability, "name": "Spring Cloud RCE", "cve": "CVE-2022-22963"}],
         ),
-        ToolTestCase(
+        ParserTestCase(
             "cve_2022_22965.txt",
-            [
-                {
-                    "model": Vulnerability,
-                    "name": "Spring4Shell RCE",
-                    "cve": "CVE-2022-22965",
-                }
-            ],
+            [{"model": Vulnerability, "name": "Spring4Shell RCE", "cve": "CVE-2022-22965"}],
         ),
-        ToolTestCase("not_vulnerable.txt"),
+        ParserTestCase("not_vulnerable.txt"),
     ]

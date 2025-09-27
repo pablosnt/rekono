@@ -1,13 +1,33 @@
+"""Django REST framework serializers for input type management.
+
+Serializer classes for converting input type models to/from JSON
+for API operations with essential field exposure.
+"""
+
 from rest_framework.serializers import ModelSerializer
 
 from input_types.models import InputType
 
 
 class InputTypeSerializer(ModelSerializer):
-    """Serializer to get the input type data via API."""
+    """Serializer for InputType model.
+
+    Handles serialization and deserialization of InputType objects for API operations.
+    Exposes the core fields needed for input type configuration.
+
+    Attributes:
+        name (str): The input type name from InputTypeName enum.
+        model (str): Reference to the primary Django model.
+        fallback_model (str): Reference to the fallback Django model.
+    """
 
     class Meta:
-        """Serializer metadata."""
+        """Meta configuration for the InputTypeSerializer.
+
+        Attributes:
+            model (Model): The InputType model to serialize.
+            fields (tuple): Field names to include in serialization.
+        """
 
         model = InputType
         fields = (

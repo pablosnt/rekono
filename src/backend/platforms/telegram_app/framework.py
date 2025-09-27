@@ -1,5 +1,11 @@
+"""Base framework for Telegram Bot integration with Rekono.
+
+Provides the foundational classes and utilities for Telegram Bot operations
+including application management, message handling, and token validation.
+"""
+
 import asyncio
-import logging
+from functools import cached_property
 from typing import Any
 
 from telegram.constants import ParseMode
@@ -7,41 +13,99 @@ from telegram.error import Forbidden, InvalidToken, NetworkError
 from telegram.ext import Application
 from telegram.helpers import escape_markdown
 
+from framework.logging import LoggingEntity
 from platforms.telegram_app.models import TelegramChat, TelegramSettings
 
-logger = logging.getLogger()
 
+class BaseTelegram(LoggingEntity):
+    """Base class for Telegram Bot integration with application management.
 
-class BaseTelegram:
+    Provides core functionality for Telegram Bot operations including application
+    initialization, message sending, token validation, and error handling.
+
+    Attributes:
+        date_format (str): Standard date format for message timestamps.
+    """
+
+    date_format = "%Y-%m-%d %H:%M:%S"
+
+    @cached_property
+    def settings(self) -> TelegramSettings:
+        """Get Telegram Bot configuration settings from database.
+
+        Returns:
+            TelegramSettings: Telegram configuration instance or None if not configured.
+        """
+        return TelegramSettings.objects.first()
+
     def __init__(self) -> None:
-        self.settings = TelegramSettings.objects.first()
-        self.app = self.initialize()
-        self.date_format = "%Y-%m-%d %H:%M:%S"
+        """Initialize the Telegram Bot base class.
 
-    def initialize(self) -> Application | None:
-        self.app = self._get_app()
-        if self.app and self.app.bot:
+        Sets up the bot application and performs initial configuration.
+        """
+        self.initialize()
+
+    def initialize(self) -> None:
+        """Initialize the Telegram Bot application.
+
+        Initializes the bot application if available and handles authentication errors.
+
+        Returns:
+            Application | None: The initialized application or None if failed.
+        """
+        if self.app and self.app.bot:  # pytype: disable=attribute-error
             try:
-                asyncio.run(self.app.bot.initialize())
+                asyncio.run(self.app.bot.initialize())  # pytype: disable=attribute-error
             except (InvalidToken, Forbidden):
-                self._handle_invalid_token()
-        return self.app
+                self.handle_invalid_token()
 
-    def get_bot_name(self) -> str | None:
-        return self.app.bot.username if self.app and self.app.bot else None
+    @cached_property
+    def app(self) -> Application | None:
+        """Get the Telegram Bot application instance.
 
-    def _get_app(self) -> Application | None:
+        Creates and configures the Telegram Bot application using the stored token.
+
+        Returns:
+            Application | None: The configured bot application or None if no token.
+        """
         if self.settings and self.settings.secret:
             try:
-                return Application.builder().token(self.settings.secret).post_init(self._post_init).build()
+                return Application.builder().token(self.settings.secret).post_init(self.post_init).build()
             except (InvalidToken, Forbidden):
-                self._handle_invalid_token()
+                self.handle_invalid_token()
         return None
 
-    async def _post_init(self, application: Application) -> None:
+    @cached_property
+    def bot_name(self) -> str | None:
+        """Get the Telegram Bot username.
+
+        Returns:
+            str | None: The bot username if available, None otherwise.
+        """
+        return self.app.bot.username if self.app and self.app.bot else None
+
+    async def post_init(self, application: Application) -> None:
+        """Post-initialization hook for the Telegram application.
+
+        Override this method to add custom initialization logic after
+        the application is created but before it starts.
+
+        Args:
+            application (Application): The Telegram Bot application instance.
+        """
         pass
 
-    def _send_message(self, chat: TelegramChat, message: str, reply_markup: Any = None) -> None:
+    def send_message(self, chat: TelegramChat, message: str, reply_markup: Any = None) -> None:
+        """Send a message to a Telegram chat.
+
+        Sends a formatted message to the specified Telegram chat using Markdown V2
+        parsing and handles network errors gracefully.
+
+        Args:
+            chat (TelegramChat): The target chat for the message.
+            message (str): The message content to send.
+            reply_markup (Any, optional): Keyboard markup for interactive messages.
+        """
         if self.app and self.app.bot:
             try:
                 asyncio.run(
@@ -55,12 +119,28 @@ class BaseTelegram:
             except NetworkError:
                 pass
 
-    def _escape(self, value: str) -> str:
+    def escape(self, value: str) -> str:
+        """Escape text for Telegram Markdown V2 formatting.
+
+        Args:
+            value (str): The text to escape.
+
+        Returns:
+            str: The escaped text safe for Markdown V2 parsing.
+        """
         return escape_markdown(value, version=2)
 
-    def _handle_invalid_token(self, log_error: bool = True) -> None:
+    def handle_invalid_token(self, log_error: bool = True) -> None:
+        """Handle invalid Telegram Bot token errors.
+
+        Clears the invalid token from settings, resets the cached application,
+        and optionally logs the error.
+
+        Args:
+            log_error (bool): Whether to log the authentication error. Defaults to True.
+        """
         self.settings.secret = None
         self.settings.save(update_fields=["_token"])
-        self.app = None
+        del self.app  # Remove cached_property value, so it will be regenerated
         if log_error:
-            logger.error("[Telegram] Authentication error")
+            self.logger.error("[Telegram] Authentication error")

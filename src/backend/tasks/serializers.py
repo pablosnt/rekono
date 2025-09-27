@@ -1,3 +1,10 @@
+"""Django REST framework serializers for task models.
+
+Provides serializer classes for task creation, validation, and conversion between
+Django model instances and JSON data. Includes complex validation logic for
+task configuration and automatic queue management.
+"""
+
 import math
 from typing import Any, cast
 
@@ -21,28 +28,35 @@ from users.serializers import SimpleUserSerializer
 
 
 class TaskSerializer(RelatedNotesSerializer):
+    """Serializer for Task model with comprehensive validation and computed fields.
+
+    Handles serialization of Task instances including complex validation logic
+    for mutually exclusive process/configuration fields, intensity validation,
+    and automatic task queuing upon creation.
+
+    Attributes:
+        target_id (PrimaryKeyRelatedField): Target ID for task creation (write-only)
+        target (SimpleTargetSerializer): Serialized target information (read-only)
+        process_id (PrimaryKeyRelatedField): Process ID for multi-step tasks (write-only, optional)
+        process (SimpleProcessSerializer): Serialized process information (read-only)
+        configuration_id (PrimaryKeyRelatedField): Tool configuration ID for single-tool tasks (write-only, optional)
+        configuration (ConfigurationSerializer): Serialized configuration information (read-only)
+        intensity (IntegerChoicesField): Execution intensity level
+        executor (SimpleUserSerializer): Task creator information (read-only)
+        status (SerializerMethodField): Computed task status based on execution states
+        progress (SerializerMethodField): Computed progress percentage (0-100)
+    """
+
     target_id = PrimaryKeyRelatedField(
-        many=False,
-        write_only=True,
-        required=True,
-        source="target",
-        queryset=Target.objects.all(),
+        many=False, write_only=True, required=True, source="target", queryset=Target.objects.all()
     )
     target = SimpleTargetSerializer(many=False, read_only=True)
     process_id = PrimaryKeyRelatedField(
-        many=False,
-        write_only=True,
-        required=False,
-        source="process",
-        queryset=Process.objects.all(),
+        many=False, write_only=True, required=False, source="process", queryset=Process.objects.all()
     )
     process = SimpleProcessSerializer(many=False, read_only=True)
     configuration_id = PrimaryKeyRelatedField(
-        many=False,
-        write_only=True,
-        required=False,
-        source="configuration",
-        queryset=Configuration.objects.all(),
+        many=False, write_only=True, required=False, source="configuration", queryset=Configuration.objects.all()
     )
     configuration = ConfigurationSerializer(many=False, read_only=True)
     intensity = IntegerChoicesField(model=IntensityEnum, required=False)
@@ -51,6 +65,14 @@ class TaskSerializer(RelatedNotesSerializer):
     progress = SerializerMethodField(read_only=True)
 
     class Meta:
+        """Meta configuration for the TaskSerializer.
+
+        Attributes:
+            model (Model): The Task model to serialize
+            fields (tuple): Field names to include in serialization
+            read_only_fields (tuple): Fields that cannot be modified
+        """
+
         model = Task
         fields = (
             "id",
@@ -92,27 +114,45 @@ class TaskSerializer(RelatedNotesSerializer):
         )
 
     def get_status(self, instance: Any) -> str:
+        """Get the computed status of the task based on execution states.
+
+        Determines task status by analyzing the status of all associated executions.
+        Follows priority: RUNNING > CANCELLED > ERROR > COMPLETED > REQUESTED
+
+        Args:
+            instance (Task): The task instance being serialized
+
+        Returns:
+            str: The computed task status
+        """
         for status in [Status.RUNNING, Status.CANCELLED, Status.ERROR]:
             if instance.executions.filter(status=status).count() > 0:
                 return status
-        if instance.executions.count() == 0:
-            return Status.REQUESTED
-        elif instance.executions.exclude(status__in=[Status.COMPLETED, Status.SKIPPED]).count() == 0:
+        if (
+            instance.executions.count() > 0
+            and instance.executions.exclude(status__in=[Status.COMPLETED, Status.SKIPPED]).count() == 0
+        ):
             return Status.COMPLETED
         return Status.REQUESTED
 
     def get_progress(self, instance: Any) -> int:
+        """Get the completion progress percentage for the task.
+
+        Calculates progress based on the ratio of completed executions
+        (including ERROR, COMPLETED, SKIPPED, CANCELLED) to total executions.
+
+        Args:
+            instance (Task): The task instance being serialized
+
+        Returns:
+            int: Progress percentage from 0 to 100
+        """
         total = instance.executions.count()
         return (
             math.ceil(
                 (
                     instance.executions.filter(
-                        status__in=[
-                            Status.ERROR,
-                            Status.COMPLETED,
-                            Status.SKIPPED,
-                            Status.CANCELLED,
-                        ]
+                        status__in=[Status.ERROR, Status.COMPLETED, Status.SKIPPED, Status.CANCELLED]
                     ).count()
                     / total
                 )
@@ -123,13 +163,29 @@ class TaskSerializer(RelatedNotesSerializer):
         )
 
     def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
+        """Validate task configuration and ensure data consistency.
+
+        Performs complex validation including:
+        - Mutually exclusive process/configuration validation
+        - Tool intensity compatibility checks
+        - Input type validation for tool configurations
+        - Repeat scheduling validation
+
+        Args:
+            attrs (dict[str, Any]): The attributes to validate
+
+        Returns:
+            dict[str, Any]: The validated attributes
+
+        Raises:
+            ValidationError: If validation fails for any reason
+        """
         if not attrs.get("intensity"):
             attrs["intensity"] = IntensityEnum.NORMAL
         if attrs.get("configuration"):
             attrs["process"] = None
             if not Intensity.objects.filter(
-                tool=cast(Configuration, attrs.get("configuration")).tool,
-                value=attrs.get("intensity"),
+                tool=cast(Configuration, attrs.get("configuration")).tool, value=attrs.get("intensity")
             ).exists():
                 raise ValidationError(
                     f"Invalid intensity {attrs['intensity']} for tool {cast(Configuration, attrs.get('configuration')).tool.name}",
@@ -140,8 +196,7 @@ class TaskSerializer(RelatedNotesSerializer):
                 (InputTypeName.VULNERABILITY, "input_vulnerabilities"),
             ]:
                 if not Input.objects.filter(
-                    argument__tool=cast(Configuration, attrs.get("configuration")).tool,
-                    type__name=input_type,
+                    argument__tool=cast(Configuration, attrs.get("configuration")).tool, type__name=input_type
                 ):
                     attrs[field] = []
         elif attrs.get("process"):
@@ -161,13 +216,16 @@ class TaskSerializer(RelatedNotesSerializer):
         return super().validate(attrs)
 
     def create(self, validated_data: dict[str, Any]) -> Task:
-        """Create instance from validated data.
+        """Create a new task and automatically enqueue it for execution.
+
+        Creates the task instance and immediately adds it to the task queue
+        for processing. Handles both immediate and scheduled task execution.
 
         Args:
-            validated_data (dict[str, Any]): Validated data
+            validated_data (dict[str, Any]): The validated data for creating the task
 
         Returns:
-            Task: Created instance
+            Task: The created Task instance
         """
         task = super().create(validated_data)
         TasksQueue().enqueue(task)

@@ -1,3 +1,9 @@
+"""Django REST framework views for authentication models.
+
+Provides REST API views for authentication records with CRUD operations
+and proper authentication and authorization controls.
+"""
+
 from rest_framework.permissions import IsAuthenticated
 
 from authentications.filters import AuthenticationFilter
@@ -9,11 +15,23 @@ from security.authorization.permissions import (
     RekonoModelPermission,
 )
 
-# Create your views here.
-
 
 class AuthenticationViewSet(BaseViewSet):
-    """Authentication ViewSet that includes: get, retrieve, create, and delete features."""
+    """ViewSet for Authentication model CRUD operations.
+
+    Provides REST API endpoints for managing authentication records with
+    filtering, searching, and ordering capabilities. Enforces project-based
+    authorization and user authentication.
+
+    Attributes:
+        queryset (QuerySet): Authentication model instances
+        serializer_class (Serializer): Serializer for Authentication model
+        filterset_class (FilterSet): Filter class for query filtering
+        permission_classes (list): Required permissions for access control
+        search_fields (list): Fields available for text search
+        ordering_fields (list): Fields available for result ordering
+        http_method_names (list): Allowed HTTP methods (GET, POST, DELETE)
+    """
 
     queryset = Authentication.objects.all()
     serializer_class = AuthenticationSerializer

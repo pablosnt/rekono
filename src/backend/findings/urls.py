@@ -1,3 +1,9 @@
+"""URL routing configuration for findings REST API endpoints.
+
+Defines REST API routes for all finding types using Django REST Framework
+router with ViewSet registration for comprehensive findings management.
+"""
+
 from rest_framework.routers import SimpleRouter
 
 from findings.views import (
@@ -10,8 +16,6 @@ from findings.views import (
     TechnologyViewSet,
     VulnerabilityViewSet,
 )
-
-# Register your views here.
 
 router = SimpleRouter()
 router.register("osint", OSINTViewSet)

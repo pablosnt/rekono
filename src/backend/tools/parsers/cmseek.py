@@ -1,3 +1,9 @@
+"""CMSeek CMS detection and vulnerability scanning output parser.
+
+Processes CMSeek JSON output to extract CMS technology fingerprints, discovered
+paths, vulnerabilities, and credential findings from CMS security scans.
+"""
+
 from urllib.parse import urlparse
 
 from findings.enums import PathType, Severity
@@ -6,9 +12,24 @@ from tools.parsers.base import BaseParser
 
 
 class Cmseek(BaseParser):
-    def _parse_report(self) -> None:
-        data = self._load_report_as_json_dict()
-        if not data.get("cms_name") or not data.get("cms_id"):
+    """Parser for CMSeek JSON output files.
+
+    Extracts CMS fingerprinting results including detected technologies, versions,
+    configuration files, backup files, user enumerations, and known vulnerabilities.
+    Processes comprehensive CMS security analysis data.
+
+    Attributes:
+        Inherits all attributes from BaseParser
+    """
+
+    def _parse(self) -> None:
+        """Parse CMSeek JSON output and extract CMS security findings.
+
+        Processes JSON scan results to create Technology, Path, Vulnerability,
+        and Credential findings from CMS detection and security analysis.
+        """
+        data = self.load_json_report()
+        if not data or not isinstance(data, dict) or not data.get("cms_name") or not data.get("cms_id"):
             return
         version = data.get(f"{data.get('cms_id')}_version") or data.get(f"{data.get('cms_name')}_version")
         base_url = data.get("url", "")
@@ -44,21 +65,12 @@ class Cmseek(BaseParser):
             if paths:
                 for path in paths:
                     if path and path != "/":
-                        self.create_finding(
-                            Path,
-                            path=path.replace("//", "/"),
-                            type=PathType.ENDPOINT,
-                        )
+                        self.create_finding(Path, path=path.replace("//", "/"), type=PathType.ENDPOINT)
                 for search_key, vulnerability_name, severity, cwe in [
                     # CWE-530: Exposure of Backup File to an Unauthorized Control Sphere
                     ("backup_file", "Backup files found", Severity.HIGH, "CWE-530"),
                     # CWE-497: Exposure of Sensitive System Information to an Unauthorized Control Sphere
-                    (
-                        "config_file",
-                        "Configuration files found",
-                        Severity.MEDIUM,
-                        "CWE-497",
-                    ),
+                    ("config_file", "Configuration files found", Severity.MEDIUM, "CWE-497"),
                 ]:
                     if search_key in key:
                         self.create_finding(
@@ -72,11 +84,9 @@ class Cmseek(BaseParser):
             elif "_users" in key and value != "disabled":
                 for user in value.split(","):
                     if user:
+                        # TODO: If context is not better used somewhere, we should remove it from database
                         self.create_finding(
-                            Credential,
-                            technology=cms,
-                            username=user.strip(),
-                            context=f"{cms.name} username",
+                            Credential, technology=cms, username=user.strip(), context=f"{cms.name} username"
                         )
             elif "_debug_mode" in key and value != "disabled":
                 self.create_finding(
@@ -93,7 +103,7 @@ class Cmseek(BaseParser):
                         Vulnerability,
                         technology=cms,
                         name=vulnerability.get("name", "").strip(),
-                        cve=(vulnerability.get("cve").strip() if vulnerability.get("cve") is not None else None),
+                        cve=vulnerability.get("cve").strip() if vulnerability.get("cve") is not None else None,
                     )
             elif "Version" in value and "," in value:
                 for component in value.split(","):

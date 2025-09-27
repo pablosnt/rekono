@@ -1,13 +1,15 @@
+from django.test import TestCase
+
 from findings.enums import Severity
 from findings.models import Technology, Vulnerability
-from tests.cases import ToolTestCase
-from tests.framework import ToolTest
+from tests.framework import ParserTest
+from tests.framework.cases import ParserTestCase
 
 
-class SslyzeTest(ToolTest):
+class SslyzeTest(ParserTest, TestCase):
     tool_name = "SSLyze"
     cases = [
-        ToolTestCase(
+        ParserTestCase(
             "protocols.json",
             [
                 {"model": Technology, "name": "TLS", "version": "1.0"},
@@ -37,16 +39,12 @@ class SslyzeTest(ToolTest):
                 },
             ],
         ),
-        ToolTestCase(
+        ParserTestCase(
             "vulnerabilities.json",
             [
                 {"model": Technology, "name": "Generic TLS"},
                 {"model": Vulnerability, "name": "Heartbleed", "cve": "CVE-2014-0160"},
-                {
-                    "model": Vulnerability,
-                    "name": "OpenSSL CSS Injection",
-                    "cve": "CVE-2014-0224",
-                },
+                {"model": Vulnerability, "name": "OpenSSL CSS Injection", "cve": "CVE-2014-0224"},
                 {
                     "model": Vulnerability,
                     "name": "ROBOT",
@@ -82,7 +80,7 @@ class SslyzeTest(ToolTest):
                 },
             ],
         ),
-        ToolTestCase(
+        ParserTestCase(
             "insecure-renegotiation.json",
             [
                 {"model": Technology, "name": "Generic TLS"},

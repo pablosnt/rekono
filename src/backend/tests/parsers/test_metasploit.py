@@ -1,12 +1,14 @@
+from django.test import TestCase
+
 from findings.models import Exploit
-from tests.cases import ToolTestCase
-from tests.framework import ToolTest
+from tests.framework import ParserTest
+from tests.framework.cases import ParserTestCase
 
 
-class MetasploitTest(ToolTest):
+class MetasploitTest(ParserTest, TestCase):
     tool_name = "Metasploit"
     cases = [
-        ToolTestCase(
+        ParserTestCase(
             "2022-exploits.txt",
             [
                 {
@@ -31,7 +33,7 @@ class MetasploitTest(ToolTest):
                 },
             ],
         ),
-        ToolTestCase(
+        ParserTestCase(
             "2025-exploits.txt",
             [
                 {
@@ -61,5 +63,5 @@ class MetasploitTest(ToolTest):
                 },
             ],
         ),
-        ToolTestCase("nothing.txt"),
+        ParserTestCase("nothing.txt"),
     ]

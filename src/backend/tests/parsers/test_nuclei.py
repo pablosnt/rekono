@@ -1,22 +1,18 @@
+from django.test import TestCase
+
 from findings.enums import Severity
 from findings.models import Credential, Technology, Vulnerability
-from tests.cases import ToolTestCase
-from tests.framework import ToolTest
+from tests.framework import ParserTest
+from tests.framework.cases import ParserTestCase
 
 
-class NucleiTest(ToolTest):
+class NucleiTest(ParserTest, TestCase):
     tool_name = "Nuclei"
     cases = [
-        ToolTestCase(
+        ParserTestCase(
             "2022-dvwa.json",
             [
-                {
-                    "model": Technology,
-                    "name": "PHP Detect",
-                    "version": None,
-                    "description": None,
-                    "reference": None,
-                },
+                {"model": Technology, "name": "PHP Detect", "version": None, "description": None, "reference": None},
                 {
                     "model": Technology,
                     "name": "Apache/2.4.25 (Debian)",
@@ -92,23 +88,13 @@ class NucleiTest(ToolTest):
                     "cwe": None,
                     "reference": None,
                 },
-                {
-                    "model": Credential,
-                    "username": "admin",
-                    "secret": "password",
-                    "context": "DVWA Default Login",
-                },
+                {"model": Credential, "username": "admin", "secret": "password", "context": "DVWA Default Login"},
             ],
         ),
-        ToolTestCase(
+        ParserTestCase(
             "2025-dvwa.json",
             [
-                {
-                    "model": Credential,
-                    "username": "admin",
-                    "secret": "password",
-                    "context": "DVWA Default Login",
-                },
+                {"model": Credential, "username": "admin", "secret": "password", "context": "DVWA Default Login"},
                 {
                     "model": Vulnerability,
                     "name": "Cookies without Secure attribute - Detect",

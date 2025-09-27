@@ -1,106 +1,51 @@
-from typing import Any
+from functools import cached_property
+
+from django.test import TestCase
 
 from executions.enums import Status
-from tests.cases import ApiTestCase
+from executions.models import Execution
+from security.authorization.roles import Role
 from tests.framework import ApiTest
+from tests.framework.cases import ApiTestCase
+from tests.framework.data import SetupProject
 
 # pytype: disable=wrong-arg-types
 
 
-class ExecutionTest(ApiTest):
+class ExecutionTest(ApiTest, TestCase):
     endpoint = "/api/executions/"
-    expected_str = "10.10.10.10 - Nmap - TCP ports"
+    expected_string = "10.10.10.10 - Nmap - TCP ports"
+    data = [SetupProject(executions_per_task=2), SetupProject()]
     cases = [
-        ApiTestCase(["admin2", "auditor2", "reader2"], "get", 200),
+        ApiTestCase(["not_members"]),
         ApiTestCase(
-            ["admin1", "auditor1", "reader1"],
-            "get",
-            200,
+            ["members"],
             expected=[
-                {
-                    "id": 3,
-                    "task": 2,
-                    "configuration": {
-                        "id": 1,
-                        "name": "TCP ports",
-                        "tool": {"id": 1, "name": "Nmap"},
-                    },
-                    "status": Status.COMPLETED.value,
-                },
-                {
-                    "id": 2,
-                    "task": 1,
-                    "configuration": {
-                        "id": 19,
-                        "name": "Simple scan",
-                        "tool": {"id": 3, "name": "theHarvester"},
-                    },
-                    "status": Status.RUNNING.value,
-                },
-                {
-                    "id": 1,
-                    "task": 1,
-                    "configuration": {
-                        "id": 19,
-                        "name": "Simple scan",
-                        "tool": {"id": 3, "name": "theHarvester"},
-                    },
-                    "status": Status.COMPLETED.value,
-                },
+                {"id": 3, "task": 2, "configuration": {"id": 1}, "status": Status.COMPLETED.value},
+                {"id": 2, "task": 1, "configuration": {"id": 1}, "status": Status.REQUESTED.value},
+                {"id": 1, "task": 1, "configuration": {"id": 1}, "status": Status.COMPLETED.value},
             ],
         ),
-        ApiTestCase(["admin2", "auditor2", "reader2"], "get", 404, endpoint="{endpoint}3/"),
+        ApiTestCase(["not_members"], 404, endpoint="3"),
         ApiTestCase(
-            ["admin1", "auditor1", "reader1"],
-            "get",
-            200,
-            expected={
-                "id": 3,
-                "task": 2,
-                "configuration": {
-                    "id": 1,
-                    "name": "TCP ports",
-                    "tool": {"id": 1, "name": "Nmap"},
-                },
-                "status": Status.COMPLETED.value,
-            },
-            endpoint="{endpoint}3/",
+            ["members"],
+            expected={"id": 3, "task": 2, "configuration": {"id": 1}, "status": Status.COMPLETED.value},
+            endpoint="3",
         ),
-        ApiTestCase(
-            ["admin1", "admin2", "auditor1", "auditor2", "reader1", "reader2"],
-            "get",
-            404,
-            endpoint="{endpoint}1/report/",
-        ),
-        ApiTestCase(
-            ["admin2", "auditor2", "reader2"],
-            "get",
-            404,
-            endpoint="{endpoint}2/report/",
-        ),
-        ApiTestCase(
-            ["admin1", "auditor1", "reader1"],
-            "get",
-            400,
-            endpoint="{endpoint}2/report/",
-        ),
-        ApiTestCase(
-            ["admin2", "auditor2", "reader2"],
-            "get",
-            404,
-            endpoint="{endpoint}3/report/",
-        ),
-        ApiTestCase(
-            ["admin1", "auditor1", "reader1"],
-            "get",
-            200,
-            endpoint="{endpoint}3/report/",
-        ),
+        ApiTestCase([Role.ADMIN, Role.AUDITOR, Role.READER], status_code=404, endpoint="1/report"),
+        ApiTestCase(["not_members"], status_code=404, endpoint="2/report"),
+        ApiTestCase(["members"], status_code=400, endpoint="2/report"),
+        ApiTestCase(["not_members"], status_code=404, endpoint="3/report"),
+        ApiTestCase(["members"], endpoint="3/report"),
     ]
 
-    def setUp(self) -> None:
-        super().setUp()
-        self._setup_tasks_and_executions()
+    def test_cases(self):
+        Execution.objects.filter(id__in=[1, 3]).update(status=Status.COMPLETED)
+        Execution.objects.filter(id=3).update(
+            output_file=self.data_dir / "reports" / "nmap" / "enumeration-vulners.xml"
+        )
+        return super().test_cases()
 
-    def _get_object(self) -> Any:
-        return self.execution3
+    @cached_property
+    def object(self) -> Execution:
+        return self.execution

@@ -1,7 +1,11 @@
+"""Django admin configuration for authentication models.
+
+Configures Django admin interface for authentication models, allowing
+administrative management of authentication records.
+"""
+
 from django.contrib import admin
 
 from authentications.models import Authentication
-
-# Register your models here.
 
 admin.site.register(Authentication)

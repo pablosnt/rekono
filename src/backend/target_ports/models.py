@@ -1,3 +1,10 @@
+"""Target port models for Rekono.
+
+Defines the TargetPort model for managing port-specific targeting within
+security testing workflows. Provides input parsing capabilities for security
+tool integration and supports authentication credential association.
+"""
+
 from typing import Any
 
 from django.core.validators import MaxValueValidator, MinValueValidator
@@ -8,39 +15,76 @@ from framework.models import BaseInput
 from security.validators.input_validator import Regex, Validator
 from targets.models import Target
 
-# Create your models here.
-
 
 class TargetPort(BaseInput):
-    """Target port model."""
+    """Model representing a target port for security testing operations.
+
+    Represents a specific port on a target that can be subject to security testing.
+    Extends BaseInput to provide parsing capabilities for integration with security
+    testing tools and frameworks. Supports optional path specification for
+    web-based services and authentication credential association.
+
+    Attributes:
+        target (ForeignKey): The target this port belongs to
+        port (IntegerField): Port number with validation (0-65535)
+        path (TextField): Optional path for web services (max 100 chars,
+                          validated)
+
+    Example:
+        Create a target port for HTTP service:
+
+        ```python
+        target_port = TargetPort.objects.create(
+            target=my_target,
+            port=80,
+            path="/api/v1"
+        )
+        ```
+    """
 
     target = models.ForeignKey(Target, related_name="target_ports", on_delete=models.CASCADE)
     port = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(65535)])
-    path = models.TextField(
-        max_length=100,
-        validators=[Validator(Regex.PATH.value, code="path")],
-        blank=True,
-        null=True,
-    )
+    path = models.TextField(max_length=100, validators=[Validator(Regex.PATH, code="path")], blank=True, null=True)
 
-    filters = [BaseInput.Filter(type=int, field="port")]
-    parse_mapping = {
+    _filters = [BaseInput.Filter(type=int, field="port")]
+    _parse_mapping = {
         InputKeyword.TARGET: lambda instance: instance.target.target,
         InputKeyword.HOST: lambda instance: instance.target.target,
         InputKeyword.PORT: "port",
         InputKeyword.PORTS: lambda instance: [instance.port],
-        InputKeyword.ENDPOINT: lambda instance: instance._clean_path(instance.path),
-        InputKeyword.URL: lambda instance: instance._get_url(
-            instance.target.target, instance.port, instance._clean_path(instance.path)
+        InputKeyword.ENDPOINT: lambda instance: instance.clean_path(instance.path),
+        InputKeyword.URL: lambda instance: instance.get_url(
+            instance.target.target, instance.port, instance.clean_path(instance.path)
         ),
     }
-    parse_dependencies = ["authentication"]
-    project_field = "target__project"
+    _parse_dependencies = ["authentication"]
+    _project_field = "target__project"
 
     class Meta:
+        """Meta configuration for the TargetPort model.
+
+        Defines database constraints and table-level configuration for
+        target port instances.
+
+        Attributes:
+            constraints (list): Database constraints including unique constraint
+                              for target-port combinations
+        """
+
         constraints = [models.UniqueConstraint(fields=["target", "port"], name="unique_target_port")]
 
     def parse(self, accumulated: dict[str, Any] = {}) -> dict[str, Any]:
+        """Parse target port data for security tool integration.
+
+        Extends the base parsing functionality to include comma-separated ports
+        format for tools that require specific port list formatting.
+
+        Args:
+            accumulated (dict): Accumulated parsing data from other inputs
+
+        Returns:
+            dict: Parsed data including port information in multiple formats
+        """
         output = super().parse(accumulated)
         output[InputKeyword.PORTS_COMMAS.name.lower()] = ",".join(
             [str(p) for p in output.get(InputKeyword.PORTS.name.lower()) or []]
@@ -48,9 +92,9 @@ class TargetPort(BaseInput):
         return output
 
     def __str__(self) -> str:
-        """Instance representation in text format.
+        """String representation of the target port.
 
         Returns:
-            str: String value that identifies this instance
+            str: String in format "target - port"
         """
         return f"{self.target.__str__()} - {self.port}"

@@ -1,7 +1,11 @@
+"""Django admin configuration for wordlist models.
+
+Registers wordlist models with the Django admin interface for
+administrative management and monitoring.
+"""
+
 from django.contrib import admin
 
 from wordlists.models import Wordlist
-
-# Register your models here.
 
 admin.site.register(Wordlist)

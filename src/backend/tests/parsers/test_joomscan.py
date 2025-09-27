@@ -1,14 +1,16 @@
+from django.test import TestCase
+
 from findings.enums import PathType, Severity
 from findings.models import Exploit, Path, Technology, Vulnerability
-from tests.cases import ToolTestCase
-from tests.framework import ToolTest
+from tests.framework import ParserTest
+from tests.framework.cases import ParserTestCase
 
 
-class JoomscanTest(ToolTest):
+class JoomscanTest(ParserTest, TestCase):
     tool_name = "JoomScan"
-    executor_arguments = ["-u", "http://10.10.10.10/"]
+    arguments = ["-u", "http://10.10.10.10/"]
     cases = [
-        ToolTestCase(
+        ParserTestCase(
             "exploitable.txt",
             [
                 {
@@ -45,36 +47,16 @@ class JoomscanTest(ToolTest):
                     "edb_id": 41157,
                     "reference": "https://www.exploit-db.com/exploits/41157/",
                 },
-                {
-                    "model": Vulnerability,
-                    "name": "Directory Traversal Vulnerability",
-                    "cve": "CVE-2015-8565",
-                },
-                {
-                    "model": Vulnerability,
-                    "name": "Directory Traversal Vulnerability",
-                    "cve": "CVE-2015-8564",
-                },
+                {"model": Vulnerability, "name": "Directory Traversal Vulnerability", "cve": "CVE-2015-8565"},
+                {"model": Vulnerability, "name": "Directory Traversal Vulnerability", "cve": "CVE-2015-8564"},
                 {
                     "model": Vulnerability,
                     "name": "Core Cross Site Request Forgery Vulnerability",
                     "cve": "CVE-2015-8563",
                 },
-                {
-                    "model": Vulnerability,
-                    "name": "Core Security Bypass Vulnerability",
-                    "cve": "CVE-2016-9081",
-                },
-                {
-                    "model": Vulnerability,
-                    "name": "Core Arbitrary File Upload Vulnerability",
-                    "cve": "CVE-2016-9836",
-                },
-                {
-                    "model": Vulnerability,
-                    "name": "Information Disclosure Vulnerability",
-                    "cve": "CVE-2016-9837",
-                },
+                {"model": Vulnerability, "name": "Core Security Bypass Vulnerability", "cve": "CVE-2016-9081"},
+                {"model": Vulnerability, "name": "Core Arbitrary File Upload Vulnerability", "cve": "CVE-2016-9836"},
+                {"model": Vulnerability, "name": "Information Disclosure Vulnerability", "cve": "CVE-2016-9837"},
                 {
                     "model": Vulnerability,
                     "name": "PHPMailer Remote Code Execution Vulnerability",
@@ -100,7 +82,7 @@ class JoomscanTest(ToolTest):
                 {"model": Path, "path": "/administrator/", "type": PathType.ENDPOINT},
             ],
         ),
-        ToolTestCase(
+        ParserTestCase(
             "not-exploitable.txt",
             [
                 {
@@ -111,11 +93,7 @@ class JoomscanTest(ToolTest):
                     "reference": "https://www.joomla.org/",
                 },
                 {"model": Path, "path": "/administrator/", "type": PathType.ENDPOINT},
-                {
-                    "model": Path,
-                    "path": "/backup/config.php.bak",
-                    "type": PathType.ENDPOINT,
-                },
+                {"model": Path, "path": "/backup/config.php.bak", "type": PathType.ENDPOINT},
                 {"model": Path, "path": "/config.php", "type": PathType.ENDPOINT},
                 {"model": Path, "path": "/error.php", "type": PathType.ENDPOINT},
                 {"model": Path, "path": "/static", "type": PathType.ENDPOINT},
@@ -156,5 +134,5 @@ class JoomscanTest(ToolTest):
                 },
             ],
         ),
-        ToolTestCase("not-joomla.txt"),
+        ParserTestCase("not-joomla.txt"),
     ]

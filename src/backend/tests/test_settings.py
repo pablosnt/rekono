@@ -1,8 +1,11 @@
-from typing import Any
+from functools import cached_property
 
+from django.test import TestCase
+
+from security.authorization.roles import Role
 from settings.models import Settings
-from tests.cases import ApiTestCase
-from tests.framework import ApiTest
+from tests.framework import ApiTestNoData
+from tests.framework.cases import ApiTestCase, PutApiTestCase
 
 # pytype: disable=wrong-arg-types
 
@@ -33,66 +36,20 @@ invalid_settings_1 = {
 invalid_settings_2 = {**invalid_settings_1, "max_uploaded_file_mb": 4096}
 
 
-class SettingsTest(ApiTest):
+class SettingsTest(ApiTestNoData, TestCase):
     endpoint = "/api/settings/"
-    expected_str = "Settings"
+    expected_string = "Settings"
     cases = [
-        ApiTestCase(
-            ["admin1", "admin2", "auditor1", "auditor2", "reader1", "reader2"],
-            "get",
-            200,
-            expected=[{"id": 1, **settings}],
-        ),
-        ApiTestCase(
-            ["admin1", "admin2", "auditor1", "auditor2", "reader1", "reader2"],
-            "get",
-            200,
-            expected={"id": 1, **settings},
-            endpoint="{endpoint}1/",
-        ),
-        ApiTestCase(
-            ["auditor1", "auditor2", "reader1", "reader2"],
-            "put",
-            403,
-            new_settings,
-            endpoint="{endpoint}1/",
-        ),
-        ApiTestCase(
-            ["admin1", "admin2"],
-            "put",
-            400,
-            invalid_settings_1,
-            endpoint="{endpoint}1/",
-        ),
-        ApiTestCase(
-            ["admin1", "admin2"],
-            "put",
-            400,
-            invalid_settings_2,
-            endpoint="{endpoint}1/",
-        ),
-        ApiTestCase(
-            ["admin1", "admin2"],
-            "put",
-            200,
-            new_settings,
-            expected={"id": 1, **new_settings},
-            endpoint="{endpoint}1/",
-        ),
-        ApiTestCase(
-            ["admin1", "admin2", "auditor1", "auditor2", "reader1", "reader2"],
-            "get",
-            200,
-            expected=[{"id": 1, **new_settings}],
-        ),
-        ApiTestCase(
-            ["admin1", "admin2", "auditor1", "auditor2", "reader1", "reader2"],
-            "get",
-            200,
-            expected={"id": 1, **new_settings},
-            endpoint="{endpoint}1/",
-        ),
+        ApiTestCase([Role.ADMIN, Role.AUDITOR, Role.READER], expected=[{"id": 1, **settings}]),
+        ApiTestCase([Role.ADMIN, Role.AUDITOR, Role.READER], expected={"id": 1, **settings}, endpoint="1/"),
+        PutApiTestCase([Role.AUDITOR, Role.READER], 403, new_settings, endpoint="1"),
+        PutApiTestCase([Role.ADMIN], 400, invalid_settings_1, endpoint="1"),
+        PutApiTestCase([Role.ADMIN], 400, invalid_settings_2, endpoint="1"),
+        PutApiTestCase([Role.ADMIN], data=new_settings, expected={"id": 1, **new_settings}, endpoint="1"),
+        ApiTestCase([Role.ADMIN, Role.AUDITOR, Role.READER], expected=[{"id": 1, **new_settings}]),
+        ApiTestCase([Role.ADMIN, Role.AUDITOR, Role.READER], expected={"id": 1, **new_settings}, endpoint="1"),
     ]
 
-    def _get_object(self) -> Any:
+    @cached_property
+    def object(self) -> Settings:
         return Settings.objects.first()

@@ -1,5 +1,11 @@
+"""Target models for Rekono.
+
+Defines the Target model for managing security testing targets with automatic
+type detection, validation, and input parsing capabilities for security tool
+integration.
+"""
+
 import ipaddress
-import logging
 import re
 import socket
 
@@ -13,39 +19,79 @@ from security.validators.input_validator import Regex
 from security.validators.target_validator import TargetValidator
 from targets.enums import TargetType
 
-# Create your models here.
-
-logger = logging.getLogger()
-
 
 class Target(BaseInput):
+    """Model representing a security testing target.
+
+    Represents a target for security testing operations with automatic type
+    detection and validation. Supports multiple target formats including IP
+    addresses, networks, IP ranges, and domain names. Extends BaseInput to
+    provide parsing capabilities for integration with security testing tools.
+
+    Attributes:
+        project (ForeignKey): The project this target belongs to
+        target (TextField): Target specification (IP, domain, network, etc.)
+        type (TextField): Automatically detected target type from TargetType enum
+
+    Example:
+        Create a target for domain testing:
+
+        ```python
+        target = Target.objects.create(
+            project=my_project,
+            target="example.com",
+            type=TargetType.DOMAIN
+        )
+        ```
+    """
+
     project = models.ForeignKey(Project, related_name="targets", on_delete=models.CASCADE)
-    target = models.TextField(max_length=100, validators=[TargetValidator(Regex.TARGET.value)])
+    target = models.TextField(max_length=100, validators=[TargetValidator(Regex.TARGET)])
     type = models.TextField(max_length=10, choices=TargetType.choices)
 
-    filters = [BaseInput.Filter(type=TargetType, field="type")]
-    parse_mapping = {
+    _filters = [BaseInput.Filter(type=TargetType, field="type")]
+    _parse_mapping = {
         InputKeyword.TARGET: "target",
         InputKeyword.HOST: "target",
-        InputKeyword.URL: lambda instance: instance._get_url(instance.target),
+        InputKeyword.URL: lambda instance: instance.get_url(instance.target),
     }
-    project_field = "project"
+    _project_field = "project"
 
     class Meta:
+        """Meta configuration for the Target model.
+
+        Defines database constraints and table-level configuration for
+        target instances.
+
+        Attributes:
+            constraints (list): Database constraints including unique constraint
+                              for project-target combinations
+        """
+
         constraints = [models.UniqueConstraint(fields=["project", "target"], name="unique_target")]
 
     @staticmethod
     def get_type(target: str) -> str:
-        """Get target type from target address.
+        """Automatically detect and classify the target type.
+
+        Analyzes the target specification to determine its type and performs
+        validation to ensure the target is valid and reachable. Supports
+        multiple target formats with intelligent classification.
+
+        Target Type Detection Logic:
+            1. IPv4/IPv6 address detection with private vs public classification
+            2. CIDR network notation validation and detection
+            3. IP range pattern matching (hyphen-separated)
+            4. Domain name resolution validation
 
         Args:
-            target (str): Target value
-
-        Raises:
-            ValidationError: Raised if target doesn't match any supported type
+            target (str): Target specification to classify
 
         Returns:
-            str: Target type associated to the target
+            str: Target type from TargetType enum
+
+        Raises:
+            ValidationError: If target format is invalid or unsupported
         """
         try:
             # Check if target is an IP address (IPv4 or IPv6)
@@ -69,7 +115,7 @@ class Target(BaseInput):
             return TargetType.DOMAIN
         except socket.gaierror:
             pass
-        logger.warning(f"[Security] Invalid target {target}")
+        BaseInput.logger.warning(f"[Security] Invalid target {target}")
         # Target is invalid or target type is not supported
         raise ValidationError(
             "Invalid target. IP address, IP range or domain is required",
@@ -78,9 +124,9 @@ class Target(BaseInput):
         )
 
     def __str__(self) -> str:
-        """Instance representation in text format.
+        """String representation of the target.
 
         Returns:
-            str: String value that identifies this instance
+            str: Target specification string
         """
         return self.target

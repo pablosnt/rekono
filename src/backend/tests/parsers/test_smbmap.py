@@ -1,21 +1,18 @@
+from django.test import TestCase
+
 from findings.enums import PathType
 from findings.models import Path
-from tests.cases import ToolTestCase
-from tests.framework import ToolTest
+from tests.framework import ParserTest
+from tests.framework.cases import ParserTestCase
 
 
-class SmbmapTest(ToolTest):
+class SmbmapTest(ParserTest, TestCase):
     tool_name = "SMBMap"
     cases = [
-        ToolTestCase(
+        ParserTestCase(
             "shares.csv",
             [
-                {
-                    "model": Path,
-                    "path": "shared",
-                    "extra_info": "READ_WRITE",
-                    "type": PathType.SHARE,
-                },
+                {"model": Path, "path": "shared", "extra_info": "READ_WRITE", "type": PathType.SHARE},
                 {
                     "model": Path,
                     "path": "IPC$",

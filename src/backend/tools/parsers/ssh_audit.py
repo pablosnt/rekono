@@ -1,3 +1,9 @@
+"""SSH Audit SSH security scanner output parser.
+
+Processes SSH Audit JSON output to extract SSH server technology fingerprints
+and security vulnerabilities from SSH configuration analysis.
+"""
+
 import re
 
 from findings.enums import Severity
@@ -7,8 +13,25 @@ from tools.parsers.base import BaseParser
 
 
 class Sshaudit(BaseParser):
-    def _parse_report(self):
-        data = self._load_report_as_json_dict()
+    """Parser for SSH Audit JSON output files.
+
+    Extracts SSH server technology and security findings including insecure
+    encryption algorithms, key exchange methods, and known vulnerabilities.
+    Processes comprehensive SSH configuration security analysis.
+
+    Attributes:
+        Inherits all attributes from BaseParser
+    """
+
+    def _parse(self) -> None:
+        """Parse SSH Audit JSON output and extract SSH security findings.
+
+        Processes JSON scan results to create Technology and Vulnerability findings
+        for SSH server configuration and security issues.
+        """
+        data = self.load_json_report()
+        if not data or not isinstance(data, dict):
+            return
         name, version = data.get("banner", {}).get("software", "_").split("_", 1)
         technology = self.create_finding(Technology, name=name, version=version)
         cves = set([])
@@ -22,7 +45,7 @@ class Sshaudit(BaseParser):
                     self.create_finding(
                         Vulnerability,
                         technology=technology,
-                        name=f"Insecure {root} algorithm: {item.get('algorithm')}",
+                        name=f"Insecure {root.upper()} algorithm: {item.get('algorithm')}",
                         description="\n".join(notes),
                         severity=Severity.MEDIUM if "fail" in item.get("notes", {}) else Severity.LOW,
                         # CWE-326: Inadequate Encryption Strength

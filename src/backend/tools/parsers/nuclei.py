@@ -1,3 +1,9 @@
+"""Nuclei vulnerability scanner output parser.
+
+Processes Nuclei JSON output to extract vulnerabilities, technology fingerprints,
+and credential findings from web application security scans.
+"""
+
 import json
 from typing import cast
 
@@ -7,21 +13,41 @@ from tools.parsers.base import BaseParser
 
 
 class Nuclei(BaseParser):
-    def _parse_report(self) -> None:
-        with open(self.report, "r", encoding="utf-8") as report:
-            data = [json.loads(line) for line in report if line]
+    """Parser for Nuclei JSON output files.
+
+    Extracts vulnerability findings, technology detections, and exposed credentials
+    from Nuclei template-based security scans. Handles multiple finding types based
+    on template tags and metadata.
+
+    Attributes:
+        Inherits all attributes from BaseParser
+    """
+
+    def _parse(self) -> None:
+        """Parse Nuclei JSON output and extract security findings.
+
+        Processes line-delimited JSON output to create Vulnerability, Technology,
+        and Credential findings based on template tags and extracted results.
+        """
+        # Parse each line of the JSON output as a separate finding
+        data = [json.loads(line) for line in self.load_report_by_lines()]
         for item in data:
+            # Extract matcher information from Nuclei results
+            # Matcher provides specific details about what triggered the template
             matcher = None
             if item.get("extracted-results", []):
                 result = item.get("extracted-results", [])[0]
+                # Skip generic "security" results, use specific extracted data as matcher
                 if result not in ["security"]:
                     matcher = result
             elif item.get("matcher-name"):
                 matcher = item.get("matcher-name")
-            name = item.get("info", {}).get("name")
-            description = item.get("info", {}).get("description")
-            reference = item.get("info", {}).get("reference", [])
-            tags = item.get("info", {}).get("tags", []) or []
+            # Extract template metadata for finding classification
+            info = item.get("info", {})
+            name = info.get("name")
+            description = info.get("description")
+            reference = info.get("reference", [])
+            tags = info.get("tags", []) or []
             """
             TODO: Don't lose information!
 
@@ -29,7 +55,10 @@ class Nuclei(BaseParser):
             - Matched at: we don't save in which path a vulnerability has been found
             - Remediation: save it in the vulnerability model and check if other tools provide that info
             """
+            # Classify findings based on Nuclei template tags
+            # Different tags indicate different types of security findings
             if "tech" in tags:
+                # Technology detection templates - create Technology findings
                 self.create_finding(
                     Technology,
                     name=matcher or name,
@@ -37,6 +66,7 @@ class Nuclei(BaseParser):
                     reference=reference[0] if reference else None,
                 )
             elif "default-login" in tags and item.get("meta"):
+                # Default credential detection templates - create Credential findings
                 self.create_finding(
                     Credential,
                     username=item.get("meta", {}).get("username"),
@@ -44,9 +74,11 @@ class Nuclei(BaseParser):
                     context=matcher or name,
                 )
             else:
-                severity = item.get("info", {}).get("severity")
-                cve = item.get("info", {}).get("classification", {}).get("cve-id")
-                cwe = item.get("info", {}).get("classification", {}).get("cwe-id", [])
+                # All other templates are treated as vulnerability findings
+                # Extract security classification data (severity, CVE, CWE)
+                severity = info.get("severity")
+                cve = info.get("classification", {}).get("cve-id")
+                cwe = info.get("classification", {}).get("cwe-id", [])
                 self.create_finding(
                     Vulnerability,
                     name=(f"{name}: {matcher}" if matcher else name).strip(),

@@ -1,11 +1,16 @@
-from typing import Any
+from functools import cached_property
+
+from django.test import TestCase
 
 from input_types.models import InputType
-from tests.framework import ApiTest
+from tests.framework import ApiTestNoData
+
+# pytype: disable=wrong-arg-types
 
 
-class InputTypeTest(ApiTest):
-    expected_str = "OSINT"
+class InputTypeTest(ApiTestNoData, TestCase):
+    expected_string = "OSINT"
 
-    def _get_object(self) -> Any:
+    @cached_property
+    def object(self) -> InputType:
         return InputType.objects.get(pk=1)

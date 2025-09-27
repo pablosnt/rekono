@@ -1,28 +1,50 @@
+"""GitLeaks secret detection tool output parser.
+
+Processes GitLeaks JSON output to extract exposed secrets and credentials
+from Git repository dumps and source code analysis.
+"""
+
+from dataclasses import dataclass
+
 from findings.enums import Severity
 from findings.models import Credential, Vulnerability
 from tools.executors.gitleaks import Gitleaks as GitleaksExecutor
 from tools.parsers.base import BaseParser
 
 
+@dataclass
 class Gitleaks(BaseParser):
-    def __init__(self, executor, output=None):
-        super().__init__(executor, output)
-        self.executor: GitleaksExecutor = executor
+    """Parser for GitLeaks JSON output files.
 
-    def _parse_report(self) -> None:
+    Extracts secret detection findings including exposed credentials, API keys,
+    and sensitive information from Git repositories. Handles both Git repository
+    exposure vulnerabilities and individual secret findings.
+
+    Attributes:
+        executor (GitleaksExecutor): GitLeaks-specific executor instance
+    """
+
+    executor: GitleaksExecutor
+
+    def _parse(self) -> None:
+        """Parse GitLeaks JSON output and extract secret findings.
+
+        Processes JSON scan results to create Vulnerability and Credential findings
+        for Git repository exposure and discovered secrets.
+        """
         if self.executor.git_directory_dumped:
             self.create_finding(
                 Vulnerability,
                 name="Git source code exposure",
-                description=(
-                    "Source code is exposed in the endpoint /.git/ and it's possible to dump it as a git repository"
-                ),
+                description="Source code is exposed in the endpoint /.git/ and it's possible to dump it as a git repository",
                 severity=Severity.HIGH,
                 # CWE-527: Exposure of Version-Control Repository to an Unauthorized Control Sphere
                 cwe="CWE-527",
                 reference="https://iosentrix.com/blog/git-source-code-disclosure-vulnerability/",
             )
-        data = self._load_report_as_json_list()
+        data = self.load_json_report()
+        if not data or not isinstance(data, list):
+            return
         emails = set()
         for finding in data:
             self.create_finding(

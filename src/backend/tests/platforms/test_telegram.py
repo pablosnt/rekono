@@ -1,117 +1,73 @@
-from typing import Any
+from functools import cached_property
+
+from django.test import TestCase
 
 from platforms.telegram_app.models import TelegramChat
-from security.cryptography.hashing import hash
-from tests.cases import ApiTestCase
-from tests.framework import ApiTest
+from security.authorization.roles import Role
+from security.cryptography import Crypto
+from tests.framework import ApiTestNoData
+from tests.framework.cases import ApiTestCase, DeleteApiTestCase, PostApiTestCase, PutApiTestCase
 from users.models import User
 
-# pytype: disable=wrong-arg-types
+# pytype: disable=wrong-arg-types,attribute-error
 
 token = {"token": "any_valid_telegram_token"}
 invalid_token = {"token": "invalid;token"}
 expected = {"id": 1, "bot": None, "is_available": False}
 
 
-class TelegramSettingsTest(ApiTest):
+class TelegramSettingsTest(ApiTestNoData, TestCase):
     endpoint = "/api/telegram/settings/1/"
     cases = [
-        ApiTestCase(
-            ["admin1", "admin2", "auditor1", "auditor2", "reader1", "reader2"],
-            "get",
-            200,
-            expected=expected,
-        ),
-        ApiTestCase(["auditor1", "auditor2", "reader1", "reader2"], "put", 403, token),
-        ApiTestCase(["admin1", "admin2"], "put", 400, invalid_token),
-        ApiTestCase(["admin1", "admin2"], "put", 200, token, expected),
-        ApiTestCase(
-            ["admin1", "admin2", "auditor1", "auditor2", "reader1", "reader2"],
-            "get",
-            200,
-            expected=expected,
-        ),
+        ApiTestCase(["members", "not_members"], expected=expected),
+        PutApiTestCase([Role.AUDITOR, Role.READER], 403, token),
+        PutApiTestCase([Role.ADMIN], 400, invalid_token),
+        PutApiTestCase([Role.ADMIN], data=token, expected=expected),
+        ApiTestCase(["members", "not_members"], expected=expected),
     ]
 
 
-class TelegramChatTest(ApiTest):
+class TelegramChatTest(ApiTestNoData, TestCase):
     endpoint = "/api/telegram/link/"
-    expected_str = "admin1@rekono.com - 1"
-    cases = [
-        ApiTestCase(
-            ["admin1", "admin2", "auditor1", "auditor2", "reader1", "reader2"],
-            "get",
-            200,
-            expected={"telegram_chat": None},
-            endpoint="/api/profile/",
-        ),
-    ]
+    expected_string = "admin1@rekono.com - 1"
+    cases = [ApiTestCase(["members", "not_members"], expected={"telegram_chat": None}, endpoint="/api/profile/")]
 
     def test_link(self) -> None:
         chat_id = 1
-        users = [
-            self.admin1,
-            self.admin2,
-            self.auditor1,
-            self.auditor2,
-            self.reader1,
-            self.reader2,
-        ]
-        for user in users:
-            otp = User.objects.generate_otp(TelegramChat)
-            chat = TelegramChat.objects.create(
-                otp=hash(otp),
-                otp_expiration=User.objects.get_otp_expiration_time(),
-                chat_id=chat_id,
-            )
-            self.assertFalse(chat.is_auditor())
-            ApiTestCase([user.username], "post", 401, {"otp": "invalid token"}).test_case(endpoint=self.endpoint)
-            ApiTestCase(
-                [user.username],
-                "post",
-                201,
-                {"otp": otp},
-                {"id": chat.id, "user": user.id},
-            ).test_case(endpoint=self.endpoint)
-            self.assertEqual(
-                user in [self.admin1, self.admin2, self.auditor1, self.auditor2],
-                TelegramChat.objects.get(pk=chat.id).is_auditor(),
-            )
-            ApiTestCase(
-                [user.username],
-                "get",
-                200,
-                expected={
-                    "id": user.id,
-                    "username": user.username,
-                    "email": user.email,
-                    "telegram_chat": chat.id,
-                },
-            ).test_case(endpoint=self.profile)
-            chat_id += 1
-        for index, user in enumerate(users):
-            for id in range(1, chat_id):
-                if id != index + 1:
-                    ApiTestCase([user.username], "delete", 403, endpoint=f"{{endpoint}}{id}/").test_case(
-                        endpoint=self.endpoint
-                    )
-        for index, user in enumerate(users):
-            ApiTestCase([user.username], "delete", 204, endpoint=f"{{endpoint}}{index + 1}/").test_case(
-                endpoint=self.endpoint
-            )
-            (
+        for role, users in self.users.items():
+            for user in users:
+                otp = User.objects.generate_otp(TelegramChat)
+                chat = TelegramChat.objects.create(
+                    otp=Crypto.hash(otp), otp_expiration=User.objects.get_otp_expiration_time(), chat_id=chat_id
+                )
+                self.assertFalse(chat.is_auditor())
+                PostApiTestCase([user.username], status_code=401, data={"otp": "invalid token"}).test_case(
+                    1, self, self.endpoint
+                )
+                PostApiTestCase(
+                    [user.username], data={"otp": otp}, expected={"id": chat.id, "user": user.id}
+                ).test_case(1, self, self.endpoint)
+                self.assertEqual(role in [Role.ADMIN, Role.AUDITOR], TelegramChat.objects.get(pk=chat.id).is_auditor())
                 ApiTestCase(
                     [user.username],
-                    "get",
-                    200,
-                    expected={
-                        "id": user.id,
-                        "username": user.username,
-                        "email": user.email,
-                        "telegram_chat": None,
-                    },
-                ).test_case(endpoint=self.profile),
-            )
+                    expected={"id": user.id, "username": user.username, "email": user.email, "telegram_chat": chat.id},
+                ).test_case(1, self, "/api/profile/")
+                chat_id += 1
+        for _user in self.members + self.not_members:
+            user = User.objects.get(pk=_user.id)
+            for _chat_id in range(1, chat_id):
+                if _chat_id != user.telegram_chat.id:
+                    DeleteApiTestCase([user.username], status_code=403, endpoint=str(_chat_id)).test_case(
+                        1, self, self.endpoint
+                    )
+        for _user in self.members + self.not_members:
+            user = User.objects.get(pk=_user.id)
+            DeleteApiTestCase([user.username], endpoint=str(user.telegram_chat.id)).test_case(1, self, self.endpoint)
+            ApiTestCase(
+                [user.username],
+                expected={"id": user.id, "username": user.username, "email": user.email, "telegram_chat": None},
+            ).test_case(1, self, "/api/profile/")
 
-    def _get_object(self) -> Any:
+    @cached_property
+    def object(self) -> TelegramChat:
         return TelegramChat.objects.create(user=self.admin1, chat_id=1)

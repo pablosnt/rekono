@@ -1,15 +1,18 @@
-from typing import Any
+from functools import cached_property
 
+from django.test import TestCase
+
+from security.authorization.roles import Role
 from settings.models import Settings
-from tests.cases import ApiTestCase
-from tests.framework import ApiTest
+from tests.framework import ApiTestNoData
+from tests.framework.cases import ApiTestCase, DeleteApiTestCase, PostApiTestCase, PutApiTestCase
 from wordlists.enums import WordlistType
 from wordlists.models import Wordlist
 
 # pytype: disable=wrong-arg-types
 
 # Wordlists paths
-data_dir = ApiTest.data_dir / "wordlists"
+data_dir = ApiTestNoData.data_dir / "wordlists"
 endpoints_path = data_dir / "endpoints_wordlist.txt"
 invalid_mime_type_path = data_dir / "invalid_mime_type.txt"
 invalid_extension_path = data_dir / "invalid_extension.pdf"
@@ -24,188 +27,131 @@ wordlist_subdomains = {"name": "test 2", "type": WordlistType.SUBDOMAIN.value}
 new_wordlist_subdomains = {"name": "new test 2", "type": WordlistType.SUBDOMAIN.value}
 
 
-class WordlistTest(ApiTest):
+class WordlistTest(ApiTestNoData, TestCase):
     endpoint = "/api/wordlists/"
-    expected_str = first_wordlist_name
-    data_dir = data_dir
-    cases = [
-        ApiTestCase(["reader1", "reader2"], "get", 403),
-        ApiTestCase(
-            ["admin1", "admin2", "auditor1", "auditor2"],
-            "get",
-            200,
-            expected={
-                "id": 1,
-                "name": first_wordlist_name,
-                "type": WordlistType.ENDPOINT,
-                "owner": None,
-                "liked": False,
-                "likes": 0,
-            },
-            endpoint="{endpoint}1/",
-        ),
-        ApiTestCase(
-            ["admin1", "admin2", "auditor1", "auditor2"],
-            "post",
-            400,
-            {
-                **wordlist_endpoints,
-                "file": invalid_mime_type_path.open("rb"),
-            },
-            format="multipart",
-        ),
-        ApiTestCase(
-            ["admin1"],
-            "post",
-            201,
-            {
-                **wordlist_endpoints,
-                "file": endpoints_path.open("rb"),
-            },
-            {
-                "id": 29,
-                **wordlist_endpoints,
-                "size": 3,
-                "owner": {"id": 1, "username": "admin1"},
-                "liked": False,
-                "likes": 0,
-            },
-            format="multipart",
-        ),
-        ApiTestCase(
-            ["auditor1"],
-            "post",
-            201,
-            {
-                **wordlist_subdomains,
-                "file": subdomains_path.open("rb"),
-            },
-            {
-                "id": 30,
-                **wordlist_subdomains,
-                "size": 3,
-                "owner": {"id": 3, "username": "auditor1"},
-                "liked": False,
-                "likes": 0,
-            },
-            format="multipart",
-        ),
-        ApiTestCase(
-            ["auditor1", "auditor2"],
-            "put",
-            403,
-            new_wordlist_endpoints,
-            endpoint="{endpoint}29/",
-        ),
-        ApiTestCase(
-            ["admin1", "admin2"],
-            "put",
-            200,
-            new_wordlist_endpoints,
-            {"id": 29, **new_wordlist_endpoints},
-            endpoint="{endpoint}29/",
-        ),
-        ApiTestCase(
-            ["auditor2"],
-            "put",
-            403,
-            new_wordlist_subdomains,
-            endpoint="{endpoint}30/",
-        ),
-        ApiTestCase(
-            ["auditor1", "admin1", "admin2"],
-            "put",
-            200,
-            new_wordlist_subdomains,
-            {"id": 30, **new_wordlist_subdomains},
-            endpoint="{endpoint}30/",
-        ),
-        ApiTestCase(["reader1", "reader2"], "post", 403, endpoint="{endpoint}29/like/"),
-        ApiTestCase(["reader1", "reader2"], "delete", 403, endpoint="{endpoint}30/like/"),
-        ApiTestCase(
-            ["admin1", "admin2", "auditor1", "auditor2"],
-            "get",
-            200,
-            endpoint="{endpoint}?like=true",
-        ),
-        ApiTestCase(
-            ["admin1", "admin2", "auditor1", "auditor2"],
-            "post",
-            204,
-            endpoint="{endpoint}29/like/",
-        ),
-        ApiTestCase(
-            ["admin1", "admin2", "auditor1", "auditor2"],
-            "get",
-            200,
-            expected={
-                "id": 29,
-                **new_wordlist_endpoints,
-                "size": 3,
-                "owner": {"id": 1, "username": "admin1"},
-                "liked": True,
-                "likes": 4,
-            },
-            endpoint="{endpoint}29/",
-        ),
-        ApiTestCase(
-            ["admin1", "admin2", "auditor1", "auditor2"],
-            "get",
-            200,
-            expected=[
-                {
+    expected_string = first_wordlist_name
+
+    @cached_property
+    def cases(self) -> list[ApiTestCase]:
+        return [
+            ApiTestCase([Role.READER], 403),
+            ApiTestCase(
+                [Role.ADMIN, Role.AUDITOR],
+                expected={
+                    "id": 1,
+                    "name": first_wordlist_name,
+                    "type": WordlistType.ENDPOINT,
+                    "owner": None,
+                    "liked": False,
+                    "likes": 0,
+                },
+                endpoint="1",
+            ),
+            PostApiTestCase(
+                [Role.ADMIN, Role.AUDITOR],
+                400,
+                {**wordlist_endpoints, "file": invalid_mime_type_path.open("rb")},
+                format="multipart",
+            ),
+            PostApiTestCase(
+                ["admin1"],
+                data={**wordlist_endpoints, "file": endpoints_path.open("rb")},
+                expected={
+                    "id": 29,
+                    **wordlist_endpoints,
+                    "size": 3,
+                    "owner": {"id": 1, "username": "admin1"},
+                    "liked": False,
+                    "likes": 0,
+                },
+                format="multipart",
+            ),
+            PostApiTestCase(
+                ["auditor1"],
+                data={**wordlist_subdomains, "file": subdomains_path.open("rb")},
+                expected={
+                    "id": 30,
+                    **wordlist_subdomains,
+                    "size": 3,
+                    "owner": {"id": 3, "username": "auditor1"},
+                    "liked": False,
+                    "likes": 0,
+                },
+                format="multipart",
+            ),
+            PutApiTestCase([Role.AUDITOR], 403, new_wordlist_endpoints, endpoint="29"),
+            PutApiTestCase(
+                [Role.ADMIN], data=new_wordlist_endpoints, expected={"id": 29, **new_wordlist_endpoints}, endpoint="29"
+            ),
+            PutApiTestCase(["auditor2"], 403, new_wordlist_subdomains, endpoint="30"),
+            PutApiTestCase(
+                ["auditor1", Role.ADMIN],
+                data=new_wordlist_subdomains,
+                expected={"id": 30, **new_wordlist_subdomains},
+                endpoint="30",
+            ),
+            PostApiTestCase([Role.READER], 403, endpoint="29/like"),
+            DeleteApiTestCase([Role.READER], 403, endpoint="30/like"),
+            ApiTestCase([Role.ADMIN, Role.AUDITOR], endpoint="{endpoint}?like=true"),
+            PostApiTestCase([Role.ADMIN, Role.AUDITOR], 204, endpoint="29/like"),
+            ApiTestCase(
+                [Role.ADMIN, Role.AUDITOR],
+                expected={
                     "id": 29,
                     **new_wordlist_endpoints,
                     "size": 3,
                     "owner": {"id": 1, "username": "admin1"},
                     "liked": True,
                     "likes": 4,
-                }
-            ],
-            endpoint="{endpoint}?like=true",
-        ),
-        ApiTestCase(
-            ["admin1", "admin2", "auditor1", "auditor2"],
-            "delete",
-            204,
-            endpoint="{endpoint}29/like/",
-        ),
-        ApiTestCase(
-            ["admin1", "admin2", "auditor1", "auditor2"],
-            "get",
-            200,
-            expected={
-                "id": 29,
-                **new_wordlist_endpoints,
-                "size": 3,
-                "owner": {"id": 1, "username": "admin1"},
-                "liked": False,
-                "likes": 0,
-            },
-            endpoint="{endpoint}29/",
-        ),
-        ApiTestCase(
-            ["reader1", "reader2", "auditor1", "auditor2"],
-            "delete",
-            403,
-            endpoint="{endpoint}29/",
-        ),
-        ApiTestCase(["reader1", "reader2", "auditor2"], "delete", 403, endpoint="{endpoint}30/"),
-        ApiTestCase(["admin2"], "delete", 204, endpoint="{endpoint}29/"),
-        ApiTestCase(["auditor1"], "delete", 204, endpoint="{endpoint}30/"),
-        ApiTestCase(
-            ["admin1", "admin2", "auditor1", "auditor2"],
-            "get",
-            404,
-            endpoint="{endpoint}29/",
-        ),
-        ApiTestCase(
-            ["admin1", "admin2", "auditor1", "auditor2"],
-            "get",
-            404,
-            endpoint="{endpoint}30/",
-        ),
-    ]
+                },
+                endpoint="29",
+            ),
+            ApiTestCase(
+                [Role.ADMIN, Role.AUDITOR],
+                expected=[
+                    {
+                        "id": 29,
+                        **new_wordlist_endpoints,
+                        "size": 3,
+                        "owner": {"id": 1, "username": "admin1"},
+                        "liked": True,
+                        "likes": 4,
+                    }
+                ],
+                endpoint="{endpoint}?like=true",
+            ),
+            DeleteApiTestCase([Role.ADMIN, Role.AUDITOR], endpoint="29/like"),
+            ApiTestCase(
+                [Role.ADMIN, Role.AUDITOR],
+                expected={
+                    "id": 29,
+                    **new_wordlist_endpoints,
+                    "size": 3,
+                    "owner": {"id": 1, "username": "admin1"},
+                    "liked": False,
+                    "likes": 0,
+                },
+                endpoint="29",
+            ),
+            DeleteApiTestCase([Role.READER, Role.AUDITOR], 403, endpoint="29"),
+            DeleteApiTestCase([Role.READER, "auditor2"], 403, endpoint="30"),
+            DeleteApiTestCase(["admin2"], endpoint="29"),
+            DeleteApiTestCase(["auditor1"], endpoint="30"),
+            ApiTestCase([Role.ADMIN, Role.AUDITOR], 404, endpoint="29"),
+            ApiTestCase([Role.ADMIN, Role.AUDITOR], 404, endpoint="30"),
+            PostApiTestCase(
+                [Role.ADMIN, Role.AUDITOR],
+                400,
+                {**wordlist_endpoints, "file": invalid_extension_path.open("rb")},
+                format="multipart",
+            ),
+            PostApiTestCase(
+                [Role.ADMIN, Role.AUDITOR],
+                400,
+                {**wordlist_endpoints, "file": invalid_size_path.open("rb")},
+                format="multipart",
+            ),
+        ]
 
     def setUp(self) -> None:
         super().setUp()
@@ -219,35 +165,12 @@ class WordlistTest(ApiTest):
         with invalid_size_path.open("a") as file:
             while invalid_size_path.stat().st_size < invalid_size:
                 file.write(valid_content)
-        self.cases.extend(
-            [
-                ApiTestCase(
-                    ["admin1", "admin2", "auditor1", "auditor2"],
-                    "post",
-                    400,
-                    {
-                        **wordlist_endpoints,
-                        "file": invalid_extension_path.open("rb"),
-                    },
-                    format="multipart",
-                ),
-                ApiTestCase(
-                    ["admin1", "admin2", "auditor1", "auditor2"],
-                    "post",
-                    400,
-                    {
-                        **wordlist_endpoints,
-                        "file": invalid_size_path.open("rb"),
-                    },
-                    format="multipart",
-                ),
-            ]
-        )
 
     def tearDown(self) -> None:
         super().tearDown()
         invalid_extension_path.unlink()
         invalid_size_path.unlink()
 
-    def _get_object(self) -> Any:
+    @cached_property
+    def object(self) -> Wordlist:
         return Wordlist.objects.first()

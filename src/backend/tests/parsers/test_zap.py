@@ -1,23 +1,21 @@
+from django.test import TestCase
+
 from findings.enums import PathType, Severity
 from findings.models import Path, Vulnerability
-from tests.cases import ToolTestCase
-from tests.framework import ToolTest
+from tests.framework import ParserTest
+from tests.framework.cases import ParserTestCase
 
 
-class ZapTest(ToolTest):
+class ZapTest(ParserTest, TestCase):
     tool_name = "ZAP"
     cases = [
-        ToolTestCase(
+        ParserTestCase(
             "active-scan.xml",
             [
                 {"model": Path, "path": "/images/", "type": PathType.ENDPOINT},
                 {"model": Path, "path": "/shared/", "type": PathType.ENDPOINT},
                 {"model": Path, "path": "/shared/css/", "type": PathType.ENDPOINT},
-                {
-                    "model": Path,
-                    "path": "/shared/images/Acunetix/",
-                    "type": PathType.ENDPOINT,
-                },
+                {"model": Path, "path": "/shared/images/Acunetix/", "type": PathType.ENDPOINT},
                 {
                     "model": Vulnerability,
                     "name": "Directory Browsing",
@@ -90,11 +88,7 @@ class ZapTest(ToolTest):
                     "severity": Severity.LOW,
                     "cwe": "CWE-829",
                 },
-                {
-                    "model": Path,
-                    "path": "/shared/images/Acunetix/acx_Chess-WB.gif",
-                    "type": PathType.ENDPOINT,
-                },
+                {"model": Path, "path": "/shared/images/Acunetix/acx_Chess-WB.gif", "type": PathType.ENDPOINT},
                 {
                     "model": Vulnerability,
                     "name": "Timestamp Disclosure - Unix",
@@ -109,26 +103,10 @@ class ZapTest(ToolTest):
                     "cwe": "CWE-200",
                     "reference": "http://projects.webappsec.org/w/page/13246936/Information%20Leakage",
                 },
-                {
-                    "model": Path,
-                    "path": "/images/sitelogo.png",
-                    "type": PathType.ENDPOINT,
-                },
-                {
-                    "model": Path,
-                    "path": "/shared/css/insecdb.css",
-                    "type": PathType.ENDPOINT,
-                },
-                {
-                    "model": Path,
-                    "path": "/shared/images/tiny-eyeicon.png",
-                    "type": PathType.ENDPOINT,
-                },
-                {
-                    "model": Path,
-                    "path": "/shared/images/topleftcurve.gif",
-                    "type": PathType.ENDPOINT,
-                },
+                {"model": Path, "path": "/images/sitelogo.png", "type": PathType.ENDPOINT},
+                {"model": Path, "path": "/shared/css/insecdb.css", "type": PathType.ENDPOINT},
+                {"model": Path, "path": "/shared/images/tiny-eyeicon.png", "type": PathType.ENDPOINT},
+                {"model": Path, "path": "/shared/images/topleftcurve.gif", "type": PathType.ENDPOINT},
                 {
                     "model": Vulnerability,
                     "name": "X-Content-Type-Options Header Missing",

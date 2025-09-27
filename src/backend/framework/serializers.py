@@ -1,32 +1,40 @@
+"""Django REST framework serializers for Rekono's core framework.
+
+Provides base serializer classes with like functionality and note relationships
+for user-interactive content across the platform.
+"""
+
 from typing import Any
 
 from django.db.models import Q
-from rest_framework import status
-from rest_framework.exceptions import AuthenticationFailed
-from rest_framework.serializers import (
-    CharField,
-    ModelSerializer,
-    Serializer,
-    SerializerMethodField,
-)
+from rest_framework.serializers import ModelSerializer, SerializerMethodField
 
+from framework.logging import LoggingEntity
 from users.models import User
 
 
-class LikeSerializer(ModelSerializer):
-    """Common serializer for all models that can be liked."""
+class LikeSerializer(ModelSerializer, LoggingEntity):
+    """Serializer for models with like/favorite functionality.
+
+    Extends ModelSerializer with computed fields for like status and counts.
+    Used for content that users can like such as tools, processes, and wordlists.
+
+    Attributes:
+        liked (SerializerMethodField): Whether current user has liked the object.
+        likes (SerializerMethodField): Total number of likes for the object.
+    """
 
     liked = SerializerMethodField(read_only=True)
     likes = SerializerMethodField(read_only=True)
 
     def get_liked(self, instance: Any) -> bool:
-        """Check if an instance is liked by the current user or not.
+        """Check if the current user has liked this object.
 
         Args:
-            instance (any): Instance to check
+            instance (Any): The model instance being serialized.
 
         Returns:
-            bool: Indicate if the current user likes this instance or not
+            bool: True if the current user has liked this object, False otherwise.
         """
         check_likes = {
             "pk": self.context.get("request").user.id,
@@ -35,35 +43,41 @@ class LikeSerializer(ModelSerializer):
         return User.objects.filter(**check_likes).exists()
 
     def get_likes(self, instance: Any) -> int:
-        """Count number of likes for an instance.
+        """Get the total number of likes for this object.
 
         Args:
-            instance (any): Instance to check
+            instance (Any): The model instance being serialized.
 
         Returns:
-            int: Number of likes for this instance
+            int: Total number of users who have liked this object.
         """
         return instance.liked_by.count()
 
 
-class MfaSerializer(Serializer):
-    mfa = CharField(max_length=200, required=True, write_only=True)
-    validator = User.objects.verify_mfa_or_otp
+class RelatedNotesSerializer(ModelSerializer, LoggingEntity):
+    """Serializer for models with related notes functionality.
 
-    def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
-        attrs = super().validate(attrs)
-        if not self.validator(
-            attrs.get("mfa"),
-            (self.user if hasattr(self, "user") and getattr(self, "user") else self.context.get("request").user),
-        ):
-            raise AuthenticationFailed(code=status.HTTP_401_UNAUTHORIZED)
-        return attrs
+    Extends ModelSerializer with computed fields for accessing related notes
+    that the current user can view based on visibility permissions.
 
+    Attributes:
+        notes (SerializerMethodField): List of note IDs accessible to current user.
+    """
 
-class RelatedNotesSerializer(ModelSerializer):
     notes = SerializerMethodField(read_only=True)
 
     def get_notes(self, instance: Any) -> list[int]:
+        """Get list of note IDs that the current user can access.
+
+        Returns notes that are either public or owned by the current user,
+        ensuring proper access control for note visibility.
+
+        Args:
+            instance (Any): The model instance with related notes.
+
+        Returns:
+            list[int]: List of note IDs accessible to the current user.
+        """
         return instance.notes.filter(Q(public=True) | Q(owner__id=self.context.get("request").user.id)).values_list(
             "id", flat=True
         )

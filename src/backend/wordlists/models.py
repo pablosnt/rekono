@@ -1,3 +1,10 @@
+"""Wordlist models for Rekono.
+
+Defines the Wordlist model for managing file-based wordlists used in security testing.
+Supports secure file storage, integrity validation, and integration with security
+tools requiring input datasets for enumeration and brute-force operations.
+"""
+
 from pathlib import Path
 from typing import Any
 
@@ -11,15 +18,36 @@ from security.validators.input_validator import Regex, Validator
 from targets.models import Target
 from wordlists.enums import WordlistType
 
-# Create your models here.
-
 
 class Wordlist(BaseInput, BaseLike):
-    name = models.TextField(
-        max_length=100,
-        unique=True,
-        validators=[Validator(Regex.NAME.value, code="name")],
-    )
+    """Model representing file-based wordlists for security testing tools.
+
+    Represents wordlists used by security tools for enumeration, directory brute-forcing,
+    subdomain discovery, and other automated testing scenarios. Provides secure file
+    management with integrity validation, user ownership, and integration capabilities.
+
+    Attributes:
+        name (TextField): Unique name for the wordlist (max 100 characters)
+        type (TextField): Wordlist type from WordlistType enum (max 10 characters)
+        path (TextField): File system path to the wordlist file (unique, max 200 characters)
+        checksum (TextField): SHA-256 checksum for file integrity verification (optional, max 128 characters)
+        size (IntegerField): Number of entries in the wordlist file (auto-calculated)
+        owner (ForeignKey): User who uploaded/owns this wordlist (optional)
+
+    Example:
+        Create a new wordlist for subdomain enumeration:
+
+        ```python
+        wordlist = Wordlist.objects.create(
+            name="Common Subdomains",
+            type=WordlistType.SUBDOMAIN,
+            path="/path/to/subdomains.txt",
+            owner=user
+        )
+        ```
+    """
+
+    name = models.TextField(max_length=100, unique=True, validators=[Validator(Regex.NAME, code="name")])
     type = models.TextField(max_length=10, choices=WordlistType.choices)
     path = models.TextField(max_length=200, unique=True)
     checksum = models.TextField(max_length=128, blank=True, null=True)
@@ -28,29 +56,34 @@ class Wordlist(BaseInput, BaseLike):
     # User that created the wordlist
     owner = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, null=True)
 
-    filters = [BaseInput.Filter(type=WordlistType, field="type")]
-    parse_mapping = {InputKeyword.WORDLIST: "path"}
+    _filters = [BaseInput.Filter(type=WordlistType, field="type")]
+    _parse_mapping = {InputKeyword.WORDLIST: "path"}
 
     def filter(self, input: Any, target: Target | None = None) -> bool:
-        """Check if this instance is valid based on input filter.
+        """Filter wordlist availability based on file existence and integrity.
+
+        Validates that the wordlist file exists on the file system and, if a checksum
+        is available, verifies the file integrity. This ensures only valid wordlists
+        are used by security tools during execution.
 
         Args:
-            input (Any): Tool input whose filter will be applied
+            input (Any): Input configuration for filtering
+            target (Target | None): Target object for context-specific filtering
 
         Returns:
-            bool: Indicate if this instance match the input filter or not
+            bool: True if wordlist is available and valid, False otherwise
         """
         check = Path(self.path).is_file()  # Check if wordlist file exists
-        if check and self.checksum:  # If checksum exists
+        if check and self.checksum:  # If checksum exists, verifies it
             check = check and FileHandler().validate_filepath_checksum(self.path, self.checksum)
-        if input.filter:  # If input filter is established
+        if input.filter:
             return super().filter(input, target) and check
         return check
 
     def __str__(self) -> str:
-        """Instance representation in text format.
+        """Return string representation of the wordlist.
 
         Returns:
-            str: String value that identifies this instance
+            str: The name of the wordlist
         """
         return self.name

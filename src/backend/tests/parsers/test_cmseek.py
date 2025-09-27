@@ -1,13 +1,15 @@
+from django.test import TestCase
+
 from findings.enums import PathType, Severity
 from findings.models import Credential, Path, Technology, Vulnerability
-from tests.cases import ToolTestCase
-from tests.framework import ToolTest
+from tests.framework import ParserTest
+from tests.framework.cases import ParserTestCase
 
 
-class CmseekTest(ToolTest):
+class CmseekTest(ParserTest, TestCase):
     tool_name = "CMSeeK"
     cases = [
-        ToolTestCase(
+        ParserTestCase(
             "dvwp.json",
             [
                 {
@@ -18,18 +20,8 @@ class CmseekTest(ToolTest):
                     "reference": "https://wordpress.org",
                 },
                 {"model": Path, "path": "/license.txt", "type": PathType.ENDPOINT},
-                {
-                    "model": Technology,
-                    "name": "social-warfare",
-                    "version": "3.5.2",
-                    "description": "WordPress plugins",
-                },
-                {
-                    "model": Technology,
-                    "name": "wp-file-upload",
-                    "version": "5.3",
-                    "description": "WordPress plugins",
-                },
+                {"model": Technology, "name": "social-warfare", "version": "3.5.2", "description": "WordPress plugins"},
+                {"model": Technology, "name": "wp-file-upload", "version": "5.3", "description": "WordPress plugins"},
                 {
                     "model": Technology,
                     "name": "wp-advanced-search",
@@ -37,15 +29,10 @@ class CmseekTest(ToolTest):
                     "description": "WordPress plugins",
                 },
                 {"model": Path, "path": "/readme.html", "type": PathType.ENDPOINT},
-                {
-                    "model": Technology,
-                    "name": "twentytwenty",
-                    "version": "1.0",
-                    "description": "WordPress themes",
-                },
+                {"model": Technology, "name": "twentytwenty", "version": "1.0", "description": "WordPress themes"},
             ],
         ),
-        ToolTestCase(
+        ParserTestCase(
             "joomla.json",
             [
                 {
@@ -76,7 +63,7 @@ class CmseekTest(ToolTest):
                 },
             ],
         ),
-        ToolTestCase(
+        ParserTestCase(
             "vwp.json",
             [
                 {
@@ -93,31 +80,11 @@ class CmseekTest(ToolTest):
                     "version": "1.0",
                     "description": "WordPress plugins",
                 },
-                {
-                    "model": Technology,
-                    "name": "social-warfare",
-                    "version": "3.5.2",
-                    "description": "WordPress plugins",
-                },
-                {
-                    "model": Technology,
-                    "name": "simple-file-list",
-                    "version": "5",
-                    "description": "WordPress plugins",
-                },
-                {
-                    "model": Technology,
-                    "name": "wp-file-upload",
-                    "version": "4.8.3",
-                    "description": "WordPress plugins",
-                },
+                {"model": Technology, "name": "social-warfare", "version": "3.5.2", "description": "WordPress plugins"},
+                {"model": Technology, "name": "simple-file-list", "version": "5", "description": "WordPress plugins"},
+                {"model": Technology, "name": "wp-file-upload", "version": "4.8.3", "description": "WordPress plugins"},
                 {"model": Path, "path": "/readme.html", "type": PathType.ENDPOINT},
-                {
-                    "model": Technology,
-                    "name": "twentyseventeen",
-                    "version": "4.8.3",
-                    "description": "WordPress themes",
-                },
+                {"model": Technology, "name": "twentyseventeen", "version": "4.8.3", "description": "WordPress themes"},
                 {"model": Vulnerability, "cve": "CVE-2019-16223"},
                 {"model": Vulnerability, "cve": "CVE-2019-16222"},
                 {"model": Vulnerability, "cve": "CVE-2019-16221"},
@@ -138,7 +105,7 @@ class CmseekTest(ToolTest):
                 {"model": Vulnerability, "cve": "CVE-2017-1000600"},
             ],
         ),
-        ToolTestCase(
+        ParserTestCase(
             "wordpress.json",
             [
                 {
@@ -161,19 +128,9 @@ class CmseekTest(ToolTest):
                     "version": "1642244787",
                     "description": "WordPress plugins",
                 },
-                {
-                    "model": Technology,
-                    "name": "monarch",
-                    "version": "1.4.14",
-                    "description": "WordPress plugins",
-                },
+                {"model": Technology, "name": "monarch", "version": "1.4.14", "description": "WordPress plugins"},
                 {"model": Path, "path": "/readme.html", "type": PathType.ENDPOINT},
-                {
-                    "model": Technology,
-                    "name": "primer",
-                    "version": "1590756562",
-                    "description": "WordPress themes",
-                },
+                {"model": Technology, "name": "primer", "version": "1590756562", "description": "WordPress themes"},
                 {
                     "model": Technology,
                     "name": "qs-on-primer",

@@ -1,12 +1,14 @@
+from django.test import TestCase
+
 from findings.models import Credential
-from tests.cases import ToolTestCase
-from tests.framework import ToolTest
+from tests.framework import ParserTest
+from tests.framework.cases import ParserTestCase
 
 
-class GitleaksTest(ToolTest):
+class GitleaksTest(ParserTest, TestCase):
     tool_name = "GitLeaks"
     cases = [
-        ToolTestCase(
+        ParserTestCase(
             "leaky-repo.json",
             [
                 {
@@ -19,11 +21,7 @@ class GitleaksTest(ToolTest):
                     "email": "git@asdf.com",
                     "context": "/.git/ : Author of the commit 9f1468c79df2cf13c66041692ca7f044a27a874b whose name is ASDF",
                 },
-                {
-                    "model": Credential,
-                    "secret": "xoxp-858723095049",
-                    "context": "/.git/ : .bash_profile -> Line 23",
-                },
+                {"model": Credential, "secret": "xoxp-858723095049", "context": "/.git/ : .bash_profile -> Line 23"},
                 {
                     "model": Credential,
                     "secret": "API_TOKEN='51e61afee2c2667123fc9ed160a0a20b330c8f74'",

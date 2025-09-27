@@ -1,7 +1,13 @@
+from functools import cached_property
+
+from django.test import TestCase
+
+from security.authorization.roles import Role
 from targets.enums import TargetType
 from targets.models import Target
-from tests.cases import ApiTestCase
 from tests.framework import ApiTest
+from tests.framework.cases import ApiTestCase, DeleteApiTestCase, PostApiTestCase
+from tests.framework.data import SetupProject
 
 # pytype: disable=wrong-arg-types
 
@@ -13,58 +19,22 @@ target5 = {"project": 1, "target": "8.8.8.8"}
 invalid_target = {"project": 1, "target": "domain-not-found"}
 
 
-class TargetTest(ApiTest):
+class TargetTest(ApiTest, TestCase):
     endpoint = "/api/targets/"
-    expected_str = target1.get("target")
+    expected_string = target1.get("target")
+    data = [SetupProject(targets_and_tasks=0)]
     cases = [
+        ApiTestCase([Role.ADMIN, Role.AUDITOR, Role.READER]),
+        PostApiTestCase(["admin2", "auditor2", "reader1", "reader2"], 403, target1),
+        PostApiTestCase(["admin1", "auditor1"], 400, invalid_target),
+        PostApiTestCase(["admin1"], data=target1, expected={"id": 1, "type": TargetType.PRIVATE_IP, **target1}),
+        PostApiTestCase(["auditor1"], data=target2, expected={"id": 2, "type": TargetType.DOMAIN, **target2}),
+        PostApiTestCase(["auditor1"], data=target3, expected={"id": 3, "type": TargetType.IP_RANGE, **target3}),
+        PostApiTestCase(["admin1"], data=target4, expected={"id": 4, "type": TargetType.NETWORK, **target4}),
+        PostApiTestCase(["auditor1"], data=target5, expected={"id": 5, "type": TargetType.PUBLIC_IP, **target5}),
+        PostApiTestCase(["admin1", "auditor1"], 400, target1),
         ApiTestCase(
-            ["admin1", "admin2", "auditor1", "auditor2", "reader1", "reader2"],
-            "get",
-            200,
-            expected=[],
-        ),
-        ApiTestCase(["admin2", "auditor2", "reader1", "reader2"], "post", 403, target1),
-        ApiTestCase(["admin1", "auditor1"], "post", 400, invalid_target),
-        ApiTestCase(
-            ["admin1"],
-            "post",
-            201,
-            target1,
-            {"id": 1, "type": TargetType.PRIVATE_IP, **target1},
-        ),
-        ApiTestCase(
-            ["auditor1"],
-            "post",
-            201,
-            target2,
-            {"id": 2, "type": TargetType.DOMAIN, **target2},
-        ),
-        ApiTestCase(
-            ["auditor1"],
-            "post",
-            201,
-            target3,
-            {"id": 3, "type": TargetType.IP_RANGE, **target3},
-        ),
-        ApiTestCase(
-            ["admin1"],
-            "post",
-            201,
-            target4,
-            {"id": 4, "type": TargetType.NETWORK, **target4},
-        ),
-        ApiTestCase(
-            ["auditor1"],
-            "post",
-            201,
-            target5,
-            {"id": 5, "type": TargetType.PUBLIC_IP, **target5},
-        ),
-        ApiTestCase(["admin1", "auditor1"], "post", 400, target1),
-        ApiTestCase(
-            ["admin1", "auditor1", "reader1"],
-            "get",
-            200,
+            ["members"],
             expected=[
                 {"id": 5, "type": TargetType.PUBLIC_IP, **target5},
                 {"id": 4, "type": TargetType.NETWORK, **target4},
@@ -73,41 +43,21 @@ class TargetTest(ApiTest):
                 {"id": 1, "type": TargetType.PRIVATE_IP, **target1},
             ],
         ),
-        ApiTestCase(
-            ["admin1", "auditor1", "reader1"],
-            "get",
-            200,
-            expected={"id": 2, "type": TargetType.DOMAIN, **target2},
-            endpoint="{endpoint}2/",
-        ),
-        ApiTestCase(["admin2", "auditor2", "reader2"], "get", 200, expected=[]),
-        ApiTestCase(["admin2", "auditor2", "reader2"], "get", 404, endpoint="{endpoint}1/"),
-        ApiTestCase(["reader1", "reader2"], "delete", 403, endpoint="{endpoint}1/"),
-        ApiTestCase(["admin2", "auditor2"], "delete", 404, endpoint="{endpoint}1/"),
-        ApiTestCase(["auditor1"], "delete", 204, endpoint="{endpoint}1/"),
-        ApiTestCase(["admin1"], "delete", 404, endpoint="{endpoint}1/"),
-        ApiTestCase(["admin1"], "delete", 204, endpoint="{endpoint}2/"),
-        ApiTestCase(["auditor1"], "delete", 204, endpoint="{endpoint}3/"),
-        ApiTestCase(["admin1"], "delete", 204, endpoint="{endpoint}4/"),
-        ApiTestCase(["auditor1"], "delete", 204, endpoint="{endpoint}5/"),
-        ApiTestCase(
-            ["admin1", "admin2", "auditor1", "auditor2", "reader1", "reader2"],
-            "get",
-            200,
-            expected=[],
-        ),
-        ApiTestCase(
-            ["admin1", "admin2", "auditor1", "auditor2", "reader1", "reader2"],
-            "get",
-            404,
-            endpoint="{endpoint}1/",
-        ),
+        ApiTestCase(["members"], expected={"id": 2, "type": TargetType.DOMAIN, **target2}, endpoint="2"),
+        ApiTestCase(["not_members"]),
+        ApiTestCase(["not_members"], 404, endpoint="1"),
+        DeleteApiTestCase(["reader1", "reader2"], 403, endpoint="1"),
+        DeleteApiTestCase(["admin2", "auditor2"], 404, endpoint="1"),
+        DeleteApiTestCase(["auditor1"], endpoint="1"),
+        DeleteApiTestCase(["admin1"], 404, endpoint="1"),
+        DeleteApiTestCase(["admin1"], endpoint="2"),
+        DeleteApiTestCase(["auditor1"], endpoint="3"),
+        DeleteApiTestCase(["admin1"], endpoint="4"),
+        DeleteApiTestCase(["auditor1"], endpoint="5"),
+        ApiTestCase([Role.ADMIN, Role.AUDITOR, Role.READER]),
+        ApiTestCase([Role.ADMIN, Role.AUDITOR, Role.READER], 404, endpoint="1"),
     ]
 
-    def setUp(self) -> None:
-        super().setUp()
-        self._setup_project()
-
-    def _get_object(self) -> Target:
-        self._setup_target()
-        return self.target
+    @cached_property
+    def object(self) -> Target:
+        return Target(**{**target1, "project": self.project})

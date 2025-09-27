@@ -1,14 +1,13 @@
+from django.test import TestCase
+
 from findings.models import Vulnerability
-from tests.cases import ToolTestCase
-from tests.framework import ToolTest
+from tests.framework import ParserTest
+from tests.framework.cases import ParserTestCase
 
 
-class Log4jscanTest(ToolTest):
+class Log4jscanTest(ParserTest, TestCase):
     tool_name = "Log4j Scan"
     cases = [
-        ToolTestCase(
-            "cve_2021_44228.txt",
-            [{"model": Vulnerability, "name": "Log4Shell", "cve": "CVE-2021-44228"}],
-        ),
-        ToolTestCase("not_vulnerable.txt"),
+        ParserTestCase("cve_2021_44228.txt", [{"model": Vulnerability, "name": "Log4Shell", "cve": "CVE-2021-44228"}]),
+        ParserTestCase("not_vulnerable.txt"),
     ]

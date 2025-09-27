@@ -1,3 +1,9 @@
+"""OWASP ZAP web application security scanner output parser.
+
+Processes OWASP ZAP XML output to extract web application vulnerabilities
+and discovered endpoints from security scans.
+"""
+
 from html import unescape
 
 from findings.enums import PathType, Severity
@@ -6,6 +12,16 @@ from tools.parsers.base import BaseParser
 
 
 class Zap(BaseParser):
+    """Parser for OWASP ZAP XML output files.
+
+    Extracts web application vulnerability findings and discovered endpoints
+    from OWASP ZAP security scans. Processes vulnerability alerts with severity
+    mapping and endpoint discovery for comprehensive web security analysis.
+
+    Attributes:
+        severity_mapping (dict): Mapping between ZAP and Rekono severity levels
+    """
+
     # Mapping between OWASP ZAP severity values and Rekono severity values
     severity_mapping = {
         0: Severity.INFO,
@@ -14,9 +30,16 @@ class Zap(BaseParser):
         3: Severity.HIGH,
     }
 
-    def _parse_report(self) -> None:
+    def _parse(self) -> None:
+        """Parse OWASP ZAP XML output and extract web security findings.
+
+        Processes XML scan results to create Vulnerability and Path findings
+        from web application security tests.
+        """
         endpoints = set(["/"])
-        root = self._load_report_as_xml()
+        root = self.load_xml_report()
+        if not root:
+            return
         for site in root:
             url_base = site.attrib["name"]
             for alert in site.findall("alerts/alertitem"):
@@ -28,27 +51,32 @@ class Zap(BaseParser):
                 instances = alert.findall("instances/instance")
                 if instances:
                     description += "\n\nLocation:\n"
-                for instance in instances or []:
-                    url = instance.findtext("uri")
-                    description += f"[{instance.findtext('method')}] {url}\n"
-                    if url:
-                        endpoint = url.replace(url_base, "")
-                        if endpoint and endpoint not in endpoints:
-                            endpoints.add(endpoint)
-                            self.create_finding(Path, path=endpoint, type=PathType.ENDPOINT)
+                    for instance in instances:
+                        url = instance.findtext("uri")
+                        description += f"[{instance.findtext('method')}] {url}\n"
+                        if url:
+                            endpoint = url.replace(url_base, "")
+                            if endpoint and endpoint not in endpoints:
+                                endpoints.add(endpoint)
+                                self.create_finding(Path, path=endpoint, type=PathType.ENDPOINT)
                 if name:
                     name = self._clean(name)
                     self.create_finding(
                         Vulnerability,
                         name=name,
                         description=self._clean(description) if description else name,
-                        severity=(self.severity_mapping[int(severity)] if severity else Severity.MEDIUM),
+                        severity=self.severity_mapping[int(severity)] if severity else Severity.MEDIUM,
                         cwe=f"CWE-{cwe}" if cwe else None,
-                        reference=(self._clean_reference(reference) if reference else None),
+                        reference=self._clean(reference.split("</p><p>", 1)[0]) if reference else None,
                     )
 
     def _clean(self, value: str) -> str:
-        return unescape(value).replace("<p>", "").replace("</p>", "")
+        """Clean HTML-encoded text from ZAP output.
 
-    def _clean_reference(self, value: str) -> str:
-        return self._clean(value.split("</p><p>", 1)[0])
+        Args:
+            value (str): HTML-encoded text to clean
+
+        Returns:
+            str: Cleaned text with HTML entities unescaped and tags removed
+        """
+        return unescape(value).replace("<p>", "").replace("</p>", "")

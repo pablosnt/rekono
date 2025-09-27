@@ -1,4 +1,9 @@
-import logging
+"""Background job queue processing for security findings.
+
+Handles asynchronous processing of security findings through background job
+queues including external platform integration, notifications, and automatic
+finding lifecycle management.
+"""
 
 from django_rq import job
 from rq.job import Job
@@ -23,42 +28,88 @@ from platforms.hacktricks import HackTricks
 from platforms.hosts_metadata import HostsMetadata
 from platforms.mail.notifications import SMTP
 from platforms.nvdnist.integrations import NvdNist
-from platforms.telegram_app.notifications.notifications import Telegram
+from platforms.telegram_app.notifications import Telegram
 from settings.models import Settings
-
-logger = logging.getLogger()
 
 
 class FindingsQueue(BaseQueue):
+    """Background job queue for asynchronous findings processing.
+
+    Manages background processing of security findings including external
+    platform integrations, alert notifications, and automatic finding
+    lifecycle management with Redis Queue (RQ) backend.
+    """
+
     name = "findings"
 
     def enqueue(self, execution: Execution, findings: list[Finding]) -> Job:
+        """Enqueue findings for background processing.
+
+        Adds findings to the background job queue for asynchronous
+        processing and logs the enqueue operation.
+
+        Args:
+            execution (Execution): Execution that produced the findings.
+            findings (list[Finding]): List of findings to process.
+
+        Returns:
+            Job: Queued job object for tracking.
+        """
         job = super().enqueue(execution=execution, findings=findings)
-        logger.info(f"[Findings] {len(findings)} findings from execution {execution.id} have been enqueued")
+        self.logger.info(f"[Findings] {len(findings)} findings from execution {execution.id} have been enqueued")
         return job
 
     @staticmethod
     @job("findings")
     def consume(execution: Execution, findings: list[Finding]) -> None:
+        """Process findings through background job workflow.
+
+        Executes complete findings processing pipeline including external
+        platform integrations, alert notifications, and automatic fixing
+        based on system settings and project configuration.
+
+        Processing Steps:
+            - External platform integration (DefectDojo, NVD, HackTricks, etc.)
+            - Alert notification dispatch (SMTP, Telegram)
+            - Automatic finding lifecycle management
+            - Cross-execution finding correlation and fixing
+
+        Args:
+            execution (Execution): Source execution for the findings.
+            findings (list[Finding]): List of findings to process.
+        """
         settings = Settings.objects.first()
         if findings:
+            # Initialize integration and notification platforms
+            integrations = [DefectDojo(), NvdNist(), HackTricks(), CveCrowd(), HostsMetadata()]
             notifications = [SMTP(), Telegram()]
-            integrations_per_execution = [DefectDojo()]
-            integrations_per_finding = [NvdNist(), HackTricks(), CveCrowd(), HostsMetadata()]
+            # Process each finding individually
             for finding in findings:
+                # Reactivate previously fixed findings if auto-fix is enabled
+                # This ensures findings that reappear are marked as active again
                 if settings.auto_fix_findings and finding.is_fixed:
                     finding.__class__.objects.remove_fix(finding)
-                for integration in integrations_per_finding:
+                # Process findings through integrations that work on individual findings
+                for integration in integrations:
+                    if integration.run_per_execution:
+                        continue
                     integration.process_finding(execution, finding)
+                # Check and trigger project alerts for this specific finding
                 for alert in execution.task.target.project.alerts.filter(enabled=True).order_by("-item").all():
                     if alert.must_be_triggered(execution, finding):
+                        # Send notifications through all configured notification platforms
                         for platform in notifications:
                             platform.process_alert(alert, finding)
-                        break
-            for notification in integrations_per_execution + notifications:
-                notification.process_findings(execution, findings)
+            # Process findings through platforms that run per execution
+            for platform in integrations + notifications:
+                if not platform.run_per_execution:
+                    continue
+                platform.process_findings(execution, findings)
+        # Automatic fixing: mark findings as fixed if they're no longer detected in identical execution contexts
         if settings.auto_fix_findings:
             same_executions = Execution.objects.filter(hash=execution.hash, status=Status.COMPLETED)
+            # For each finding type, mark findings as fixed if they don't appear in the current execution
+            # but were found in previous executions with the same parameters
             for finding_type in [
                 OSINT,
                 Host,

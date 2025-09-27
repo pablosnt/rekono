@@ -1,15 +1,30 @@
+"""Enumeration classes for user notification preferences.
+
+Defines notification scope options for user preference management
+with Django TextChoices implementation.
+"""
+
 from django.db import models
 from django.db.models.enums import Choices
 
 
 class Notification(models.TextChoices):
-    """Notification choices for users."""
+    """Notification scope preferences for user accounts.
 
-    DISABLED = "Disabled"  # All notifications disabled
-    # Only notifications with executions made by the user
+    Defines the scope of notifications users receive about security executions.
+    Controls which execution events trigger notifications to the user.
+
+    Choices:
+        DISABLED: All notifications disabled except security-critical ones
+        MY_EXECUTIONS: Only notifications for executions started by the user
+        ALL_EXECUTIONS: Notifications for all executions in accessible projects
+    """
+
+    DISABLED = "Disabled"
     MY_EXECUTIONS = "Only my executions"
-    # Notifications with all executions made in user projects
     ALL_EXECUTIONS = "All executions"
 
 
-Notification: type[Choices] = Notification  # https://github.com/google/pytype/issues/1048
+# Type annotation fix for pytype compatibility
+# https://github.com/google/pytype/issues/1048
+Notification: type[Choices] = Notification

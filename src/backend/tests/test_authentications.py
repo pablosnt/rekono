@@ -1,19 +1,17 @@
-from typing import Any
+import base64
+from functools import cached_property
+
+from django.test import TestCase
 
 from authentications.enums import AuthenticationType
 from authentications.models import Authentication
-from target_ports.models import TargetPort
-from tests.cases import ApiTestCase
+from security.authorization.roles import Role
 from tests.framework import ApiTest
+from tests.framework.cases import ApiTestCase, DeleteApiTestCase, PostApiTestCase
 
 # pytype: disable=wrong-arg-types
 
-authentication = {
-    "name": "admin",
-    "secret": "admin",
-    "type": AuthenticationType.BASIC,
-    "target_port": 1,
-}
+authentication = {"name": "admin", "secret": "admin", "type": AuthenticationType.BASIC, "target_port": 1}
 invalid_authentication1 = {
     "name": "invalid;name",
     "secret": "admin",
@@ -26,91 +24,53 @@ invalid_authentication2 = {
     "type": AuthenticationType.BEARER,
     "target_port": 1,
 }
-invalid_authentication3 = {
-    "name": "newadmin",
-    "secret": "newadmin",
-    "type": AuthenticationType.BASIC,
-    "target_port": 1,
-}
+invalid_authentication3 = {"name": "newadmin", "secret": "newadmin", "type": AuthenticationType.BASIC, "target_port": 1}
 
 
-class AuthenticationTest(ApiTest):
+class AuthenticationTest(ApiTest, TestCase):
     endpoint = "/api/authentications/"
-    expected_str = "10.10.10.10 - 80 - admin"
+    expected_string = "10.10.10.10 - 80 - admin"
+    target_parameters_flag = True
     cases = [
-        ApiTestCase(
-            ["admin1", "admin2", "auditor1", "auditor2", "reader1", "reader2"],
-            "get",
-            200,
-            expected=[],
-        ),
-        ApiTestCase(
-            ["admin1", "admin2", "auditor1", "auditor2", "reader1", "reader2"],
-            "get",
-            404,
-            endpoint="{endpoint}1/",
-        ),
-        ApiTestCase(["admin1", "auditor1"], "post", 400, invalid_authentication1),
-        ApiTestCase(["admin1", "auditor1"], "post", 400, invalid_authentication2),
-        ApiTestCase(["admin2", "auditor2", "reader1", "reader2"], "post", 403, authentication),
-        ApiTestCase(
+        ApiTestCase([Role.ADMIN, Role.AUDITOR, Role.READER]),
+        ApiTestCase([Role.ADMIN, Role.AUDITOR, Role.READER], 404, endpoint="1"),
+        PostApiTestCase(["admin1", "auditor1"], 400, invalid_authentication1),
+        PostApiTestCase(["admin1", "auditor1"], 400, invalid_authentication2),
+        PostApiTestCase(["admin2", "auditor2", Role.READER], 403, authentication),
+        PostApiTestCase(
             ["admin1"],
-            "post",
-            201,
-            authentication,
-            {"id": 1, **authentication, "secret": "*" * len(authentication["secret"])},
+            data=authentication,
+            expected={"id": 2, **authentication, "secret": "*" * len(authentication["secret"])},
         ),
-        ApiTestCase(["admin1", "auditor1"], "post", 400, authentication),
-        ApiTestCase(["admin1", "auditor1"], "post", 400, invalid_authentication3),
+        PostApiTestCase(["admin1", "auditor1"], 400, authentication),
+        PostApiTestCase(["admin1", "auditor1"], 400, invalid_authentication3),
+        ApiTestCase(["members"], expected=[{"id": 2, **authentication, "secret": "*" * len(authentication["secret"])}]),
         ApiTestCase(
-            ["admin1", "auditor1", "reader1"],
-            "get",
-            200,
-            expected=[
-                {
-                    "id": 1,
-                    **authentication,
-                    "secret": "*" * len(authentication["secret"]),
-                }
-            ],
+            ["members"],
+            expected={"id": 2, **authentication, "secret": "*" * len(authentication["secret"])},
+            endpoint="2",
         ),
-        ApiTestCase(
-            ["admin1", "auditor1", "reader1"],
-            "get",
-            200,
-            expected={
-                "id": 1,
-                **authentication,
-                "secret": "*" * len(authentication["secret"]),
-            },
-            endpoint="{endpoint}1/",
-        ),
-        ApiTestCase(["admin2", "auditor2", "reader2"], "get", 200, expected=[]),
-        ApiTestCase(["admin2", "auditor2", "reader2"], "get", 404, endpoint="{endpoint}1/"),
-        ApiTestCase(["reader1", "reader2"], "delete", 403, endpoint="{endpoint}1/"),
-        ApiTestCase(["admin2", "auditor2"], "delete", 404, endpoint="{endpoint}1/"),
-        ApiTestCase(["auditor1"], "delete", 204, endpoint="{endpoint}1/"),
-        ApiTestCase(["admin1"], "delete", 404, endpoint="{endpoint}1/"),
-        ApiTestCase(
-            ["admin1", "admin2", "auditor1", "auditor2", "reader1", "reader2"],
-            "get",
-            200,
-            expected=[],
-        ),
-        ApiTestCase(
-            ["admin1", "admin2", "auditor1", "auditor2", "reader1", "reader2"],
-            "get",
-            404,
-            endpoint="{endpoint}1/",
-        ),
+        ApiTestCase(["not_members"]),
+        ApiTestCase(["not_members"], 404, endpoint="2"),
+        DeleteApiTestCase([Role.READER], 403, endpoint="2"),
+        DeleteApiTestCase(["admin2", "auditor2"], 404, endpoint="2"),
+        DeleteApiTestCase(["auditor1"], endpoint="2"),
+        DeleteApiTestCase(["admin1"], 404, endpoint="2"),
+        ApiTestCase([Role.ADMIN, Role.AUDITOR, Role.READER]),
+        ApiTestCase([Role.ADMIN, Role.AUDITOR, Role.READER], 404, endpoint="2"),
     ]
 
-    def setUp(self) -> None:
-        super().setUp()
-        self._setup_target()
-        self.target_port = TargetPort.objects.create(target=self.target, port=80, path=None)
-        TargetPort.objects.create(target=self.target, port=22, path=None)
-        TargetPort.objects.create(target=self.target, port=443, path=None)
+    @cached_property
+    def object(self) -> Authentication:
+        return Authentication(**{**authentication, "target_port": self.targetport})
 
-    def _get_object(self) -> Any:
-        return Authentication(**{**authentication, "target_port": self.target_port})
+    def test_token(self) -> None:
+        self.assertEqual(base64.b64encode("admin:admin".encode()).decode(), self.object.token)
+
+    def setUp(self):
+        super().setUp()
+        Authentication.objects.all().delete()
+
+    def test_no_relationships(self) -> None:
+        self.assertEqual(0, len(self.object.input_type.parent_input_types))
+        self.assertEqual(0, len(self.object.input_type.children_input_types))

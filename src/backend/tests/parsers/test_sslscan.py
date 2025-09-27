@@ -1,13 +1,15 @@
+from django.test import TestCase
+
 from findings.enums import Severity
 from findings.models import Technology, Vulnerability
-from tests.cases import ToolTestCase
-from tests.framework import ToolTest
+from tests.framework import ParserTest
+from tests.framework.cases import ParserTestCase
 
 
-class SslscanTest(ToolTest):
+class SslscanTest(ParserTest, TestCase):
     tool_name = "Sslscan"
     cases = [
-        ToolTestCase(
+        ParserTestCase(
             "protocols.xml",
             [
                 {"model": Technology, "name": "TLS", "version": "1.0"},
@@ -50,7 +52,7 @@ class SslscanTest(ToolTest):
                 },
             ],
         ),
-        ToolTestCase(
+        ParserTestCase(
             "heartbleed.xml",
             [
                 {"model": Technology, "name": "TLS", "version": "1.0"},
@@ -70,19 +72,11 @@ class SslscanTest(ToolTest):
                     "cwe": "CWE-326",
                 },
                 {"model": Technology, "name": "TLS", "version": "1.2"},
-                {
-                    "model": Vulnerability,
-                    "name": "Heartbleed in TLSv1.1",
-                    "cve": "CVE-2014-0160",
-                },
-                {
-                    "model": Vulnerability,
-                    "name": "Heartbleed in TLSv1.0",
-                    "cve": "CVE-2014-0160",
-                },
+                {"model": Vulnerability, "name": "Heartbleed in TLSv1.1", "cve": "CVE-2014-0160"},
+                {"model": Vulnerability, "name": "Heartbleed in TLSv1.0", "cve": "CVE-2014-0160"},
             ],
         ),
-        ToolTestCase(
+        ParserTestCase(
             "insecure-renegotiation.xml",
             [
                 {"model": Technology, "name": "SSL", "version": "2"},

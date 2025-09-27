@@ -36,8 +36,10 @@ jobs:
 
       - name: Run unit tests
         working-directory: src/backend
-        run: uv run coverage run manage.py test
+        run: uv run coverage run --concurrency=multiprocessing,thread manage.py test --parallel 50
       
       - name: Check coverage
         working-directory: src/backend
-        run: uv run coverage report -m --skip-covered --omit="tests/*,platforms/telegram_app/bot/*,platforms/telegram_app/framework.py,platforms/**/notifications.py" --fail-under=$REQUIRED_COVERAGE
+        run: |
+          uv run coverage combine
+          uv run coverage report -m --skip-covered --omit="tests/*,platforms/telegram_app/bot/*,platforms/telegram_app/framework.py,platforms/**/notifications.py" --fail-under=$REQUIRED_COVERAGE

@@ -1,74 +1,39 @@
-from typing import Any
+from functools import cached_property
+
+from django.test import TestCase
 
 from reporting.enums import FindingName, ReportFormat
 from reporting.models import Report
+from security.authorization.roles import Role
 from targets.enums import TargetType
 from targets.models import Target
-from tests.cases import ApiTestCase
 from tests.framework import ApiTest
+from tests.framework.cases import ApiTestCase, DeleteApiTestCase, PostApiTestCase
+from tests.framework.data import SetupProject
 
-# pytype: disable=wrong-arg-types
+# pytype: disable=wrong-arg-types,attribute-error
 
 
 class ReportingTest(ApiTest):
     endpoint = "/api/reports/"
     format = None
     only_true_positives = False
-    finding_types: list[str] | None = [
-        FindingName.OSINT.value,
-        FindingName.HOST.value,
-        FindingName.PORT.value,
-        FindingName.PATH.value,
-        FindingName.CREDENTIAL.value,
-        FindingName.TECHNOLOGY.value,
-        FindingName.VULNERABILITY.value,
-        FindingName.EXPLOIT.value,
-    ]
-
-    def setUp(self) -> None:
-        super().setUp()
-        self._setup_tasks_and_executions()
-        self._setup_findings(self.execution1)
+    finding_types: list[str] | None = [name.value for name in FindingName]
 
     def test_cases(self) -> None:
         if self.format:
-            report = {
-                "format": self.format.value,
-                "only_true_positives": self.only_true_positives,
-            }
+            report = {"format": self.format.value, "only_true_positives": self.only_true_positives}
             if self.finding_types:
                 report["finding_types"] = self.finding_types
             self.cases = [
-                ApiTestCase(
-                    ["admin1", "admin2", "auditor1", "auditor2", "reader1", "reader2"],
-                    "get",
-                    200,
-                    expected=[],
-                ),
-                ApiTestCase(
-                    ["admin2", "auditor2", "reader2"],
-                    "post",
-                    403,
-                    {**report, "project": 1},
-                ),
-                ApiTestCase(
-                    ["admin2", "auditor2", "reader2"],
-                    "post",
-                    403,
-                    {**report, "target": 1},
-                ),
-                ApiTestCase(
-                    ["admin2", "auditor2", "reader2"],
-                    "post",
-                    403,
-                    {**report, "task": 1},
-                ),
-                ApiTestCase(["admin1", "auditor1", "reader1"], "post", 400, report),
-                ApiTestCase(
+                ApiTestCase([Role.ADMIN, Role.AUDITOR, Role.READER]),
+                PostApiTestCase(["not_members"], 403, {**report, "project": 1}),
+                PostApiTestCase(["not_members"], 403, {**report, "target": 1}),
+                PostApiTestCase(["not_members"], 403, {**report, "task": 1}),
+                PostApiTestCase(["members"], 400, report),
+                PostApiTestCase(
                     ["admin1"],
-                    "post",
-                    201,
-                    {**report, "project": 1},
+                    data={**report, "project": 1},
                     expected={
                         "id": 1,
                         "project": 1,
@@ -78,11 +43,9 @@ class ReportingTest(ApiTest):
                         "user": 1,
                     },
                 ),
-                ApiTestCase(
+                PostApiTestCase(
                     ["auditor1"],
-                    "post",
-                    201,
-                    {**report, "task": 1},
+                    data={**report, "task": 1},
                     expected={
                         "id": 2,
                         "project": None,
@@ -92,11 +55,9 @@ class ReportingTest(ApiTest):
                         "user": 3,
                     },
                 ),
-                ApiTestCase(
+                PostApiTestCase(
                     ["reader1"],
-                    "post",
-                    201,
-                    {**report, "target": 1},
+                    data={**report, "target": 1},
                     expected={
                         "id": 3,
                         "project": None,
@@ -106,43 +67,24 @@ class ReportingTest(ApiTest):
                         "user": 5,
                     },
                 ),
+                ApiTestCase(["not_members"], 404, endpoint="1"),
+                ApiTestCase(["not_members"], 404, endpoint="2"),
+                ApiTestCase(["not_members"], 404, endpoint="3"),
+                ApiTestCase(["not_members"]),
                 ApiTestCase(
-                    ["admin2", "auditor2", "reader2"],
-                    "get",
-                    404,
-                    endpoint="{endpoint}1/",
-                ),
-                ApiTestCase(
-                    ["admin2", "auditor2", "reader2"],
-                    "get",
-                    404,
-                    endpoint="{endpoint}2/",
-                ),
-                ApiTestCase(
-                    ["admin2", "auditor2", "reader2"],
-                    "get",
-                    404,
-                    endpoint="{endpoint}3/",
-                ),
-                ApiTestCase(["admin2", "auditor2", "reader2"], "get", 200, expected=[]),
-                ApiTestCase(
-                    ["admin1", "auditor1", "reader1"],
-                    "get",
-                    200,
+                    ["members"],
                     expected={
                         "id": 1,
-                        "project": {"id": 1, "name": "test"},
+                        "project": {"id": 1},
                         "task": None,
                         "target": None,
                         "format": self.format.value,
                         "user": {"id": 1, "username": "admin1"},
                     },
-                    endpoint="{endpoint}1/",
+                    endpoint="1",
                 ),
                 ApiTestCase(
-                    ["admin1", "auditor1", "reader1"],
-                    "get",
-                    200,
+                    ["members"],
                     expected={
                         "id": 2,
                         "project": None,
@@ -151,12 +93,10 @@ class ReportingTest(ApiTest):
                         "format": self.format.value,
                         "user": {"id": 3, "username": "auditor1"},
                     },
-                    endpoint="{endpoint}2/",
+                    endpoint="2",
                 ),
                 ApiTestCase(
-                    ["admin1", "auditor1", "reader1"],
-                    "get",
-                    200,
+                    ["members"],
                     expected={
                         "id": 3,
                         "project": None,
@@ -165,12 +105,10 @@ class ReportingTest(ApiTest):
                         "format": self.format.value,
                         "user": {"id": 5, "username": "reader1"},
                     },
-                    endpoint="{endpoint}3/",
+                    endpoint="3",
                 ),
                 ApiTestCase(
-                    ["admin1", "auditor1", "reader1"],
-                    "get",
-                    200,
+                    ["members"],
                     expected=[
                         {
                             "id": 3,
@@ -190,7 +128,7 @@ class ReportingTest(ApiTest):
                         },
                         {
                             "id": 1,
-                            "project": {"id": 1, "name": "test"},
+                            "project": {"id": 1},
                             "task": None,
                             "target": None,
                             "format": self.format.value,
@@ -200,153 +138,68 @@ class ReportingTest(ApiTest):
                 ),
                 # Downloads return a 400 error because reports are created within a thread execution and having two
                 # threads working on the same tables at the same time is not compatible with SQLite
-                ApiTestCase(
-                    ["admin1", "auditor1", "reader1"],
-                    "get",
-                    400,
-                    endpoint=f"{self.endpoint}1/download/",
-                ),
-                ApiTestCase(
-                    ["admin2", "auditor2", "reader2"],
-                    "get",
-                    404,
-                    endpoint=f"{self.endpoint}1/download/",
-                ),
-                ApiTestCase(
-                    ["admin1", "auditor1", "reader1"],
-                    "get",
-                    400,
-                    endpoint=f"{self.endpoint}2/download/",
-                ),
-                ApiTestCase(
-                    ["admin2", "auditor2", "reader2"],
-                    "get",
-                    404,
-                    endpoint=f"{self.endpoint}2/download/",
-                ),
-                ApiTestCase(
-                    ["admin1", "auditor1", "reader1"],
-                    "get",
-                    400,
-                    endpoint=f"{self.endpoint}3/download/",
-                ),
-                ApiTestCase(
-                    ["admin2", "auditor2", "reader2"],
-                    "get",
-                    404,
-                    endpoint=f"{self.endpoint}3/download/",
-                ),
-                ApiTestCase(["auditor2", "reader2"], "delete", 404, endpoint="{endpoint}1/"),
-                ApiTestCase(["auditor1", "reader1"], "delete", 403, endpoint="{endpoint}1/"),
-                ApiTestCase(["admin1"], "delete", 204, endpoint="{endpoint}1/"),
-                ApiTestCase(["admin1"], "delete", 204, endpoint="{endpoint}2/"),
-                ApiTestCase(["reader1"], "delete", 204, endpoint="{endpoint}3/"),
-                ApiTestCase(
-                    [
-                        "admin1",
-                        "admin2",
-                        "auditor1",
-                        "auditor2",
-                        "reader1",
-                        "reader2",
-                    ],
-                    "get",
-                    404,
-                    endpoint="{endpoint}1/",
-                ),
-                ApiTestCase(
-                    [
-                        "admin1",
-                        "admin2",
-                        "auditor1",
-                        "auditor2",
-                        "reader1",
-                        "reader2",
-                    ],
-                    "get",
-                    404,
-                    endpoint="{endpoint}2/",
-                ),
-                ApiTestCase(
-                    [
-                        "admin1",
-                        "admin2",
-                        "auditor1",
-                        "auditor2",
-                        "reader1",
-                        "reader2",
-                    ],
-                    "get",
-                    404,
-                    endpoint="{endpoint}3/",
-                ),
-                ApiTestCase(
-                    [
-                        "admin1",
-                        "admin2",
-                        "auditor1",
-                        "auditor2",
-                        "reader1",
-                        "reader2",
-                    ],
-                    "get",
-                    200,
-                    expected=[],
-                ),
+                ApiTestCase(["members"], 400, endpoint="1/download"),
+                ApiTestCase(["not_members"], 404, endpoint="1/download"),
+                ApiTestCase(["members"], 400, endpoint="2/download"),
+                ApiTestCase(["not_members"], 404, endpoint="2/download"),
+                ApiTestCase(["members"], 400, endpoint="3/download"),
+                ApiTestCase(["not_members"], 404, endpoint="3/download"),
+                DeleteApiTestCase(["auditor2", "reader2"], 404, endpoint="1"),
+                DeleteApiTestCase(["auditor1", "reader1"], 403, endpoint="1"),
+                DeleteApiTestCase(["admin1"], endpoint="1"),
+                DeleteApiTestCase(["admin1"], endpoint="2"),
+                DeleteApiTestCase(["reader1"], endpoint="3"),
+                ApiTestCase([Role.ADMIN, Role.AUDITOR, Role.READER], 404, endpoint="1"),
+                ApiTestCase([Role.ADMIN, Role.AUDITOR, Role.READER], 404, endpoint="2"),
+                ApiTestCase([Role.ADMIN, Role.AUDITOR, Role.READER], 404, endpoint="3"),
+                ApiTestCase([Role.ADMIN, Role.AUDITOR, Role.READER]),
             ]
             super().test_cases()
 
-    def test_str(self) -> None:
+    def test_string(self) -> None:
         if self.format:
-            self.expected_str = f"{self.project.name} - {self.format.value} - {self.admin1.email}"
-            super().test_str()
+            self.expected_string = f"{self.project.name} - {self.format.value} - {self.admin1.email}"
+            super().test_string()
 
-    def _get_object(self) -> Any:
+    @cached_property
+    def object(self) -> Report:
         return Report(format=self.format, project=self.project, user=self.admin1)
 
 
-class JsonReportTest(ReportingTest):
+class JsonReportTest(ReportingTest, TestCase):
     format = ReportFormat.JSON
 
 
-class JsonReportTruePositivesTest(ReportingTest):
+class JsonReportTruePositivesTest(ReportingTest, TestCase):
     format = ReportFormat.JSON
     only_true_positives = False
 
 
-class XmlReportTest(ReportingTest):
+class XmlReportTest(ReportingTest, TestCase):
     format = ReportFormat.XML
 
 
-class XmlReportTruePositivesTest(ReportingTest):
+class XmlReportTruePositivesTest(ReportingTest, TestCase):
     format = ReportFormat.XML
     only_true_positives = False
 
 
-class PdfReportTest(ReportingTest):
+class PdfReportTest(ReportingTest, TestCase):
     format = ReportFormat.PDF
     finding_types = None
 
-    def setUp(self) -> None:
-        super().setUp()
+    def setup_testing_data(self) -> None:
+        super().setup_testing_data()
         Target.objects.create(project=self.project, target="10.10.10.15", type=TargetType.PRIVATE_IP)
 
 
-class PdfReportWithoutFindingsTest(ApiTest):
+class PdfReportWithoutFindingsTest(ApiTest, TestCase):
     endpoint = "/api/reports/"
+    data = [SetupProject(executions_per_task=0)]
     cases = [
-        ApiTestCase(
-            ["admin1", "auditor1", "reader1"],
-            "post",
+        PostApiTestCase(
+            ["members"],
             404,
-            {
-                "format": ReportFormat.PDF.value,
-                "only_true_positives": True,
-                "project": 1,
-            },
+            data={"format": ReportFormat.PDF.value, "only_true_positives": True, "project": 1},
         )
     ]
-
-    def setUp(self) -> None:
-        super().setUp()
-        self._setup_tasks_and_executions()

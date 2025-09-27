@@ -1,3 +1,9 @@
+"""JoomScan Joomla CMS vulnerability scanner output parser.
+
+Processes JoomScan plain text output to extract Joomla technology fingerprints,
+vulnerabilities, exploits, and security findings from Joomla CMS scans.
+"""
+
 from urllib.parse import urlparse
 
 from findings.enums import PathType, Severity
@@ -6,14 +12,29 @@ from tools.parsers.base import BaseParser
 
 
 class Joomscan(BaseParser):
-    def _parse_standard_output(self) -> None:
-        technology = None
-        vulnerability_name = None
+    """Parser for JoomScan plain text output.
+
+    Extracts Joomla CMS security findings including version detection, CVE
+    vulnerabilities, exploit references, configuration issues, and discovered
+    endpoints from comprehensive Joomla security scans.
+
+    Attributes:
+        Inherits all attributes from BaseParser
+    """
+
+    def _parse(self) -> None:
+        """Parse JoomScan output and extract Joomla security findings.
+
+        Processes plain text scan results to create Technology, Vulnerability,
+        Exploit, and Path findings from Joomla CMS security analysis.
+        """
+        # TODO: Review
+        technology = vulnerability_name = None
         endpoints = set(["/"])
-        backups: set[str] = set()
-        configurations: set[str] = set()
-        path_disclosure: set[str] = set()
-        directory_listing: set[str] = set()
+        backups = set()
+        configurations = set()
+        path_disclosure = set()
+        directory_listing = set()
         host = urlparse(self.executor.arguments[self.executor.arguments.index("-u") + 1]).hostname
         lines = self.output.split("\n")
         for index, line in enumerate(lines):
@@ -32,12 +53,7 @@ class Joomscan(BaseParser):
             elif "CVE : " in data:
                 vulnerability_name = lines[index - 1].replace("[++]", "").replace("Joomla!", "").strip()
                 for cve in data.replace("CVE : ", "").strip().split(","):
-                    self.create_finding(
-                        Vulnerability,
-                        technology=technology,
-                        name=vulnerability_name,
-                        cve=cve.strip(),
-                    )
+                    self.create_finding(Vulnerability, technology=technology, name=vulnerability_name, cve=cve.strip())
             elif "EDB : " in data:
                 link = data.replace("EDB : ", "").strip()
                 self.create_finding(

@@ -1,36 +1,25 @@
-from typing import Any
+from functools import cached_property
+
+from django.test import TestCase
 
 from platforms.mail.models import SMTPSettings
-from tests.cases import ApiTestCase
-from tests.framework import ApiTest
+from security.authorization.roles import Role
+from tests.framework import ApiTestNoData
+from tests.framework.cases import ApiTestCase, PutApiTestCase
 
 # pytype: disable=wrong-arg-types
 
-config = {
-    "host": "smtp.rekono.com",
-    "port": 587,
-    "username": "rekono",
-    "password": "rekono",
-    "tls": True,
-}
-invalid_config = {
-    "host": "smtp;rekono.com",
-    "port": 999999,
-    "username": "reko;no",
-    "password": "re;kono",
-    "tls": True,
-}
+config = {"host": "smtp.rekono.com", "port": 587, "username": "rekono", "password": "rekono", "tls": True}
+invalid_config = {"host": "smtp;rekono.com", "port": 999999, "username": "reko;no", "password": "re;kono", "tls": True}
 
 
-class SmtpSettingsTest(ApiTest):
+class SmtpSettingsTest(ApiTestNoData, TestCase):
     endpoint = "/api/smtp/1/"
-    expected_str = f"{config['host']}:{config['port']}"
+    expected_string = f"{config['host']}:{config['port']}"
     cases = [
-        ApiTestCase(["auditor1", "auditor2", "reader1", "reader2"], "get", 403),
+        ApiTestCase([Role.AUDITOR, Role.READER], status_code=403),
         ApiTestCase(
-            ["admin1", "admin2"],
-            "get",
-            200,
+            [Role.ADMIN],
             expected={
                 "id": 1,
                 "host": None,
@@ -41,34 +30,21 @@ class SmtpSettingsTest(ApiTest):
                 "is_available": False,
             },
         ),
-        ApiTestCase(["auditor1", "auditor2", "reader1", "reader2"], "put", 403, config),
-        ApiTestCase(["admin1", "admin2"], "put", 400, invalid_config),
-        ApiTestCase(
-            ["admin1", "admin2"],
-            "put",
-            200,
-            config,
-            expected={
-                "id": 1,
-                **config,
-                "password": "*" * len(str(config.get("password", ""))),
-                "is_available": False,
-            },
+        PutApiTestCase([Role.AUDITOR, Role.READER], 403, config),
+        PutApiTestCase([Role.ADMIN], 400, invalid_config),
+        PutApiTestCase(
+            [Role.ADMIN],
+            data=config,
+            expected={"id": 1, **config, "password": "*" * len(str(config.get("password", ""))), "is_available": False},
         ),
         ApiTestCase(
-            ["admin1", "admin2"],
-            "get",
-            200,
-            expected={
-                "id": 1,
-                **config,
-                "password": "*" * len(str(config.get("password", ""))),
-                "is_available": False,
-            },
+            [Role.ADMIN],
+            expected={"id": 1, **config, "password": "*" * len(str(config.get("password", ""))), "is_available": False},
         ),
     ]
 
-    def _get_object(self) -> Any:
+    @cached_property
+    def object(self) -> SMTPSettings:
         settings = SMTPSettings.objects.get(pk=1)
         config["secret"] = config.pop("password")
         for field, value in config.items():

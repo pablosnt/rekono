@@ -15,8 +15,8 @@ db.sqlite3
 db.sqlite3-journal
 
 # Environments
-/.env
-.venv
+.env/
+.venv/
 env/
 venv/
 ENV/
@@ -27,13 +27,13 @@ venv.bak/
 .ruff_cache/
 
 # pytype
-.pytype
+.pytype/
 
 # Envionment
 .DS_Store
 .vscode/
 reports/
-wordlists/
+/wordlists/
 logs/
 /src/backend/tests/home/
 

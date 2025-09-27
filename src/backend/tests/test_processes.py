@@ -1,13 +1,15 @@
-from typing import Any
+from functools import cached_property
+
+from django.test import TestCase
 
 from processes.models import Process, Step
-from tests.cases import ApiTestCase
-from tests.framework import ApiTest
+from security.authorization.roles import Role
+from tests.framework import ApiTestNoData
+from tests.framework.cases import ApiTestCase, DeleteApiTestCase, PostApiTestCase, PutApiTestCase
 
 # pytype: disable=wrong-arg-types
 
 first_process_name = "All tools"
-
 process1 = {"name": "test1", "description": "test", "tags": ["test"]}
 new_process1 = {"name": "new test1", "description": "test", "tags": ["test"]}
 process2 = {"name": "test2", "description": "test", "tags": ["newtest"]}
@@ -16,267 +18,120 @@ invalid_process1 = {"name": "invalid ; test", "description": "test", "tags": ["t
 invalid_process2 = {"name": "test", "description": "invalid ; test", "tags": ["test"]}
 
 
-class ProcessTest(ApiTest):
+class ProcessTest(ApiTestNoData, TestCase):
     endpoint = "/api/processes/"
-    expected_str = first_process_name
+    expected_string = first_process_name
     cases = [
-        ApiTestCase(["reader1", "reader2"], "get", 403),
+        ApiTestCase([Role.READER], 403),
         ApiTestCase(
-            ["admin1", "admin2", "auditor1", "auditor2"],
-            "get",
-            200,
-            expected={
-                "id": 1,
-                "name": first_process_name,
-                "owner": None,
-                "liked": False,
-                "likes": 0,
-            },
-            endpoint="{endpoint}1/",
+            [Role.ADMIN, Role.AUDITOR],
+            expected={"id": 1, "name": first_process_name, "owner": None, "liked": False, "likes": 0},
+            endpoint="1",
         ),
-        ApiTestCase(["admin1", "admin2", "auditor1", "auditor2"], "post", 400, invalid_process1),
-        ApiTestCase(["admin1", "admin2", "auditor1", "auditor2"], "post", 400, invalid_process2),
-        ApiTestCase(
+        PostApiTestCase([Role.ADMIN, Role.AUDITOR], 400, invalid_process1),
+        PostApiTestCase([Role.ADMIN, Role.AUDITOR], 400, invalid_process2),
+        PostApiTestCase(
             ["admin1"],
-            "post",
-            201,
-            process1,
-            {
-                "id": 8,
-                **process1,
-                "owner": {"id": 1, "username": "admin1"},
-                "liked": False,
-                "likes": 0,
-            },
+            data=process1,
+            expected={"id": 8, **process1, "owner": {"id": 1, "username": "admin1"}, "liked": False, "likes": 0},
         ),
-        ApiTestCase(["admin1", "admin2", "auditor1", "auditor2"], "post", 400, process1),
+        PostApiTestCase([Role.ADMIN, Role.AUDITOR], 400, process1),
         ApiTestCase(
-            ["admin1", "admin2", "auditor1", "auditor2"],
-            "get",
-            200,
-            expected={
-                "id": 8,
-                **process1,
-                "owner": {"id": 1, "username": "admin1"},
-                "liked": False,
-                "likes": 0,
-            },
-            endpoint="{endpoint}8/",
+            [Role.ADMIN, Role.AUDITOR],
+            expected={"id": 8, **process1, "owner": {"id": 1, "username": "admin1"}, "liked": False, "likes": 0},
+            endpoint="8",
         ),
-        ApiTestCase(["reader1", "reader2"], "get", 403, endpoint="{endpoint}8/"),
-        ApiTestCase(
+        ApiTestCase([Role.READER], 403, endpoint="8"),
+        PostApiTestCase(
             ["auditor1"],
-            "post",
-            201,
-            process2,
-            {
-                "id": 9,
-                **process2,
-                "owner": {"id": 3, "username": "auditor1"},
-                "liked": False,
-                "likes": 0,
-            },
+            data=process2,
+            expected={"id": 9, **process2, "owner": {"id": 3, "username": "auditor1"}, "liked": False, "likes": 0},
         ),
-        ApiTestCase(["admin1", "admin2", "auditor1", "auditor2"], "post", 400, process2),
+        PostApiTestCase([Role.ADMIN, Role.AUDITOR], 400, process2),
         ApiTestCase(
-            ["admin1", "admin2", "auditor1", "auditor2"],
-            "get",
-            200,
-            expected={
-                "id": 9,
-                **process2,
-                "owner": {"id": 3, "username": "auditor1"},
-                "liked": False,
-                "likes": 0,
-            },
-            endpoint="{endpoint}9/",
+            [Role.ADMIN, Role.AUDITOR],
+            expected={"id": 9, **process2, "owner": {"id": 3, "username": "auditor1"}, "liked": False, "likes": 0},
+            endpoint="9",
         ),
-        ApiTestCase(["reader1", "reader2"], "get", 403, endpoint="{endpoint}9/"),
+        ApiTestCase([Role.READER], 403, endpoint="9"),
+        PutApiTestCase(
+            [Role.ADMIN],
+            data=new_process1,
+            expected={"id": 8, **new_process1, "owner": {"id": 1, "username": "admin1"}, "liked": False, "likes": 0},
+            endpoint="8",
+        ),
+        PutApiTestCase([Role.AUDITOR, Role.READER], 403, new_process1, endpoint="8"),
+        PutApiTestCase(
+            [Role.ADMIN, "auditor1"],
+            data=new_process2,
+            expected={"id": 9, **new_process2, "owner": {"id": 3, "username": "auditor1"}, "liked": False, "likes": 0},
+            endpoint="9",
+        ),
+        PutApiTestCase(["auditor2", Role.READER], 403, new_process2, endpoint="9"),
+        PostApiTestCase([Role.READER], 403, endpoint="8/like"),
+        DeleteApiTestCase([Role.READER], 403, endpoint="9/like"),
+        ApiTestCase([Role.ADMIN, Role.AUDITOR], endpoint="{endpoint}?like=true"),
+        PostApiTestCase([Role.ADMIN, Role.AUDITOR], 204, endpoint="8/like/"),
         ApiTestCase(
-            ["admin1", "admin2"],
-            "put",
-            200,
-            new_process1,
-            {
-                "id": 8,
-                **new_process1,
-                "owner": {"id": 1, "username": "admin1"},
-                "liked": False,
-                "likes": 0,
-            },
-            endpoint="{endpoint}8/",
+            [Role.ADMIN, Role.AUDITOR],
+            expected={"id": 8, **new_process1, "owner": {"id": 1, "username": "admin1"}, "liked": True, "likes": 4},
+            endpoint="8",
         ),
         ApiTestCase(
-            ["auditor1", "auditor2", "reader1", "reader2"],
-            "put",
-            403,
-            new_process1,
-            endpoint="{endpoint}8/",
-        ),
-        ApiTestCase(
-            ["admin1", "admin2", "auditor1"],
-            "put",
-            200,
-            new_process2,
-            {
-                "id": 9,
-                **new_process2,
-                "owner": {"id": 3, "username": "auditor1"},
-                "liked": False,
-                "likes": 0,
-            },
-            endpoint="{endpoint}9/",
-        ),
-        ApiTestCase(
-            ["auditor2", "reader1", "reader2"],
-            "put",
-            403,
-            new_process2,
-            endpoint="{endpoint}9/",
-        ),
-        ApiTestCase(["reader1", "reader2"], "post", 403, endpoint="{endpoint}8/like/"),
-        ApiTestCase(["reader1", "reader2"], "delete", 403, endpoint="{endpoint}9/like/"),
-        ApiTestCase(
-            ["admin1", "admin2", "auditor1", "auditor2"],
-            "get",
-            200,
+            [Role.ADMIN, Role.AUDITOR],
+            expected=[{"id": 8, **new_process1, "owner": {"id": 1, "username": "admin1"}, "liked": True, "likes": 4}],
             endpoint="{endpoint}?like=true",
         ),
+        DeleteApiTestCase([Role.ADMIN, Role.AUDITOR], endpoint="8/like"),
         ApiTestCase(
-            ["admin1", "admin2", "auditor1", "auditor2"],
-            "post",
-            204,
-            endpoint="{endpoint}8/like/",
+            [Role.ADMIN, Role.AUDITOR],
+            expected={"id": 8, **new_process1, "owner": {"id": 1, "username": "admin1"}, "liked": False, "likes": 0},
+            endpoint="8",
         ),
-        ApiTestCase(
-            ["admin1", "admin2", "auditor1", "auditor2"],
-            "get",
-            200,
-            expected={
-                "id": 8,
-                **new_process1,
-                "owner": {"id": 1, "username": "admin1"},
-                "liked": True,
-                "likes": 4,
-            },
-            endpoint="{endpoint}8/",
-        ),
-        ApiTestCase(
-            ["admin1", "admin2", "auditor1", "auditor2"],
-            "get",
-            200,
-            expected=[
-                {
-                    "id": 8,
-                    **new_process1,
-                    "owner": {"id": 1, "username": "admin1"},
-                    "liked": True,
-                    "likes": 4,
-                }
-            ],
-            endpoint="{endpoint}?like=true",
-        ),
-        ApiTestCase(
-            ["admin1", "admin2", "auditor1", "auditor2"],
-            "delete",
-            204,
-            endpoint="{endpoint}8/like/",
-        ),
-        ApiTestCase(
-            ["admin1", "admin2", "auditor1", "auditor2"],
-            "get",
-            200,
-            expected={
-                "id": 8,
-                **new_process1,
-                "owner": {"id": 1, "username": "admin1"},
-                "liked": False,
-                "likes": 0,
-            },
-            endpoint="{endpoint}8/",
-        ),
-        ApiTestCase(
-            ["auditor1", "auditor2", "reader1", "reader2"],
-            "delete",
-            403,
-            endpoint="{endpoint}8/",
-        ),
-        ApiTestCase(["auditor2", "reader1", "reader2"], "delete", 403, endpoint="{endpoint}9/"),
-        ApiTestCase(["admin2"], "delete", 204, endpoint="{endpoint}8/"),
-        ApiTestCase(
-            ["admin1", "admin2", "auditor1", "auditor2"],
-            "get",
-            404,
-            endpoint="{endpoint}8/",
-        ),
-        ApiTestCase(["reader1", "reader2"], "get", 403, endpoint="{endpoint}9/"),
-        ApiTestCase(["auditor1"], "delete", 204, endpoint="{endpoint}9/"),
-        ApiTestCase(
-            ["admin1", "admin2", "auditor1", "auditor2"],
-            "get",
-            404,
-            endpoint="{endpoint}9/",
-        ),
-        ApiTestCase(["reader1", "reader2"], "get", 403, endpoint="{endpoint}9/"),
+        DeleteApiTestCase([Role.AUDITOR, Role.READER], 403, endpoint="8"),
+        DeleteApiTestCase(["auditor2", Role.READER], 403, endpoint="9"),
+        DeleteApiTestCase(["admin2"], endpoint="8"),
+        ApiTestCase([Role.ADMIN, Role.AUDITOR], 404, endpoint="8"),
+        ApiTestCase([Role.READER], 403, endpoint="9"),
+        DeleteApiTestCase(["auditor1"], endpoint="9"),
+        ApiTestCase([Role.ADMIN, Role.AUDITOR], 404, endpoint="9"),
+        ApiTestCase([Role.READER], 403, endpoint="9"),
     ]
 
-    def _get_object(self) -> Any:
+    @cached_property
+    def object(self) -> Process:
         return Process.objects.first()
 
 
 step1 = {"process_id": 8, "configuration_id": 1}
-expected_step1 = {
-    "process": {"id": step1["process_id"]},
-    "configuration": {"id": step1["configuration_id"]},
-}
+expected_step1 = {"process": {"id": step1["process_id"]}, "configuration": {"id": step1["configuration_id"]}}
 
 
-class StepTest(ApiTest):
+class StepTest(ApiTestNoData, TestCase):
     endpoint = "/api/steps/"
-    expected_str = f"{first_process_name} - theHarvester - Simple scan"
+    expected_string = f"{first_process_name} - theHarvester - Simple scan"
     cases = [
-        ApiTestCase(["reader1", "reader2"], "get", 403),
+        ApiTestCase([Role.READER], 403),
         ApiTestCase(
-            ["admin1", "admin2", "auditor1", "auditor2"],
-            "get",
-            200,
-            expected={
-                "id": 1,
-                "process": {"id": 1},
-                "configuration": {"id": 19},
-            },
-            endpoint="{endpoint}1/",
+            [Role.ADMIN, Role.AUDITOR],
+            expected={"id": 1, "process": {"id": 1}, "configuration": {"id": 19}},
+            endpoint="1",
         ),
-        ApiTestCase(["auditor1", "auditor2", "reader1", "reader2"], "post", 403, step1),
-        ApiTestCase(["admin1"], "post", 201, step1, {"id": 73, **expected_step1}),
-        ApiTestCase(["admin2"], "post", 400, step1),
-        ApiTestCase(["reader1", "reader2"], "get", 403, endpoint="{endpoint}73/"),
-        ApiTestCase(
-            ["admin1", "admin2", "auditor1", "auditor2"],
-            "get",
-            200,
-            expected={"id": 73, **expected_step1},
-            endpoint="{endpoint}73/",
-        ),
-        ApiTestCase(
-            ["auditor1", "auditor2", "reader1", "reader2"],
-            "delete",
-            403,
-            endpoint="{endpoint}73/",
-        ),
-        ApiTestCase(["admin2"], "delete", 204, endpoint="{endpoint}73/"),
-        ApiTestCase(["admin1"], "delete", 404, endpoint="{endpoint}73/"),
-        ApiTestCase(
-            ["admin1", "admin2", "auditor1", "auditor2"],
-            "get",
-            404,
-            endpoint="{endpoint}73/",
-        ),
+        PostApiTestCase([Role.AUDITOR, Role.READER], 403, step1),
+        PostApiTestCase(["admin1"], data=step1, expected={"id": 73, **expected_step1}),
+        PostApiTestCase(["admin2"], 400, step1),
+        ApiTestCase([Role.READER], 403, endpoint="73"),
+        ApiTestCase([Role.ADMIN, Role.AUDITOR], expected={"id": 73, **expected_step1}, endpoint="73"),
+        DeleteApiTestCase([Role.AUDITOR, Role.READER], 403, endpoint="73"),
+        DeleteApiTestCase(["admin2"], endpoint="73"),
+        DeleteApiTestCase(["admin1"], 404, endpoint="73"),
+        ApiTestCase([Role.ADMIN, Role.AUDITOR], 404, endpoint="73"),
     ]
 
     def setUp(self) -> None:
         super().setUp()
         self.process = Process.objects.create(name="test", description="test")
 
-    def _get_object(self) -> Any:
+    @cached_property
+    def object(self) -> Step:
         return Step.objects.first()
