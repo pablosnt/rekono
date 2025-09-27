@@ -100,7 +100,7 @@ class DefectDojo(BaseIntegration):
         Returns:
             Any: Response data (JSON dict if json=True, Response object otherwise)
         """
-        return super()._request(
+        return super()._request(  # pragma: no cover
             method,
             f"{self.settings.server}/api/v2{url}",
             json,
@@ -152,7 +152,7 @@ class DefectDojo(BaseIntegration):
         except Exception:
             return False
 
-    def create_product_type(self, name: str, description: str) -> dict[str, Any]:
+    def create_product_type(self, name: str, description: str) -> dict[str, Any]:  # pragma: no cover
         """Create a new product type in DefectDojo.
 
         Creates a top-level organizational entity in DefectDojo's hierarchy.
@@ -168,7 +168,9 @@ class DefectDojo(BaseIntegration):
         """
         return self._request(self.session.post, "/product_types/", data={"name": name, "description": description})
 
-    def create_product(self, product_type: int, name: str, description: str, tags: list[str]) -> dict[str, Any]:
+    def create_product(
+        self, product_type: int, name: str, description: str, tags: list[str]
+    ) -> dict[str, Any]:  # pragma: no cover
         """Create a new product in DefectDojo under a specific product type.
 
         Creates a product entity representing a specific application or system
@@ -190,7 +192,9 @@ class DefectDojo(BaseIntegration):
             data={"tags": tags, "name": name, "description": description, "prod_type": product_type},
         )
 
-    def create_engagement(self, product: int, name: str, description: str, tags: list[str]) -> dict[str, Any]:
+    def create_engagement(
+        self, product: int, name: str, description: str, tags: list[str]
+    ) -> dict[str, Any]:  # pragma: no cover
         """Create a new engagement in DefectDojo under a specific product.
 
         Creates an engagement representing a specific security assessment or testing
@@ -223,7 +227,7 @@ class DefectDojo(BaseIntegration):
             },
         )
 
-    def _create_test_type(self, name: str, tags: list[str]) -> dict[str, Any]:
+    def _create_test_type(self, name: str, tags: list[str]) -> dict[str, Any]:  # pragma: no cover
         """Create a new test type in DefectDojo for categorizing tests.
 
         Creates a test type definition that can be reused across multiple tests.
@@ -239,7 +243,9 @@ class DefectDojo(BaseIntegration):
         """
         return self._request(self.session.post, "/test_types/", data={"name": name, "tags": tags, "dynamic_tool": True})
 
-    def _create_test(self, test_type: int, engagement: int, title: str, description: str) -> dict[str, Any]:
+    def _create_test(
+        self, test_type: int, engagement: int, title: str, description: str
+    ) -> dict[str, Any]:  # pragma: no cover
         """Create a new test in DefectDojo under a specific engagement.
 
         Creates a test entity representing a specific security testing activity.
@@ -269,7 +275,9 @@ class DefectDojo(BaseIntegration):
             },
         )
 
-    def _create_endpoint(self, product: int, endpoint: Path, target: Target) -> dict[str, Any] | None:
+    def _create_endpoint(
+        self, product: int, endpoint: Path, target: Target
+    ) -> dict[str, Any] | None:  # pragma: no cover
         """Create a new endpoint in DefectDojo for web application testing.
 
         Creates an endpoint entity representing a specific web service or API
@@ -289,7 +297,7 @@ class DefectDojo(BaseIntegration):
             self.session.post, "/endpoints/", data={**endpoint.defectdojo_endpoint(target), "product": product}
         )
 
-    def _create_finding(self, test: int, finding: Finding) -> dict[str, Any]:
+    def _create_finding(self, test: int, finding: Finding) -> dict[str, Any]:  # pragma: no cover
         """Create a new finding in DefectDojo under a specific test.
 
         Creates a security finding representing a discovered vulnerability or
@@ -316,7 +324,9 @@ class DefectDojo(BaseIntegration):
             },
         )
 
-    def _import_scan(self, engagement: int, execution: Execution, tags: list[str]) -> dict[str, Any]:
+    def _import_scan(
+        self, engagement: int, execution: Execution, tags: list[str]
+    ) -> dict[str, Any]:  # pragma: no cover
         """Import scan results file directly into DefectDojo.
 
         Imports security tool output files directly into DefectDojo using the

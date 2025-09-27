@@ -14,15 +14,15 @@ from tests.framework.data import SetupProject
 # pytype: disable=wrong-arg-types
 
 
-def return_true(*args: Any) -> bool:
+def return_true(*args: Any, **kwargs: Any) -> bool:
     return True
 
 
-def return_false(*args: Any) -> bool:
+def return_false(*args: Any, **kwargs: Any) -> bool:
     return False
 
 
-def return_id(*args: Any) -> dict[str, int]:
+def return_id(*args: Any, **kwargs: Any) -> dict[str, int]:
     return {"id": 1}
 
 
@@ -48,6 +48,10 @@ def create_test(*args: Any) -> dict[str, Any]:
 
 def import_scan(*args: Any) -> dict[str, Any]:
     return {"test_id": 1, "engagement_id": 1, "product_id": 1, "product_type_id": 1, "active": True}
+
+
+def exception(*args: Any, **kwargs: Any) -> Any:
+    raise Exception("Test")
 
 
 class DefectDojoEntitiesTest(ApiTest, TestCase):
@@ -90,12 +94,28 @@ class DefectDojoEntitiesTest(ApiTest, TestCase):
     def test_cases(self) -> None:
         super().test_cases()
 
-    @mock.patch("platforms.defectdojo.integrations.DefectDojo.is_available", return_false)
-    def test_cases_not_available(self) -> None:
+    def test_bad_request_cases(self) -> None:
         for entity, valid, _ in self.entity_cases:
             PostApiTestCase(["admin1", "auditor1"], 400, {**valid, **self.valid}, endpoint=entity).test_case(
                 1, self, base_endpoint=self.endpoint
             )
+
+    @mock.patch("platforms.defectdojo.integrations.DefectDojo.is_available", return_false)
+    def test_cases_not_available(self) -> None:
+        self.test_bad_request_cases()
+
+    @mock.patch("platforms.defectdojo.integrations.DefectDojo.is_available", return_true)
+    @mock.patch("platforms.defectdojo.integrations.DefectDojo.exists", return_false)
+    def test_cases_does_not_exist(self) -> None:
+        self.test_bad_request_cases()
+
+    @mock.patch("platforms.defectdojo.integrations.DefectDojo.is_available", return_true)
+    @mock.patch("platforms.defectdojo.integrations.DefectDojo.exists", return_true)
+    @mock.patch("platforms.defectdojo.integrations.DefectDojo.create_product_type", exception)
+    @mock.patch("platforms.defectdojo.integrations.DefectDojo.create_product", exception)
+    @mock.patch("platforms.defectdojo.integrations.DefectDojo.create_engagement", exception)
+    def test_unexpected_error(self) -> None:
+        self.test_bad_request_cases()
 
     def test_anonymous_access(self) -> None:
         base = self.endpoint
@@ -148,6 +168,23 @@ class DefectDojoIntegrationTest(BaseTest, TestCase):
         for finding in self.findings:
             self.assertEqual(1, finding.defectdojo_id)
 
+    def _test_is_available_and_exists(self, expected: bool) -> None:
+        settings = DefectDojoSettings.objects.first()
+        settings.server = "http://localhost:8080"
+        settings.secret = "fake-token"
+        settings.save(update_fields=["server", "_api_token"])
+        client = DefectDojo()
+        self.assertEqual(expected, client.is_available())
+        self.assertEqual(expected, client.exists("product-types", 1))
+
+    @mock.patch("platforms.defectdojo.integrations.DefectDojo._request", return_true)
+    def test_is_available_and_exists(self) -> None:
+        self._test_is_available_and_exists(True)
+
+    @mock.patch("platforms.defectdojo.integrations.DefectDojo._request", exception)
+    def test_is_not_available_and_does_not_exist(self) -> None:
+        self._test_is_available_and_exists(False)
+
 
 settings = {
     "server": None,
@@ -158,7 +195,7 @@ settings = {
     "test": "Rekono Execution",
 }
 new_settings = {
-    "server": "https://defectdojo.rekono.com",
+    "server": "https://defectdojo.rekono.com/api/v2/",
     "api_token": "any_valid_defectdojo_token",
     "tls_validation": True,
     "tag": "rekono",
@@ -189,6 +226,7 @@ class DefectDojoSettingsTest(ApiTestNoData, TestCase):
             expected={
                 "id": 1,
                 **new_settings,
+                "server": new_settings["server"].replace("/api/v2/", ""),
                 "api_token": "*" * len(str(new_settings.get("api_token", ""))),
                 "is_available": False,
             },
@@ -198,6 +236,7 @@ class DefectDojoSettingsTest(ApiTestNoData, TestCase):
             expected={
                 "id": 1,
                 **new_settings,
+                "server": new_settings["server"].replace("/api/v2/", ""),
                 "api_token": "*" * len(str(new_settings.get("api_token", ""))),
                 "is_available": False,
             },
