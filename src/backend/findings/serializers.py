@@ -284,7 +284,7 @@ class VulnerabilitySerializer(TriageFindingSerializer):
         original_triage_status = instance.triage_status
         instance = super().update(instance, validated_data)
         # This is the only case of two related finding types that can be triaged
-        if original_triage_status != instance.triage_status:  # TOTEST
+        if original_triage_status != instance.triage_status:
             exploits_triage_comment = (
                 "Automatically triaged after triaging the related vulnerability as a false positive"
             )
