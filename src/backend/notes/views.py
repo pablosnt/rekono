@@ -152,4 +152,4 @@ class NoteViewSet(LikeViewSet):
             # Copy all tags from the original note
             fork.tags.set(note.tags.all())
             return Response(self.get_serializer(instance=fork).data, status=HTTP_201_CREATED)
-        return Response(status=HTTP_404_NOT_FOUND)  # TOTEST
+        return Response(status=HTTP_404_NOT_FOUND)

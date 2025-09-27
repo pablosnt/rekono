@@ -70,3 +70,7 @@ class AuthenticationTest(ApiTest, TestCase):
     def setUp(self):
         super().setUp()
         Authentication.objects.all().delete()
+
+    def test_no_relationships(self) -> None:
+        self.assertEqual(0, len(self.object.input_type.parent_input_types))
+        self.assertEqual(0, len(self.object.input_type.children_input_types))

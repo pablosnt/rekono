@@ -47,3 +47,7 @@ class HttpHeaderTest(ApiTest, TestCase):
     @cached_property
     def object(self) -> HttpHeader:
         return HttpHeader(**{**valid_data, "target": self.target, "user": None})
+
+    def test_no_relationships(self) -> None:
+        self.assertEqual(0, len(self.object.input_type.parent_input_types))
+        self.assertEqual(0, len(self.object.input_type.children_input_types))
