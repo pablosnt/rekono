@@ -124,6 +124,10 @@ class Host(Finding):
     city = models.TextField(max_length=100, blank=True, null=True)
     latitude = models.FloatField(blank=True, null=True)
     longitude = models.FloatField(blank=True, null=True)
+    reputation = models.IntegerField(blank=True, null=True)
+    harmless_votes = models.IntegerField(blank=True, null=True)
+    malicious_votes = models.IntegerField(blank=True, null=True)
+    whois = models.TextField(blank=True, null=True)
 
     unique_fields = ["ip"]
     _filters = [Finding.Filter(TargetType, "ip", processor=lambda a: Target.get_type(a))]

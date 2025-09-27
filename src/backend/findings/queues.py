@@ -29,6 +29,7 @@ from platforms.hosts_metadata import HostsMetadata
 from platforms.mail.notifications import SMTP
 from platforms.nvdnist.integrations import NvdNist
 from platforms.telegram_app.notifications import Telegram
+from platforms.virustotal.integrations import VirusTotal
 from settings.models import Settings
 
 
@@ -81,7 +82,7 @@ class FindingsQueue(BaseQueue):
         settings = Settings.objects.first()
         if findings:
             # Initialize integration and notification platforms
-            integrations = [DefectDojo(), NvdNist(), HackTricks(), CveCrowd(), HostsMetadata()]
+            integrations = [DefectDojo(), NvdNist(), HackTricks(), CveCrowd(), HostsMetadata(), VirusTotal()]
             notifications = [SMTP(), Telegram()]
             # Process each finding individually
             for finding in findings:

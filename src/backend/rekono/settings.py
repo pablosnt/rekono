@@ -63,6 +63,7 @@ INSTALLED_APPS = [
     "platforms.mail",
     "platforms.nvdnist",
     "platforms.telegram_app",
+    "platforms.virustotal",
     "parameters",
     "projects",
     "reporting",

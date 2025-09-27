@@ -46,5 +46,17 @@
             "reference": "https://cvecrowd.com/",
             "icon": "https://cvecrowd.com/icon-small-crowd.svg"
         }
+    },
+    {
+        "model": "integrations.integration",
+        "pk": 5,
+        "fields": {
+            "key": "virustotal",
+            "name": "Virus Total",
+            "description": "TODO",
+            "enabled": true,
+            "reference": "https://www.virustotal.com/",
+            "icon": "https://www.virustotal.com/gui/images/manifest/icon-192x192.png"
+        }
     }
 ]
