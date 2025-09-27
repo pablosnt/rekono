@@ -1,0 +1,9 @@
+[
+    {
+        "model": "virustotal.virustotalsettings",
+        "pk": 1,
+        "fields": {
+            "_api_token": null
+        }
+    }
+]

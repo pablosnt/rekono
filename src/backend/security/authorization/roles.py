@@ -213,4 +213,5 @@ ROLES = {
     "cvecrowdsettings": {"view": [Role.ADMIN], "add": [], "change": [Role.ADMIN], "delete": []},
     "monitorsettings": {"view": [Role.ADMIN], "add": [], "change": [Role.ADMIN], "delete": []},
     "nvdnistsettings": {"view": [Role.ADMIN], "add": [], "change": [Role.ADMIN], "delete": []},
+    "virustotalsettings": {"view": [Role.ADMIN], "add": [], "change": [Role.ADMIN], "delete": []},
 }

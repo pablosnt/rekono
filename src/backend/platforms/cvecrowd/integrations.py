@@ -7,7 +7,6 @@ processing and bulk monitoring capabilities for comprehensive threat intelligenc
 """
 
 from functools import cached_property
-from typing import Any, Callable
 
 from alerts.enums import AlertItem, AlertMode
 from alerts.models import Alert
@@ -81,32 +80,6 @@ class CveCrowd(BaseIntegration):
         if self.settings.secret:
             return len(self.trending_cves) > 0
         return False
-
-    # Needed to mock the method for unit testing
-    def _request(
-        self,
-        method: Callable,
-        url: str,
-        json: bool = True,
-        trigger_exception: bool = True,
-        **kwargs: Any,
-    ) -> Any:
-        """Execute HTTP request to CVE Crowd API.
-
-        Wrapper method for HTTP requests to enable unit testing through
-        method mocking while maintaining the same interface as the parent class.
-
-        Args:
-            method (Callable): HTTP method function (GET, POST, etc.)
-            url (str): Target URL for the request
-            json (bool): Parse response as JSON (default True)
-            trigger_exception (bool): Raise exceptions on errors (default True)
-            **kwargs (Any): Additional request parameters
-
-        Returns:
-            Any: API response data
-        """
-        return super()._request(method, url, json, trigger_exception, **kwargs)  # pragma: no cover
 
     def _process_finding(self, execution: Execution, finding: Vulnerability) -> None:
         """Process a vulnerability finding by marking it as trending.

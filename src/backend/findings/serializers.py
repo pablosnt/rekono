@@ -114,6 +114,10 @@ class HostSerializer(FindingSerializer):
             "city",
             "latitude",
             "longitude",
+            "reputation",
+            "harmless_votes",
+            "malicious_votes",
+            "whois",
             "port",
         )
 
