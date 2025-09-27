@@ -23,12 +23,21 @@ invalid_task3 = {**task1, "configuration_id": 25, "intensity": Intensity.SNEAKY.
 class TaskTest(ApiTest, TestCase):
     endpoint = "/api/tasks/"
     expected_string = "10.10.10.10 - Nmap - TCP ports"
-    data = [SetupProject(executions_per_task=2), SetupProject()]
+    data = [SetupProject(executions_per_task=2), SetupProject(), SetupProject(executions_per_task=0)]
     cases = [
         ApiTestCase([Role.ADMIN, Role.AUDITOR, Role.READER]),
         ApiTestCase(
             ["members"],
             expected=[
+                {
+                    "id": 3,
+                    "target": {"id": 3, "target": "10.10.10.30"},
+                    "configuration": {"id": 1},
+                    "process": None,
+                    "executor": {"id": 3, "username": "auditor1"},
+                    "intensity": Intensity.NORMAL.name.capitalize(),
+                    "executions": [],
+                },
                 {
                     "id": 2,
                     "target": {"id": 2, "target": "10.10.10.20"},
@@ -69,7 +78,7 @@ class TaskTest(ApiTest, TestCase):
         PostApiTestCase(
             ["auditor1"],
             expected={
-                "id": 3,
+                "id": 4,
                 "target": {"id": 2, "target": "10.10.10.20"},
                 "configuration": {"id": 1},
                 "process": None,
@@ -83,6 +92,7 @@ class TaskTest(ApiTest, TestCase):
         DeleteApiTestCase(["admin1", "auditor1"], 400, endpoint="2"),
         DeleteApiTestCase(["admin1"], endpoint="1"),
         DeleteApiTestCase(["auditor1"], 400, endpoint="1"),
+        DeleteApiTestCase(["admin1"], endpoint="3"),
         ApiTestCase(["members"], expected={"id": 1, "status": Status.CANCELLED}, endpoint="/api/executions/1/"),
         ApiTestCase(["members"], expected={"id": 2, "status": Status.CANCELLED}, endpoint="/api/executions/2/"),
         PostApiTestCase(["admin1", "auditor1"], 400, invalid_task1),
@@ -93,7 +103,7 @@ class TaskTest(ApiTest, TestCase):
             ["admin1"],
             data=task1,
             expected={
-                "id": 4,
+                "id": 5,
                 "target": {"id": 1, "target": "10.10.10.10"},
                 "configuration": {"id": 1},
                 "process": None,
@@ -105,7 +115,7 @@ class TaskTest(ApiTest, TestCase):
             ["auditor1"],
             data=task2,
             expected={
-                "id": 5,
+                "id": 6,
                 "target": {"id": 1, "target": "10.10.10.10"},
                 "configuration": None,
                 "process": {"id": 1, "name": "All tools"},
@@ -118,6 +128,22 @@ class TaskTest(ApiTest, TestCase):
     def test_cases(self):
         Execution.objects.filter(id=3).update(status=Status.COMPLETED)
         super().test_cases()
+
+    def test_status(self):
+        execution = Execution.objects.get(pk=3)
+        for status, task_status in [
+            (Status.RUNNING, Status.RUNNING),
+            (Status.CANCELLED, Status.CANCELLED),
+            (Status.ERROR, Status.ERROR),
+            (Status.COMPLETED, Status.COMPLETED),
+            (Status.SKIPPED, Status.COMPLETED),
+            (Status.REQUESTED, Status.REQUESTED),
+        ]:
+            execution.status = status
+            execution.save(update_fields=["status"])
+            ApiTestCase(["members"], expected={"id": 2, "status": task_status.value}, endpoint="2").test_case(
+                0, self, self.endpoint
+            )
 
     @cached_property
     def object(self) -> Task:

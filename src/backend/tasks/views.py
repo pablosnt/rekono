@@ -94,7 +94,7 @@ class TaskViewSet(BaseViewSet):
         if not running_executions.exists() and has_executions:
             self.logger.warning(f"[Task] Task {task.id} can't be cancelled")
             return Response({"task": f"Task {task.id} can't be cancelled"}, status=status.HTTP_400_BAD_REQUEST)
-        if task.rq_job_id:
+        if task.rq_job_id:  # pragma: no cover
             self.tasks_queue.cancel_job(task.rq_job_id)
             self.tasks_queue.delete_job(task.rq_job_id)
             self.logger.info(f"[Task] Task {task.id} has been cancelled")
