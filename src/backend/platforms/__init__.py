@@ -10,6 +10,10 @@ Key Features:
     - HackTricks integration for penetration testing methodologies and guides
     - Host metadata enrichment with geolocation and DNS resolution
     - NVD NIST vulnerability intelligence integration for CVE enrichment
+    - VirusTotal threat intelligence for reputation and malware analysis
+    - CVE Crowd trending vulnerability monitoring and alerting
+    - DefectDojo vulnerability management integration
+    - SMTP and Telegram notification platform support
     - Extensible integration framework for custom platform connectors
     - Asynchronous processing for scalable intelligence gathering
 
