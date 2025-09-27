@@ -216,4 +216,4 @@ class SearchSploitExecutorTest(BaseTest, TestCase):
         self.assertTrue(executor.check_arguments([], [], [], [self.input_technology], []))
 
         executor = self.configuration.tool.executor_class(self.execution)
-        self.assertTrue(self.executor.check_arguments([], [], [self.input_vulnerability], [], []))
+        self.assertTrue(executor.check_arguments([], [], [self.input_vulnerability], [], []))

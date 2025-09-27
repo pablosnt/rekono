@@ -49,9 +49,6 @@ class Searchsploit(BaseExecutor):
             RuntimeError: If neither technology nor CVE arguments are available
         """
         arguments = super().get_arguments(findings, target_ports, input_vulnerabilities, input_technologies, wordlists)
-        print(arguments)
-        print(self.targets_used_in_execution)
-        print(self.findings_used_in_execution)
         if (
             InputVulnerability not in self.targets_used_in_execution
             and InputTechnology not in self.targets_used_in_execution
