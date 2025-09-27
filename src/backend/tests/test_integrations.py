@@ -17,6 +17,7 @@ class IntegrationTest(ApiTestNoData, TestCase):
         ApiTestCase(
             [Role.ADMIN, Role.AUDITOR, Role.READER],
             expected=[
+                {"id": 5, "enabled": True},
                 {"id": 4, "enabled": True},
                 {"id": 3, "enabled": True},
                 {"id": 2, "enabled": True},
@@ -28,6 +29,7 @@ class IntegrationTest(ApiTestNoData, TestCase):
         ApiTestCase(
             [Role.ADMIN, Role.AUDITOR, Role.READER],
             expected=[
+                {"id": 5, "enabled": True},
                 {"id": 4, "enabled": True},
                 {"id": 3, "enabled": True},
                 {"id": 2, "enabled": True},
