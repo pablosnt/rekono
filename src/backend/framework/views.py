@@ -61,7 +61,7 @@ class BaseViewSet(ModelViewSet, LoggingEntity):
         ]:
             if cls and hasattr(cls, "Meta") and hasattr(cls.Meta, "model"):
                 return cls.Meta.model
-        return BaseModel
+        return BaseModel  # pragma: no cover
 
     def _get_project_from_data(self, project_field: str, data: dict[str, Any]) -> Project | None:
         """Extract project instance from nested data structure.

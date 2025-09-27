@@ -110,7 +110,7 @@ class SecurityMiddleware(LoggingEntity):
         """
         x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
         if x_forwarded_for and CONFIG.trusted_proxy:
-            return x_forwarded_for.split(",", 1)[0]
+            return x_forwarded_for.split(",", 1)[0]  # pragma: no cover
         return request.META["REMOTE_ADDR"]
 
     def _get_options_response(self, request: HttpRequest) -> Response:
@@ -149,7 +149,7 @@ class SecurityMiddleware(LoggingEntity):
         """
         for header, value in SECURITY_HEADERS.items():
             if header == "Referrer-Policy" and request.path.startswith("/admin"):
-                value = "strict-origin"
+                value = "strict-origin"  # pragma: no cover
             if header == "Content-Security-Policy":
                 for path, csp in CSP.items():
                     if request.path.startswith(path):

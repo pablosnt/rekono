@@ -136,10 +136,12 @@ class DefectDojoIntegrationTest(BaseTest, TestCase):
     @mock.patch("platforms.defectdojo.integrations.DefectDojo.exists", return_true)
     @mock.patch("platforms.defectdojo.integrations.DefectDojo._import_scan", import_scan)
     def test_project_sync(self) -> None:
+        self.execution.output_file = self.data_dir / "reports" / "nmap" / "enumeration-vulners.xml"
+        DefectDojo().process_findings(self.execution, self.findings)
+        self.assertIsNone(self.execution.defectdojo_test_id)
         PostApiTestCase(["admin1"], data=sync, expected={"id": 1, **sync}, endpoint="sync").test_case(
             0, self, self.endpoint
         )
-        self.execution.output_file = self.data_dir / "reports" / "nmap" / "enumeration-vulners.xml"
         DefectDojo().process_findings(self.execution, self.findings)
         self.assertEqual(1, self.execution.defectdojo_test_id)
         for finding in self.findings:

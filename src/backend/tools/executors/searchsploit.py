@@ -4,7 +4,7 @@ Executes Searchsploit tool to search the Exploit Database for available
 exploits and proof-of-concepts based on technologies and vulnerabilities.
 """
 
-from findings.models import Finding
+from findings.models import Finding, Technology, Vulnerability
 from parameters.models import InputTechnology, InputVulnerability
 from target_ports.models import TargetPort
 from tools.executors.base import BaseExecutor
@@ -49,7 +49,15 @@ class Searchsploit(BaseExecutor):
             RuntimeError: If neither technology nor CVE arguments are available
         """
         arguments = super().get_arguments(findings, target_ports, input_vulnerabilities, input_technologies, wordlists)
-        if "--cve" not in arguments and len(arguments) == 3:
+        print(arguments)
+        print(self.targets_used_in_execution)
+        print(self.findings_used_in_execution)
+        if (
+            InputVulnerability not in self.targets_used_in_execution
+            and InputTechnology not in self.targets_used_in_execution
+            and Vulnerability not in self.findings_used_in_execution
+            and Technology not in self.findings_used_in_execution
+        ):
             raise RuntimeError(
                 f"Argument 'technology' or 'cve' is required to execute tool '{self.execution.configuration.tool.name}'"
             )

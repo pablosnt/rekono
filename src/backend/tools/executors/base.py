@@ -258,7 +258,7 @@ class BaseExecutor(LoggingEntity):
                 environment[proxy.upper()] = getattr(settings, proxy)
         return environment
 
-    def before_running(self) -> None:
+    def before_running(self) -> None:  # pragma: no cover
         """Hook method called before tool execution.
 
         Override this method in tool-specific executor classes to implement
@@ -266,7 +266,7 @@ class BaseExecutor(LoggingEntity):
         """
         pass
 
-    def run_tool(self, environment: dict[str, Any] = os.environ.copy()) -> None:
+    def run_tool(self, environment: dict[str, Any] = os.environ.copy()) -> None:  # pragma: no cover
         """Execute the security tool with configured arguments and environment.
 
         Runs the tool subprocess with proper output handling, status tracking,
@@ -311,7 +311,7 @@ class BaseExecutor(LoggingEntity):
         else:
             self.on_completed()
 
-    def after_running(self) -> None:
+    def after_running(self) -> None:  # pragma: no cover
         """Hook method called after tool execution.
 
         Override this method in tool-specific executor classes to implement

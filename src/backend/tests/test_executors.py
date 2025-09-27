@@ -11,11 +11,11 @@ from findings.enums import OSINTDataType, Protocol
 from findings.models import Port
 from settings.models import Settings
 from target_ports.models import TargetPort
+from targets.enums import TargetType
 from targets.models import Target
 from tasks.models import Task
 from tests.framework import BaseTest
 from tests.framework.data import SetupProject
-from tools.executors.base import BaseExecutor
 from tools.models import Configuration
 from wordlists.enums import WordlistType
 from wordlists.models import Wordlist
@@ -175,30 +175,45 @@ class GobusterExecutorTest(BaseTest, TestCase):
         self.subdomains_wordlist = Wordlist.objects.create(
             name="subdomains", type=WordlistType.SUBDOMAIN, path=self.data_dir / "wordlists" / "subdomains_wordlist.txt"
         )
-
-    def _get_executor(self, target: str) -> BaseExecutor:
-        configuration = Configuration.objects.get(tool__name="Gobuster", default=True)
-        return configuration.tool.executor_class(
-            Execution.objects.create(
-                task=Task.objects.create(
-                    target=Target.objects.create(project=self.project, target=target, type=Target.get_type(target)),
-                    configuration=configuration,
-                    executor=self.auditor1,
-                ),
-                configuration=configuration,
-                status=Status.REQUESTED,
-            )
-        )
-
-    def test_check_arguments_no_domain_target(self) -> None:
-        self.assertFalse(self._get_executor("10.10.10.10").check_arguments([], [], [], [], [self.subdomains_wordlist]))
-
-    def test_check_arguments_no_wordlist(self) -> None:
-        self.assertFalse(
-            self._get_executor("scanme.nmap.org").check_arguments([], [], [], [], [self.endpoints_wordlist])
+        self.configuration = Configuration.objects.get(tool__name="Gobuster", default=True)
+        self.target = Target.objects.create(project=self.project, target="10.10.10.10", type=TargetType.PRIVATE_IP)
+        self.task = Task.objects.create(target=self.target, configuration=self.configuration, executor=self.auditor1)
+        self.execution = Execution.objects.create(
+            task=self.task, configuration=self.configuration, status=Status.REQUESTED
         )
 
     def test_check_arguments(self) -> None:
-        self.assertTrue(
-            self._get_executor("scanme.nmap.org").check_arguments([], [], [], [], [self.subdomains_wordlist])
+        executor = self.configuration.tool.executor_class(self.execution)
+        self.assertFalse(executor.check_arguments([], [], [], [], [self.subdomains_wordlist]))
+
+        self.target.target = "scanme.nmap.org"
+        self.target.type = TargetType.DOMAIN
+        self.target.save(update_fields=["target", "type"])
+        executor = self.configuration.tool.executor_class(self.execution)
+        self.assertFalse(executor.check_arguments([], [], [], [], [self.endpoints_wordlist]))
+
+        executor = self.configuration.tool.executor_class(self.execution)
+        self.assertTrue(executor.check_arguments([], [], [], [], [self.subdomains_wordlist]))
+
+
+class SearchSploitExecutorTest(BaseTest, TestCase):
+    data = [SetupProject(executions_per_task=0)]
+
+    def setUp(self):
+        super().setUp()
+        self.configuration = Configuration.objects.get(tool__name="SearchSploit", default=True)
+        self.task = Task.objects.create(target=self.target, configuration=self.configuration, executor=self.auditor1)
+        self.setup_task_parameters()
+        self.execution = Execution.objects.create(
+            task=self.task, configuration=self.configuration, status=Status.REQUESTED
         )
+
+    def test_check_arguments(self) -> None:
+        executor = self.configuration.tool.executor_class(self.execution)
+        self.assertFalse(executor.check_arguments([], [], [], [], []))
+
+        executor = self.configuration.tool.executor_class(self.execution)
+        self.assertTrue(executor.check_arguments([], [], [], [self.input_technology], []))
+
+        executor = self.configuration.tool.executor_class(self.execution)
+        self.assertTrue(self.executor.check_arguments([], [], [self.input_vulnerability], [], []))

@@ -10,9 +10,8 @@ from tests.framework.cases import ApiTestCase, DeleteApiTestCase, PostApiTestCas
 
 # pytype: disable=wrong-arg-types
 
-expiration = (datetime.now() + timedelta(days=365)).isoformat() + "Z"
-valid_api_token = {"name": "test1", "expiration": expiration}
-invalid_api_token = {"name": "test;1", "expiration": expiration}
+valid_api_token = {"name": "test1", "expiration": (datetime.now() + timedelta(days=365)).isoformat() + "Z"}
+invalid_api_token = {"name": "test1", "expiration": (datetime.now() - timedelta(days=365)).isoformat() + "Z"}
 
 
 class ApiTokenTest(ApiTestNoData, TestCase):

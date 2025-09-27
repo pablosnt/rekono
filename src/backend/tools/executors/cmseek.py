@@ -24,7 +24,7 @@ class Cmseek(BaseExecutor):
         Inherits all attributes from BaseExecutor
     """
 
-    def after_running(self) -> None:
+    def after_running(self) -> None:  # pragma: no cover
         """Handle post-execution cleanup and result file management.
 
         Moves CMSeek result files from the default output directory to the

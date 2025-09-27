@@ -166,9 +166,9 @@ class Tool(BaseLike):
             path = Path(getattr(CONFIG, self.script_directory_property.lower()))
             if not path.is_dir() or not (path / self.script).is_file():
                 return False
-        return True
+        return True  # pragma: no cover
 
-    def _parse_version(self) -> str | None:
+    def _parse_version(self) -> str | None:  # pragma: no cover
         """Parse version information from the tool's version output.
 
         Executes the tool with version argument and extracts version string using

@@ -4,10 +4,14 @@ from datetime import datetime, timedelta
 from functools import cached_property
 
 import pyotp
+from django.core.exceptions import ValidationError
 from django.test import TestCase
 from django.utils import timezone
 from rest_framework.test import APIClient
 
+from security.validators.enums import Regex
+from security.validators.input_validator import Validator
+from security.validators.target_validator import TargetValidator
 from tests.framework import ApiTest
 from tests.framework.cases import ApiTestCase, CustomApiTestCase
 from users.models import User
@@ -211,3 +215,12 @@ class SecurityTest(ApiTest, TestCase):
         response = APIClient(HTTP_AUTHORIZATION=f"Bearer {content.get('access')}").get(self.profile)
         self.assertEqual(200, response.status_code)
         self.assertFalse(json.loads((response.content or "{}".encode()).decode()).get("mfa"))
+
+    def test_input_validation_with_no_value(self) -> None:
+        for validator in [Validator(Regex.CVE), TargetValidator(Regex.TARGET)]:
+            exception = False
+            try:
+                validator(None)
+            except ValidationError:
+                exception = True
+            self.assertTrue(exception)

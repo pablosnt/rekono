@@ -11,7 +11,7 @@ from tools.models import Argument, Configuration, Input, Intensity, Output, Tool
 # pytype: disable=wrong-arg-types
 
 nmap = "Nmap"
-the_harvester = "theHarvester"
+gobuster = "Gobuster"
 
 
 class ToolTest(ApiTestNoData, TestCase):
@@ -45,8 +45,8 @@ class ToolTest(ApiTestNoData, TestCase):
         ),
         ApiTestCase(
             [Role.ADMIN, Role.AUDITOR],
-            expected={"id": 3, "name": the_harvester, "command": the_harvester, "likes": 0, "liked": False},
-            endpoint="3",
+            expected={"id": 20, "name": gobuster, "command": gobuster.lower(), "likes": 0, "liked": False},
+            endpoint="20",
         ),
         DeleteApiTestCase([Role.READER], 403, endpoint="1/like"),
         DeleteApiTestCase([Role.ADMIN, Role.AUDITOR], endpoint="1/like"),

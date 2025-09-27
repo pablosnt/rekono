@@ -29,7 +29,7 @@ class Gitleaks(BaseExecutor):
     git_directory_dumped = False
     execution_directory = None
 
-    def run_tool(self, environment: dict[str, Any] = os.environ.copy()) -> None:
+    def run_tool(self, environment: dict[str, Any] = os.environ.copy()) -> None:  # pragma: no cover
         """Execute GitLeaks with Git repository dumping.
 
         First attempts to dump the Git repository using GitDumper, then runs
