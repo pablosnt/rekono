@@ -21,6 +21,7 @@ data = {
             "cve": {
                 "descriptions": [{"lang": "en", "value": "description"}],
                 "weaknesses": [
+                    {"type": "Whatever", "description": [{"lang": "en", "value": "CWE-100"}]},
                     {"type": "Primary", "description": [{"lang": "en", "value": "CWE-200"}]},
                     {"type": "Secondary", "description": [{"lang": "en", "value": "CWE-300"}]},
                 ],
@@ -44,6 +45,10 @@ def success_cvss_2(*args: Any, **kwargs: Any) -> dict[str, Any]:
     return _success({"cvssMetricV2": [{"type": "Primary", "cvssData": {"baseScore": 8}}]})
 
 
+def success_empty(*args: Any, **kwargs: Any) -> dict[str, Any]:
+    return {"vulnerabilities": []}
+
+
 def not_found(*args: Any, **kwargs: Any) -> dict:
     raise Exception("CVE not found")
 
@@ -57,6 +62,9 @@ class NvdNistTest(BaseTest, TestCase):
             name="test", description="test", cve="CVE-2023-1111", severity=Severity.LOW
         )
         self.vulnerability.executions.add(self.execution)
+        self.settings = NvdNistSettings.objects.first()
+        self.settings.secret = "fake-token"
+        self.settings.save(update_fields=["_api_token"])
         self.nvdnist = NvdNist()
 
     def _test(
@@ -78,11 +86,31 @@ class NvdNistTest(BaseTest, TestCase):
 
     @mock.patch("platforms.nvdnist.integrations.NvdNist._request", success_cvss_2)
     def test_integration_cvss_2(self) -> None:
+        self.settings.secret = None
+        self.settings.save(update_fields=["_api_token"])
         self._test(Severity.HIGH, self.nvdnist.reference.format(cve=self.vulnerability.cve))
 
     @mock.patch("platforms.nvdnist.integrations.NvdNist._request", not_found)
     def test_integration_not_found(self) -> None:
         self._test(Severity.LOW, None, None, "test")
+
+    @mock.patch("platforms.nvdnist.integrations.NvdNist._request", success_empty)
+    def test_integration_empty(self) -> None:
+        self._test(Severity.LOW, None, None, "test")
+
+    @mock.patch("platforms.nvdnist.integrations.NvdNist._request", success_cvss_3)
+    def test_is_api_token_available(self) -> None:
+        self.assertTrue(self.nvdnist.is_api_token_available)
+
+    @mock.patch("platforms.nvdnist.integrations.NvdNist._request", success_cvss_3)
+    def test_is_api_token_not_available_1(self) -> None:
+        self.settings.secret = None
+        self.settings.save(update_fields=["_api_token"])
+        self.assertFalse(self.nvdnist.is_api_token_available)
+
+    @mock.patch("platforms.nvdnist.integrations.NvdNist._request", not_found)
+    def test_is_api_token_not_available_2(self) -> None:
+        self.assertFalse(self.nvdnist.is_api_token_available)
 
 
 new_settings = {"api_token": "nvd-nist-token"}

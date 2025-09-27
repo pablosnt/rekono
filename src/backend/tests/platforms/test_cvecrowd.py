@@ -26,6 +26,10 @@ def not_found(*args: Any, **kwargs: Any) -> list[str]:
     return []
 
 
+def exception(*args: Any, **kwargs: Any) -> list[str]:
+    raise Exception("test")
+
+
 class CveCrowdTest(BaseTest, TestCase):
     data = [SetupProject()]
 
@@ -77,6 +81,18 @@ class CveCrowdTest(BaseTest, TestCase):
         self.cvecrowd.monitor()
         self.assertFalse(Vulnerability.objects.get(pk=self.trending.id).trending)
         self.assertFalse(Vulnerability.objects.get(pk=self.not_trending.id).trending)
+
+    @mock.patch("platforms.cvecrowd.integrations.CveCrowd._request", success)
+    def test_is_available(self) -> None:
+        self.assertTrue(self.cvecrowd.is_available())
+
+    @mock.patch("platforms.cvecrowd.integrations.CveCrowd._request", not_found)
+    def test_is_not_available_1(self) -> None:
+        self.assertFalse(self.cvecrowd.is_available())
+
+    @mock.patch("platforms.cvecrowd.integrations.CveCrowd._request", exception)
+    def test_is_not_available_2(self) -> None:
+        self.assertFalse(self.cvecrowd.is_available())
 
 
 new_settings = {"api_token": "cve-crowd-token", "trending_span_days": 3, "execute_per_execution": False}

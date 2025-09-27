@@ -90,7 +90,8 @@ class ProjectSerializer(TaggitSerializer, RelatedNotesSerializer):
             item=AlertItem.CVE,
             mode=AlertMode.MONITOR,
             enabled=True,
-            owner=None,
+            owner=validated_data.get("owner"),
+            subscribe_all_members=True,
         )
         alert.subscribers.add(validated_data.get("owner"))
         return project

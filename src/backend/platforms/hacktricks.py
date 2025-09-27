@@ -115,7 +115,7 @@ class HackTricks(BaseIntegration):
         }
         self.all_links = self._get_all_hacktricks_links()
 
-    def _get_all_hacktricks_links(self) -> list[str]:
+    def _get_all_hacktricks_links(self) -> list[str]:  # pragma: no cover
         """Retrieve all available HackTricks documentation links from sitemap.
 
         Parses the HackTricks XML sitemap to extract all available documentation

@@ -106,7 +106,7 @@ class CveCrowd(BaseIntegration):
         Returns:
             Any: API response data
         """
-        return super()._request(method, url, json, trigger_exception, **kwargs)
+        return super()._request(method, url, json, trigger_exception, **kwargs)  # pragma: no cover
 
     def _process_finding(self, execution: Execution, finding: Vulnerability) -> None:
         """Process a vulnerability finding by marking it as trending.

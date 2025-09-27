@@ -88,9 +88,9 @@ class NvdNist(BaseIntegration):
         Returns:
             dict[str, Any]: JSON response containing CVE details and metadata
         """
-        if self.settings.secret is not None:
-            return self._request(self.session.get, self.url.format(cve=cve), headers={"apiKey": self.settings.secret})
-        return self._request(self.session.get, self.url.format(cve=cve))
+        if self.settings.secret is None:
+            return self._request(self.session.get, self.url.format(cve=cve))
+        return self._request(self.session.get, self.url.format(cve=cve), headers={"apiKey": self.settings.secret})
 
     def _process_finding(self, execution: Execution, finding: Vulnerability) -> None:
         """Process and enrich vulnerability finding with NVD data.
