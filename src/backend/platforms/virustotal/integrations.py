@@ -67,7 +67,9 @@ class VirusTotal(BaseIntegration):
         except Exception:
             return False
 
-    def _request(self, method: Callable, url: str, json: bool = True, trigger_exception: bool = True, **kwargs: Any):
+    def _request(
+        self, method: Callable, url: str, json: bool = True, trigger_exception: bool = True, **kwargs: Any
+    ):  # pragma: no cover
         """Make authenticated HTTP request to VirusTotal API.
 
         Constructs and executes authenticated HTTP requests to the VirusTotal API
@@ -122,10 +124,8 @@ class VirusTotal(BaseIntegration):
         try:
             if finding.domain is not None:
                 data = self._request(self.session.get, f"domains/{finding.domain}")
-            elif finding.ip is not None:
-                data = self._request(self.session.get, f"ip_addresses/{finding.ip}")
             else:
-                return
+                data = self._request(self.session.get, f"ip_addresses/{finding.ip}")
             data = data.get("data", {}).get("attributes", {})
             finding.reputation = data.get("reputation")
             finding.harmless_votes = data.get("total_votes", {}).get("harmless")
