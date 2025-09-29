@@ -44,6 +44,7 @@ class Sshaudit(BaseParser):
                 if "fail" in item.get("notes", {}) or "warn" in item.get("notes", {}):
                     self.create_finding(
                         Vulnerability,
+                        linked_finding=True,
                         technology=technology,
                         name=f"Insecure {root.upper()} algorithm: {item.get('algorithm')}",
                         description="\n".join(notes),
@@ -55,4 +56,4 @@ class Sshaudit(BaseParser):
                     for cve in re.findall(Regex.CVE.value, note):
                         cves.add(cve)
         for cve in cves:
-            self.create_finding(Vulnerability, technology=technology, name=cve, cve=cve)
+            self.create_finding(Vulnerability, linked_finding=True, technology=technology, name=cve, cve=cve)

@@ -9,8 +9,10 @@ import os
 import re
 import subprocess
 import uuid
+from functools import cached_property
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlparse
 
 from django.forms.models import model_to_dict
 from django.utils import timezone
@@ -60,6 +62,10 @@ class BaseExecutor(LoggingEntity):
     findings_used_in_execution = {}
     targets_used_in_execution = {}
     authentication = None
+    # This will save the port included in URL or TARGET parameters
+    # so, we have the scanned port independently of its source, i.e.
+    # port found in previous execution, target port or default URL port
+    port_from_arguments = None
 
     def __init__(self, execution: Execution) -> None:
         """Initialize the executor with execution context and configuration.
@@ -81,6 +87,14 @@ class BaseExecutor(LoggingEntity):
             getattr(CONFIG, self.execution.configuration.tool.run_directory_property.lower())
             if self.execution.configuration.tool.run_directory_property
             else None
+        )
+
+    @cached_property
+    def scanned_port(self) -> int | None:
+        return (
+            self.port_from_arguments
+            if self.port_from_arguments is not None
+            else self.execution.configuration.default_scanned_port
         )
 
     def get_arguments(
@@ -192,6 +206,18 @@ class BaseExecutor(LoggingEntity):
                 if parsed_data:
                     break
             if parsed_data:
+                if InputKeyword.URL.name.lower() in parsed_data or InputKeyword.TARGET.name.lower() in parsed_data:
+                    try:
+                        parse = urlparse(
+                            parsed_data.get(
+                                InputKeyword.URL.name.lower(),
+                                f"https://{parsed_data.get(InputKeyword.TARGET.name.lower(), '')}",
+                            )
+                        )
+                        if parse and parse.port and self.port_from_arguments is None:
+                            self.port_from_arguments = parse.port
+                    except Exception:
+                        pass
                 # Special handling for HTTP headers - format each header individually then join
                 if InputKeyword.HEADERS.name.lower() in parsed_data:
                     parameters[argument.name] = " ".join(

@@ -12,6 +12,9 @@ from pathlib import Path
 from typing import Any
 
 import defusedxml.ElementTree as parser
+from backend.parameters.models import InputTechnology, InputVulnerability
+from backend.target_ports.models import TargetPort
+from backend.targets.models import Target
 from django.db.models.fields.related_descriptors import ReverseManyToOneDescriptor
 from django.db.models.query_utils import DeferredAttribute
 
@@ -72,7 +75,16 @@ class BaseParser:
             else None
         )
 
-    def create_finding(self, finding_type: type[Finding], **fields: Any) -> Finding:
+    def is_finding_link_field(self, finding_type: type[Finding], field: str) -> bool:
+        return (
+            hasattr(finding_type, field)
+            # Discard relations between findings (many-to-many, reverse foreign keys)
+            and not isinstance(getattr(finding_type, field), ReverseManyToOneDescriptor)
+            # Discard standard fields: Text, Number, etc. (these are not relationships)
+            and not isinstance(getattr(finding_type, field), DeferredAttribute)
+        )
+
+    def create_finding(self, finding_type: type[Finding], linked_finding: bool = False, **fields: Any) -> Finding:
         """Create or update a finding with automatic relationship management.
 
         Creates a new finding or updates an existing one based on unique fields.
@@ -88,40 +100,57 @@ class BaseParser:
         """
         # Automatically establish relationships with other findings from the same execution
         # This creates links between related findings (e.g., Host -> Port -> Path relationships)
-        for finding_type_used, finding_used in self.executor.findings_used_in_execution.items():
-            if (
-                finding_type_used != finding_type
-                and hasattr(finding_type, finding_type_used.__name__.lower())
-                # Discard relations between findings (many-to-many, reverse foreign keys)
-                and not isinstance(
-                    getattr(finding_type, finding_type_used.__name__.lower()), ReverseManyToOneDescriptor
-                )
-                # Discard standard fields: Text, Number, etc. (these are not relationships)
-                and not isinstance(getattr(finding_type, finding_type_used.__name__.lower()), DeferredAttribute)
-            ):
-                # Set the relationship field to link this finding with the related finding
-                fields[finding_type_used.__name__.lower()] = finding_used
-        # Check if a finding with the same unique characteristics already exists for this target
-        # This prevents duplicate findings while allowing updates to existing ones
-        unique_finding = finding_type.objects.filter(
-            **{
-                **{f: fields.get(f) for f in finding_type.unique_fields},
-                "executions__task__target": self.executor.execution.task.target,
-            }
-        )
-        if unique_finding.exists():
-            # Update existing finding with new field values
-            finding = unique_finding.first()
-            for field, value in fields.items():
-                setattr(finding, field, value)
-            finding.save(update_fields=fields.keys())
-        else:
-            # Create new finding if no duplicate exists
-            finding = finding_type.objects.create(**fields)
-        # Associate this finding with the current execution for tracking
-        finding.executions.add(self.executor.execution)
-        self.findings.append(finding)
-        return finding
+        if not linked_finding:
+            for finding_model, related_finding in self.executor.findings_used_in_execution.items():
+                field = finding_model.__name__.lower()
+                if finding_model != finding_type and self.is_finding_link_field(finding_type, field):
+                    # Set the relationship field to link this finding with the related finding
+                    fields[field] = related_finding
+                    linked_finding = True
+                    break
+        if not linked_finding:
+            port_for_input_parameter = None
+            is_port_for_input_parameter = (
+                InputVulnerability in self.executor.targets_used_in_execution
+                or InputTechnology in self.executor.targets_used_in_execution
+            )
+            for related_target in [
+                self.executor.targets_used_in_execution.get(TargetPort),
+                TargetPort(target=self.executor.execution.task.target, port=self.executor.scanned_port)
+                if self.executor.scanned_port is not None
+                else None,
+                self.executor.execution.task.target_port,
+                self.executor.targets_used_in_execution.get(Target),
+            ]:
+                if not related_target:
+                    continue
+                field = related_target.input_type.model_class.__name__.lower()
+                add_findings_to_field = self.is_finding_link_field(finding_type, field)
+                if not fields.get(field) and (
+                    (not is_port_for_input_parameter and add_findings_to_field)
+                    or (is_port_for_input_parameter and field == "port")
+                ):
+                    related_finding = related_target.create_finding_from_user_input(self.executor.execution)
+                    if add_findings_to_field:
+                        fields[field] = related_finding
+                        linked_finding = True
+                    if is_port_for_input_parameter:
+                        port_for_input_parameter = related_finding
+                    break
+            if is_port_for_input_parameter and port_for_input_parameter and not linked_finding:
+                for input_parameter_class in [InputTechnology, InputVulnerability]:
+                    field = input_parameter_class.input_type.model_class.__name__.lower()
+                    if self.is_finding_link_field(finding_type, field):
+                        fields[field] = self.executor.targets_used_in_execution.get(
+                            input_parameter_class
+                        ).create_finding_from_user_input(self.executor.execution, port=port_for_input_parameter)
+                        linked_finding = True
+                        break
+        if linked_finding:
+            fields["created_from_user_input"] = False
+            finding = finding_type.objects.create(finding_type, self.executor.execution, **fields)
+            self.findings.append(finding)
+            return finding
 
     def load_json_report(self) -> dict[str, Any] | list[dict[str, Any]] | None:
         """Load and parse JSON report file.

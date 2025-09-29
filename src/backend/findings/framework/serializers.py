@@ -52,6 +52,7 @@ class FindingSerializer(RelatedNotesSerializer):
             "fixed_by",
             "defectdojo_id",
             "hacktricks_link",
+            "created_from_user_input",
             "notes",
         )
         read_only_fields = (
@@ -62,6 +63,7 @@ class FindingSerializer(RelatedNotesSerializer):
             "fixed_by",
             "defectdojo_id",
             "hacktricks_link",
+            "created_from_user_input",
             "notes",
         )
 

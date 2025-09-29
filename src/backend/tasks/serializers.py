@@ -91,6 +91,7 @@ class TaskSerializer(RelatedNotesSerializer):
             "enqueued_at",
             "start",
             "end",
+            "target_port",
             "wordlists",
             "input_technologies",
             "input_vulnerabilities",
@@ -195,7 +196,7 @@ class TaskSerializer(RelatedNotesSerializer):
                 (InputTypeName.TECHNOLOGY, "input_technologies"),
                 (InputTypeName.VULNERABILITY, "input_vulnerabilities"),
             ]:
-                if not Input.objects.filter(
+                if len(attrs[field]) > 0 and not Input.objects.filter(
                     argument__tool=cast(Configuration, attrs.get("configuration")).tool, type__name=input_type
                 ):
                     attrs[field] = []

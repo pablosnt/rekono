@@ -201,7 +201,7 @@ class BaseInput(BaseModel):
             ]
             _parse_mapping = {
                 InputKeyword.PORT: "port",
-                InputKeyword.TARGET: lambda instance: f"{instance.host}:{instance.port}"
+                InputKeyword.TARGET: lambda instance, target: f"{instance.host}:{instance.port}"
             }
         ```
     """
@@ -318,6 +318,7 @@ class BaseInput(BaseModel):
 
     def get_url(
         self,
+        target: Any,
         host: str,
         port: int | None = None,
         endpoint: str | None = None,
@@ -343,21 +344,23 @@ class BaseInput(BaseModel):
             endpoint = ""
         elif endpoint.startswith("/"):
             endpoint = endpoint[1:]
-        schema = "{protocol}://{host}/{endpoint}"
-        if port:
-            schema = "{protocol}://{host}:{port}/{endpoint}"  # Include port schema if port exists
-            if port == 80:
-                protocols = ["http"]
-            elif port == 443:
-                protocols = ["https"]
-        for protocol in protocols:  # For each protocol
-            url_to_test = schema.format(protocol=protocol, host=host, port=port, endpoint=endpoint)
-            try:
-                # nosemgrep: python.requests.security.disabled-cert-validation.disabled-cert-validation
-                requests.get(url_to_test, timeout=5, verify=False)
-                return url_to_test
-            except Exception:
-                continue
+        schema = "{protocol}://{host}:{port}/{endpoint}"
+        ports = (
+            [port]
+            if port
+            else ([tp.port for tp in target.target_ports.all()] if target.target_ports.exists() else [80, 443])
+        )
+        for port in ports:
+            for protocol in protocols:
+                if len(protocols) > 1 and (port == 80 and protocol == "https") or (port == 443 and protocol == "http"):
+                    continue
+                url_to_test = schema.format(protocol=protocol, host=host, port=port, endpoint=endpoint)
+                try:
+                    # nosemgrep: python.requests.security.disabled-cert-validation.disabled-cert-validation
+                    requests.get(url_to_test, timeout=5, verify=False)
+                    return url_to_test
+                except Exception:
+                    continue
 
     def filter(self, argument_input: Any, target: Any = None) -> bool:
         """Apply complex filtering logic based on tool argument requirements.
@@ -411,7 +414,7 @@ class BaseInput(BaseModel):
             conclusion = conclusion and filter_conclusion
         return conclusion
 
-    def parse(self, accumulated: dict[str, Any] = {}) -> dict[str, Any]:
+    def parse(self, target: Any, accumulated: dict[str, Any] = {}) -> dict[str, Any]:
         """Parse input data into a format suitable for tool execution.
 
         Processes the input data according to the configured parse mapping,
@@ -448,7 +451,7 @@ class BaseInput(BaseModel):
             value = (
                 getattr(self, field_or_function)
                 if isinstance(field_or_function, str) and hasattr(self, field_or_function)
-                else (field_or_function(self) if isinstance(field_or_function, Callable) else field_or_function)
+                else (field_or_function(self, target) if callable(field_or_function) else field_or_function)
             )
             # Ensure we always have a string value (empty string if None)
             if value is None:
@@ -468,6 +471,9 @@ class BaseInput(BaseModel):
             # Default case: assign value directly
             result[key] = value
         return result
+
+    def create_finding_from_user_input(self, execution: Any, **fields: Any) -> Any | None:
+        return None  # pragma: no cover
 
 
 class BaseLike(BaseModel):

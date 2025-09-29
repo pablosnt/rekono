@@ -129,6 +129,30 @@ class FindingManager(Manager):
         finding.save(update_fields=["is_fixed", "auto_fixed", "fixed_date", "fixed_by"])
         return finding
 
+    def create(self, finding_type: type[BaseInput], execution: Execution, **fields: Any) -> Any:
+        # Check if a finding with the same unique characteristics already exists for this target
+        # This prevents duplicate findings while allowing updates to existing ones
+        unique_finding = finding_type.objects.filter(
+            **{
+                **{f: fields.get(f) for f in finding_type.unique_fields},
+                "executions__task__target": execution.task.target,
+            }
+        )
+        if unique_finding.exists():
+            # Update existing finding with new field values
+            finding = unique_finding.first()
+            for field, value in fields.items():
+                if finding.created_from_user_input is False and field == "created_from_user_input":
+                    continue
+                setattr(finding, field, value)
+            finding.save(update_fields=fields.keys())
+        else:
+            # Create new finding if no duplicate exists
+            finding = finding_type.objects.create(**fields)
+        # Associate this finding with the current execution for tracking
+        finding.executions.add(execution)
+        return finding
+
 
 class Finding(BaseInput):
     """Abstract base model for all security findings.
@@ -154,6 +178,7 @@ class Finding(BaseInput):
     fixed_by = ForeignKey(AUTH_USER_MODEL, related_name="fixed_%(class)s", on_delete=SET_NULL, blank=True, null=True)
     defectdojo_id = IntegerField(blank=True, null=True)
     hacktricks_link = TextField(max_length=300, blank=True, null=True)
+    created_from_user_input = BooleanField(default=False)
 
     objects = FindingManager()
     unique_fields: list[str] = []

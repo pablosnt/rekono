@@ -178,7 +178,8 @@ class Alert(BaseModel):
         # Check if the finding is of the correct model type, is not fixed,
         # is not a false positive, and passes any custom filter (if present).
         if (
-            not isinstance(finding, data["model"])
+            finding.created_from_user_input
+            or not isinstance(finding, data["model"])
             or finding.is_fixed
             or (hasattr(finding, "triage_status") and finding.triage_status == TriageStatus.FALSE_POSITIVE)
             or not data.get(_mode)

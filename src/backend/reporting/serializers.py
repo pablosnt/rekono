@@ -50,6 +50,7 @@ class CreateReportSerializer(ModelSerializer):
     """
 
     only_true_positives = BooleanField(required=False, write_only=True)
+    include_findings_from_user_input = BooleanField(required=True, default=False, write_only=True)
     finding_types = MultipleChoiceField(choices=FindingName.choices, required=False, write_only=True)
     validated_filter: dict[str, Any] = {}
     validated_finding_types: list[FindingName] = []
@@ -84,6 +85,8 @@ class CreateReportSerializer(ModelSerializer):
         """
         attrs = super().validate(attrs)
         self.validated_filter = {"is_fixed": False}
+        if not attrs.pop("include_findings_from_user_input", False):
+            self.validated_filter["created_from_user_input"] = False
         self.validated_triage_filter = {}
         only_true_positives = attrs.pop("only_true_positives", False)
         if only_true_positives:

@@ -53,11 +53,18 @@ class Joomscan(BaseParser):
             elif "CVE : " in data:
                 vulnerability_name = lines[index - 1].replace("[++]", "").replace("Joomla!", "").strip()
                 for cve in data.replace("CVE : ", "").strip().split(","):
-                    self.create_finding(Vulnerability, technology=technology, name=vulnerability_name, cve=cve.strip())
+                    self.create_finding(
+                        Vulnerability,
+                        linked_finding=True,
+                        technology=technology,
+                        name=vulnerability_name,
+                        cve=cve.strip(),
+                    )
             elif "EDB : " in data:
                 link = data.replace("EDB : ", "").strip()
                 self.create_finding(
                     Exploit,
+                    linked_finding=True,
                     technology=technology,
                     title=vulnerability_name,
                     edb_id=int(link.split("https://www.exploit-db.com/exploits/", 1)[1].replace("/", "")),
@@ -66,6 +73,7 @@ class Joomscan(BaseParser):
             elif "Debug mode Enabled" in data:
                 self.create_finding(
                     Vulnerability,
+                    linked_finding=True,
                     technology=technology,
                     name="Debug mode enabled",
                     description="Joomla debug mode enabled",
@@ -99,6 +107,7 @@ class Joomscan(BaseParser):
             if paths:
                 self.create_finding(
                     Vulnerability,
+                    linked_finding=True,
                     technology=technology,
                     name=name,
                     description=", ".join(paths),

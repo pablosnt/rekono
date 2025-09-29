@@ -75,7 +75,7 @@ class HttpHeader(BaseInput):
     value = models.TextField(max_length=500, validators=[Validator(Regex.TEXT, code="value", deny_injections=True)])
 
     _filters = [BaseInput.Filter(type=str, field="key")]
-    _parse_mapping = {InputKeyword.HEADERS: lambda instance: {instance.key: instance.value}}
+    _parse_mapping = {InputKeyword.HEADERS: lambda instance, target: {instance.key: instance.value}}
     _project_field = "target__project"
 
     class Meta:

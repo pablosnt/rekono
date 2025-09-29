@@ -75,6 +75,7 @@ class Cmseek(BaseParser):
                     if search_key in key:
                         self.create_finding(
                             Vulnerability,
+                            linked_finding=True,
                             technology=cms,
                             name=vulnerability_name,
                             description=", ".join(paths),
@@ -86,11 +87,16 @@ class Cmseek(BaseParser):
                     if user:
                         # TODO: If context is not better used somewhere, we should remove it from database
                         self.create_finding(
-                            Credential, technology=cms, username=user.strip(), context=f"{cms.name} username"
+                            Credential,
+                            linked_finding=True,
+                            technology=cms,
+                            username=user.strip(),
+                            context=f"{cms.name} username",
                         )
             elif "_debug_mode" in key and value != "disabled":
                 self.create_finding(
                     Vulnerability,
+                    linked_finding=True,
                     technology=cms,
                     name="Debug mode enabled",
                     description=f"{cms.name} debug mode enabled",
@@ -101,6 +107,7 @@ class Cmseek(BaseParser):
                 for vulnerability in value["vulnerabilities"]:
                     self.create_finding(
                         Vulnerability,
+                        linked_finding=True,
                         technology=cms,
                         name=vulnerability.get("name", "").strip(),
                         cve=vulnerability.get("cve").strip() if vulnerability.get("cve") is not None else None,

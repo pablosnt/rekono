@@ -108,7 +108,6 @@ class FindingsQueue(BaseQueue):
                 platform.process_findings(execution, findings)
         # Automatic fixing: mark findings as fixed if they're no longer detected in identical execution contexts
         if settings.auto_fix_findings:
-            same_executions = Execution.objects.filter(hash=execution.hash, status=Status.COMPLETED)
             # For each finding type, mark findings as fixed if they don't appear in the current execution
             # but were found in previous executions with the same parameters
             for finding_type in [
@@ -123,6 +122,6 @@ class FindingsQueue(BaseQueue):
             ]:
                 finding_type.objects.fix(
                     finding_type.objects.exclude(executions__id=execution.id)
-                    .filter(executions__in=same_executions)
+                    .filter(hash=execution.hash, status=Status.COMPLETED)
                     .all()
                 )

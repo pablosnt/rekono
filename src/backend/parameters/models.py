@@ -13,8 +13,11 @@ Architecture:
     logic to ensure data consistency and efficient parameter management.
 """
 
+from typing import Any
+
 from django.db import models
 
+from findings.models import Technology, Vulnerability
 from framework.enums import InputKeyword
 from framework.models import BaseInput
 from parameters.framework.models import InputParameter
@@ -62,6 +65,14 @@ class InputTechnology(InputParameter):
         """
         return f"{self.name} - {self.version}" if self.version else self.name
 
+    def create_finding_from_user_input(self, execution: Any, **fields: Any) -> Technology | None:
+        if "port" in fields:
+            return Technology.objects.create(
+                Technology,
+                execution,
+                **{**fields, "name": self.name, "version": self.version, "created_from_user_input": True},
+            )
+
 
 class InputVulnerability(InputParameter):
     """Model representing vulnerability parameters for security tool execution.
@@ -101,3 +112,11 @@ class InputVulnerability(InputParameter):
             str: The CVE identifier
         """
         return self.cve
+
+    def create_finding_from_user_input(self, execution: Any, **fields: Any) -> Vulnerability | None:
+        if "port" in fields:
+            return Vulnerability.objects.create(
+                Vulnerability,
+                execution,
+                **{**fields, "name": self.cve, "cve": self.cve, "created_from_user_input": True},
+            )

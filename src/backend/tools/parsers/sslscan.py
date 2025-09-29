@@ -25,7 +25,7 @@ class Sslscan(BaseParser):
 
     technologies: list[Technology] = []
 
-    def create_finding(self, finding_type: type[Finding], **fields: Any) -> Finding:
+    def create_finding(self, finding_type: type[Finding], linked_finding: bool = False, **fields: Any) -> Finding:
         """Create findings with automatic SSL/TLS technology association.
 
         Args:
@@ -37,9 +37,11 @@ class Sslscan(BaseParser):
         """
         if finding_type == Vulnerability and not fields.get("technology") and fields.get("sslversion"):
             search = [t for t in self.technologies if f"{t.name}v{t.version}" == fields.get("sslversion")]
-            fields["technology"] = search[0] if search else None
+            if search:
+                fields["technology"] = search[0]
+                linked_finding = True
             fields.pop("sslversion")
-        return super().create_finding(finding_type, **fields)
+        return super().create_finding(finding_type, linked_finding, **fields)
 
     def _parse(self) -> None:
         """Parse SSLScan XML output and extract SSL/TLS security findings.
@@ -60,6 +62,7 @@ class Sslscan(BaseParser):
                     if technology.name != "TLS" or technology.version not in ["1.2", "1.3"]:
                         self.create_finding(
                             Vulnerability,
+                            linked_finding=True,
                             technology=technology,
                             name=f"Insecure {technology.name} version supported",
                             description=f"{technology.name} {technology.version} is supported",

@@ -56,6 +56,7 @@ class Nmap(BaseParser):
             for service in nmap_host.services:
                 port = self.create_finding(
                     Port,
+                    linked_finding=True,
                     host=host,
                     port=service.port,
                     status=PortStatus[service.state.upper()],
@@ -68,6 +69,7 @@ class Nmap(BaseParser):
                 if "product" in service.service_dict and "version" in service.service_dict:
                     technology = self.create_finding(
                         Technology,
+                        linked_finding=True,
                         port=port,
                         name=service.service_dict["product"],
                         version=service.service_dict["version"],
@@ -104,6 +106,7 @@ class Nmap(BaseParser):
                 case "ftp-anon":
                     self.create_finding(
                         Vulnerability,
+                        linked_finding=True,
                         technology=technology,
                         name="Anonymous FTP",
                         description="Anonymous login is allowed in FTP",
@@ -115,6 +118,7 @@ class Nmap(BaseParser):
                 case "ftp-proftpd-backdoor":
                     self.create_finding(
                         Vulnerability,
+                        linked_finding=True,
                         technology=technology,
                         name="FTP Backdoor",
                         description="FTP ProFTPD 1.3.3c Backdoor",
@@ -124,15 +128,24 @@ class Nmap(BaseParser):
                     )
                 case "ftp-vsftpd-backdoor":
                     self.create_finding(
-                        Vulnerability, technology=technology, name="vsFTPd Backdoor", cve="CVE-2011-2523"
+                        Vulnerability,
+                        linked_finding=True,
+                        technology=technology,
+                        name="vsFTPd Backdoor",
+                        cve="CVE-2011-2523",
                     )
                 case "ftp-libopie":
                     self.create_finding(
-                        Vulnerability, technology=technology, name="OPIE off-by-one stack overflow", cve="CVE-2010-1938"
+                        Vulnerability,
+                        linked_finding=True,
+                        technology=technology,
+                        name="OPIE off-by-one stack overflow",
+                        cve="CVE-2010-1938",
                     )
                 case "ftp-vuln-cve2010-4221":
                     self.create_finding(
                         Vulnerability,
+                        linked_finding=True,
                         technology=technology,
                         name="ProFTPD server TELNET IAC stack overflow",
                         cve="CVE-2010-4221",
@@ -140,6 +153,7 @@ class Nmap(BaseParser):
                 case "smb-double-pulsar-backdoor":
                     self.create_finding(
                         Vulnerability,
+                        linked_finding=True,
                         technology=smb_technology,
                         name="SMB Server DOUBLEPULSAR Backdoor",
                         description=(
@@ -156,6 +170,7 @@ class Nmap(BaseParser):
                 case "smb-vuln-webexec":
                     self.create_finding(
                         Vulnerability,
+                        linked_finding=True,
                         technology=smb_technology,
                         name="Remote Code Execution vulnerability in WebExService",
                         cve="CVE-2018-15442",
@@ -163,6 +178,7 @@ class Nmap(BaseParser):
                 case "smb-vuln-cve-2017-7494":
                     self.create_finding(
                         Vulnerability,
+                        linked_finding=True,
                         technology=smb_technology,
                         name="SAMBA Remote Code Execution from Writable Share",
                         cve="CVE-2017-7494",
@@ -181,6 +197,7 @@ class Nmap(BaseParser):
                         if data and " (RID:" in data:
                             self.create_finding(
                                 Credential,
+                                linked_finding=True,
                                 technology=smb_technology,
                                 username=data.split(" (RID:", 1)[0],
                                 context="SMB user",
@@ -196,6 +213,7 @@ class Nmap(BaseParser):
                             # Create a Path finding for each discovered SMB share
                             self.create_finding(
                                 Path,
+                                linked_finding=bool(smb_technology),
                                 port=smb_technology.port if smb_technology else None,
                                 path=path,
                                 extra_info=(
@@ -211,6 +229,7 @@ class Nmap(BaseParser):
                             if "READ" in anonymous or "WRITE" in anonymous:
                                 self.create_finding(
                                     Vulnerability,
+                                    linked_finding=True,
                                     technology=smb_technology,
                                     name="Anonymous SMB",
                                     description=f"Anonymous access is allowed to the SMB share {path}",
@@ -236,4 +255,4 @@ class Nmap(BaseParser):
         for cve in re.findall(Regex.CVE.value, script.get("output", "")):
             if cve not in cves:
                 cves.add(cve)
-                self.create_finding(Vulnerability, technology=technology, name=cve, cve=cve)
+                self.create_finding(Vulnerability, linked_finding=True, technology=technology, name=cve, cve=cve)

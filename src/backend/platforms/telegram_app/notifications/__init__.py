@@ -63,6 +63,8 @@ class Telegram(BaseNotification, BaseTelegram):
         """
         texts_by_type: dict[Any, list[str]] = {}
         for finding in findings:
+            if finding.created_from_user_input:
+                continue
             if finding.__class__ not in texts_by_type:
                 texts_by_type[finding.__class__] = []
             texts_by_type[finding.__class__].append(self._format_finding(finding))

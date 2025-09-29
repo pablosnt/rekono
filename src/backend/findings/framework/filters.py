@@ -56,6 +56,7 @@ class FindingFilter(MultipleFieldFilterSet):
             "fixed_date": ["gte", "lte", "exact"],
             "fixed_by": ["exact"],
             "defectdojo_id": ["exact"],
+            "created_from_user_input": ["exact"],
         }
 
 
