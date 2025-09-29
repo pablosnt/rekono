@@ -12,13 +12,13 @@ from pathlib import Path
 from typing import Any
 
 import defusedxml.ElementTree as parser
-from backend.parameters.models import InputTechnology, InputVulnerability
-from backend.target_ports.models import TargetPort
-from backend.targets.models import Target
 from django.db.models.fields.related_descriptors import ReverseManyToOneDescriptor
 from django.db.models.query_utils import DeferredAttribute
 
 from findings.framework.models import Finding
+from parameters.models import InputTechnology, InputVulnerability
+from target_ports.models import TargetPort
+from targets.models import Target
 from tools.executors.base import BaseExecutor
 
 

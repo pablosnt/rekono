@@ -5,7 +5,6 @@ dependency management, and execution coordination. Supports both single tool
 execution and complex multi-step security processes.
 """
 
-from backend.target_ports.models import TargetPort
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
@@ -14,6 +13,7 @@ from parameters.models import InputTechnology, InputVulnerability
 from processes.models import Process
 from rekono.settings import AUTH_USER_MODEL
 from security.validators.input_validator import FutureDatetimeValidator
+from target_ports.models import TargetPort
 from targets.models import Target
 from tasks.enums import TimeUnit
 from tools.enums import Intensity
