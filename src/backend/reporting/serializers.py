@@ -47,6 +47,13 @@ class CreateReportSerializer(ModelSerializer):
 
     Handles report creation with advanced filtering options including triage
     status filtering and finding type selection with validation logic.
+
+    Attributes:
+        only_true_positives (BooleanField): Filter to include only true positive findings (optional, write-only)
+        include_findings_from_user_input (BooleanField): Include findings created from user input (optional, default=False, write-only)
+        finding_types (MultipleChoiceField): Specific finding types to include in the report (optional, write-only)
+        validated_filter (dict[str, Any]): Internal filter criteria applied during validation
+        validated_finding_types (list[FindingName]): Internal list of validated finding types for report generation
     """
 
     only_true_positives = BooleanField(required=False, write_only=True)

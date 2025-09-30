@@ -42,6 +42,7 @@ class Task(BaseModel):
         enqueued_at (DateTimeField): When task was queued for execution (optional)
         start (DateTimeField): Task execution start time (optional)
         end (DateTimeField): Task execution completion time (optional)
+        target_port (ForeignKey): Specific target port for task execution (optional)
         wordlists (ManyToManyField): Wordlists to use during execution
         input_technologies (ManyToManyField): Technology inputs for tool execution
         input_vulnerabilities (ManyToManyField): Vulnerability inputs for tool execution

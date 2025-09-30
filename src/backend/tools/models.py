@@ -258,6 +258,7 @@ class Configuration(BaseModel):
         arguments (TextField): Additional command-line arguments (max 250 chars)
         stage (IntegerField): Execution stage from Stage enum
         default (BooleanField): Whether this is the default configuration for the tool
+        default_scanned_port (IntegerField): Default port to scan (0-65535, optional)
 
     Example:
         Create a tool configuration:
