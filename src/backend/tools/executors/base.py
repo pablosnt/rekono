@@ -91,6 +91,14 @@ class BaseExecutor(LoggingEntity):
 
     @cached_property
     def scanned_port(self) -> int | None:
+        """Get the port that is being scanned by this execution.
+
+        Determines the port being scanned by prioritizing ports extracted from
+        execution arguments over the tool's default scanned port configuration.
+
+        Returns:
+            int | None: The port number being scanned, or None if not applicable
+        """
         return (
             self.port_from_arguments
             if self.port_from_arguments is not None

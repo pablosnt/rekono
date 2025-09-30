@@ -187,8 +187,9 @@ class LatestHostsViewSet(LatestViewSet):
 class LatestVulnerabilitiesViewSet(LatestViewSet):
     """ViewSet for retrieving latest vulnerability statistics.
 
-    Provides the most recently discovered vulnerabilities that are unfixed
-    and not marked as false positives, with latest execution timestamps.
+    Provides the most recently discovered vulnerabilities that are unfixed,
+    not marked as false positives, and not created from user input, with
+    latest execution timestamps.
 
     Attributes:
         queryset: Active vulnerabilities with latest execution annotations

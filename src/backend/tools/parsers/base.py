@@ -77,6 +77,19 @@ class BaseParser:
         )
 
     def is_finding_link_field(self, finding_type: type[Finding], field: str) -> bool:
+        """Check if a field represents a valid finding relationship link.
+
+        Determines whether a given field on a finding type represents a valid
+        relationship that can be used for automatic finding linking, excluding
+        reverse relationships and standard data fields.
+
+        Args:
+            finding_type (type[Finding]): The finding class to check
+            field (str): The field name to validate
+
+        Returns:
+            bool: True if the field is a valid relationship link, False otherwise
+        """
         return (
             hasattr(finding_type, field)
             # Discard relations between findings (many-to-many, reverse foreign keys)
@@ -104,61 +117,97 @@ class BaseParser:
         Returns:
             Finding | None: The created or updated finding instance, or None if creation fails
         """
-        # Automatically establish relationships with other findings from the same execution
-        # This creates links between related findings (e.g., Host -> Port -> Path relationships)
+        # PHASE 1: Attempt to link with findings already discovered in this execution
+        # This creates hierarchical relationships like Host > Port > Technology > Vulnerability > Exploit
         if not linked_finding:
+            # Iterate through all findings that have been used as inputs in this execution
             for finding_model, related_finding in self.executor.findings_used_in_execution.items():
+                # Convert the finding model class name to lowercase to match field names
+                # Example: "Host" becomes "host" to match the foreign key field name
                 field = finding_model.__name__.lower()
+                # Check if this finding type can be linked to the current finding type
+                # Avoid self-references and ensure the field exists as a valid relationship
                 if finding_model != finding_type and self.is_finding_link_field(finding_type, field):
-                    # Set the relationship field to link this finding with the related finding
                     fields[field] = related_finding
                     linked_finding = True
+                    # Stop after first successful link to avoid multiple relationships
                     break
+        # PHASE 2: If no existing findings to link with, try to create relationships from user inputs
         if not linked_finding:
             port_for_input_parameter = None
+            # Check if we're dealing with input parameters that require port associations
+            # Technologies and vulnerabilities often need to be associated with specific ports
             is_port_for_input_parameter = (
                 InputVulnerability in self.executor.targets_used_in_execution
                 or InputTechnology in self.executor.targets_used_in_execution
             )
+            # Try to establish relationships with target-related inputs in priority order
             for related_target in [
+                # 1. First try explicit target port from execution context
                 self.executor.targets_used_in_execution.get(TargetPort),
+                # 2. Create target port from scanned port if available
                 TargetPort(target=self.executor.execution.task.target, port=self.executor.scanned_port)
                 if self.executor.scanned_port is not None
                 else None,
+                # 3. Use task's target port if specified
                 self.executor.execution.task.target_port,
+                # 4. Finally, try the base target
                 self.executor.targets_used_in_execution.get(Target),
             ]:
+                # Skip if no target is available at this level
                 if not related_target:
                     continue
+                # Determine the field name for this relationship type
+                # Example: Target -> "host", TargetPort -> "port"
                 field = related_target.input_type.model_class.__name__.lower()
                 add_findings_to_field = self.is_finding_link_field(finding_type, field)
+                # Check if we should create this relationship
                 if not fields.get(field) and (
+                    # For regular findings, create if it's a valid link field
                     (not is_port_for_input_parameter and add_findings_to_field)
+                    # For input parameters, specifically look for port relationships
                     or (is_port_for_input_parameter and field == "port")
                 ):
+                    # Create a finding from the user input
                     related_finding = related_target.create_finding_from_user_input(self.executor.execution)
+                    # Establish the relationship if it's a valid link field
                     if add_findings_to_field:
                         fields[field] = related_finding
                         linked_finding = True
+                    # Store port finding for potential use with input parameters
                     if is_port_for_input_parameter:
                         port_for_input_parameter = related_finding
+                    # Stop after first successful relationship
                     break
+            # PHASE 3: Handle special case for input parameters (Technologies/Vulnerabilities)
+            # These need to be associated with ports when creating findings
             if is_port_for_input_parameter and port_for_input_parameter and not linked_finding:
+                # Process technology and vulnerability input parameters
                 for input_parameter_class in [InputTechnology, InputVulnerability]:
                     related_parameter = self.executor.targets_used_in_execution.get(input_parameter_class)
                     if not related_parameter:
                         continue
+                    # Determine field name for the parameter type
+                    # Example: InputTechnology -> "technology", InputVulnerability -> "vulnerability"
                     field = input_parameter_class.input_type.model_class.__name__.lower()
+                    # Create finding from input parameter if it's a valid relationship
                     if self.is_finding_link_field(finding_type, field):
+                        # Create the parameter finding and associate it with the port
                         fields[field] = related_parameter.create_finding_from_user_input(
                             self.executor.execution, port=port_for_input_parameter
                         )
                         linked_finding = True
+                        # Stop after first successful parameter association
                         break
-        # We need to test all the parsers independently on how the findings are created
+        # PHASE 4: Create the finding if relationships were established or
+        # we're in testing mode, as we need to test parsers completely
         if linked_finding or CONFIG.testing:
+            # Mark as tool-generated (not from user input) since this is from parser output
             fields["created_from_user_input"] = False
+            # Use the manager's create_finding method for proper duplicate handling
             finding = finding_type.objects.create_finding(finding_type, self.executor.execution, **fields)
+            # Add to the parser's findings list for tracking
+            # TODO: Do we have to track user-input findings in the variale?
             self.findings.append(finding)
             return finding
 

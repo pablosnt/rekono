@@ -133,6 +133,19 @@ class Target(BaseInput):
         return self.target
 
     def create_finding_from_user_input(self, execution: Any, **fields: Any) -> Any | None:
+        """Create a Host finding from this target user input.
+
+        Creates a Host finding when user input targets are used in execution context.
+        Handles different target types by performing appropriate resolution and
+        field mapping for domain and IP address targets.
+
+        Args:
+            execution (Any): The execution context for the finding
+            **fields (Any): Additional fields for the finding
+
+        Returns:
+            Any | None: Created Host finding or None if target type not supported
+        """
         from findings.models import Host
 
         if self.type == TargetType.DOMAIN:

@@ -66,7 +66,7 @@ class Authentication(BaseInput, BaseEncrypted):
 
     # Filter configuration for BaseInput
     _filters = [BaseInput.Filter(type=AuthenticationType, field="type")]
-    # Parse mapping for integration with hackign tools
+    # Parse mapping for integration with hacking tools
     _parse_mapping = {
         InputKeyword.COOKIE_NAME: lambda instance, target: (
             instance.name if instance.type == AuthenticationType.COOKIE else None
@@ -75,9 +75,9 @@ class Authentication(BaseInput, BaseEncrypted):
         InputKeyword.CREDENTIAL_TYPE: "type",
         InputKeyword.CREDENTIAL_TYPE_LOWER: lambda instance, target: instance.type.lower(),
         InputKeyword.TOKEN: "token",
-        InputKeyword.USERNAME: lambda instance, target: (
-            instance.name if instance.type == AuthenticationType.BASIC else None
-        ),
+        InputKeyword.USERNAME: lambda instance, target: instance.name
+        if instance.type == AuthenticationType.BASIC
+        else None,
     }
     # Encryption and project field configuration
     _encrypted_field = "_secret"

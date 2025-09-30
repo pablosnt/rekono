@@ -340,27 +340,42 @@ class BaseInput(BaseModel):
         Returns:
             str | None: A valid URL string or None if no working URL found.
         """
+        # Disable SSL warnings since we're testing connectivity with disabled certificate verification
         urllib3.disable_warnings(category=urllib3.exceptions.InsecureRequestWarning)
+
+        # Normalize endpoint parameter: ensure it doesn't start with '/' to avoid double slashes in URL
         if endpoint is None:
             endpoint = ""
         elif endpoint.startswith("/"):
+            # Remove leading slash since we'll add it in the schema template
             endpoint = endpoint[1:]
+        # Define URL schema template with placeholders for dynamic components
         schema = "{protocol}://{host}:{port}/{endpoint}"
+        # Determine which ports to test based on input parameters
         ports = (
             [port]
             if port
+            # If no port specified, try to use target ports, otherwise default to common web ports
             else ([tp.port for tp in target.target_ports.all()] if target.target_ports.exists() else [80, 443])
         )
+        # Test all combinations of ports and protocols to find a working URL
         for port in ports:
             for protocol in protocols:
+                # Skip invalid protocol/port combinations to avoid unnecessary requests
+                # Don't try HTTPS on port 80 or HTTP on port 443 when both protocols are available
                 if len(protocols) > 1 and (port == 80 and protocol == "https") or (port == 443 and protocol == "http"):
                     continue
+                # Construct the URL using the current protocol/port combination
                 url_to_test = schema.format(protocol=protocol, host=host, port=port, endpoint=endpoint)
                 try:
+                    # Attempt to connect to the URL to verify it's accessible
+                    # Use disabled SSL verification for testing purposes and short timeout for efficiency
                     # nosemgrep: python.requests.security.disabled-cert-validation.disabled-cert-validation
                     requests.get(url_to_test, timeout=5, verify=False)
+                    # If the request succeeds, return this working URL
                     return url_to_test
                 except Exception:
+                    # If connection fails, try the next protocol/port combination
                     continue
 
     def filter(self, argument_input: Any, target: Any = None) -> bool:
@@ -431,8 +446,7 @@ class BaseInput(BaseModel):
 
         Note:
             Dependencies are parsed first to ensure required data is available
-            when processing the main parsing mappings. Callable mappings now
-            receive both self and target parameters for context-aware parsing.
+            when processing the main parsing mappings.
         """
         result = {}
         # Process dependencies first - these must be parsed before current input

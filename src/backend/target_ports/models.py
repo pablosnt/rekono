@@ -101,6 +101,19 @@ class TargetPort(BaseInput):
         return f"{self.target.__str__()} - {self.port}"
 
     def create_finding_from_user_input(self, execution: Any, **fields: Any) -> Any | None:
+        """Create a Port finding from this target port user input.
+
+        Creates a Port finding associated with the target's host when user input
+        target ports are used in execution context. Establishes the relationship
+        between target port and discovered port findings.
+
+        Args:
+            execution (Any): The execution context for the finding
+            **fields (Any): Additional fields for the finding
+
+        Returns:
+            Any | None: Created Port finding or None if host creation fails
+        """
         from findings.models import Port
 
         host = self.target.create_finding_from_user_input(execution)
