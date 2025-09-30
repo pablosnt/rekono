@@ -85,7 +85,9 @@ class BaseParser:
             and not isinstance(getattr(finding_type, field), DeferredAttribute)
         )
 
-    def create_finding(self, finding_type: type[Finding], linked_finding: bool = False, **fields: Any) -> Finding:
+    def create_finding(
+        self, finding_type: type[Finding], linked_finding: bool = False, **fields: Any
+    ) -> Finding | None:
         """Create or update a finding with automatic relationship management.
 
         Creates a new finding or updates an existing one based on unique fields.
