@@ -140,11 +140,14 @@ class BaseParser:
                     break
             if is_port_for_input_parameter and port_for_input_parameter and not linked_finding:
                 for input_parameter_class in [InputTechnology, InputVulnerability]:
+                    related_parameter = self.executor.targets_used_in_execution.get(input_parameter_class)
+                    if not related_parameter:
+                        continue
                     field = input_parameter_class.input_type.model_class.__name__.lower()
                     if self.is_finding_link_field(finding_type, field):
-                        fields[field] = self.executor.targets_used_in_execution.get(
-                            input_parameter_class
-                        ).create_finding_from_user_input(self.executor.execution, port=port_for_input_parameter)
+                        fields[field] = related_parameter.create_finding_from_user_input(
+                            self.executor.execution, port=port_for_input_parameter
+                        )
                         linked_finding = True
                         break
         # We need to test all the parsers independently on how the findings are created
