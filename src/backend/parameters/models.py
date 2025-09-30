@@ -17,7 +17,6 @@ from typing import Any
 
 from django.db import models
 
-from findings.models import Technology, Vulnerability
 from framework.enums import InputKeyword
 from framework.models import BaseInput
 from parameters.framework.models import InputParameter
@@ -65,9 +64,11 @@ class InputTechnology(InputParameter):
         """
         return f"{self.name} - {self.version}" if self.version else self.name
 
-    def create_finding_from_user_input(self, execution: Any, **fields: Any) -> Technology | None:
+    def create_finding_from_user_input(self, execution: Any, **fields: Any) -> Any | None:
+        from findings.models import Technology
+
         if "port" in fields:
-            return Technology.objects.create(
+            return Technology.objects.create_finding(
                 Technology,
                 execution,
                 **{**fields, "name": self.name, "version": self.version, "created_from_user_input": True},
@@ -113,9 +114,11 @@ class InputVulnerability(InputParameter):
         """
         return self.cve
 
-    def create_finding_from_user_input(self, execution: Any, **fields: Any) -> Vulnerability | None:
+    def create_finding_from_user_input(self, execution: Any, **fields: Any) -> Any | None:
+        from findings.models import Vulnerability
+
         if "port" in fields:
-            return Vulnerability.objects.create(
+            return Vulnerability.objects.create_finding(
                 Vulnerability,
                 execution,
                 **{**fields, "name": self.cve, "cve": self.cve, "created_from_user_input": True},

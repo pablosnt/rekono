@@ -17,6 +17,7 @@ from django.db.models.query_utils import DeferredAttribute
 
 from findings.framework.models import Finding
 from parameters.models import InputTechnology, InputVulnerability
+from rekono.settings import CONFIG
 from target_ports.models import TargetPort
 from targets.models import Target
 from tools.executors.base import BaseExecutor
@@ -146,9 +147,10 @@ class BaseParser:
                         ).create_finding_from_user_input(self.executor.execution, port=port_for_input_parameter)
                         linked_finding = True
                         break
-        if linked_finding:
+        # We need to test all the parsers independently on how the findings are created
+        if linked_finding or CONFIG.testing:
             fields["created_from_user_input"] = False
-            finding = finding_type.objects.create(finding_type, self.executor.execution, **fields)
+            finding = finding_type.objects.create_finding(finding_type, self.executor.execution, **fields)
             self.findings.append(finding)
             return finding
 

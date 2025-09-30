@@ -13,7 +13,6 @@ from typing import Any
 from django.core.exceptions import ValidationError
 from django.db import models
 
-from findings.models import Host
 from framework.enums import InputKeyword
 from framework.models import BaseInput
 from projects.models import Project
@@ -134,11 +133,13 @@ class Target(BaseInput):
         return self.target
 
     def create_finding_from_user_input(self, execution: Any, **fields: Any) -> Any | None:
-        if self.target.type == TargetType.DOMAIN:
+        from findings.models import Host
+
+        if self.type == TargetType.DOMAIN:
             fields["ip"] = socket.gethostbyname(self.target.target)
-            fields["domain"] = self.target.target
-        elif self.target.type in [TargetType.PRIVATE_IP, TargetType.PUBLIC_IP]:
-            fields["ip"] = self.target.target
+            fields["domain"] = self.target
+        elif self.type in [TargetType.PRIVATE_IP, TargetType.PUBLIC_IP]:
+            fields["ip"] = self.target
         else:
             return None
-        return Host.objects.create(Host, execution, **{**fields, "created_from_user_input": True})
+        return Host.objects.create_finding(Host, execution, **{**fields, "created_from_user_input": True})

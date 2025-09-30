@@ -88,7 +88,7 @@ class Task(BaseModel):
     enqueued_at = models.DateTimeField(blank=True, null=True)
     start = models.DateTimeField(blank=True, null=True)
     end = models.DateTimeField(blank=True, null=True)
-    target_port = models.ForeignKey(TargetPort, related_name="tasks", blank=True, null=True)
+    target_port = models.ForeignKey(TargetPort, related_name="tasks", on_delete=models.SET_NULL, blank=True, null=True)
     wordlists = models.ManyToManyField(Wordlist, related_name="tasks", blank=True)
     input_technologies = models.ManyToManyField(InputTechnology, related_name="tasks", blank=True)
     input_vulnerabilities = models.ManyToManyField(InputVulnerability, related_name="tasks", blank=True)

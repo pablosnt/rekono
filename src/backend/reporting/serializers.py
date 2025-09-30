@@ -50,7 +50,7 @@ class CreateReportSerializer(ModelSerializer):
     """
 
     only_true_positives = BooleanField(required=False, write_only=True)
-    include_findings_from_user_input = BooleanField(required=True, default=False, write_only=True)
+    include_findings_from_user_input = BooleanField(required=False, default=False, write_only=True)
     finding_types = MultipleChoiceField(choices=FindingName.choices, required=False, write_only=True)
     validated_filter: dict[str, Any] = {}
     validated_finding_types: list[FindingName] = []
@@ -65,7 +65,17 @@ class CreateReportSerializer(ModelSerializer):
         """
 
         model = Report
-        fields = ("id", "project", "target", "task", "format", "only_true_positives", "finding_types", "user")
+        fields = (
+            "id",
+            "project",
+            "target",
+            "task",
+            "format",
+            "only_true_positives",
+            "include_findings_from_user_input",
+            "finding_types",
+            "user",
+        )
         read_only_fields = ("user",)
 
     def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:

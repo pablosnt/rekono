@@ -129,7 +129,7 @@ class FindingManager(Manager):
         finding.save(update_fields=["is_fixed", "auto_fixed", "fixed_date", "fixed_by"])
         return finding
 
-    def create(self, finding_type: type[BaseInput], execution: Execution, **fields: Any) -> Any:
+    def create_finding(self, finding_type: type[BaseInput], execution: Execution, **fields: Any) -> Any:
         # Check if a finding with the same unique characteristics already exists for this target
         # This prevents duplicate findings while allowing updates to existing ones
         unique_finding = finding_type.objects.filter(

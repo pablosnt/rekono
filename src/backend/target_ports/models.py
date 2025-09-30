@@ -10,7 +10,6 @@ from typing import Any
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
-from findings.models import Port
 from framework.enums import InputKeyword
 from framework.models import BaseInput
 from security.validators.input_validator import Regex, Validator
@@ -102,8 +101,10 @@ class TargetPort(BaseInput):
         return f"{self.target.__str__()} - {self.port}"
 
     def create_finding_from_user_input(self, execution: Any, **fields: Any) -> Any | None:
+        from findings.models import Port
+
         host = self.target.create_finding_from_user_input(execution)
         if host:
-            return Port.objects.create(
+            return Port.objects.create_finding(
                 Port, execution, **{**fields, "host": host, "port": self.port, "created_from_user_input": True}
             )
