@@ -130,6 +130,18 @@ class FindingManager(Manager):
         return finding
 
     def create_finding(self, finding_type: type[BaseInput], execution: Execution, **fields: Any) -> Any:
+        """Create or update a finding with duplicate prevention and user input handling.
+
+        Creates a new finding or updates an existing one based on unique fields and target.
+
+        Args:
+            finding_type (type[BaseInput]): The finding class to create
+            execution (Execution): The execution context for this finding
+            **fields (Any): Field values for the finding
+
+        Returns:
+            Any: The created or updated finding instance
+        """
         # Check if a finding with the same unique characteristics already exists for this target
         # This prevents duplicate findings while allowing updates to existing ones
         unique_finding = finding_type.objects.filter(
@@ -159,7 +171,8 @@ class Finding(BaseInput):
 
     Provides common functionality for all finding types including fixing status
     tracking, DefectDojo integration, relationship management, and automatic
-    lifecycle operations with execution history.
+    lifecycle operations with execution history. Enhanced with user input tracking
+    for distinguishing between tool-discovered and user-input-based findings.
 
     Attributes:
         executions (ManyToManyField): Related executions that discovered this finding.
@@ -169,6 +182,7 @@ class Finding(BaseInput):
         fixed_by (ForeignKey): User who fixed the finding (optional).
         defectdojo_id (IntegerField): DefectDojo platform identifier (optional).
         hacktricks_link (TextField): HackTricks documentation link (optional, max 300 chars).
+        created_from_user_input (BooleanField): Whether finding was created based on an user input (default: False).
     """
 
     executions = ManyToManyField(Execution, related_name="%(class)s")

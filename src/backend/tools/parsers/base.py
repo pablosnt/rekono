@@ -92,14 +92,17 @@ class BaseParser:
 
         Creates a new finding or updates an existing one based on unique fields.
         Automatically establishes relationships with other findings from the same
-        execution and associates the finding with the current execution.
+        task and associates the finding with the current execution. Supports the
+        creation of findings from data provided by users and ensures the integrity
+        of the relationships between findings.
 
         Args:
             finding_type (type[Finding]): The finding class to create
+            linked_finding (bool): Whether the finding has already been linked to other findings
             **fields (Any): Field values for the finding
 
         Returns:
-            Finding: The created or updated finding instance
+            Finding | None: The created or updated finding instance, or None if creation fails
         """
         # Automatically establish relationships with other findings from the same execution
         # This creates links between related findings (e.g., Host -> Port -> Path relationships)

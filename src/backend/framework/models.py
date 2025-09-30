@@ -327,10 +327,11 @@ class BaseInput(BaseModel):
         """Construct and validate a URL with automatic protocol detection.
 
         Attempts to construct a valid URL by testing different protocols and
-        validating connectivity. Returns the first working URL or None if
-        no valid URL can be constructed.
+        validating connectivity. Enhanced with target context to use target
+        ports when no specific port is provided.
 
         Args:
+            target (Any): Target context containing port information
             host (str): The hostname or IP address.
             port (int | None): The port number (optional).
             endpoint (str | None): The endpoint path (optional).
@@ -418,10 +419,11 @@ class BaseInput(BaseModel):
         """Parse input data into a format suitable for tool execution.
 
         Processes the input data according to the configured parse mapping,
-        handling dependencies and accumulation strategies. Supports various
-        data types including lists, dictionaries, and scalar values.
+        handling dependencies and accumulation strategies. Enhanced with target
+        context for improved URL generation.
 
         Args:
+            target (Any): Target context for parsing (e.g., for URL generation)
             accumulated (dict[str, Any]): Previously accumulated parsing data.
 
         Returns:
@@ -429,7 +431,8 @@ class BaseInput(BaseModel):
 
         Note:
             Dependencies are parsed first to ensure required data is available
-            when processing the main parsing mappings.
+            when processing the main parsing mappings. Callable mappings now
+            receive both self and target parameters for context-aware parsing.
         """
         result = {}
         # Process dependencies first - these must be parsed before current input
@@ -473,6 +476,19 @@ class BaseInput(BaseModel):
         return result
 
     def create_finding_from_user_input(self, execution: Any, **fields: Any) -> Any | None:
+        """Create a finding from user input parameters.
+
+        Override this method in subclasses to create specific finding types
+        from user input parameters. Used for establishing relationships between
+        user-provided data and tool execution findings.
+
+        Args:
+            execution (Any): The execution context for the finding
+            **fields (Any): Additional fields for the finding
+
+        Returns:
+            Any | None: Created finding instance or None if not applicable
+        """
         return None  # pragma: no cover
 
 

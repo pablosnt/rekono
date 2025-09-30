@@ -75,6 +75,7 @@ class OSINT(TriageFinding):
         targets, filtering out non-targetable data types.
 
         Args:
+            target (Any): Target context for parsing
             accumulated (dict[str, Any]): Previously accumulated parsing data.
 
         Returns:
@@ -226,6 +227,7 @@ class Port(Finding):
         for detailed service-specific security analysis.
 
         Args:
+            target (Any): Target context for parsing
             accumulated (dict[str, Any]): Previously accumulated parsing data.
 
         Returns:
