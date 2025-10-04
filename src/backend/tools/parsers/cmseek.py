@@ -87,7 +87,6 @@ class Cmseek(BaseParser):
             elif "_users" in key and value != "disabled":
                 for user in value.split(","):
                     if user:
-                        # TODO: If context is not better used somewhere, we should remove it from database
                         self.create_finding(
                             Credential,
                             linked_finding=True,

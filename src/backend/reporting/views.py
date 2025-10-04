@@ -241,21 +241,25 @@ class ReportingViewSet(BaseViewSet):
                 else serializer.validated_data.get("project").targets.all()
             )
         ):
-            target_filter = {"executions__task__target": target}
+            scope_filter = (
+                {"executions__task": serializer.validated_data.get("task")}
+                if serializer.validated_data.get("task")
+                else {"executions__task__target": target}
+            )
             results["stats_by_target"][target.id] = {severity.name.lower(): 0 for severity in Severity}
             _osint = OSINT.objects.filter(
-                **{**target_filter, **serializer.validated_filter, **serializer.validated_triage_filter}
+                **{**scope_filter, **serializer.validated_filter, **serializer.validated_triage_filter}
             )
             _target_count = _osint.count()
             _findings = {FindingName.OSINT.value: _osint.all(), FindingName.HOST.value: []}
-            for host in Host.objects.filter(**{**target_filter, **serializer.validated_filter}).all():
-                _ports = Port.objects.filter(**{**target_filter, "host": host, **serializer.validated_filter})
+            for host in Host.objects.filter(**{**scope_filter, **serializer.validated_filter}).all():
+                _ports = Port.objects.filter(**{**scope_filter, "host": host, **serializer.validated_filter})
                 _technologies = Technology.objects.filter(
-                    **{**target_filter, "port__host": host, **serializer.validated_filter}
+                    **{**scope_filter, "port__host": host, **serializer.validated_filter}
                 )
                 _credentials = Credential.objects.filter(
                     **{
-                        **target_filter,
+                        **scope_filter,
                         "technology__port__host": host,
                         **serializer.validated_filter,
                         **serializer.validated_triage_filter,
@@ -263,21 +267,13 @@ class ReportingViewSet(BaseViewSet):
                 )
                 _vulnerabilities = (
                     Vulnerability.objects.filter(
-                        **{
-                            **target_filter,
-                            **serializer.validated_filter,
-                            **serializer.validated_triage_filter,
-                        }
+                        **{**scope_filter, **serializer.validated_filter, **serializer.validated_triage_filter}
                     )
                     .filter(Q(technology__port__host=host) | Q(port__host=host))
                     .order_by("-severity")
                 )
                 _exploits = Exploit.objects.filter(
-                    **{
-                        **target_filter,
-                        **serializer.validated_filter,
-                        **serializer.validated_triage_filter,
-                    }
+                    **{**scope_filter, **serializer.validated_filter, **serializer.validated_triage_filter}
                 ).filter(
                     Q(technology__port__host=host)
                     | Q(vulnerability__technology__port__host=host)

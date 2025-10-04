@@ -127,7 +127,10 @@ class CreateReportSerializer(ModelSerializer):
             value = attrs.get(field)
             if value:
                 no_mandatory_field = False
-                # TODO: Why PDF is different?
+                # PDF reports are splitting findings per target in order to structure the final document
+                # That means that it doesn't make sense to create a filter valid to get all the findings together,
+                # as if a project is specified, the generator will need to iterate over the project targets,
+                # and then filter the findings by each target.
                 if attrs.get("format") != ReportFormat.PDF:
                     self.validated_filter[filter_field] = value
                 break

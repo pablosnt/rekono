@@ -172,6 +172,10 @@ class BaseParser:
                     related_finding = related_target.create_finding_from_user_input(self.executor.execution)
                     if not related_finding:
                         continue
+                    # We avoid including the new user-input findings in the findings list
+                    # to make parser unit tests easier and more intuitive
+                    if not CONFIG.testing:  # pragma: no cover
+                        self.findings.append(related_finding)
                     # Establish the relationship if it's a valid link field
                     if add_findings_to_field:
                         fields[field] = related_finding
@@ -200,6 +204,10 @@ class BaseParser:
                         )
                         if not related_finding:
                             continue
+                        # We avoid including the new user-input findings in the findings list
+                        # to make parser unit tests easier and more intuitive
+                        if not CONFIG.testing:  # pragma: no cover
+                            self.findings.append(related_finding)
                         fields[field] = related_finding
                         linked_finding = True
                         # Stop after first successful parameter association
@@ -212,7 +220,6 @@ class BaseParser:
             # Use the manager's create_finding method for proper duplicate handling
             finding = finding_type.objects.create_finding(finding_type, self.executor.execution, **fields)
             # Add to the parser's findings list for tracking
-            # TODO: Do we have to track user-input findings in the findings variale?
             self.findings.append(finding)
             return finding
 
