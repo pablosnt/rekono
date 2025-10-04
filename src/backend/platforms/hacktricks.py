@@ -50,7 +50,6 @@ class HackTricks(BaseIntegration):
         documentation links from the HackTricks sitemap for dynamic matching.
         """
         super().__init__()
-        # TODO: Unit test to ensure all these custom URLs are still alive
         self.services_base_url = f"{self.url}network-services-pentesting/"
         self.web_base_url = f"{self.url}pentesting-web/"
         self.host_type_mapping = {

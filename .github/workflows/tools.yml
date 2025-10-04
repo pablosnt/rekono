@@ -1,11 +1,14 @@
-name: Tools
+# TODO: Rename file to monitor-dependencies.yml. Keep it as it is for now, to execute the workflow before reaching main
+name: Monitor Dependencies
 on:
   workflow_dispatch:
   schedule:
     - cron: '0 0 * * *'
+  # TODO: REMOVE ME:
+  pull_request:
 
 jobs:
-  latest-version:
+  tools:
     runs-on: ubuntu-latest
     container:
       image: kalilinux/kali-last-release:latest
@@ -101,3 +104,32 @@ jobs:
           then
             exit 1
           fi
+
+  hacktricks:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        urls:
+          - https://www.hacktricks.wiki/sitemap.xml
+          - https://book.hacktricks.wiki/en/linux-hardening/privilege-escalation/index.html
+          - https://book.hacktricks.wiki/en/macos-hardening/macos-security-and-privilege-escalation/index.html
+          - https://book.hacktricks.wiki/en/windows-hardening/windows-local-privilege-escalation/index.html
+          - https://book.hacktricks.wiki/en/mobile-pentesting/android-app-pentesting/index.html
+          - https://book.hacktricks.wiki/en/mobile-pentesting/ios-pentesting/index.html
+          - https://book.hacktricks.wiki/en/generic-methodologies-and-resources/pentesting-network/dhcpv6.html
+          - https://book.hacktricks.wiki/en/pentesting-web/sql-injection/index.html
+          - https://book.hacktricks.wiki/en/pentesting-web/sql-injection/mysql-injection/index.html
+          - https://book.hacktricks.wiki/en/pentesting-web/web-vulnerabilities-methodology.html
+          - https://book.hacktricks.wiki/en/windows-hardening/active-directory-methodology/kerberoast.html
+          - https://book.hacktricks.wiki/en/generic-methodologies-and-resources/pentesting-network/network-protocols-explained-esp.html#radius
+          - https://book.hacktricks.wiki/en/pentesting-web/sql-injection/oracle-injection.html
+          - https://book.hacktricks.wiki/en/network-services-pentesting/ipsec-ike-vpn-pentesting.html
+          - https://book.hacktricks.wiki/en/network-services-pentesting/pentesting-mssql-microsoft-sql-server/index.html
+    name: Verify ${{ matrix.url }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Check URL
+        run: if [ "$(curl -s -o /dev/null -w "%{http_code}" ${{ matrix.url }})" -ne 200 ]; then exit 1; fi
