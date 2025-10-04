@@ -60,18 +60,19 @@ class Sslscan(BaseParser):
                     technology = self.create_finding(
                         Technology, name=item.attrib["type"].upper(), version=item.attrib["version"]
                     )
-                    self.technologies.append(technology)
-                    if technology.name != "TLS" or technology.version not in ["1.2", "1.3"]:
-                        self.create_finding(
-                            Vulnerability,
-                            linked_finding=True,
-                            technology=technology,
-                            name=f"Insecure {technology.name} version supported",
-                            description=f"{technology.name} {technology.version} is supported",
-                            severity=Severity.MEDIUM if technology.name == "TLS" else Severity.HIGH,
-                            # CWE-326: Inadequate Encryption Strength
-                            cwe="CWE-326",
-                        )
+                    if technology:
+                        self.technologies.append(technology)
+                        if technology.name != "TLS" or technology.version not in ["1.2", "1.3"]:
+                            self.create_finding(
+                                Vulnerability,
+                                linked_finding=True,
+                                technology=technology,
+                                name=f"Insecure {technology.name} version supported",
+                                description=f"{technology.name} {technology.version} is supported",
+                                severity=Severity.MEDIUM if technology.name == "TLS" else Severity.HIGH,
+                                # CWE-326: Inadequate Encryption Strength
+                                cwe="CWE-326",
+                            )
                 else:
                     for check, fields in [
                         (

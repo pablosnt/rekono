@@ -118,7 +118,7 @@ class Sslyze(BaseParser):
                                         linked_finding=True,
                                         technology=technology,
                                         name="Insecure cipher suite supported",
-                                        description=f"TLS {technology.version} {cs['cipher_suite']['name']}",
+                                        description=f"TLS {technology.version if technology else ''} {cs['cipher_suite']['name']}",
                                         severity=Severity.LOW,
                                         # CWE-326: Inadequate Encryption Strength
                                         cwe="CWE-326",

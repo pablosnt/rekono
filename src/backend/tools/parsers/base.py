@@ -170,6 +170,8 @@ class BaseParser:
                 ):
                     # Create a finding from the user input
                     related_finding = related_target.create_finding_from_user_input(self.executor.execution)
+                    if not related_finding:
+                        continue
                     # Establish the relationship if it's a valid link field
                     if add_findings_to_field:
                         fields[field] = related_finding
@@ -183,19 +185,22 @@ class BaseParser:
             # These need to be associated with ports when creating findings
             if is_port_for_input_parameter and port_for_input_parameter and not linked_finding:
                 # Process technology and vulnerability input parameters
-                for input_parameter_class in [InputTechnology, InputVulnerability]:
+                for input_parameter_class in [InputVulnerability, InputTechnology]:
                     related_parameter = self.executor.targets_used_in_execution.get(input_parameter_class)
                     if not related_parameter:
                         continue
                     # Determine field name for the parameter type
                     # Example: InputTechnology -> "technology", InputVulnerability -> "vulnerability"
-                    field = input_parameter_class.input_type.model_class.__name__.lower()
+                    field = related_parameter.input_type.model_class.__name__.lower()
                     # Create finding from input parameter if it's a valid relationship
                     if self.is_finding_link_field(finding_type, field):
-                        # Create the parameter finding and associate it with the port
-                        fields[field] = related_parameter.create_finding_from_user_input(
+                        #  Create the parameter finding and associate it with the port
+                        related_finding = related_parameter.create_finding_from_user_input(
                             self.executor.execution, port=port_for_input_parameter
                         )
+                        if not related_finding:
+                            continue
+                        fields[field] = related_finding
                         linked_finding = True
                         # Stop after first successful parameter association
                         break
@@ -207,7 +212,7 @@ class BaseParser:
             # Use the manager's create_finding method for proper duplicate handling
             finding = finding_type.objects.create_finding(finding_type, self.executor.execution, **fields)
             # Add to the parser's findings list for tracking
-            # TODO: Do we have to track user-input findings in the variale?
+            # TODO: Do we have to track user-input findings in the findings variale?
             self.findings.append(finding)
             return finding
 
