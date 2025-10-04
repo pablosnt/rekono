@@ -13,6 +13,8 @@ Architecture:
     logic to ensure data consistency and efficient parameter management.
 """
 
+from typing import Any
+
 from django.db import models
 
 from framework.enums import InputKeyword
@@ -62,6 +64,28 @@ class InputTechnology(InputParameter):
         """
         return f"{self.name} - {self.version}" if self.version else self.name
 
+    def create_finding_from_user_input(self, execution: Any, **fields: Any) -> Any | None:
+        """Create a Technology finding from user input technology parameter.
+
+        Creates a Technology finding associated with a port when user input
+        technology parameters are used in execution context.
+
+        Args:
+            execution (Any): The execution context for the finding
+            **fields (Any): Additional fields including port information
+
+        Returns:
+            Any | None: Created Technology finding or None if no port specified
+        """
+        from findings.models import Technology
+
+        if "port" in fields:
+            return Technology.objects.create_finding(
+                Technology,
+                execution,
+                **{**fields, "name": self.name, "version": self.version, "created_from_user_input": True},
+            )
+
 
 class InputVulnerability(InputParameter):
     """Model representing vulnerability parameters for security tool execution.
@@ -101,3 +125,25 @@ class InputVulnerability(InputParameter):
             str: The CVE identifier
         """
         return self.cve
+
+    def create_finding_from_user_input(self, execution: Any, **fields: Any) -> Any | None:
+        """Create a Vulnerability finding from user input vulnerability parameter.
+
+        Creates a Vulnerability finding associated with a port when user input
+        vulnerability parameters are used in execution context.
+
+        Args:
+            execution (Any): The execution context for the finding
+            **fields (Any): Additional fields including port information
+
+        Returns:
+            Any | None: Created Vulnerability finding or None if no port specified
+        """
+        from findings.models import Vulnerability
+
+        if "port" in fields:
+            return Vulnerability.objects.create_finding(
+                Vulnerability,
+                execution,
+                **{**fields, "name": self.cve, "cve": self.cve, "created_from_user_input": True},
+            )

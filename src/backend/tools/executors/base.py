@@ -9,8 +9,10 @@ import os
 import re
 import subprocess
 import uuid
+from functools import cached_property
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlparse
 
 from django.forms.models import model_to_dict
 from django.utils import timezone
@@ -60,6 +62,10 @@ class BaseExecutor(LoggingEntity):
     findings_used_in_execution = {}
     targets_used_in_execution = {}
     authentication = None
+    # This will save the port included in URL or TARGET parameters
+    # so, we have the scanned port independently of its source, i.e.
+    # port found in previous execution, target port or default URL port
+    port_from_arguments = None
 
     def __init__(self, execution: Execution) -> None:
         """Initialize the executor with execution context and configuration.
@@ -81,6 +87,22 @@ class BaseExecutor(LoggingEntity):
             getattr(CONFIG, self.execution.configuration.tool.run_directory_property.lower())
             if self.execution.configuration.tool.run_directory_property
             else None
+        )
+
+    @cached_property
+    def scanned_port(self) -> int | None:
+        """Get the port that is being scanned by this execution.
+
+        Determines the port being scanned by prioritizing ports extracted from
+        execution arguments over the tool's default scanned port configuration.
+
+        Returns:
+            int | None: The port number being scanned, or None if not applicable
+        """
+        return (
+            self.port_from_arguments
+            if self.port_from_arguments is not None
+            else self.execution.configuration.default_scanned_port
         )
 
     def get_arguments(
@@ -176,7 +198,7 @@ class BaseExecutor(LoggingEntity):
                     # Apply input-specific filtering to ensure compatibility with tool requirements
                     if base_input.filter(argument_input, self.execution.task.target):
                         # Parse the input data and accumulate results
-                        parsed_data = base_input.parse(parsed_data)
+                        parsed_data = base_input.parse(self.execution.task.target, parsed_data)
                         # Track which inputs are being used for this execution
                         if is_fallback:
                             self.targets_used_in_execution[base_input.__class__] = base_input
@@ -192,6 +214,18 @@ class BaseExecutor(LoggingEntity):
                 if parsed_data:
                     break
             if parsed_data:
+                if InputKeyword.URL.name.lower() in parsed_data or InputKeyword.TARGET.name.lower() in parsed_data:
+                    try:
+                        parse = urlparse(
+                            parsed_data.get(
+                                InputKeyword.URL.name.lower(),
+                                f"https://{parsed_data.get(InputKeyword.TARGET.name.lower(), '')}",
+                            )
+                        )
+                        if parse and parse.port and self.port_from_arguments is None:
+                            self.port_from_arguments = parse.port
+                    except Exception:
+                        pass
                 # Special handling for HTTP headers - format each header individually then join
                 if InputKeyword.HEADERS.name.lower() in parsed_data:
                     parameters[argument.name] = " ".join(

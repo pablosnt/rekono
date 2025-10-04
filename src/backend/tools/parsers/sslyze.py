@@ -26,7 +26,9 @@ class Sslyze(BaseParser):
     protocol_versions = {"ssl": ["2.0", "3.0"], "tls": ["1.0", "1.1", "1.2", "1.3"]}
     generic_tech: Technology | None = None
 
-    def create_finding(self, finding_type: type[Finding], **fields: Any) -> Finding:
+    def create_finding(
+        self, finding_type: type[Finding], linked_finding: bool = False, **fields: Any
+    ) -> Finding | None:
         """Create findings with automatic TLS technology association.
 
         Args:
@@ -40,7 +42,8 @@ class Sslyze(BaseParser):
             if not self.generic_tech:
                 self.generic_tech = super().create_finding(Technology, name="Generic TLS")
             fields["technology"] = self.generic_tech
-        return super().create_finding(finding_type, **fields)
+            linked_finding = True
+        return super().create_finding(finding_type, linked_finding, **fields)
 
     def _parse(self) -> None:
         """Parse SSLyze JSON output and extract SSL/TLS security findings.
@@ -112,9 +115,10 @@ class Sslyze(BaseParser):
                                 if "_RC4_" in cs["cipher_suite"]["name"]:
                                     self.create_finding(
                                         Vulnerability,
+                                        linked_finding=True,
                                         technology=technology,
                                         name="Insecure cipher suite supported",
-                                        description=f"TLS {technology.version} {cs['cipher_suite']['name']}",
+                                        description=f"TLS {technology.version if technology else ''} {cs['cipher_suite']['name']}",
                                         severity=Severity.LOW,
                                         # CWE-326: Inadequate Encryption Strength
                                         cwe="CWE-326",
@@ -122,6 +126,7 @@ class Sslyze(BaseParser):
                         if protocol.lower() == "ssl" or version not in ["1.2", "1.3"]:
                             self.create_finding(
                                 Vulnerability,
+                                linked_finding=True,
                                 technology=technology,
                                 name=f"Insecure {protocol.upper()} version supported",
                                 description=f"{protocol.upper()} {version} is supported",
@@ -133,6 +138,7 @@ class Sslyze(BaseParser):
                 if not deploy["leaf_certificate_subject_matches_hostname"]:
                     self.create_finding(
                         Vulnerability,
+                        linked_finding=self.generic_tech is not None,
                         technology=self.generic_tech,
                         name="Certificate subject error",
                         description="Certificate subject doesn't match hostname",

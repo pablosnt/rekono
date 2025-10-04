@@ -409,6 +409,8 @@ class DefectDojo(BaseIntegration):
         else:
             test_id = None
             for finding in findings:
+                if finding.created_from_user_input:
+                    continue
                 if isinstance(finding, Path) and finding.type == PathType.ENDPOINT:
                     # TODO: They won't be imported again? So, it will be different to import from file?
                     # Is it for being an endpoint instead of a finding?

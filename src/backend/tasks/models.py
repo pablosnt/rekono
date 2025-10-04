@@ -13,6 +13,7 @@ from parameters.models import InputTechnology, InputVulnerability
 from processes.models import Process
 from rekono.settings import AUTH_USER_MODEL
 from security.validators.input_validator import FutureDatetimeValidator
+from target_ports.models import TargetPort
 from targets.models import Target
 from tasks.enums import TimeUnit
 from tools.enums import Intensity
@@ -41,6 +42,7 @@ class Task(BaseModel):
         enqueued_at (DateTimeField): When task was queued for execution (optional)
         start (DateTimeField): Task execution start time (optional)
         end (DateTimeField): Task execution completion time (optional)
+        target_port (ForeignKey): Specific target port for task execution (optional)
         wordlists (ManyToManyField): Wordlists to use during execution
         input_technologies (ManyToManyField): Technology inputs for tool execution
         input_vulnerabilities (ManyToManyField): Vulnerability inputs for tool execution
@@ -87,6 +89,7 @@ class Task(BaseModel):
     enqueued_at = models.DateTimeField(blank=True, null=True)
     start = models.DateTimeField(blank=True, null=True)
     end = models.DateTimeField(blank=True, null=True)
+    target_port = models.ForeignKey(TargetPort, related_name="tasks", on_delete=models.SET_NULL, blank=True, null=True)
     wordlists = models.ManyToManyField(Wordlist, related_name="tasks", blank=True)
     input_technologies = models.ManyToManyField(InputTechnology, related_name="tasks", blank=True)
     input_vulnerabilities = models.ManyToManyField(InputVulnerability, related_name="tasks", blank=True)

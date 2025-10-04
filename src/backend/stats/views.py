@@ -187,8 +187,9 @@ class LatestHostsViewSet(LatestViewSet):
 class LatestVulnerabilitiesViewSet(LatestViewSet):
     """ViewSet for retrieving latest vulnerability statistics.
 
-    Provides the most recently discovered vulnerabilities that are unfixed
-    and not marked as false positives, with latest execution timestamps.
+    Provides the most recently discovered vulnerabilities that are unfixed,
+    not marked as false positives, and not created from user input, with
+    latest execution timestamps.
 
     Attributes:
         queryset: Active vulnerabilities with latest execution annotations
@@ -198,7 +199,7 @@ class LatestVulnerabilitiesViewSet(LatestViewSet):
     """
 
     queryset = (
-        Vulnerability.objects.filter(is_fixed=False)
+        Vulnerability.objects.filter(is_fixed=False, created_from_user_input=False)
         .exclude(triage_status=TriageStatus.FALSE_POSITIVE)
         .annotate(latest=Max("executions__start"))
     )
@@ -235,7 +236,8 @@ class TopProjectsViewSet(LatestViewSet):
                 "targets__tasks__executions__vulnerability",
                 distinct=True,
                 filter=~Q(targets__tasks__executions__vulnerability__triage_status=TriageStatus.FALSE_POSITIVE)
-                & Q(targets__tasks__executions__vulnerability__is_fixed=False),
+                & Q(targets__tasks__executions__vulnerability__is_fixed=False)
+                & Q(targets__tasks__executions__vulnerability__created_from_user_input=False),
             )
         )
     )
@@ -286,7 +288,7 @@ class HostVulnerabilitiesStatsViewSet(StatsViewSet):
             open=Subquery(
                 Vulnerability.objects.exclude(triage_status=TriageStatus.FALSE_POSITIVE)
                 .filter(Q(port__host__pk=OuterRef("pk")) | Q(technology__port__host__pk=OuterRef("pk")))
-                .filter(is_fixed=False)
+                .filter(is_fixed=False, created_from_user_input=False)
                 .annotate(count=Func(F("id"), function="Count"))
                 .values("count")
             )
@@ -295,7 +297,7 @@ class HostVulnerabilitiesStatsViewSet(StatsViewSet):
             fixed=Subquery(
                 Vulnerability.objects.exclude(triage_status=TriageStatus.FALSE_POSITIVE)
                 .filter(Q(port__host=OuterRef("pk")) | Q(technology__port__host=OuterRef("pk")))
-                .filter(is_fixed=True)
+                .filter(is_fixed=True, created_from_user_input=False)
                 .annotate(count=Func(F("id"), function="Count"))
                 .values("count")
             )
@@ -303,7 +305,7 @@ class HostVulnerabilitiesStatsViewSet(StatsViewSet):
         .annotate(
             **{
                 severity.name.lower(): Subquery(
-                    Vulnerability.objects.exclude(is_fixed=True)
+                    Vulnerability.objects.filter(is_fixed=False, created_from_user_input=False)
                     .exclude(triage_status=TriageStatus.FALSE_POSITIVE)
                     .filter(Q(port__host=OuterRef("pk")) | Q(technology__port__host=OuterRef("pk")))
                     .filter(severity=severity)
@@ -378,7 +380,11 @@ class TechnologyStatsViewSet(StatsViewSet):
         filterset_class: Technology filtering capabilities
     """
 
-    queryset = Technology.objects.filter(is_fixed=False).values("name").annotate(count=Count("name"))
+    queryset = (
+        Technology.objects.filter(is_fixed=False, created_from_user_input=False)
+        .values("name")
+        .annotate(count=Count("name"))
+    )
     ordering = ["-count", "name"]
     serializer_class = TechnologyStatsSerializer
     filterset_class = TechnologyFilter
@@ -398,9 +404,9 @@ class VulnerabilityTrendingStatsViewSet(StatsViewSet):
     """
 
     queryset = (
-        Vulnerability.objects.exclude(triage_status=TriageStatus.FALSE_POSITIVE)
+        Vulnerability.objects.filter(trending=True, created_from_user_input=False)
+        .exclude(triage_status=TriageStatus.FALSE_POSITIVE)
         .exclude(triage_status=TriageStatus.WONT_FIX)
-        .filter(trending=True)
         .exclude(cve=None)
         .annotate(link=Max("reference"))
         .annotate(severity_value=Max("severity"))
@@ -427,7 +433,8 @@ class VulnerabilityCVEStatsViewSet(StatsViewSet):
     """
 
     queryset = (
-        Vulnerability.objects.exclude(triage_status=TriageStatus.FALSE_POSITIVE)
+        Vulnerability.objects.filter(created_from_user_input=False)
+        .exclude(triage_status=TriageStatus.FALSE_POSITIVE)
         .exclude(triage_status=TriageStatus.WONT_FIX)
         .exclude(cve=None)
         .annotate(link=Max("reference"))
@@ -455,7 +462,8 @@ class VulnerabilityCWEStatsViewSet(StatsViewSet):
     """
 
     queryset = (
-        Vulnerability.objects.exclude(triage_status=TriageStatus.FALSE_POSITIVE)
+        Vulnerability.objects.filter(created_from_user_input=False)
+        .exclude(triage_status=TriageStatus.FALSE_POSITIVE)
         .exclude(triage_status=TriageStatus.WONT_FIX)
         .exclude(cwe=None)
         .values("cwe")
@@ -482,7 +490,8 @@ class VulnerabilitySeverityStatsViewSet(StatsViewSet):
     """
 
     queryset = (
-        Vulnerability.objects.exclude(triage_status=TriageStatus.FALSE_POSITIVE)
+        Vulnerability.objects.filter(created_from_user_input=False)
+        .exclude(triage_status=TriageStatus.FALSE_POSITIVE)
         .exclude(triage_status=TriageStatus.WONT_FIX)
         .values("severity")
         .annotate(open=Count("severity", filter=Q(is_fixed=False)))
@@ -509,7 +518,8 @@ class VulnerabilityEvolutionStatsViewSet(StatsViewSet):
     """
 
     queryset = (
-        Vulnerability.objects.exclude(triage_status=TriageStatus.FALSE_POSITIVE)
+        Vulnerability.objects.filter(created_from_user_input=False)
+        .exclude(triage_status=TriageStatus.FALSE_POSITIVE)
         .prefetch_related("executions")
         .annotate(date=TruncDate("executions__start"))
         .values("date", "severity")
@@ -535,7 +545,8 @@ class VulnerabilityStatusStatsViewSet(StatsViewSet):
     """
 
     queryset = (
-        Vulnerability.objects.exclude(triage_status=TriageStatus.FALSE_POSITIVE)
+        Vulnerability.objects.filter(created_from_user_input=False)
+        .exclude(triage_status=TriageStatus.FALSE_POSITIVE)
         .exclude(triage_status=TriageStatus.WONT_FIX)
         .values("is_fixed")
         .annotate(count=Count("id", distinct=True))
@@ -561,7 +572,8 @@ class VulnerabilityStatusPerServerityStatsViewSet(StatsViewSet):
     """
 
     queryset = (
-        Vulnerability.objects.exclude(triage_status=TriageStatus.FALSE_POSITIVE)
+        Vulnerability.objects.filter(created_from_user_input=False)
+        .exclude(triage_status=TriageStatus.FALSE_POSITIVE)
         .exclude(triage_status=TriageStatus.WONT_FIX)
         .values("severity")
         .annotate(open=Count("id", distinct=True, filter=Q(is_fixed=False)))
@@ -588,7 +600,8 @@ class TriagingStatsViewSet(StatsViewSet):
     """
 
     queryset = (
-        OSINT.objects.values("triage_status")
+        OSINT.objects.filter(created_from_user_input=False)
+        .values("triage_status")
         .annotate(open=Count("id", distinct=True, filter=Q(is_fixed=False)))
         .annotate(fixed=Count("id", distinct=True, filter=Q(is_fixed=True)))
     )
@@ -619,7 +632,8 @@ class TriagingStatsViewSet(StatsViewSet):
         ]:
             self.filterset_class = filterset_class
             new_queryset = super().filter_queryset(
-                model.objects.values("triage_status")
+                model.objects.filter(created_from_user_input=False)
+                .values("triage_status")
                 .annotate(open=Count("id", distinct=True, filter=Q(is_fixed=False)))
                 .annotate(fixed=Count("id", distinct=True, filter=Q(is_fixed=True)))
             )

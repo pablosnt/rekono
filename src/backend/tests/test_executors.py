@@ -23,7 +23,7 @@ from wordlists.models import Wordlist
 # pytype: disable=attribute-error
 
 
-def get_url(self, host: str, port: int | None = None, endpoint: str | None = None, *args: Any) -> str:
+def get_url(self, target: Any, host: str, port: int | None = None, endpoint: str | None = None, *args: Any) -> str:
     return f"http://{host}" + (f":{port}" if port else "") + (endpoint or "/")
 
 

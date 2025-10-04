@@ -25,7 +25,9 @@ class Sslscan(BaseParser):
 
     technologies: list[Technology] = []
 
-    def create_finding(self, finding_type: type[Finding], **fields: Any) -> Finding:
+    def create_finding(
+        self, finding_type: type[Finding], linked_finding: bool = False, **fields: Any
+    ) -> Finding | None:
         """Create findings with automatic SSL/TLS technology association.
 
         Args:
@@ -33,13 +35,15 @@ class Sslscan(BaseParser):
             **fields (Any): Field values for the finding
 
         Returns:
-            Finding: Created finding instance with technology association
+            Finding | None: Created finding instance with technology association
         """
         if finding_type == Vulnerability and not fields.get("technology") and fields.get("sslversion"):
             search = [t for t in self.technologies if f"{t.name}v{t.version}" == fields.get("sslversion")]
-            fields["technology"] = search[0] if search else None
+            if search:
+                fields["technology"] = search[0]
+                linked_finding = True
             fields.pop("sslversion")
-        return super().create_finding(finding_type, **fields)
+        return super().create_finding(finding_type, linked_finding, **fields)
 
     def _parse(self) -> None:
         """Parse SSLScan XML output and extract SSL/TLS security findings.
@@ -56,17 +60,19 @@ class Sslscan(BaseParser):
                     technology = self.create_finding(
                         Technology, name=item.attrib["type"].upper(), version=item.attrib["version"]
                     )
-                    self.technologies.append(technology)
-                    if technology.name != "TLS" or technology.version not in ["1.2", "1.3"]:
-                        self.create_finding(
-                            Vulnerability,
-                            technology=technology,
-                            name=f"Insecure {technology.name} version supported",
-                            description=f"{technology.name} {technology.version} is supported",
-                            severity=Severity.MEDIUM if technology.name == "TLS" else Severity.HIGH,
-                            # CWE-326: Inadequate Encryption Strength
-                            cwe="CWE-326",
-                        )
+                    if technology:
+                        self.technologies.append(technology)
+                        if technology.name != "TLS" or technology.version not in ["1.2", "1.3"]:
+                            self.create_finding(
+                                Vulnerability,
+                                linked_finding=True,
+                                technology=technology,
+                                name=f"Insecure {technology.name} version supported",
+                                description=f"{technology.name} {technology.version} is supported",
+                                severity=Severity.MEDIUM if technology.name == "TLS" else Severity.HIGH,
+                                # CWE-326: Inadequate Encryption Strength
+                                cwe="CWE-326",
+                            )
                 else:
                     for check, fields in [
                         (

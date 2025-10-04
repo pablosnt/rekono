@@ -201,7 +201,7 @@ class BaseInput(BaseModel):
             ]
             _parse_mapping = {
                 InputKeyword.PORT: "port",
-                InputKeyword.TARGET: lambda instance: f"{instance.host}:{instance.port}"
+                InputKeyword.TARGET: lambda instance, target: f"{instance.host}:{instance.port}"
             }
         ```
     """
@@ -318,6 +318,7 @@ class BaseInput(BaseModel):
 
     def get_url(
         self,
+        target: Any,
         host: str,
         port: int | None = None,
         endpoint: str | None = None,
@@ -326,10 +327,11 @@ class BaseInput(BaseModel):
         """Construct and validate a URL with automatic protocol detection.
 
         Attempts to construct a valid URL by testing different protocols and
-        validating connectivity. Returns the first working URL or None if
-        no valid URL can be constructed.
+        validating connectivity. Enhanced with target context to use target
+        ports when no specific port is provided.
 
         Args:
+            target (Any): Target context containing port information
             host (str): The hostname or IP address.
             port (int | None): The port number (optional).
             endpoint (str | None): The endpoint path (optional).
@@ -338,26 +340,43 @@ class BaseInput(BaseModel):
         Returns:
             str | None: A valid URL string or None if no working URL found.
         """
+        # Disable SSL warnings since we're testing connectivity with disabled certificate verification
         urllib3.disable_warnings(category=urllib3.exceptions.InsecureRequestWarning)
+
+        # Normalize endpoint parameter: ensure it doesn't start with '/' to avoid double slashes in URL
         if endpoint is None:
             endpoint = ""
         elif endpoint.startswith("/"):
+            # Remove leading slash since we'll add it in the schema template
             endpoint = endpoint[1:]
-        schema = "{protocol}://{host}/{endpoint}"
-        if port:
-            schema = "{protocol}://{host}:{port}/{endpoint}"  # Include port schema if port exists
-            if port == 80:
-                protocols = ["http"]
-            elif port == 443:
-                protocols = ["https"]
-        for protocol in protocols:  # For each protocol
-            url_to_test = schema.format(protocol=protocol, host=host, port=port, endpoint=endpoint)
-            try:
-                # nosemgrep: python.requests.security.disabled-cert-validation.disabled-cert-validation
-                requests.get(url_to_test, timeout=5, verify=False)
-                return url_to_test
-            except Exception:
-                continue
+        # Define URL schema template with placeholders for dynamic components
+        schema = "{protocol}://{host}:{port}/{endpoint}"
+        # Determine which ports to test based on input parameters
+        ports = (
+            [port]
+            if port
+            # If no port specified, try to use target ports, otherwise default to common web ports
+            else ([tp.port for tp in target.target_ports.all()] if target.target_ports.exists() else [80, 443])
+        )
+        # Test all combinations of ports and protocols to find a working URL
+        for port in ports:
+            for protocol in protocols:
+                # Skip invalid protocol/port combinations to avoid unnecessary requests
+                # Don't try HTTPS on port 80 or HTTP on port 443 when both protocols are available
+                if len(protocols) > 1 and (port == 80 and protocol == "https") or (port == 443 and protocol == "http"):
+                    continue
+                # Construct the URL using the current protocol/port combination
+                url_to_test = schema.format(protocol=protocol, host=host, port=port, endpoint=endpoint)
+                try:
+                    # Attempt to connect to the URL to verify it's accessible
+                    # Use disabled SSL verification for testing purposes and short timeout for efficiency
+                    # nosemgrep: python.requests.security.disabled-cert-validation.disabled-cert-validation
+                    requests.get(url_to_test, timeout=5, verify=False)
+                    # If the request succeeds, return this working URL
+                    return url_to_test
+                except Exception:
+                    # If connection fails, try the next protocol/port combination
+                    continue
 
     def filter(self, argument_input: Any, target: Any = None) -> bool:
         """Apply complex filtering logic based on tool argument requirements.
@@ -411,14 +430,15 @@ class BaseInput(BaseModel):
             conclusion = conclusion and filter_conclusion
         return conclusion
 
-    def parse(self, accumulated: dict[str, Any] = {}) -> dict[str, Any]:
+    def parse(self, target: Any, accumulated: dict[str, Any] = {}) -> dict[str, Any]:
         """Parse input data into a format suitable for tool execution.
 
         Processes the input data according to the configured parse mapping,
-        handling dependencies and accumulation strategies. Supports various
-        data types including lists, dictionaries, and scalar values.
+        handling dependencies and accumulation strategies. Enhanced with target
+        context for improved URL generation.
 
         Args:
+            target (Any): Target context for parsing (e.g., for URL generation)
             accumulated (dict[str, Any]): Previously accumulated parsing data.
 
         Returns:
@@ -448,7 +468,7 @@ class BaseInput(BaseModel):
             value = (
                 getattr(self, field_or_function)
                 if isinstance(field_or_function, str) and hasattr(self, field_or_function)
-                else (field_or_function(self) if isinstance(field_or_function, Callable) else field_or_function)
+                else (field_or_function(self, target) if callable(field_or_function) else field_or_function)
             )
             # Ensure we always have a string value (empty string if None)
             if value is None:
@@ -468,6 +488,22 @@ class BaseInput(BaseModel):
             # Default case: assign value directly
             result[key] = value
         return result
+
+    def create_finding_from_user_input(self, execution: Any, **fields: Any) -> Any | None:
+        """Create a finding from user input parameters.
+
+        Override this method in subclasses to create specific finding types
+        from user input parameters. Used for establishing relationships between
+        user-provided data and tool execution findings.
+
+        Args:
+            execution (Any): The execution context for the finding
+            **fields (Any): Additional fields for the finding
+
+        Returns:
+            Any | None: Created finding instance or None if not applicable
+        """
+        return None  # pragma: no cover
 
 
 class BaseLike(BaseModel):

@@ -8,6 +8,7 @@ integration.
 import ipaddress
 import re
 import socket
+from typing import Any
 
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -53,7 +54,7 @@ class Target(BaseInput):
     _parse_mapping = {
         InputKeyword.TARGET: "target",
         InputKeyword.HOST: "target",
-        InputKeyword.URL: lambda instance: instance.get_url(instance.target),
+        InputKeyword.URL: lambda instance, target: instance.get_url(target, instance.target),
     }
     _project_field = "project"
 
@@ -130,3 +131,28 @@ class Target(BaseInput):
             str: Target specification string
         """
         return self.target
+
+    def create_finding_from_user_input(self, execution: Any, **fields: Any) -> Any | None:
+        """Create a Host finding from this target user input.
+
+        Creates a Host finding when user input targets are used in execution context.
+        Handles different target types by performing appropriate resolution and
+        field mapping for domain and IP address targets.
+
+        Args:
+            execution (Any): The execution context for the finding
+            **fields (Any): Additional fields for the finding
+
+        Returns:
+            Any | None: Created Host finding or None if target type not supported
+        """
+        from findings.models import Host
+
+        if self.type == TargetType.DOMAIN:
+            fields["ip"] = socket.gethostbyname(self.target.target)
+            fields["domain"] = self.target
+        elif self.type in [TargetType.PRIVATE_IP, TargetType.PUBLIC_IP]:
+            fields["ip"] = self.target
+        else:
+            return None
+        return Host.objects.create_finding(Host, execution, **{**fields, "created_from_user_input": True})

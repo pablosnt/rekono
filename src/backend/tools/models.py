@@ -28,6 +28,7 @@ from functools import cached_property
 from pathlib import Path
 from typing import Any
 
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
 from framework.models import BaseLike, BaseModel
@@ -257,6 +258,7 @@ class Configuration(BaseModel):
         arguments (TextField): Additional command-line arguments (max 250 chars)
         stage (IntegerField): Execution stage from Stage enum
         default (BooleanField): Whether this is the default configuration for the tool
+        default_scanned_port (IntegerField): Default port to scan (0-65535, optional)
 
     Example:
         Create a tool configuration:
@@ -277,6 +279,9 @@ class Configuration(BaseModel):
     arguments = models.TextField(max_length=250, default="", blank=True)
     stage = models.IntegerField(choices=Stage.choices)
     default = models.BooleanField(default=False)
+    default_scanned_port = models.IntegerField(
+        validators=[MinValueValidator(0), MaxValueValidator(65535)], blank=True, null=True
+    )
 
     class Meta:
         """Meta configuration for the Configuration model.

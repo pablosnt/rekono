@@ -163,6 +163,7 @@ class Alert(BaseModel):
         Evaluates whether a finding should trigger this alert based on:
         - Finding type matches alert item type
         - Finding is not fixed or marked as false positive
+        - Finding is not created from user input
         - Alert mode conditions are met (NEW/FILTER/MONITOR)
         - Custom filter functions pass (if defined)
 
@@ -176,9 +177,11 @@ class Alert(BaseModel):
         _mode = AlertMode(self.mode)
         data = self.mapping[AlertItem(self.item)]
         # Check if the finding is of the correct model type, is not fixed,
-        # is not a false positive, and passes any custom filter (if present).
+        # is not created from user input, is not a false positive, and
+        # passes any custom filter (if present).
         if (
-            not isinstance(finding, data["model"])
+            finding.created_from_user_input
+            or not isinstance(finding, data["model"])
             or finding.is_fixed
             or (hasattr(finding, "triage_status") and finding.triage_status == TriageStatus.FALSE_POSITIVE)
             or not data.get(_mode)

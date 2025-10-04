@@ -129,13 +129,50 @@ class FindingManager(Manager):
         finding.save(update_fields=["is_fixed", "auto_fixed", "fixed_date", "fixed_by"])
         return finding
 
+    def create_finding(self, finding_type: type[BaseInput], execution: Execution, **fields: Any) -> Any:
+        """Create or update a finding with duplicate prevention and user input handling.
+
+        Creates a new finding or updates an existing one based on unique fields and target.
+
+        Args:
+            finding_type (type[BaseInput]): The finding class to create
+            execution (Execution): The execution context for this finding
+            **fields (Any): Field values for the finding
+
+        Returns:
+            Any: The created or updated finding instance
+        """
+        # Check if a finding with the same unique characteristics already exists for this target
+        # This prevents duplicate findings while allowing updates to existing ones
+        unique_finding = finding_type.objects.filter(
+            **{
+                **{f: fields.get(f) for f in finding_type.unique_fields},
+                "executions__task__target": execution.task.target,
+            }
+        )
+        if unique_finding.exists():
+            # Update existing finding with new field values
+            finding = unique_finding.first()
+            for field, value in fields.items():
+                if finding.created_from_user_input is False and field == "created_from_user_input":
+                    continue
+                setattr(finding, field, value)
+            finding.save(update_fields=fields.keys())
+        else:
+            # Create new finding if no duplicate exists
+            finding = finding_type.objects.create(**fields)
+        # Associate this finding with the current execution for tracking
+        finding.executions.add(execution)
+        return finding
+
 
 class Finding(BaseInput):
     """Abstract base model for all security findings.
 
     Provides common functionality for all finding types including fixing status
     tracking, DefectDojo integration, relationship management, and automatic
-    lifecycle operations with execution history.
+    lifecycle operations with execution history. Enhanced with user input tracking
+    for distinguishing between tool-discovered and user-input-based findings.
 
     Attributes:
         executions (ManyToManyField): Related executions that discovered this finding.
@@ -145,6 +182,7 @@ class Finding(BaseInput):
         fixed_by (ForeignKey): User who fixed the finding (optional).
         defectdojo_id (IntegerField): DefectDojo platform identifier (optional).
         hacktricks_link (TextField): HackTricks documentation link (optional, max 300 chars).
+        created_from_user_input (BooleanField): Whether finding was created based on an user input (default: False).
     """
 
     executions = ManyToManyField(Execution, related_name="%(class)s")
@@ -154,6 +192,7 @@ class Finding(BaseInput):
     fixed_by = ForeignKey(AUTH_USER_MODEL, related_name="fixed_%(class)s", on_delete=SET_NULL, blank=True, null=True)
     defectdojo_id = IntegerField(blank=True, null=True)
     hacktricks_link = TextField(max_length=300, blank=True, null=True)
+    created_from_user_input = BooleanField(default=False)
 
     objects = FindingManager()
     unique_fields: list[str] = []

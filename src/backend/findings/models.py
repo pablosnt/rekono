@@ -58,7 +58,7 @@ class OSINT(TriageFinding):
     _parse_mapping = {
         InputKeyword.TARGET: "data",
         InputKeyword.HOST: "data",
-        InputKeyword.URL: lambda instance: instance.get_url(instance.data),
+        InputKeyword.URL: lambda instance, target: instance.get_url(target, instance.data),
     }
     _defectdojo_finding_mapping = {
         "title": lambda instance: f"{instance.data_type} found using OSINT techniques",
@@ -68,19 +68,20 @@ class OSINT(TriageFinding):
         "severity": Severity.MEDIUM,
     }
 
-    def parse(self, accumulated: dict[str, Any] = {}) -> dict[str, Any]:
+    def parse(self, target: Any, accumulated: dict[str, Any] = {}) -> dict[str, Any]:
         """Parse OSINT data for tool execution input.
 
         Processes IP and Domain OSINT data types for use as tool execution
         targets, filtering out non-targetable data types.
 
         Args:
+            target (Any): Target context for parsing
             accumulated (dict[str, Any]): Previously accumulated parsing data.
 
         Returns:
             dict[str, Any]: Parsed data for target creation, empty for non-targetable types.
         """
-        return super().parse(accumulated) if self.data_type in [OSINTDataType.IP, OSINTDataType.DOMAIN] else {}
+        return super().parse(target, accumulated) if self.data_type in [OSINTDataType.IP, OSINTDataType.DOMAIN] else {}
 
 
 class Host(Finding):
@@ -134,7 +135,7 @@ class Host(Finding):
     _parse_mapping = {
         InputKeyword.TARGET: "ip",
         InputKeyword.HOST: "ip",
-        InputKeyword.URL: lambda instance: instance.get_url(instance.ip),
+        InputKeyword.URL: lambda instance, target: instance.get_url(target, instance.ip),
     }
     _defectdojo_finding_mapping = {
         "title": "Host discovered",
@@ -195,7 +196,8 @@ class Port(Finding):
     service = models.TextField(max_length=50, blank=True, null=True)
 
     unique_fields = ["host", "port", "protocol"]
-    _parse_mapping = {InputKeyword.PORT: "port", InputKeyword.PORTS: lambda instance: [instance.port]}
+    # _parse_dependencies is not used to avoid recalculation of URLs
+    _parse_mapping = {InputKeyword.PORT: "port", InputKeyword.PORTS: lambda instance, target: [instance.port]}
     _defectdojo_finding_mapping = {
         "title": "Port discovered",
         "description": lambda instance: "\n".join(
@@ -218,19 +220,20 @@ class Port(Finding):
         Finding.Filter(str, "service", contains=True, processor=lambda s: s.lower()),
     ]
 
-    def parse(self, accumulated: dict[str, Any] = {}) -> dict[str, Any]:
+    def parse(self, target: Any, accumulated: dict[str, Any] = {}) -> dict[str, Any]:
         """Parse port data for tool execution targeting.
 
         Generates target specifications combining host and port information
         for detailed service-specific security analysis.
 
         Args:
+            target (Any): Target context for parsing
             accumulated (dict[str, Any]): Previously accumulated parsing data.
 
         Returns:
             dict[str, Any]: Port-specific target data including host:port combinations.
         """
-        output = super().parse(accumulated)
+        output = super().parse(target, accumulated)
         output[InputKeyword.PORTS_COMMAS.name.lower()] = ",".join(
             [str(p) for p in output.get(InputKeyword.PORTS.name.lower()) or []]
         )
@@ -239,7 +242,7 @@ class Port(Finding):
                 {
                     InputKeyword.TARGET.name.lower(): f"{self.host.ip}:{self.port}",
                     InputKeyword.HOST.name.lower(): self.host.ip,
-                    InputKeyword.URL.name.lower(): self.get_url(self.host.ip, self.port),
+                    InputKeyword.URL.name.lower(): self.get_url(target, self.host.ip, self.port),
                 }
             )
         return output
@@ -289,9 +292,9 @@ class Path(Finding):
         Finding.Filter(str, "path", contains=True, processor=lambda p: p.lower()),
     ]
     _parse_mapping = {
-        InputKeyword.ENDPOINT: lambda instance: instance.clean_path(instance.path),
-        InputKeyword.URL: lambda instance: instance.get_url(
-            instance.port.host.ip, instance.port.port, instance.clean_path(instance.path)
+        InputKeyword.ENDPOINT: lambda instance, target: instance.clean_path(instance.path),
+        InputKeyword.URL: lambda instance, target: (
+            instance.get_url(target, instance.port.host.ip, instance.port.port, instance.clean_path(instance.path))
         )
         if instance.port and instance.port.host
         else None,
