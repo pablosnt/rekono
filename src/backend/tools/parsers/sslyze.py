@@ -26,7 +26,9 @@ class Sslyze(BaseParser):
     protocol_versions = {"ssl": ["2.0", "3.0"], "tls": ["1.0", "1.1", "1.2", "1.3"]}
     generic_tech: Technology | None = None
 
-    def create_finding(self, finding_type: type[Finding], linked_finding: bool = False, **fields: Any) -> Finding:
+    def create_finding(
+        self, finding_type: type[Finding], linked_finding: bool = False, **fields: Any
+    ) -> Finding | None:
         """Create findings with automatic TLS technology association.
 
         Args:

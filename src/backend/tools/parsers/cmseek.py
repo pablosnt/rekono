@@ -43,6 +43,8 @@ class Cmseek(BaseParser):
             description="CMS",
             reference=(data.get("cms_url", "").strip() if data.get("cms_url") else None),
         )
+        if not cms:
+            return
         for key, value in data.items():
             if key in [
                 "cms_id",

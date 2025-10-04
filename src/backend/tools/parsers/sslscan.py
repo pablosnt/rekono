@@ -25,7 +25,9 @@ class Sslscan(BaseParser):
 
     technologies: list[Technology] = []
 
-    def create_finding(self, finding_type: type[Finding], linked_finding: bool = False, **fields: Any) -> Finding:
+    def create_finding(
+        self, finding_type: type[Finding], linked_finding: bool = False, **fields: Any
+    ) -> Finding | None:
         """Create findings with automatic SSL/TLS technology association.
 
         Args:
@@ -33,7 +35,7 @@ class Sslscan(BaseParser):
             **fields (Any): Field values for the finding
 
         Returns:
-            Finding: Created finding instance with technology association
+            Finding | None: Created finding instance with technology association
         """
         if finding_type == Vulnerability and not fields.get("technology") and fields.get("sslversion"):
             search = [t for t in self.technologies if f"{t.name}v{t.version}" == fields.get("sslversion")]
