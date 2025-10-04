@@ -4,8 +4,6 @@ on:
   workflow_dispatch:
   schedule:
     - cron: '0 0 * * *'
-  # TODO: REMOVE ME:
-  pull_request:
 
 jobs:
   tools:
@@ -110,7 +108,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        urls:
+        url:
           - https://www.hacktricks.wiki/sitemap.xml
           - https://book.hacktricks.wiki/en/linux-hardening/privilege-escalation/index.html
           - https://book.hacktricks.wiki/en/macos-hardening/macos-security-and-privilege-escalation/index.html
