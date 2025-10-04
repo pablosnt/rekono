@@ -50,8 +50,7 @@ class Process(BaseLike):
     """
 
     name = models.TextField(max_length=100, unique=True, validators=[Validator(Regex.NAME, code="name")])
-    # TODO: Review default process descriptions
-    description = models.TextField(max_length=300, validators=[Validator(Regex.TEXT, code="description")])
+    description = models.TextField(max_length=500, validators=[Validator(Regex.TEXT, code="description")])
     owner = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, null=True)
     tags = TaggableManager()
 

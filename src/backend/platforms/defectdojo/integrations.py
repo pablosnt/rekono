@@ -292,7 +292,7 @@ class DefectDojo(BaseIntegration):
         Returns:
             dict[str, Any] | None: DefectDojo API response with endpoint data or None on error
         """
-        # TODO: Test this. There were an HTTPError exception captured, and None was returned on exception
+        # TOTEST: What happen if the endpoint already exists?
         return self._request(
             self.session.post, "/endpoints/", data={**endpoint.defectdojo_endpoint(target), "product": product}
         )
@@ -312,7 +312,6 @@ class DefectDojo(BaseIntegration):
             dict[str, Any]: DefectDojo API response containing created finding data
         """
         data = finding.defectdojo_finding()
-        # TODO: close_old findings? Maybe it's not doable when creating findings manually?
         return self._request(
             self.session.post,
             "/findings/",
@@ -343,7 +342,6 @@ class DefectDojo(BaseIntegration):
             dict[str, Any]: DefectDojo API response containing import results
         """
         with open(execution.output_file, "r") as report:
-            # TODO: close_old findings?
             return self._request(
                 self.session.post,
                 "/import-scan/",
@@ -412,8 +410,6 @@ class DefectDojo(BaseIntegration):
                 if finding.created_from_user_input:
                     continue
                 if isinstance(finding, Path) and finding.type == PathType.ENDPOINT:
-                    # TODO: They won't be imported again? So, it will be different to import from file?
-                    # Is it for being an endpoint instead of a finding?
                     if finding.defectdojo_id is None:
                         new_endpoint = self._create_endpoint(product_id, finding, execution.task.target)
                         if new_endpoint is not None:

@@ -443,6 +443,6 @@ class ReportingViewSet(BaseViewSet):
             }
         )
         with (CONFIG.generated_reports / filename).open("wb") as report:
-            # TODO: This is raising an exception sometimes
+            # TOTEST
             pisa_status = pisa.CreatePDF(template, dest=report, link_callback=self._pdf_static_content)
         return not pisa_status.err

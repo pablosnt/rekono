@@ -199,7 +199,6 @@ class SMTP(BaseNotification):
             alert (Alert): The triggered alert configuration
             finding (Finding): The security finding that triggered the alert
         """
-        # TODO: AlertMode.X.value changed to AlertMode.X. Verify that it works!
         subjects = {
             AlertMode.NEW: f"New {finding.__class__.__name__.lower()} detected",
             AlertMode.FILTER: f"New {finding.__class__.__name__.lower()} matches alert criterion",

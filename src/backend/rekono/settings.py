@@ -18,8 +18,7 @@ from rekono.config import RekonoConfig
 # Rekono basic information                                                     #
 ################################################################################
 
-# TODO: Improve it!
-DESCRIPTION = "Pentesting automation platform that combines hacking tools to complete security assessments"
+DESCRIPTION = "Offensive security platform that automates attack surface discovery and vulnerability management"
 VERSION = "2.0.0"
 
 

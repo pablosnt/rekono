@@ -108,8 +108,8 @@ class TaskViewSet(BaseViewSet):
                         pass
                 else:
                     self.executions_queue.cancel_job(execution.rq_job_id)
-                # TODO: Test this:
-                self.tasks_queue.delete_job(execution.rq_job_id)
+                # TOTEST:
+                self.executions_queue.delete_job(execution.rq_job_id)
             self.logger.info(f"[Execution] Execution {execution.id} has been cancelled")
             execution.status = Status.CANCELLED
             execution.end = timezone.now()

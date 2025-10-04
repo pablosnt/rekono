@@ -78,7 +78,6 @@ class Tool(BaseLike):
     name = models.TextField(max_length=30, unique=True)
     command = models.TextField(max_length=30)
     script = models.TextField(max_length=100, blank=True, null=True)
-    # TODO: lower these default values in the fixtures
     script_directory_property = models.TextField(max_length=100, blank=True, null=True)
     run_directory_property = models.TextField(max_length=100, blank=True, null=True)
     ignore_exit_code = models.BooleanField(default=False)

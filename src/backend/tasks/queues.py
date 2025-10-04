@@ -26,7 +26,6 @@ from tools.enums import Intensity as IntensityValue
 from tools.models import Intensity
 
 
-# TODO: Test this:
 @dataclass
 class PlanJob:
     """Dataclass representing a planned job in a process execution workflow.

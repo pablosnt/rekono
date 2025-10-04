@@ -4,7 +4,7 @@
         "pk": 1,
         "fields": {
             "name": "All tools",
-            "description": "Run all tools with the most relevant configurations. This process covers all the pentesting stages from OSINT to exploits finding."
+            "description": "Comprehensive security assessment that performs passive information gathering, port and service enumeration, web application testing, vulnerability scanning, and exploit research. This process provides complete coverage across all penetration testing phases to identify potential security weaknesses in the target infrastructure."
         }
     },
     {
@@ -12,7 +12,7 @@
         "pk": 2,
         "fields": {
             "name": "HTTP Analysis",
-            "description": "Analysis of HTTP services after port enumeration. Search for endpoints, TLS vulnerabilities, CMS information, Log4Shell, etc."
+            "description": "Focused security assessment of web applications and HTTP services. Performs directory and endpoint enumeration, SSL/TLS configuration analysis, content management system identification, and security testing of web-based attack vectors."
         }
     },
     {
@@ -20,7 +20,7 @@
         "pk": 3,
         "fields": {
             "name": "FTP Analysis",
-            "description": "Analysis of FTP services using nmap with NSE scripts."
+            "description": "Specialized security assessment of FTP services. Examines FTP server configurations, tests for anonymous access, identifies common vulnerabilities and backdoors, performs SSL/TLS analysis for secure FTP implementations, and searches for applicable exploits."
         }
     },
     {
@@ -28,7 +28,7 @@
         "pk": 4,
         "fields": {
             "name": "SSH Analysis",
-            "description": "Analysis of SSH services after port enumeration, using ssh-audit."
+            "description": "Specialized security assessment of SSH services. Evaluates SSH server configurations, cipher suites, key exchange algorithms, authentication methods, identifies security weaknesses in the implementation, and searches for potential exploits related to the SSH service version."
         }
     },
     {
@@ -36,7 +36,7 @@
         "pk": 5,
         "fields": {
             "name": "SMB Analysis",
-            "description": "Analysis of SMB services using nmap with NSE scripts and smbmap."
+            "description": "Specialized security assessment of SMB/CIFS services. Enumerates shared resources, user accounts, groups, and domain information, tests for anonymous access, identifies SMB protocol vulnerabilities, and searches for applicable exploits."
         }
     },
     {
@@ -44,7 +44,7 @@
         "pk": 6,
         "fields": {
             "name": "OSINT",
-            "description": "Run OSINT tools to gather publicly available information."
+            "description": "Passive information gathering and reconnaissance activities. Collects publicly available information including email addresses, subdomains, and organizational data from various online sources without directly interacting with the target infrastructure, providing intelligence for further security assessments."
         }
     },
     {
@@ -52,7 +52,7 @@
         "pk": 7,
         "fields": {
             "name": "Active Analysis",
-            "description": "Run all active tools with the most relevant configurations. This process covers all active pentesting stages from enumeration to exploits finding."
+            "description": "Active security assessment that directly interacts with target systems. Performs port scanning, service enumeration, web application testing, vulnerability scanning, and exploit research."
         }
     }
 ]

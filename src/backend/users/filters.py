@@ -81,8 +81,6 @@ class UserFilter(FilterSet):
             QuerySet: Filtered queryset excluding project members or empty if no access
         """
         return (
-            # queryset.exclude(id__in=User.objects.filter(projects__id=value).values_list("id", flat=True))
-            # TODO: Test that the new version works
             queryset.exclude(projects__id=value)
             if self.request.user.projects.filter(pk=value).exists()
             else queryset.none()

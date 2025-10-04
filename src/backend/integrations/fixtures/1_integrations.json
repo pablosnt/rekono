@@ -41,7 +41,7 @@
         "fields": {
             "key": "cvecrowd",
             "name": "CVE Crowd",
-            "description": "Platform that identifies the most trending CVEs at the moment based on their impact on social networks, and whose data will be used by Rekono to check if the CVEs detected on the targets are trending or not",
+            "description": "Platform that identifies the most trending CVEs at the moment based on their impact on social networks, and whose data will be used by Rekono to check if the CVEs detected are trending or not",
             "enabled": true,
             "reference": "https://cvecrowd.com/",
             "icon": "https://cvecrowd.com/icon-small-crowd.svg"
@@ -53,7 +53,7 @@
         "fields": {
             "key": "virustotal",
             "name": "Virus Total",
-            "description": "TODO",
+            "description": "Malware analysis platform that analyzes files, hosts or URLs, and whose reputation data will be used by Rekono to add context to the hosts identified",
             "enabled": true,
             "reference": "https://www.virustotal.com/",
             "icon": "https://www.virustotal.com/gui/images/manifest/icon-192x192.png"
