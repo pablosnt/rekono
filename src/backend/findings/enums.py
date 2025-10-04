@@ -111,8 +111,7 @@ class PortStatus(models.TextChoices):
     CLOSED = "Closed"
 
 
-# TODO: Rename to TransportProtocol
-class Protocol(models.TextChoices):
+class TransportProtocol(models.TextChoices):
     """Network transport layer protocol types.
 
     Defines supported transport protocols for network service identification.
@@ -166,5 +165,5 @@ Severity: type[Choices] = Severity
 OSINTDataType: type[Choices] = OSINTDataType
 HostOS: type[Choices] = HostOS
 PortStatus: type[Choices] = PortStatus
-Protocol: type[Choices] = Protocol
+TransportProtocol: type[Choices] = TransportProtocol
 TriageStatus: type[Choices] = TriageStatus

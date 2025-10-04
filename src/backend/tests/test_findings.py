@@ -2,7 +2,7 @@ from functools import cached_property
 
 from django.test import TestCase
 
-from findings.enums import HostOS, OSINTDataType, PortStatus, Protocol, Severity, TriageStatus
+from findings.enums import HostOS, OSINTDataType, PortStatus, Severity, TransportProtocol, TriageStatus
 from findings.framework.models import Finding
 from findings.models import OSINT, Credential, Exploit, Host, Path, Port, Technology, Vulnerability
 from security.authorization.roles import Role
@@ -137,10 +137,10 @@ class PortTest(FindingTest, TestCase):
     endpoint = "/api/ports/"
     expected_defectdojo = {
         "title": "Port discovered",
-        "description": f"Host: 10.10.10.10\nPort: 80\nStatus: {PortStatus.OPEN.value}\nProtocol: {Protocol.TCP.value}\nService: http",
+        "description": f"Host: 10.10.10.10\nPort: 80\nStatus: {PortStatus.OPEN.value}\nProtocol: {TransportProtocol.TCP.value}\nService: http",
         "severity": Severity.INFO,
     }
-    expected_string = f"10.10.10.10 - 80 - {Protocol.TCP.value}"
+    expected_string = f"10.10.10.10 - 80 - {TransportProtocol.TCP.value}"
 
 
 class PathTest(FindingTest, TestCase):
@@ -151,7 +151,7 @@ class PathTest(FindingTest, TestCase):
         "description": "Host: 10.10.10.10\nPort: 80\nPath: /index.html\nType: ENDPOINT\nStatus: 200",
         "severity": Severity.INFO,
     }
-    expected_string = f"10.10.10.10 - 80 - {Protocol.TCP.value} - /index.html"
+    expected_string = f"10.10.10.10 - 80 - {TransportProtocol.TCP.value} - /index.html"
 
     def test_defectdojo(self):
         super().test_defectdojo()
@@ -171,7 +171,7 @@ class TechnologyTest(FindingTest, TestCase):
         "cwe": 200,
         "references": "https://wordpress.org",
     }
-    expected_string = f"10.10.10.10 - 80 - {Protocol.TCP.value} - WordPress - 1.0.10"
+    expected_string = f"10.10.10.10 - 80 - {TransportProtocol.TCP.value} - WordPress - 1.0.10"
 
 
 class CredentialTest(FindingTest, TestCase):
@@ -184,7 +184,7 @@ class CredentialTest(FindingTest, TestCase):
         "severity": Severity.HIGH,
     }
     expected_string = (
-        f"10.10.10.10 - 80 - {Protocol.TCP.value} - WordPress - 1.0.10 - admin10@rekono.com - admin10 - admin"
+        f"10.10.10.10 - 80 - {TransportProtocol.TCP.value} - WordPress - 1.0.10 - admin10@rekono.com - admin10 - admin"
     )
 
 
@@ -198,7 +198,9 @@ class VulnerabilityTest(FindingTest, TestCase):
         "cve": "CVE-2025-3010",
         "cwe": 200,
     }
-    expected_string = f"10.10.10.10 - 80 - {Protocol.TCP.value} - WordPress - 1.0.10 - Vulnerability 10 - CVE-2025-3010"
+    expected_string = (
+        f"10.10.10.10 - 80 - {TransportProtocol.TCP.value} - WordPress - 1.0.10 - Vulnerability 10 - CVE-2025-3010"
+    )
 
 
 class ExploitTest(FindingTest, TestCase):
@@ -210,4 +212,4 @@ class ExploitTest(FindingTest, TestCase):
         "severity": Severity.MEDIUM,
         "references": "https://www.exploit-db.com/exploits/1",
     }
-    expected_string = f"10.10.10.10 - 80 - {Protocol.TCP.value} - WordPress - 1.0.10 - Vulnerability 10 - CVE-2025-3010 - 1 - https://www.exploit-db.com/exploits/1"
+    expected_string = f"10.10.10.10 - 80 - {TransportProtocol.TCP.value} - WordPress - 1.0.10 - Vulnerability 10 - CVE-2025-3010 - 1 - https://www.exploit-db.com/exploits/1"

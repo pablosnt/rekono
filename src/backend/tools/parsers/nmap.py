@@ -9,7 +9,7 @@ from typing import Any
 
 from libnmap.parser import NmapParser
 
-from findings.enums import HostOS, PathType, PortStatus, Protocol, Severity
+from findings.enums import HostOS, PathType, PortStatus, Severity, TransportProtocol
 from findings.models import Credential, Host, Path, Port, Technology, Vulnerability
 from security.validators.input_validator import Regex
 from tools.parsers.base import BaseParser
@@ -60,7 +60,7 @@ class Nmap(BaseParser):
                     host=host,
                     port=service.port,
                     status=PortStatus[service.state.upper()],
-                    protocol=Protocol[service.protocol.upper()],
+                    protocol=TransportProtocol[service.protocol.upper()],
                     service=service.service,
                 )
                 technologies = []

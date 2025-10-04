@@ -14,8 +14,8 @@ from findings.enums import (
     OSINTDataType,
     PathType,
     PortStatus,
-    Protocol,
     Severity,
+    TransportProtocol,
 )
 from findings.framework.models import Finding, TriageFinding
 from framework.enums import InputKeyword
@@ -172,7 +172,7 @@ class Port(Finding):
         host (ForeignKey): Parent host where port was discovered (optional relationship)
         port (IntegerField): Network port number in range 1-65535
         status (TextField): Port scan status from PortStatus enum (default: OPEN, max 15 characters)
-        protocol (TextField): Transport protocol from Protocol enum (optional, max 5 characters)
+        protocol (TextField): Transport protocol from TransportProtocol enum (optional, max 5 characters)
         service (TextField): Identified service name or banner information (optional, max 50 characters)
 
     Example:
@@ -183,7 +183,7 @@ class Port(Finding):
             host=host_instance,
             port=443,
             status=PortStatus.OPEN,
-            protocol=Protocol.TCP,
+            protocol=TransportProtocol.TCP,
             service="https"
         )
         ```
@@ -192,7 +192,7 @@ class Port(Finding):
     host = models.ForeignKey(Host, related_name="port", on_delete=models.DO_NOTHING, blank=True, null=True)
     port = models.IntegerField()
     status = models.TextField(max_length=15, choices=PortStatus.choices, default=PortStatus.OPEN)
-    protocol = models.TextField(max_length=5, choices=Protocol.choices, blank=True, null=True)
+    protocol = models.TextField(max_length=5, choices=TransportProtocol.choices, blank=True, null=True)
     service = models.TextField(max_length=50, blank=True, null=True)
 
     unique_fields = ["host", "port", "protocol"]

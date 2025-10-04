@@ -7,7 +7,7 @@ from django.test import TestCase
 from authentications.enums import AuthenticationType
 from executions.enums import Status
 from executions.models import Execution
-from findings.enums import OSINTDataType, Protocol
+from findings.enums import OSINTDataType, TransportProtocol
 from findings.models import Port
 from settings.models import Settings
 from target_ports.models import TargetPort
@@ -83,7 +83,7 @@ class ToolExecutorTest(BaseTest, TestCase):
 
     @mock.patch("framework.models.BaseInput.get_url", get_url)
     def test_get_arguments_multiple_ports(self) -> None:
-        new_port = Port.objects.create(host=self.host, port=443, service="http", protocol=Protocol.TCP)
+        new_port = Port.objects.create(host=self.host, port=443, service="http", protocol=TransportProtocol.TCP)
         new_port.executions.add(self.execution)
         self.assertEqual(
             "-p 10.10.10.10 -p http://10.10.10.10:80/ -p 80,443 -p WordPress -p CVE-2025-3010 -p root",

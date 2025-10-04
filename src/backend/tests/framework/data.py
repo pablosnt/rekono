@@ -9,7 +9,7 @@ from django.utils import timezone
 from authentications.enums import AuthenticationType
 from authentications.models import Authentication
 from executions.models import Execution
-from findings.enums import HostOS, OSINTDataType, PathType, Protocol, Severity
+from findings.enums import HostOS, OSINTDataType, PathType, Severity, TransportProtocol
 from findings.framework.models import Finding
 from findings.models import OSINT, Credential, Exploit, Host, Path, Port, Technology, Vulnerability
 from input_types.enums import InputTypeName
@@ -115,7 +115,13 @@ class TestingDataMixin:
                     host.executions.add(execution)
                     for port_fields in config.ports_fields if config.ports_fields is not None else [{}]:
                         port = Port.objects.create(
-                            **{"port": 80, "service": "http", "protocol": Protocol.TCP, **port_fields, "host": host}
+                            **{
+                                "port": 80,
+                                "service": "http",
+                                "protocol": TransportProtocol.TCP,
+                                **port_fields,
+                                "host": host,
+                            }
                         )
                         port.executions.add(execution)
                         for paths_index, path_fields in enumerate(
