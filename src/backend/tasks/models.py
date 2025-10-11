@@ -66,10 +66,14 @@ class Task(BaseModel):
     # Job Id in the tasks queue
     rq_job_id = models.TextField(max_length=50, blank=True, null=True)
     target = models.ForeignKey(Target, related_name="tasks", on_delete=models.CASCADE)
-    process = models.ForeignKey(Process, blank=True, null=True, on_delete=models.SET_NULL)
-    configuration = models.ForeignKey(Configuration, on_delete=models.SET_NULL, blank=True, null=True)
+    process = models.ForeignKey(Process, related_name="tasks", blank=True, null=True, on_delete=models.SET_NULL)
+    configuration = models.ForeignKey(
+        Configuration, related_name="tasks", on_delete=models.SET_NULL, blank=True, null=True
+    )
     intensity = models.IntegerField(choices=Intensity.choices, default=Intensity.NORMAL)
-    executor = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, null=True)
+    executor = models.ForeignKey(
+        AUTH_USER_MODEL, related_name="tasks", on_delete=models.SET_NULL, blank=True, null=True
+    )
     # Date when the task will be executed
     scheduled_at = models.DateTimeField(
         blank=True,
