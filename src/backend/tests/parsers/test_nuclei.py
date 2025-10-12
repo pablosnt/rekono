@@ -100,6 +100,7 @@ class NucleiTest(ParserTest, TestCase):
                     "name": "Cookies without Secure attribute - Detect",
                     "description": "Checks whether cookies in the HTTP response contain the Secure attribute. If the Secure flag is set, it means that the cookie can only be transmitted over HTTPS",
                     "severity": Severity.INFO,
+                    "cvss_vector": "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:N",
                     "cve": None,
                     "cwe": None,
                     "reference": "https://owasp.org/www-community/controls/SecureCookieAttribute",

@@ -26,6 +26,8 @@ class NvdNist(BaseIntegration):
     Processing Features:
         - Automated CVE data retrieval and parsing
         - CVSS score mapping to Rekono severity levels
+        - CVSS version and vector string extraction
+        - CVSS base score preservation for detailed analysis
         - CWE code extraction and classification
         - Vulnerability description and reference updates
         - API token authentication for enhanced rate limits
@@ -97,7 +99,8 @@ class NvdNist(BaseIntegration):
 
         Retrieves detailed vulnerability information from NVD API and updates
         the finding with enhanced data including descriptions, CVSS scores,
-        CWE classifications, and official references.
+        CVSS vector strings, CVSS versions, severity mappings, CWE classifications,
+        and official references.
 
         Args:
             execution (Execution): The execution context for this processing
@@ -152,14 +155,17 @@ class NvdNist(BaseIntegration):
                         [],
                     ):
                         if cvss.get("type", "").lower() == type:
-                            base_score = cvss.get("cvssData", {}).get("baseScore")
+                            cvss_data = cvss.get("cvssData", {})
+                            base_score = cvss_data.get("baseScore")
                             if base_score:
                                 severity = base_score
-                                # TODO: Save CVSS version, vector and baseScore in the vulnerability model
                                 finding.severity = [
-                                    k for k, v in self.cvss_mapping.items() if severity >= v[0] and severity < v[1]
+                                    k for k, v in self.cvss_mapping.items() if base_score >= v[0] and base_score < v[1]
                                 ][0]
-                                update.extend(["severity"])
+                                finding.cvss_version = cvss_data.get("version")
+                                finding.cvss_vector = cvss_data.get("vectorString")
+                                finding.cvss_base_score = base_score
+                                update.extend(["severity", "cvss_version", "cvss_vector", "cvss_base_score"])
                                 break
                     if severity > 0:
                         break

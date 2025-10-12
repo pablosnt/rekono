@@ -77,13 +77,15 @@ class Nuclei(BaseParser):
                 # All other templates are treated as vulnerability findings
                 # Extract security classification data (severity, CVE, CWE)
                 severity = info.get("severity")
-                cve = info.get("classification", {}).get("cve-id")
-                cwe = info.get("classification", {}).get("cwe-id", [])
+                classification = info.get("classification", {})
+                cve = classification.get("cve-id")
+                cwe = classification.get("cwe-id", [])
                 self.create_finding(
                     Vulnerability,
                     name=(f"{name}: {matcher}" if matcher else name).strip(),
                     description=description.strip() if description else None,
                     severity=(cast(dict[str, str], Severity)[severity.upper()] if severity else Severity.INFO),
+                    cvss_vector=classification.get("cvss-metrics"),
                     cve=cve.upper() if cve else None,
                     cwe=cwe[0].upper() if cwe else None,
                     reference=reference[0] if reference else None,

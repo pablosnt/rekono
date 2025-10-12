@@ -491,8 +491,8 @@ class Vulnerability(TriageFinding):
 
     Represents confirmed security vulnerabilities discovered through automated scanning,
     manual testing, and code analysis. Vulnerability findings include industry-standard
-    classifications, severity ratings, and trending indicators to support risk-based
-    prioritization and remediation planning within enterprise security programs.
+    classifications, severity ratings, CVSS scoring, and trending indicators to support
+    risk-based prioritization and remediation planning within enterprise security programs.
 
     Attributes:
         technology (ForeignKey): Vulnerable technology component (optional relationship)
@@ -500,13 +500,16 @@ class Vulnerability(TriageFinding):
         name (TextField): Vulnerability name or identifier (max 50 characters)
         description (TextField): Detailed technical vulnerability description (optional)
         severity (IntegerField): Risk severity level from Severity enum (default: MEDIUM)
+        cvss_version (TextField): CVSS framework version identifier (optional, max 3 characters)
+        cvss_vector (TextField): CVSS vector string for detailed scoring (optional, max 200 characters)
+        cvss_base_score (FloatField): CVSS base score numerical value (optional)
         cve (TextField): Common Vulnerabilities and Exposures identifier (optional, max 20 characters)
         cwe (TextField): Common Weakness Enumeration classification (optional, max 20 characters)
         reference (TextField): Security advisory or documentation links (optional, max 250 characters)
         trending (BooleanField): Active exploitation or trending status indicator (default: False)
 
     Example:
-        Create a vulnerability finding with CVE mapping:
+        Create a vulnerability finding with CVE and CVSS data:
 
         ```python
         vulnerability = Vulnerability.objects.create(
@@ -514,6 +517,9 @@ class Vulnerability(TriageFinding):
             name="Remote Code Execution",
             description="Buffer overflow in HTTP request parsing",
             severity=Severity.CRITICAL,
+            cvss_version="3.1",
+            cvss_vector="CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+            cvss_base_score=9.8,
             cve="CVE-2021-12345",
             cwe="CWE-120",
             trending=True
@@ -538,6 +544,9 @@ class Vulnerability(TriageFinding):
     name = models.TextField(max_length=50)
     description = models.TextField(blank=True, null=True)
     severity = models.IntegerField(choices=Severity.choices, default=Severity.MEDIUM)
+    cvss_version = models.TextField(max_length=3, blank=True, null=True)
+    cvss_vector = models.TextField(max_length=200, blank=True, null=True)
+    cvss_base_score = models.FloatField(blank=True, null=True)
     cve = models.TextField(max_length=20, blank=True, null=True)
     cwe = models.TextField(max_length=20, blank=True, null=True)
     reference = models.TextField(max_length=250, blank=True, null=True)

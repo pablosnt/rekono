@@ -245,6 +245,8 @@ class VulnerabilityFilter(TriageFindingFilter):
             "name": ["exact", "icontains"],
             "description": ["exact", "icontains"],
             "severity": ["exact"],
+            "cvss_version": ["exact"],
+            "cvss_base_score": ["gte", "lte", "exact"],
             "cve": ["exact", "icontains"],
             "cwe": ["exact", "icontains"],
             "trending": ["exact"],
