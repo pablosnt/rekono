@@ -20,6 +20,7 @@ from platforms.telegram_app.models import TelegramSettings
 filterwarnings(action="ignore", message=r".*CallbackQueryHandler", category=PTBUserWarning)
 
 
+# TODO: Telegram bot is not working at all.
 class TelegramBot(BaseTelegram):
     """Main Telegram Bot class for handling security testing commands and conversations.
 
@@ -64,7 +65,7 @@ class TelegramBot(BaseTelegram):
         """
         bot_commands = []
         for command in self.commands:
-            bot_commands.append((command.name, command.help))
+            bot_commands.append((command.command_name, command.help))
             application.add_handler(command)
         await application.bot.set_my_commands(bot_commands)
 
@@ -89,8 +90,9 @@ class TelegramBot(BaseTelegram):
             if self.settings.secret:
                 self.handle_invalid_token(False)
             self._wait_for_token(sleep_time)
-        else:
-            self.initialize()
+        # TODO: Remove if not needed
+        # else:
+        #     self.initialize()
 
     def deploy(self) -> None:
         """Deploy and start the Telegram Bot with polling mode.
@@ -102,7 +104,12 @@ class TelegramBot(BaseTelegram):
         if not self.app or not self.app.updater or not self.app.bot:
             return self.deploy()
         try:
+            loop = asyncio.get_event_loop()
+            if loop.is_closed():
+                asyncio.set_event_loop(asyncio.new_event_loop())
+        except RuntimeError:
             asyncio.set_event_loop(asyncio.new_event_loop())
+        try:
             self.app.run_polling()
         except (InvalidToken, Forbidden):
             self.handle_invalid_token()

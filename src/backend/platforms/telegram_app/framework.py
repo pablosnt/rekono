@@ -38,26 +38,25 @@ class BaseTelegram(LoggingEntity):
         """
         return TelegramSettings.objects.first()
 
-    def __init__(self) -> None:
-        """Initialize the Telegram Bot base class.
+    # TODO: Remove this if not needed:
+    # def __init__(self) -> None:
+    #     """Initialize the Telegram Bot base class.
 
-        Sets up the bot application and performs initial configuration.
-        """
-        self.initialize()
+    #     Sets up the bot application and performs initial configuration.
+    #     """
+    #     self.initialize()
 
-    def initialize(self) -> None:
-        """Initialize the Telegram Bot application.
+    # def initialize(self) -> None:
+    #     """Initialize the Telegram Bot application.
 
-        Initializes the bot application if available and handles authentication errors.
+    #     Initializes the bot application if available and handles authentication errors.
 
-        Returns:
-            Application | None: The initialized application or None if failed.
-        """
-        if self.app and self.app.bot:  # pytype: disable=attribute-error
-            try:
-                asyncio.run(self.app.bot.initialize())  # pytype: disable=attribute-error
-            except (InvalidToken, Forbidden):
-                self.handle_invalid_token()
+    #     Returns:
+    #         Application | None: The initialized application or None if failed.
+    #     """
+    #     # Bot initialization is handled by run_polling(), so no manual initialization needed
+    #     # to avoid "Event loop is closed" errors
+    #     pass
 
     @cached_property
     def app(self) -> Application | None:

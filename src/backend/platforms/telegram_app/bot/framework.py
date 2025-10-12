@@ -57,14 +57,6 @@ class BaseTelegramBot(BaseTelegram):
         Returns:
             int | None: Conversation state or None for simple commands.
         """
-        # TODO: Ensure that these checks are no longer needed:
-        # if not self._is_valid_update(update):
-        #     raise Exception("Invalid update")
-        # if not self.allow_readers:
-        #     chat = await self.get_active_telegram_chat(update)
-        #     if not chat:
-        #         raise Exception("User is not authenticated")
-        # TODO: So, ensure that it's not needed to call super()._execute_command in each subclass
         pass
 
     def validate_update(self, update: Update) -> None:
@@ -90,8 +82,6 @@ class BaseTelegramBot(BaseTelegram):
             message (str): The message content to send.
             reply_markup (Any, optional): Keyboard markup for interactive replies.
         """
-        # TODO: Validate that this is no longer needed. Update should have been validated before
-        # if self.is_valid_update(update):
         await update.effective_message.reply_text(message, reply_markup=reply_markup, parse_mode=ParseMode.MARKDOWN_V2)
 
     def get_context_value(self, context: CallbackContext, key: Context) -> Any:
