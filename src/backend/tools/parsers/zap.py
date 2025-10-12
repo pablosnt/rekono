@@ -47,6 +47,7 @@ class Zap(BaseParser):
                 description = alert.findtext("desc") or ""
                 severity = alert.findtext("riskcode")
                 cwe = alert.findtext("cweid")
+                remediation = alert.findtext("solution")
                 reference = alert.findtext("reference")
                 instances = alert.findall("instances/instance")
                 if instances:
@@ -67,6 +68,7 @@ class Zap(BaseParser):
                         description=self._clean(description) if description else name,
                         severity=self.severity_mapping[int(severity)] if severity else Severity.MEDIUM,
                         cwe=f"CWE-{cwe}" if cwe else None,
+                        remediation=self._clean(remediation) if remediation else None,
                         reference=self._clean(reference.split("</p><p>", 1)[0]) if reference else None,
                     )
 

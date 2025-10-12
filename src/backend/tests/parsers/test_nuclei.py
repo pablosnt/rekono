@@ -1,7 +1,7 @@
 from django.test import TestCase
 
-from findings.enums import Severity
-from findings.models import Credential, Technology, Vulnerability
+from findings.enums import PathType, Severity
+from findings.models import Credential, Path, Technology, Vulnerability
 from tests.framework import ParserTest
 from tests.framework.cases import ParserTestCase
 
@@ -89,6 +89,11 @@ class NucleiTest(ParserTest, TestCase):
                     "reference": None,
                 },
                 {"model": Credential, "username": "admin", "secret": "password", "context": "DVWA Default Login"},
+                {"model": Path, "path": "/robots.txt", "type": PathType.ENDPOINT},
+                {"model": Path, "path": "/.gitignore", "type": PathType.ENDPOINT},
+                {"model": Path, "path": "/phpinfo.php", "type": PathType.ENDPOINT},
+                {"model": Path, "path": "/README.md", "type": PathType.ENDPOINT},
+                {"model": Path, "path": "/index.php", "type": PathType.ENDPOINT},
             ],
         ),
         ParserTestCase(
@@ -259,6 +264,10 @@ class NucleiTest(ParserTest, TestCase):
                     "cwe": "CWE-200",
                     "reference": "https://support.dnsimple.com/articles/caa-record/#whats-a-caa-record",
                 },
+                {"model": Path, "path": "/index.php", "type": PathType.ENDPOINT},
+                {"model": Path, "path": "/README.md", "type": PathType.ENDPOINT},
+                {"model": Path, "path": "/robots.txt", "type": PathType.ENDPOINT},
+                {"model": Path, "path": "/login.php", "type": PathType.ENDPOINT},
             ],
         ),
     ]

@@ -106,8 +106,8 @@ class Cmseek(BaseParser):
                 )
             elif "_vulns" in key and "vulnerabilities" in value:
                 for vulnerability in value["vulnerabilities"]:
-                    # TODO: Remmediation: fixed_in
                     base_score = vulnerability.get("cvss_score")
+                    fixed_version = vulnerability.get("fixed_in")
                     self.create_finding(
                         Vulnerability,
                         linked_finding=True,
@@ -116,6 +116,9 @@ class Cmseek(BaseParser):
                         description=vulnerability.get("name", "").strip(),
                         cve=vulnerability.get("cve").strip() if vulnerability.get("cve") is not None else None,
                         cvss_base_score=float(base_score) if base_score else None,
+                        remediation=f"Update {cms.name} to version {fixed_version}"
+                        if fixed_version and fixed_version != "N/A"
+                        else None,
                     )
             elif "Version" in value and "," in value:
                 for component in value.split(","):

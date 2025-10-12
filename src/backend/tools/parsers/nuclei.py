@@ -6,9 +6,10 @@ and credential findings from web application security scans.
 
 import json
 from typing import cast
+from urllib.parse import urlparse
 
-from findings.enums import Severity
-from findings.models import Credential, Technology, Vulnerability
+from findings.enums import PathType, Severity
+from findings.models import Credential, Path, Technology, Vulnerability
 from tools.parsers.base import BaseParser
 
 
@@ -31,7 +32,14 @@ class Nuclei(BaseParser):
         """
         # Parse each line of the JSON output as a separate finding
         data = [json.loads(line) for line in self.load_report_by_lines()]
+        paths = []
         for item in data:
+            # Save the path where the Nuclei alert was triggered
+            matched_at = item.get("matched-at")
+            if matched_at and "://" in matched_at:
+                parse = urlparse(item.get("matched-at"))
+                if parse.path and parse.path != "/" and parse.path not in paths:
+                    paths.append(parse.path)
             # Extract matcher information from Nuclei results
             # Matcher provides specific details about what triggered the template
             matcher = None
@@ -48,13 +56,6 @@ class Nuclei(BaseParser):
             description = info.get("description")
             reference = info.get("reference", [])
             tags = info.get("tags", []) or []
-            """
-            TODO: Don't lose information!
-
-            - Paths
-            - Matched at: we don't save in which path a vulnerability has been found
-            - Remediation: save it in the vulnerability model and check if other tools provide that info
-            """
             # Classify findings based on Nuclei template tags
             # Different tags indicate different types of security findings
             if "tech" in tags:
@@ -80,6 +81,7 @@ class Nuclei(BaseParser):
                 classification = info.get("classification", {})
                 cve = classification.get("cve-id")
                 cwe = classification.get("cwe-id", [])
+                remediation = info.get("remediation")
                 self.create_finding(
                     Vulnerability,
                     name=(f"{name}: {matcher}" if matcher else name).strip(),
@@ -88,5 +90,10 @@ class Nuclei(BaseParser):
                     cvss_vector=classification.get("cvss-metrics"),
                     cve=cve.upper() if cve else None,
                     cwe=cwe[0].upper() if cwe else None,
+                    remediation=remediation.strip() if remediation else None,
                     reference=reference[0] if reference else None,
                 )
+        # Create identified paths
+        for path in paths:
+            # TODO: Update unit tests
+            self.create_finding(Path, path=path, type=PathType.ENDPOINT)

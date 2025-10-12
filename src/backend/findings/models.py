@@ -497,7 +497,7 @@ class Vulnerability(TriageFinding):
     Attributes:
         technology (ForeignKey): Vulnerable technology component (optional relationship)
         port (ForeignKey): Network service where vulnerability was identified (optional relationship)
-        name (TextField): Vulnerability name or identifier (max 50 characters)
+        name (TextField): Vulnerability name or identifier (max 100 characters)
         description (TextField): Detailed technical vulnerability description (optional)
         severity (IntegerField): Risk severity level from Severity enum (default: MEDIUM)
         cvss_version (TextField): CVSS framework version identifier (optional, max 3 characters)
@@ -505,6 +505,7 @@ class Vulnerability(TriageFinding):
         cvss_base_score (FloatField): CVSS base score numerical value (optional)
         cve (TextField): Common Vulnerabilities and Exposures identifier (optional, max 20 characters)
         cwe (TextField): Common Weakness Enumeration classification (optional, max 20 characters)
+        remediation (TextField): Recommended remediation steps or mitigation guidance (optional)
         reference (TextField): Security advisory or documentation links (optional, max 250 characters)
         trending (BooleanField): Active exploitation or trending status indicator (default: False)
 
@@ -522,6 +523,7 @@ class Vulnerability(TriageFinding):
             cvss_base_score=9.8,
             cve="CVE-2021-12345",
             cwe="CWE-120",
+            remediation="Update to the latest version or apply security patches",
             trending=True
         )
         ```
@@ -541,7 +543,7 @@ class Vulnerability(TriageFinding):
         blank=True,
         null=True,
     )
-    name = models.TextField(max_length=50)
+    name = models.TextField(max_length=100)
     description = models.TextField(blank=True, null=True)
     severity = models.IntegerField(choices=Severity.choices, default=Severity.MEDIUM)
     cvss_version = models.TextField(max_length=3, blank=True, null=True)
@@ -549,6 +551,7 @@ class Vulnerability(TriageFinding):
     cvss_base_score = models.FloatField(blank=True, null=True)
     cve = models.TextField(max_length=20, blank=True, null=True)
     cwe = models.TextField(max_length=20, blank=True, null=True)
+    remediation = models.TextField(blank=True, null=True)
     reference = models.TextField(max_length=250, blank=True, null=True)
     trending = models.BooleanField(default=False)
 
