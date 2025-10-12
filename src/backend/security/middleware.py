@@ -17,46 +17,58 @@ from rest_framework.response import Response
 from framework.logging import LoggingEntity
 from rekono.settings import CONFIG
 
-# TODO: Update CSP
 CSP = {
-    "/admin": (
-        "default-src 'none'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; "
-        "script-src 'self'; style-src 'self' 'sha256-28J4mQEy4Sqd0R+nZ89dOl9euh+Y3XvT+VfXD5pOiOE='; "
-        "img-src 'self'; font-src 'self'"
+    "/admin": "; ".join(
+        [
+            "default-src 'none'",
+            "connect-src 'self'",
+            "base-uri 'none'",
+            "object-src 'none'",
+            "frame-ancestors 'none'",
+            "script-src 'self'",
+            "style-src 'self' ",
+            "img-src 'self'",
+            "font-src 'self'",
+        ]
     ),
-    "/api/schema/swagger-ui": (
-        "default-src 'none'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; "
-        # 'unsafe-inline' required due to a inline script with hardcoded dynamic CSRF token, so its hash changes
-        "script-src http://cdn.jsdelivr.net 'unsafe-inline'; "
-        "style-src http://cdn.jsdelivr.net fonts.googleapis.com "
-        "'sha256-MMpT0iDxyjALd9PdfepImGX3DBfJPXZ4IlDWdPAgtn0='; "
-        "img-src data: http://cdn.jsdelivr.net; "
-        "connect-src 'self'; "
+    "/api/schema/swagger-ui": "; ".join(
+        [
+            "default-src 'none'",
+            "base-uri 'none'",
+            "object-src 'none'",
+            "frame-ancestors 'none'",
+            # 'unsafe-inline' required due to a inline script with hardcoded dynamic CSRF token, so its hash changes
+            "script-src cdn.jsdelivr.net 'unsafe-inline'",
+            "style-src cdn.jsdelivr.net fonts.googleapis.com 'sha256-MMpT0iDxyjALd9PdfepImGX3DBfJPXZ4IlDWdPAgtn0='",
+            "img-src data: cdn.jsdelivr.net",
+            "connect-src 'self' cdn.jsdelivr.net",
+        ]
     ),
-    "/api/schema/redoc": (
-        "default-src 'none'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; "
-        "script-src http://cdn.jsdelivr.net; "
-        "style-src http://cdn.jsdelivr.net fonts.googleapis.com "
-        "'sha256-47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=' "
-        "'sha256-m6OsjZ+ZE+8plS5r0wBVuIy/qbXuHEw//v/OhLyy9Xg=' "
-        "'sha256-DLDPR1ic47WIdK2WyeLkblb/tm2mQH+Jt/NNhZWu1k0=' "
-        "'sha256-GvZq6XrzMRhFZ2MvEI09Lw7QbE3DnWuVQTMYafGYLcg='; "
-        "img-src 'self' data: http://cdn.jsdelivr.net cdn.redoc.ly; "
-        "font-src fonts.gstatic.com; "
-        "worker-src blob:; "
-        "child-src blob:; "
-        "connect-src 'self'"
+    "/api/schema/redoc": "; ".join(
+        [
+            "default-src 'none'",
+            "base-uri 'none'",
+            "object-src 'none'",
+            "frame-ancestors 'none'",
+            "script-src cdn.jsdelivr.net",
+            "style-src cdn.jsdelivr.net fonts.googleapis.com 'unsafe-inline'",
+            "img-src 'self' data: cdn.jsdelivr.net cdn.redoc.ly",
+            "font-src fonts.gstatic.com",
+            "worker-src blob:",
+            "child-src blob:",
+            "connect-src 'self' cdn.jsdelivr.net",
+        ]
     ),
-    "/api/": "default-src 'none'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'",
+    "/api/": "; ".join(["default-src 'none'", "base-uri 'none'", "object-src 'none'", "frame-ancestors 'none'"]),
 }
-# TODO: Evaluate again
 SECURITY_HEADERS = {
     "Content-Security-Policy": None,
     "Server": None,
-    "Cache-Control": "no-store",
+    "Cache-Control": "no-store, no-cache, must-revalidate",
     "Referrer-Policy": "no-referrer",
     "X-Content-Type-Options": "nosniff",
     "X-Frame-Options": "DENY",
+    "Permissions-Policy": "camera=(), geolocation=(), microphone=(), midi=(), payment=(), usb=()",
     "Access-Control-Allow-Origin": "app://.",
     "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
     "Access-Control-Allow-Headers": "content-type, authorization",
