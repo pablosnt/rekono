@@ -43,7 +43,7 @@ class Validator(RegexValidator, LoggingEntity):
 
     def __init__(
         self,
-        regex: Regex,
+        regex: Regex | str,
         message: Any | None = "Provided value contains disallowed characters",
         code: str | None = None,
         inverse_match: bool | None = ...,  # type: ignore
@@ -57,7 +57,7 @@ class Validator(RegexValidator, LoggingEntity):
         with the provided parameters while adding security-specific features.
 
         Args:
-            regex (Regex): The regex pattern enum to use for validation.
+            regex (Regex | str): The regex pattern enum to use for validation.
             message (Any | None): Custom error message for validation failures.
             code (str | None): Error code for ValidationError exceptions.
             inverse_match (bool | None): Whether to invert the regex matching logic.
@@ -65,8 +65,6 @@ class Validator(RegexValidator, LoggingEntity):
             deny_injections (bool): Enable injection attack detection (default: False).
         """
         self.deny_injections = deny_injections
-        # TODO: Review if this is needed for really old database migrations or the ones generated
-        # during version 2.0.0 development
         # isinstance verification is needed to keep compatibility with old database migrations
         super().__init__(regex.value if isinstance(regex, Regex) else regex, message, code, inverse_match, flags)
 

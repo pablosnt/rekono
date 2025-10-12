@@ -95,5 +95,4 @@ class Nuclei(BaseParser):
                 )
         # Create identified paths
         for path in paths:
-            # TODO: Update unit tests
             self.create_finding(Path, path=path, type=PathType.ENDPOINT)

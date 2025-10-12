@@ -53,7 +53,7 @@ class TargetValidator(RegexValidator, LoggingEntity):
 
     def __init__(
         self,
-        regex: Regex,
+        regex: Regex | str,
         message: Any | None = "Target is disallowed by policy",
         code: str | None = "target",
         inverse_match: bool | None = False,
@@ -66,14 +66,13 @@ class TargetValidator(RegexValidator, LoggingEntity):
         the provided parameters while storing the error code for validation failures.
 
         Args:
-            regex (Any): Regex pattern enum for target format validation.
+            regex (Regex | str): Regex pattern enum for target format validation.
             message (Any | None): Custom error message for validation failures.
             code (str | None): Error code for ValidationError exceptions (default: 'target').
             inverse_match (bool | None): Whether to invert the regex matching logic (default: False).
             flags (RegexFlag | None): Regex compilation flags for pattern matching.
         """
         self.code = code
-        # TODO: Same as in input_validator
         # isinstance verification is needed to keep compatibility with old database migrations
         super().__init__(regex.value if isinstance(regex, Regex) else regex, message, code, inverse_match, flags)
 
