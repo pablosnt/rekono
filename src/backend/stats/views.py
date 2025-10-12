@@ -321,7 +321,6 @@ class HostVulnerabilitiesStatsViewSet(StatsViewSet):
     filterset_class = HostFilter
 
 
-# TODO: In addition to hosts/detection-date, create stats for getting hosts exposure evolution (first detection to mitigation date/today)
 class HostEvolutionStatsViewSet(StatsViewSet):
     """ViewSet for host discovery evolution statistics over time.
 
@@ -503,7 +502,6 @@ class VulnerabilitySeverityStatsViewSet(StatsViewSet):
     pagination_class = None
 
 
-# TODO: In addition to vulns/detection-date, create stats for getting vulns exposure window (first detection to mitigation date/today)
 class VulnerabilityEvolutionStatsViewSet(StatsViewSet):
     """ViewSet for vulnerability discovery evolution statistics over time.
 
