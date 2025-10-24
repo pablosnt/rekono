@@ -19,7 +19,6 @@ from pathlib import Path
 from typing import Any
 
 import yaml
-
 from security.cryptography import Crypto
 
 
@@ -204,7 +203,9 @@ class RekonoConfig:
     _cmseek_dir = Property("RKN_CMSEEK_RESULTS", "tools.cmseek.directory", "/usr/share/cmseek")
     _log4j_scan_dir = Property("RKN_LOG4J_SCAN_DIR", "tools.log4j-scan.directory", "/opt/log4j-scan")
     _spring4shell_scan_dir = Property(
-        "RKN_SPRING4SHELL_SCAN_DIR", "tools.spring4shell-scan.directory", "/opt/spring4shell-scan"
+        "RKN_SPRING4SHELL_SCAN_DIR",
+        "tools.spring4shell-scan.directory",
+        "/opt/spring4shell-scan",
     )
     _gittools_dir = Property("RKN_GITTOOLS_DIR", "tools.gittools.directory", "/opt/GitTools")
 
@@ -219,7 +220,7 @@ class RekonoConfig:
         # Use the environment or config value if it exists and is a directory,
         # otherwise fall back to the parent of the backend directory
         home_value = Path(self._home.read())
-        return home_value if home_value.is_dir() else self.base_dir.parent.parent
+        return home_value if home_value.is_dir() else self.base_dir.parent
 
     @property
     def home(self) -> Path:
