@@ -71,29 +71,32 @@ class BaseMixin(BaseTelegramBot):
         current_state = self._get_current_state(method)
         return current_state if current_state == 0 else current_state - 1
 
-    async def go_to_next_state(self, update: Update, context: CallbackContext, next_state: int) -> int:
+    async def go_to_next_state(
+        self, update: Update, context: CallbackContext, next_state: int, invoke_next_state: bool = False
+    ) -> int:
         """Navigate to the next state in the conversation flow.
 
         Automatically executes certain state methods based on naming conventions
-        or returns the state index for handler processing.
+        or explicit invocation. Methods starting with 'ask_' or 'reply_' are
+        automatically executed, or if invoke_next_state is True.
 
         Args:
             update (Update): The Telegram update containing user interaction.
             context (CallbackContext): The callback context for the conversation.
             next_state (int): The next state index to navigate to.
+            invoke_next_state (bool): Force execution of next state method.
 
         Returns:
             int: State index or result of state method execution.
         """
-        if (
-            next_state != ConversationHandler.END
-            and len(self._mixin_states) > 0
-            and (
-                self._mixin_states[next_state].__name__.startswith("_ask_for_")
-                or self._mixin_states[next_state].__name__.startswith("reply")
-            )
-        ):
-            return await self._mixin_states[next_state](update, context)
+        if next_state != ConversationHandler.END and len(self._mixin_states) > 0:
+            next_callable = self._mixin_states[next_state]
+            if (
+                invoke_next_state
+                or next_callable.__name__.startswith("ask_")
+                or next_callable.__name__.startswith("reply_")
+            ):
+                return await next_callable(update, context)
         return next_state
 
     @sync_to_async
@@ -164,6 +167,17 @@ class BaseMixin(BaseTelegramBot):
 
     @sync_to_async
     def _save_serializer_async(self, serializer: Serializer) -> tuple[Any | None, dict[str, Any]]:
+        """Save serializer data with validation and integrity error handling (async wrapper).
+
+        Args:
+            serializer (Serializer): The serializer to validate and save.
+
+        Returns:
+            tuple[Any | None, dict[str, Any]]: Tuple of (saved_instance, errors_dict).
+                                              Returns (instance, {}) on success,
+                                              (None, validation_errors) on validation failure,
+                                              or (None, integrity_error) on database conflicts.
+        """
         try:
             return (serializer.save(), {}) if serializer.is_valid() else (None, serializer.errors)
         except IntegrityError:
@@ -221,7 +235,6 @@ class BaseMixin(BaseTelegramBot):
             await self.reply(update, not_found_message)
             return ConversationHandler.END
         keyboard = await self._get_keyboard_from_queryset_async(queryset, attribute)
-        # TODO: Test if _get_inline_keyboard_markup requires await / async or not
         await self.reply(update, message, reply_markup=self._get_inline_keyboard_markup(keyboard, options_per_row))
         return next_state
 
@@ -254,7 +267,6 @@ class BaseMixin(BaseTelegramBot):
         if not chat:
             return ConversationHandler.END
         keyboard = [InlineKeyboardButton(v.capitalize(), callback_data=v) for v in values]
-        # TODO: Test if _get_inline_keyboard_markup requires await / async or not
         await self.reply(update, message, reply_markup=self._get_inline_keyboard_markup(keyboard, options_per_row))
         return next_state
 

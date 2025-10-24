@@ -49,18 +49,19 @@ class BaseConversation(ConversationHandler, BaseTelegramBot):
         """Initialize the conversation with entry points, states, and fallbacks.
 
         Sets up the conversation handler with automatic state mapping based
-        on method names and provides cancel functionality.
+        on method names. Methods starting with 'create_' use MessageHandler
+        for text input, others use CallbackQueryHandler for button interactions.
 
         Args:
             **kwargs: Additional keyword arguments for ConversationHandler.
         """
         super().__init__(
-            entry_points=[CommandHandler(self.command_name, self._save_command_name)],
+            entry_points=[CommandHandler(self.command_name, self.save_command_name)],
             states={
                 index: [
                     (
                         MessageHandler(filters.TEXT, state_method)
-                        if state_method.__name__.startswith("_create_")
+                        if state_method.__name__.startswith("create_")
                         else CallbackQueryHandler(state_method)
                     )
                 ]
@@ -81,7 +82,7 @@ class BaseConversation(ConversationHandler, BaseTelegramBot):
         """
         return []
 
-    async def _save_command_name(self, update: Update, context: CallbackContext) -> int:
+    async def save_command_name(self, update: Update, context: CallbackContext) -> int:
         """Save the command name to context and start the conversation.
 
         Args:
@@ -103,11 +104,11 @@ class SelectProject(BaseConversation, ProjectMixin):
 
     Attributes:
         help (str): Command help text displayed in command list.
-        section (Section): Command section for organization (SELECTION).
+        section (Section): Command section for organization (PROJECTS).
     """
 
     help = "Select one project to be used in next commands"
-    section = Section.SELECTION
+    section = Section.PROJECTS
 
     @cached_property
     def states_methods(self) -> list[Callable]:
@@ -139,7 +140,9 @@ class BaseConversationFromProject(BaseConversation, ProjectMixin):
         return (
             await super().ask_for_project(update, context)
             if not self.get_context_value(context, Context.PROJECT)
-            else await self.go_to_next_state(update, context, self.get_next_state(self.save_project))
+            else await self.go_to_next_state(
+                update, context, self.get_next_state(self.save_project), invoke_next_state=True
+            )
         )
 
 

@@ -155,9 +155,6 @@ class IntensityMixin(BaseMixin):
         """
         self.validate_update(update)
         tool = self.get_context_value(context, Context.TOOL)
-        if not tool:
-            self.reply(update, "No tool selected")
-            return ConversationHandler.END
         values = await self._get_tool_intensities_async(tool) if tool else Intensity.names
         values.reverse()
         return await self.go_to_next_state(

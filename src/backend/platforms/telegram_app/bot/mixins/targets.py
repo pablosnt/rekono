@@ -104,7 +104,7 @@ class TargetMixin(BaseMixin):
         self.validate_update(update)
         project = self.get_context_value(context, Context.PROJECT)
         if not project:
-            self.reply(update, "No project selected")
+            await self.reply(update, "No project selected")
             return ConversationHandler.END
         next_state, instance = await self.create(
             update,
@@ -119,4 +119,4 @@ class TargetMixin(BaseMixin):
                 update,
                 f"New target *{self.escape(instance.target)}* \(_{self.escape(instance.type)}_\) has been created in project *{self.escape(instance.project.name)}*",
             )
-        return await self.go_to_next_state(update, context, next_state)
+        return await self.go_to_next_state(update, context, next_state, invoke_next_state=instance is None)

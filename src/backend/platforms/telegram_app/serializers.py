@@ -52,12 +52,15 @@ class TelegramSettingsSerializer(ModelSerializer, LoggingEntity):
     def get_bot(self, instance: TelegramSettings) -> str | None:
         """Get the Telegram Bot name from the client.
 
+        Initializes the client and retrieves the bot name from the Telegram API.
+
         Args:
             instance (TelegramSettings): The settings instance being serialized.
 
         Returns:
             str | None: The Bot name if available, None otherwise.
         """
+        self.client.initialize()
         return self.client.bot_name
 
     def get_is_available(self, instance: TelegramSettings) -> bool:

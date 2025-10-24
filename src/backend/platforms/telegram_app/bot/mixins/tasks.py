@@ -54,7 +54,7 @@ class TaskMixin(BaseMixin):
             (intensity, "intensity"),
         ]:
             if not condition:
-                self.reply(update, f"No {text} selected")
+                await self.reply(update, f"No {text} selected")
                 return ConversationHandler.END
         return await self.go_to_next_state(
             update,
@@ -129,8 +129,8 @@ Are you sure?
                 )
                 if instance:
                     self.remove_all_context_values(context)
-                    await self.reply(update, f"✅ Task #{instance.id} created successfully\!")
+                    await self.reply(update, f"✅ Task \#{instance.id} created successfully\!")
             else:
                 self.remove_all_context_values(context)
                 await self.reply(update, "❌ Task has been cancelled")
-        return await self.go_to_next_state(update, context, next_state)
+        return await self.go_to_next_state(update, context, next_state, invoke_next_state=instance is None)

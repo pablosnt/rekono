@@ -62,11 +62,11 @@ class TargetPortMixin(BaseMixin):
         try:
             port = int(update.effective_message.text)
         except ValueError:
-            self.reply(update, "Port must be a valid number")
+            await self.reply(update, "Port must be a valid number")
             return await self.go_to_next_state(update, context, self.get_previous_state(self.create_target_port))
         target = self.get_context_value(context, Context.TARGET)
         if not target:
-            self.reply(update, "No target selected")
+            await self.reply(update, "No target selected")
             return ConversationHandler.END
         next_state, instance = await self.create(
             update,
@@ -78,7 +78,7 @@ class TargetPortMixin(BaseMixin):
         )
         if instance:
             self.add_context_value(context, Context.TARGET_PORT, instance)
-        return await self.go_to_next_state(update, context, next_state)
+        return await self.go_to_next_state(update, context, next_state, invoke_next_state=instance is None)
 
     async def reply_summary(self, update: Update, context: Context) -> int:
         """Display target port creation summary to user.

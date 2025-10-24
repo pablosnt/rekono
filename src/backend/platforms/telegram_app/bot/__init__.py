@@ -20,7 +20,6 @@ from platforms.telegram_app.models import TelegramSettings
 filterwarnings(action="ignore", message=r".*CallbackQueryHandler", category=PTBUserWarning)
 
 
-# TODO: Telegram bot is not working at all.
 class TelegramBot(BaseTelegram):
     """Main Telegram Bot class for handling security testing commands and conversations.
 
@@ -90,9 +89,6 @@ class TelegramBot(BaseTelegram):
             if self.settings.secret:
                 self.handle_invalid_token(False)
             self._wait_for_token(sleep_time)
-        # TODO: Remove if not needed
-        # else:
-        #     self.initialize()
 
     def deploy(self) -> None:
         """Deploy and start the Telegram Bot with polling mode.

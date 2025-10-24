@@ -266,16 +266,16 @@ class Cancel(BaseCommand):
 
 
 class SelectionCommands(BaseCommand):
-    """Base class for selection-related commands.
+    """Base class for project-related commands.
 
-    Abstract base class for commands that handle selection operations
+    Abstract base class for commands that handle project operations
     such as project selection and context management.
 
     Attributes:
-        section (Section): Command section for organization (SELECTION).
+        section (Section): Command section for organization (PROJECTS).
     """
 
-    section = Section.SELECTION
+    section = Section.PROJECTS
 
 
 class ShowProject(SelectionCommands):

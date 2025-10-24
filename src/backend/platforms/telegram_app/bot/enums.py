@@ -15,13 +15,13 @@ class Section(Enum):
 
     Attributes:
         BASIC (str): Basic commands for authentication and help.
-        SELECTION (str): Commands for selecting projects and contexts.
+        PROJECTS (str): Commands for selecting projects and contexts.
         TARGETS (str): Commands for target and port management.
         TASKS (str): Commands for executing tools and processes.
     """
 
     BASIC = "Basic"
-    SELECTION = "Selection"
+    PROJECTS = "Projects"
     TARGETS = "Targets"
     TASKS = "Tasks"
 

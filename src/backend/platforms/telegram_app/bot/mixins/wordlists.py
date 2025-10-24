@@ -55,7 +55,7 @@ class WordlistMixin(BaseMixin):
         tool = self.get_context_value(context, Context.TOOL)
         process = self.get_context_value(context, Context.PROCESS)
         if not tool and not process:
-            self.reply(update, "No tool or process selected")
+            await self.reply(update, "No tool or process selected")
             return ConversationHandler.END
         if (
             tool

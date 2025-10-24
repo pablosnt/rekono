@@ -4,6 +4,8 @@ Provides input parameter selection and creation functionality for technology
 and vulnerability parameters used in security testing configurations.
 """
 
+from typing import Any
+
 from asgiref.sync import sync_to_async
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import CallbackContext, ConversationHandler
@@ -21,28 +23,26 @@ class InputMixin(BaseMixin):
     """Base mixin for input parameter management.
 
     Provides common functionality for input parameter selection and creation
-    including keyboard generation for existing parameters.
-
-    Attributes:
-        model (Model): Django model class for input parameters (default: InputTechnology).
+    including keyboard generation for existing parameters with dynamic model support.
     """
 
-    model = InputTechnology
-
     @sync_to_async
-    def _get_keyboard_async(self, user: User) -> list[InlineKeyboardButton]:
+    def _get_keyboard_async(self, user: User, model: Any) -> list[InlineKeyboardButton]:
         """Generate keyboard buttons for user's existing input parameters (async wrapper).
 
         Args:
             user (User): User to filter parameters for.
+            model (Any): Django model class to query for parameters.
 
         Returns:
             list[InlineKeyboardButton]: Buttons for existing parameters plus "New one" option.
         """
         return [
-            InlineKeyboardButton(" - ".join([v for v in i.parse().values() if v]), callback_data=i.id)
-            for i in self.model.objects.filter(tasks__target__project__members=user).all()
-        ] + [InlineKeyboardButton("New one", callback_data=None)]
+            InlineKeyboardButton(
+                " - ".join([value for value in item.parse(None).values() if value]), callback_data=item.id
+            )
+            for item in model.objects.filter(tasks__target__project__members=user).all().distinct()
+        ] + [InlineKeyboardButton("New one", callback_data=0)]
 
 
 class InputTechnologyMixin(InputMixin):
@@ -50,12 +50,7 @@ class InputTechnologyMixin(InputMixin):
 
     Provides functionality for selecting and creating technology-specific
     input parameters for security tool configuration.
-
-    Attributes:
-        model (Model): InputTechnology model class for technology parameters.
     """
-
-    model = InputTechnology
 
     async def ask_for_input_technology(self, update: Update, context: CallbackContext) -> int:
         """Display technology input parameter selection options.
@@ -75,14 +70,14 @@ class InputTechnologyMixin(InputMixin):
             return ConversationHandler.END
         tool = self.get_context_value(context, Context.TOOL)
         if not tool:
-            self.reply(update, "No tool selected")
+            await self.reply(update, "No tool selected")
             return ConversationHandler.END
         if not await self.queryset_exists_async(
             Input.objects.filter(argument__tool=tool, type__name=InputTypeName.TECHNOLOGY)
         ):
             return await self.go_to_next_state(update, context, self.get_next_state(self.create_input_technology))
         if not await self.queryset_exists_async(
-            InputTechnology.objects.filter(tasks__target__project__members=chat.user).exists()
+            InputTechnology.objects.filter(tasks__target__project__members=chat.user)
         ):
             return await self.go_to_next_state(
                 update,
@@ -91,11 +86,12 @@ class InputTechnologyMixin(InputMixin):
                     update, "input technology", "'name \- version'", self.get_next_state(self.save_input_technology)
                 ),
             )
-        keyboard = await self._get_keyboard_async(chat.user)
         await self.reply(
             update,
             "Choose technology to use as input parameter",
-            reply_markup=InlineKeyboardMarkup([[item] for item in keyboard]),
+            reply_markup=InlineKeyboardMarkup(
+                [[item] for item in await self._get_keyboard_async(chat.user, InputTechnology)]
+            ),
         )
         return await self.go_to_next_state(update, context, self.get_next_state(self.ask_for_input_technology))
 
@@ -121,7 +117,7 @@ class InputTechnologyMixin(InputMixin):
                     update, "input technology", "'name \- version'", self.get_next_state(self.save_input_technology)
                 ),
             )
-            if not update.callback_query or not update.callback_query.data
+            if not update.callback_query or not update.callback_query.data or update.callback_query.data == "0"
             else await self.go_to_next_state(
                 update,
                 context,
@@ -166,7 +162,7 @@ class InputTechnologyMixin(InputMixin):
         if instance:
             await self.reply(update, f"New input technology *{self.escape(instance.name)}* has been created")
             self.add_context_value(context, Context.INPUT_TECHNOLOGY, instance)
-        return await self.go_to_next_state(update, context, next_state)
+        return await self.go_to_next_state(update, context, next_state, invoke_next_state=instance is None)
 
 
 class InputVulnerabilityMixin(InputMixin):
@@ -174,12 +170,7 @@ class InputVulnerabilityMixin(InputMixin):
 
     Provides functionality for selecting and creating vulnerability-specific
     input parameters for security tool configuration.
-
-    Attributes:
-        model (Model): InputVulnerability model class for vulnerability parameters.
     """
-
-    model = InputVulnerability
 
     async def ask_for_input_vulnerability(self, update: Update, context: CallbackContext) -> int:
         """Display vulnerability input parameter selection options.
@@ -199,14 +190,14 @@ class InputVulnerabilityMixin(InputMixin):
             return ConversationHandler.END
         tool = self.get_context_value(context, Context.TOOL)
         if not tool:
-            self.reply(update, "No tool selected")
+            await self.reply(update, "No tool selected")
             return ConversationHandler.END
         if not await self.queryset_exists_async(
             Input.objects.filter(argument__tool=tool, type__name=InputTypeName.VULNERABILITY)
         ):
             return await self.go_to_next_state(update, context, self.get_next_state(self.create_input_vulnerability))
         if not await self.queryset_exists_async(
-            InputVulnerability.objects.filter(tasks__target__project__members=chat.user).exists()
+            InputVulnerability.objects.filter(tasks__target__project__members=chat.user)
         ):
             return await self.go_to_next_state(
                 update,
@@ -215,11 +206,12 @@ class InputVulnerabilityMixin(InputMixin):
                     update, "input vulnerability", "cve", self.get_next_state(self.save_input_vulnerability)
                 ),
             )
-        keyboard = await self._get_keyboard_async(chat.user)
         await self.reply(
             update,
             "Choose vulnerability to use as input parameter",
-            reply_markup=InlineKeyboardMarkup([[item] for item in keyboard]),
+            reply_markup=InlineKeyboardMarkup(
+                [[item] for item in await self._get_keyboard_async(chat.user, InputVulnerability)]
+            ),
         )
         return await self.go_to_next_state(update, context, self.get_next_state(self.ask_for_input_vulnerability))
 
@@ -242,10 +234,10 @@ class InputVulnerabilityMixin(InputMixin):
                 update,
                 context,
                 await self.ask_for_new_attribute(
-                    update, "input vulnerability", "cve", self.get_next_state(self.ask_for_input_vulnerability)
+                    update, "input vulnerability", "cve", self.get_next_state(self.save_input_vulnerability)
                 ),
             )
-            if not update.callback_query or not update.callback_query.data
+            if not update.callback_query or not update.callback_query.data or update.callback_query.data == "0"
             else await self.go_to_next_state(
                 update,
                 context,
@@ -284,4 +276,4 @@ class InputVulnerabilityMixin(InputMixin):
         if instance:
             await self.reply(update, f"New input vulnerability *{self.escape(instance.cve)}* has been created")
             self.add_context_value(context, Context.INPUT_VULNERABILITY, instance)
-        return await self.go_to_next_state(update, context, next_state)
+        return await self.go_to_next_state(update, context, next_state, invoke_next_state=instance is None)

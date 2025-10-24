@@ -150,4 +150,4 @@ class AuthenticationMixin(BaseMixin):
         )
         if instance:
             self.add_context_value(context, Context.AUTHENTICATION, instance)
-        return await self.go_to_next_state(update, context, next_state)
+        return await self.go_to_next_state(update, context, next_state, invoke_next_state=instance is None)

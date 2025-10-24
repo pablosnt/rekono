@@ -99,12 +99,14 @@ class BaseTelegramBot(BaseTelegram):
     def add_context_value(self, context: CallbackContext, key: Context, value: Any) -> None:
         """Add a value to the conversation context.
 
+        Safely stores a value in the conversation context only if chat_data is available.
+
         Args:
             context (CallbackContext): The callback context to update.
             key (Context): The context key to set.
             value (Any): The value to store.
         """
-        if context.chat_data:
+        if context.chat_data is not None:
             context.chat_data[key.value] = value
 
     def remove_context_value(self, context: CallbackContext, key: Context) -> None:

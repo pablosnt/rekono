@@ -60,7 +60,6 @@ services:
   
   tasks-worker:
     restart: always
-    # Needed to verify the existence of wordlists. TODO: Support soft wordlist verification on Docker environments for default wordlists
     image: pablosnt/rekono-worker:unstable
     command: uv run --no-dev manage.py rqworker tasks
     hostname: tasks-worker
