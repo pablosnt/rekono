@@ -7,7 +7,7 @@ ARG LABEL_DOCUMENTATION="https://github.com/pablosnt/rekono/wiki"
 ARG LABEL_AUTHORS="Pablo Santiago López"
 ARG LABEL_LICENSES="GPL-3.0"
 
-ARG BACKEND_DEBIAN_DEPENDENCIES="libpq-dev libmagic1 libgcc-s1"
+ARG BACKEND_DEBIAN_DEPENDENCIES="libpq-dev libmagic1 libgcc-s1 libxml2-dev libxslt-dev python3-dev python3-pil python3-pil.imagetk libjpeg-dev zlib1g-dev"
 
 
 FROM ghcr.io/astral-sh/uv:python3.13-bookworm-slim AS build-backend
@@ -16,12 +16,16 @@ ARG BACKEND_DEBIAN_DEPENDENCIES
 
 COPY backend/ /code
 COPY config.yaml /rekono/
+WORKDIR /code
 
 RUN mkdir -p /opt/python/ /dpkg && \
     # Explicitly install python in order to export it to the next stage
     uv python install --managed-python --install-dir /tmp/python && \
     # Save python environment
     mv /tmp/python/cpython*/* /opt/python/ && \
+    # Install debian dependencies required to build python dependencies
+    apt update && \
+    apt install --yes --no-install-recommends $BACKEND_DEBIAN_DEPENDENCIES && \
     # Install python dependencies
     uv sync --no-dev --locked --project /code --python /opt/python/bin/python  && \
     # Download debian dependencies to export them to the next stage
@@ -62,7 +66,7 @@ COPY --from=build-backend --chown=65532:65532 /code /code
 COPY --from=build-backend /dpkg /
 COPY --from=build-backend /opt/python /opt/python
 COPY --from=build-backend /usr/local/bin/uv /bin/
-# Wget needed to perform the healthcheck
+# Wget required to healthcheck
 COPY --from=busybox:stable /bin/wget /usr/bin/wget
 
 WORKDIR /code
@@ -99,7 +103,7 @@ LABEL org.opencontainers.image.title="Rekono Frontend"
 LABEL org.opencontainers.image.description="Rekono frontend image based on a distroless debian image"
 
 COPY --from=build-frontend --chown=65532:65532 /code/.output/ /app
-# Wget needed to perform the healthcheck
+# Wget required to healthcheck
 COPY --from=busybox:stable /bin/wget /usr/bin/wget
 
 WORKDIR /app
@@ -142,7 +146,7 @@ WORKDIR /code
 RUN apt update && \
     TOOLS="nmap theharvester nikto sslscan sslyze cmseek zaproxy exploitdb metasploit-framework emailharvester joomscan gitleaks smbmap nuclei gobuster seclists dirb" && \
     apt install --yes --no-install-recommends $TOOLS $BACKEND_DEBIAN_DEPENDENCIES libcap2-bin git ca-certificates && \
-    # Grant capabilities needed to nmap in order to get it running in a rootless environment
+    # Grant capabilities required to nmap in order to get it running in a rootless environment
     setcap cap_net_raw,cap_net_admin,cap_net_bind_service+eip $(which nmap) && \
     # Clean apt resources
     apt autoremove -y && \
