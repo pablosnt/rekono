@@ -14,7 +14,7 @@ jobs:
         with:
           filters: |
             backend:
-              - 'src/backend/**'
+              - 'backend/**'
 
       - name: Checkout
         if: ${{ steps.changes.outputs.backend == 'true' || github.event_name != 'pull_request' }}
@@ -30,25 +30,25 @@ jobs:
           python-version: 3.12.0 # Required by pytype
       
       - name: Install dependencies
-        working-directory: src/backend
+        working-directory: backend
         if: ${{ steps.changes.outputs.backend == 'true' || github.event_name != 'pull_request' }}
         run: uv sync --locked
 
       - name: Ruff
         if: ${{ steps.changes.outputs.backend == 'true' || github.event_name != 'pull_request' }}
-        working-directory: src/backend
+        working-directory: backend
         run: |
           uvx ruff format --check
           uvx ruff check
       
       - name: Flake8
         if: ${{ (steps.changes.outputs.backend == 'true' || github.event_name != 'pull_request') && !cancelled() }}
-        working-directory: src/backend
+        working-directory: backend
         run: uvx flake8 .
       
       - name: PyType
         if: ${{ (steps.changes.outputs.backend == 'true' || github.event_name != 'pull_request') && !cancelled() }}
-        working-directory: src/backend
+        working-directory: backend
         run: uvx pytype --disable "import-error,pyi-error,invalid-annotation" --keep-going --jobs 100 .
 
   frontend:
@@ -61,7 +61,7 @@ jobs:
         with:
           filters: |
             frontend:
-              - 'src/frontend/**'
+              - 'frontend/**'
 
       - name: Checkout
         if: ${{ steps.changes.outputs.frontend == 'true' || github.event_name != 'pull_request' }}
@@ -71,15 +71,15 @@ jobs:
       
       - name: Install NPM dependencies
         if: ${{ steps.changes.outputs.frontend == 'true' || github.event_name != 'pull_request' }}
-        working-directory: src/frontend
+        working-directory: frontend
         run: npm install .
       
       - name: ESLint
         if: ${{ steps.changes.outputs.frontend == 'true' || github.event_name != 'pull_request' }}
-        working-directory: src/frontend/
+        working-directory: frontend/
         run: npm run eslint
       
       - name: Prettier
         if: ${{ (steps.changes.outputs.frontend == 'true' || github.event_name != 'pull_request') && !cancelled() }}
-        working-directory: src/frontend/
+        working-directory: frontend/
         run: npm run prettier

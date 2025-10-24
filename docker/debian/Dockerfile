@@ -31,8 +31,8 @@ RUN apt update -y && \
     echo 1 > /kaboxer/packaging-revision
 
 # Source code and configuration
-COPY src/backend/ /code
-COPY src/frontend/dist_electron/rekono_*.deb /code
+COPY backend/ /code
+COPY frontend/dist_electron/rekono_*.deb /code
 COPY config.yaml /rekono
 COPY docker/debian/entrypoint.sh /entrypoint.sh
 COPY docker/debian/set_permissions.sh /set_permissions.sh

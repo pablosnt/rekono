@@ -32,10 +32,10 @@ venv.bak/
 # Envionment
 .DS_Store
 .vscode/
-reports/
+/reports/
 /wordlists/
-logs/
-/src/backend/tests/home/
+/logs/
+home/
 
 # Vue.js and Nuxt
 node_modules/

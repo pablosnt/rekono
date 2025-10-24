@@ -3,11 +3,10 @@ on:
   workflow_dispatch:
   pull_request:
     paths:
-      - 'src/backend/**'
+      - 'backend/**'
 
 env:
-  # Temporal change to detect actual test errors easily. Then change it to 95
-  REQUIRED_COVERAGE: 90
+  REQUIRED_COVERAGE: 95
 
 jobs:
   unit-tests:
@@ -31,15 +30,15 @@ jobs:
           activate-environment: true
       
       - name: Install dependencies
-        working-directory: src/backend
+        working-directory: backend
         run: uv sync --locked
 
       - name: Run unit tests
-        working-directory: src/backend
+        working-directory: backend
         run: uv run coverage run --concurrency=multiprocessing,thread manage.py test --parallel 50
       
       - name: Check coverage
-        working-directory: src/backend
+        working-directory: backend
         run: |
           uv run coverage combine
           uv run coverage report -m --skip-covered --omit="tests/*,platforms/telegram_app/bot/*,platforms/telegram_app/framework.py,platforms/**/notifications.py" --fail-under=$REQUIRED_COVERAGE

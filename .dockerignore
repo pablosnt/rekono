@@ -19,7 +19,7 @@ LICENSE.txt
 reports/
 wordlists/
 logs/
-src/backend/tests/*
+backend/tests/*
 node_modules/
 .nuxt/
 .prettierigonre
