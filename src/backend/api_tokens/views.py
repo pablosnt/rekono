@@ -7,6 +7,7 @@ access and proper authentication controls.
 from django.db.models import QuerySet
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.serializers import Serializer
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from api_tokens.filters import ApiTokenFilter
 from api_tokens.models import ApiToken
@@ -27,6 +28,7 @@ class ApiTokenViewSet(BaseViewSet):
         serializer_class (Serializer): Default serializer for API tokens
         filterset_class (FilterSet): Filter class for token queries
         permission_classes (list): Required permissions for access
+        authentication_classes (list): Authentication classes for request validation
         http_method_names (list): Allowed HTTP methods
         search_fields (list): Fields available for text search
         ordering_fields (list): Fields available for result ordering
@@ -37,6 +39,8 @@ class ApiTokenViewSet(BaseViewSet):
     serializer_class = ApiTokenSerializer
     filterset_class = ApiTokenFilter
     permission_classes = [IsAuthenticated]
+    # Needed to disallow API token management by an user authenticated with an API token
+    authentication_classes = [JWTAuthentication]
     http_method_names = ["get", "post", "delete"]
     search_fields = ["name"]
     ordering_fields = ["id", "name", "expiration"]
