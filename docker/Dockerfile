@@ -14,7 +14,7 @@ FROM ghcr.io/astral-sh/uv:python3.13-bookworm-slim AS build-backend
 
 ARG BACKEND_DEBIAN_DEPENDENCIES
 
-COPY src/backend/ /code
+COPY backend/ /code
 COPY config.yaml /rekono/
 
 RUN mkdir -p /opt/python/ /dpkg && \
@@ -71,7 +71,7 @@ EXPOSE 8000
 
 FROM node:22.15.1-bookworm-slim AS build-frontend
 
-COPY src/frontend /code
+COPY frontend /code
 WORKDIR /code
 # Build frontend for production
 RUN npm install && npm run build

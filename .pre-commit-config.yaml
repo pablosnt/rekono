@@ -1,15 +1,14 @@
 repos:
-    # TODO: Move backend and frontend to the root folder
     - repo: local
       hooks:
           - id: eslint
             name: eslint
-            entry: sh -c 'cd src/frontend; npm run eslint:fix; npm run eslint'
+            entry: sh -c 'cd frontend; npm run eslint:fix; npm run eslint'
             language: system
             types: [ javascript ]
           - id: prettier
             name: prettier
-            entry: sh -c 'cd src/frontend; npm run prettier:fix; npm run prettier'
+            entry: sh -c 'cd frontend; npm run prettier:fix; npm run prettier'
             language: system
             types: [ javascript ]
     - repo: https://github.com/gitleaks/gitleaks.git

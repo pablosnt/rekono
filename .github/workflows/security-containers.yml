@@ -75,7 +75,7 @@ jobs:
 
       - name: Get metadata
         id: metadata
-        working-directory: src/backend/rekono
+        working-directory: backend/rekono
         run: |
           REKONO_VERSION=$(grep -oP '^VERSION = "\K[^"]+' settings.py | head -1)
           echo "version=$REKONO_VERSION" >> "$GITHUB_OUTPUT"
