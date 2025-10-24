@@ -2,37 +2,33 @@ repos:
     # TODO: Move backend and frontend to the root folder
     - repo: local
       hooks:
-          - id: ruff-format
-            name: ruff format
-            entry: sh -c 'cd src/backend; uvx ruff format .; uvx ruff format . --check'
-            language: python
-            types: [python]
-          - id: ruff-check
-            name: ruff check
-            entry: sh -c 'cd src/backend; uvx ruff check --fix; uvx ruff check'
-            language: python
-            types: [python]
-          - id: ruff-imports
-            name: ruff check --select I
-            entry: sh -c 'cd src/backend; uvx ruff check --select I --fix; uvx ruff check --select I'
-            language: python
-            types: [python]
-          - id: flake8
-            name: flake8
-            entry: sh -c 'cd src/backend; uvx flake8 .'
-            language: python
-            types: [python]
           - id: eslint
             name: eslint
             entry: sh -c 'cd src/frontend; npm run eslint:fix; npm run eslint'
             language: system
-            types: [javascript]
+            types: [ javascript ]
           - id: prettier
             name: prettier
             entry: sh -c 'cd src/frontend; npm run prettier:fix; npm run prettier'
             language: system
-            types: [javascript]
+            types: [ javascript ]
     - repo: https://github.com/gitleaks/gitleaks.git
-      rev: v8.18.2
+      rev: v8.28.0
       hooks:
         - id: gitleaks
+    - repo: https://github.com/astral-sh/ruff-pre-commit
+      rev: v0.14.2
+      hooks:
+        - id: ruff-check
+          types_or: [ python, pyi ]
+          args: [ --fix ]
+        - id: ruff-check
+          types_or: [ python, pyi ]
+          args: [ --select I,--fix ]
+        - id: ruff-format
+          types_or: [ python, pyi ]
+    -   repo: https://github.com/pycqa/flake8
+        rev: 7.3.0
+        hooks:
+        - id: flake8
+          types_or: [ python, pyi ]
