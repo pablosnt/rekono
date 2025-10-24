@@ -1,0 +1,13 @@
+{
+    "cms_id": "wp",
+    "cms_name": "WordPress",
+    "cms_url": "https://wordpress.org",
+    "detection_param": "generator",
+    "last_scanned": "2022-02-18 17:43:42.398858",
+    "url": "http://10.10.10.10/",
+    "wp_license": "http://10.10.10.10//license.txt",
+    "wp_plugins": "social-warfare Version 3.5.2,wp-file-upload Version 5.3,wp-advanced-search Version 1.0,",
+    "wp_readme_file": "http://10.10.10.10//readme.html",
+    "wp_themes": "twentytwenty Version 1.0,",
+    "wp_version": "5.3"
+}

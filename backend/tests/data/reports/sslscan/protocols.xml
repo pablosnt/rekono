@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document title="SSLScan Results" version="2.0.11-static" web="http://github.com/rbsec/sslscan">
+ <ssltest host="10.10.10.10" sniname="10.10.10.10" port="443">
+  <protocol type="ssl" version="2" enabled="0" />
+  <protocol type="ssl" version="3" enabled="0" />
+  <protocol type="tls" version="1.0" enabled="1" />
+  <protocol type="tls" version="1.1" enabled="1" />
+  <protocol type="tls" version="1.2" enabled="1" />
+  <protocol type="tls" version="1.3" enabled="0" />
+  <fallback supported="0" />
+  <renegotiation supported="1" secure="1" />
+  <compression supported="0" />
+  <heartbleed sslversion="TLSv1.2" vulnerable="0" />
+  <heartbleed sslversion="TLSv1.1" vulnerable="0" />
+  <heartbleed sslversion="TLSv1.0" vulnerable="0" />
+  <cipher status="preferred" sslversion="TLSv1.2" bits="256" cipher="ECDHE-RSA-AES256-GCM-SHA384" id="0xC030" strength="strong" curve="P-384" ecdhebits="384" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="ECDHE-RSA-AES128-GCM-SHA256" id="0xC02F" strength="strong" curve="25519" ecdhebits="253" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="DHE-RSA-AES256-GCM-SHA384" id="0x009F" strength="strong" dhebits="2048" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="DHE-RSA-AES128-GCM-SHA256" id="0x009E" strength="strong" dhebits="2048" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="ECDHE-RSA-AES256-SHA384" id="0xC028" strength="acceptable" curve="P-384" ecdhebits="384" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="ECDHE-RSA-AES128-SHA256" id="0xC027" strength="acceptable" curve="25519" ecdhebits="253" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="ECDHE-RSA-AES256-SHA" id="0xC014" strength="acceptable" curve="P-384" ecdhebits="384" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="ECDHE-RSA-AES128-SHA" id="0xC013" strength="acceptable" curve="25519" ecdhebits="253" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="AES256-GCM-SHA384" id="0x009D" strength="acceptable" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="AES128-GCM-SHA256" id="0x009C" strength="acceptable" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="AES256-SHA256" id="0x003D" strength="acceptable" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="AES128-SHA256" id="0x003C" strength="acceptable" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="256" cipher="AES256-SHA" id="0x0035" strength="acceptable" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="128" cipher="AES128-SHA" id="0x002F" strength="acceptable" />
+  <cipher status="accepted" sslversion="TLSv1.2" bits="112" cipher="DES-CBC3-SHA" id="0x000A" strength="medium" />
+  <cipher status="preferred" sslversion="TLSv1.1" bits="256" cipher="ECDHE-RSA-AES256-SHA" id="0xC014" strength="acceptable" curve="P-384" ecdhebits="384" />
+  <cipher status="accepted" sslversion="TLSv1.1" bits="128" cipher="ECDHE-RSA-AES128-SHA" id="0xC013" strength="acceptable" curve="25519" ecdhebits="253" />
+  <cipher status="accepted" sslversion="TLSv1.1" bits="256" cipher="AES256-SHA" id="0x0035" strength="acceptable" />
+  <cipher status="accepted" sslversion="TLSv1.1" bits="128" cipher="AES128-SHA" id="0x002F" strength="acceptable" />
+  <cipher status="accepted" sslversion="TLSv1.1" bits="112" cipher="DES-CBC3-SHA" id="0x000A" strength="medium" />
+  <cipher status="preferred" sslversion="TLSv1.0" bits="256" cipher="ECDHE-RSA-AES256-SHA" id="0xC014" strength="acceptable" curve="P-384" ecdhebits="384" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="128" cipher="ECDHE-RSA-AES128-SHA" id="0xC013" strength="acceptable" curve="25519" ecdhebits="253" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="256" cipher="AES256-SHA" id="0x0035" strength="acceptable" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="128" cipher="AES128-SHA" id="0x002F" strength="acceptable" />
+  <cipher status="accepted" sslversion="TLSv1.0" bits="112" cipher="DES-CBC3-SHA" id="0x000A" strength="medium" />
+ <certificates>
+  <certificate type="short">
+   <signature-algorithm>sha256WithRSAEncryption</signature-algorithm>
+   <pk error="false" type="RSA" bits="2048" />
+   <subject><![CDATA[atsserver.acute.local]]></subject>
+   <altnames><![CDATA[DNS:atsserver.acute.local, DNS:atsserver]]></altnames>
+   <issuer><![CDATA[acute-ATSSERVER-CA]]></issuer>
+   <self-signed>false</self-signed>
+   <not-valid-before>Jan  6 06:34:58 2022 GMT</not-valid-before>
+   <not-valid-after>Jan  4 06:34:58 2030 GMT</not-valid-after>
+   <expired>false</expired>
+  </certificate>
+ </certificates>
+ </ssltest>
+</document>

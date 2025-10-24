@@ -1,0 +1,16 @@
+{
+    "asns": [
+        "AS63949"
+    ],
+    "interesting_urls": [
+        "http:\/\/scanme.nmap.org",
+        "http:\/\/scanme.nmap.org\/",
+        "http:\/\/scanme.nmap.org\/\/r\/n\/r\/nUser:\/r\/n-"
+    ],
+    "ips": [
+        "45.33.32.156",
+        "74.207.244.221",
+        "2600:3c01::f03c:91ff:fe18:bb2f"
+    ],
+    "shodan": []
+}

@@ -1,0 +1,18 @@
+{
+    "cms_id": "joom",
+    "cms_name": "joomla",
+    "cms_url": "https://joomla.org",
+    "detection_param": "header",
+    "joomla_backup_files": [
+        "https://10.10.10.10/demo/2.back",
+        "https://10.10.10.10/demo/2.save",
+        "https://10.10.10.10/demo/2.tmp",
+        "https://10.10.10.10/demo/2.backup",
+        "https://10.10.10.10/demo/2.txt"
+    ],
+    "joomla_debug_mode": "enabled",
+    "joomla_version": "1.0",
+    "last_scanned": "2022-02-18 17:02:47.609972",
+    "url": "https://10.10.10.10/demo",
+    "vulnerabilities_count": "0"
+}

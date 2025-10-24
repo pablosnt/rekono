@@ -1,0 +1,296 @@
+{
+    "cms_id": "wp",
+    "cms_name": "WordPress",
+    "cms_url": "https://wordpress.org",
+    "detection_param": "generator",
+    "last_scanned": "2022-02-18 17:48:14.232005",
+    "path": "var/www/html/",
+    "url": "http://10.10.10.10",
+    "wp_changelog_file": "https://codex.wordpress.org/Version_4.8.3",
+    "wp_license": "http://10.10.10.10/license.txt",
+    "wp_plugins": "wp-advanced-search Version 1.0,social-warfare Version 3.5.2,simple-file-list Version 5,wp-file-upload Version 4.8.3,",
+    "wp_readme_file": "http://10.10.10.10/readme.html",
+    "wp_themes": "twentyseventeen Version 4.8.3,",
+    "wp_version": "4.8.3",
+    "wp_vuln_count": "18",
+    "wp_vulns": {
+        "changelog_url": "https://codex.wordpress.org/Version_4.8.3",
+        "release_date": "2017-10-31",
+        "version": "4.8.3",
+        "vulnerabilities": [
+            {
+                "cve": "CVE-2019-16223",
+                "cvss_score": "3.5",
+                "cwe_id": "79",
+                "date": "2019-09-11",
+                "fixed_in": "N/A",
+                "name": "WordPress before 5.2.3 allows XSS in post previews by authenticated users.",
+                "references": [
+                    "https://wordpress.org/news/2019/09/wordpress-5-2-3-security-and-maintenance-release/"
+                ],
+                "type": "Cross Site Scripting"
+            },
+            {
+                "cve": "CVE-2019-16222",
+                "cvss_score": "4.3",
+                "cwe_id": "79",
+                "date": "2019-09-11",
+                "fixed_in": "N/A",
+                "name": "WordPress before 5.2.3 has an issue with URL sanitization in wp_kses_bad_protocol_once in wp-includes/kses.php that can lead to cross-site scripting (XSS) attacks.",
+                "references": [
+                    "https://github.com/WordPress/WordPress/commit/30ac67579559fe42251b5a9f887211bf61a8ed68",
+                    "https://wordpress.org/news/2019/09/wordpress-5-2-3-security-and-maintenance-release/",
+                    "https://core.trac.wordpress.org/changeset/45997"
+                ],
+                "type": "Cross Site Scripting"
+            },
+            {
+                "cve": "CVE-2019-16221",
+                "cvss_score": "4.3",
+                "cwe_id": "79",
+                "date": "2019-09-11",
+                "fixed_in": "N/A",
+                "name": "WordPress before 5.2.3 allows reflected XSS in the dashboard.",
+                "references": [
+                    "https://wordpress.org/news/2019/09/wordpress-5-2-3-security-and-maintenance-release/"
+                ],
+                "type": "Cross Site Scripting"
+            },
+            {
+                "cve": "CVE-2019-16220",
+                "cvss_score": "5.8",
+                "cwe_id": "601",
+                "date": "2019-09-11",
+                "fixed_in": "N/A",
+                "name": "In WordPress before 5.2.3, validation and sanitization of a URL in wp_validate_redirect in wp-includes/pluggable.php could lead to an open redirect.",
+                "references": [
+                    "https://core.trac.wordpress.org/changeset/45971",
+                    "https://github.com/WordPress/WordPress/commit/c86ee39ff4c1a79b93c967eb88522f5c09614a28",
+                    "https://wordpress.org/news/2019/09/wordpress-5-2-3-security-and-maintenance-release/"
+                ],
+                "type": ""
+            },
+            {
+                "cve": "CVE-2019-16219",
+                "cvss_score": "4.3",
+                "cwe_id": "79",
+                "date": "2019-09-11",
+                "fixed_in": "N/A",
+                "name": "WordPress before 5.2.3 allows XSS in shortcode previews.",
+                "references": [
+                    "https://fortiguard.com/zeroday/FG-VD-18-165",
+                    "https://wordpress.org/news/2019/09/wordpress-5-2-3-security-and-maintenance-release/"
+                ],
+                "type": "Cross Site Scripting"
+            },
+            {
+                "cve": "CVE-2019-16218",
+                "cvss_score": "4.3",
+                "cwe_id": "79",
+                "date": "2019-09-11",
+                "fixed_in": "N/A",
+                "name": "WordPress before 5.2.3 allows XSS in stored comments.",
+                "references": [
+                    "https://wordpress.org/news/2019/09/wordpress-5-2-3-security-and-maintenance-release/"
+                ],
+                "type": "Cross Site Scripting"
+            },
+            {
+                "cve": "CVE-2019-16217",
+                "cvss_score": "4.3",
+                "cwe_id": "79",
+                "date": "2019-09-11",
+                "fixed_in": "N/A",
+                "name": "WordPress before 5.2.3 allows XSS in media uploads because wp_ajax_upload_attachment is mishandled.",
+                "references": [
+                    "https://core.trac.wordpress.org/changeset/45936",
+                    "https://wordpress.org/news/2019/09/wordpress-5-2-3-security-and-maintenance-release/"
+                ],
+                "type": "Cross Site Scripting"
+            },
+            {
+                "cve": "CVE-2019-9787",
+                "cvss_score": "6.8",
+                "cwe_id": "352",
+                "date": "2019-03-14",
+                "fixed_in": "N/A",
+                "name": "WordPress before 5.1.1 does not properly filter comment content, leading to Remote Code Execution by unauthenticated users in a default configuration. This occurs because CSRF protection is mishandled, and because Search Engine Optimization of A elements is performed incorrectly, leading to XSS. The XSS results in administrative access, which allows arbitrary changes to .php files. This is related to wp-admin/includes/ajax-actions.php and wp-includes/comment.php.",
+                "references": [
+                    "https://wordpress.org/support/wordpress-version/version-5-1-1/",
+                    "https://wordpress.org/news/2019/03/wordpress-5-1-1-security-and-maintenance-release/",
+                    "http://www.securityfocus.com/bid/107411",
+                    "https://blog.ripstech.com/2019/wordpress-csrf-to-rce/",
+                    "https://github.com/WordPress/WordPress/commit/0292de60ec78c5a44956765189403654fe4d080b",
+                    "https://lists.debian.org/debian-lts-announce/2019/03/msg00044.html"
+                ],
+                "type": "Execute Code, Cross Site Scripting, CSRF "
+            },
+            {
+                "cve": "CVE-2019-8942",
+                "cvss_score": "6.5",
+                "cwe_id": "94",
+                "date": "2019-02-19",
+                "fixed_in": "N/A",
+                "name": "WordPress before 4.9.9 and 5.x before 5.0.1 allows remote code execution because an _wp_attached_file Post Meta entry can be changed to an arbitrary string, such as one ending with a .jpg?file.php substring. An attacker with author privileges can execute arbitrary code by uploading a crafted image containing PHP code in the Exif metadata. Exploitation can leverage CVE-2019-8943.",
+                "references": [
+                    "https://www.exploit-db.com/exploits/46662/",
+                    "https://www.exploit-db.com/exploits/46511/",
+                    "https://www.debian.org/security/2019/dsa-4401",
+                    "https://lists.debian.org/debian-lts-announce/2019/03/msg00044.html",
+                    "http://www.rapid7.com/db/modules/exploit/multi/http/wp_crop_rce",
+                    "http://www.securityfocus.com/bid/107088",
+                    "https://blog.ripstech.com/2019/wordpress-image-remote-code-execution/",
+                    "http://packetstormsecurity.com/files/152396/WordPress-5.0.0-crop-image-Shell-Upload.html"
+                ],
+                "type": "Execute Code"
+            },
+            {
+                "cve": "CVE-2018-20153",
+                "cvss_score": "3.5",
+                "cwe_id": "79",
+                "date": "2018-12-14",
+                "fixed_in": "N/A",
+                "name": "In WordPress before 4.9.9 and 5.x before 5.0.1, contributors could modify new comments made by users with greater privileges, possibly causing XSS.",
+                "references": [
+                    "https://www.zdnet.com/article/wordpress-plugs-bug-that-led-to-google-indexing-some-user-passwords/",
+                    "https://codex.wordpress.org/Version_4.9.9",
+                    "https://wordpress.org/support/wordpress-version/version-5-0-1/",
+                    "http://www.securityfocus.com/bid/106220",
+                    "https://wordpress.org/news/2018/12/wordpress-5-0-1-security-release/"
+                ],
+                "type": "Cross Site Scripting"
+            },
+            {
+                "cve": "CVE-2018-20152",
+                "cvss_score": "5.0",
+                "cwe_id": "20",
+                "date": "2018-12-14",
+                "fixed_in": "N/A",
+                "name": "In WordPress before 4.9.9 and 5.x before 5.0.1, authors could bypass intended restrictions on post types via crafted input.",
+                "references": [
+                    "https://wordpress.org/support/wordpress-version/version-5-0-1/",
+                    "http://www.securityfocus.com/bid/106220",
+                    "https://codex.wordpress.org/Version_4.9.9",
+                    "https://www.zdnet.com/article/wordpress-plugs-bug-that-led-to-google-indexing-some-user-passwords/",
+                    "https://wordpress.org/news/2018/12/wordpress-5-0-1-security-release/"
+                ],
+                "type": "Bypass a restriction or similar"
+            },
+            {
+                "cve": "CVE-2018-20151",
+                "cvss_score": "5.0",
+                "cwe_id": "200",
+                "date": "2018-12-14",
+                "fixed_in": "N/A",
+                "name": "In WordPress before 4.9.9 and 5.x before 5.0.1, the user-activation page could be read by a search engine&amp;#039;s web crawler if an unusual configuration were chosen. The search engine could then index and display a user&amp;#039;s e-mail address and (rarely) the password that was generated by default.",
+                "references": [
+                    "https://www.zdnet.com/article/wordpress-plugs-bug-that-led-to-google-indexing-some-user-passwords/",
+                    "http://www.securityfocus.com/bid/106220",
+                    "https://wordpress.org/news/2018/12/wordpress-5-0-1-security-release/",
+                    "https://codex.wordpress.org/Version_4.9.9",
+                    "https://wordpress.org/support/wordpress-version/version-5-0-1/"
+                ],
+                "type": "Obtain Information"
+            },
+            {
+                "cve": "CVE-2018-20150",
+                "cvss_score": "4.3",
+                "cwe_id": "79",
+                "date": "2018-12-14",
+                "fixed_in": "N/A",
+                "name": "In WordPress before 4.9.9 and 5.x before 5.0.1, crafted URLs could trigger XSS for certain use cases involving plugins.",
+                "references": [
+                    "https://www.zdnet.com/article/wordpress-plugs-bug-that-led-to-google-indexing-some-user-passwords/",
+                    "https://wordpress.org/support/wordpress-version/version-5-0-1/",
+                    "https://wordpress.org/news/2018/12/wordpress-5-0-1-security-release/",
+                    "http://www.securityfocus.com/bid/106220",
+                    "https://codex.wordpress.org/Version_4.9.9",
+                    "https://github.com/WordPress/WordPress/commit/fb3c6ea0618fcb9a51d4f2c1940e9efcd4a2d460"
+                ],
+                "type": "Cross Site Scripting"
+            },
+            {
+                "cve": "CVE-2018-20149",
+                "cvss_score": "3.5",
+                "cwe_id": "79",
+                "date": "2018-12-14",
+                "fixed_in": "N/A",
+                "name": "In WordPress before 4.9.9 and 5.x before 5.0.1, when the Apache HTTP Server is used, authors could upload crafted files that bypass intended MIME type restrictions, leading to XSS, as demonstrated by a .jpg file without JPEG data.",
+                "references": [
+                    "https://wordpress.org/news/2018/12/wordpress-5-0-1-security-release/",
+                    "https://www.zdnet.com/article/wordpress-plugs-bug-that-led-to-google-indexing-some-user-passwords/",
+                    "https://wordpress.org/support/wordpress-version/version-5-0-1/",
+                    "http://www.securityfocus.com/bid/106220",
+                    "https://codex.wordpress.org/Version_4.9.9",
+                    "https://github.com/WordPress/WordPress/commit/246a70bdbfac3bd45ff71c7941deef1bb206b19a"
+                ],
+                "type": "Cross Site Scripting, Bypass a restriction or similar"
+            },
+            {
+                "cve": "CVE-2018-20148",
+                "cvss_score": "7.5",
+                "cwe_id": "502",
+                "date": "2018-12-14",
+                "fixed_in": "N/A",
+                "name": "In WordPress before 4.9.9 and 5.x before 5.0.1, contributors could conduct PHP object injection attacks via crafted metadata in a wp.getMediaItem XMLRPC call. This is caused by mishandling of serialized data at phar:// URLs in the wp_get_attachment_thumb_file function in wp-includes/post.php.",
+                "references": [
+                    "https://www.zdnet.com/article/wordpress-vulnerability-affects-a-third-of-most-popular-websites-online/",
+                    "http://www.securityfocus.com/bid/106220",
+                    "https://blog.secarma.co.uk/labs/near-phar-dangerous-unserialization-wherever-you-are",
+                    "https://codex.wordpress.org/Version_4.9.9",
+                    "https://wordpress.org/news/2018/12/wordpress-5-0-1-security-release/",
+                    "https://wordpress.org/support/wordpress-version/version-5-0-1/",
+                    "https://www.zdnet.com/article/wordpress-plugs-bug-that-led-to-google-indexing-some-user-passwords/"
+                ],
+                "type": ""
+            },
+            {
+                "cve": "CVE-2018-20147",
+                "cvss_score": "5.5",
+                "cwe_id": "287",
+                "date": "2018-12-14",
+                "fixed_in": "N/A",
+                "name": "In WordPress before 4.9.9 and 5.x before 5.0.1, authors could modify metadata to bypass intended restrictions on deleting files.",
+                "references": [
+                    "https://wordpress.org/news/2018/12/wordpress-5-0-1-security-release/",
+                    "https://wordpress.org/support/wordpress-version/version-5-0-1/",
+                    "https://www.debian.org/security/2019/dsa-4401",
+                    "https://www.zdnet.com/article/wordpress-plugs-bug-that-led-to-google-indexing-some-user-passwords/",
+                    "http://www.securityfocus.com/bid/106220",
+                    "https://codex.wordpress.org/Version_4.9.9",
+                    "https://lists.debian.org/debian-lts-announce/2019/02/msg00019.html"
+                ],
+                "type": "Bypass a restriction or similar"
+            },
+            {
+                "cve": "CVE-2018-12895",
+                "cvss_score": "6.5",
+                "cwe_id": "22",
+                "date": "2018-06-26",
+                "fixed_in": "N/A",
+                "name": "WordPress through 4.9.6 allows Author users to execute arbitrary code by leveraging directory traversal in the wp-admin/post.php thumb parameter, which is passed to the PHP unlink function and can delete the wp-config.php file. This is related to missing filename validation in the wp-includes/post.php wp_delete_attachment function. The attacker must have capabilities for files and posts that are normally available only to the Author, Editor, and Administrator roles. The attack methodology is to delete wp-config.php and then launch a new installation process to increase the attacker&amp;#039;s privileges.",
+                "references": [
+                    "https://lists.debian.org/debian-lts-announce/2018/07/msg00046.html",
+                    "https://www.debian.org/security/2018/dsa-4250",
+                    "http://www.securityfocus.com/bid/104569",
+                    "https://blog.ripstech.com/2018/wordpress-file-delete-to-code-execution/"
+                ],
+                "type": "Execute Code, Directory traversal"
+            },
+            {
+                "cve": "CVE-2017-1000600",
+                "cvss_score": "6.5",
+                "cwe_id": "20",
+                "date": "2018-09-06",
+                "fixed_in": "N/A",
+                "name": "WordPress version &amp;lt;4.9 contains a CWE-20 Input Validation vulnerability in thumbnail processing that can result in remote code execution. This attack appears to be exploitable via thumbnail upload by an authenticated user and may require additional plugins in order to be exploited however this has not been confirmed at this time. This issue appears to have been partially, but not completely fixed in WordPress 4.9",
+                "references": [
+                    "http://www.securityfocus.com/bid/105305",
+                    "https://www.theregister.co.uk/2018/08/20/php_unserialisation_wordpress_vuln/",
+                    "https://youtu.be/GePBmsNJw6Y?t=1763"
+                ],
+                "type": "Execute Code"
+            }
+        ]
+    }
+}

@@ -1,0 +1,31 @@
+.,:::::: .-:::::':::.    :::.:::::::-.  :::::::..   
+;;;;'''' ;;;'''' `;;;;,  `;;; ;;,   `';,;;;;``;;;;  
+ [[cccc  [[[,,==   [[[[[. '[[ `[[     [[ [[[,/[[['  
+ $$""""  `$$$"``   $$$ "Y$c$$  $$,    $$ $$$$$$c    
+ 888oo,__ 888      888    Y88  888_,o8P' 888b "88bo,
+ """"YUMMM"MM,     MMM     YM  MMMMP"`   MMMM   "W" 
+
+[+] Bing discovered 5 emails
+|_ Author: @JosueEncinar
+|_ Description: Search emails from a domain through search engines.
+|_ Version: 0.3.0b
+|_ Usage: emailfinder -d domain.com
+
+Searching in google...
+Searching in bing...
+Searching in baidu...
+Searching in yandex...
+[+] bing done!
+[!]  yandex error YandexDetection, Robot detected
+[+] Google discovered 1 emails
+[+] google done!
+[i] Baidu did not discover any email IDs
+[+] baidu done!
+
+Total emails: 5
+----------------
+support@test.com
+education@test.com
+ceo@test.com
+someone@test.com
+other@test.com

