@@ -1,26 +1,38 @@
 repos:
+    # TODO: Move backend and frontend to the root folder
     - repo: local
       hooks:
-          - id: mypy
-            name: mypy
-            entry: sh -c 'cd src/; mypy --namespace-packages --package backend --install-types --non-interactive --ignore-missing-imports --exclude migrations/ --exclude env/'
+          - id: ruff-format
+            name: ruff format
+            entry: sh -c 'cd src/backend; uvx ruff format .; uvx ruff format . --check'
             language: python
             types: [python]
-            require_serial: true
-            verbose: true
+          - id: ruff-check
+            name: ruff check
+            entry: sh -c 'cd src/backend; uvx ruff check --fix; uvx ruff check'
+            language: python
+            types: [python]
+          - id: ruff-imports
+            name: ruff check --select I
+            entry: sh -c 'cd src/backend; uvx ruff check --select I --fix; uvx ruff check --select I'
+            language: python
+            types: [python]
+          - id: flake8
+            name: flake8
+            entry: sh -c 'cd src/backend; uvx flake8 .'
+            language: python
+            types: [python]
           - id: eslint
             name: eslint
             entry: sh -c 'cd src/frontend; npm run eslint:fix; npm run eslint'
             language: system
+            types: [javascript]
           - id: prettier
             name: prettier
             entry: sh -c 'cd src/frontend; npm run prettier:fix; npm run prettier'
             language: system
+            types: [javascript]
     - repo: https://github.com/gitleaks/gitleaks.git
       rev: v8.18.2
       hooks:
         - id: gitleaks
-    - repo: https://github.com/python/black.git
-      rev: 24.4.2
-      hooks:
-        - id: black

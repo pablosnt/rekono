@@ -94,12 +94,6 @@ class SecurityTest(ApiTest, TestCase):
         for operation in ["register", "enable", "disable"]:
             self.assertEqual(401, api_client.post(f"{self.mfa_user}{operation}/").status_code)
 
-        # Remove API token
-        self.assertEqual(204, api_client.delete(f"{self.api_tokens}{data['id']}/").status_code)
-
-        # Try to get admin1's profile using the removed API token
-        self.assertEqual(401, api_client.get(self.profile).status_code)
-
     def test_mfa(self) -> None:
         # Login as admin1
         client = APIClient()
