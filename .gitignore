@@ -33,9 +33,9 @@ venv.bak/
 .DS_Store
 .vscode/
 reports/
-/wordlists/
+wordlists/
 logs/
-/backend/tests/home/
+backend/tests/home/
 
 # Vue.js and Nuxt
 node_modules/
