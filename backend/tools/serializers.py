@@ -63,7 +63,7 @@ class SimpleConfigurationSerializer(ModelSerializer):
         """
 
         model = Configuration
-        fields = ("id", "name", "stage", "default")
+        fields = ("id", "name", "stage", "default", "deprecated")
 
 
 class ToolSerializer(LikeSerializer):

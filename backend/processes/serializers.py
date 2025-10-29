@@ -57,7 +57,11 @@ class SimpleStepSerializer(ModelSerializer):
     """
 
     configuration_id = PrimaryKeyRelatedField(
-        many=False, write_only=True, required=True, source="configuration", queryset=Configuration.objects.all()
+        many=False,
+        write_only=True,
+        required=True,
+        source="configuration",
+        queryset=Configuration.objects.filter(deprecated=False),
     )
     configuration = ConfigurationSerializer(many=False, read_only=True)
 

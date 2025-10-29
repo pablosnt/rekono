@@ -204,11 +204,11 @@ class TasksQueue(BaseScanQueue):
         # Order steps by stage, input complexity, output complexity, and configuration ID
         # This ensures proper execution order where simpler tools run before complex ones
         steps = (
-            Step.objects.annotate(
+            task.process.steps.filter(configuration__deprecated=False)
+            .annotate(
                 max_input=Max("configuration__arguments__inputs__type__id"),
                 max_output=Max("configuration__outputs__type__id"),
             )
-            .filter(process=task.process)
             .order_by("configuration__stage", "max_input", "max_output", "configuration__id")
         )
         executions_queue = ExecutionsQueue()

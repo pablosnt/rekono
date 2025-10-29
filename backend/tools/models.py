@@ -281,6 +281,7 @@ class Configuration(BaseModel):
     default_scanned_port = models.IntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(65535)], blank=True, null=True
     )
+    deprecated = models.BooleanField(default=False)
 
     class Meta:
         """Meta configuration for the Configuration model.
@@ -328,7 +329,9 @@ class Argument(BaseModel):
         ```
     """
 
-    configuration = models.ForeignKey(Configuration, related_name="arguments", on_delete=models.CASCADE)
+    configuration = models.ForeignKey(
+        Configuration, related_name="arguments", on_delete=models.CASCADE, blank=True, null=True
+    )
     name = models.TextField(max_length=20)
     argument = models.TextField(max_length=50, default="", blank=True)
     required = models.BooleanField(default=False)
