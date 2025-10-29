@@ -1175,16 +1175,5 @@
             "required": false,
             "multiple": false
         }
-    },
-    {
-        "model": "tools.argument",
-        "pk": 122,
-        "fields": {
-            "configuration": 50,
-            "name": "technology",
-            "argument": "{technology} {version}",
-            "required": false,
-            "multiple": false
-        }
     }
 ]
