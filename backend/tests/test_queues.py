@@ -56,7 +56,8 @@ class GenericQueueTest(QueueTest, TestCase):
                     new_item.append("findings", path)
                     last_expected.append(new_item)
         self.assertEqual(
-            expected + last_expected, self.queue.calculate_executions(self.fake_tool, self.findings, [], [], [], [])
+            expected + last_expected,
+            self.queue.calculate_executions(self.fake_configuration, self.findings, [], [], [], []),
         )
 
     def test_calculate_executions_from_only_hosts(self) -> None:
@@ -66,7 +67,7 @@ class GenericQueueTest(QueueTest, TestCase):
         hosts = Host.objects.all()
         self.assertEqual(
             [ExecutionParametersToEnqueue([host], [], [], [], []) for host in hosts],
-            self.queue.calculate_executions(self.fake_tool, hosts, [], [], [], []),
+            self.queue.calculate_executions(self.fake_configuration, hosts, [], [], [], []),
         )
 
     def test_calculate_executions_user_provided_entities(self) -> None:
@@ -88,7 +89,7 @@ class GenericQueueTest(QueueTest, TestCase):
                 )
             )
         executions = self.queue.calculate_executions(
-            self.fake_tool, [], target_ports, vulnerabilities, technologies, [self.wordlist]
+            self.fake_configuration, [], target_ports, vulnerabilities, technologies, [self.wordlist]
         )
         expected = []
         last_expected = []

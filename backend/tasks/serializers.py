@@ -184,6 +184,8 @@ class TaskSerializer(RelatedNotesSerializer):
         if not attrs.get("intensity"):
             attrs["intensity"] = IntensityEnum.NORMAL
         if attrs.get("configuration"):
+            if cast(Configuration, attrs.get("configuration")).deprecated:
+                raise ValidationError("Deprecated configurations can't be executed", code="configuration")
             attrs["process"] = None
             if not Intensity.objects.filter(
                 tool=cast(Configuration, attrs.get("configuration")).tool, value=attrs.get("intensity")
@@ -197,7 +199,7 @@ class TaskSerializer(RelatedNotesSerializer):
                 (InputTypeName.VULNERABILITY, "input_vulnerabilities"),
             ]:
                 if len(attrs.get(field, [])) > 0 and not Input.objects.filter(
-                    argument__tool=cast(Configuration, attrs.get("configuration")).tool, type__name=input_type
+                    argument__configuration=attrs.get("configuration"), type__name=input_type
                 ):
                     attrs[field] = []
         elif attrs.get("process"):

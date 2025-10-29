@@ -152,8 +152,8 @@ class BaseExecutor(LoggingEntity):
             "intensity": self.intensity.argument,
             "output": self.report if self.execution.configuration.tool.output_format else "",
         }
-        # For each tool argument, find the best input source that satisfies the argument requirements
-        for argument in self.execution.configuration.tool.arguments.all():
+        # For each configuration argument, find the best input source that satisfies the argument requirements
+        for argument in self.execution.configuration.arguments.all():
             for argument_input in argument.inputs.all().order_by("order"):
                 parsed_data: dict[str, Any] = {}
                 # Create a comprehensive list of all available input sources in priority order
@@ -245,13 +245,16 @@ class BaseExecutor(LoggingEntity):
             elif not argument.required:
                 parameters[argument.name] = ""
             else:
-                raise RuntimeError(f"Argument '{argument.name}' is required to execute tool '{argument.tool.name}'")
+                raise RuntimeError(
+                    f"Argument '{argument.name}' is required to execute configuration '{argument.configuration.name}'"
+                )
         # Parse formatted command arguments into list, handling quoted strings properly
         # Remove quotes from individual arguments to prevent shell escaping issues
         return [
             a.replace('"', "")
             for a in re.findall(
-                r'[^\s\'"]*[\'"][^\'"]+[\'"]|[^\'"\s]+', self.execution.configuration.arguments.format(**parameters)
+                r'[^\s\'"]*[\'"][^\'"]+[\'"]|[^\'"\s]+',
+                self.execution.configuration.command_template.format(**parameters),
             )
         ]
 

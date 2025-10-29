@@ -68,12 +68,12 @@ class InputTechnologyMixin(InputMixin):
         chat = await self.get_active_telegram_chat(update)
         if not chat:
             return ConversationHandler.END
-        tool = self.get_context_value(context, Context.TOOL)
-        if not tool:
-            await self.reply(update, "No tool selected")
+        configuration = self.get_context_value(context, Context.CONFIGURATION)
+        if not configuration:
+            await self.reply(update, "No configuration selected")
             return ConversationHandler.END
         if not await self.queryset_exists_async(
-            Input.objects.filter(argument__tool=tool, type__name=InputTypeName.TECHNOLOGY)
+            Input.objects.filter(argument__configuration=configuration, type__name=InputTypeName.TECHNOLOGY)
         ):
             return await self.go_to_next_state(update, context, self.get_next_state(self.create_input_technology))
         if not await self.queryset_exists_async(
@@ -188,12 +188,12 @@ class InputVulnerabilityMixin(InputMixin):
         chat = await self.get_active_telegram_chat(update)
         if not chat:
             return ConversationHandler.END
-        tool = self.get_context_value(context, Context.TOOL)
-        if not tool:
-            await self.reply(update, "No tool selected")
+        configuration = self.get_context_value(context, Context.CONFIGURATION)
+        if not configuration:
+            await self.reply(update, "No configuration selected")
             return ConversationHandler.END
         if not await self.queryset_exists_async(
-            Input.objects.filter(argument__tool=tool, type__name=InputTypeName.VULNERABILITY)
+            Input.objects.filter(argument__configuration=configuration, type__name=InputTypeName.VULNERABILITY)
         ):
             return await self.go_to_next_state(update, context, self.get_next_state(self.create_input_vulnerability))
         if not await self.queryset_exists_async(

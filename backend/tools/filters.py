@@ -28,7 +28,7 @@ class ToolFilter(LikeFilter):
 
     stage = ChoiceFilter(field_name="configurations__stage", choices=Stage.choices)
     intensity = ChoiceFilter(field_name="intensities__value", choices=Intensity.choices)
-    input = CharFilter(field_name="arguments__inputs__type__name")
+    input = CharFilter(field_name="configurations__arguments__inputs__type__name")
     output = CharFilter(field_name="configurations__outputs__type__name")
 
     class Meta:
@@ -51,17 +51,19 @@ class ToolFilter(LikeFilter):
 
 
 class ConfigurationFilter(FilterSet):
-    """Filter set for Configuration model with process and output filtering.
+    """Filter set for Configuration model with process and input/output filtering.
 
-    Provides filtering capabilities for tool configurations including output types,
+    Provides filtering capabilities for tool configurations including input/output types,
     process associations, and standard configuration field filtering.
 
     Attributes:
+        input (CharFilter): Filter by accepted input type name
         output (CharFilter): Filter by produced output type name
         process (NumberFilter): Filter by associated process ID
         no_process (NumberFilter): Exclude configurations associated with specific process
     """
 
+    input = CharFilter(field_name="arguments__inputs__type__name")
     output = CharFilter(field_name="outputs__type__name")
     process = NumberFilter(field_name="steps__process__id")
     no_process = NumberFilter(field_name="steps__process__id", exclude=True)
@@ -78,7 +80,8 @@ class ConfigurationFilter(FilterSet):
         fields = {
             "name": ["exact", "icontains"],
             "tool": ["exact"],
-            "arguments": ["exact", "icontains"],
+            "command_template": ["exact", "icontains"],
             "stage": ["exact"],
             "default": ["exact"],
+            "deprecated": ["exact"],
         }

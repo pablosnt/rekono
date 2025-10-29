@@ -91,7 +91,7 @@ class IntensityTest(ApiTestNoData, TestCase):
 
 
 class ArgumentTest(ApiTestNoData, TestCase):
-    expected_string = f"{nmap} - host"
+    expected_string = f"{nmap} - {first_nmap_configuration} - host"
 
     @cached_property
     def object(self) -> Argument:
@@ -99,7 +99,7 @@ class ArgumentTest(ApiTestNoData, TestCase):
 
 
 class InputTest(ApiTestNoData, TestCase):
-    expected_string = f"{nmap} - host - Host"
+    expected_string = f"{nmap} - {first_nmap_configuration} - host - Host"
 
     @cached_property
     def object(self) -> Input:

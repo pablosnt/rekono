@@ -51,7 +51,7 @@ class Execution(BaseModel):
 
     task = models.ForeignKey(Task, related_name="executions", on_delete=models.CASCADE, blank=True, null=True)
     rq_job_id = models.TextField(max_length=50, blank=True, null=True)
-    configuration = models.ForeignKey(Configuration, on_delete=models.CASCADE, blank=True, null=True)
+    configuration = models.ForeignKey(Configuration, on_delete=models.SET_NULL, blank=True, null=True)
     output_file = models.TextField(max_length=50, blank=True, null=True)
     output_plain = models.TextField(blank=True, null=True)
     skipped_reason = models.TextField(blank=True, null=True)

@@ -248,8 +248,10 @@ class TestingDataMixin:
         )
         for index, value in enumerate(IntensityEnum):
             Intensity.objects.create(tool=self.fake_tool, argument=f"-i {index}", value=value)
+
+        # Create configuration first
         configuration_arguments = []
-        for pattern, required, multiple, input_type_names in [
+        argument_patterns = [
             ("host", False, False, [InputTypeName.OSINT, InputTypeName.HOST]),
             ("url", True, False, [InputTypeName.PATH, InputTypeName.PORT, InputTypeName.HOST]),
             ("ports_commas", True, True, [InputTypeName.PORT]),
@@ -260,23 +262,34 @@ class TestingDataMixin:
             ("exploit", False, False, [InputTypeName.EXPLOIT]),
             ("token", False, False, [InputTypeName.AUTHENTICATION]),
             ("wordlist", False, False, [InputTypeName.WORDLIST]),
-        ]:
+        ]
+
+        for pattern, _, _, _ in argument_patterns:
             format_pattern = "{" + pattern + "}"
             configuration_arguments.append(format_pattern)
+
+        self.fake_configuration = Configuration.objects.create(
+            name="fake",
+            tool=self.fake_tool,
+            command_template=" ".join(configuration_arguments),
+            stage=Stage.ENUMERATION,
+            default=True,
+        )
+
+        # Now create arguments associated with the configuration
+        for pattern, required, multiple, input_type_names in argument_patterns:
+            format_pattern = "{" + pattern + "}"
             argument = Argument.objects.create(
-                tool=self.fake_tool, name=pattern, argument=f"-p {format_pattern}", required=required, multiple=multiple
+                configuration=self.fake_configuration,
+                name=pattern,
+                argument=f"-p {format_pattern}",
+                required=required,
+                multiple=multiple,
             )
             for index, input_type_name in enumerate(input_type_names):
                 Input.objects.create(
                     argument=argument, type=InputType.objects.get(name=input_type_name), order=index + 1
                 )
-        self.fake_configuration = Configuration.objects.create(
-            name="fake",
-            tool=self.fake_tool,
-            arguments=" ".join(configuration_arguments),
-            stage=Stage.ENUMERATION,
-            default=True,
-        )
 
     def setup_task_parameters(self) -> None:
         self.input_vulnerability = InputVulnerability.objects.create(cve="CVE-2023-2222")

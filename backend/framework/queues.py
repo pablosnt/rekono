@@ -19,7 +19,7 @@ from framework.models import BaseInput
 from input_types.models import InputType
 from parameters.models import InputTechnology, InputVulnerability
 from target_ports.models import TargetPort
-from tools.models import Input, Tool
+from tools.models import Configuration, Input
 from wordlists.models import Wordlist
 
 
@@ -238,7 +238,7 @@ class BaseScanQueue(BaseQueue):
 
     @staticmethod
     def calculate_executions(
-        tool: Tool,
+        configuration: Configuration,
         findings: list[Finding],
         target_ports: list[TargetPort],
         input_vulnerabilities: list[InputVulnerability],
@@ -252,7 +252,7 @@ class BaseScanQueue(BaseQueue):
         tool argument constraints and dependencies.
 
         Args:
-            tool (Tool): The security tool to execute.
+            configuration (Configuration): The security configuration to execute.
             findings (list[Finding]): Available findings for input.
             target_ports (list[TargetPort]): Available target ports.
             input_vulnerabilities (list[InputVulnerability]): Known vulnerabilities.
@@ -286,8 +286,10 @@ class BaseScanQueue(BaseQueue):
             # Avoid processing the same input type more than once
             if input_type in input_types_used:
                 continue
-            # For each tool input that matches the input type, ordered by priority order
-            for tool_input in Input.objects.filter(argument__tool=tool, type=input_type).order_by("order"):
+            # For each configuration input that matches the input type, ordered by priority order
+            for tool_input in Input.objects.filter(argument__configuration=configuration, type=input_type).order_by(
+                "order"
+            ):
                 # Filter base inputs according to the tool input's filter logic
                 filtered_base_inputs = [bi for bi in source if bi.filter(tool_input)]
                 if not filtered_base_inputs:

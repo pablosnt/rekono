@@ -5,10 +5,11 @@
         "fields": {
             "tool": 1,
             "name": "TCP ports",
-            "arguments": "--privileged {host} {intensity} {ports} -sS -oX {output}",
+            "command_template": "--privileged {host} {intensity} {ports} -sS -oX {output}",
             "stage": 2,
             "default": false,
-            "default_scanned_port": null
+            "default_scanned_port": null,
+            "deprecated": false
         }
     },
     {
@@ -17,10 +18,11 @@
         "fields": {
             "tool": 1,
             "name": "UDP ports",
-            "arguments": "--privileged {host} {intensity} {ports} -sU -oX {output}",
+            "command_template": "--privileged {host} {intensity} {ports} -sU -oX {output}",
             "stage": 2,
             "default": false,
-            "default_scanned_port": null
+            "default_scanned_port": null,
+            "deprecated": false
         }
     },
     {
@@ -29,10 +31,11 @@
         "fields": {
             "tool": 1,
             "name": "TCP ports & service versions",
-            "arguments": "--privileged {host} {intensity} {ports} -sS -sV -A -oX {output}",
+            "command_template": "--privileged {host} {intensity} {ports} -sS -sV -A -oX {output}",
             "stage": 2,
             "default": true,
-            "default_scanned_port": null
+            "default_scanned_port": null,
+            "deprecated": false
         }
     },
     {
@@ -41,10 +44,11 @@
         "fields": {
             "tool": 1,
             "name": "UDP ports & service versions",
-            "arguments": "--privileged {host} {intensity} {ports} -sU -sV -A -oX {output}",
+            "command_template": "--privileged {host} {intensity} {ports} -sU -sV -A -oX {output}",
             "stage": 2,
             "default": false,
-            "default_scanned_port": null
+            "default_scanned_port": null,
+            "deprecated": false
         }
     },
     {
@@ -53,10 +57,11 @@
         "fields": {
             "tool": 1,
             "name": "TCP & UDP ports",
-            "arguments": "--privileged {host} {intensity} {ports} -sS -sU -oX {output}",
+            "command_template": "--privileged {host} {intensity} {ports} -sS -sU -oX {output}",
             "stage": 2,
             "default": false,
-            "default_scanned_port": null
+            "default_scanned_port": null,
+            "deprecated": false
         }
     },
     {
@@ -65,10 +70,11 @@
         "fields": {
             "tool": 1,
             "name": "TCP & UDP ports & service versions",
-            "arguments": "--privileged {host} {intensity} {ports} -sS -sU -sV -A -oX {output}",
+            "command_template": "--privileged {host} {intensity} {ports} -sS -sU -sV -A -oX {output}",
             "stage": 2,
             "default": false,
-            "default_scanned_port": null
+            "default_scanned_port": null,
+            "deprecated": false
         }
     },
     {
@@ -77,10 +83,11 @@
         "fields": {
             "tool": 1,
             "name": "Fast TCP ports",
-            "arguments": "--privileged {host} {intensity} {ports} -F -sS -oX {output}",
+            "command_template": "--privileged {host} {intensity} {ports} -F -sS -oX {output}",
             "stage": 2,
             "default": false,
-            "default_scanned_port": null
+            "default_scanned_port": null,
+            "deprecated": false
         }
     },
     {
@@ -89,10 +96,11 @@
         "fields": {
             "tool": 1,
             "name": "Fast UDP ports",
-            "arguments": "--privileged {host} {intensity} {ports} -F -sU -oX {output}",
+            "command_template": "--privileged {host} {intensity} {ports} -F -sU -oX {output}",
             "stage": 2,
             "default": false,
-            "default_scanned_port": null
+            "default_scanned_port": null,
+            "deprecated": false
         }
     },
     {
@@ -101,10 +109,11 @@
         "fields": {
             "tool": 1,
             "name": "Fast TCP ports & service versions",
-            "arguments": "--privileged {host} {intensity} {ports} -F -sS -sV -A -oX {output}",
+            "command_template": "--privileged {host} {intensity} {ports} -F -sS -sV -A -oX {output}",
             "stage": 2,
             "default": false,
-            "default_scanned_port": null
+            "default_scanned_port": null,
+            "deprecated": false
         }
     },
     {
@@ -113,10 +122,11 @@
         "fields": {
             "tool": 1,
             "name": "Fast UDP ports & service versions",
-            "arguments": "--privileged {host} {intensity} {ports} -F -sU -sV -A -oX {output}",
+            "command_template": "--privileged {host} {intensity} {ports} -F -sU -sV -A -oX {output}",
             "stage": 2,
             "default": false,
-            "default_scanned_port": null
+            "default_scanned_port": null,
+            "deprecated": false
         }
     },
     {
@@ -125,10 +135,11 @@
         "fields": {
             "tool": 1,
             "name": "Fast TCP & UDP ports",
-            "arguments": "--privileged {host} {intensity} {ports} -F -sS -sU -oX {output}",
+            "command_template": "--privileged {host} {intensity} {ports} -F -sS -sU -oX {output}",
             "stage": 2,
             "default": false,
-            "default_scanned_port": null
+            "default_scanned_port": null,
+            "deprecated": false
         }
     },
     {
@@ -137,10 +148,11 @@
         "fields": {
             "tool": 1,
             "name": "Fast TCP & UDP ports & service versions",
-            "arguments": "--privileged {host} {intensity} {ports} -F -sS -sU -sV -A -oX {output}",
+            "command_template": "--privileged {host} {intensity} {ports} -F -sS -sU -sV -A -oX {output}",
             "stage": 2,
             "default": false,
-            "default_scanned_port": null
+            "default_scanned_port": null,
+            "deprecated": false
         }
     },
     {
@@ -149,10 +161,11 @@
         "fields": {
             "tool": 1,
             "name": "Vulners",
-            "arguments": "--privileged {host} {intensity} {ports} -sS -sV -A --script vulners -oX {output}",
+            "command_template": "--privileged {host} {intensity} {ports} -sS -sV -A --script vulners -oX {output}",
             "stage": 2,
             "default": false,
-            "default_scanned_port": null
+            "default_scanned_port": null,
+            "deprecated": false
         }
     },
     {
@@ -161,10 +174,11 @@
         "fields": {
             "tool": 1,
             "name": "FTP NSE scripts",
-            "arguments": "--privileged {host} {intensity} {ports} -sS -sV -A --script ftp-anon,ftp-proftpd-backdoor,ftp-vsftpd-backdoor,ftp-libopie,ftp-vuln-cve2010-4221 -oX {output}",
+            "command_template": "--privileged {host} {intensity} {ports} -sS -sV -A --script ftp-anon,ftp-proftpd-backdoor,ftp-vsftpd-backdoor,ftp-libopie,ftp-vuln-cve2010-4221 -oX {output}",
             "stage": 2,
             "default": false,
-            "default_scanned_port": null
+            "default_scanned_port": null,
+            "deprecated": false
         }
     },
     {
@@ -173,10 +187,11 @@
         "fields": {
             "tool": 2,
             "name": "Standard wordlist",
-            "arguments": "{url} {intensity} -o {output} --format=json --crawl --no-color --quiet-mode {headers} {wordlist} {authentication} {cookie}",
+            "command_template": "{url} {intensity} -o {output} --format=json --crawl --no-color --quiet-mode {headers} {wordlist} {authentication} {cookie}",
             "stage": 4,
             "default": true,
-            "default_scanned_port": null
+            "default_scanned_port": null,
+            "deprecated": false
         }
     },
     {
@@ -185,10 +200,11 @@
         "fields": {
             "tool": 2,
             "name": "Wordlist with extensions",
-            "arguments": "{url} {intensity} -o {output} --format=json --crawl --no-color --quiet-mode --force-extensions {headers} {wordlist} {authentication} {cookie}",
+            "command_template": "{url} {intensity} -o {output} --format=json --crawl --no-color --quiet-mode --force-extensions {headers} {wordlist} {authentication} {cookie}",
             "stage": 4,
             "default": false,
-            "default_scanned_port": null
+            "default_scanned_port": null,
+            "deprecated": false
         }
     },
     {
@@ -197,10 +213,11 @@
         "fields": {
             "tool": 2,
             "name": "Recursive",
-            "arguments": "{url} {intensity} -o {output} --format=json --crawl --no-color --quiet-mode --recursive --max-recursion-depth=10 {headers} {wordlist} {authentication} {cookie}",
+            "command_template": "{url} {intensity} -o {output} --format=json --crawl --no-color --quiet-mode --recursive --max-recursion-depth=10 {headers} {wordlist} {authentication} {cookie}",
             "stage": 4,
             "default": false,
-            "default_scanned_port": null
+            "default_scanned_port": null,
+            "deprecated": false
         }
     },
     {
@@ -209,10 +226,11 @@
         "fields": {
             "tool": 2,
             "name": "Deep recursive",
-            "arguments": "{url} {intensity} -o {output} --format=json --crawl --no-color --quiet-mode --deep-recursive --max-recursion-depth=10 {headers} {wordlist} {authentication} {cookie}",
+            "command_template": "{url} {intensity} -o {output} --format=json --crawl --no-color --quiet-mode --deep-recursive --max-recursion-depth=10 {headers} {wordlist} {authentication} {cookie}",
             "stage": 4,
             "default": false,
-            "default_scanned_port": null
+            "default_scanned_port": null,
+            "deprecated": false
         }
     },
     {
@@ -221,10 +239,11 @@
         "fields": {
             "tool": 3,
             "name": "Simple scan",
-            "arguments": "{target} -b all -f {output} --quiet",
+            "command_template": "{target} -b all -f {output} --quiet",
             "stage": 1,
             "default": true,
-            "default_scanned_port": null
+            "default_scanned_port": null,
+            "deprecated": false
         }
     },
     {
@@ -233,10 +252,11 @@
         "fields": {
             "tool": 3,
             "name": "DNS lookup & Domain take over & Virtual hosts",
-            "arguments": "{target} -b all -f {output} --quiet --dns-lookup --take-over --virtual-host",
+            "command_template": "{target} -b all -f {output} --quiet --dns-lookup --take-over --virtual-host",
             "stage": 1,
             "default": false,
-            "default_scanned_port": null
+            "default_scanned_port": null,
+            "deprecated": false
         }
     },
     {
@@ -245,10 +265,11 @@
         "fields": {
             "tool": 4,
             "name": "Web scan",
-            "arguments": "{url} -Format xml -output {output} {authentication} {cookie} {headers}",
+            "command_template": "{url} -Format xml -output {output} {authentication} {cookie} {headers}",
             "stage": 4,
             "default": true,
-            "default_scanned_port": null
+            "default_scanned_port": null,
+            "deprecated": false
         }
     },
     {
@@ -257,10 +278,11 @@
         "fields": {
             "tool": 5,
             "name": "SSL/TLS analysis",
-            "arguments": "--no-colour --xml={output} {intensity} {target}",
+            "command_template": "--no-colour --xml={output} {intensity} {target}",
             "stage": 4,
             "default": true,
-            "default_scanned_port": 443
+            "default_scanned_port": 443,
+            "deprecated": false
         }
     },
     {
@@ -269,10 +291,11 @@
         "fields": {
             "tool": 6,
             "name": "SSL/TLS analysis",
-            "arguments": "--json_out={output} {target}",
+            "command_template": "--json_out={output} {target}",
             "stage": 4,
             "default": true,
-            "default_scanned_port": 443
+            "default_scanned_port": 443,
+            "deprecated": false
         }
     },
     {
@@ -281,10 +304,11 @@
         "fields": {
             "tool": 7,
             "name": "Deep scan",
-            "arguments": "{url} {intensity} --follow-redirect --batch",
+            "command_template": "{url} {intensity} --follow-redirect --batch",
             "stage": 4,
             "default": true,
-            "default_scanned_port": null
+            "default_scanned_port": null,
+            "deprecated": false
         }
     },
     {
@@ -293,10 +317,11 @@
         "fields": {
             "tool": 8,
             "name": "Active scan",
-            "arguments": "{authentication} {cookie} {command} -cmd {url} -silent -notel -quickout {output}",
+            "command_template": "{authentication} {cookie} {command} -cmd {url} -silent -notel -quickout {output}",
             "stage": 4,
             "default": true,
-            "default_scanned_port": null
+            "default_scanned_port": null,
+            "deprecated": false
         }
     },
     {
@@ -305,10 +330,11 @@
         "fields": {
             "tool": 9,
             "name": "Search by technology",
-            "arguments": "{technology} --json --disable-colour",
+            "command_template": "{technology} --json --disable-colour",
             "stage": 5,
             "default": true,
-            "default_scanned_port": null
+            "default_scanned_port": null,
+            "deprecated": false
         }
     },
     {
@@ -317,10 +343,11 @@
         "fields": {
             "tool": 10,
             "name": "Search by CVE",
-            "arguments": "-q -x \"search {cve};quit\"",
+            "command_template": "-q -x \"search {cve};quit\"",
             "stage": 5,
             "default": true,
-            "default_scanned_port": null
+            "default_scanned_port": null,
+            "deprecated": false
         }
     },
     {
@@ -329,10 +356,24 @@
         "fields": {
             "tool": 11,
             "name": "Log4Shell (CVE-2021-44228)",
-            "arguments": "{script} {url} --dns-callback-provider dnslog.cn --run-all-tests --wait-time 30 --waf-bypass",
+            "command_template": "{script} {url} --dns-callback-provider dnslog.cn --run-all-tests --wait-time 30 --waf-bypass",
             "stage": 4,
             "default": true,
-            "default_scanned_port": null
+            "default_scanned_port": null,
+            "deprecated": false
+        }
+    },
+    {
+        "model": "tools.configuration",
+        "pk": 29,
+        "fields": {
+            "tool": 11,
+            "name": "Log4Shell (CVE-2021-44228) with WAF bypass",
+            "command_template": "{script} {url} --dns-callback-provider dnslog.cn --run-all-tests --waf-bypass",
+            "stage": 4,
+            "default": false,
+            "default_scanned_port": null,
+            "deprecated": true
         }
     },
     {
@@ -341,10 +382,11 @@
         "fields": {
             "tool": 12,
             "name": "Search emails",
-            "arguments": "{target}",
+            "command_template": "{target}",
             "stage": 1,
             "default": true,
-            "default_scanned_port": null
+            "default_scanned_port": null,
+            "deprecated": false
         }
     },
     {
@@ -353,10 +395,11 @@
         "fields": {
             "tool": 13,
             "name": "Search emails",
-            "arguments": "{target} --exclude ask --save {output}",
+            "command_template": "{target} --exclude ask --save {output}",
             "stage": 1,
             "default": true,
-            "default_scanned_port": null
+            "default_scanned_port": null,
+            "deprecated": false
         }
     },
     {
@@ -365,10 +408,11 @@
         "fields": {
             "tool": 14,
             "name": "Joomla scan",
-            "arguments": "{url} {cookie} {headers}",
+            "command_template": "{url} {cookie} {headers}",
             "stage": 4,
             "default": true,
-            "default_scanned_port": null
+            "default_scanned_port": null,
+            "deprecated": false
         }
     },
     {
@@ -377,10 +421,11 @@
         "fields": {
             "tool": 15,
             "name": "Dump .git and find secrets in all commits",
-            "arguments": "GIT_DUMPER_TARGET_URL={url} {command} detect -f json --report-path {output}",
+            "command_template": "GIT_DUMPER_TARGET_URL={url} {command} detect -f json --report-path {output}",
             "stage": 4,
             "default": true,
-            "default_scanned_port": null
+            "default_scanned_port": null,
+            "deprecated": false
         }
     },
     {
@@ -389,10 +434,11 @@
         "fields": {
             "tool": 16,
             "name": "SSH scan",
-            "arguments": "{host} {port} --no-colors --skip-rate-test -jj",
+            "command_template": "{host} {port} --no-colors --skip-rate-test -jj",
             "stage": 4,
             "default": true,
-            "default_scanned_port": 22
+            "default_scanned_port": 22,
+            "deprecated": false
         }
     },
     {
@@ -401,10 +447,24 @@
         "fields": {
             "tool": 17,
             "name": "List shares",
-            "arguments": "{host} {port} {authentication} --no-color --no-update --csv {output}",
+            "command_template": "{host} {port} {authentication} --no-color --no-update --csv {output}",
             "stage": 4,
             "default": true,
-            "default_scanned_port": 445
+            "default_scanned_port": 445,
+            "deprecated": false
+        }
+    },
+    {
+        "model": "tools.configuration",
+        "pk": 36,
+        "fields": {
+            "tool": 17,
+            "name": "List shares and directories recursively",
+            "command_template": "{host} {port} -R {authentication}",
+            "stage": 4,
+            "default": false,
+            "default_scanned_port": null,
+            "deprecated": true
         }
     },
     {
@@ -413,10 +473,11 @@
         "fields": {
             "tool": 1,
             "name": "SMB NSE scripts",
-            "arguments": "--privileged {host} {intensity} {ports} -sS -sV -A --script smb-enum-shares,smb-enum-users,smb-enum-groups,smb-enum-sessions,smb-protocols,smb-enum-domains,smb-enum-services,smb-mbenum,smb-ls,smb-security-mode,smb2-security-mode,smb-double-pulsar-backdoor,smb-vuln-webexec,smb2-vuln-uptime,smb-vuln-ms06-025,smb-vuln-ms07-029,smb-vuln-ms10-061,smb-vuln-ms17-010,smb-vuln-cve-2017-7494 -oX {output}",
+            "command_template": "--privileged {host} {intensity} {ports} -sS -sV -A --script smb-enum-shares,smb-enum-users,smb-enum-groups,smb-enum-sessions,smb-protocols,smb-enum-domains,smb-enum-services,smb-mbenum,smb-ls,smb-security-mode,smb2-security-mode,smb-double-pulsar-backdoor,smb-vuln-webexec,smb2-vuln-uptime,smb-vuln-ms06-025,smb-vuln-ms07-029,smb-vuln-ms10-061,smb-vuln-ms17-010,smb-vuln-cve-2017-7494 -oX {output}",
             "stage": 2,
             "default": false,
-            "default_scanned_port": null
+            "default_scanned_port": null,
+            "deprecated": false
         }
     },
     {
@@ -425,10 +486,11 @@
         "fields": {
             "tool": 1,
             "name": "FTP & SMB NSE scripts",
-            "arguments": "--privileged {host} {intensity} {ports} -sS -sV -A --script ftp-anon,ftp-proftpd-backdoor,ftp-vsftpd-backdoor,ftp-libopie,ftp-vuln-cve2010-4221,smb-enum-shares,smb-enum-users,smb-enum-groups,smb-enum-sessions,smb-protocols,smb-enum-domains,smb-enum-services,smb-mbenum,smb-ls,smb-security-mode,smb2-security-mode,smb-double-pulsar-backdoor,smb-vuln-webexec,smb2-vuln-uptime,smb-vuln-ms06-025,smb-vuln-ms07-029,smb-vuln-ms10-061,smb-vuln-ms17-010,smb-vuln-cve-2017-7494 -oX {output}",
+            "command_template": "--privileged {host} {intensity} {ports} -sS -sV -A --script ftp-anon,ftp-proftpd-backdoor,ftp-vsftpd-backdoor,ftp-libopie,ftp-vuln-cve2010-4221,smb-enum-shares,smb-enum-users,smb-enum-groups,smb-enum-sessions,smb-protocols,smb-enum-domains,smb-enum-services,smb-mbenum,smb-ls,smb-security-mode,smb2-security-mode,smb-double-pulsar-backdoor,smb-vuln-webexec,smb2-vuln-uptime,smb-vuln-ms06-025,smb-vuln-ms07-029,smb-vuln-ms10-061,smb-vuln-ms17-010,smb-vuln-cve-2017-7494 -oX {output}",
             "stage": 2,
             "default": false,
-            "default_scanned_port": null
+            "default_scanned_port": null,
+            "deprecated": false
         }
     },
     {
@@ -437,10 +499,11 @@
         "fields": {
             "tool": 18,
             "name": "All templates",
-            "arguments": "{url} {authentication} {cookie} {headers} -follow-redirects -no-color -jsonl-export {output}",
+            "command_template": "{url} {authentication} {cookie} {headers} -follow-redirects -no-color -jsonl-export {output}",
             "stage": 4,
             "default": true,
-            "default_scanned_port": null
+            "default_scanned_port": null,
+            "deprecated": false
         }
     },
     {
@@ -449,10 +512,11 @@
         "fields": {
             "tool": 18,
             "name": "Automatic technology detection",
-            "arguments": "{url} -automatic-scan {authentication} {cookie} {headers} -follow-redirects -no-color -jsonl-export {output}",
+            "command_template": "{url} -automatic-scan {authentication} {cookie} {headers} -follow-redirects -no-color -jsonl-export {output}",
             "stage": 4,
             "default": false,
-            "default_scanned_port": null
+            "default_scanned_port": null,
+            "deprecated": false
         }
     },
     {
@@ -461,10 +525,11 @@
         "fields": {
             "tool": 18,
             "name": "CVE templates",
-            "arguments": "{url} -tags cve {authentication} {cookie} {headers} -follow-redirects -no-color -jsonl-export {output}",
+            "command_template": "{url} -tags cve {authentication} {cookie} {headers} -follow-redirects -no-color -jsonl-export {output}",
             "stage": 4,
             "default": false,
-            "default_scanned_port": null
+            "default_scanned_port": null,
+            "deprecated": false
         }
     },
     {
@@ -473,10 +538,50 @@
         "fields": {
             "tool": 19,
             "name": "Spring Shell (CVE-2022-22965 & CVE-2022-22963)",
-            "arguments": "{script} {url} --test-CVE-2022-22963 --waf-bypass",
+            "command_template": "{script} {url} --test-CVE-2022-22963 --waf-bypass",
             "stage": 4,
             "default": true,
-            "default_scanned_port": null
+            "default_scanned_port": null,
+            "deprecated": false
+        }
+    },
+    {
+        "model": "tools.configuration",
+        "pk": 43,
+        "fields": {
+            "tool": 19,
+            "name": "Spring Cloud RCE (CVE-2022-22963)",
+            "command_template": "{script} {url} --test-CVE-2022-22963",
+            "stage": 4,
+            "default": false,
+            "default_scanned_port": null,
+            "deprecated": true
+        }
+    },
+    {
+        "model": "tools.configuration",
+        "pk": 44,
+        "fields": {
+            "tool": 19,
+            "name": "SpringShell RCE (CVE-2022-22965) with WAF bypass",
+            "command_template": "{script} {url} --waf-bypass",
+            "stage": 4,
+            "default": false,
+            "default_scanned_port": null,
+            "deprecated": true
+        }
+    },
+    {
+        "model": "tools.configuration",
+        "pk": 45,
+        "fields": {
+            "tool": 19,
+            "name": "Spring Cloud RCE (CVE-2022-22963) with WAF bypass",
+            "command_template": "{script} {url} --waf-bypass --test-CVE-2022-22963",
+            "stage": 4,
+            "default": false,
+            "default_scanned_port": null,
+            "deprecated": true
         }
     },
     {
@@ -485,10 +590,11 @@
         "fields": {
             "tool": 20,
             "name": "Subdomains enumeration",
-            "arguments": "dns {target} {subdomain_wordlist} {intensity} --wildcard --show-ips --no-color --no-progress --output {output}",
+            "command_template": "dns {target} {wordlist} {intensity} --wildcard --show-ips --no-color --no-progress --output {output}",
             "stage": 1,
             "default": true,
-            "default_scanned_port": null
+            "default_scanned_port": null,
+            "deprecated": false
         }
     },
     {
@@ -497,10 +603,11 @@
         "fields": {
             "tool": 20,
             "name": "VHOST enumeration",
-            "arguments": "vhost {target_url} {subdomain_wordlist} {basic_auth} {token_auth} {cookie} {headers} {intensity} --append-domain --no-tls-validation --no-color --no-progress --output {output}",
+            "command_template": "vhost {target} {wordlist} {basic_auth} {token_auth} {cookie} {headers} {intensity} --append-domain --no-tls-validation --no-color --no-progress --output {output}",
             "stage": 2,
             "default": false,
-            "default_scanned_port": null
+            "default_scanned_port": null,
+            "deprecated": false
         }
     },
     {
@@ -509,10 +616,11 @@
         "fields": {
             "tool": 20,
             "name": "Endpoints enumeration",
-            "arguments": "dir {url} {endpoint_wordlist} {basic_auth} {token_auth} {cookie} {headers} {intensity} --no-tls-validation --no-color --no-progress --output {output}",
+            "command_template": "dir {url} {wordlist} {basic_auth} {token_auth} {cookie} {headers} {intensity} --no-tls-validation --no-color --no-progress --output {output}",
             "stage": 4,
             "default": false,
-            "default_scanned_port": null
+            "default_scanned_port": null,
+            "deprecated": false
         }
     },
     {
@@ -521,10 +629,11 @@
         "fields": {
             "tool": 7,
             "name": "Light scan",
-            "arguments": "{url} {intensity} --follow-redirect --batch --light-scan",
+            "command_template": "{url} {intensity} --follow-redirect --batch --light-scan",
             "stage": 4,
             "default": false,
-            "default_scanned_port": null
+            "default_scanned_port": null,
+            "deprecated": false
         }
     },
     {
@@ -533,10 +642,11 @@
         "fields": {
             "tool": 9,
             "name": "Search by CVE",
-            "arguments": "{cve} --json --disable-colour",
+            "command_template": "{cve} --json --disable-colour",
             "stage": 5,
             "default": false,
-            "default_scanned_port": null
+            "default_scanned_port": null,
+            "deprecated": false
         }
     }
 ]

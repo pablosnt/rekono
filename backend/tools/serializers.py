@@ -63,7 +63,7 @@ class SimpleConfigurationSerializer(ModelSerializer):
         """
 
         model = Configuration
-        fields = ("id", "name", "stage", "default")
+        fields = ("id", "name", "stage", "default", "deprecated")
 
 
 class ToolSerializer(LikeSerializer):
@@ -76,16 +76,10 @@ class ToolSerializer(LikeSerializer):
     Attributes:
         intensities (IntensitySerializer): Nested intensity configurations
         configurations (SimpleConfigurationSerializer): Nested tool configurations
-        wordlists (SerializerMethodField): Wordlist requirement and support information
-        input_technologies (SerializerMethodField): Technology input requirement analysis
-        input_vulnerabilities (SerializerMethodField): Vulnerability input requirement analysis
     """
 
     intensities = IntensitySerializer(many=True, read_only=True)
     configurations = SimpleConfigurationSerializer(many=True, read_only=True)
-    wordlists = SerializerMethodField(read_only=True)
-    input_technologies = SerializerMethodField(read_only=True)
-    input_vulnerabilities = SerializerMethodField(read_only=True)
 
     class Meta:
         """Meta configuration for the ToolSerializer.
@@ -109,72 +103,7 @@ class ToolSerializer(LikeSerializer):
             "likes",
             "intensities",
             "configurations",
-            "wordlists",
-            "input_technologies",
-            "input_vulnerabilities",
         )
-
-    def _get_argument_requirement(self, tool: Tool, input_type: InputTypeName) -> dict[str, bool]:
-        """Get argument requirement information for a specific input type.
-
-        Analyzes tool arguments to determine if a specific input type is supported
-        and whether it's required for tool execution.
-
-        Args:
-            tool (Tool): The tool instance to analyze
-            input_type (InputTypeName): The input type to check requirements for
-
-        Returns:
-            dict[str, bool]: Dictionary with 'required' and 'supported' boolean flags
-        """
-        argument = Argument.objects.filter(tool=tool, inputs__type__name=input_type)
-        return (
-            {"required": argument.first().required, "supported": True}
-            if argument.exists()
-            else {"required": False, "supported": False}
-        )
-
-    def get_wordlists(self, instance: Any) -> dict[str, bool]:
-        """Get wordlist requirement information for the tool.
-
-        Analyzes wordlist input requirements with special handling for tools
-        like Gobuster that have multiple wordlist arguments.
-
-        Args:
-            instance (Tool): The tool instance being serialized
-
-        Returns:
-            dict[str, bool]: Dictionary with 'required' and 'supported' boolean flags
-        """
-        output = self._get_argument_requirement(instance, InputTypeName.WORDLIST)
-        if instance.name == "Gobuster":
-            # There are two wordlist arguments for Gobuster, one to get a
-            # subdomains wordlist and other to get an endpoints wordlist.
-            # So, none can be marked as required, but they actually are
-            output["required"] = True
-        return output
-
-    def get_input_technologies(self, instance: Any) -> dict[str, bool]:
-        """Get technology input requirement information for the tool.
-
-        Args:
-            instance (Tool): The tool instance being serialized
-
-        Returns:
-            dict[str, bool]: Dictionary with 'required' and 'supported' boolean flags
-        """
-        return self._get_argument_requirement(instance, InputTypeName.TECHNOLOGY)
-
-    def get_input_vulnerabilities(self, instance: Any) -> dict[str, bool]:
-        """Get vulnerability input requirement information for the tool.
-
-        Args:
-            instance (Tool): The tool instance being serialized
-
-        Returns:
-            dict[str, bool]: Dictionary with 'required' and 'supported' boolean flags
-        """
-        return self._get_argument_requirement(instance, InputTypeName.VULNERABILITY)
 
 
 class SimpleToolSerializer(ModelSerializer):
@@ -200,13 +129,19 @@ class ConfigurationSerializer(SimpleConfigurationSerializer):
     """Extended serializer for Configuration model with nested tool information.
 
     Extends SimpleConfigurationSerializer to include nested tool details
-    for complete configuration information in API responses.
+    and computed requirement information for complete configuration data in API responses.
 
     Attributes:
         tool (SimpleToolSerializer): Nested tool information
+        wordlists (SerializerMethodField): Wordlist requirement and support information
+        input_technologies (SerializerMethodField): Technology input requirement analysis
+        input_vulnerabilities (SerializerMethodField): Vulnerability input requirement analysis
     """
 
     tool = SimpleToolSerializer(many=False, read_only=True)
+    wordlists = SerializerMethodField(read_only=True)
+    input_technologies = SerializerMethodField(read_only=True)
+    input_vulnerabilities = SerializerMethodField(read_only=True)
 
     class Meta:
         """Meta configuration for the ConfigurationSerializer.
@@ -217,4 +152,62 @@ class ConfigurationSerializer(SimpleConfigurationSerializer):
         """
 
         model = Configuration
-        fields = SimpleConfigurationSerializer.Meta.fields + ("tool",)
+        fields = SimpleConfigurationSerializer.Meta.fields + (
+            "tool",
+            "wordlists",
+            "input_technologies",
+            "input_vulnerabilities",
+        )
+
+    def _get_argument_requirement(self, configuration: Configuration, input_type: InputTypeName) -> dict[str, bool]:
+        """Get argument requirement information for a specific input type.
+
+        Analyzes tool configurations and their arguments to determine if a specific input type is supported
+        and whether it's required for tool execution.
+
+        Args:
+            configuration (Configuration): The tool instance to analyze
+            input_type (InputTypeName): The input type to check requirements for
+
+        Returns:
+            dict[str, bool]: Dictionary with 'required' and 'supported' boolean flags
+        """
+        argument = Argument.objects.filter(configuration=configuration, inputs__type__name=input_type)
+        return (
+            {"required": argument.first().required, "supported": True}
+            if argument.exists()
+            else {"required": False, "supported": False}
+        )
+
+    def get_wordlists(self, instance: Any) -> dict[str, bool]:
+        """Get wordlist requirement information for the tool.
+
+        Args:
+            instance (Tool): The tool instance being serialized
+
+        Returns:
+            dict[str, bool]: Dictionary with 'required' and 'supported' boolean flags
+        """
+        return self._get_argument_requirement(instance, InputTypeName.WORDLIST)
+
+    def get_input_technologies(self, instance: Any) -> dict[str, bool]:
+        """Get technology input requirement information for the tool.
+
+        Args:
+            instance (Tool): The tool instance being serialized
+
+        Returns:
+            dict[str, bool]: Dictionary with 'required' and 'supported' boolean flags
+        """
+        return self._get_argument_requirement(instance, InputTypeName.TECHNOLOGY)
+
+    def get_input_vulnerabilities(self, instance: Any) -> dict[str, bool]:
+        """Get vulnerability input requirement information for the tool.
+
+        Args:
+            instance (Tool): The tool instance being serialized
+
+        Returns:
+            dict[str, bool]: Dictionary with 'required' and 'supported' boolean flags
+        """
+        return self._get_argument_requirement(instance, InputTypeName.VULNERABILITY)

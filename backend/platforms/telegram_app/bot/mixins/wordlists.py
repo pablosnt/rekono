@@ -23,11 +23,9 @@ class WordlistMixin(BaseMixin):
 
     Attributes:
         default_wordlist (str): Label for default wordlist option.
-        tools_with_required_wordlists (list[str]): Tools that require wordlist selection.
     """
 
     default_wordlist = "Default tools wordlists"
-    tools_with_required_wordlists = ["Gobuster"]
 
     @sync_to_async
     def _get_wordlists_keyboard_async(self) -> list[InlineKeyboardButton]:
@@ -52,21 +50,21 @@ class WordlistMixin(BaseMixin):
             int: Next conversation state or ConversationHandler.END.
         """
         self.validate_update(update)
-        tool = self.get_context_value(context, Context.TOOL)
+        configuration = self.get_context_value(context, Context.CONFIGURATION)
         process = self.get_context_value(context, Context.PROCESS)
-        if not tool and not process:
-            await self.reply(update, "No tool or process selected")
+        if not configuration and not process:
+            await self.reply(update, "No configuration or process selected")
             return ConversationHandler.END
         if (
-            tool
+            configuration
             and not await self.queryset_exists_async(
-                Input.objects.filter(argument__tool=tool, type__name=InputTypeName.WORDLIST)
+                Input.objects.filter(argument__configuration=configuration, type__name=InputTypeName.WORDLIST)
             )
         ) or (
             process
             and not await self.queryset_exists_async(
                 Input.objects.filter(
-                    argument__tool__in=process.steps.all().values("configuration__tool"),
+                    argument__configuration__in=process.steps.all().values("configuration"),
                     type__name=InputTypeName.WORDLIST,
                 )
             )
@@ -75,22 +73,20 @@ class WordlistMixin(BaseMixin):
         keyboard = await self._get_wordlists_keyboard_async()
         required_filter = {"argument__required": True, "type__name": InputTypeName.WORDLIST}
         is_wordlist_required = (
-            tool
+            configuration
             and (
-                tool.name in self.tools_with_required_wordlists
-                or await self.queryset_exists_async(Input.objects.filter(**{**required_filter, "argument__tool": tool}))
+                await self.queryset_exists_async(
+                    Input.objects.filter(**{**required_filter, "argument__configuration": configuration})
+                )
             )
             or (
                 process
                 and (
                     await self.queryset_exists_async(
-                        process.steps.filter(configuration__tool__name__in=self.tools_with_required_wordlists)
-                    )
-                    or await self.queryset_exists_async(
                         Input.objects.filter(
                             **{
                                 **required_filter,
-                                "argument__tool__in": process.steps.all().values("configuration__tool"),
+                                "argument__configuration__in": process.steps.all().values("configuration"),
                             }
                         )
                     )
