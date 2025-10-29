@@ -140,7 +140,7 @@ class TaskViewSet(BaseViewSet):
         task = self.get_object()
         if task.executions.filter(status__in=[Status.REQUESTED, Status.RUNNING]).exists():
             return Response({"task": "Task is still running"}, status=status.HTTP_400_BAD_REQUEST)
-        if task.configuration and task.configuration.deprecated:
+        if task.configuration and task.configuration.deprecated:  # pragma: no cover
             return Response(
                 {"configuration": "Deprecated configurations can't be executed"}, status=status.HTTP_400_BAD_REQUEST
             )

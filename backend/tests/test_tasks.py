@@ -18,6 +18,7 @@ task2 = {"target_id": 1, "process_id": 1}
 invalid_task1 = {"target_id": 1, "intensity": 1}
 invalid_task2 = {"target_id": 1}
 invalid_task3 = {**task1, "configuration_id": 25, "intensity": Intensity.SNEAKY.name.capitalize()}
+invalid_task4 = {"target_id": 1, "configuration_id": 36}  # Deprecated configuration
 
 
 class TaskTest(ApiTest, TestCase):
@@ -98,6 +99,7 @@ class TaskTest(ApiTest, TestCase):
         PostApiTestCase(["admin1", "auditor1"], 400, invalid_task1),
         PostApiTestCase(["admin1", "auditor1"], 400, invalid_task2),
         PostApiTestCase(["admin1", "auditor1"], 400, invalid_task3),
+        PostApiTestCase(["admin1", "auditor1"], 400, invalid_task4),
         PostApiTestCase(["admin2", "auditor2", Role.READER], 403, task1),
         PostApiTestCase(
             ["admin1"],
