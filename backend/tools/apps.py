@@ -33,6 +33,28 @@ class ToolsConfig(BaseApp, AppConfig):
         super().ready()
         post_migrate.connect(self.update_tools_status, sender=self)
 
+    def load_fixtures(self, **kwargs: Any) -> None:
+        """Load tool fixtures by recreating internal model data.
+
+        Deletes and recreates internal models (Intensity, Argument, Input, Output)
+        while preserving Tool and Configuration entities to maintain consistency
+        with related entities like Tasks and Processes.
+
+        Args:
+            **kwargs (Any): Additional keyword arguments passed from parent method
+        """
+        from tools.models import Argument, Input, Intensity, Output
+
+        # Tool and Configurations are not re-created to keep consistency
+        # with other entities like Tasks or Processes.
+        # However, all the "internal" models whose only relationships are
+        # with Tool and  Configuration, and whose only source are fixtures,
+        # we will re-create them to keep the flexibility to order them in
+        # the most convenient way for the maintainers.
+        for model in [Intensity, Argument, Input, Output]:
+            model.objects.all().delete()
+        super().load_fixtures(**kwargs)
+
     def update_tools_status(self, **kwargs: Any) -> None:
         """Update installation status for all tools after migrations.
 
