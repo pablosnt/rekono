@@ -833,7 +833,7 @@
         "model": "tools.input",
         "pk": 85,
         "fields": {
-            "argument": 62,
+            "argument": 61,
             "type": 5,
             "filter": null,
             "order": 1
@@ -843,7 +843,7 @@
         "model": "tools.input",
         "pk": 86,
         "fields": {
-            "argument": 63,
+            "argument": 62,
             "type": 6,
             "filter": "cve",
             "order": 1
@@ -853,7 +853,7 @@
         "model": "tools.input",
         "pk": 87,
         "fields": {
-            "argument": 64,
+            "argument": 63,
             "type": 3,
             "filter": "http",
             "order": 1
@@ -863,7 +863,7 @@
         "model": "tools.input",
         "pk": 88,
         "fields": {
-            "argument": 64,
+            "argument": 63,
             "type": 2,
             "filter": "!ip_range and !network",
             "order": 2
@@ -873,7 +873,7 @@
         "model": "tools.input",
         "pk": 89,
         "fields": {
-            "argument": 65,
+            "argument": 64,
             "type": 2,
             "filter": "domain",
             "order": 1
@@ -883,7 +883,7 @@
         "model": "tools.input",
         "pk": 90,
         "fields": {
-            "argument": 66,
+            "argument": 65,
             "type": 2,
             "filter": "domain",
             "order": 1
@@ -893,7 +893,7 @@
         "model": "tools.input",
         "pk": 91,
         "fields": {
-            "argument": 67,
+            "argument": 66,
             "type": 10,
             "filter": "cookie",
             "order": 1
@@ -903,7 +903,7 @@
         "model": "tools.input",
         "pk": 92,
         "fields": {
-            "argument": 68,
+            "argument": 67,
             "type": 11,
             "filter": "User-Agent",
             "order": 1
@@ -913,7 +913,7 @@
         "model": "tools.input",
         "pk": 93,
         "fields": {
-            "argument": 69,
+            "argument": 68,
             "type": 3,
             "filter": "http",
             "order": 1
@@ -923,7 +923,7 @@
         "model": "tools.input",
         "pk": 94,
         "fields": {
-            "argument": 69,
+            "argument": 68,
             "type": 2,
             "filter": "!ip_range and !network",
             "order": 2
@@ -933,7 +933,7 @@
         "model": "tools.input",
         "pk": 95,
         "fields": {
-            "argument": 70,
+            "argument": 69,
             "type": 3,
             "filter": "http",
             "order": 1
@@ -943,7 +943,7 @@
         "model": "tools.input",
         "pk": 96,
         "fields": {
-            "argument": 70,
+            "argument": 69,
             "type": 2,
             "filter": "!ip_range and !network",
             "order": 2
@@ -953,7 +953,7 @@
         "model": "tools.input",
         "pk": 97,
         "fields": {
-            "argument": 71,
+            "argument": 70,
             "type": 3,
             "filter": "ssh",
             "order": 1
@@ -963,7 +963,7 @@
         "model": "tools.input",
         "pk": 98,
         "fields": {
-            "argument": 71,
+            "argument": 70,
             "type": 2,
             "filter": "!ip_range and !network",
             "order": 2
@@ -973,7 +973,7 @@
         "model": "tools.input",
         "pk": 99,
         "fields": {
-            "argument": 72,
+            "argument": 71,
             "type": 3,
             "filter": "ssh",
             "order": 1
@@ -983,7 +983,7 @@
         "model": "tools.input",
         "pk": 100,
         "fields": {
-            "argument": 73,
+            "argument": 72,
             "type": 10,
             "filter": "basic",
             "order": 1
@@ -993,7 +993,7 @@
         "model": "tools.input",
         "pk": 101,
         "fields": {
-            "argument": 74,
+            "argument": 73,
             "type": 3,
             "filter": "microsoft-ds or netbios-ssn",
             "order": 1
@@ -1003,7 +1003,7 @@
         "model": "tools.input",
         "pk": 102,
         "fields": {
-            "argument": 74,
+            "argument": 73,
             "type": 2,
             "filter": "!ip_range and !network",
             "order": 2
@@ -1013,7 +1013,7 @@
         "model": "tools.input",
         "pk": 103,
         "fields": {
-            "argument": 75,
+            "argument": 74,
             "type": 3,
             "filter": "microsoft-ds or netbios-ssn",
             "order": 1
@@ -1023,7 +1023,7 @@
         "model": "tools.input",
         "pk": 104,
         "fields": {
-            "argument": 76,
+            "argument": 75,
             "type": 2,
             "filter": null,
             "order": 1
@@ -1033,7 +1033,7 @@
         "model": "tools.input",
         "pk": 105,
         "fields": {
-            "argument": 76,
+            "argument": 75,
             "type": 3,
             "filter": null,
             "order": 2
@@ -1043,7 +1043,7 @@
         "model": "tools.input",
         "pk": 106,
         "fields": {
-            "argument": 77,
+            "argument": 76,
             "type": 3,
             "filter": null,
             "order": 1
@@ -1053,7 +1053,7 @@
         "model": "tools.input",
         "pk": 107,
         "fields": {
-            "argument": 78,
+            "argument": 77,
             "type": 2,
             "filter": null,
             "order": 1
@@ -1063,7 +1063,7 @@
         "model": "tools.input",
         "pk": 108,
         "fields": {
-            "argument": 78,
+            "argument": 77,
             "type": 3,
             "filter": null,
             "order": 2
@@ -1073,7 +1073,7 @@
         "model": "tools.input",
         "pk": 109,
         "fields": {
-            "argument": 79,
+            "argument": 78,
             "type": 3,
             "filter": null,
             "order": 1
@@ -1083,7 +1083,7 @@
         "model": "tools.input",
         "pk": 110,
         "fields": {
-            "argument": 80,
+            "argument": 79,
             "type": 10,
             "filter": "!cookie",
             "order": 1
@@ -1093,7 +1093,7 @@
         "model": "tools.input",
         "pk": 111,
         "fields": {
-            "argument": 81,
+            "argument": 80,
             "type": 10,
             "filter": "cookie",
             "order": 1
@@ -1103,7 +1103,7 @@
         "model": "tools.input",
         "pk": 112,
         "fields": {
-            "argument": 82,
+            "argument": 81,
             "type": 11,
             "filter": null,
             "order": 1
@@ -1113,7 +1113,7 @@
         "model": "tools.input",
         "pk": 113,
         "fields": {
-            "argument": 83,
+            "argument": 82,
             "type": 3,
             "filter": "http",
             "order": 1
@@ -1123,7 +1123,7 @@
         "model": "tools.input",
         "pk": 114,
         "fields": {
-            "argument": 83,
+            "argument": 82,
             "type": 2,
             "filter": "!ip_range and !network",
             "order": 2
@@ -1133,7 +1133,7 @@
         "model": "tools.input",
         "pk": 115,
         "fields": {
-            "argument": 84,
+            "argument": 83,
             "type": 10,
             "filter": "!cookie",
             "order": 1
@@ -1143,7 +1143,7 @@
         "model": "tools.input",
         "pk": 116,
         "fields": {
-            "argument": 85,
+            "argument": 84,
             "type": 10,
             "filter": "cookie",
             "order": 1
@@ -1153,7 +1153,7 @@
         "model": "tools.input",
         "pk": 117,
         "fields": {
-            "argument": 86,
+            "argument": 85,
             "type": 11,
             "filter": null,
             "order": 1
@@ -1163,7 +1163,7 @@
         "model": "tools.input",
         "pk": 118,
         "fields": {
-            "argument": 87,
+            "argument": 86,
             "type": 3,
             "filter": "http",
             "order": 1
@@ -1173,7 +1173,7 @@
         "model": "tools.input",
         "pk": 119,
         "fields": {
-            "argument": 87,
+            "argument": 86,
             "type": 2,
             "filter": "!ip_range and !network",
             "order": 2
@@ -1183,7 +1183,7 @@
         "model": "tools.input",
         "pk": 120,
         "fields": {
-            "argument": 88,
+            "argument": 87,
             "type": 10,
             "filter": "!cookie",
             "order": 1
@@ -1193,7 +1193,7 @@
         "model": "tools.input",
         "pk": 121,
         "fields": {
-            "argument": 89,
+            "argument": 88,
             "type": 10,
             "filter": "cookie",
             "order": 1
@@ -1203,7 +1203,7 @@
         "model": "tools.input",
         "pk": 122,
         "fields": {
-            "argument": 90,
+            "argument": 89,
             "type": 11,
             "filter": null,
             "order": 1
@@ -1213,7 +1213,7 @@
         "model": "tools.input",
         "pk": 123,
         "fields": {
-            "argument": 91,
+            "argument": 90,
             "type": 3,
             "filter": "http",
             "order": 1
@@ -1223,7 +1223,7 @@
         "model": "tools.input",
         "pk": 124,
         "fields": {
-            "argument": 91,
+            "argument": 90,
             "type": 2,
             "filter": "!ip_range and !network",
             "order": 2
@@ -1233,7 +1233,7 @@
         "model": "tools.input",
         "pk": 125,
         "fields": {
-            "argument": 92,
+            "argument": 91,
             "type": 3,
             "filter": "http",
             "order": 1
@@ -1243,7 +1243,7 @@
         "model": "tools.input",
         "pk": 126,
         "fields": {
-            "argument": 92,
+            "argument": 91,
             "type": 2,
             "filter": "!ip_range and !network",
             "order": 2
@@ -1253,7 +1253,7 @@
         "model": "tools.input",
         "pk": 131,
         "fields": {
-            "argument": 97,
+            "argument": 92,
             "type": 9,
             "filter": "subdomain",
             "order": 1
@@ -1263,7 +1263,7 @@
         "model": "tools.input",
         "pk": 132,
         "fields": {
-            "argument": 98,
+            "argument": 93,
             "type": 2,
             "filter": "domain",
             "order": 1
@@ -1273,7 +1273,7 @@
         "model": "tools.input",
         "pk": 137,
         "fields": {
-            "argument": 102,
+            "argument": 94,
             "type": 10,
             "filter": "basic",
             "order": 1
@@ -1283,7 +1283,7 @@
         "model": "tools.input",
         "pk": 138,
         "fields": {
-            "argument": 103,
+            "argument": 95,
             "type": 10,
             "filter": "cookie",
             "order": 1
@@ -1293,7 +1293,7 @@
         "model": "tools.input",
         "pk": 140,
         "fields": {
-            "argument": 105,
+            "argument": 96,
             "type": 11,
             "filter": null,
             "order": 1
@@ -1303,7 +1303,7 @@
         "model": "tools.input",
         "pk": 141,
         "fields": {
-            "argument": 106,
+            "argument": 97,
             "type": 9,
             "filter": "subdomain",
             "order": 1
@@ -1313,7 +1313,7 @@
         "model": "tools.input",
         "pk": 143,
         "fields": {
-            "argument": 108,
+            "argument": 98,
             "type": 2,
             "filter": "domain",
             "order": 1
@@ -1323,7 +1323,7 @@
         "model": "tools.input",
         "pk": 144,
         "fields": {
-            "argument": 109,
+            "argument": 99,
             "type": 10,
             "filter": "!cookie and !basic",
             "order": 1
@@ -1333,7 +1333,7 @@
         "model": "tools.input",
         "pk": 147,
         "fields": {
-            "argument": 111,
+            "argument": 100,
             "type": 10,
             "filter": "basic",
             "order": 1
@@ -1343,7 +1343,7 @@
         "model": "tools.input",
         "pk": 148,
         "fields": {
-            "argument": 112,
+            "argument": 101,
             "type": 10,
             "filter": "cookie",
             "order": 1
@@ -1353,7 +1353,7 @@
         "model": "tools.input",
         "pk": 149,
         "fields": {
-            "argument": 113,
+            "argument": 102,
             "type": 9,
             "filter": "endpoint",
             "order": 1
@@ -1363,7 +1363,7 @@
         "model": "tools.input",
         "pk": 150,
         "fields": {
-            "argument": 114,
+            "argument": 103,
             "type": 11,
             "filter": null,
             "order": 1
@@ -1373,7 +1373,7 @@
         "model": "tools.input",
         "pk": 154,
         "fields": {
-            "argument": 118,
+            "argument": 104,
             "type": 10,
             "filter": "!cookie and !basic",
             "order": 1
@@ -1383,7 +1383,7 @@
         "model": "tools.input",
         "pk": 155,
         "fields": {
-            "argument": 119,
+            "argument": 105,
             "type": 3,
             "filter": "http",
             "order": 1
@@ -1393,7 +1393,7 @@
         "model": "tools.input",
         "pk": 156,
         "fields": {
-            "argument": 119,
+            "argument": 105,
             "type": 2,
             "filter": "!ip_range and !network",
             "order": 2
@@ -1403,7 +1403,7 @@
         "model": "tools.input",
         "pk": 157,
         "fields": {
-            "argument": 120,
+            "argument": 106,
             "type": 3,
             "filter": "http",
             "order": 1
@@ -1413,7 +1413,7 @@
         "model": "tools.input",
         "pk": 158,
         "fields": {
-            "argument": 120,
+            "argument": 106,
             "type": 2,
             "filter": "!ip_range and !network",
             "order": 2
@@ -1423,7 +1423,7 @@
         "model": "tools.input",
         "pk": 159,
         "fields": {
-            "argument": 121,
+            "argument": 107,
             "type": 6,
             "filter": "cve",
             "order": 1

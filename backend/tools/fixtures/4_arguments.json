@@ -661,7 +661,7 @@
     },
     {
         "model": "tools.argument",
-        "pk": 62,
+        "pk": 61,
         "fields": {
             "configuration": 26,
             "name": "technology",
@@ -672,7 +672,7 @@
     },
     {
         "model": "tools.argument",
-        "pk": 63,
+        "pk": 62,
         "fields": {
             "configuration": 27,
             "name": "cve",
@@ -683,7 +683,7 @@
     },
     {
         "model": "tools.argument",
-        "pk": 64,
+        "pk": 63,
         "fields": {
             "configuration": 28,
             "name": "url",
@@ -694,7 +694,7 @@
     },
     {
         "model": "tools.argument",
-        "pk": 65,
+        "pk": 64,
         "fields": {
             "configuration": 30,
             "name": "target",
@@ -705,7 +705,7 @@
     },
     {
         "model": "tools.argument",
-        "pk": 66,
+        "pk": 65,
         "fields": {
             "configuration": 31,
             "name": "target",
@@ -716,7 +716,7 @@
     },
     {
         "model": "tools.argument",
-        "pk": 67,
+        "pk": 66,
         "fields": {
             "configuration": 32,
             "name": "cookie",
@@ -727,7 +727,7 @@
     },
     {
         "model": "tools.argument",
-        "pk": 68,
+        "pk": 67,
         "fields": {
             "configuration": 32,
             "name": "headers",
@@ -738,7 +738,7 @@
     },
     {
         "model": "tools.argument",
-        "pk": 69,
+        "pk": 68,
         "fields": {
             "configuration": 32,
             "name": "url",
@@ -749,7 +749,7 @@
     },
     {
         "model": "tools.argument",
-        "pk": 70,
+        "pk": 69,
         "fields": {
             "configuration": 33,
             "name": "url",
@@ -760,7 +760,7 @@
     },
     {
         "model": "tools.argument",
-        "pk": 71,
+        "pk": 70,
         "fields": {
             "configuration": 34,
             "name": "host",
@@ -771,7 +771,7 @@
     },
     {
         "model": "tools.argument",
-        "pk": 72,
+        "pk": 71,
         "fields": {
             "configuration": 34,
             "name": "port",
@@ -782,7 +782,7 @@
     },
     {
         "model": "tools.argument",
-        "pk": 73,
+        "pk": 72,
         "fields": {
             "configuration": 35,
             "name": "authentication",
@@ -793,7 +793,7 @@
     },
     {
         "model": "tools.argument",
-        "pk": 74,
+        "pk": 73,
         "fields": {
             "configuration": 35,
             "name": "host",
@@ -804,7 +804,7 @@
     },
     {
         "model": "tools.argument",
-        "pk": 75,
+        "pk": 74,
         "fields": {
             "configuration": 35,
             "name": "port",
@@ -815,7 +815,7 @@
     },
     {
         "model": "tools.argument",
-        "pk": 76,
+        "pk": 75,
         "fields": {
             "configuration": 37,
             "name": "host",
@@ -826,13 +826,24 @@
     },
     {
         "model": "tools.argument",
-        "pk": 77,
+        "pk": 76,
         "fields": {
             "configuration": 37,
             "name": "ports",
             "argument": "-p {ports_commas}",
             "required": false,
             "multiple": true
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 77,
+        "fields": {
+            "configuration": 38,
+            "name": "host",
+            "argument": "{host}",
+            "required": true,
+            "multiple": false
         }
     },
     {
@@ -840,17 +851,6 @@
         "pk": 78,
         "fields": {
             "configuration": 38,
-            "name": "host",
-            "argument": "{host}",
-            "required": true,
-            "multiple": false
-        }
-    },
-    {
-        "model": "tools.argument",
-        "pk": 79,
-        "fields": {
-            "configuration": 38,
             "name": "ports",
             "argument": "-p {ports_commas}",
             "required": false,
@@ -859,11 +859,22 @@
     },
     {
         "model": "tools.argument",
-        "pk": 80,
+        "pk": 79,
         "fields": {
             "configuration": 39,
             "name": "authentication",
             "argument": "-header 'Authorization:{credential_type} {token}'",
+            "required": false,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 80,
+        "fields": {
+            "configuration": 39,
+            "name": "cookie",
+            "argument": "-header 'Cookie:{cookie_name}={secret}'",
             "required": false,
             "multiple": false
         }
@@ -873,17 +884,6 @@
         "pk": 81,
         "fields": {
             "configuration": 39,
-            "name": "cookie",
-            "argument": "-header 'Cookie:{cookie_name}={secret}'",
-            "required": false,
-            "multiple": false
-        }
-    },
-    {
-        "model": "tools.argument",
-        "pk": 82,
-        "fields": {
-            "configuration": 39,
             "name": "headers",
             "argument": "-header '{header_key}:{header_value}'",
             "required": false,
@@ -892,7 +892,7 @@
     },
     {
         "model": "tools.argument",
-        "pk": 83,
+        "pk": 82,
         "fields": {
             "configuration": 39,
             "name": "url",
@@ -903,11 +903,22 @@
     },
     {
         "model": "tools.argument",
-        "pk": 84,
+        "pk": 83,
         "fields": {
             "configuration": 40,
             "name": "authentication",
             "argument": "-header 'Authorization:{credential_type} {token}'",
+            "required": false,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 84,
+        "fields": {
+            "configuration": 40,
+            "name": "cookie",
+            "argument": "-header 'Cookie:{cookie_name}={secret}'",
             "required": false,
             "multiple": false
         }
@@ -917,17 +928,6 @@
         "pk": 85,
         "fields": {
             "configuration": 40,
-            "name": "cookie",
-            "argument": "-header 'Cookie:{cookie_name}={secret}'",
-            "required": false,
-            "multiple": false
-        }
-    },
-    {
-        "model": "tools.argument",
-        "pk": 86,
-        "fields": {
-            "configuration": 40,
             "name": "headers",
             "argument": "-header '{header_key}:{header_value}'",
             "required": false,
@@ -936,7 +936,7 @@
     },
     {
         "model": "tools.argument",
-        "pk": 87,
+        "pk": 86,
         "fields": {
             "configuration": 40,
             "name": "url",
@@ -947,7 +947,7 @@
     },
     {
         "model": "tools.argument",
-        "pk": 88,
+        "pk": 87,
         "fields": {
             "configuration": 41,
             "name": "authentication",
@@ -958,7 +958,7 @@
     },
     {
         "model": "tools.argument",
-        "pk": 89,
+        "pk": 88,
         "fields": {
             "configuration": 41,
             "name": "cookie",
@@ -969,7 +969,7 @@
     },
     {
         "model": "tools.argument",
-        "pk": 90,
+        "pk": 89,
         "fields": {
             "configuration": 41,
             "name": "headers",
@@ -980,7 +980,7 @@
     },
     {
         "model": "tools.argument",
-        "pk": 91,
+        "pk": 90,
         "fields": {
             "configuration": 41,
             "name": "url",
@@ -991,7 +991,7 @@
     },
     {
         "model": "tools.argument",
-        "pk": 92,
+        "pk": 91,
         "fields": {
             "configuration": 42,
             "name": "url",
@@ -1002,7 +1002,7 @@
     },
     {
         "model": "tools.argument",
-        "pk": 97,
+        "pk": 92,
         "fields": {
             "configuration": 46,
             "name": "wordlist",
@@ -1013,7 +1013,7 @@
     },
     {
         "model": "tools.argument",
-        "pk": 98,
+        "pk": 93,
         "fields": {
             "configuration": 46,
             "name": "target",
@@ -1024,7 +1024,7 @@
     },
     {
         "model": "tools.argument",
-        "pk": 102,
+        "pk": 94,
         "fields": {
             "configuration": 47,
             "name": "basic_auth",
@@ -1035,7 +1035,7 @@
     },
     {
         "model": "tools.argument",
-        "pk": 103,
+        "pk": 95,
         "fields": {
             "configuration": 47,
             "name": "cookie",
@@ -1046,7 +1046,7 @@
     },
     {
         "model": "tools.argument",
-        "pk": 105,
+        "pk": 96,
         "fields": {
             "configuration": 47,
             "name": "headers",
@@ -1057,7 +1057,7 @@
     },
     {
         "model": "tools.argument",
-        "pk": 106,
+        "pk": 97,
         "fields": {
             "configuration": 47,
             "name": "wordlist",
@@ -1068,7 +1068,7 @@
     },
     {
         "model": "tools.argument",
-        "pk": 108,
+        "pk": 98,
         "fields": {
             "configuration": 47,
             "name": "target",
@@ -1079,7 +1079,7 @@
     },
     {
         "model": "tools.argument",
-        "pk": 109,
+        "pk": 99,
         "fields": {
             "configuration": 47,
             "name": "token_auth",
@@ -1090,7 +1090,7 @@
     },
     {
         "model": "tools.argument",
-        "pk": 111,
+        "pk": 100,
         "fields": {
             "configuration": 48,
             "name": "basic_auth",
@@ -1101,7 +1101,7 @@
     },
     {
         "model": "tools.argument",
-        "pk": 112,
+        "pk": 101,
         "fields": {
             "configuration": 48,
             "name": "cookie",
@@ -1112,7 +1112,7 @@
     },
     {
         "model": "tools.argument",
-        "pk": 113,
+        "pk": 102,
         "fields": {
             "configuration": 48,
             "name": "wordlist",
@@ -1123,7 +1123,7 @@
     },
     {
         "model": "tools.argument",
-        "pk": 114,
+        "pk": 103,
         "fields": {
             "configuration": 48,
             "name": "headers",
@@ -1134,7 +1134,7 @@
     },
     {
         "model": "tools.argument",
-        "pk": 118,
+        "pk": 104,
         "fields": {
             "configuration": 48,
             "name": "token_auth",
@@ -1145,7 +1145,7 @@
     },
     {
         "model": "tools.argument",
-        "pk": 119,
+        "pk": 105,
         "fields": {
             "configuration": 48,
             "name": "url",
@@ -1156,7 +1156,7 @@
     },
     {
         "model": "tools.argument",
-        "pk": 120,
+        "pk": 106,
         "fields": {
             "configuration": 49,
             "name": "url",
@@ -1167,7 +1167,7 @@
     },
     {
         "model": "tools.argument",
-        "pk": 121,
+        "pk": 107,
         "fields": {
             "configuration": 50,
             "name": "cve",
