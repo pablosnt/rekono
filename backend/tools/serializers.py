@@ -76,16 +76,10 @@ class ToolSerializer(LikeSerializer):
     Attributes:
         intensities (IntensitySerializer): Nested intensity configurations
         configurations (SimpleConfigurationSerializer): Nested tool configurations
-        wordlists (SerializerMethodField): Wordlist requirement and support information
-        input_technologies (SerializerMethodField): Technology input requirement analysis
-        input_vulnerabilities (SerializerMethodField): Vulnerability input requirement analysis
     """
 
     intensities = IntensitySerializer(many=True, read_only=True)
     configurations = SimpleConfigurationSerializer(many=True, read_only=True)
-    wordlists = SerializerMethodField(read_only=True)
-    input_technologies = SerializerMethodField(read_only=True)
-    input_vulnerabilities = SerializerMethodField(read_only=True)
 
     class Meta:
         """Meta configuration for the ToolSerializer.
@@ -109,25 +103,76 @@ class ToolSerializer(LikeSerializer):
             "likes",
             "intensities",
             "configurations",
+        )
+
+
+class SimpleToolSerializer(ModelSerializer):
+    """Simplified serializer for Tool model with basic information only.
+
+    Provides essential tool information for nested relationships and
+    list views where full detail is not required.
+    """
+
+    class Meta:
+        """Meta configuration for the SimpleToolSerializer.
+
+        Attributes:
+            model (type): The Tool model to serialize
+            fields (tuple): Field names to include in serialization
+        """
+
+        model = Tool
+        fields = ("id", "name", "command", "version", "reference", "icon")
+
+
+class ConfigurationSerializer(SimpleConfigurationSerializer):
+    """Extended serializer for Configuration model with nested tool information.
+
+    Extends SimpleConfigurationSerializer to include nested tool details
+    and computed requirement information for complete configuration data in API responses.
+
+    Attributes:
+        tool (SimpleToolSerializer): Nested tool information
+        wordlists (SerializerMethodField): Wordlist requirement and support information
+        input_technologies (SerializerMethodField): Technology input requirement analysis
+        input_vulnerabilities (SerializerMethodField): Vulnerability input requirement analysis
+    """
+
+    tool = SimpleToolSerializer(many=False, read_only=True)
+    wordlists = SerializerMethodField(read_only=True)
+    input_technologies = SerializerMethodField(read_only=True)
+    input_vulnerabilities = SerializerMethodField(read_only=True)
+
+    class Meta:
+        """Meta configuration for the ConfigurationSerializer.
+
+        Attributes:
+            model (type): The Configuration model to serialize
+            fields (tuple): Field names to include in serialization
+        """
+
+        model = Configuration
+        fields = SimpleConfigurationSerializer.Meta.fields + (
+            "tool",
             "wordlists",
             "input_technologies",
             "input_vulnerabilities",
         )
 
-    def _get_argument_requirement(self, tool: Tool, input_type: InputTypeName) -> dict[str, bool]:
+    def _get_argument_requirement(self, configuration: Configuration, input_type: InputTypeName) -> dict[str, bool]:
         """Get argument requirement information for a specific input type.
 
-        Analyzes tool arguments to determine if a specific input type is supported
+        Analyzes tool configurations and their arguments to determine if a specific input type is supported
         and whether it's required for tool execution.
 
         Args:
-            tool (Tool): The tool instance to analyze
+            configuration (Configuration): The tool instance to analyze
             input_type (InputTypeName): The input type to check requirements for
 
         Returns:
             dict[str, bool]: Dictionary with 'required' and 'supported' boolean flags
         """
-        argument = Argument.objects.filter(tool=tool, inputs__type__name=input_type)
+        argument = Argument.objects.filter(configuration=configuration, inputs__type__name=input_type)
         return (
             {"required": argument.first().required, "supported": True}
             if argument.exists()
@@ -147,6 +192,7 @@ class ToolSerializer(LikeSerializer):
             dict[str, bool]: Dictionary with 'required' and 'supported' boolean flags
         """
         output = self._get_argument_requirement(instance, InputTypeName.WORDLIST)
+        # TODO: Remove and adapt fixtures to this situation
         if instance.name == "Gobuster":
             # There are two wordlist arguments for Gobuster, one to get a
             # subdomains wordlist and other to get an endpoints wordlist.
@@ -175,46 +221,3 @@ class ToolSerializer(LikeSerializer):
             dict[str, bool]: Dictionary with 'required' and 'supported' boolean flags
         """
         return self._get_argument_requirement(instance, InputTypeName.VULNERABILITY)
-
-
-class SimpleToolSerializer(ModelSerializer):
-    """Simplified serializer for Tool model with basic information only.
-
-    Provides essential tool information for nested relationships and
-    list views where full detail is not required.
-    """
-
-    class Meta:
-        """Meta configuration for the SimpleToolSerializer.
-
-        Attributes:
-            model (type): The Tool model to serialize
-            fields (tuple): Field names to include in serialization
-        """
-
-        model = Tool
-        fields = ("id", "name", "command", "version", "reference", "icon")
-
-
-class ConfigurationSerializer(SimpleConfigurationSerializer):
-    """Extended serializer for Configuration model with nested tool information.
-
-    Extends SimpleConfigurationSerializer to include nested tool details
-    for complete configuration information in API responses.
-
-    Attributes:
-        tool (SimpleToolSerializer): Nested tool information
-    """
-
-    tool = SimpleToolSerializer(many=False, read_only=True)
-
-    class Meta:
-        """Meta configuration for the ConfigurationSerializer.
-
-        Attributes:
-            model (type): The Configuration model to serialize
-            fields (tuple): Field names to include in serialization
-        """
-
-        model = Configuration
-        fields = SimpleConfigurationSerializer.Meta.fields + ("tool",)

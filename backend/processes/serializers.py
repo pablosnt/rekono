@@ -160,11 +160,11 @@ class ProcessSerializer(TaggitSerializer, LikeSerializer):
                 - required: True if any step requires wordlists
                 - supported: True if any step supports wordlists
         """
-        params = {"configuration__tool__arguments__inputs__type__name": "Wordlist"}
+        # TODO: Remove and adapt fixtures to this situation
+        params = {"configuration__arguments__inputs__type__name": "Wordlist"}
         return {
             "required": instance.steps.filter(
-                Q(**params)
-                & (Q(configuration__tool__arguments__required=True) | Q(configuration__tool__name="Gobuster"))
+                Q(**params) & (Q(configuration__arguments__required=True) | Q(configuration__tool__name="Gobuster"))
             ).exists(),
             "supported": instance.steps.filter(**params).exists(),
         }

@@ -51,7 +51,7 @@ class PlanJob:
         Returns:
             Sequence[InputType]: Input types needed by the step's tool
         """
-        return InputType.objects.filter(inputs__argument__tool=self.step.configuration.tool).distinct()
+        return InputType.objects.filter(inputs__argument__configuration=self.step.configuration).distinct()
 
     @cached_property
     def outputs(self) -> Sequence[InputType]:
@@ -170,7 +170,7 @@ class TasksQueue(BaseScanQueue):
             task (Task): The single tool task to process
         """
         executions = TasksQueue.calculate_executions(
-            task.configuration.tool,
+            task.configuration,
             [],
             task.target.target_ports.all(),
             task.input_vulnerabilities.all(),
@@ -205,7 +205,7 @@ class TasksQueue(BaseScanQueue):
         # This ensures proper execution order where simpler tools run before complex ones
         steps = (
             Step.objects.annotate(
-                max_input=Max("configuration__tool__arguments__inputs__type__id"),
+                max_input=Max("configuration__arguments__inputs__type__id"),
                 max_output=Max("configuration__outputs__type__id"),
             )
             .filter(process=task.process)
@@ -237,9 +237,9 @@ class TasksQueue(BaseScanQueue):
                 )
         # Execute the planned jobs with proper dependency management
         for execution_job in plan:
-            # Calculate execution parameters for this step's tool
+            # Calculate execution parameters for this step's configuration
             executions = TasksQueue.calculate_executions(
-                execution_job.step.configuration.tool,
+                execution_job.step.configuration,
                 [],  # No findings from previous steps yet (will be resolved by dependencies)
                 task.target.target_ports.all(),
                 task.input_vulnerabilities.all(),

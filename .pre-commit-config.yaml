@@ -23,7 +23,7 @@ repos:
           args: [ --fix ]
         - id: ruff-check
           types_or: [ python, pyi ]
-          args: [ --select I,--fix ]
+          args: [ --select, I,--fix ]
         - id: ruff-format
           types_or: [ python, pyi ]
     -   repo: https://github.com/pycqa/flake8
@@ -31,3 +31,4 @@ repos:
         hooks:
         - id: flake8
           types_or: [ python, pyi ]
+          args: [ --config=backend/.flake8 ]

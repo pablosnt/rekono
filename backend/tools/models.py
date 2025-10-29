@@ -248,13 +248,13 @@ class Configuration(BaseModel):
     """Model representing tool execution configurations for different stages.
 
     Defines specific configurations for tool execution with stage-based parameters,
-    custom arguments, and default selection logic. Configurations determine how
+    custom command template, and default selection logic. Configurations determine how
     tools are executed within security testing workflows.
 
     Attributes:
         name (TextField): Configuration identifier and display name (max 30 chars)
         tool (ForeignKey): The associated Tool instance
-        arguments (TextField): Additional command-line arguments (max 250 chars)
+        command_template (TextField): Command template with placeholders (max 250 chars)
         stage (IntegerField): Execution stage from Stage enum
         default (BooleanField): Whether this is the default configuration for the tool
         default_scanned_port (IntegerField): Default port to scan (0-65535, optional)
@@ -266,7 +266,7 @@ class Configuration(BaseModel):
         config = Configuration.objects.create(
             name="Full Scan",
             tool=nmap_tool,
-            arguments="-sS -O",
+            command_template="-sS -O",
             stage=Stage.RECON,
             default=True
         )
@@ -275,7 +275,7 @@ class Configuration(BaseModel):
 
     name = models.TextField(max_length=30)
     tool = models.ForeignKey(Tool, related_name="configurations", on_delete=models.CASCADE)
-    arguments = models.TextField(max_length=250, default="", blank=True)
+    command_template = models.TextField(max_length=250, default="", blank=True)
     stage = models.IntegerField(choices=Stage.choices)
     default = models.BooleanField(default=False)
     default_scanned_port = models.IntegerField(
@@ -301,25 +301,25 @@ class Configuration(BaseModel):
 
 
 class Argument(BaseModel):
-    """Model representing tool command-line arguments and their specifications.
+    """Model representing configuration command-line arguments and their specifications.
 
-    Defines individual arguments that tools accept, including parameter names,
+    Defines individual arguments that configurations accept, including parameter names,
     command-line flags, requirement status, and multiplicity support. Arguments
     are mapped to input types for automated parameter generation.
 
     Attributes:
-        tool (ForeignKey): The associated Tool instance
+        configuration (ForeignKey): The associated Configuration instance
         name (TextField): Argument identifier and display name (max 20 chars)
         argument (TextField): Command-line flag or parameter (max 50 chars)
-        required (BooleanField): Whether this argument is mandatory for tool execution
+        required (BooleanField): Whether this argument is mandatory for configuration execution
         multiple (BooleanField): Whether multiple input values are accepted
 
     Example:
-        Create a tool argument:
+        Create a configuration argument:
 
         ```python
         argument = Argument.objects.create(
-            tool=nmap_tool,
+            configuration=nmap_config,
             name="target",
             argument="",
             required=True,
@@ -328,7 +328,7 @@ class Argument(BaseModel):
         ```
     """
 
-    tool = models.ForeignKey(Tool, related_name="arguments", on_delete=models.CASCADE)
+    configuration = models.ForeignKey(Configuration, related_name="arguments", on_delete=models.CASCADE)
     name = models.TextField(max_length=20)
     argument = models.TextField(max_length=50, default="", blank=True)
     required = models.BooleanField(default=False)
@@ -339,18 +339,18 @@ class Argument(BaseModel):
         """Meta configuration for the Argument model.
 
         Attributes:
-            constraints (list): Database constraints ensuring tool-name argument uniqueness
+            constraints (list): Database constraints ensuring configuration-name argument uniqueness
         """
 
-        constraints = [models.UniqueConstraint(fields=["tool", "name"], name="unique_argument")]
+        constraints = [models.UniqueConstraint(fields=["configuration", "name"], name="unique_argument")]
 
     def __str__(self) -> str:
         """Return string representation of the argument.
 
         Returns:
-            str: String in format "tool_name - argument_name"
+            str: String in format "configuration_name - argument_name"
         """
-        return f"{self.tool.__str__()} - {self.name}"
+        return f"{self.configuration.__str__()} - {self.name}"
 
 
 class Input(BaseModel):

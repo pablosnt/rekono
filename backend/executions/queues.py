@@ -192,7 +192,7 @@ class ExecutionsQueue(BaseScanQueue):
         executions = [
             e
             for e in ExecutionsQueue.calculate_executions(
-                executor.execution.configuration.tool,
+                executor.execution.configuration,
                 findings,
                 target_ports,
                 input_vulnerabilities,

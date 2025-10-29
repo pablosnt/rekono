@@ -197,7 +197,7 @@ class TaskSerializer(RelatedNotesSerializer):
                 (InputTypeName.VULNERABILITY, "input_vulnerabilities"),
             ]:
                 if len(attrs.get(field, [])) > 0 and not Input.objects.filter(
-                    argument__tool=cast(Configuration, attrs.get("configuration")).tool, type__name=input_type
+                    argument__configuration=attrs.get("configuration"), type__name=input_type
                 ):
                     attrs[field] = []
         elif attrs.get("process"):
