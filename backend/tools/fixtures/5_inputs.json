@@ -15,7 +15,7 @@
         "fields": {
             "argument": 1,
             "type": 3,
-            "filter": "http",
+            "filter": null,
             "order": 2
         }
     },
@@ -45,7 +45,7 @@
         "fields": {
             "argument": 3,
             "type": 3,
-            "filter": "http",
+            "filter": null,
             "order": 2
         }
     },
@@ -75,7 +75,7 @@
         "fields": {
             "argument": 5,
             "type": 3,
-            "filter": "http",
+            "filter": null,
             "order": 2
         }
     },
@@ -105,7 +105,7 @@
         "fields": {
             "argument": 7,
             "type": 3,
-            "filter": "http",
+            "filter": null,
             "order": 2
         }
     },
@@ -135,7 +135,7 @@
         "fields": {
             "argument": 9,
             "type": 3,
-            "filter": "http",
+            "filter": null,
             "order": 2
         }
     },
@@ -165,7 +165,7 @@
         "fields": {
             "argument": 11,
             "type": 3,
-            "filter": "http",
+            "filter": null,
             "order": 2
         }
     },
@@ -195,7 +195,7 @@
         "fields": {
             "argument": 13,
             "type": 3,
-            "filter": "http",
+            "filter": null,
             "order": 2
         }
     },
@@ -225,7 +225,7 @@
         "fields": {
             "argument": 15,
             "type": 3,
-            "filter": "http",
+            "filter": null,
             "order": 2
         }
     },
@@ -255,7 +255,7 @@
         "fields": {
             "argument": 17,
             "type": 3,
-            "filter": "http",
+            "filter": null,
             "order": 2
         }
     },
@@ -285,7 +285,7 @@
         "fields": {
             "argument": 19,
             "type": 3,
-            "filter": "http",
+            "filter": null,
             "order": 2
         }
     },
@@ -315,7 +315,7 @@
         "fields": {
             "argument": 21,
             "type": 3,
-            "filter": "http",
+            "filter": null,
             "order": 2
         }
     },
@@ -345,7 +345,7 @@
         "fields": {
             "argument": 23,
             "type": 3,
-            "filter": "http",
+            "filter": null,
             "order": 2
         }
     },
@@ -375,7 +375,7 @@
         "fields": {
             "argument": 25,
             "type": 3,
-            "filter": "http",
+            "filter": null,
             "order": 2
         }
     },
@@ -405,7 +405,7 @@
         "fields": {
             "argument": 27,
             "type": 3,
-            "filter": "http",
+            "filter": null,
             "order": 2
         }
     },
@@ -1045,7 +1045,7 @@
         "fields": {
             "argument": 76,
             "type": 3,
-            "filter": "http",
+            "filter": null,
             "order": 2
         }
     },
@@ -1075,7 +1075,7 @@
         "fields": {
             "argument": 78,
             "type": 3,
-            "filter": "http",
+            "filter": null,
             "order": 2
         }
     },
