@@ -182,23 +182,13 @@ class ConfigurationSerializer(SimpleConfigurationSerializer):
     def get_wordlists(self, instance: Any) -> dict[str, bool]:
         """Get wordlist requirement information for the tool.
 
-        Analyzes wordlist input requirements with special handling for tools
-        like Gobuster that have multiple wordlist arguments.
-
         Args:
             instance (Tool): The tool instance being serialized
 
         Returns:
             dict[str, bool]: Dictionary with 'required' and 'supported' boolean flags
         """
-        output = self._get_argument_requirement(instance, InputTypeName.WORDLIST)
-        # TODO: Remove and adapt fixtures to this situation
-        if instance.name == "Gobuster":
-            # There are two wordlist arguments for Gobuster, one to get a
-            # subdomains wordlist and other to get an endpoints wordlist.
-            # So, none can be marked as required, but they actually are
-            output["required"] = True
-        return output
+        return self._get_argument_requirement(instance, InputTypeName.WORDLIST)
 
     def get_input_technologies(self, instance: Any) -> dict[str, bool]:
         """Get technology input requirement information for the tool.

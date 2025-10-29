@@ -26,8 +26,6 @@ class WordlistMixin(BaseMixin):
     """
 
     default_wordlist = "Default tools wordlists"
-    # TODO: Remove this and adapt fixtures
-    #    tools_with_required_wordlists = ["Gobuster"]
 
     @sync_to_async
     def _get_wordlists_keyboard_async(self) -> list[InlineKeyboardButton]:

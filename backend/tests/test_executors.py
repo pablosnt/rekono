@@ -5,20 +5,12 @@ from unittest import mock
 from django.test import TestCase
 
 from authentications.enums import AuthenticationType
-from executions.enums import Status
-from executions.models import Execution
 from findings.enums import OSINTDataType, TransportProtocol
 from findings.models import Port
 from settings.models import Settings
 from target_ports.models import TargetPort
-from targets.enums import TargetType
-from targets.models import Target
-from tasks.models import Task
 from tests.framework import BaseTest
 from tests.framework.data import SetupProject
-from tools.models import Configuration
-from wordlists.enums import WordlistType
-from wordlists.models import Wordlist
 
 # pytype: disable=attribute-error
 
@@ -162,58 +154,3 @@ class ToolExecutorTest(BaseTest, TestCase):
         self.assertFalse(
             self.executor.check_arguments([self.osint, self.host, self.port, self.technology], [], [], [], [])
         )
-
-
-class GobusterExecutorTest(BaseTest, TestCase):
-    data = [SetupProject(targets_and_tasks=0)]
-
-    def setUp(self):
-        super().setUp()
-        self.endpoints_wordlist = Wordlist.objects.create(
-            name="endpoints", type=WordlistType.ENDPOINT, path=self.data_dir / "wordlists" / "endpoints_wordlist.txt"
-        )
-        self.subdomains_wordlist = Wordlist.objects.create(
-            name="subdomains", type=WordlistType.SUBDOMAIN, path=self.data_dir / "wordlists" / "subdomains_wordlist.txt"
-        )
-        self.configuration = Configuration.objects.get(tool__name="Gobuster", default=True)
-        self.target = Target.objects.create(project=self.project, target="10.10.10.10", type=TargetType.PRIVATE_IP)
-        self.task = Task.objects.create(target=self.target, configuration=self.configuration, executor=self.auditor1)
-        self.execution = Execution.objects.create(
-            task=self.task, configuration=self.configuration, status=Status.REQUESTED
-        )
-
-    def test_check_arguments(self) -> None:
-        executor = self.configuration.tool.executor_class(self.execution)
-        self.assertFalse(executor.check_arguments([], [], [], [], [self.subdomains_wordlist]))
-
-        self.target.target = "scanme.nmap.org"
-        self.target.type = TargetType.DOMAIN
-        self.target.save(update_fields=["target", "type"])
-        executor = self.configuration.tool.executor_class(self.execution)
-        self.assertFalse(executor.check_arguments([], [], [], [], [self.endpoints_wordlist]))
-
-        executor = self.configuration.tool.executor_class(self.execution)
-        self.assertTrue(executor.check_arguments([], [], [], [], [self.subdomains_wordlist]))
-
-
-class SearchSploitExecutorTest(BaseTest, TestCase):
-    data = [SetupProject(executions_per_task=0)]
-
-    def setUp(self):
-        super().setUp()
-        self.configuration = Configuration.objects.get(tool__name="SearchSploit", default=True)
-        self.task = Task.objects.create(target=self.target, configuration=self.configuration, executor=self.auditor1)
-        self.setup_task_parameters()
-        self.execution = Execution.objects.create(
-            task=self.task, configuration=self.configuration, status=Status.REQUESTED
-        )
-
-    def test_check_arguments(self) -> None:
-        executor = self.configuration.tool.executor_class(self.execution)
-        self.assertFalse(executor.check_arguments([], [], [], [], []))
-
-        executor = self.configuration.tool.executor_class(self.execution)
-        self.assertTrue(executor.check_arguments([], [], [], [self.input_technology], []))
-
-        executor = self.configuration.tool.executor_class(self.execution)
-        self.assertTrue(executor.check_arguments([], [], [self.input_vulnerability], [], []))

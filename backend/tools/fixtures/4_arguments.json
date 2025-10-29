@@ -661,23 +661,12 @@
     },
     {
         "model": "tools.argument",
-        "pk": 61,
-        "fields": {
-            "configuration": 26,
-            "name": "cve",
-            "argument": "--cve {cve}",
-            "required": false,
-            "multiple": false
-        }
-    },
-    {
-        "model": "tools.argument",
         "pk": 62,
         "fields": {
             "configuration": 26,
             "name": "technology",
             "argument": "{technology} {version}",
-            "required": false,
+            "required": true,
             "multiple": false
         }
     },
@@ -1013,56 +1002,12 @@
     },
     {
         "model": "tools.argument",
-        "pk": 93,
-        "fields": {
-            "configuration": 46,
-            "name": "basic_auth",
-            "argument": "--username {username} --password {secret}",
-            "required": false,
-            "multiple": false
-        }
-    },
-    {
-        "model": "tools.argument",
-        "pk": 94,
-        "fields": {
-            "configuration": 46,
-            "name": "cookie",
-            "argument": "--cookie '{cookie_name}={secret}'",
-            "required": false,
-            "multiple": false
-        }
-    },
-    {
-        "model": "tools.argument",
-        "pk": 95,
-        "fields": {
-            "configuration": 46,
-            "name": "endpoint_wordlist",
-            "argument": "--wordlist {wordlist}",
-            "required": false,
-            "multiple": false
-        }
-    },
-    {
-        "model": "tools.argument",
-        "pk": 96,
-        "fields": {
-            "configuration": 46,
-            "name": "headers",
-            "argument": "--headers '{header_key}: {header_value}'",
-            "required": false,
-            "multiple": true
-        }
-    },
-    {
-        "model": "tools.argument",
         "pk": 97,
         "fields": {
             "configuration": 46,
-            "name": "subdomain_wordlist",
+            "name": "wordlist",
             "argument": "--wordlist {wordlist}",
-            "required": false,
+            "required": true,
             "multiple": false
         }
     },
@@ -1073,40 +1018,7 @@
             "configuration": 46,
             "name": "target",
             "argument": "--domain {target}",
-            "required": false,
-            "multiple": false
-        }
-    },
-    {
-        "model": "tools.argument",
-        "pk": 99,
-        "fields": {
-            "configuration": 46,
-            "name": "target_url",
-            "argument": "--url {target}",
-            "required": false,
-            "multiple": false
-        }
-    },
-    {
-        "model": "tools.argument",
-        "pk": 100,
-        "fields": {
-            "configuration": 46,
-            "name": "token_auth",
-            "argument": "--headers 'Authorization: {credential_type} {token}'",
-            "required": false,
-            "multiple": false
-        }
-    },
-    {
-        "model": "tools.argument",
-        "pk": 101,
-        "fields": {
-            "configuration": 46,
-            "name": "url",
-            "argument": "--url {url}",
-            "required": false,
+            "required": true,
             "multiple": false
         }
     },
@@ -1134,17 +1046,6 @@
     },
     {
         "model": "tools.argument",
-        "pk": 104,
-        "fields": {
-            "configuration": 47,
-            "name": "endpoint_wordlist",
-            "argument": "--wordlist {wordlist}",
-            "required": false,
-            "multiple": false
-        }
-    },
-    {
-        "model": "tools.argument",
         "pk": 105,
         "fields": {
             "configuration": 47,
@@ -1159,20 +1060,9 @@
         "pk": 106,
         "fields": {
             "configuration": 47,
-            "name": "subdomain_wordlist",
+            "name": "wordlist",
             "argument": "--wordlist {wordlist}",
-            "required": false,
-            "multiple": false
-        }
-    },
-    {
-        "model": "tools.argument",
-        "pk": 107,
-        "fields": {
-            "configuration": 47,
-            "name": "target",
-            "argument": "--domain {target}",
-            "required": false,
+            "required": true,
             "multiple": false
         }
     },
@@ -1181,9 +1071,9 @@
         "pk": 108,
         "fields": {
             "configuration": 47,
-            "name": "target_url",
+            "name": "target",
             "argument": "--url {target}",
-            "required": false,
+            "required": true,
             "multiple": false
         }
     },
@@ -1194,17 +1084,6 @@
             "configuration": 47,
             "name": "token_auth",
             "argument": "--headers 'Authorization: {credential_type} {token}'",
-            "required": false,
-            "multiple": false
-        }
-    },
-    {
-        "model": "tools.argument",
-        "pk": 110,
-        "fields": {
-            "configuration": 47,
-            "name": "url",
-            "argument": "--url {url}",
             "required": false,
             "multiple": false
         }
@@ -1236,9 +1115,9 @@
         "pk": 113,
         "fields": {
             "configuration": 48,
-            "name": "endpoint_wordlist",
+            "name": "wordlist",
             "argument": "--wordlist {wordlist}",
-            "required": false,
+            "required": true,
             "multiple": false
         }
     },
@@ -1251,39 +1130,6 @@
             "argument": "--headers '{header_key}: {header_value}'",
             "required": false,
             "multiple": true
-        }
-    },
-    {
-        "model": "tools.argument",
-        "pk": 115,
-        "fields": {
-            "configuration": 48,
-            "name": "subdomain_wordlist",
-            "argument": "--wordlist {wordlist}",
-            "required": false,
-            "multiple": false
-        }
-    },
-    {
-        "model": "tools.argument",
-        "pk": 116,
-        "fields": {
-            "configuration": 48,
-            "name": "target",
-            "argument": "--domain {target}",
-            "required": false,
-            "multiple": false
-        }
-    },
-    {
-        "model": "tools.argument",
-        "pk": 117,
-        "fields": {
-            "configuration": 48,
-            "name": "target_url",
-            "argument": "--url {target}",
-            "required": false,
-            "multiple": false
         }
     },
     {
@@ -1304,7 +1150,7 @@
             "configuration": 48,
             "name": "url",
             "argument": "--url {url}",
-            "required": false,
+            "required": true,
             "multiple": false
         }
     },

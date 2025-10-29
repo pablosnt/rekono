@@ -7,7 +7,6 @@ nested serialization for complex process workflow management.
 
 from typing import Any
 
-from django.db.models import Q
 from rest_framework.serializers import (
     ModelSerializer,
     PrimaryKeyRelatedField,
@@ -17,8 +16,9 @@ from taggit.serializers import TaggitSerializer
 
 from framework.fields import TagField
 from framework.serializers import LikeSerializer
+from input_types.enums import InputTypeName
 from processes.models import Process, Step
-from tools.models import Configuration
+from tools.models import Argument, Configuration
 from tools.serializers import ConfigurationSerializer
 from users.serializers import SimpleUserSerializer
 
@@ -160,11 +160,11 @@ class ProcessSerializer(TaggitSerializer, LikeSerializer):
                 - required: True if any step requires wordlists
                 - supported: True if any step supports wordlists
         """
-        # TODO: Remove and adapt fixtures to this situation
-        params = {"configuration__arguments__inputs__type__name": "Wordlist"}
         return {
-            "required": instance.steps.filter(
-                Q(**params) & (Q(configuration__arguments__required=True) | Q(configuration__tool__name="Gobuster"))
+            "required": Argument.objects.filter(
+                inputs__type__name=InputTypeName.WORDLIST.value, required=True, configuration__steps__process=instance
             ).exists(),
-            "supported": instance.steps.filter(**params).exists(),
+            "supported": instance.steps.filter(
+                configuration__arguments__inputs__type__name=InputTypeName.WORDLIST.value
+            ).exists(),
         }

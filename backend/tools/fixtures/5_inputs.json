@@ -831,16 +831,6 @@
     },
     {
         "model": "tools.input",
-        "pk": 84,
-        "fields": {
-            "argument": 61,
-            "type": 6,
-            "filter": "cve",
-            "order": 1
-        }
-    },
-    {
-        "model": "tools.input",
         "pk": 85,
         "fields": {
             "argument": 62,
@@ -1261,46 +1251,6 @@
     },
     {
         "model": "tools.input",
-        "pk": 127,
-        "fields": {
-            "argument": 93,
-            "type": 10,
-            "filter": "basic",
-            "order": 1
-        }
-    },
-    {
-        "model": "tools.input",
-        "pk": 128,
-        "fields": {
-            "argument": 94,
-            "type": 10,
-            "filter": "cookie",
-            "order": 1
-        }
-    },
-    {
-        "model": "tools.input",
-        "pk": 129,
-        "fields": {
-            "argument": 95,
-            "type": 9,
-            "filter": "endpoint",
-            "order": 1
-        }
-    },
-    {
-        "model": "tools.input",
-        "pk": 130,
-        "fields": {
-            "argument": 96,
-            "type": 11,
-            "filter": null,
-            "order": 1
-        }
-    },
-    {
-        "model": "tools.input",
         "pk": 131,
         "fields": {
             "argument": 97,
@@ -1321,46 +1271,6 @@
     },
     {
         "model": "tools.input",
-        "pk": 133,
-        "fields": {
-            "argument": 99,
-            "type": 2,
-            "filter": "domain",
-            "order": 1
-        }
-    },
-    {
-        "model": "tools.input",
-        "pk": 134,
-        "fields": {
-            "argument": 100,
-            "type": 10,
-            "filter": "!cookie and !basic",
-            "order": 1
-        }
-    },
-    {
-        "model": "tools.input",
-        "pk": 135,
-        "fields": {
-            "argument": 101,
-            "type": 3,
-            "filter": "http",
-            "order": 1
-        }
-    },
-    {
-        "model": "tools.input",
-        "pk": 136,
-        "fields": {
-            "argument": 101,
-            "type": 2,
-            "filter": "!ip_range and !network",
-            "order": 2
-        }
-    },
-    {
-        "model": "tools.input",
         "pk": 137,
         "fields": {
             "argument": 102,
@@ -1376,16 +1286,6 @@
             "argument": 103,
             "type": 10,
             "filter": "cookie",
-            "order": 1
-        }
-    },
-    {
-        "model": "tools.input",
-        "pk": 139,
-        "fields": {
-            "argument": 104,
-            "type": 9,
-            "filter": "endpoint",
             "order": 1
         }
     },
@@ -1411,16 +1311,6 @@
     },
     {
         "model": "tools.input",
-        "pk": 142,
-        "fields": {
-            "argument": 107,
-            "type": 2,
-            "filter": "domain",
-            "order": 1
-        }
-    },
-    {
-        "model": "tools.input",
         "pk": 143,
         "fields": {
             "argument": 108,
@@ -1437,26 +1327,6 @@
             "type": 10,
             "filter": "!cookie and !basic",
             "order": 1
-        }
-    },
-    {
-        "model": "tools.input",
-        "pk": 145,
-        "fields": {
-            "argument": 110,
-            "type": 3,
-            "filter": "http",
-            "order": 1
-        }
-    },
-    {
-        "model": "tools.input",
-        "pk": 146,
-        "fields": {
-            "argument": 110,
-            "type": 2,
-            "filter": "!ip_range and !network",
-            "order": 2
         }
     },
     {
@@ -1496,36 +1366,6 @@
             "argument": 114,
             "type": 11,
             "filter": null,
-            "order": 1
-        }
-    },
-    {
-        "model": "tools.input",
-        "pk": 151,
-        "fields": {
-            "argument": 115,
-            "type": 9,
-            "filter": "subdomain",
-            "order": 1
-        }
-    },
-    {
-        "model": "tools.input",
-        "pk": 152,
-        "fields": {
-            "argument": 116,
-            "type": 2,
-            "filter": "domain",
-            "order": 1
-        }
-    },
-    {
-        "model": "tools.input",
-        "pk": 153,
-        "fields": {
-            "argument": 117,
-            "type": 2,
-            "filter": "domain",
             "order": 1
         }
     },
@@ -1586,16 +1426,6 @@
             "argument": 121,
             "type": 6,
             "filter": "cve",
-            "order": 1
-        }
-    },
-    {
-        "model": "tools.input",
-        "pk": 160,
-        "fields": {
-            "argument": 122,
-            "type": 5,
-            "filter": null,
             "order": 1
         }
     }
