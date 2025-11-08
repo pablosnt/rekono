@@ -461,7 +461,7 @@
                       activator="parent"
                       transition="scale-transition"
                     >
-                      <VTimePicker
+                      <v-time-picker
                         v-if="timeMenu"
                         v-model="scheduledTime"
                         full-width
@@ -472,7 +472,7 @@
                         <template #actions>
                           <v-btn text="Clear" @click="scheduledTime = null" />
                         </template>
-                      </VTimePicker>
+                      </v-time-picker>
                     </v-menu>
                   </v-text-field>
                 </v-col>
@@ -537,7 +537,6 @@
 </template>
 
 <script setup lang="ts">
-import { VTimePicker } from "vuetify/labs/VTimePicker";
 const props = defineProps({
   project: { type: Object, required: false, default: null },
   target: { type: Object, required: false, default: null },

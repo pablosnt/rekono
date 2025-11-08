@@ -45,6 +45,7 @@ yarn-debug.log*
 yarn-error.log*
 .nuxt/
 .output/
+.env
 
 # Debian package
 *.desktop
