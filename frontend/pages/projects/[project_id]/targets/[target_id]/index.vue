@@ -1,9 +1,0 @@
-<script setup lang="ts">
-definePageMeta({ layout: false });
-const route = useRoute();
-const router = useRouter();
-router.push(
-  `/projects/${route.params.project_id}/targets/${route.params.target_id}/dashboard`,
-);
-</script>
-<!-- TODO: Add basic target data on the top of the tabs -->

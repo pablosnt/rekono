@@ -1,33 +1,26 @@
-import vuetify, { transformAssetUrls } from "vite-plugin-vuetify";
-
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-  ssr: false,
-  devtools: { enabled: true },
-  build: {
-    transpile: ["vuetify"],
+  modules: ["@nuxt/eslint", "@nuxt/ui", "@pinia/nuxt"],
+
+  devtools: {
+    enabled: true,
   },
+
+  css: ["~/assets/css/main.css"],
+
   runtimeConfig: {
-    backendUrl: process.env.BACKEND_URL,
-    backendRootPath: process.env.BACKEND_ROOT_PATH,
+    backendUrl: "",
+    backendRootPath: "",
   },
+
+  routeRules: {
+    "/": { prerender: true },
+  },
+
+  compatibilityDate: "2025-01-15",
+
   vite: {
-    vue: {
-      template: {
-        transformAssetUrls,
-      },
-    },
     server: {
-      headers: {
-        "Cache-Control": "no-store",
-        // TODO: Update this and the Nginx configuration
-        "Content-Security-Policy-Report-Only":
-          "default-src 'none'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; connect-src 'self'; img-src 'self' data: www.kali.org raw.githubusercontent.com camo.githubusercontent.com fullhunt.io gitleaks.io nuclei.projectdiscovery.io www.lunasec.io; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'",
-        "Referrer-Policy": "no-referrer",
-        "X-Content-Type-Options": "nosniff",
-        "X-Frame-Options": "DENY",
-        "X-Powered-By": "",
-      },
       proxy:
         process.env.NODE_ENV === "development"
           ? {
@@ -39,15 +32,13 @@ export default defineNuxtConfig({
           : {},
     },
   },
-  modules: [
-    (_options, nuxt) => {
-      nuxt.hooks.hook("vite:extendConfig", (config) => {
-        // @ts-expect-error https://vuetifyjs.com/en/getting-started/installation/#using-nuxt-3
-        config.plugins.push(vuetify({ autoImport: true }));
-      });
+
+  eslint: {
+    config: {
+      stylistic: {
+        commaDangle: "never",
+        braceStyle: "1tbs",
+      },
     },
-    "@pinia/nuxt",
-    "@nuxt/image",
-    "@nuxt/eslint",
-  ],
+  },
 });

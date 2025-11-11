@@ -69,6 +69,13 @@ jobs:
         with:
           fetch-depth: 0
       
+      - name: Install node
+        if: ${{ steps.changes.outputs.frontend == 'true' || github.event_name != 'pull_request' }}
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+      
       - name: Install NPM dependencies
         if: ${{ steps.changes.outputs.frontend == 'true' || github.event_name != 'pull_request' }}
         working-directory: frontend
@@ -77,9 +84,14 @@ jobs:
       - name: ESLint
         if: ${{ steps.changes.outputs.frontend == 'true' || github.event_name != 'pull_request' }}
         working-directory: frontend/
-        run: npm run eslint
+        run: npm run lint
       
       - name: Prettier
         if: ${{ (steps.changes.outputs.frontend == 'true' || github.event_name != 'pull_request') && !cancelled() }}
         working-directory: frontend/
         run: npm run prettier
+      
+      - name: Typecheck
+        if: ${{ (steps.changes.outputs.frontend == 'true' || github.event_name != 'pull_request') && !cancelled() }}
+        working-directory: frontend/
+        run: npm run typecheck

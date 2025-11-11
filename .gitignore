@@ -55,5 +55,6 @@ rekono-kbx
 # Tools paths
 Result/
 
-# Temporal ignore
+# TODO Temporal ignore
 migrations/
+frontend-old/

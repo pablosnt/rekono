@@ -7,3 +7,4 @@ export default withNuxt({
     "vue/require-default-prop": "off",
   },
 });
+// Your custom configs here
