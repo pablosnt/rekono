@@ -24,7 +24,7 @@ export default defineNuxtConfig({
       proxy:
         process.env.NODE_ENV === "development"
           ? {
-              "/api/": {
+              "^/api/(?!_nuxt_icon/).*": {
                 target: "http://127.0.0.1:8000",
                 changeOrigin: true,
               },

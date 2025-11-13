@@ -31,11 +31,19 @@
       >
         <template #leading>
           <div class="flex flex-col items-center justify-center mb-3 mt-3">
-            <img src="/favicon.ico" />
+            <UColorModeImage
+                light="/favicon.ico"
+                dark="/favicon.ico"
+                :width="100"
+                :height="100"
+            />
           </div>
         </template>
         <template #password-hint>
-          <ULink to="#" class="text-primary font-medium" tabindex="-1"
+          <ULink
+            :to="{ path: '/reset-password' }"
+            class="text-primary font-medium"
+            tabindex="-1"
             >Forgot password?</ULink
           >
         </template>
@@ -50,29 +58,29 @@ import * as z from "zod";
 const api = useApi("/api/security/login/", false);
 const tokens = useTokens();
 
-let loading = false;
+const loading = ref(false);
 const schema = z.object({
   username: z.string("Username is required"),
   password: z.string("Password is required"),
 });
 
 function onSubmit(payload: FormSubmitEvent<Schema>) {
-  loading = true;
+  loading.value = true;
   api
     .create("", {
       username: payload.data.username,
       password: payload.data.password,
     })
     .then((response) => {
-      loading = false;
       if (tokens.login(response)) {
         navigateTo("/");
       } else {
         navigateTo("/mfa");
       }
+      loading.value = false;
     })
     .catch(() => {
-      loading = false;
+      loading.value = false;
     });
 }
 </script>
