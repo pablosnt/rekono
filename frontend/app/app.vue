@@ -29,7 +29,7 @@ useSeoMeta({
       <UMain>
         <NuxtPage />
       </UMain>
+      <Footer />
     </NuxtLayout>
-    <Footer />
   </UApp>
 </template>
