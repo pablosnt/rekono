@@ -58,3 +58,4 @@ Result/
 # TODO Temporal ignore
 migrations/
 frontend-old/
+frontend/app/pages/example.vue

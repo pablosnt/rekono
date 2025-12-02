@@ -38,7 +38,7 @@
 
 <script setup lang="ts">
 import * as z from "zod";
-
+definePageMeta({ layout: "public" });
 const api = useApi("/api/security/login/", false);
 const tokens = useTokens();
 const loading = ref(false);

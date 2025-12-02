@@ -9,8 +9,10 @@ export default defineNuxtConfig({
   css: ["~/assets/css/main.css"],
 
   runtimeConfig: {
-    backendUrl: "",
-    backendRootPath: "",
+    public: {
+      backendUrl: "",
+      backendRootPath: "",
+    },
   },
 
   routeRules: {

@@ -1,7 +1,7 @@
 import { useUserStore } from "~/store/user";
 
 export default function (
-  base_endpoint: string,
+  base_endpoint: string = "/api/",
   authentication: boolean = true,
 ) {
   const config = useRuntimeConfig();

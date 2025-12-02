@@ -12,7 +12,7 @@
 
 <script setup lang="ts">
 import * as z from "zod";
-
+definePageMeta({ layout: "public" });
 const api = useApi("/api/users/reset-password/", false);
 const validation = useValidation();
 const route = useRoute();

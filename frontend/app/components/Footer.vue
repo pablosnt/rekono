@@ -1,6 +1,4 @@
 <template>
-  <USeparator />
-
   <UFooter>
     <template #left>
       <UNavigationMenu
@@ -36,11 +34,13 @@
     </template>
 
     <template #default>
-      <p class="text-sm text-muted">
+      <UIcon
+        name="i-simple-icons-nuxtdotjs"
+        class="size-5 text-muted mx-auto"
+      />
+      <p class="ml-2 text-sm text-muted">
         Rekono Maintainers © {{ new Date().getFullYear() }}
       </p>
-      <!-- TODO: Move this to the lateral panel on main pages -->
-      <UColorModeButton />
     </template>
 
     <template #right>
