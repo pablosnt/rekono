@@ -281,5 +281,5 @@ export default function (
     });
   }
 
-  return { get, list, download, create, update, remove };
+  return { get, list, download, create, update, remove, forwardToLogin };
 }

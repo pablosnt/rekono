@@ -1,17 +1,32 @@
 <template>
   <UDashboardGroup>
     <UDashboardSidebar
+      class="group"
+      v-model:collapsed="sidebarCollapsed"
       collapsible
       resizable
-      :ui="{ footer: 'border-t border-default' }"
     >
       <template #header="{ collapsed }">
-        <AppLogo v-if="!collapsed" class="h-5 w-auto shrink-0" />
-        <UIcon
-          v-else
-          name="i-simple-icons-nuxtdotjs"
-          class="size-5 text-primary mx-auto"
-        />
+        <div class="relative flex items-center justify-center w-full">
+          <AppLogo v-if="!collapsed" class="h-5 w-auto shrink-0" />
+          <UIcon
+            v-else
+            name="i-simple-icons-nuxtdotjs"
+            class="size-5 text-primary opacity-100 group-hover:opacity-0 transition-opacity duration-200"
+          />
+          <UButton
+            :icon="
+              collapsed ? 'i-lucide-chevrons-right' : 'i-lucide-chevrons-left'
+            "
+            color="neutral"
+            variant="ghost"
+            :class="
+              'ml-auto opacity-0 group-hover:opacity-100 transition-opacity duration-200' +
+              (collapsed ? ' absolute' : '')
+            "
+            @click="sidebarCollapsed = !sidebarCollapsed"
+          />
+        </div>
       </template>
 
       <template #default="{ collapsed }">
@@ -21,39 +36,68 @@
           orientation="vertical"
           popover
         />
-
-        <!-- TODO: Move the button to the user profile page -->
-        <UColorModeButton
-          :label="colorMode.value === 'dark' ? 'Dark mode' : 'Light mode'"
-          class="mt-auto"
-          size="xl"
-        />
       </template>
 
       <template #footer="{ collapsed }">
-        <!-- TODO: Popup to show user options -->
-        <UButton
-          :avatar="{
-            text: userStore.name ? userStore.name.charAt(0).toUpperCase() : '',
-            size: 'lg',
-          }"
-          :label="collapsed ? undefined : userStore.name"
-          color="neutral"
-          variant="ghost"
-          class="w-full"
-          :block="collapsed"
-          size="xl"
-        />
+        <UModal
+          v-model:open="profileOpen"
+          :ui="{ content: 'sm:max-w-6xl sm:max-h-2xl' }"
+        >
+          <UButton
+            :avatar="{
+              text: userStore.name
+                ? userStore.name.charAt(0).toUpperCase()
+                : '',
+              class: 'bg-primary-500 text-white',
+              size: 'lg',
+            }"
+            :label="collapsed ? undefined : userStore.name"
+            color="neutral"
+            variant="ghost"
+            class="w-full"
+            :block="collapsed"
+            size="xl"
+            @click="profileOpen = true"
+          />
+          <template #header>
+            <UUser
+              :avatar="{
+                text: userStore.name
+                  ? userStore.name.charAt(0).toUpperCase()
+                  : '',
+                class: 'bg-primary-500 text-white',
+              }"
+              size="xl"
+              :name="userStore.name"
+              :description="userStore.role"
+            />
+            <UColorModeButton class="ml-auto" size="xl" />
+            <UButton
+              icon="i-lucide-x"
+              size="xl"
+              variant="ghost"
+              color="neutral"
+              @click="profileOpen = false"
+            />
+          </template>
+          <template #body>
+            <Profile />
+          </template>
+        </UModal>
       </template>
     </UDashboardSidebar>
-    <slot />
+    <UContainer>
+      <slot />
+    </UContainer>
   </UDashboardGroup>
 </template>
 
 <script setup lang="ts">
 import { useUserStore } from "~/store/user";
+
 const api = useApi();
-const colorMode = useColorMode();
+const profileOpen = ref(false);
+const sidebarCollapsed = ref(false);
 const userStore = useUserStore();
 const items = ref([
   {
@@ -152,7 +196,7 @@ onMounted(() => {
     });
   }
   api.get("stats/top-projects/").then((response) => {
-    let children = [];
+    const children = [];
     for (let i = 0; i < response.length; i++) {
       children.push({
         label: response[i].name,

@@ -12,6 +12,7 @@
 
 <script setup lang="ts">
 import * as z from "zod";
+
 definePageMeta({ layout: "public" });
 const api = useApi("/api/users/reset-password/", false);
 const validation = useValidation();
@@ -31,7 +32,7 @@ let fields = [
   },
 ];
 let schema = z.object({ email: z.email("Valid email is required") });
-let description = ref(
+const description = ref(
   "Enter your user account's email and we will send you a password reset link",
 );
 if (otp.value) {

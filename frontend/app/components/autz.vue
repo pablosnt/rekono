@@ -3,7 +3,7 @@
     <slot />
   </template>
   <template v-else>
-    <!-- TODO -->
+    <!-- todo -->
     <UNotification
       color="danger"
       title="Access denied"
@@ -14,6 +14,7 @@
 
 <script setup lang="ts">
 import { useUserStore } from "~/store/user";
+
 defineProps<{ role: string }>();
 const userStore = useUserStore();
 </script>

@@ -31,7 +31,8 @@
 </template>
 
 <script setup lang="ts">
-import * as z from "zod";
+import type * as z from "zod";
+
 interface Props {
   title: string;
   description?: string;

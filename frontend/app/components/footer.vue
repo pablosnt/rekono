@@ -1,4 +1,5 @@
 <template>
+  <!-- todo: the footer is shown on top of the main panel -->
   <UFooter>
     <template #left>
       <UNavigationMenu
