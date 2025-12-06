@@ -86,8 +86,11 @@
         </UModal>
       </template>
     </UDashboardSidebar>
-    <UContainer>
-      <slot />
+    <UContainer class="flex flex-col min-h-full">
+      <div class="flex-1">
+        <slot />
+      </div>
+      <Footer />
     </UContainer>
   </UDashboardGroup>
 </template>

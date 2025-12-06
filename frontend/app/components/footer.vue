@@ -1,6 +1,5 @@
 <template>
-  <!-- todo: the footer is shown on top of the main panel -->
-  <UFooter>
+  <UFooter class="sticky bottom-0">
     <template #left>
       <UNavigationMenu
         :items="[

@@ -57,11 +57,8 @@ const items = computed(() =>
 function logout() {
   const refresh = tokens.get().refresh;
   if (refresh) {
-    api.create("", { refresh: refresh }).then(() => {
-      return api.forwardToLogin();
-    });
-  } else {
-    return api.forwardToLogin();
+    api.create("", { refresh: refresh });
   }
+  return api.forwardToLogin();
 }
 </script>
