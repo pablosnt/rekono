@@ -57,7 +57,7 @@ class ProjectSerializer(TaggitSerializer, RelatedNotesSerializer):
             "members",
             "tags",
             "defectdojo_sync",
-            "notes",
+            "notes",  # TODO: Is it really needed?
         )
         read_only_fields = (
             "owner",

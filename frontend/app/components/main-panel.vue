@@ -1,5 +1,8 @@
 <template>
   <UDashboardGroup>
+    <!-- TODO: When one option is clicked while the sidebar is collapsed, it goes to the next page with the sidebar extended
+      We must keep the sidebar status in the localStorage, so the user preferences are saved in the browser 
+    -->
     <UDashboardSidebar
       class="group"
       v-model:collapsed="sidebarCollapsed"

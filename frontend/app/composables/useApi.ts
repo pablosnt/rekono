@@ -6,12 +6,15 @@ export default function (
 ) {
   const config = useRuntimeConfig();
   const toast = useToast();
+  const utils = useUtils();
   const defaultHeaders = { Accept: "application/json" };
 
   function url(endpoint: string): string {
-    endpoint = endpoint.startsWith(base_endpoint)
-      ? endpoint
-      : base_endpoint + endpoint;
+    endpoint =
+      endpoint.startsWith(base_endpoint) ||
+      endpoint === "/api/security/refresh/"
+        ? endpoint
+        : base_endpoint + endpoint;
     endpoint = config.backendRootPath
       ? config.backendRootPath + endpoint
       : endpoint;
@@ -54,7 +57,7 @@ export default function (
     const field = Object.keys(error.data)[0];
     let value = Object.values(error.data)[0];
     value = Array.isArray(value) ? value[0] : value;
-    const message = `${value.charAt(0).toUpperCase()}${value.slice(1)}`;
+    const message = utils.firstUpper(value);
     return field !== "non_field_errors" && include_field
       ? `${field}: ${message}`
       : message;
