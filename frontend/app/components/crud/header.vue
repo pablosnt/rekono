@@ -68,10 +68,15 @@
 
           <UModal
             v-if="config.canCreate"
+            :open="openCreateModal"
             :title="`New ${config.entityName}`"
             :ui="{ content: 'sm:max-w-3xl sm:max-h-xl', footer: 'justify-end' }"
+            @update:open="(open) => $emit('openCreateModal', open)"
           >
-            <UButton icon="i-lucide-plus" />
+            <UButton
+              icon="i-lucide-plus"
+              @click="$emit('openCreateModal', true)"
+            />
             <template #body>
               <CrudForm :config="config" />
             </template>
@@ -82,7 +87,14 @@
                 variant="outline"
                 @click="close"
               />
-              <UButton color="primary" label="Create" />
+              <UButton
+                color="primary"
+                label="Create"
+                @click="
+                  emit('create');
+                  close($event);
+                "
+              />
             </template>
           </UModal>
         </div>
@@ -94,14 +106,18 @@
 <script setup lang="ts">
 import type { CrudConfig } from "~/types/crud";
 
-const props = defineProps<{ config: CrudConfig; table: any }>();
+const props = defineProps<{
+  config: CrudConfig;
+  table: any;
+  openCreateModal: boolean;
+}>();
 const emit = defineEmits<{
   search: [search: string];
   filters: [filters: Record<string, unknown>];
   create: [];
+  openCreateModal: [open: boolean];
 }>();
 const utils = useUtils();
-
 const search = ref("");
 const openFilters = ref(false);
 </script>

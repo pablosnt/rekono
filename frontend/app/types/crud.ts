@@ -39,12 +39,13 @@ export interface CrudConfig<T = unknown> {
   endpoint: string;
   entityName: string;
   entityNamePlural: string;
+  icon?: string;
+  breadcrumbs?: BreadcrumbItem[];
 
   tableColumns?: TableColumn<T>[];
   tableColumnsVisibility?: Record<string, boolean>;
   cardFormatter?: (item: T) => CardConfig;
 
-  breadcrumbs?: BreadcrumbItem[];
   searchable: boolean;
   searchPlaceholder?: string;
   filters?: FilterConfig[];

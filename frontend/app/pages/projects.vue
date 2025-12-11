@@ -28,6 +28,7 @@ const config: CrudConfig<Project> = reactive({
   endpoint: "/api/projects/",
   entityName: "Project",
   entityNamePlural: "Projects",
+  icon: "i-lucide-folder",
   // TODO: Add icons to some columns like tags and targets
   tableColumns: [
     {
