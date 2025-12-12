@@ -16,6 +16,7 @@
           @create="fetch()"
           @openCreateModal="(open) => (openCreateModal = open)"
         />
+
         <UEmpty
           v-if="state.items.length === 0 && !state.loading"
           class="mt-10"
@@ -38,6 +39,7 @@
           size="xl"
           variant="naked"
         />
+
         <CrudTable
           v-if="config.tableColumns"
           v-show="state.items.length > 0 || state.loading"
@@ -56,9 +58,52 @@
             }
           "
         />
+
         <!-- todo: Cards -->
-        <!-- TODO: Pagination -->
+
+        <div
+          class="grid grid-cols-3 items-center mt-5 px-3"
+          v-if="state.total > state.items.length"
+        >
+          <div class="text-sm text-gray-500">
+            Showing
+            <span class="font-medium">{{
+              (state.page - 1) * state.pageSize + 1
+            }}</span>
+            to
+            <span class="font-medium">{{
+              Math.min(state.page * state.pageSize, state.total)
+            }}</span>
+            of
+            <span class="font-medium">{{ state.total }}</span>
+            results
+          </div>
+          <div class="flex justify-center">
+            <UPagination
+              v-model:page="state.page"
+              :total="state.total"
+              :items-per-page="state.pageSize"
+              show-edges
+              color="neutral"
+              variant="ghost"
+              size="lg"
+              @update:modelValue="fetch()"
+            />
+          </div>
+          <div
+            class="flex justify-end items-center gap-2 text-sm text-gray-500"
+          >
+            <span>Items per page</span>
+            <USelect
+              v-model="state.pageSize"
+              :items="config.pageSizeOptions?.filter((i) => i <= state.total)"
+              size="sm"
+              @update:modelValue="fetch()"
+            />
+          </div>
+        </div>
       </template>
+
       <template v-else>
         <UEmpty
           class="mt-20"
@@ -117,10 +162,6 @@ function fetch() {
       state.loading = false;
     });
 }
-
-watch([state.page, state.pageSize], () => {
-  fetch();
-});
 
 onMounted(() => {
   if (props.config.canRead) {

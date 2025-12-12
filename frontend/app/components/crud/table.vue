@@ -1,5 +1,4 @@
 <template>
-  <!-- TODO: Improve table header's borders -->
   <UContainer>
     <UTable
       ref="table"
