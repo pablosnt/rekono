@@ -36,9 +36,9 @@
     <template #default>
       <UIcon
         name="i-simple-icons-nuxtdotjs"
-        class="size-5 text-muted mx-auto"
+        class="size-5 text-muted mx-auto mr-3"
       />
-      <p class="ml-2 text-sm text-muted">
+      <p class="text-sm text-muted">
         Rekono Maintainers © {{ new Date().getFullYear() }}
       </p>
     </template>

@@ -147,7 +147,7 @@ export default function (
     user.refresh();
     const refresh = tokens.get().refresh;
     if (!refresh) {
-      forwardToLogin();
+      return forwardToLogin();
     } else {
       return request("/api/security/refresh/", {
         method: "POST",
@@ -160,8 +160,7 @@ export default function (
           return Promise.resolve();
         })
         .catch(() => {
-          forwardToLogin();
-          return Promise.reject();
+          return forwardToLogin();
         });
     }
   }

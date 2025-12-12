@@ -12,7 +12,7 @@
             fetch();
           }
         "
-        @create="fetch"
+        @create="fetch()"
         @openCreateModal="(open) => (openCreateModal = open)"
       />
       <div class="flex-1 overflow-auto">
@@ -39,9 +39,8 @@
           variant="naked"
         />
         <CrudTable
-          v-if="
-            config.tableColumns && (state.items.length > 0 || state.loading)
-          "
+          v-if="config.tableColumns"
+          v-show="state.items.length > 0 || state.loading"
           :config="config"
           :state="state"
           @ordering="
@@ -52,8 +51,8 @@
             }
           "
           @tableRef="
-            (tableRef) => {
-              tableRef = tableRef;
+            (newTableRef) => {
+              tableRef = newTableRef
             }
           "
         />
@@ -62,7 +61,7 @@
       </div>
     </template>
     <template v-else>
-      <!-- todo -->
+      <!-- TODO -->
       <!-- <UNotification
         color="danger"
         title="Access denied"
@@ -83,7 +82,7 @@ const openCreateModal = ref(false);
 const state = reactive<CrudState<T>>({
   items: [],
   total: 0,
-  loading: false,
+  loading: true,
   page: 1,
   pageSize: props.config.pageSize || 24,
   filters: {},

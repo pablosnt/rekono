@@ -18,7 +18,7 @@ import type { CrudConfig, CrudState } from "~/types/crud";
 
 const props = defineProps<{ config: CrudConfig; state: CrudState }>();
 const emit = defineEmits<{
-  tableRef: [tableRef: any];
+  tableRef: [newTableRef: any];
   ordering: [ordering: string];
 }>();
 
@@ -91,8 +91,9 @@ const columns = computed(() =>
 );
 
 const table = useTemplateRef("table");
-watch(table, (newVal) => {
-  emit("tableRef", newVal);
+
+onMounted(() => {
+  emit("tableRef", table.value);
 });
 // TODO: Actions -> Edit & Delete -> https://ui.nuxt.com/docs/components/table#with-slots
 </script>
