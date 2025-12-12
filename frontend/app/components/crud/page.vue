@@ -1,21 +1,21 @@
 <template>
   <div class="flex flex-col h-full">
-    <template v-if="config.canRead">
-      <CrudHeader
-        :openCreateModal="openCreateModal"
-        :config="config"
-        :table="tableRef"
-        @search="
-          (search) => {
-            state.searchQuery = search;
-            state.page = 1;
-            fetch();
-          }
-        "
-        @create="fetch()"
-        @openCreateModal="(open) => (openCreateModal = open)"
-      />
-      <div class="flex-1 overflow-auto">
+    <div class="flex-1 overflow-auto">
+      <template v-if="config.canRead">
+        <CrudHeader
+          :openCreateModal="openCreateModal"
+          :config="config"
+          :table="tableRef"
+          @search="
+            (search) => {
+              state.searchQuery = search;
+              state.page = 1;
+              fetch();
+            }
+          "
+          @create="fetch()"
+          @openCreateModal="(open) => (openCreateModal = open)"
+        />
         <UEmpty
           v-if="state.items.length === 0 && !state.loading"
           class="mt-10"
@@ -52,22 +52,31 @@
           "
           @tableRef="
             (newTableRef) => {
-              tableRef = newTableRef
+              tableRef = newTableRef;
             }
           "
         />
         <!-- todo: Cards -->
         <!-- TODO: Pagination -->
-      </div>
-    </template>
-    <template v-else>
-      <!-- TODO -->
-      <!-- <UNotification
-        color="danger"
-        title="Access denied"
-        description="You do not have permission to access this page."
-      /> -->
-    </template>
+      </template>
+      <template v-else>
+        <UEmpty
+          class="mt-20"
+          title="Access Denied"
+          description="You do not have the necessary permissions to view this page"
+          icon="i-lucide-shield-ban"
+          :actions="[
+            {
+              icon: 'i-lucide-home',
+              label: 'Home',
+              to: '/',
+            },
+          ]"
+          size="xl"
+          variant="naked"
+        />
+      </template>
+    </div>
   </div>
 </template>
 
@@ -114,6 +123,8 @@ watch([state.page, state.pageSize], () => {
 });
 
 onMounted(() => {
-  fetch();
+  if (props.config.canRead) {
+    fetch();
+  }
 });
 </script>

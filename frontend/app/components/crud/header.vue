@@ -37,7 +37,11 @@
           </UCollapsible>
 
           <UDropdownMenu
-            v-if="table && config.tableColumnsVisibility && config.tableColumns?.length"
+            v-if="
+              table &&
+              config.tableColumnsVisibility &&
+              config.tableColumns?.length
+            "
             :items="
               table?.tableApi
                 ?.getAllColumns()

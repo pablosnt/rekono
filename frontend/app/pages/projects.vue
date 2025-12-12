@@ -138,7 +138,7 @@ const config: CrudConfig<Project> = reactive({
   canDelete: (project: Project) => userStore.is_admin,
   deleteMessage: (project: Project) =>
     `Are you sure you want to delete "${project.name}"? All associated data including targets findings, and executions will be permanently deleted.`,
-  pageSize: 24,
-  pageSizeOptions: [24, 50, 100],
+  pageSize: 25,
+  pageSizeOptions: [25, 50, 100],
 });
 </script>
