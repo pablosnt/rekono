@@ -35,6 +35,10 @@ export interface CardConfig {
   to?: string;
 }
 
+export type CrudTableColumn<T> = TableColumn<T> & {
+  icon?: string;
+};
+
 export interface CrudConfig<T = unknown> {
   endpoint: string;
   entityName: string;
@@ -42,7 +46,7 @@ export interface CrudConfig<T = unknown> {
   icon?: string;
   breadcrumbs?: BreadcrumbItem[];
 
-  tableColumns?: TableColumn<T>[];
+  tableColumns?: CrudTableColumn<T>[];
   tableColumnsVisibility?: Record<string, boolean>;
   cardFormatter?: (item: T) => CardConfig;
 

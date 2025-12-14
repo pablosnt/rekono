@@ -29,12 +29,12 @@ const config: CrudConfig<Project> = reactive({
   entityName: "Project",
   entityNamePlural: "Projects",
   icon: "i-lucide-folder",
-  // TODO: Add icons to some columns like tags and targets
   tableColumns: [
     {
       accessorKey: "id",
       header: "ID",
-      cell: ({ row }) => `#${row.getValue("id")}`,
+      icon: "i-lucide-hash",
+      cell: ({ row }) => h("span", { class: "font-medium" }, row.getValue("id")),
     },
     {
       accessorKey: "name",
@@ -86,6 +86,7 @@ const config: CrudConfig<Project> = reactive({
     {
       accessorKey: "targets",
       header: "Targets",
+      icon: "i-lucide-locate-fixed",
       cell: ({ row }) =>
         h("span", { class: "font-medium" }, row.getValue("targets").length),
       enableResizing: true,
@@ -93,6 +94,7 @@ const config: CrudConfig<Project> = reactive({
     {
       accessorKey: "owner",
       header: "Owner",
+      icon: "i-lucide-user",
       cell: ({ row }) => {
         const owner = row.getValue("owner") as Project["owner"];
         return owner?.username ? `@${owner.username}` : "";
@@ -101,7 +103,7 @@ const config: CrudConfig<Project> = reactive({
     },
   ] as TableColumn<Project>[],
   tableColumnsVisibility: {
-    id: true,
+    id: false,
     description: false,
     owner: false,
   },

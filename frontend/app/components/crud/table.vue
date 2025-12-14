@@ -23,10 +23,22 @@ const emit = defineEmits<{
 
 const UDropdownMenu = resolveComponent("UDropdownMenu");
 const UButton = resolveComponent("UButton");
+const UIcon = resolveComponent("UIcon");
 
 const columns = computed(() =>
-  props.config.tableColumns?.map((column) => {
-    if (!props.config.ordering?.includes(column.accessorKey)) return column;
+  props.config.tableColumns?.map((column: any) => {
+    if (!props.config.ordering?.includes(column.accessorKey)) {
+        return column.icon ? {
+          ...column,
+          header: h("div", { class: "flex items-center gap-1.5" }, [
+            h(UIcon, {
+              name: column.icon,
+              class: "w-4 h-4 text-gray-500 dark:text-gray-400",
+            }),
+            h("span", column.header as string),
+          ]),
+        } : column;
+    }
     let sorted = null;
     if (props.state.ordering) {
       if (props.state.ordering.includes(column.accessorKey)) {
@@ -75,12 +87,12 @@ const columns = computed(() =>
           h(UButton, {
             color: "neutral",
             variant: "ghost",
-            label: column.header,
+            label: column.header as string,
             icon: sorted
               ? sorted === "asc"
                 ? "i-lucide-arrow-up-narrow-wide"
                 : "i-lucide-arrow-down-wide-narrow"
-              : "i-lucide-arrow-up-down",
+              : column.icon ? column.icon : "i-lucide-arrow-up-down",
             class: "-mx-2.5 data-[state=open]:bg-elevated",
             "aria-label": `Sort by ${sorted === "asc" ? "ascending" : "descending"}`,
           }),
