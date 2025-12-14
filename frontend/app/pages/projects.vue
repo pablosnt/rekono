@@ -127,7 +127,7 @@ const config: CrudConfig<Project> = reactive({
     userStore.is_admin
       ? {
           key: "owner_id",
-          label: "Mine",
+          label: "My projects",
           type: "boolean",
           value: userStore.user,
         }
