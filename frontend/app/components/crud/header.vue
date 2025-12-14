@@ -37,6 +37,51 @@
           </UCollapsible>
 
           <UDropdownMenu
+            :items="
+              config.ordering?.map((ordering: string) => ({
+                id: ordering,
+                label: ordering === 'id' ? 'ID' : utils.firstUpper(ordering),
+              }))
+            "
+            :content="{ align: 'end' }"
+          >
+            <UButton
+              icon="i-lucide-arrow-up-down"
+              color="neutral"
+              variant="outline"
+            />
+            <template #item="{ item }">
+              <div class="flex items-center justify-between flex-1 gap-2">
+                <span class="text-sm font-medium">{{ item.label }}</span>
+                <div class="flex items-center gap-1">
+                  <UTooltip text="Ascending">
+                    <UButton
+                      size="xs"
+                      :color="
+                        state.ordering === item.id ? 'primary' : 'neutral'
+                      "
+                      variant="soft"
+                      icon="i-lucide-arrow-up-narrow-wide"
+                      @click.stop="emit('ordering', item.id)"
+                    />
+                  </UTooltip>
+                  <UTooltip text="Descending">
+                    <UButton
+                      size="xs"
+                      :color="
+                        state.ordering === `-${item.id}` ? 'primary' : 'neutral'
+                      "
+                      variant="soft"
+                      icon="i-lucide-arrow-down-wide-narrow"
+                      @click.stop="emit('ordering', `-${item.id}`)"
+                    />
+                  </UTooltip>
+                </div>
+              </div>
+            </template>
+          </UDropdownMenu>
+
+          <UDropdownMenu
             v-if="
               table &&
               config.tableColumnsVisibility &&
@@ -108,16 +153,18 @@
 </template>
 
 <script setup lang="ts">
-import type { CrudConfig } from "~/types/crud";
+import type { CrudConfig, CrudState   } from "~/types/crud";
 
 const props = defineProps<{
   config: CrudConfig;
+  state: CrudState;
   table: any;
   openCreateModal: boolean;
 }>();
 const emit = defineEmits<{
   search: [search: string];
   filters: [filters: Record<string, unknown>];
+  ordering: [sortering: string];
   create: [];
   openCreateModal: [open: boolean];
 }>();

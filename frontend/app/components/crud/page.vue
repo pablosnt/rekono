@@ -5,10 +5,18 @@
         <CrudHeader
           :openCreateModal="openCreateModal"
           :config="config"
+          :state="state"
           :table="tableRef"
           @search="
             (search) => {
               state.searchQuery = search;
+              state.page = 1;
+              fetch();
+            }
+          "
+          @ordering="
+            (sorting) => {
+              state.ordering = sorting;
               state.page = 1;
               fetch();
             }
@@ -45,13 +53,6 @@
           v-show="state.items.length > 0 || state.loading"
           :config="config"
           :state="state"
-          @ordering="
-            (sorting) => {
-              state.ordering = sorting;
-              state.page = 1;
-              fetch();
-            }
-          "
           @tableRef="
             (newTableRef) => {
               tableRef = newTableRef;

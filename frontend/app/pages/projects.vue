@@ -6,8 +6,7 @@
 
 <script setup lang="ts">
 import { h } from "vue";
-import type { CrudConfig } from "~/types/crud";
-import type { TableColumn } from "@nuxt/ui";
+import type { CrudConfig, CrudTableColumn } from "~/types/crud";
 import { useUserStore } from "~/store/user";
 
 interface Project {
@@ -39,6 +38,7 @@ const config: CrudConfig<Project> = reactive({
     {
       accessorKey: "name",
       header: "Name",
+      icon: "i-lucide-case-sensitive",
       cell: ({ row }) =>
         h("span", { class: "font-medium" }, row.getValue("name")),
       enableResizing: true,
@@ -46,6 +46,7 @@ const config: CrudConfig<Project> = reactive({
     {
       accessorKey: "description",
       header: "Description",
+      icon: "i-lucide-align-left",
       cell: ({ row }) =>
         h("span", { class: "font-medium" }, row.getValue("description")),
       enableResizing: true,
@@ -101,7 +102,7 @@ const config: CrudConfig<Project> = reactive({
       },
       enableResizing: true,
     },
-  ] as TableColumn<Project>[],
+  ] as CrudTableColumn<Project>[],
   tableColumnsVisibility: {
     id: false,
     description: false,

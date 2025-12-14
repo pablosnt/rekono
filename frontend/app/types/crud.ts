@@ -58,9 +58,9 @@ export interface CrudConfig<T = unknown> {
 
   canRead: boolean;
   canCreate: boolean;
-  canEdit: boolean;
-  canDelete: boolean;
-  deleteMessage?: string;
+  canEdit: boolean | ((item: T) => boolean);
+  canDelete: boolean | ((item: T) => boolean);
+  deleteMessage?: string | ((item: T) => string);
 
   pageSize?: number;
   pageSizeOptions?: number[];
