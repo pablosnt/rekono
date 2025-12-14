@@ -33,7 +33,8 @@ const config: CrudConfig<Project> = reactive({
       accessorKey: "id",
       header: "ID",
       icon: "i-lucide-hash",
-      cell: ({ row }) => h("span", { class: "font-medium" }, row.getValue("id")),
+      cell: ({ row }) =>
+        h("span", { class: "font-medium" }, row.getValue("id")),
     },
     {
       accessorKey: "name",

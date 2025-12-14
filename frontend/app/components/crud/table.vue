@@ -23,7 +23,8 @@ const emit = defineEmits<{
 
 const columns = computed(() =>
   props.config.tableColumns?.map((column: any) => {
-        return column.icon ? {
+    return column.icon
+      ? {
           ...column,
           header: h("div", { class: "flex items-center gap-1.5" }, [
             h(UIcon, {
@@ -32,8 +33,9 @@ const columns = computed(() =>
             }),
             h("span", column.header as string),
           ]),
-        } : column;
-    })
+        }
+      : column;
+  }),
 );
 
 const table = useTemplateRef("table");

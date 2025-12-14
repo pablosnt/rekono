@@ -25,7 +25,10 @@
               'ml-auto opacity-0 group-hover:opacity-100 transition-opacity duration-200' +
               (collapsed ? ' absolute' : '')
             "
-            @click="sidebarCollapsed = !sidebarCollapsed; updateSidebar()"
+            @click="
+              sidebarCollapsed = !sidebarCollapsed;
+              updateSidebar();
+            "
           />
         </div>
       </template>
@@ -103,7 +106,7 @@ const api = useApi();
 const userStore = useUserStore();
 const profileOpen = ref(false);
 const sidebarCollapsed = ref(null);
-const sidebarCollapsedKey = ref('main-panel-collapsed');
+const sidebarCollapsedKey = ref("main-panel-collapsed");
 const mounted = ref(false);
 const items = ref([
   {
@@ -159,7 +162,7 @@ function updateSidebar() {
 
 onMounted(() => {
   mounted.value = true;
-  if (localStorage.getItem(sidebarCollapsedKey.value) === 'true') {
+  if (localStorage.getItem(sidebarCollapsedKey.value) === "true") {
     sidebarCollapsed.value = true;
   } else {
     sidebarCollapsed.value = false;
