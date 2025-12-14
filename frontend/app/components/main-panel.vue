@@ -1,13 +1,11 @@
 <template>
   <UDashboardGroup>
-    <!-- TODO: When one option is clicked while the sidebar is collapsed, it goes to the next page with the sidebar extended
-      We must keep the sidebar status in the localStorage, so the user preferences are saved in the browser 
-    -->
     <UDashboardSidebar
       class="group"
       v-model:collapsed="sidebarCollapsed"
       collapsible
       resizable
+      @update:collapsed="updateSidebar()"
     >
       <template #header="{ collapsed }">
         <div class="relative flex items-center justify-center w-full">
@@ -27,7 +25,7 @@
               'ml-auto opacity-0 group-hover:opacity-100 transition-opacity duration-200' +
               (collapsed ? ' absolute' : '')
             "
-            @click="sidebarCollapsed = !sidebarCollapsed"
+            @click="sidebarCollapsed = !sidebarCollapsed; updateSidebar()"
           />
         </div>
       </template>
@@ -102,9 +100,11 @@
 import { useUserStore } from "~/store/user";
 
 const api = useApi();
-const profileOpen = ref(false);
-const sidebarCollapsed = ref(false);
 const userStore = useUserStore();
+const profileOpen = ref(false);
+const sidebarCollapsed = ref(null);
+const sidebarCollapsedKey = ref('main-panel-collapsed');
+const mounted = ref(false);
 const items = ref([
   {
     label: "Home",
@@ -152,7 +152,18 @@ const items = ref([
   },
 ]);
 
+function updateSidebar() {
+  if (!mounted.value) return;
+  localStorage.setItem(sidebarCollapsedKey.value, sidebarCollapsed.value);
+}
+
 onMounted(() => {
+  mounted.value = true;
+  if (localStorage.getItem(sidebarCollapsedKey.value) === 'true') {
+    sidebarCollapsed.value = true;
+  } else {
+    sidebarCollapsed.value = false;
+  }
   if (userStore.is_auditor) {
     items.value.push({
       label: "Tooling",
