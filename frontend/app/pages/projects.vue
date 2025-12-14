@@ -113,11 +113,25 @@ const config: CrudConfig<Project> = reactive({
   searchPlaceholder: "Search projects...",
   filters: [
     {
-      key: "tags",
+      key: "tag",
       label: "Tag",
       type: "text",
       placeholder: "Filter by tag...",
     },
+    {
+      key: "owner",
+      label: "Owner",
+      type: "text",
+      placeholder: "Filter by owner username...",
+    },
+    userStore.is_admin
+      ? {
+          key: "owner_id",
+          label: "Mine",
+          type: "boolean",
+          value: userStore.user,
+        }
+      : {},
   ],
   ordering: ["id", "name"],
   defaultOrdering: "-id",

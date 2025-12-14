@@ -22,19 +22,16 @@
             @update:model-value="$emit('search', search)"
           />
 
-          <UCollapsible
-            v-model:open="openFilters"
+          <UButton
             v-if="config.filters?.length"
-          >
-            <UButton
-              :icon="openFilters ? 'i-lucide-filter-x' : 'i-lucide-filter'"
-              :color="openFilters ? 'primary' : 'neutral'"
-              variant="outline"
-            />
-            <template #content>
-              <CrudFilters :config="config" />
-            </template>
-          </UCollapsible>
+            :icon="openFilters ? 'i-lucide-filter-x' : 'i-lucide-filter'"
+            :color="openFilters ? 'primary' : 'neutral'"
+            variant="outline"
+            @click="
+              openFilters = !openFilters;
+              !openFilters ? emit('filters', {}) : null;
+            "
+          />
 
           <UDropdownMenu
             :items="
@@ -149,11 +146,20 @@
         </div>
       </div>
     </UContainer>
+    <UCollapsible v-model:open="openFilters">
+      <template #content>
+        <CrudFilters
+          :config="config"
+          :state="state"
+          @filters="(filters) => $emit('filters', filters)"
+        />
+      </template>
+    </UCollapsible>
   </div>
 </template>
 
 <script setup lang="ts">
-import type { CrudConfig, CrudState   } from "~/types/crud";
+import type { CrudConfig, CrudState } from "~/types/crud";
 
 const props = defineProps<{
   config: CrudConfig;

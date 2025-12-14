@@ -25,6 +25,7 @@ class ProjectFilter(FilterSet):
     """
 
     tag = CharFilter(field_name="tags__name")
+    owner = CharFilter(field_name="owner__username")
     defectdojo_product_type = NumberFilter(field_name="defectdojo_sync__product_type_id")
     defectdojo_product = NumberFilter(field_name="defectdojo_sync__product_id")
     defectdojo_engagement = NumberFilter(field_name="defectdojo_sync__engagement_id")
@@ -43,7 +44,7 @@ class ProjectFilter(FilterSet):
         model = Project
         fields = {
             "name": ["exact", "icontains"],
-            "owner": ["exact"],
+            "owner_id": ["exact"],
             "members": ["exact"],
             "defectdojo_sync": ["exact"],
         }

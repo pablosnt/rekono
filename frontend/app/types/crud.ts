@@ -9,7 +9,8 @@ export interface FilterOption {
 export interface FilterConfig {
   key: string;
   label: string;
-  type: "select" | "multiselect" | "text" | "date" | "daterange" | "boolean";
+  value?: any;
+  type: "select" | "text" | "boolean";
   options?: FilterOption[] | (() => Promise<FilterOption[]>);
   placeholder?: string;
   icon?: string;

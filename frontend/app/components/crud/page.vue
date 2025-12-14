@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col h-full">
+  <div class="flex flex-col h-full w-full">
     <div class="flex-1 overflow-auto">
       <template v-if="config.canRead">
         <CrudHeader
@@ -10,15 +10,19 @@
           @search="
             (search) => {
               state.searchQuery = search;
-              state.page = 1;
-              fetch();
+              fetchFirstPage();
+            }
+          "
+          @filters="
+            (filters) => {
+              state.filters = filters;
+              fetchFirstPage();
             }
           "
           @ordering="
             (sorting) => {
               state.ordering = sorting;
-              state.page = 1;
-              fetch();
+              fetchFirstPage();
             }
           "
           @create="fetch()"
@@ -162,6 +166,11 @@ function fetch() {
     .finally(() => {
       state.loading = false;
     });
+}
+
+function fetchFirstPage() {
+  state.page = 1;
+  fetch();
 }
 
 onMounted(() => {
