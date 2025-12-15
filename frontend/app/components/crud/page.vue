@@ -59,7 +59,48 @@
           :config="config"
           :state="state"
           ref="tableRef"
+          @edit="
+            (item) => {
+              selectedItem = item;
+              openEditModal = true;
+            }
+          "
         />
+
+        <UModal
+          v-if="config.canEdit"
+          :open="openEditModal"
+          :title="`Edit ${config.entityName}`"
+          :ui="{ content: 'sm:max-w-3xl sm:max-h-xl', footer: 'justify-end' }"
+          @update:open="(open) => (openEditModal = open)"
+        >
+          <template #body>
+            <CrudForm
+              ref="editFormRef"
+              :api="api"
+              :config="config"
+              :entity="selectedItem"
+              @submit="
+                fetch();
+                openEditModal = false;
+                selectedItem = null;
+              "
+            />
+          </template>
+          <template #footer="{ close }">
+            <UButton
+              label="Cancel"
+              color="neutral"
+              variant="outline"
+              @click="close"
+            />
+            <UButton
+              color="primary"
+              label="Save"
+              @click="editFormRef.submit()"
+            />
+          </template>
+        </UModal>
 
         <!-- todo: Cards -->
 
@@ -133,7 +174,10 @@ import type { CrudConfig, CrudState } from "~/types/crud";
 const props = defineProps<{ config: CrudConfig<T> }>();
 const api = useApi(props.config.endpoint);
 const tableRef = ref(null);
+const editFormRef = ref();
 const openCreateModal = ref(false);
+const openEditModal = ref(false);
+const selectedItem = ref(null);
 
 const state = reactive<CrudState<T>>({
   items: [],
