@@ -1,4 +1,8 @@
 <template>
+  <!-- TODO: Increase width of the CrudPages -->
+  <!-- TODO: Improve compartimentability of the CrudPage. At the end too many components in the same place, right? -->
+   <!-- TODO: Move toasts to right bottom -->
+  <!-- TODO: Fix typecheck -->
   <div class="flex flex-col h-full w-full">
     <div class="flex-1 overflow-auto">
       <template v-if="config.canRead">
@@ -65,7 +69,15 @@
               openEditModal = true;
             }
           "
+          @delete="
+            (item) => {
+              selectedItem = item;
+              openDeleteModal = true;
+            }
+          "
         />
+
+        <!-- todo: Cards -->
 
         <UModal
           v-if="config.canEdit"
@@ -102,7 +114,36 @@
           </template>
         </UModal>
 
-        <!-- todo: Cards -->
+        <UModal
+          v-if="config.canDelete"
+          :open="openDeleteModal"
+          :title="`Delete ${config.entityName}`"
+          :ui="{ content: 'sm:max-w-3xl sm:max-h-xl', footer: 'justify-end' }"
+          :loading="deleteLoading"
+          @update:open="(open) => (openDeleteModal = open)"
+        >
+          <template #body>
+            <template v-if="selectedItem">
+              <template
+                v-for="(message, index) in config.deleteMessage(selectedItem)"
+                :key="index"
+              >
+                <p :class="message.class">
+                  {{ message.text }}
+                </p>
+              </template>
+            </template>
+          </template>
+          <template #footer="{ close }">
+            <UButton
+              label="Cancel"
+              color="neutral"
+              variant="outline"
+              @click="close"
+            />
+            <UButton color="primary" label="Delete" :loading="deleteLoading" @click="remove()" />
+          </template>
+        </UModal>
 
         <div
           class="grid grid-cols-3 items-center mt-5 px-3"
@@ -174,9 +215,11 @@ import type { CrudConfig, CrudState } from "~/types/crud";
 const props = defineProps<{ config: CrudConfig<T> }>();
 const api = useApi(props.config.endpoint);
 const tableRef = ref(null);
-const editFormRef = ref();
+const editFormRef = ref(null);
 const openCreateModal = ref(false);
 const openEditModal = ref(false);
+const openDeleteModal = ref(false);
+const deleteLoading = ref(false);
 const selectedItem = ref(null);
 
 const state = reactive<CrudState<T>>({
@@ -206,6 +249,20 @@ function fetch() {
     })
     .finally(() => {
       state.loading = false;
+    });
+}
+
+function remove() {
+  deleteLoading.value = true;
+  api
+    .remove(`${selectedItem.value.id}/`, {}, props.config.entityName)
+    .then(() => {
+      fetch();
+    })
+    .finally(() => {
+      deleteLoading.value = false;
+      openDeleteModal.value = false;
+      selectedItem.value = null;
     });
 }
 

@@ -16,7 +16,7 @@
 import type { CrudConfig, CrudState } from "~/types/crud";
 const UIcon = resolveComponent("UIcon");
 const props = defineProps<{ config: CrudConfig; state: CrudState }>();
-const emit = defineEmits<{ edit: [item: any] }>();
+const emit = defineEmits<{ edit: [item: any]; delete: [item: any] }>();
 
 const columns = computed(() => {
   const cols =
@@ -71,9 +71,7 @@ const columns = computed(() => {
           label: "Delete",
           icon: "i-lucide-trash",
           color: "error",
-          onSelect: () => {
-            // TODO: Delete action
-          },
+          onSelect: () => emit("delete", item),
         });
       }
       if (actions.length === 0) return null;

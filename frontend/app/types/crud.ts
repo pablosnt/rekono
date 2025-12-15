@@ -40,6 +40,11 @@ export type CrudTableColumn<T> = TableColumn<T> & {
   icon?: string;
 };
 
+export interface DeleteDetail {
+  text: string;
+  class?: string;
+}
+
 export interface CrudConfig<T = unknown> {
   endpoint: string;
   entityName: string;
@@ -58,7 +63,7 @@ export interface CrudConfig<T = unknown> {
   pageSizeOptions?: number[];
   formFields?: FormField[];
   formSchema?: z.ZodType<T>;
-  deleteMessage?: string | ((item: T) => string);
+  deleteMessage?: ((item: T) => DeleteDetail[]);
   canRead: boolean;
   canCreate: boolean;
   canEdit: boolean | ((item: T) => boolean);
