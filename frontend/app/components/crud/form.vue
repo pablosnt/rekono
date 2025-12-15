@@ -120,15 +120,16 @@ function getOptions(field: FormField): FilterOption[] {
 }
 
 function initFormData() {
-  if (!props.entity) return {};
   let data: Record<string, unknown> = {};
   for (const field of props.config.formFields || []) {
     if (field.type === "tags") {
-      data[field.key] = Array.isArray(props.entity[field.key])
+      data[field.key] = props.entity && Array.isArray(props.entity[field.key])
         ? [...props.entity[field.key]]
         : [];
     } else {
-      data[field.key] = props.entity[field.key] ?? "";
+      if (props.entity) {
+        data[field.key] = props.entity[field.key] ?? "";
+      }
     }
   }
   return data;
