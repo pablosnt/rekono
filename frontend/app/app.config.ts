@@ -6,8 +6,8 @@ export default defineAppConfig({
       neutral: "slate",
     },
     icons: {
-      light: "i-ph-sun",
-      dark: "i-ph-moon",
+      light: "i-lucide-sun",
+      dark: "i-lucide-moon",
     },
   },
 });

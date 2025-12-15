@@ -1,188 +1,189 @@
 <template>
-  <!-- TODO: Increase width of the CrudPages -->
   <!-- TODO: Improve compartimentability of the CrudPage. At the end too many components in the same place, right? -->
   <!-- TODO: Fix typecheck -->
   <div class="flex flex-col h-full w-full">
     <div class="flex-1 overflow-auto">
       <template v-if="config.canRead">
-        <CrudHeader
-          :api="api"
-          :openCreateModal="openCreateModal"
-          :config="config"
-          :state="state"
-          :table="tableRef"
-          @search="
-            (search) => {
-              state.searchQuery = search;
-              fetchFirstPage();
-            }
-          "
-          @filters="
-            (filters) => {
-              state.filters = filters;
-              fetchFirstPage();
-            }
-          "
-          @ordering="
-            (sorting) => {
-              state.ordering = sorting;
-              fetchFirstPage();
-            }
-          "
-          @create="fetch()"
-          @openCreateModal="(open) => (openCreateModal = open)"
-        />
+        <div class="container mx-auto max-w-screen-2xl">
+          <CrudHeader
+            :api="api"
+            :openCreateModal="openCreateModal"
+            :config="config"
+            :state="state"
+            :table="tableRef"
+            @search="
+              (search) => {
+                state.searchQuery = search;
+                fetchFirstPage();
+              }
+            "
+            @filters="
+              (filters) => {
+                state.filters = filters;
+                fetchFirstPage();
+              }
+            "
+            @ordering="
+              (sorting) => {
+                state.ordering = sorting;
+                fetchFirstPage();
+              }
+            "
+            @create="fetch()"
+            @openCreateModal="(open) => (openCreateModal = open)"
+          />
 
-        <UEmpty
-          v-if="state.items.length === 0 && !state.loading"
-          class="mt-10"
-          :title="`No ${config.entityNamePlural.toLowerCase()} found`"
-          :description="`It looks like you don\'t have access to any ${config.entityName.toLowerCase()} yet. ${config.canCreate ? 'You can create one below.' : 'Please contact your administrator.'}`"
-          :icon="config.icon"
-          :actions="
-            config.canCreate
-              ? [
-                  {
-                    icon: 'i-lucide-plus',
-                    label: 'Create new',
-                    onClick: () => {
-                      openCreateModal = true;
+          <UEmpty
+            v-if="state.items.length === 0 && !state.loading"
+            class="mt-10"
+            :title="`No ${config.entityNamePlural.toLowerCase()} found`"
+            :description="`It looks like you don\'t have access to any ${config.entityName.toLowerCase()} yet. ${config.canCreate ? 'You can create one below.' : 'Please contact your administrator.'}`"
+            :icon="config.icon"
+            :actions="
+              config.canCreate
+                ? [
+                    {
+                      icon: 'i-lucide-plus',
+                      label: 'Create new',
+                      onClick: () => {
+                        openCreateModal = true;
+                      },
                     },
-                  },
-                ]
-              : []
-          "
-          size="xl"
-          variant="naked"
-        />
+                  ]
+                : []
+            "
+            size="xl"
+            variant="naked"
+          />
 
-        <CrudTable
-          v-if="config.tableColumns"
-          v-show="state.items.length > 0 || state.loading"
-          :config="config"
-          :state="state"
-          ref="tableRef"
-          @edit="
-            (item) => {
-              selectedItem = item;
-              openEditModal = true;
-            }
-          "
-          @delete="
-            (item) => {
-              selectedItem = item;
-              openDeleteModal = true;
-            }
-          "
-        />
+          <CrudTable
+            v-if="config.tableColumns"
+            v-show="state.items.length > 0 || state.loading"
+            :config="config"
+            :state="state"
+            ref="tableRef"
+            @edit="
+              (item) => {
+                selectedItem = item;
+                openEditModal = true;
+              }
+            "
+            @delete="
+              (item) => {
+                selectedItem = item;
+                openDeleteModal = true;
+              }
+            "
+          />
 
-        <!-- todo: Cards -->
+          <!-- todo: Cards -->
 
-        <UModal
-          v-if="config.canEdit"
-          :open="openEditModal"
-          :title="`Edit ${config.entityName}`"
-          :ui="{ content: 'sm:max-w-3xl sm:max-h-xl', footer: 'justify-end' }"
-          @update:open="(open) => (openEditModal = open)"
-        >
-          <template #body>
-            <CrudForm
-              ref="editFormRef"
-              :api="api"
-              :config="config"
-              :entity="selectedItem"
-              @submit="
-                fetch();
-                openEditModal = false;
-                selectedItem = null;
-              "
-            />
-          </template>
-          <template #footer="{ close }">
-            <UButton
-              label="Cancel"
-              color="neutral"
-              variant="outline"
-              @click="close"
-            />
-            <UButton
-              color="primary"
-              label="Save"
-              @click="editFormRef.submit()"
-            />
-          </template>
-        </UModal>
+          <UModal
+            v-if="config.canEdit"
+            :open="openEditModal"
+            :title="`Edit ${config.entityName}`"
+            :ui="{ content: 'sm:max-w-3xl sm:max-h-xl', footer: 'justify-end' }"
+            @update:open="(open) => (openEditModal = open)"
+          >
+            <template #body>
+              <CrudForm
+                ref="editFormRef"
+                :api="api"
+                :config="config"
+                :entity="selectedItem"
+                @submit="
+                  fetch();
+                  openEditModal = false;
+                  selectedItem = null;
+                "
+              />
+            </template>
+            <template #footer="{ close }">
+              <UButton
+                label="Cancel"
+                color="neutral"
+                variant="outline"
+                @click="close"
+              />
+              <UButton
+                color="primary"
+                label="Save"
+                @click="editFormRef.submit()"
+              />
+            </template>
+          </UModal>
 
-        <UModal
-          v-if="config.canDelete"
-          :open="openDeleteModal"
-          :title="`Delete ${config.entityName}`"
-          :ui="{ content: 'sm:max-w-3xl sm:max-h-xl', footer: 'justify-end' }"
-          :loading="deleteLoading"
-          @update:open="(open) => (openDeleteModal = open)"
-        >
-          <template #body>
-            <template v-if="selectedItem">
-              <template
-                v-for="(message, index) in config.deleteMessage(selectedItem)"
-                :key="index"
-              >
-                <p :class="message.class">
-                  {{ message.text }}
-                </p>
+          <UModal
+            v-if="config.canDelete"
+            :open="openDeleteModal"
+            :title="`Delete ${config.entityName}`"
+            :ui="{ content: 'sm:max-w-3xl sm:max-h-xl', footer: 'justify-end' }"
+            :loading="deleteLoading"
+            @update:open="(open) => (openDeleteModal = open)"
+          >
+            <template #body>
+              <template v-if="selectedItem">
+                <template
+                  v-for="(message, index) in config.deleteMessage(selectedItem)"
+                  :key="index"
+                >
+                  <p :class="message.class">
+                    {{ message.text }}
+                  </p>
+                </template>
               </template>
             </template>
-          </template>
-          <template #footer="{ close }">
-            <UButton
-              label="Cancel"
-              color="neutral"
-              variant="outline"
-              @click="close"
-            />
-            <UButton color="primary" label="Delete" :loading="deleteLoading" @click="remove()" />
-          </template>
-        </UModal>
+            <template #footer="{ close }">
+              <UButton
+                label="Cancel"
+                color="neutral"
+                variant="outline"
+                @click="close"
+              />
+              <UButton color="primary" label="Delete" :loading="deleteLoading" @click="remove()" />
+            </template>
+          </UModal>
 
-        <div
-          class="grid grid-cols-3 items-center mt-5 px-3"
-          v-if="state.total > state.items.length"
-        >
-          <div class="text-sm text-gray-500">
-            Showing
-            <span class="font-medium">{{
-              (state.page - 1) * state.pageSize + 1
-            }}</span>
-            to
-            <span class="font-medium">{{
-              Math.min(state.page * state.pageSize, state.total)
-            }}</span>
-            of
-            <span class="font-medium">{{ state.total }}</span>
-            results
-          </div>
-          <div class="flex justify-center">
-            <UPagination
-              v-model:page="state.page"
-              :total="state.total"
-              :items-per-page="state.pageSize"
-              show-edges
-              color="neutral"
-              variant="ghost"
-              size="lg"
-              @update:modelValue="fetch()"
-            />
-          </div>
           <div
-            class="flex justify-end items-center gap-2 text-sm text-gray-500"
+            class="grid grid-cols-3 items-center mt-5 px-3"
+            v-if="state.total > state.items.length"
           >
-            <span>Items per page</span>
-            <USelect
-              v-model="state.pageSize"
-              :items="config.pageSizeOptions?.filter((i) => i <= state.total)"
-              size="sm"
-              @update:modelValue="fetch()"
-            />
+            <div class="text-sm text-gray-500">
+              Showing
+              <span class="font-medium">{{
+                (state.page - 1) * state.pageSize + 1
+              }}</span>
+              to
+              <span class="font-medium">{{
+                Math.min(state.page * state.pageSize, state.total)
+              }}</span>
+              of
+              <span class="font-medium">{{ state.total }}</span>
+              results
+            </div>
+            <div class="flex justify-center">
+              <UPagination
+                v-model:page="state.page"
+                :total="state.total"
+                :items-per-page="state.pageSize"
+                show-edges
+                color="neutral"
+                variant="ghost"
+                size="lg"
+                @update:modelValue="fetch()"
+              />
+            </div>
+            <div
+              class="flex justify-end items-center gap-2 text-sm text-gray-500"
+            >
+              <span>Items per page</span>
+              <USelect
+                v-model="state.pageSize"
+                :items="config.pageSizeOptions?.filter((i) => i <= state.total)"
+                size="sm"
+                @update:modelValue="fetch()"
+              />
+            </div>
           </div>
         </div>
       </template>

@@ -1,6 +1,5 @@
 <template>
   <div class="space-y-4 p-3">
-    <UContainer>
       <UBreadcrumb
         v-if="config.breadcrumbs?.length"
         :items="config.breadcrumbs"
@@ -146,7 +145,6 @@
           </UModal>
         </div>
       </div>
-    </UContainer>
     <UCollapsible v-model:open="openFilters">
       <template #content>
         <CrudFilters

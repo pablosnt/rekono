@@ -1,5 +1,4 @@
 <template>
-  <UContainer>
     <UTable
       ref="table"
       :data="state.items"
@@ -9,7 +8,6 @@
       v-model:column-visibility="config.tableColumnsVisibility"
       class="flex-1"
     />
-  </UContainer>
 </template>
 
 <script setup lang="ts">
