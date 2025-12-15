@@ -1,7 +1,6 @@
 <template>
   <!-- TODO: Increase width of the CrudPages -->
   <!-- TODO: Improve compartimentability of the CrudPage. At the end too many components in the same place, right? -->
-   <!-- TODO: Move toasts to right bottom -->
   <!-- TODO: Fix typecheck -->
   <div class="flex flex-col h-full w-full">
     <div class="flex-1 overflow-auto">
