@@ -8,6 +8,7 @@
 import { h } from "vue";
 import type { CrudConfig, CrudTableColumn } from "~/types/crud";
 import { useUserStore } from "~/store/user";
+import * as z from "zod";
 
 interface Project {
   id: number;
@@ -23,6 +24,7 @@ interface Project {
 }
 
 const userStore = useUserStore();
+const validation = useValidation();
 const config: CrudConfig<Project> = reactive({
   endpoint: "/api/projects/",
   entityName: "Project",
@@ -115,12 +117,14 @@ const config: CrudConfig<Project> = reactive({
     {
       key: "tag",
       label: "Tag",
+      icon: "i-lucide-tag",
       type: "text",
       placeholder: "Filter by tag...",
     },
     {
       key: "owner",
       label: "Owner",
+      icon: "i-lucide-user",
       type: "text",
       placeholder: "Filter by owner username...",
     },
@@ -135,28 +139,42 @@ const config: CrudConfig<Project> = reactive({
   ],
   ordering: ["id", "name"],
   defaultOrdering: "-id",
-  // formFields: [
-  //   {
-  //     key: "name",
-  //     label: "Name",
-  //     type: "text",
-  //     required: true,
-  //     placeholder: "Enter project name",
-  //   },
-  //   {
-  //     key: "description",
-  //     label: "Description",
-  //     type: "textarea",
-  //     placeholder: "Enter project description",
-  //   },
-  // ],
+  pageSize: 25,
+  pageSizeOptions: [25, 50, 100],
+  formFields: [
+    {
+      key: "name",
+      label: "Name",
+      type: "text",
+      required: true,
+      placeholder: "Enter project name",
+    },
+    {
+      key: "description",
+      label: "Description",
+      type: "textarea",
+      required: true,
+      placeholder: "Enter project description",
+    },
+    {
+      key: "tags",
+      label: "Tags",
+      type: "tags",
+      required: false,
+      placeholder: "Add project tags",
+      icon: "i-lucide-tag",
+    },
+  ],
+  formSchema: z.object({
+    name: validation.name(),
+    description: validation.text("description"),
+    tags: z.array(validation.name("tag", true, 100)).optional(),
+  }),
+  deleteMessage: (project: Project) =>
+    `Are you sure you want to delete "${project.name}"? All associated data including targets findings, and executions will be permanently deleted.`,
   canRead: true,
   canCreate: userStore.is_admin,
   canEdit: (project: Project) => userStore.is_admin,
   canDelete: (project: Project) => userStore.is_admin,
-  deleteMessage: (project: Project) =>
-    `Are you sure you want to delete "${project.name}"? All associated data including targets findings, and executions will be permanently deleted.`,
-  pageSize: 25,
-  pageSizeOptions: [25, 50, 100],
 });
 </script>

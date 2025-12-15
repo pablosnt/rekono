@@ -1,8 +1,166 @@
 <template>
-  <!-- TODO -->
-  <Placeholder class="h-48" />
+  <UForm
+    ref="form"
+    @submit="save()"
+    :state="formData"
+    :validate-on="['input', 'change']"
+    :schema="config.formSchema"
+    :loading="loading"
+    class="space-y-4 mx-auto"
+  >
+    <template v-for="field in config.formFields" :key="field.key">
+      <UFormField
+        :name="field.key"
+        :label="field.label"
+        :required="field.required"
+        :hint="field.hint"
+      >
+        <UInput
+          v-if="field.type === 'text' || field.type === 'number'"
+          class="w-full"
+          v-model="formData[field.key]"
+          :placeholder="field.placeholder"
+          :icon="field.icon"
+          :required="field.required"
+          :type="field.type"
+          size="lg"
+        />
+        <UTextarea
+          v-else-if="field.type === 'textarea'"
+          class="w-full"
+          v-model="formData[field.key]"
+          :placeholder="field.placeholder"
+          :required="field.required"
+          :rows="5"
+        />
+        <USelect
+          v-else-if="field.type === 'select' || field.type === 'multiselect'"
+          class="w-full"
+          v-model="formData[field.key]"
+          :placeholder="field.placeholder"
+          :options="getOptions(field)"
+          value-key="value"
+          option-key="label"
+          :required="field.required"
+          :multiple="field.type === 'multiselect'"
+        />
+        <UCheckbox
+          v-else-if="field.type === 'checkbox'"
+          v-model="formData[field.key]"
+          :label="field.label"
+        />
+        <template v-else-if="field.type === 'tags'">
+          <UInput
+            class="w-full"
+            :placeholder="
+              field.placeholder || 'Type and press Enter to add tag'
+            "
+            :icon="field.icon"
+            size="lg"
+            @keydown.enter.prevent="
+              (e: any) => {
+                const val = e.target.value.trim();
+                if (val) {
+                  if (!formData[field.key]) formData[field.key] = [];
+                  if (!(formData[field.key] as string[]).includes(val)) {
+                    (formData[field.key] as string[]).push(val);
+                  }
+                  e.target.value = '';
+                }
+              }
+            "
+          />
+          <div
+            class="flex flex-wrap gap-2 mt-2"
+            v-if="formData[field.key]?.length"
+          >
+            <UBadge
+              v-for="(tag, index) in formData[field.key] as string[]"
+              :key="index"
+              color="neutral"
+              variant="subtle"
+            >
+              {{ tag }}
+              <UButton
+                icon="i-lucide-x"
+                size="xs"
+                color="neutral"
+                variant="ghost"
+                class="ml-1 -mr-1"
+                @click="(formData[field.key] as string[]).splice(index, 1)"
+              />
+            </UBadge>
+          </div>
+        </template>
+      </UFormField>
+    </template>
+  </UForm>
 </template>
 
 <script setup lang="ts">
-defineProps<{ config: CrudConfig }>();
+import type { FormField } from "@nuxt/ui";
+import type { FilterOption, CrudConfig } from "~/types/crud";
+
+const props = defineProps<{
+  api: any;
+  config: CrudConfig;
+  entity?: any;
+}>();
+const emit = defineEmits<{
+  submit: [data: Record<string, unknown>];
+}>();
+
+const utils = useUtils();
+const formData = ref<Record<string, unknown>>(initFormData());
+const loading = ref(false);
+const form = ref();
+
+function getOptions(field: FormField): FilterOption[] {
+  return Array.isArray(field.options) ? field.options : [];
+}
+
+function initFormData() {
+  if (!props.entity) return {};
+  let data: Record<string, unknown> = {};
+  for (const field of props.config.formFields || []) {
+    if (field.type === "tags") {
+      data[field.key] = Array.isArray(props.entity[field.key])
+        ? [...props.entity[field.key]]
+        : [];
+    } else {
+      data[field.key] = props.entity[field.key] ?? "";
+    }
+  }
+  return data;
+}
+
+function save() {
+  loading.value = true;
+  const request = props.entity
+    ? props.api.update(
+        `${props.entity.id}/`,
+        formData.value,
+        {},
+        utils.firstUpper(props.config.entityName),
+      )
+    : props.api.create(
+        "",
+        formData.value,
+        {},
+        utils.firstUpper(props.config.entityName),
+      );
+  request
+    .then(() => {
+      emit("submit", formData.value);
+    })
+    .finally(() => {
+      loading.value = false;
+    });
+}
+
+function submit() {
+  form.value.submit();
+}
+
+defineExpose({ submit });
 </script>

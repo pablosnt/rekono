@@ -17,9 +17,6 @@ import type { CrudConfig, CrudState } from "~/types/crud";
 const UIcon = resolveComponent("UIcon");
 
 const props = defineProps<{ config: CrudConfig; state: CrudState }>();
-const emit = defineEmits<{
-  tableRef: [newTableRef: any];
-}>();
 
 const columns = computed(() =>
   props.config.tableColumns?.map((column: any) => {
@@ -39,8 +36,6 @@ const columns = computed(() =>
 );
 
 const table = useTemplateRef("table");
-onMounted(() => {
-  emit("tableRef", table.value);
-});
+defineExpose({ tableApi: computed(() => table.value?.tableApi) });
 // TODO: Actions -> Edit & Delete -> https://ui.nuxt.com/docs/components/table#with-slots
 </script>

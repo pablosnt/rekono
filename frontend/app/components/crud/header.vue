@@ -124,7 +124,15 @@
               @click="$emit('openCreateModal', true)"
             />
             <template #body>
-              <CrudForm :config="config" />
+              <CrudForm
+                ref="form"
+                :api="api"
+                :config="config"
+                @submit="
+                  emit('create');
+                  $emit('openCreateModal', false);
+                "
+              />
             </template>
             <template #footer="{ close }">
               <UButton
@@ -133,14 +141,7 @@
                 variant="outline"
                 @click="close"
               />
-              <UButton
-                color="primary"
-                label="Create"
-                @click="
-                  emit('create');
-                  close($event);
-                "
-              />
+              <UButton color="primary" label="Create" @click="form.submit()" />
             </template>
           </UModal>
         </div>
@@ -162,6 +163,7 @@
 import type { CrudConfig, CrudState } from "~/types/crud";
 
 const props = defineProps<{
+  api: any;
   config: CrudConfig;
   state: CrudState;
   table: any;
@@ -177,4 +179,5 @@ const emit = defineEmits<{
 const utils = useUtils();
 const search = ref("");
 const openFilters = ref(false);
+const form = ref();
 </script>

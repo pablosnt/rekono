@@ -3,6 +3,7 @@
     <div class="flex-1 overflow-auto">
       <template v-if="config.canRead">
         <CrudHeader
+          :api="api"
           :openCreateModal="openCreateModal"
           :config="config"
           :state="state"
@@ -57,11 +58,7 @@
           v-show="state.items.length > 0 || state.loading"
           :config="config"
           :state="state"
-          @tableRef="
-            (newTableRef) => {
-              tableRef = newTableRef;
-            }
-          "
+          ref="tableRef"
         />
 
         <!-- todo: Cards -->

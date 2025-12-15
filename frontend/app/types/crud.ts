@@ -1,5 +1,5 @@
-import type { TableColumn } from "@nuxt/ui";
-import type { BreadcrumbItem } from "@nuxt/ui";
+import type { TableColumn, FormField, BreadcrumbItem } from "@nuxt/ui";
+import * as z from "zod";
 
 export interface FilterOption {
   label: string;
@@ -46,25 +46,23 @@ export interface CrudConfig<T = unknown> {
   entityNamePlural: string;
   icon?: string;
   breadcrumbs?: BreadcrumbItem[];
-
   tableColumns?: CrudTableColumn<T>[];
   tableColumnsVisibility?: Record<string, boolean>;
   cardFormatter?: (item: T) => CardConfig;
-
   searchable: boolean;
   searchPlaceholder?: string;
   filters?: FilterConfig[];
   ordering?: string[];
   defaultOrdering: string;
-
+  pageSize?: number;
+  pageSizeOptions?: number[];
+  formFields?: FormField[];
+  formSchema?: z.ZodType<T>;
+  deleteMessage?: string | ((item: T) => string);
   canRead: boolean;
   canCreate: boolean;
   canEdit: boolean | ((item: T) => boolean);
   canDelete: boolean | ((item: T) => boolean);
-  deleteMessage?: string | ((item: T) => string);
-
-  pageSize?: number;
-  pageSizeOptions?: number[];
 }
 
 export interface CrudState<T = unknown> {

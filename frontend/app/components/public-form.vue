@@ -33,22 +33,24 @@
 <script setup lang="ts">
 import type * as z from "zod";
 
-interface Props {
-  title: string;
-  description?: string;
-  fields: object[];
-  schema: z.ZodObject;
-  validateOn?: string[];
-  submit?: object;
-  loading?: boolean;
-  maxWidth?: string;
-}
-const props = withDefaults(defineProps<Props>(), {
-  description: undefined,
-  validateOn: ["input", "change"],
-  submit: { label: "Submit", autoFocus: true, size: "xl" },
-  loading: false,
-});
+const props = withDefaults(
+  defineProps<{
+    title: string;
+    description?: string;
+    fields: object[];
+    schema: z.ZodObject;
+    validateOn?: string[];
+    submit?: object;
+    loading?: boolean;
+    maxWidth?: string;
+  }>(),
+  {
+    description: undefined,
+    validateOn: ["input", "change"],
+    submit: { label: "Submit", autoFocus: true, size: "xl" },
+    loading: false,
+  },
+);
 const emit = defineEmits<{
   submit: [data: any];
 }>();
