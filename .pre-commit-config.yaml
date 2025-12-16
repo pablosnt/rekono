@@ -3,7 +3,7 @@ repos:
       hooks:
           - id: eslint
             name: eslint
-            entry: sh -c 'cd frontend; npm run lint:fix; npm run lint'
+            entry: sh -c 'cd frontend; npm run eslint:fix; npm run eslint'
             language: system
             types: [ javascript ]
           - id: prettier
