@@ -1,34 +1,34 @@
 repos:
-    - repo: local
-      hooks:
-          - id: eslint
-            name: eslint
-            entry: sh -c 'cd frontend; npm run eslint:fix; npm run eslint'
-            language: system
-            types: [ javascript ]
-          - id: prettier
-            name: prettier
-            entry: sh -c 'cd frontend; npm run prettier:fix; npm run prettier'
-            language: system
-            types: [ javascript ]
-    - repo: https://github.com/gitleaks/gitleaks.git
-      rev: v8.28.0
-      hooks:
-        - id: gitleaks
-    - repo: https://github.com/astral-sh/ruff-pre-commit
-      rev: v0.14.2
-      hooks:
-        - id: ruff-check
-          types_or: [ python, pyi ]
-          args: [ --fix ]
-        - id: ruff-check
-          types_or: [ python, pyi ]
-          args: [ --select, I,--fix ]
-        - id: ruff-format
-          types_or: [ python, pyi ]
-    -   repo: https://github.com/pycqa/flake8
-        rev: 7.3.0
-        hooks:
-        - id: flake8
-          types_or: [ python, pyi ]
-          args: [ --config=backend/.flake8 ]
+  - repo: local
+    hooks:
+      - id: eslint
+        name: eslint
+        entry: sh -c 'cd frontend; npm run eslint:fix'
+        language: system
+        types: [javascript]
+      - id: prettier
+        name: prettier
+        entry: sh -c 'cd frontend; npm run prettier:fix'
+        language: system
+        types: [javascript]
+  - repo: https://github.com/gitleaks/gitleaks.git
+    rev: v8.28.0
+    hooks:
+      - id: gitleaks
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.14.2
+    hooks:
+      - id: ruff-check
+        types_or: [python, pyi]
+        args: [--fix]
+      - id: ruff-check
+        types_or: [python, pyi]
+        args: [--select, I, --fix]
+      - id: ruff-format
+        types_or: [python, pyi]
+  - repo: https://github.com/pycqa/flake8
+    rev: 7.3.0
+    hooks:
+      - id: flake8
+        types_or: [python, pyi]
+        args: [--config=backend/.flake8]
