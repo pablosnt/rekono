@@ -1,12 +1,12 @@
 <template>
   <UForm
     ref="form"
-    @submit="save()"
     :state="formData"
     :validate-on="['input', 'change']"
     :schema="config.formSchema"
     :loading="loading"
     class="space-y-4 mx-auto"
+    @submit="save()"
   >
     <template v-for="field in config.formFields" :key="field.key">
       <UFormField
@@ -17,8 +17,8 @@
       >
         <UInput
           v-if="field.type === 'text' || field.type === 'number'"
-          class="w-full"
           v-model="formData[field.key]"
+          class="w-full"
           :placeholder="field.placeholder"
           :icon="field.icon"
           :required="field.required"
@@ -27,16 +27,16 @@
         />
         <UTextarea
           v-else-if="field.type === 'textarea'"
-          class="w-full"
           v-model="formData[field.key]"
+          class="w-full"
           :placeholder="field.placeholder"
           :required="field.required"
           :rows="5"
         />
         <USelect
           v-else-if="field.type === 'select' || field.type === 'multiselect'"
-          class="w-full"
           v-model="formData[field.key]"
+          class="w-full"
           :placeholder="field.placeholder"
           :options="getOptions(field)"
           value-key="value"
@@ -71,8 +71,8 @@
             "
           />
           <div
-            class="flex flex-wrap gap-2 mt-2"
             v-if="formData[field.key]?.length"
+            class="flex flex-wrap gap-2 mt-2"
           >
             <UBadge
               v-for="(tag, index) in formData[field.key] as string[]"
@@ -120,7 +120,7 @@ function getOptions(field: FormField): FilterOption[] {
 }
 
 function initFormData() {
-  let data: Record<string, unknown> = {};
+  const data: Record<string, unknown> = {};
   for (const field of props.config.formFields || []) {
     if (field.type === "tags") {
       data[field.key] =

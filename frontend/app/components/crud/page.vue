@@ -7,7 +7,7 @@
         <div class="container mx-auto max-w-screen-2xl">
           <CrudHeader
             :api="api"
-            :openCreateModal="openCreateModal"
+            :open-create-modal="openCreateModal"
             :config="config"
             :state="state"
             :table="tableRef"
@@ -30,7 +30,7 @@
               }
             "
             @create="fetch()"
-            @openCreateModal="(open) => (openCreateModal = open)"
+            @open-create-modal="(open) => (openCreateModal = open)"
           />
 
           <UEmpty
@@ -59,9 +59,9 @@
           <CrudTable
             v-if="config.tableColumns"
             v-show="state.items.length > 0 || state.loading"
+            ref="tableRef"
             :config="config"
             :state="state"
-            ref="tableRef"
             @edit="
               (item) => {
                 selectedItem = item;
@@ -150,8 +150,8 @@
           </UModal>
 
           <div
-            class="grid grid-cols-3 items-center mt-5 px-3"
             v-if="state.total > state.items.length"
+            class="grid grid-cols-3 items-center mt-5 px-3"
           >
             <div class="text-sm text-gray-500">
               Showing
@@ -175,7 +175,7 @@
                 color="neutral"
                 variant="ghost"
                 size="lg"
-                @update:modelValue="fetch()"
+                @update:model-value="fetch()"
               />
             </div>
             <div
@@ -186,7 +186,7 @@
                 v-model="state.pageSize"
                 :items="config.pageSizeOptions?.filter((i) => i <= state.total)"
                 size="sm"
-                @update:modelValue="fetch()"
+                @update:model-value="fetch()"
               />
             </div>
           </div>

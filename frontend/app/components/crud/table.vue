@@ -1,17 +1,18 @@
 <template>
   <UTable
     ref="table"
+    v-model:column-visibility="config.tableColumnsVisibility"
     :data="state.items"
     :loading="state.loading"
     loading-color="primary"
     :columns="columns"
-    v-model:column-visibility="config.tableColumnsVisibility"
     class="flex-1"
   />
 </template>
 
 <script setup lang="ts">
 import type { CrudConfig, CrudState } from "~/types/crud";
+
 const UIcon = resolveComponent("UIcon");
 const props = defineProps<{ config: CrudConfig; state: CrudState }>();
 const emit = defineEmits<{ edit: [item: any]; delete: [item: any] }>();

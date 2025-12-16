@@ -1,8 +1,8 @@
 <template>
   <UDashboardGroup>
     <UDashboardSidebar
-      class="group"
       v-model:collapsed="sidebarCollapsed"
+      class="group"
       collapsible
       resizable
       @update:collapsed="updateSidebar()"

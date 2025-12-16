@@ -1,5 +1,5 @@
 import type { TableColumn, FormField, BreadcrumbItem } from "@nuxt/ui";
-import * as z from "zod";
+import type * as z from "zod";
 
 export interface FilterOption {
   label: string;
