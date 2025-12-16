@@ -140,7 +140,12 @@
                 variant="outline"
                 @click="close"
               />
-              <UButton color="primary" label="Delete" :loading="deleteLoading" @click="remove()" />
+              <UButton
+                color="primary"
+                label="Delete"
+                :loading="deleteLoading"
+                @click="remove()"
+              />
             </template>
           </UModal>
 

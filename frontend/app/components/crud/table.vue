@@ -1,13 +1,13 @@
 <template>
-    <UTable
-      ref="table"
-      :data="state.items"
-      :loading="state.loading"
-      loading-color="primary"
-      :columns="columns"
-      v-model:column-visibility="config.tableColumnsVisibility"
-      class="flex-1"
-    />
+  <UTable
+    ref="table"
+    :data="state.items"
+    :loading="state.loading"
+    loading-color="primary"
+    :columns="columns"
+    v-model:column-visibility="config.tableColumnsVisibility"
+    class="flex-1"
+  />
 </template>
 
 <script setup lang="ts">

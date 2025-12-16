@@ -123,9 +123,10 @@ function initFormData() {
   let data: Record<string, unknown> = {};
   for (const field of props.config.formFields || []) {
     if (field.type === "tags") {
-      data[field.key] = props.entity && Array.isArray(props.entity[field.key])
-        ? [...props.entity[field.key]]
-        : [];
+      data[field.key] =
+        props.entity && Array.isArray(props.entity[field.key])
+          ? [...props.entity[field.key]]
+          : [];
     } else {
       if (props.entity) {
         data[field.key] = props.entity[field.key] ?? "";

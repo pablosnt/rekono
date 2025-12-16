@@ -63,7 +63,7 @@ export interface CrudConfig<T = unknown> {
   pageSizeOptions?: number[];
   formFields?: FormField[];
   formSchema?: z.ZodType<T>;
-  deleteMessage?: ((item: T) => DeleteDetail[]);
+  deleteMessage?: (item: T) => DeleteDetail[];
   canRead: boolean;
   canCreate: boolean;
   canEdit: boolean | ((item: T) => boolean);
