@@ -157,11 +157,11 @@
 <script setup lang="ts">
 import type { CrudConfig, CrudState } from "~/types/crud";
 
-const props = defineProps<{
-  api: any;
+defineProps<{
+  api: object;
   config: CrudConfig;
   state: CrudState;
-  table: any;
+  table: unknown;
   openCreateModal: boolean;
 }>();
 const emit = defineEmits<{

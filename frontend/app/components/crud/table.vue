@@ -1,7 +1,7 @@
 <template>
   <UTable
     ref="table"
-    v-model:column-visibility="config.tableColumnsVisibility"
+    :column-visibility="config.tableColumnsVisibility"
     :data="state.items"
     :loading="state.loading"
     loading-color="primary"
@@ -15,11 +15,11 @@ import type { CrudConfig, CrudState } from "~/types/crud";
 
 const UIcon = resolveComponent("UIcon");
 const props = defineProps<{ config: CrudConfig; state: CrudState }>();
-const emit = defineEmits<{ edit: [item: any]; delete: [item: any] }>();
+const emit = defineEmits<{ edit: [item: object]; delete: [item: object] }>();
 
 const columns = computed(() => {
   const cols =
-    props.config.tableColumns?.map((column: any) => {
+    props.config.tableColumns?.map((column: unknown) => {
       return column.icon
         ? {
             ...column,
@@ -36,7 +36,7 @@ const columns = computed(() => {
   cols.push({
     id: "actions",
     enableHiding: false,
-    cell: ({ row }: any) => {
+    cell: ({ row }: unknown) => {
       const actions = [];
       const item = row.original;
       if (

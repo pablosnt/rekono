@@ -187,7 +187,7 @@ const config: CrudConfig<Project> = reactive({
   ],
   canRead: true,
   canCreate: userStore.is_admin,
-  canEdit: (project: Project) => userStore.is_admin,
-  canDelete: (project: Project) => userStore.is_admin,
+  canEdit: (_project: Project) => userStore.is_admin,
+  canDelete: (_project: Project) => userStore.is_admin,
 });
 </script>

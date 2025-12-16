@@ -9,7 +9,7 @@ export interface FilterOption {
 export interface FilterConfig {
   key: string;
   label: string;
-  value?: any;
+  value?: unknown;
   type: "select" | "text" | "boolean";
   options?: FilterOption[] | (() => Promise<FilterOption[]>);
   placeholder?: string;
@@ -62,7 +62,7 @@ export interface CrudConfig<T = unknown> {
   pageSize?: number;
   pageSizeOptions?: number[];
   formFields?: FormField[];
-  formSchema?: z.ZodType<T>;
+  formSchema?: z.ZodType;
   deleteMessage?: (item: T) => DeleteDetail[];
   canRead: boolean;
   canCreate: boolean;

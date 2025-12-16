@@ -33,7 +33,7 @@
 <script setup lang="ts">
 import type * as z from "zod";
 
-const props = withDefaults(
+withDefaults(
   defineProps<{
     title: string;
     description?: string;
@@ -46,12 +46,12 @@ const props = withDefaults(
   }>(),
   {
     description: undefined,
-    validateOn: ["input", "change"],
-    submit: { label: "Submit", autoFocus: true, size: "xl" },
+    validateOn: () => ["input", "change"],
+    submit: () => ({ label: "Submit", autoFocus: true, size: "xl" }),
     loading: false,
   },
 );
-const emit = defineEmits<{
-  submit: [data: any];
+defineEmits<{
+  submit: [data: object];
 }>();
 </script>

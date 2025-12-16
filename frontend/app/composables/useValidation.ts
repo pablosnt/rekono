@@ -28,7 +28,7 @@ export default function () {
       : z.string();
     return policy
       .max(max)
-      .refine((name) => /^[\wÀ-ÿ\s\.:\-\[\]()@]*$/.test(name), {
+      .refine((name) => /^[\wÀ-ÿ\s.:\-[\]()@]*$/.test(name), {
         message: `Invalid ${field.toLowerCase()}`,
       });
   }

@@ -58,8 +58,9 @@
             :icon="field.icon"
             size="lg"
             @keydown.enter.prevent="
-              (e: any) => {
-                const val = e.target.value.trim();
+              (e: Event) => {
+                const target = e.target as HTMLInputElement;
+                const val = target.value.trim();
                 if (val) {
                   if (!formData[field.key]) formData[field.key] = [];
                   if (!(formData[field.key] as string[]).includes(val)) {
@@ -98,13 +99,12 @@
 </template>
 
 <script setup lang="ts">
-import type { FormField } from "@nuxt/ui";
 import type { FilterOption, CrudConfig } from "~/types/crud";
 
 const props = defineProps<{
-  api: any;
+  api: object;
   config: CrudConfig;
-  entity?: any;
+  entity?: object;
 }>();
 const emit = defineEmits<{
   submit: [data: Record<string, unknown>];
@@ -115,7 +115,7 @@ const formData = ref<Record<string, unknown>>(initFormData());
 const loading = ref(false);
 const form = ref();
 
-function getOptions(field: FormField): FilterOption[] {
+function getOptions(field: object): FilterOption[] {
   return Array.isArray(field.options) ? field.options : [];
 }
 
