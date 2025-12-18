@@ -17,7 +17,7 @@
       >
         <UInput
           v-if="field.type === 'text' || field.type === 'number'"
-          v-model="formData[field.key]"
+          v-model="formData[field.key] as any"
           class="w-full"
           :placeholder="field.placeholder"
           :icon="field.icon"
@@ -27,7 +27,7 @@
         />
         <UTextarea
           v-else-if="field.type === 'textarea'"
-          v-model="formData[field.key]"
+          v-model="formData[field.key] as any"
           class="w-full"
           :placeholder="field.placeholder"
           :required="field.required"
@@ -35,7 +35,7 @@
         />
         <USelect
           v-else-if="field.type === 'select' || field.type === 'multiselect'"
-          v-model="formData[field.key]"
+          v-model="formData[field.key] as any"
           class="w-full"
           :placeholder="field.placeholder"
           :options="getOptions(field)"
@@ -46,7 +46,7 @@
         />
         <UCheckbox
           v-else-if="field.type === 'checkbox'"
-          v-model="formData[field.key]"
+          v-model="formData[field.key] as any"
           :label="field.label"
         />
         <template v-else-if="field.type === 'tags'">
@@ -66,13 +66,16 @@
                   if (!(formData[field.key] as string[]).includes(val)) {
                     (formData[field.key] as string[]).push(val);
                   }
-                  e.target.value = '';
+                  target.value = '';
                 }
               }
             "
           />
           <div
-            v-if="formData[field.key]?.length"
+            v-if="
+              Array.isArray(formData[field.key]) &&
+              (formData[field.key] as string[]).length
+            "
             class="flex flex-wrap gap-2 mt-2"
           >
             <UBadge
@@ -104,7 +107,7 @@ import type { FilterOption, CrudConfig } from "~/types/crud";
 const props = defineProps<{
   api: object;
   config: CrudConfig;
-  entity?: object;
+  entity?: Record<string, any>;
 }>();
 const emit = defineEmits<{
   submit: [data: Record<string, unknown>];
@@ -115,8 +118,8 @@ const formData = ref<Record<string, unknown>>(initFormData());
 const loading = ref(false);
 const form = ref();
 
-function getOptions(field: object): FilterOption[] {
-  return Array.isArray(field.options) ? field.options : [];
+function getOptions(field: any): FilterOption[] {
+  return Array.isArray(field.options) ? (field.options as FilterOption[]) : [];
 }
 
 function initFormData() {

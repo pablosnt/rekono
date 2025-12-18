@@ -55,7 +55,7 @@
               class: 'bg-primary-500 text-white',
               size: 'lg',
             }"
-            :label="collapsed ? undefined : (userStore.name || undefined)"
+            :label="collapsed ? undefined : userStore.name || undefined"
             color="neutral"
             variant="ghost"
             class="w-full"
@@ -105,10 +105,20 @@ import { useUserStore } from "~/store/user";
 const api = useApi();
 const userStore = useUserStore();
 const profileOpen = ref(false);
-const sidebarCollapsed = ref(null);
+const sidebarCollapsed = ref(false);
 const sidebarCollapsedKey = ref("main-panel-collapsed");
 const mounted = ref(false);
-const items = ref([
+interface NavigationItem {
+  label: string;
+  icon: string;
+  to?: string;
+  type?: "link" | "label" | "trigger";
+  defaultOpen?: boolean;
+  children?: NavigationItem[];
+  badge?: string;
+}
+
+const items = ref<NavigationItem[]>([
   {
     label: "Home",
     icon: "i-lucide-house",
@@ -157,7 +167,10 @@ const items = ref([
 
 function updateSidebar() {
   if (!mounted.value) return;
-  localStorage.setItem(sidebarCollapsedKey.value, sidebarCollapsed.value);
+  localStorage.setItem(
+    sidebarCollapsedKey.value,
+    String(sidebarCollapsed.value),
+  );
 }
 
 onMounted(() => {
@@ -215,37 +228,54 @@ onMounted(() => {
       ],
     });
   }
-  api.get("stats/top-projects/").then((response) => {
-    const children = [];
+  api.get("stats/top-projects/").then((response: any) => {
+    const children: NavigationItem[] = [];
     for (let i = 0; i < response.length; i++) {
       children.push({
         label: response[i].name,
+        icon: "i-lucide-folder",
         to: `/projects/${response[i].id}`,
       });
     }
     if (children.length > 0) {
-      api.list("projects/", {}, false, 1, 1).then((response) => {
-        items.value[1].badge = response.total.toString();
-        if (response.total > children.length) {
-          children.push({ label: "Show all", to: "/projects" });
+      api.list("projects/", {}, false, 1, 1).then((response: any) => {
+        if (items.value[1]) {
+          items.value[1].badge = response.total.toString();
+          if (response.total > children.length) {
+            children.push({
+              label: "Show all",
+              icon: "i-lucide-list",
+              to: "/projects",
+            });
+          }
+          items.value[1].children = children;
         }
-        items.value[1].children = children;
       });
     } else {
-      items.value[1].badge = "0";
+      if (items.value[1]) {
+        items.value[1].badge = "0";
+      }
     }
   });
-  api.list("hosts/", {}, false, 1, 1).then((response) => {
-    items.value[2].badge = response.total.toString();
+  api.list("hosts/", {}, false, 1, 1).then((response: any) => {
+    if (items.value[2]) {
+      items.value[2].badge = response.total.toString();
+    }
   });
-  api.list("osint/", {}, false, 1, 1).then((response) => {
-    items.value[3].children[0].badge = response.total.toString();
+  api.list("osint/", {}, false, 1, 1).then((response: any) => {
+    if (items.value[3]?.children?.[0]) {
+      items.value[3].children[0].badge = response.total.toString();
+    }
   });
-  api.list("credentials/", {}, false, 1, 1).then((response) => {
-    items.value[3].children[1].badge = response.total.toString();
+  api.list("credentials/", {}, false, 1, 1).then((response: any) => {
+    if (items.value[3]?.children?.[1]) {
+      items.value[3].children[1].badge = response.total.toString();
+    }
   });
-  api.list("vulnerabilities/", {}, false, 1, 1).then((response) => {
-    items.value[3].children[2].badge = response.total.toString();
+  api.list("vulnerabilities/", {}, false, 1, 1).then((response: any) => {
+    if (items.value[3]?.children?.[2]) {
+      items.value[3].children[2].badge = response.total.toString();
+    }
   });
 });
 </script>

@@ -131,10 +131,10 @@ const config: CrudConfig<Project> = reactive({
     ...(userStore.is_admin
       ? [
           {
-          key: "owner_id",
-          label: "My projects",
+            key: "owner_id",
+            label: "My projects",
             type: "boolean" as const,
-          value: userStore.user,
+            value: userStore.user,
           },
         ]
       : []),
