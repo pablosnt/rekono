@@ -128,14 +128,16 @@ const config: CrudConfig<Project> = reactive({
       type: "text",
       placeholder: "Filter by owner username...",
     },
-    userStore.is_admin
-      ? {
+    ...(userStore.is_admin
+      ? [
+          {
           key: "owner_id",
           label: "My projects",
-          type: "boolean",
+            type: "boolean" as const,
           value: userStore.user,
-        }
-      : {},
+          },
+        ]
+      : []),
   ],
   ordering: ["id", "name"],
   defaultOrdering: "-id",

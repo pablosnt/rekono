@@ -88,7 +88,7 @@ jobs:
       - name: Prettier
         if: ${{ (steps.changes.outputs.frontend == 'true' || github.event_name != 'pull_request') && !cancelled() }}
         working-directory: frontend/
-        run: npm run prettier --ignore-path .nuxt/
+        run: npm run prettier --ignore-path ../.gitignore
 
       - name: Typecheck
         if: ${{ (steps.changes.outputs.frontend == 'true' || github.event_name != 'pull_request') && !cancelled() }}

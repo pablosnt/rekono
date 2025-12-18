@@ -55,7 +55,7 @@
               class: 'bg-primary-500 text-white',
               size: 'lg',
             }"
-            :label="collapsed ? undefined : userStore.name"
+            :label="collapsed ? undefined : (userStore.name || undefined)"
             color="neutral"
             variant="ghost"
             class="w-full"
@@ -72,8 +72,8 @@
                 class: 'bg-primary-500 text-white',
               }"
               size="xl"
-              :name="userStore.name"
-              :description="userStore.role"
+              :name="userStore.name || undefined"
+              :description="userStore.role || undefined"
             />
             <UColorModeButton class="ml-auto" size="xl" />
             <UButton
