@@ -4,7 +4,7 @@
       <template v-for="filter in config.filters" :key="filter.key">
         <USelect
           v-if="filter.type === 'select'"
-          :model-value="filters[filter.key]"
+          :model-value="filters[filter.key] as AcceptableValue | undefined"
           :placeholder="filter.placeholder || filter.label"
           :options="getOptions(filter)"
           value-key="value"
@@ -43,6 +43,7 @@
 </template>
 
 <script setup lang="ts">
+import type { AcceptableValue } from "@nuxt/ui/runtime/types/utils.js";
 import type {
   CrudConfig,
   FilterConfig,

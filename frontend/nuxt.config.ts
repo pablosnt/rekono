@@ -3,7 +3,7 @@ export default defineNuxtConfig({
   modules: ["@nuxt/eslint", "@nuxt/ui", "@pinia/nuxt"],
 
   devtools: {
-    enabled: true,
+    enabled: process.env.NODE_ENV === "development",
   },
 
   css: ["~/assets/css/main.css"],
