@@ -1,6 +1,5 @@
 <template>
   <!-- TODO: Improve compartimentability of the CrudPage. At the end too many components in the same place, right? -->
-  <!-- TODO: Fix typecheck -->
   <div class="flex flex-col h-full w-full">
     <div class="flex-1 overflow-auto">
       <template v-if="config.canRead">
