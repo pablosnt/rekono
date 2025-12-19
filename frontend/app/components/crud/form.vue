@@ -103,11 +103,12 @@
 
 <script setup lang="ts">
 import type { FilterOption, CrudConfig } from "~/types/crud";
+import type FormField from "@nuxt/ui";
 
 const props = defineProps<{
   api: typeof useApi;
   config: CrudConfig;
-  entity?: Record<string, any>;
+  entity?: Record<string, unknown>;
 }>();
 const emit = defineEmits<{
   submit: [data: Record<string, unknown>];
@@ -118,7 +119,7 @@ const formData = ref<Record<string, unknown>>(initFormData());
 const loading = ref(false);
 const form = ref();
 
-function getOptions(field: any): FilterOption[] {
+function getOptions(field: FormField): FilterOption[] {
   return Array.isArray(field.options) ? (field.options as FilterOption[]) : [];
 }
 

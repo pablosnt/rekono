@@ -47,16 +47,14 @@
     ]"
     :submit="{ label: 'Sign up', autoFocus: true, size: 'xl' }"
     :loading="loading"
-    @submit="onSubmit"
+    @submit="submit"
   />
 </template>
 
 <script setup lang="ts">
 import * as z from "zod";
-import type { FormSubmitEvent } from "#ui/types";
 
 definePageMeta({ layout: "public" });
-type Schema = z.output<typeof schema>;
 const api = useApi("/api/security/signup/", false);
 const validation = useValidation();
 const route = useRoute();
@@ -78,15 +76,15 @@ const schema = z
     path: ["confirmpassword"],
   });
 
-function onSubmit(payload: FormSubmitEvent<Schema>) {
+function submit(event: object) {
   loading.value = true;
   api
     .create("", {
-      username: payload.data.username,
-      first_name: payload.data.firstname,
-      last_name: payload.data.lastname,
-      password: payload.data.password,
-      otp: otp,
+      username: event.data.username,
+      first_name: event.data.firstname,
+      last_name: event.data.lastname,
+      password: event.data.password,
+      otp: otp.value,
     })
     .then(() => {
       navigateTo("/login");

@@ -9,19 +9,7 @@ import { h } from "vue";
 import type { CrudConfig, CrudTableColumn } from "~/types/crud";
 import { useUserStore } from "~/store/user";
 import * as z from "zod";
-
-interface Project {
-  id: number;
-  name: string;
-  description: string;
-  owner: {
-    id: number;
-    username: string;
-  } | null;
-  targets: Array<number>;
-  members: Array<number>;
-  tags: Array<string>;
-}
+import type { Project } from "~/types/projects";
 
 const userStore = useUserStore();
 const validation = useValidation();
@@ -92,7 +80,11 @@ const config: CrudConfig<Project> = reactive({
       header: "Targets",
       icon: "i-lucide-locate-fixed",
       cell: ({ row }) =>
-        h("span", { class: "font-medium" }, row.getValue("targets").length),
+        h(
+          "span",
+          { class: "font-medium" },
+          (row.getValue("targets") as Project["targets"]).length,
+        ),
       enableResizing: true,
     },
     {

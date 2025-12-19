@@ -23,7 +23,7 @@
     ]"
     :submit="{ label: 'Sign in', autoFocus: true, size: 'xl' }"
     :loading="loading"
-    @submit="onSubmit"
+    @submit="submit"
   >
     <template #password-hint>
       <ULink
@@ -48,12 +48,12 @@ const schema = z.object({
   password: z.string("Password is required"),
 });
 
-function onSubmit(payload: FormSubmitEvent<Schema>) {
+function submit(event: object) {
   loading.value = true;
   api
     .create("", {
-      username: payload.data.username,
-      password: payload.data.password,
+      username: event.data.username,
+      password: event.data.password,
     })
     .then((response) => {
       if (tokens.login(response)) {

@@ -5,12 +5,12 @@ repos:
         name: eslint
         entry: sh -c 'cd frontend; npm run eslint:fix'
         language: system
-        types: [javascript]
+        types: [javascript, ts, vue]
       - id: prettier
         name: prettier
         entry: sh -c 'cd frontend; npm run prettier:fix'
         language: system
-        types: [javascript]
+        types: [javascript, ts, vue]
   - repo: https://github.com/gitleaks/gitleaks.git
     rev: v8.28.0
     hooks:

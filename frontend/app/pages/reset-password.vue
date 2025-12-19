@@ -6,17 +6,15 @@
     :fields="fields"
     :submit="{ label: 'Reset password', autoFocus: true, size: 'xl' }"
     :loading="loading"
-    @submit="(payload: any) => onSubmit(payload as FormSubmitEvent<any>)"
+    @submit="submit"
   />
 </template>
 
 <script setup lang="ts">
 import * as z from "zod";
-import type { FormSubmitEvent } from "#ui/types";
 import type FormField from "@nuxt/ui";
 
 definePageMeta({ layout: "public" });
-type Schema = z.output<typeof schema>;
 const api = useApi("/api/users/reset-password/", false);
 const validation = useValidation();
 const route = useRoute();
@@ -72,11 +70,11 @@ if (otp.value) {
   description.value = "Define the new password to access your user account";
 }
 
-function onSubmit(payload: FormSubmitEvent<Schema>) {
+function submit(event: object) {
   loading.value = true;
   if (otp.value) {
     api
-      .update("", { password: payload.data.password, otp: otp.value })
+      .update("", { password: event.data.password, otp: otp.value })
       .then(() => {
         loading.value = false;
         navigateTo("/login");
@@ -86,7 +84,7 @@ function onSubmit(payload: FormSubmitEvent<Schema>) {
       });
   } else {
     api
-      .create("", { email: payload.data.email })
+      .create("", { email: event.data.email })
       .then(() => {
         loading.value = false;
         toast.add({

@@ -63,8 +63,10 @@ export const useUserStore = defineStore("user", {
     },
     isOwner(entity: Record<string, unknown>, field: string = "owner"): boolean {
       return (
-        entity[field] &&
-        (entity[field] as Record<string, unknown>).id === this.user
+        entity[field] !== null &&
+        entity[field] !== undefined &&
+        ((entity[field] as Record<string, number | unknown>).id as number) ===
+          this.user
       );
     },
   },

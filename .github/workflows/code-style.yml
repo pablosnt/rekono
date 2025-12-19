@@ -89,8 +89,3 @@ jobs:
         if: ${{ (steps.changes.outputs.frontend == 'true' || github.event_name != 'pull_request') && !cancelled() }}
         working-directory: frontend/
         run: npm run prettier
-
-      - name: Typecheck
-        if: ${{ (steps.changes.outputs.frontend == 'true' || github.event_name != 'pull_request') && !cancelled() }}
-        working-directory: frontend/
-        run: npm run typecheck

@@ -228,7 +228,7 @@ onMounted(() => {
       ],
     });
   }
-  api.get("stats/top-projects/").then((response: any) => {
+  api.get("stats/top-projects/").then((response: object) => {
     const children: NavigationItem[] = [];
     for (let i = 0; i < response.length; i++) {
       children.push({
@@ -238,7 +238,7 @@ onMounted(() => {
       });
     }
     if (children.length > 0) {
-      api.list("projects/", {}, false, 1, 1).then((response: any) => {
+      api.list("projects/", {}, false, 1, 1).then((response: object) => {
         if (items.value[1]) {
           items.value[1].badge = response.total.toString();
           if (response.total > children.length) {
@@ -257,22 +257,22 @@ onMounted(() => {
       }
     }
   });
-  api.list("hosts/", {}, false, 1, 1).then((response: any) => {
+  api.list("hosts/", {}, false, 1, 1).then((response: object) => {
     if (items.value[2]) {
       items.value[2].badge = response.total.toString();
     }
   });
-  api.list("osint/", {}, false, 1, 1).then((response: any) => {
+  api.list("osint/", {}, false, 1, 1).then((response: object) => {
     if (items.value[3]?.children?.[0]) {
       items.value[3].children[0].badge = response.total.toString();
     }
   });
-  api.list("credentials/", {}, false, 1, 1).then((response: any) => {
+  api.list("credentials/", {}, false, 1, 1).then((response: object) => {
     if (items.value[3]?.children?.[1]) {
       items.value[3].children[1].badge = response.total.toString();
     }
   });
-  api.list("vulnerabilities/", {}, false, 1, 1).then((response: any) => {
+  api.list("vulnerabilities/", {}, false, 1, 1).then((response: object) => {
     if (items.value[3]?.children?.[2]) {
       items.value[3].children[2].badge = response.total.toString();
     }
