@@ -6,21 +6,24 @@
     :fields="fields"
     :submit="{ label: 'Reset password', autoFocus: true, size: 'xl' }"
     :loading="loading"
-    @submit="onSubmit"
+    @submit="(payload: any) => onSubmit(payload as FormSubmitEvent<any>)"
   />
 </template>
 
 <script setup lang="ts">
 import * as z from "zod";
+import type { FormSubmitEvent } from "#ui/types";
+import type FormField from "@nuxt/ui";
 
 definePageMeta({ layout: "public" });
+type Schema = z.output<typeof schema>;
 const api = useApi("/api/users/reset-password/", false);
 const validation = useValidation();
 const route = useRoute();
 const toast = useToast();
 const loading = ref(false);
 const otp = ref(route.query.otp ? route.query.otp : null);
-let fields = [
+const fields = ref<(typeof FormField)[]>([
   {
     name: "email",
     type: "text",
@@ -30,13 +33,15 @@ let fields = [
     size: "xl",
     autofocus: true,
   },
-];
-let schema = z.object({ email: z.email("Valid email is required") });
+]);
+const schema = ref<z.ZodObject>(
+  z.object({ email: z.email("Valid email is required") }),
+);
 const description = ref(
   "Enter your user account's email and we will send you a password reset link",
 );
 if (otp.value) {
-  fields = [
+  fields.value = [
     {
       name: "password",
       label: "Password",
@@ -55,10 +60,10 @@ if (otp.value) {
       size: "xl",
     },
   ];
-  schema = z
+  schema.value = z
     .object({
       password: validation.passwordPolicy,
-      confirmpassword: z.string("Password must be confirmed"),
+      confirmpassword: z.string().min(1, "Password must be confirmed"),
     })
     .refine((data) => data.password === data.confirmpassword, {
       message: "Passwords don't match",

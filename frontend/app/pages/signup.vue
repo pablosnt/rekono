@@ -53,8 +53,10 @@
 
 <script setup lang="ts">
 import * as z from "zod";
+import type { FormSubmitEvent } from "#ui/types";
 
 definePageMeta({ layout: "public" });
+type Schema = z.output<typeof schema>;
 const api = useApi("/api/security/signup/", false);
 const validation = useValidation();
 const route = useRoute();

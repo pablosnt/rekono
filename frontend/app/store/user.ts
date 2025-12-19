@@ -34,7 +34,7 @@ export const useUserStore = defineStore("user", {
     check() {
       const tokens = useTokens();
       const jwt = tokens.get().access;
-      if (jwt !== null && this.user === null) {
+      if (jwt !== null && typeof jwt === "string" && this.user === null) {
         this.login(jwt);
       } else if (jwt === null && this.user !== null) {
         this.logout();
@@ -62,7 +62,10 @@ export const useUserStore = defineStore("user", {
       return (this.role?.toLowerCase() ?? "") === role.toLowerCase();
     },
     isOwner(entity: Record<string, unknown>, field: string = "owner"): boolean {
-      return entity[field] && (entity[field] as Record<string, unknown>).id === this.user;
+      return (
+        entity[field] &&
+        (entity[field] as Record<string, unknown>).id === this.user
+      );
     },
   },
 });
