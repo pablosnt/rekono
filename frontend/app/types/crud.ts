@@ -1,5 +1,6 @@
-import type { TableColumn, FormField, BreadcrumbItem } from "@nuxt/ui";
+import type { TableColumn, BreadcrumbItem } from "@nuxt/ui";
 import type * as z from "zod";
+import FormField from "@nuxt/ui";
 
 export interface FilterOption {
   label: string;
@@ -61,7 +62,7 @@ export interface CrudConfig<T = unknown> {
   defaultOrdering: string;
   pageSize?: number;
   pageSizeOptions?: number[];
-  formFields?: FormField[];
+  formFields?: typeof FormField[];
   formSchema?: z.ZodType;
   deleteMessage?: (item: T) => DeleteDetail[];
   canRead: boolean;

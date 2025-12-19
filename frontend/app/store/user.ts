@@ -1,18 +1,24 @@
-import { jwtDecode } from "jwt-decode";
+import { jwtDecode, type JwtPayload } from "jwt-decode";
+import type { User } from "~/types/users";
+
+interface UserPayload extends JwtPayload {
+  user_id: number;
+  role: string;
+}
 
 export const useUserStore = defineStore("user", {
   state: () => ({
-    user: null,
-    name: null,
-    role: null,
+    user: null as number | null,
+    name: null as string | null,
+    role: null as string | null,
     refreshing: false,
     is_admin: false,
     is_auditor: false,
-    profile: null,
+    profile: null as User | null,
   }),
   actions: {
     login(token: string) {
-      const payload = jwtDecode(token);
+      const payload = jwtDecode<UserPayload>(token);
       this.user = payload.user_id;
       this.role = payload.role;
       this.is_admin = this.isRole("admin");
@@ -40,23 +46,23 @@ export const useUserStore = defineStore("user", {
     fetchProfile() {
       useApi()
         .get("profile/")
-        .then((response) => {
+        .then((response: User) => {
           this.updateProfile(response);
         });
     },
-    updateProfile(profile: object) {
+    updateProfile(profile: User) {
       this.profile = profile;
       this.name = profile.first_name
         ? profile.first_name
         : profile.username
           ? profile.username
-          : profile.email;
+          : (profile.email ?? null);
     },
     isRole(role: string): boolean {
-      return this.role.toLowerCase() === role.toLowerCase();
+      return (this.role?.toLowerCase() ?? "") === role.toLowerCase();
     },
-    isOwner(entity: object, field: string = "owner"): boolean {
-      return entity[field] && entity[field].id === this.user;
+    isOwner(entity: Record<string, any>, field: string = "owner"): boolean {
+      return entity[field] && (entity[field] as any).id === this.user;
     },
   },
 });
