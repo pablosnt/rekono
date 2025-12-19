@@ -61,8 +61,8 @@ export const useUserStore = defineStore("user", {
     isRole(role: string): boolean {
       return (this.role?.toLowerCase() ?? "") === role.toLowerCase();
     },
-    isOwner(entity: Record<string, any>, field: string = "owner"): boolean {
-      return entity[field] && (entity[field] as any).id === this.user;
+    isOwner(entity: Record<string, unknown>, field: string = "owner"): boolean {
+      return entity[field] && (entity[field] as Record<string, unknown>).id === this.user;
     },
   },
 });
