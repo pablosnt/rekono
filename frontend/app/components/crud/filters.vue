@@ -2,17 +2,41 @@
   <div class="border-b border-default bg-muted/30 p-4 space-y-4">
     <div class="flex flex-wrap gap-4 justify-between">
       <template v-for="filter in config.filters" :key="filter.key">
-        <!-- TODO: Allow clear of the selected filter -->
         <USelectMenu
           v-if="filter.type === 'select'"
           :model-value="_filters[filter.key]"
           :placeholder="filter.placeholder || filter.label"
-          :items="getOptions(filter)"
+          :items="Array.isArray(filter.options) ? filter.options : []"
           value-key="value"
           label-key="label"
           class="w-64"
+          :avatar="
+            filter.options.filter(
+              (option) => option.value === _filters[filter.key],
+            )?.[0]?.avatar
+          "
+          leading
           @update:model-value="(value) => updateFilter(filter.key, value)"
-        />
+        >
+          <template #trailing>
+            <UIcon
+              v-if="
+                _filters[filter.key] === null ||
+                _filters[filter.key] === undefined
+              "
+              class="group-data-[state=open]:rotate-180 transition-transform duration-200"
+              name="i-lucide-chevron-down"
+            />
+            <UButton
+              v-else
+              icon="i-lucide-x"
+              variant="ghost"
+              color="neutral"
+              size="sm"
+              @click="updateFilter(filter.key, null)"
+            />
+          </template>
+        </USelectMenu>
         <UInput
           v-else-if="filter.type === 'text'"
           :model-value="_filters[filter.key] as string"
@@ -44,12 +68,7 @@
 </template>
 
 <script setup lang="ts">
-import type {
-  CrudConfig,
-  FilterConfig,
-  FilterOption,
-  CrudState,
-} from "~/types/crud";
+import type { CrudConfig, CrudState } from "~/types/crud";
 
 const props = defineProps<{
   config: CrudConfig;
@@ -59,10 +78,6 @@ const emit = defineEmits<{
   filters: [filters: Record<string, unknown>];
 }>();
 const _filters = ref(props.state.filters);
-
-function getOptions(filter: FilterConfig): FilterOption[] {
-  return Array.isArray(filter.options) ? filter.options : [];
-}
 
 function updateFilter(key: string, value: unknown) {
   if (value !== null && value !== undefined && value !== "") {
