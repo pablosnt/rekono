@@ -2,13 +2,14 @@
   <div class="border-b border-default bg-muted/30 p-4 space-y-4">
     <div class="flex flex-wrap gap-4 justify-between">
       <template v-for="filter in config.filters" :key="filter.key">
-        <USelect
+        <!-- TODO: Allow clear of the selected filter -->
+        <USelectMenu
           v-if="filter.type === 'select'"
           :model-value="_filters[filter.key]"
           :placeholder="filter.placeholder || filter.label"
-          :options="getOptions(filter)"
+          :items="getOptions(filter)"
           value-key="value"
-          option-key="label"
+          label-key="label"
           class="w-64"
           @update:model-value="(value) => updateFilter(filter.key, value)"
         />

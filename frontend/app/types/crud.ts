@@ -58,7 +58,7 @@ export interface CrudConfig<T = unknown> {
   searchable: boolean;
   searchPlaceholder?: string;
   filters?: FilterConfig[];
-  ordering?: string[];
+  ordering?: Array<string | { id: string; label: string }>;
   defaultOrdering: string;
   pageSize?: number;
   pageSizeOptions?: number[];

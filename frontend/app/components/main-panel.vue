@@ -1,11 +1,12 @@
 <template>
   <UDashboardGroup>
     <UDashboardSidebar
+      v-if="mounted"
       v-model:collapsed="sidebarCollapsed"
       class="group"
       collapsible
       resizable
-      @update:collapsed="updateSidebar()"
+      @update:collapsed="updatePreference(sidebarCollapsedKey, String(sidebarCollapsed))"
     >
       <template #header="{ collapsed }">
         <div class="relative flex items-center justify-center w-full">
@@ -27,7 +28,7 @@
             "
             @click="
               sidebarCollapsed = !sidebarCollapsed;
-              updateSidebar();
+              updatePreference(sidebarCollapsedKey, String(sidebarCollapsed));
             "
           />
         </div>

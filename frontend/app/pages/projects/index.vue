@@ -46,34 +46,7 @@ const config: CrudConfig<Project> = reactive({
       accessorKey: "tags",
       header: "Tags",
       icon: "i-lucide-tag",
-      cell: ({ row }) => {
-        const tags = row.getValue("tags") as Project["tags"];
-        if (!tags?.length) return "";
-        return h(
-          "div",
-          { class: "flex flex-wrap gap-1 text-center" },
-          tags
-            .slice(0, 5)
-            .map((tag) =>
-              h(resolveComponent("UBadge"), {
-                label: tag,
-                color: "neutral",
-                variant: "subtle",
-              }),
-            )
-            .concat(
-              tags.length > 5
-                ? [
-                    h(
-                      "span",
-                      { class: "text-sm text-muted" },
-                      `+${tags.length - 5}`,
-                    ),
-                  ]
-                : [],
-            ),
-        );
-      },
+      cell: ({ row }) => h(resolveComponent("CrudTags"), { tags: row.getValue("tags") }),
     },
     {
       accessorKey: "targets",

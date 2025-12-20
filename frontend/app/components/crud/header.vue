@@ -34,10 +34,13 @@
 
         <UDropdownMenu
           :items="
-            config.ordering?.map((ordering: string) => ({
-              id: ordering,
-              label: ordering === 'id' ? 'ID' : utils.firstUpper(ordering),
-            }))
+            config.ordering?.map((ordering: string | { id: string; label: string }) => {
+              const id = typeof ordering === 'string' ? ordering : ordering.id;
+              const label = typeof ordering === 'string' 
+                ? (ordering === 'id' ? 'ID' : utils.firstUpper(ordering))
+                : ordering.label;
+              return { id, label };
+            })
           "
           :content="{ align: 'end' }"
         >

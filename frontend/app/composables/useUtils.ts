@@ -3,5 +3,13 @@ export default function () {
     return `${value.charAt(0).toUpperCase()}${value.slice(1)}`;
   }
 
-  return { firstUpper };
+  const stageOptions = [
+    { label: "OSINT", value: 1 },
+    { label: "Enumeration", value: 2 },
+    { label: "Vulnerabilities", value: 3 },
+    { label: "Services", value: 4 },
+    { label: "Exploitation", value: 5 },
+  ];
+
+  return { firstUpper, stageOptions };
 }
