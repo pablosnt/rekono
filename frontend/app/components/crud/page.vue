@@ -1,143 +1,141 @@
 <template>
-  <div class="flex flex-col h-full w-full">
-    <div class="flex-1 overflow-auto">
-      <template v-if="config.canRead">
-        <div class="container mx-auto max-w-screen-2xl">
-          <CrudHeader
-            :api="api"
-            :open-create-modal="openCreateModal"
-            :config="config"
-            :state="state"
-            :table="tableRef"
-            @search="
-              (search: string) => {
-                state.searchQuery = search;
-                fetchFirstPage();
-              }
-            "
-            @filters="
-              (filters: Record<string, any>) => {
-                state.filters = filters;
-                fetchFirstPage();
-              }
-            "
-            @ordering="
-              (sorting: string) => {
-                state.ordering = sorting;
-                fetchFirstPage();
-              }
-            "
-            @create="fetch()"
-            @open-create="(open: boolean) => (openCreateModal = open)"
-          />
+  <div v-if="mounted" class="flex flex-col h-full w-full">
+    <template v-if="config.canRead">
+      <div class="container mx-auto max-w-screen-2xl">
+        <CrudHeader
+          :api="api"
+          :open-create-modal="openCreateModal"
+          :config="config"
+          :state="state"
+          :table="tableRef"
+          @search="
+            (search: string) => {
+              state.searchQuery = search;
+              fetchFirstPage();
+            }
+          "
+          @filters="
+            (filters: Record<string, any>) => {
+              state.filters = filters;
+              fetchFirstPage();
+            }
+          "
+          @ordering="
+            (sorting: string) => {
+              state.ordering = sorting;
+              fetchFirstPage();
+            }
+          "
+          @create="fetch()"
+          @open-create="(open: boolean) => (openCreateModal = open)"
+        />
 
-          <UEmpty
-            v-if="
-              state.items.length === 0 &&
-              !state.loading &&
-              Object.keys(state.filters).length === 0 &&
-              !state.searchQuery
-            "
-            class="mt-10"
-            :title="`No ${config.entityNamePlural.toLowerCase()} found`"
-            :description="`It looks like you don\'t have access to any ${config.entityName.toLowerCase()} yet. ${config.canCreate ? 'You can create one below.' : 'Please contact your administrator.'}`"
-            :icon="config.icon"
-            :actions="
-              config.canCreate
-                ? [
-                    {
-                      icon: 'i-lucide-plus',
-                      label: 'Create new',
-                      onClick: () => {
-                        openCreateModal = true;
-                      },
-                    },
-                  ]
-                : []
-            "
-            size="xl"
-            variant="naked"
-          />
-
-          <CrudTable
-            v-if="config.tableColumns"
-            v-show="state.items.length > 0 || state.loading"
-            ref="tableRef"
-            :config="config"
-            :state="state"
-            @edit="
-              (item) => {
-                selectedItem = item;
-                openEditModal = true;
-              }
-            "
-            @delete="
-              (item) => {
-                selectedItem = item;
-                openDeleteModal = true;
-              }
-            "
-          />
-
-          <!-- todo: Cards -->
-
-          <CrudFormModal
-            v-if="config.canEdit"
-            :open="openEditModal"
-            :api="api"
-            :config="config"
-            :item="selectedItem"
-            @open="(open: boolean) => (openEditModal = open)"
-            @submit="fetch()"
-          />
-
-          <CrudDeleteModal
-            v-if="config.canDelete"
-            :open="openDeleteModal"
-            :api="api"
-            :config="config"
-            :item="selectedItem"
-            @open="(open: boolean) => (openDeleteModal = open)"
-            @deleted="fetch()"
-          />
-
-          <CrudPagination
-            :config="config"
-            :state="state"
-            @page="
-              (page: number) => {
-                state.page = page;
-                fetch();
-              }
-            "
-            @page-size="
-              (size: number) => {
-                state.pageSize = size;
-                fetch();
-              }
-            "
-          />
-        </div>
-      </template>
-
-      <template v-else>
         <UEmpty
-          class="mt-20"
-          title="Access Denied"
-          description="You do not have the necessary permissions to view this page"
-          icon="i-lucide-shield-ban"
-          :actions="[
-            {
-              icon: 'i-lucide-home',
-              label: 'Home',
-              to: '/',
-            },
-          ]"
+          v-if="
+            state.items.length === 0 &&
+            !state.loading &&
+            Object.keys(state.filters).length === 0 &&
+            !state.searchQuery
+          "
+          class="mt-10"
+          :title="`No ${config.entityNamePlural.toLowerCase()} found`"
+          :description="`It looks like you don\'t have access to any ${config.entityName.toLowerCase()} yet. ${config.canCreate ? 'You can create one below.' : 'Please contact your administrator.'}`"
+          :icon="config.icon"
+          :actions="
+            config.canCreate
+              ? [
+                  {
+                    icon: 'i-lucide-plus',
+                    label: 'Create new',
+                    onClick: () => {
+                      openCreateModal = true;
+                    },
+                  },
+                ]
+              : []
+          "
           size="xl"
           variant="naked"
         />
-      </template>
-    </div>
+
+        <CrudTable
+          v-if="config.tableColumns"
+          v-show="state.items.length > 0 || state.loading"
+          ref="tableRef"
+          :config="config"
+          :state="state"
+          @edit="
+            (item) => {
+              selectedItem = item;
+              openEditModal = true;
+            }
+          "
+          @delete="
+            (item) => {
+              selectedItem = item;
+              openDeleteModal = true;
+            }
+          "
+        />
+
+        <!-- todo: Cards -->
+
+        <CrudFormModal
+          v-if="config.canEdit"
+          :open="openEditModal"
+          :api="api"
+          :config="config"
+          :item="selectedItem"
+          @open="(open: boolean) => (openEditModal = open)"
+          @submit="fetch()"
+        />
+
+        <CrudDeleteModal
+          v-if="config.canDelete"
+          :open="openDeleteModal"
+          :api="api"
+          :config="config"
+          :item="selectedItem"
+          @open="(open: boolean) => (openDeleteModal = open)"
+          @deleted="fetch()"
+        />
+
+        <CrudPagination
+          :config="config"
+          :state="state"
+          @page="
+            (page: number) => {
+              state.page = page;
+              fetch();
+            }
+          "
+          @page-size="
+            (size: number) => {
+              state.pageSize = size;
+              fetch();
+            }
+          "
+        />
+      </div>
+    </template>
+
+    <template v-else>
+      <UEmpty
+        class="mt-20"
+        title="Access Denied"
+        description="You do not have the necessary permissions to view this page"
+        icon="i-lucide-shield-ban"
+        :actions="[
+          {
+            icon: 'i-lucide-home',
+            label: 'Home',
+            to: '/',
+          },
+        ]"
+        size="xl"
+        variant="naked"
+      />
+    </template>
   </div>
 </template>
 
@@ -151,6 +149,7 @@ const openCreateModal = ref(false);
 const openEditModal = ref(false);
 const openDeleteModal = ref(false);
 const selectedItem = ref(null);
+const mounted = ref(false);
 
 const state = reactive<CrudState>({
   items: [],
@@ -188,6 +187,7 @@ function fetchFirstPage() {
 }
 
 onMounted(() => {
+  mounted.value = true;
   if (props.config.canRead) {
     fetch();
   }

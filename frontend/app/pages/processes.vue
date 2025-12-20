@@ -1,5 +1,7 @@
 <template>
   <CrudPage :config="config" />
+  <!-- TODO: Customize the creation form, and the edition form to modify the process steps -->
+  <!-- TODO: Add Run button to the actions (before the menu) to allow running the process -->
 </template>
 
 <script setup lang="ts">
@@ -195,12 +197,8 @@ const config: CrudConfig<Process> = reactive({
       class: "font-bold text-lg text-center my-2 text-gray-900 dark:text-white",
     },
   ],
-  get canRead() {
-    return userStore.is_auditor;
-  },
-  get canCreate() {
-    return userStore.is_auditor;
-  },
+  canRead: userStore.is_auditor,
+  canCreate: userStore.is_auditor,
   canEdit: (process: Process) =>
     userStore.is_admin || userStore.isOwner(process, "owner"),
   canDelete: (process: Process) =>
