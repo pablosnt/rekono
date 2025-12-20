@@ -1,7 +1,5 @@
 <template>
-  <MainPanel>
-    <CrudPage :config="config" />
-  </MainPanel>
+  <CrudPage :config="config" />
 </template>
 
 <script setup lang="ts">

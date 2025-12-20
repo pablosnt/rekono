@@ -166,12 +166,9 @@ const items = ref<NavigationItem[]>([
   },
 ]);
 
-function updateSidebar() {
+function updatePreference(key: string, value: string) {
   if (!mounted.value) return;
-  localStorage.setItem(
-    sidebarCollapsedKey.value,
-    String(sidebarCollapsed.value),
-  );
+  localStorage.setItem(key, value);
 }
 
 onMounted(() => {
@@ -185,7 +182,7 @@ onMounted(() => {
     items.value.push({
       label: "Tooling",
       icon: "i-lucide-wrench",
-      defaultOpen: true,
+      defaultOpen: false,
       children: [
         {
           label: "Tools",
@@ -209,7 +206,7 @@ onMounted(() => {
     items.value.push({
       label: "Administration",
       icon: "i-lucide-settings",
-      defaultOpen: true,
+      defaultOpen: false,
       children: [
         {
           label: "Settings",

@@ -4,9 +4,9 @@
       v-if="config.breadcrumbs?.length"
       :items="config.breadcrumbs"
     />
-    <div class="flex flex-wrap items-center justify-between">
-      <div>
-        <h1 class="text-2xl font-bold text-default">
+    <div class="flex flex-row items-center justify-between gap-4 w-full">
+      <div class="flex-none">
+        <h1 class="text-2xl font-bold text-default truncate max-w-[300px] sm:max-w-none">
           {{ config.entityNamePlural }}
         </h1>
       </div>

@@ -1,3 +1,3 @@
 <template>
-  <MainPanel />
+  <div />
 </template>
