@@ -32,7 +32,12 @@
           />
 
           <UEmpty
-            v-if="state.items.length === 0 && !state.loading && Object.keys(state.filters).length === 0 && !state.searchQuery"
+            v-if="
+              state.items.length === 0 &&
+              !state.loading &&
+              Object.keys(state.filters).length === 0 &&
+              !state.searchQuery
+            "
             class="mt-10"
             :title="`No ${config.entityNamePlural.toLowerCase()} found`"
             :description="`It looks like you don\'t have access to any ${config.entityName.toLowerCase()} yet. ${config.canCreate ? 'You can create one below.' : 'Please contact your administrator.'}`"

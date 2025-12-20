@@ -6,7 +6,9 @@
       class="group"
       collapsible
       resizable
-      @update:collapsed="updatePreference(sidebarCollapsedKey, String(sidebarCollapsed))"
+      @update:collapsed="
+        updatePreference(sidebarCollapsedKey, String(sidebarCollapsed))
+      "
     >
       <template #header="{ collapsed }">
         <div class="relative flex items-center justify-center w-full">

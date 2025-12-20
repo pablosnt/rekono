@@ -1,10 +1,10 @@
 import type { User } from "./users";
+import type { Configuration } from "./tools";
 
 export interface Step {
   id: number;
   process: number;
-  configuration_id: number;
-  configuration: any;
+  configuration: Configuration;
 }
 
 export interface Process {
@@ -20,5 +20,4 @@ export interface Process {
     required: boolean;
     supported: boolean;
   };
-  [key: string]: any;
 }

@@ -44,7 +44,8 @@ const config: CrudConfig<Project> = reactive({
       accessorKey: "tags",
       header: "Tags",
       icon: "i-lucide-tag",
-      cell: ({ row }) => h(resolveComponent("CrudTags"), { tags: row.getValue("tags") }),
+      cell: ({ row }) =>
+        h(resolveComponent("CrudTags"), { tags: row.getValue("tags") }),
     },
     {
       accessorKey: "targets",

@@ -6,7 +6,9 @@
     />
     <div class="flex flex-row items-center justify-between gap-4 w-full">
       <div class="flex-none">
-        <h1 class="text-2xl font-bold text-default truncate max-w-[300px] sm:max-w-none">
+        <h1
+          class="text-2xl font-bold text-default truncate max-w-[300px] sm:max-w-none"
+        >
           {{ config.entityNamePlural }}
         </h1>
       </div>
@@ -34,13 +36,19 @@
 
         <UDropdownMenu
           :items="
-            config.ordering?.map((ordering: string | { id: string; label: string }) => {
-              const id = typeof ordering === 'string' ? ordering : ordering.id;
-              const label = typeof ordering === 'string' 
-                ? (ordering === 'id' ? 'ID' : utils.firstUpper(ordering))
-                : ordering.label;
-              return { id, label };
-            })
+            config.ordering?.map(
+              (ordering: string | { id: string; label: string }) => {
+                const id =
+                  typeof ordering === 'string' ? ordering : ordering.id;
+                const label =
+                  typeof ordering === 'string'
+                    ? ordering === 'id'
+                      ? 'ID'
+                      : utils.firstUpper(ordering)
+                    : ordering.label;
+                return { id, label };
+              },
+            )
           "
           :content="{ align: 'end' }"
         >
