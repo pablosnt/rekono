@@ -1,5 +1,4 @@
 <template>
-  <!-- TODO: Improve compartimentability of the CrudPage. At the end too many components in the same place, right? -->
   <div class="flex flex-col h-full w-full">
     <div class="flex-1 overflow-auto">
       <template v-if="config.canRead">
@@ -11,25 +10,25 @@
             :state="state"
             :table="tableRef"
             @search="
-              (search) => {
+              (search: string) => {
                 state.searchQuery = search;
                 fetchFirstPage();
               }
             "
             @filters="
-              (filters) => {
+              (filters: Record<string, any>) => {
                 state.filters = filters;
                 fetchFirstPage();
               }
             "
             @ordering="
-              (sorting) => {
+              (sorting: string) => {
                 state.ordering = sorting;
                 fetchFirstPage();
               }
             "
             @create="fetch()"
-            @open-create-modal="(open) => (openCreateModal = open)"
+            @open-create="(open: boolean) => (openCreateModal = open)"
           />
 
           <UEmpty
@@ -77,118 +76,42 @@
 
           <!-- todo: Cards -->
 
-          <UModal
+          <CrudFormModal
             v-if="config.canEdit"
             :open="openEditModal"
-            :title="`Edit ${config.entityName}`"
-            :ui="{ content: 'sm:max-w-3xl sm:max-h-xl', footer: 'justify-end' }"
-            @update:open="(open) => (openEditModal = open)"
-          >
-            <template #body>
-              <CrudForm
-                ref="editFormRef"
-                :api="api"
-                :config="config"
-                :entity="selectedItem"
-                @submit="
-                  fetch();
-                  openEditModal = false;
-                  selectedItem = null;
-                "
-              />
-            </template>
-            <template #footer="{ close }">
-              <UButton
-                label="Cancel"
-                color="neutral"
-                variant="outline"
-                @click="close"
-              />
-              <UButton
-                color="primary"
-                label="Save"
-                @click="editFormRef.submit()"
-              />
-            </template>
-          </UModal>
+            :api="api"
+            :config="config"
+            :item="selectedItem"
+            @open="(open: boolean) => (openEditModal = open)"
+            @submit="fetch()"
+          />
 
-          <UModal
+          <CrudDeleteModal
             v-if="config.canDelete"
             :open="openDeleteModal"
-            :title="`Delete ${config.entityName}`"
-            :ui="{ content: 'sm:max-w-3xl sm:max-h-xl', footer: 'justify-end' }"
-            :loading="deleteLoading"
-            @update:open="(open) => (openDeleteModal = open)"
-          >
-            <template #body>
-              <template v-if="selectedItem">
-                <template
-                  v-for="(message, index) in config.deleteMessage(selectedItem)"
-                  :key="index"
-                >
-                  <p :class="message.class">
-                    {{ message.text }}
-                  </p>
-                </template>
-              </template>
-            </template>
-            <template #footer="{ close }">
-              <UButton
-                label="Cancel"
-                color="neutral"
-                variant="outline"
-                @click="close"
-              />
-              <UButton
-                color="primary"
-                label="Delete"
-                :loading="deleteLoading"
-                @click="remove()"
-              />
-            </template>
-          </UModal>
+            :api="api"
+            :config="config"
+            :item="selectedItem"
+            @open="(open: boolean) => (openDeleteModal = open)"
+            @deleted="fetch()"
+          />
 
-          <div
-            v-if="state.total > state.items.length"
-            class="grid grid-cols-3 items-center mt-5 px-3"
-          >
-            <div class="text-sm text-gray-500">
-              Showing
-              <span class="font-medium">{{
-                (state.page - 1) * state.pageSize + 1
-              }}</span>
-              to
-              <span class="font-medium">{{
-                Math.min(state.page * state.pageSize, state.total)
-              }}</span>
-              of
-              <span class="font-medium">{{ state.total }}</span>
-              results
-            </div>
-            <div class="flex justify-center">
-              <UPagination
-                v-model:page="state.page"
-                :total="state.total"
-                :items-per-page="state.pageSize"
-                show-edges
-                color="neutral"
-                variant="ghost"
-                size="lg"
-                @update:model-value="fetch()"
-              />
-            </div>
-            <div
-              class="flex justify-end items-center gap-2 text-sm text-gray-500"
-            >
-              <span>Items per page</span>
-              <USelect
-                v-model="state.pageSize"
-                :items="config.pageSizeOptions?.filter((i) => i <= state.total)"
-                size="sm"
-                @update:model-value="fetch()"
-              />
-            </div>
-          </div>
+          <CrudPagination
+            :config="config"
+            :state="state"
+            @page="
+              (page: number) => {
+                state.page = page;
+                fetch();
+              }
+            "
+            @page-size="
+              (size: number) => {
+                state.pageSize = size;
+                fetch();
+              }
+            "
+          />
         </div>
       </template>
 
@@ -216,17 +139,15 @@
 <script setup lang="ts">
 import type { CrudConfig, CrudState } from "~/types/crud";
 
-const props = defineProps<{ config: CrudConfig<T> }>();
+const props = defineProps<{ config: CrudConfig }>();
 const api = useApi(props.config.endpoint);
 const tableRef = ref(null);
-const editFormRef = ref(null);
 const openCreateModal = ref(false);
 const openEditModal = ref(false);
 const openDeleteModal = ref(false);
-const deleteLoading = ref(false);
 const selectedItem = ref(null);
 
-const state = reactive<CrudState<T>>({
+const state = reactive<CrudState>({
   items: [],
   total: 0,
   loading: true,
@@ -253,20 +174,6 @@ function fetch() {
     })
     .finally(() => {
       state.loading = false;
-    });
-}
-
-function remove() {
-  deleteLoading.value = true;
-  api
-    .remove(`${selectedItem.value.id}/`, {}, props.config.entityName)
-    .then(() => {
-      fetch();
-    })
-    .finally(() => {
-      deleteLoading.value = false;
-      openDeleteModal.value = false;
-      selectedItem.value = null;
     });
 }
 

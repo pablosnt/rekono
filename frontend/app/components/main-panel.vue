@@ -124,6 +124,7 @@ const items = ref<NavigationItem[]>([
     icon: "i-lucide-house",
     to: "/",
   },
+  // TODO: Fix that when a project page is selected, the global projects link shouldn't be marked as active
   {
     label: "Projects",
     icon: "i-lucide-folder",

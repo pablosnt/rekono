@@ -108,38 +108,19 @@
           />
         </UDropdownMenu>
 
-        <UModal
+        <CrudFormModal
           v-if="config.canCreate"
           :open="openCreateModal"
-          :title="`New ${config.entityName}`"
-          :ui="{ content: 'sm:max-w-3xl sm:max-h-xl', footer: 'justify-end' }"
-          @update:open="(open) => $emit('openCreateModal', open)"
-        >
-          <UButton
-            icon="i-lucide-plus"
-            @click="$emit('openCreateModal', true)"
-          />
-          <template #body>
-            <CrudForm
-              ref="form"
-              :api="api"
-              :config="config"
-              @submit="
-                emit('create');
-                $emit('openCreateModal', false);
-              "
-            />
-          </template>
-          <template #footer="{ close }">
-            <UButton
-              label="Cancel"
-              color="neutral"
-              variant="outline"
-              @click="close"
-            />
-            <UButton color="primary" label="Create" @click="form.submit()" />
-          </template>
-        </UModal>
+          :api="api"
+          :config="config"
+          @open="(open: boolean) => $emit('openCreate', open)"
+          @submit="emit('create')"
+        />
+        <UButton
+          v-if="config.canCreate"
+          icon="i-lucide-plus"
+          @click="$emit('openCreate', true)"
+        />
       </div>
     </div>
     <UCollapsible v-model:open="openFilters">
@@ -169,10 +150,9 @@ const emit = defineEmits<{
   filters: [filters: Record<string, unknown>];
   ordering: [sortering: string];
   create: [];
-  openCreateModal: [open: boolean];
+  openCreate: [open: boolean];
 }>();
 const utils = useUtils();
 const search = ref("");
 const openFilters = ref(false);
-const form = ref();
 </script>
