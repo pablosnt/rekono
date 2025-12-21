@@ -16,6 +16,8 @@ export interface Tool {
   id: number;
   name: string;
   command?: string;
+  script?: string;
+  is_installed?: boolean;
   version?: string;
   reference?: string;
   icon?: string;

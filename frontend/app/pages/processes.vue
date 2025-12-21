@@ -112,48 +112,46 @@ const config: CrudConfig<Process> = reactive({
   },
   searchable: true,
   searchPlaceholder: "Search processes...",
-  get filters() {
-    return [
-      {
-        key: "stage",
-        label: "Stage",
-        icon: "i-lucide-layers",
-        type: "select" as const,
-        options: utils.stageOptions,
-      },
-      {
-        key: "tag",
-        label: "Tag",
-        icon: "i-lucide-tag",
-        type: "text" as const,
-        placeholder: "Filter by tag...",
-      },
-      {
-        key: "tool",
-        label: "Tool",
-        icon: "i-lucide-wrench",
-        type: "select" as const,
-        options: toolOptions.value,
-      },
-      {
-        key: "owner",
-        label: "Owner",
-        icon: "i-lucide-user",
-        type: "text" as const,
-        placeholder: "Filter by owner username...",
-      },
-      ...(userStore.is_admin
-        ? [
-            {
-              key: "owner_id",
-              label: "My processes",
-              type: "boolean" as const,
-              value: userStore.user,
-            },
-          ]
-        : []),
-    ];
-  },
+  filters: [
+    {
+      key: "stage",
+      label: "Stage",
+      icon: "i-lucide-layers",
+      type: "select" as const,
+      options: utils.stageOptions,
+    },
+    {
+      key: "tag",
+      label: "Tag",
+      icon: "i-lucide-tag",
+      type: "text" as const,
+      placeholder: "Filter by tag...",
+    },
+    {
+      key: "tool",
+      label: "Tool",
+      icon: "i-lucide-wrench",
+      type: "select" as const,
+      options: toolOptions.value,
+    },
+    {
+      key: "owner",
+      label: "Owner",
+      icon: "i-lucide-user",
+      type: "text" as const,
+      placeholder: "Filter by owner username...",
+    },
+    ...(userStore.is_admin
+      ? [
+          {
+            key: "owner_id",
+            label: "My processes",
+            type: "boolean" as const,
+            value: userStore.user,
+          },
+        ]
+      : []),
+  ],
   ordering: ["id", "name", "owner", { id: "likes_count", label: "Likes" }],
   defaultOrdering: "-id",
   pageSize: 25,

@@ -11,9 +11,20 @@
           label-key="label"
           class="w-64"
           :avatar="
-            filter.options.filter(
-              (option) => option.value === _filters[filter.key],
-            )?.[0]?.avatar
+            Array.isArray(filter.options)
+              ? filter.options.filter(
+                  (option: FilterOption) =>
+                    option.value === _filters[filter.key],
+                )?.[0]?.avatar
+              : undefined
+          "
+          :icon="
+            Array.isArray(filter.options)
+              ? filter.options.filter(
+                  (option: FilterOption) =>
+                    option.value === _filters[filter.key],
+                )?.[0]?.icon
+              : undefined
           "
           leading
           @update:model-value="(value) => updateFilter(filter.key, value)"
