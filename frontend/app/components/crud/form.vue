@@ -96,14 +96,21 @@
             </UBadge>
           </div>
         </template>
+        <UFileUpload
+          v-else-if="field.type === 'file'"
+          v-model="formData[field.key]"
+          :accept="field.accept"
+          :label="field.fileUploadLabel"
+          variant="area"
+          size="xl"
+        />
       </UFormField>
     </template>
   </UForm>
 </template>
 
 <script setup lang="ts">
-import type { FilterOption, CrudConfig } from "~/types/crud";
-import type FormField from "@nuxt/ui";
+import type { FilterOption, CrudConfig, FormField } from "~/types/crud";
 
 const props = defineProps<{
   api: typeof useApi;
@@ -131,6 +138,8 @@ function initFormData() {
         props.entity && Array.isArray(props.entity[field.key])
           ? [...props.entity[field.key]]
           : [];
+    } else if (field.type === "file") {
+      data[field.key] = null;
     } else {
       if (props.entity) {
         data[field.key] = props.entity[field.key] ?? "";

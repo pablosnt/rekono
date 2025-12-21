@@ -1,10 +1,31 @@
 import type { TableColumn, BreadcrumbItem } from "@nuxt/ui";
 import type * as z from "zod";
-import type FormField from "@nuxt/ui";
 
 export interface FilterOption {
   label: string;
   value: unknown;
+}
+
+export interface FormField {
+  key: string;
+  label: string;
+  type:
+    | "text"
+    | "number"
+    | "textarea"
+    | "select"
+    | "multiselect"
+    | "checkbox"
+    | "tags"
+    | "file";
+  required?: boolean;
+  placeholder?: string;
+  hint?: string;
+  icon?: string;
+  options?: FilterOption[];
+  accept?: string;
+  fileSize?: number;
+  fileUploadLabel?: string;
 }
 
 export interface FilterConfig {
@@ -62,7 +83,7 @@ export interface CrudConfig<T = unknown> {
   defaultOrdering: string;
   pageSize?: number;
   pageSizeOptions?: number[];
-  formFields?: (typeof FormField)[];
+  formFields?: FormField[];
   formSchema?: z.ZodType;
   deleteMessage?: (item: T) => DeleteDetail[];
   canRead: boolean;
