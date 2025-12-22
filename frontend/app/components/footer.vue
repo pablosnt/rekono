@@ -34,13 +34,12 @@
     </template>
 
     <template #default>
-      <UIcon
-        name="i-simple-icons-nuxtdotjs"
-        class="size-5 text-muted mx-auto mr-3"
-      />
-      <p class="text-sm text-muted">
-        Rekono Maintainers © {{ new Date().getFullYear() }}
-      </p>
+      <div class="flex items-center justify-center w-full sm:w-auto">
+        <UIcon name="i-simple-icons-nuxtdotjs" class="size-5 text-muted mr-2" />
+        <p class="text-sm text-muted text-center">
+          Rekono Maintainers © {{ new Date().getFullYear() }}
+        </p>
+      </div>
     </template>
 
     <template #right>
