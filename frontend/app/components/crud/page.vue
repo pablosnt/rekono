@@ -1,122 +1,120 @@
 <template>
-  <div v-if="mounted" class="flex flex-col h-full w-full">
+  <div v-if="mounted">
     <template v-if="config.canRead">
-      <div class="container mx-auto max-w-screen-2xl">
-        <CrudHeader
-          :api="api"
-          :open-create-modal="openCreateModal"
-          :config="config"
-          :state="state"
-          :table="tableRef"
-          @search="
-            (search: string) => {
-              state.searchQuery = search;
-              fetchFirstPage();
-            }
-          "
-          @filters="
-            (filters: Record<string, any>) => {
-              state.filters = filters;
-              fetchFirstPage();
-            }
-          "
-          @ordering="
-            (sorting: string) => {
-              state.ordering = sorting;
-              fetchFirstPage();
-            }
-          "
-          @create="fetch()"
-          @open-create="(open: boolean) => (openCreateModal = open)"
-        />
+      <CrudHeader
+        :api="api"
+        :open-create-modal="openCreateModal"
+        :config="config"
+        :state="state"
+        :table="tableRef"
+        @search="
+          (search: string) => {
+            state.searchQuery = search;
+            fetchFirstPage();
+          }
+        "
+        @filters="
+          (filters: Record<string, any>) => {
+            state.filters = filters;
+            fetchFirstPage();
+          }
+        "
+        @ordering="
+          (sorting: string) => {
+            state.ordering = sorting;
+            fetchFirstPage();
+          }
+        "
+        @create="fetch()"
+        @open-create="(open: boolean) => (openCreateModal = open)"
+      />
 
-        <UEmpty
-          v-if="
-            state.items.length === 0 &&
-            !state.loading &&
-            Object.keys(state.filters).length === 0 &&
-            !state.searchQuery
-          "
-          class="mt-10"
-          :title="`No ${config.entityNamePlural.toLowerCase()} found`"
-          :description="`It looks like you don\'t have access to any ${config.entityName.toLowerCase()} yet. ${config.canCreate ? 'You can create one below.' : 'Please contact your administrator.'}`"
-          :icon="config.icon"
-          :actions="
-            config.canCreate
-              ? [
-                  {
-                    icon: 'i-lucide-plus',
-                    label: 'Create new',
-                    onClick: () => {
-                      openCreateModal = true;
-                    },
+      <UEmpty
+        v-if="
+          state.items.length === 0 &&
+          !state.loading &&
+          Object.keys(state.filters).length === 0 &&
+          !state.searchQuery
+        "
+        class="mt-10"
+        :title="`No ${config.entityNamePlural.toLowerCase()} found`"
+        :description="`It looks like you don\'t have access to any ${config.entityName.toLowerCase()} yet. ${config.canCreate ? 'You can create one below.' : 'Please contact your administrator.'}`"
+        :icon="config.icon"
+        :actions="
+          config.canCreate
+            ? [
+                {
+                  icon: 'i-lucide-plus',
+                  label: 'Create new',
+                  onClick: () => {
+                    openCreateModal = true;
                   },
-                ]
-              : []
-          "
-          size="xl"
-          variant="naked"
-        />
+                },
+              ]
+            : []
+        "
+        size="xl"
+        variant="naked"
+      />
 
-        <CrudTable
-          v-if="config.tableColumns"
-          v-show="state.items.length > 0 || state.loading"
-          ref="tableRef"
-          :config="config"
-          :state="state"
-          @edit="
-            (item) => {
-              selectedItem = item;
-              openEditModal = true;
-            }
-          "
-          @delete="
-            (item) => {
-              selectedItem = item;
-              openDeleteModal = true;
-            }
-          "
-        />
+      <CrudTable
+        v-if="config.tableColumns"
+        v-show="state.items.length > 0 || state.loading"
+        ref="tableRef"
+        :config="config"
+        :state="state"
+        @edit="
+          (item) => {
+            selectedItem = item;
+            openEditModal = true;
+          }
+        "
+        @delete="
+          (item) => {
+            selectedItem = item;
+            openDeleteModal = true;
+          }
+        "
+      />
 
-        <!-- todo: Cards -->
+      <!-- todo: Cards -->
 
-        <CrudFormModal
-          v-if="config.canEdit"
-          :open="openEditModal"
-          :api="api"
-          :config="config"
-          :item="selectedItem"
-          @open="(open: boolean) => (openEditModal = open)"
-          @submit="fetch()"
-        />
+      <CrudFormModal
+        v-if="config.canEdit"
+        :open="openEditModal"
+        :api="api"
+        :config="config"
+        :item="selectedItem"
+        @open="(open: boolean) => (openEditModal = open)"
+        @submit="fetch()"
+      />
 
-        <CrudDeleteModal
-          v-if="config.canDelete"
-          :open="openDeleteModal"
-          :api="api"
-          :config="config"
-          :item="selectedItem"
-          @open="(open: boolean) => (openDeleteModal = open)"
-          @deleted="fetch()"
-        />
+      <CrudDeleteModal
+        v-if="config.canDelete"
+        :open="openDeleteModal"
+        :api="api"
+        :config="config"
+        :item="selectedItem"
+        @open="(open: boolean) => (openDeleteModal = open)"
+        @deleted="fetch()"
+      />
 
-        <CrudPagination
-          :config="config"
-          :state="state"
-          @page="
-            (page: number) => {
-              state.page = page;
-              fetch();
-            }
-          "
-          @page-size="
-            (size: number) => {
-              state.pageSize = size;
-              fetch();
-            }
-          "
-        />
-      </div>
+      <CrudPagination
+        :config="config"
+        :state="state"
+        @page="
+          (page: number) => {
+            state.page = page;
+            fetch();
+          }
+        "
+        @page-size="
+          (size: number) => {
+            state.pageSize = size;
+            fetch();
+          }
+        "
+      />
     </template>
 
     <template v-else>

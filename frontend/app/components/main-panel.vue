@@ -1,5 +1,9 @@
 <template>
-  <UDashboardGroup>
+  <UDashboardGroup
+    persistent
+    storage="local"
+    :storage-key="sidebarCollapsedKey"
+  >
     <UDashboardSidebar
       v-if="mounted"
       v-model:collapsed="sidebarCollapsed"
@@ -11,7 +15,6 @@
         (value) => {
           if (largeScreen) {
             sidebarCollapsed = value;
-            updatePreference(sidebarCollapsedKey, String(value));
           }
         }
       "
@@ -37,10 +40,7 @@
               'ml-auto opacity-0 group-hover:opacity-100 transition-opacity duration-200' +
               (sidebarCollapsed ? ' absolute' : '')
             "
-            @click="
-              sidebarCollapsed = !sidebarCollapsed;
-              updatePreference(sidebarCollapsedKey, String(sidebarCollapsed));
-            "
+            @click="sidebarCollapsed = !sidebarCollapsed"
           />
         </div>
       </template>
@@ -98,12 +98,15 @@
         </UModal>
       </template>
     </UDashboardSidebar>
-    <UContainer class="flex flex-col min-h-full">
-      <div class="flex-1">
-        <slot />
-      </div>
-      <Footer />
-    </UContainer>
+    <UDashboardPanel>
+      <template #body>
+        <UContainer class="min-h-screen">
+          <slot />
+
+          <Footer />
+        </UContainer>
+      </template>
+    </UDashboardPanel>
   </UDashboardGroup>
 </template>
 
@@ -114,7 +117,7 @@ const api = useApi();
 const userStore = useUserStore();
 const profileOpen = ref(false);
 const sidebarCollapsed = ref(false);
-const sidebarCollapsedKey = ref("main-panel-collapsed");
+const sidebarCollapsedKey = ref("main-panel");
 const mounted = ref(false);
 const windowWidth = ref(0);
 const largeScreen = computed(() => windowWidth.value >= 1024);
@@ -175,18 +178,10 @@ const items = ref<NavigationItem[]>([
   },
 ]);
 
-function updatePreference(key: string, value: string) {
-  if (!mounted.value) return;
-  localStorage.setItem(key, value);
-}
-
 const handleResize = () => {
   windowWidth.value = window.innerWidth;
   if (!largeScreen.value) {
     sidebarCollapsed.value = true;
-  } else {
-    sidebarCollapsed.value =
-      localStorage.getItem(sidebarCollapsedKey.value) === "true";
   }
 };
 
@@ -196,15 +191,8 @@ onUnmounted(() => {
 
 onMounted(() => {
   mounted.value = true;
-
   handleResize();
   window.addEventListener("resize", handleResize);
-
-  if (localStorage.getItem(sidebarCollapsedKey.value) === "true") {
-    sidebarCollapsed.value = true;
-  } else {
-    sidebarCollapsed.value = false;
-  }
   if (userStore.is_auditor) {
     items.value.push({
       label: "Tooling",

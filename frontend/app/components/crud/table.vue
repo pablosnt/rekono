@@ -6,7 +6,6 @@
     :loading="state.loading"
     loading-color="primary"
     :columns="columns"
-    class="flex-1"
   />
 </template>
 
