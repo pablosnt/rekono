@@ -4,29 +4,38 @@
       v-if="mounted"
       v-model:collapsed="sidebarCollapsed"
       class="group"
+      style="display: flex"
+      :resizable="largeScreen"
       collapsible
-      resizable
       @update:collapsed="
-        updatePreference(sidebarCollapsedKey, String(sidebarCollapsed))
+        (value) => {
+          if (largeScreen) {
+            sidebarCollapsed = value;
+            updatePreference(sidebarCollapsedKey, String(value));
+          }
+        }
       "
     >
-      <template #header="{ collapsed }">
+      <template #header>
         <div class="relative flex items-center justify-center w-full">
-          <AppLogo v-if="!collapsed" class="h-5 w-auto shrink-0" />
+          <AppLogo v-if="!sidebarCollapsed" class="h-5 w-auto shrink-0" />
           <UIcon
             v-else
             name="i-simple-icons-nuxtdotjs"
             class="size-5 text-primary opacity-100 group-hover:opacity-0 transition-opacity duration-200"
           />
           <UButton
+            v-if="largeScreen"
             :icon="
-              collapsed ? 'i-lucide-chevrons-right' : 'i-lucide-chevrons-left'
+              sidebarCollapsed
+                ? 'i-lucide-chevrons-right'
+                : 'i-lucide-chevrons-left'
             "
             color="neutral"
             variant="ghost"
             :class="
               'ml-auto opacity-0 group-hover:opacity-100 transition-opacity duration-200' +
-              (collapsed ? ' absolute' : '')
+              (sidebarCollapsed ? ' absolute' : '')
             "
             @click="
               sidebarCollapsed = !sidebarCollapsed;
@@ -35,17 +44,13 @@
           />
         </div>
       </template>
-
-      <template #default="{ collapsed }">
-        <UNavigationMenu
-          :collapsed="collapsed"
-          :items="items"
-          orientation="vertical"
-          popover
-        />
-      </template>
-
-      <template #footer="{ collapsed }">
+      <UNavigationMenu
+        :collapsed="sidebarCollapsed"
+        :items="items"
+        orientation="vertical"
+        popover
+      />
+      <template #footer>
         <UModal
           v-model:open="profileOpen"
           :ui="{ content: 'sm:max-w-6xl sm:max-h-2xl' }"
@@ -58,11 +63,11 @@
               class: 'bg-primary-500 text-white',
               size: 'lg',
             }"
-            :label="collapsed ? undefined : userStore.name || undefined"
+            :label="sidebarCollapsed ? undefined : userStore.name || undefined"
             color="neutral"
             variant="ghost"
             class="w-full"
-            :block="collapsed"
+            :block="sidebarCollapsed"
             size="xl"
             @click="profileOpen = true"
           />
@@ -111,6 +116,8 @@ const profileOpen = ref(false);
 const sidebarCollapsed = ref(false);
 const sidebarCollapsedKey = ref("main-panel-collapsed");
 const mounted = ref(false);
+const windowWidth = ref(0);
+const largeScreen = computed(() => windowWidth.value >= 1024);
 interface NavigationItem {
   label: string;
   icon: string;
@@ -173,8 +180,26 @@ function updatePreference(key: string, value: string) {
   localStorage.setItem(key, value);
 }
 
+const handleResize = () => {
+  windowWidth.value = window.innerWidth;
+  if (!largeScreen.value) {
+    sidebarCollapsed.value = true;
+  } else {
+    sidebarCollapsed.value =
+      localStorage.getItem(sidebarCollapsedKey.value) === "true";
+  }
+};
+
+onUnmounted(() => {
+  window.removeEventListener("resize", handleResize);
+});
+
 onMounted(() => {
   mounted.value = true;
+
+  handleResize();
+  window.addEventListener("resize", handleResize);
+
   if (localStorage.getItem(sidebarCollapsedKey.value) === "true") {
     sidebarCollapsed.value = true;
   } else {
