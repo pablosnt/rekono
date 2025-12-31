@@ -2,7 +2,6 @@
   <CrudPage :config="config" />
   <!-- TODO: Customize the creation form, and the edition form to modify the process steps -->
   <!-- TODO: Add Run button to the actions (before the menu) to allow running the process -->
-  <!-- TODO: Decide how sort all the filters better -->
   <!-- TODO: What to do with owner filter? Selector or free form by name? -->
 </template>
 
@@ -116,19 +115,20 @@ const config: CrudConfig<Process> = reactive({
   searchPlaceholder: "Search processes...",
   filters: [
     {
-      key: "stage",
-      label: "Stage",
-      icon: "i-lucide-layers",
-      type: "select" as const,
-      options: utils.stageOptions,
-    },
-    {
       key: "tag",
       label: "Tag",
       icon: "i-lucide-tag",
       type: "text" as const,
       placeholder: "Filter by tag...",
     },
+    {
+      key: "stage",
+      label: "Stage",
+      icon: "i-lucide-layers",
+      type: "select" as const,
+      options: utils.stageOptions,
+    },
+
     {
       key: "tool",
       label: "Tool",
@@ -143,16 +143,6 @@ const config: CrudConfig<Process> = reactive({
       type: "text" as const,
       placeholder: "Filter by owner username...",
     },
-    ...(userStore.is_admin
-      ? [
-          {
-            key: "owner_id",
-            label: "My processes",
-            type: "boolean" as const,
-            value: userStore.user,
-          },
-        ]
-      : []),
   ],
   ordering: ["id", "name", "owner", { id: "likes_count", label: "Likes" }],
   defaultOrdering: "-id",

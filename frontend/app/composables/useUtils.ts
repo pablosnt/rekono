@@ -4,11 +4,11 @@ export default function () {
   }
 
   const stageOptions = [
-    { label: "OSINT", value: 1 },
-    { label: "Enumeration", value: 2 },
-    { label: "Vulnerabilities", value: 3 },
-    { label: "Services", value: 4 },
-    { label: "Exploitation", value: 5 },
+    { label: "OSINT", value: 1, icon: "i-lucide-globe" },
+    { label: "Enumeration", value: 2, icon: "i-lucide-network" },
+    { label: "Vulnerabilities", value: 3, icon: "i-lucide-bug" },
+    { label: "Services", value: 4, icon: "i-lucide-server" },
+    { label: "Exploitation", value: 5, icon: "i-lucide-flame" },
   ];
 
   return { firstUpper, stageOptions };
