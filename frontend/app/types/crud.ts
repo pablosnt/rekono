@@ -4,6 +4,8 @@ import type * as z from "zod";
 export interface FilterOption {
   label: string;
   value: unknown;
+  avatar?: { src?: string; text?: string; class?: string };
+  icon?: string;
 }
 
 export interface FormField {

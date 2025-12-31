@@ -2,7 +2,6 @@
   <CrudPage :config="config" />
   <!-- TODO: Customize the creation form, and the edition form to modify the process steps -->
   <!-- TODO: Add Run button to the actions (before the menu) to allow running the process -->
-  <!-- TODO: What to do with owner filter? Selector or free form by name? -->
 </template>
 
 <script setup lang="ts">
@@ -11,22 +10,19 @@ import type { CrudConfig, FilterOption } from "~/types/crud";
 import * as z from "zod";
 import { useUserStore } from "~/store/user";
 import type { Process } from "~/types/processes";
-import type { Tool } from "~/types/tools";
 
 const userStore = useUserStore();
 const validation = useValidation();
 const utils = useUtils();
-const api = useApi("/api/tools/");
 const toolOptions = ref<FilterOption[]>([]);
+const userOptions = ref<FilterOption[]>([]);
 
 onMounted(() => {
-  api.list("", {}, true).then((response) => {
-    toolOptions.value = (response.items as Tool[]).map((tool) => ({
-      avatar: tool.icon ? { src: tool.icon } : undefined,
-      label: tool.name,
-      value: tool.id,
-    }));
-  });
+  utils.getToolOptions(toolOptions);
+  if (userStore.is_auditor) {
+    utils.getUserOptions(userOptions, { role: "Admin" });
+    utils.getUserOptions(userOptions, { role: "Auditor" });
+  }
 });
 
 const config: CrudConfig<Process> = reactive({
@@ -136,13 +132,25 @@ const config: CrudConfig<Process> = reactive({
       type: "select" as const,
       options: toolOptions,
     },
-    {
-      key: "owner",
-      label: "Owner",
-      icon: "i-lucide-user",
-      type: "text" as const,
-      placeholder: "Filter by owner username...",
-    },
+    ...(userStore.is_auditor
+      ? [
+          {
+            key: "owner",
+            label: "Owner",
+            icon: "i-lucide-user",
+            type: "select" as const,
+            options: userOptions,
+          },
+        ]
+      : [
+          {
+            key: "owner_username",
+            label: "Owner",
+            icon: "i-lucide-user",
+            type: "text" as const,
+            placeholder: "Filter by owner username...",
+          },
+        ]),
   ],
   ordering: ["id", "name", "owner", { id: "likes_count", label: "Likes" }],
   defaultOrdering: "-id",

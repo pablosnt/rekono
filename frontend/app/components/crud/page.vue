@@ -9,12 +9,14 @@
         :table="tableRef"
         @search="
           (search: string) => {
+            state.loading = true;
             state.searchQuery = search;
             fetchFirstPage();
           }
         "
         @filters="
           (filters: Record<string, any>) => {
+            state.loading = true;
             state.filters = filters;
             fetchFirstPage();
           }

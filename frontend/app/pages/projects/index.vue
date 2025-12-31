@@ -4,13 +4,22 @@
 
 <script setup lang="ts">
 import { h } from "vue";
-import type { CrudConfig, CrudTableColumn } from "~/types/crud";
+import type { CrudConfig, CrudTableColumn, FilterOption } from "~/types/crud";
 import { useUserStore } from "~/store/user";
 import * as z from "zod";
 import type { Project } from "~/types/projects";
 
 const userStore = useUserStore();
 const validation = useValidation();
+const utils = useUtils();
+const userOptions = ref<FilterOption[]>([]);
+
+onMounted(() => {
+  if (userStore.is_admin) {
+    utils.getUserOptions(userOptions, { role: "Admin" });
+  }
+});
+
 const config: CrudConfig<Project> = reactive({
   endpoint: "/api/projects/",
   entityName: "Project",
@@ -85,23 +94,25 @@ const config: CrudConfig<Project> = reactive({
       type: "text",
       placeholder: "Filter by tag...",
     },
-    {
-      key: "owner",
-      label: "Owner",
-      icon: "i-lucide-user",
-      type: "text",
-      placeholder: "Filter by owner username...",
-    },
     ...(userStore.is_admin
       ? [
           {
-            key: "owner_id",
-            label: "My projects",
-            type: "boolean" as const,
-            value: userStore.user,
+            key: "owner",
+            label: "Owner",
+            icon: "i-lucide-user",
+            type: "select" as const,
+            options: userOptions,
           },
         ]
-      : []),
+      : [
+          {
+            key: "owner_username",
+            label: "Owner",
+            icon: "i-lucide-user",
+            type: "text" as const,
+            placeholder: "Filter by owner username...",
+          },
+        ]),
   ],
   ordering: ["id", "name"],
   defaultOrdering: "-id",

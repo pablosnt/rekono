@@ -1,6 +1,6 @@
 <template>
   <div class="border-b border-default bg-muted/30 p-4 space-y-4">
-    <div class="flex flex-wrap gap-4 justify-between">
+    <div class="flex flex-wrap gap-4 justify-around">
       <template v-for="filter in config.filters" :key="filter.key">
         <USelectMenu
           v-if="filter.type === 'select'"
@@ -11,20 +11,20 @@
           label-key="label"
           class="w-64"
           :avatar="
-            Array.isArray(filter.options)
+            (Array.isArray(filter.options)
               ? filter.options.filter(
                   (option: FilterOption) =>
                     option.value === _filters[filter.key],
                 )?.[0]?.avatar
-              : undefined
+              : undefined) || filter.avatar
           "
           :icon="
-            Array.isArray(filter.options)
+            (Array.isArray(filter.options)
               ? filter.options.filter(
                   (option: FilterOption) =>
                     option.value === _filters[filter.key],
                 )?.[0]?.icon
-              : undefined
+              : undefined) || filter.icon
           "
           leading
           @update:model-value="(value) => updateFilter(filter.key, value)"
