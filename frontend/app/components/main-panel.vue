@@ -102,7 +102,6 @@
       <template #body>
         <UContainer class="min-h-screen">
           <slot />
-
           <Footer />
         </UContainer>
       </template>

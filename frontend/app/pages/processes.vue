@@ -5,7 +5,6 @@
   <!-- TODO: Tools for the filters are not loaded -->
   <!-- TODO: Decide how sort all the filters better -->
   <!-- TODO: What to do with owner filter? Selector or free form by name? -->
-  <!-- TODO: Fix the footer behaviour when the page content reaches the bottom of the page -->
 </template>
 
 <script setup lang="ts">
