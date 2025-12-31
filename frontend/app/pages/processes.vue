@@ -2,7 +2,6 @@
   <CrudPage :config="config" />
   <!-- TODO: Customize the creation form, and the edition form to modify the process steps -->
   <!-- TODO: Add Run button to the actions (before the menu) to allow running the process -->
-  <!-- TODO: Tools for the filters are not loaded -->
   <!-- TODO: Decide how sort all the filters better -->
   <!-- TODO: What to do with owner filter? Selector or free form by name? -->
 </template>
@@ -135,7 +134,7 @@ const config: CrudConfig<Process> = reactive({
       label: "Tool",
       icon: "i-lucide-wrench",
       type: "select" as const,
-      options: toolOptions.value,
+      options: toolOptions,
     },
     {
       key: "owner",
