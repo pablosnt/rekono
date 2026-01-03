@@ -11,15 +11,16 @@
         <template
           v-for="(message, index) in config.deleteMessage?.(item) || [
             {
-              text: `Are you sure you want to delete this ${config.entityName.toLowerCase()}? This action can't be undone.`,
-              class: 'text-default',
+              component: h(
+                'p',
+                { class: 'text-gray-900 dark:text-white font-medium' },
+                `Are you sure you want to delete this ${config.entityName.toLowerCase()}? This action can't be undone.`,
+              ),
             },
           ]"
           :key="index"
         >
-          <p :class="message.class">
-            {{ message.text }}
-          </p>
+          <component :is="message.component" v-bind="message.props || {}" />
         </template>
       </template>
     </template>

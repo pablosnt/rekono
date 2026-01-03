@@ -64,9 +64,9 @@ export type CrudTableColumn<T> = TableColumn<T> & {
   icon?: string;
 };
 
-export interface DeleteDetail {
-  text: string;
-  class?: string;
+export interface ComponentDetails {
+  component: unknown;
+  props?: Record<string, unknown>;
 }
 
 export interface CrudConfig<T = unknown> {
@@ -89,7 +89,7 @@ export interface CrudConfig<T = unknown> {
   formSchema?: z.ZodType;
   formFullscreen?: boolean;
   formComponent?: T;
-  deleteMessage?: (item: T) => DeleteDetail[];
+  deleteMessage?: (item: T) => ComponentDetails[];
   canRead: boolean;
   canCreate: boolean;
   canEdit: boolean | ((item: T) => boolean);

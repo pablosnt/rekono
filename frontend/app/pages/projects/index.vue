@@ -147,20 +147,34 @@ const config: CrudConfig<Project> = reactive({
     description: validation.text("description"),
     tags: z.array(validation.name("tag", true, 100)).optional(),
   }),
-  // TODO: Improve this!
   deleteMessage: (project: Project) => [
     {
-      text: "Are you sure you want to delete this project?",
-      class: "text-gray-900 dark:text-white",
+      component: h(
+        "p",
+        { class: "text-gray-900 dark:text-white font-medium" },
+        "Are you sure you want to delete this project?",
+      ),
     },
     {
-      text: project.name,
-      class: "font-bold text-lg text-center my-2 text-gray-900 dark:text-white",
+      component: resolveComponent("UAlert"),
+      props: {
+        color: "neutral",
+        variant: "subtle",
+        description: project.name,
+        ui: { root: "text-center font-bold" },
+        class: "mt-4",
+      },
     },
     {
-      text: "All its data including assets, findings, and scans will be permanently deleted. This action can't be undone.",
-      class:
-        "text-sm text-red-600 bg-red-50 dark:bg-red-900/10 p-3 rounded border border-red-200 dark:border-red-800 mt-5",
+      component: resolveComponent("UAlert"),
+      props: {
+        color: "error",
+        icon: "i-lucide-triangle-alert",
+        title: "Permanent deletion",
+        description:
+          "All associated data including assets, findings, and scans will be permanently deleted. This action cannot be undone.",
+        class: "mt-4",
+      },
     },
   ],
   canRead: true,
