@@ -4,19 +4,21 @@
     :title="
       title || (item ? `Edit ${config.entityName}` : `New ${config.entityName}`)
     "
-    :ui="{ content: 'sm:max-w-3xl sm:max-h-xl', footer: 'justify-end' }"
+    :fullscreen="config.formFullscreen ? true : false"
+    :ui="{
+      content: config.formFullscreen ? '' : 'sm:max-w-3xl sm:max-h-xl',
+      footer: 'justify-end',
+    }"
     @update:open="(value: boolean) => $emit('open', value)"
   >
     <template #body>
-      <CrudForm
-        ref="formRef"
+      <component
+        :is="formComponent"
+        ref="form"
         :api="api"
         :config="config"
         :entity="item"
-        @submit="
-          $emit('submit');
-          $emit('open', false);
-        "
+        @submit="handleSubmit"
       />
     </template>
     <template #footer="{ close }">
@@ -29,16 +31,17 @@
       <UButton
         color="primary"
         :label="submitLabel || (item ? 'Save' : 'Create')"
-        @click="formRef.submit()"
+        @click="form?.submit()"
       />
     </template>
   </UModal>
 </template>
 
 <script setup lang="ts">
+import { resolveComponent } from "vue";
 import type { CrudConfig } from "~/types/crud";
 
-defineProps<{
+const props = defineProps<{
   open: boolean;
   item?: Record<string, string | number | boolean | null>;
   config: CrudConfig;
@@ -47,10 +50,20 @@ defineProps<{
   submitLabel?: string;
 }>();
 
-defineEmits<{
+const emit = defineEmits<{
   open: [open: boolean];
   submit: [];
 }>();
 
-const formRef = ref();
+const form = ref();
+const formComponent = ref(
+  props.config.formComponent || resolveComponent("CrudForm"),
+);
+
+const handleSubmit = (complete: boolean = true) => {
+  emit("submit");
+  if (complete) {
+    emit("open", false);
+  }
+};
 </script>

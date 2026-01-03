@@ -147,6 +147,7 @@ const config: CrudConfig<Project> = reactive({
     description: validation.text("description"),
     tags: z.array(validation.name("tag", true, 100)).optional(),
   }),
+  // TODO: Improve this!
   deleteMessage: (project: Project) => [
     {
       text: "Are you sure you want to delete this project?",
