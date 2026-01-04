@@ -1,9 +1,7 @@
 <template>
   <UModal
     :open="open"
-    :title="
-      title || (item ? `Edit ${config.entityName}` : `New ${config.entityName}`)
-    "
+    :title="modalTitle"
     :fullscreen="config.formFullscreen ? true : false"
     :ui="{
       content: config.formFullscreen ? '' : 'sm:max-w-3xl sm:max-h-xl',
@@ -12,7 +10,6 @@
     @update:open="(value: boolean) => $emit('open', value)"
   >
     <template #body>
-      <!-- TODO: Customize the formComponent based o creation/edition -->
       <component
         :is="formComponent"
         ref="form"
@@ -20,7 +17,10 @@
         :config="config"
         :entity="item"
         @submit="handleSubmit"
-        @new-entity="(newEntity: object) => $emit('new-entity', newEntity)"
+        @new-title="(newTitle: string) => (modalTitle = newTitle)"
+        @new-submit-label="
+          (newSubmitLabel: string) => (submitButton = newSubmitLabel)
+        "
       />
     </template>
     <template #footer="{ close }">
@@ -30,11 +30,7 @@
         variant="outline"
         @click="close"
       />
-      <UButton
-        color="primary"
-        :label="submitLabel || (item ? 'Save' : 'Create')"
-        @click="form?.submit()"
-      />
+      <UButton color="primary" :label="submitButton" @click="form?.submit()" />
     </template>
   </UModal>
 </template>
@@ -55,13 +51,20 @@ const props = defineProps<{
 const emit = defineEmits<{
   open: [open: boolean];
   submit: [];
-  "new-entity": [newEntity: object];
 }>();
 
 const form = ref();
 const formComponent = ref(
-  props.config.formComponent || resolveComponent("CrudForm"),
+  (props.item ? props.config.editForm : props.config.createForm) ||
+    resolveComponent("CrudForm"),
 );
+const modalTitle = ref(
+  props.title ||
+    (props.item
+      ? `Edit ${props.config.entityName}`
+      : `New ${props.config.entityName}`),
+);
+const submitButton = ref(props.submitLabel || (props.item ? "Save" : "Create"));
 
 const handleSubmit = () => {
   emit("submit");

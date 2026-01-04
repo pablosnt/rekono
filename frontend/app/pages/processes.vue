@@ -29,7 +29,10 @@ const config: CrudConfig<Process> = reactive({
   entityName: "Process",
   entityNamePlural: "Processes",
   icon: "i-lucide-workflow",
-  formComponent: resolveComponent("ProcessForm"),
+  createForm: resolveComponent("ProcessForm"),
+  updateOnCreateModalOpen: true,
+  editForm: resolveComponent("ProcessForm"),
+  updateOnEditModalOpen: true,
   tableColumns: [
     {
       accessorKey: "id",

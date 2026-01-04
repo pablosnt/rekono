@@ -87,7 +87,14 @@
         :api="api"
         :config="config"
         :item="selectedItem"
-        @open="(open: boolean) => (openEditModal = open)"
+        @open="
+          (open: boolean) => {
+            openEditModal = open;
+            if (!open && config.updateOnEditModalOpen) {
+              fetch();
+            }
+          }
+        "
         @submit="fetch()"
       />
 

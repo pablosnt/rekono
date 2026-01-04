@@ -28,8 +28,9 @@
               @submit="
                 (data) => {
                   process = data;
-                  emit('new-entity', data);
                   stepper = 1;
+                  $emit('new-submit-label', 'Continue');
+                  $emit('new-title', data.name);
                 }
               "
             />
@@ -65,7 +66,8 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   submit: [data: Record<string, unknown>];
-  "new-entity": [newEntity: object];
+  "new-title": [newTitle: string];
+  "new-submit-label": [newSubmitLabel: string];
 }>();
 
 const processFormRef = ref();
