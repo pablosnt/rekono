@@ -30,6 +30,7 @@ const config: CrudConfig<Process> = reactive({
   entityName: "Process",
   entityNamePlural: "Processes",
   icon: "i-lucide-workflow",
+  formComponent: resolveComponent("ProcessForm"),
   tableColumns: [
     {
       accessorKey: "id",
@@ -185,14 +186,24 @@ const config: CrudConfig<Process> = reactive({
     description: validation.text("description", true),
     tags: z.array(validation.name("tag", true, 100)).optional(),
   }),
+  formFullscreen: true,
   deleteMessage: (process: Process) => [
     {
-      text: "Are you sure you want to delete this process?",
-      class: "text-gray-900 dark:text-white",
+      component: h(
+        "p",
+        { class: "text-gray-900 dark:text-white font-medium" },
+        "Are you sure you want to delete this process?",
+      ),
     },
     {
-      text: process.name,
-      class: "font-bold text-lg text-center my-2 text-gray-900 dark:text-white",
+      component: resolveComponent("UAlert"),
+      props: {
+        color: "neutral",
+        variant: "subtle",
+        description: process.name,
+        ui: { root: "text-center font-bold" },
+        class: "mt-4",
+      },
     },
   ],
   canRead: userStore.is_auditor,
