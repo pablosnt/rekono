@@ -124,8 +124,18 @@
           :open="openCreateModal"
           :api="api"
           :config="config"
-          @open="(open: boolean) => $emit('openCreate', open)"
-          @submit="emit('create')"
+          :item="entity"
+          @open="
+            (open: boolean) => {
+              $emit('openCreate', open);
+              entity = null;
+            }
+          "
+          @submit="
+            emit('create');
+            entity = null;
+          "
+          @new-entity="(newEntity) => (entity = newEntity)"
         />
         <UButton
           v-if="config.canCreate"
@@ -166,4 +176,5 @@ const emit = defineEmits<{
 const utils = useUtils();
 const search = ref("");
 const openFilters = ref(false);
+const entity = ref(null);
 </script>

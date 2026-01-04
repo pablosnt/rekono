@@ -19,6 +19,7 @@
         :config="config"
         :entity="item"
         @submit="handleSubmit"
+        @new-entity="(newEntity: object) => $emit('new-entity', newEntity)"
       />
     </template>
     <template #footer="{ close }">
@@ -53,6 +54,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   open: [open: boolean];
   submit: [];
+  "new-entity": [newEntity: object];
 }>();
 
 const form = ref();
@@ -60,10 +62,8 @@ const formComponent = ref(
   props.config.formComponent || resolveComponent("CrudForm"),
 );
 
-const handleSubmit = (complete: boolean = true) => {
+const handleSubmit = () => {
   emit("submit");
-  if (complete) {
-    emit("open", false);
-  }
+  emit("open", false);
 };
 </script>

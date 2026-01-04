@@ -165,8 +165,8 @@ function save() {
         utils.firstUpper(props.config.entityName),
       );
   request
-    .then(() => {
-      emit("submit", formData.value);
+    .then((response) => {
+      emit("submit", response);
     })
     .finally(() => {
       loading.value = false;

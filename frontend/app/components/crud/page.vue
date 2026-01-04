@@ -144,7 +144,7 @@ import type { CrudConfig, CrudState } from "~/types/crud";
 
 const props = defineProps<{ config: CrudConfig }>();
 const api = useApi(props.config.endpoint);
-const tableRef = ref(null);
+const tableRef = ref();
 const openCreateModal = ref(false);
 const openEditModal = ref(false);
 const openDeleteModal = ref(false);
