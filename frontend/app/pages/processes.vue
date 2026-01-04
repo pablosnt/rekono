@@ -1,6 +1,5 @@
 <template>
   <CrudPage :config="config" />
-  <!-- TODO: Customize the creation form, and the edition form to modify the process steps -->
   <!-- TODO: Add Run button to the actions (before the menu) to allow running the process -->
 </template>
 

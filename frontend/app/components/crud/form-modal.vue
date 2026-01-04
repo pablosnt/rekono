@@ -12,6 +12,7 @@
     @update:open="(value: boolean) => $emit('open', value)"
   >
     <template #body>
+      <!-- TODO: Customize the formComponent based o creation/edition -->
       <component
         :is="formComponent"
         ref="form"

@@ -17,37 +17,38 @@
       ]"
       :disabled="!process"
     >
-      <!-- TODO: Fix form margins -->
       <template #content="{ item }">
-        <template v-if="item.title === 'Process'">
-          <CrudForm
-            ref="processFormRef"
-            :api="api"
-            :config="config"
-            :entity="process || entity"
-            @submit="
-              (data) => {
-                process = data;
-                emit('new-entity', data);
-                stepper = 1;
-              }
-            "
-          />
-        </template>
-        <template v-else>
-          <div class="text-center py-8">
-            <UIcon
-              name="i-lucide-construction"
-              class="text-4xl text-gray-400 mb-4"
+        <UContainer>
+          <template v-if="item.title === 'Process'">
+            <CrudForm
+              ref="processFormRef"
+              :api="api"
+              :config="config"
+              :entity="process || entity"
+              @submit="
+                (data) => {
+                  process = data;
+                  emit('new-entity', data);
+                  stepper = 1;
+                }
+              "
             />
-            <h3 class="text-lg font-medium text-gray-600 dark:text-gray-400">
-              Steps Configuration
-            </h3>
-            <p class="text-gray-500 dark:text-gray-500 mt-2">
-              This step will be implemented to configure process steps.
-            </p>
-          </div>
-        </template>
+          </template>
+          <template v-else>
+            <div class="text-center py-8">
+              <UIcon
+                name="i-lucide-construction"
+                class="text-4xl text-gray-400 mb-4"
+              />
+              <h3 class="text-lg font-medium text-gray-600 dark:text-gray-400">
+                Steps Configuration
+              </h3>
+              <p class="text-gray-500 dark:text-gray-500 mt-2">
+                This step will be implemented to configure process steps.
+              </p>
+            </div>
+          </template>
+        </UContainer>
       </template>
     </UStepper>
   </div>
