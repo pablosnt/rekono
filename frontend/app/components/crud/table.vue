@@ -6,7 +6,11 @@
     :loading="state.loading"
     loading-color="primary"
     :columns="columns"
-    @select="onTableSelect"
+    v-on="
+      config.itemLink || config.onItemClick
+        ? { select: onTableSelect }
+        : undefined
+    "
   />
 </template>
 

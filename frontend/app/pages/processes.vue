@@ -1,6 +1,16 @@
 <template>
-  <CrudPage :config="config" />
-  <!-- TODO: On click, open a modal with the ProcessStepForm -->
+  <div>
+    <CrudPage :config="config"> </CrudPage>
+    <UModal
+      v-model:open="processModalOpen"
+      :title="selectedProcess ? selectedProcess.name : undefined"
+      fullscreen
+    >
+      <template #body>
+        <ProcessStepsForm v-if="selectedProcess" :process="selectedProcess" />
+      </template>
+    </UModal>
+  </div>
   <!-- TODO: Add Run button to the actions -->
 </template>
 
@@ -16,6 +26,8 @@ const validation = useValidation();
 const utils = useUtils();
 const toolOptions = ref<FilterOption[]>([]);
 const userOptions = ref<FilterOption[]>([]);
+const processModalOpen = ref(false);
+const selectedProcess = ref();
 
 onMounted(() => {
   utils.getToolOptions(toolOptions);
@@ -110,6 +122,10 @@ const config: CrudConfig<Process> = reactive({
   tableColumnsVisibility: {
     id: false,
     owner: false,
+  },
+  onItemClick: (item: Process) => {
+    processModalOpen.value = true;
+    selectedProcess.value = item;
   },
   searchable: true,
   searchPlaceholder: "Search processes...",
