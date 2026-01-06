@@ -146,10 +146,15 @@ function getStageTree(stage: string): Array {
 
 function addStep(configuration: number) {
   api
-    .create("steps/", {
-      process_id: props.process.id,
-      configuration_id: configuration,
-    })
+    .create(
+      "steps/",
+      {
+        process_id: props.process.id,
+        configuration_id: configuration,
+      },
+      {},
+      "Step",
+    )
     .then(() => configurations.value.push(configuration));
 }
 
@@ -165,7 +170,7 @@ function removeStep(configuration: number) {
     .then((response) => {
       if (response.total === 1) {
         api
-          .remove(`steps/${response.items[0].id}/`)
+          .remove(`steps/${response.items[0].id}/`, {}, "Step")
           .then(() =>
             configurations.value.splice(
               configurations.value.indexOf(configuration),
