@@ -28,7 +28,7 @@
                 (data) => {
                   process = data;
                   stepper = 1;
-                  $emit('new-submit-label', 'Save Process');
+                  $emit('new-submit-label', 'Save');
                   $emit('new-title', data.name);
                 }
               "

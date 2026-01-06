@@ -17,9 +17,9 @@
         :config="config"
         :entity="item"
         @submit="handleSubmit"
-        @new-title="(newTitle: string) => (modalTitle = newTitle)"
+        @new-title="(newTitle: string) => (updatedTitle = newTitle)"
         @new-submit-label="
-          (newSubmitLabel: string) => (submitButton = newSubmitLabel)
+          (newSubmitLabel: string) => (updatedSubmitLabel = newSubmitLabel)
         "
       />
     </template>
@@ -58,16 +58,27 @@ const formComponent = ref(
   (props.item ? props.config.editForm : props.config.createForm) ||
     resolveComponent("CrudForm"),
 );
-const modalTitle = ref(
-  props.title ||
+const updatedTitle = ref();
+const modalTitle = computed(
+  () =>
+    updatedTitle.value ||
+    props.title ||
     (props.item
       ? `Edit ${props.config.entityName}`
       : `New ${props.config.entityName}`),
 );
-const submitButton = ref(props.submitLabel || (props.item ? "Save" : "Create"));
+const updatedSubmitLabel = ref();
+const submitButton = computed(
+  () =>
+    updatedSubmitLabel.value ||
+    props.submitLabel ||
+    (props.item ? "Save" : "Create"),
+);
 
 const handleSubmit = () => {
   emit("submit");
   emit("open", false);
+  updatedTitle.value = null;
+  updatedSubmitLabel.value = null;
 };
 </script>
