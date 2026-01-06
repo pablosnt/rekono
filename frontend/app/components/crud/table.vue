@@ -6,6 +6,7 @@
     :loading="state.loading"
     loading-color="primary"
     :columns="columns"
+    @select="onTableSelect"
   />
 </template>
 
@@ -90,6 +91,14 @@ const columns = computed(() => {
   });
   return cols;
 });
+
+function onTableSelect(event: unknown, row: unknown) {
+  if (props.config.itemLink) {
+    navigateTo(props.config.itemLink(row.original));
+  } else if (props.config.onItemClick) {
+    props.config.onItemClick(row.original);
+  }
+}
 
 const table = useTemplateRef("table");
 defineExpose({ tableApi: computed(() => table.value?.tableApi) });

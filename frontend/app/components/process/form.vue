@@ -1,4 +1,3 @@
-<!-- TODO: Define Steps form that must be shown in a specific modal when one row is clicked -->
 <template>
   <div>
     <UStepper

@@ -78,6 +78,8 @@ export interface CrudConfig<T = unknown> {
   tableColumns?: CrudTableColumn<T>[];
   tableColumnsVisibility?: Record<string, boolean>;
   cardFormatter?: (item: T) => CardConfig;
+  itemLink?: (item: T) => string;
+  onItemClick?: (item: T) => void;
   searchable: boolean;
   searchPlaceholder?: string;
   filters?: FilterConfig[];

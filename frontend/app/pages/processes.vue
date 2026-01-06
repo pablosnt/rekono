@@ -1,5 +1,6 @@
 <template>
   <CrudPage :config="config" />
+  <!-- TODO: On click, open a modal with the ProcessStepForm -->
   <!-- TODO: Add Run button to the actions -->
 </template>
 
