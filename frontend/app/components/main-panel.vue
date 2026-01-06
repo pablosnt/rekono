@@ -195,12 +195,12 @@ onMounted(() => {
   if (userStore.is_auditor) {
     items.value.push({
       label: "Tooling",
-      icon: "i-lucide-wrench",
+      icon: "i-lucide-terminal",
       defaultOpen: false,
       children: [
         {
           label: "Tools",
-          icon: "i-lucide-terminal",
+          icon: "i-lucide-square-terminal",
           to: "/tools",
         },
         {

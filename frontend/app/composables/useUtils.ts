@@ -59,6 +59,7 @@ export default function () {
       .then((response) => {
         toolOptionsRef.value = (response.items as Tool[]).map((tool) => ({
           avatar: tool.icon ? { src: tool.icon } : undefined,
+          icon: tool.icon ? undefined : "i-lucide-square-terminal",
           label: tool.name,
           value: tool.id,
         }));

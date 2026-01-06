@@ -21,8 +21,8 @@ export interface Tool {
   version?: string;
   reference?: string;
   icon?: string;
-  liked?: boolean;
-  likes?: number;
-  intensities?: Intensity[];
-  configurations?: Configuration[];
+  liked: boolean;
+  likes: number;
+  intensities: Intensity[];
+  configurations: Configuration[];
 }

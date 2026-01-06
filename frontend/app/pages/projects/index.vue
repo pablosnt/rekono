@@ -118,6 +118,7 @@ const config: CrudConfig<Project> = reactive({
   defaultOrdering: "-id",
   pageSize: 25,
   pageSizeOptions: [25, 50, 100],
+  // TODO: Customize the creation form to create targets after creating a new project
   formFields: [
     {
       key: "name",

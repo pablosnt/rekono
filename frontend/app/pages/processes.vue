@@ -1,6 +1,6 @@
 <template>
   <CrudPage :config="config" />
-  <!-- TODO: Add Run button to the actions (before the menu) to allow running the process -->
+  <!-- TODO: Add Run button to the actions -->
 </template>
 
 <script setup lang="ts">
@@ -131,7 +131,7 @@ const config: CrudConfig<Process> = reactive({
     {
       key: "tool",
       label: "Tool",
-      icon: "i-lucide-wrench",
+      icon: "i-lucide-square-terminal",
       type: "select" as const,
       options: toolOptions,
     },

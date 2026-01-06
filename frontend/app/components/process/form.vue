@@ -1,4 +1,4 @@
-<!-- TODO: Define Steps form that must be shown in the edit modal and in a specific modal when one row is clicked -->
+<!-- TODO: Define Steps form that must be shown in a specific modal when one row is clicked -->
 <template>
   <div>
     <UStepper
@@ -29,25 +29,14 @@
                 (data) => {
                   process = data;
                   stepper = 1;
-                  $emit('new-submit-label', 'Continue');
+                  $emit('new-submit-label', 'Save Process');
                   $emit('new-title', data.name);
                 }
               "
             />
           </template>
           <template v-else>
-            <div class="text-center py-8">
-              <UIcon
-                name="i-lucide-construction"
-                class="text-4xl text-gray-400 mb-4"
-              />
-              <h3 class="text-lg font-medium text-gray-600 dark:text-gray-400">
-                Steps Configuration
-              </h3>
-              <p class="text-gray-500 dark:text-gray-500 mt-2">
-                This step will be implemented to configure process steps.
-              </p>
-            </div>
+            <ProcessStepsForm :process="process" />
           </template>
         </UContainer>
       </template>
@@ -78,7 +67,7 @@ function submit() {
   if (stepper.value === 0) {
     processFormRef.value.submit();
   } else {
-    emit("submit");
+    emit("submit", process.value);
   }
 }
 
