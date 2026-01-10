@@ -32,6 +32,9 @@
                   $emit('new-title', data.name);
                 }
               "
+              @validation-change="
+                (isValid) => $emit('validation-change', isValid)
+              "
             />
           </template>
           <template v-else>
@@ -56,6 +59,7 @@ const emit = defineEmits<{
   submit: [data: Record<string, unknown>];
   "new-title": [newTitle: string];
   "new-submit-label": [newSubmitLabel: string];
+  "validation-change": [isValid: boolean];
 }>();
 
 const processFormRef = ref();

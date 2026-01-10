@@ -1,4 +1,5 @@
 <template>
+  <!-- TODO: Allow redirection to the new entity page on submit, based on config -->
   <UModal
     :open="open"
     :title="modalTitle"
@@ -21,6 +22,7 @@
         @new-submit-label="
           (newSubmitLabel: string) => (updatedSubmitLabel = newSubmitLabel)
         "
+        @validation-change="(isValid: boolean) => (formValid = isValid)"
       />
     </template>
     <template #footer="{ close }">
@@ -30,7 +32,12 @@
         variant="outline"
         @click="close"
       />
-      <UButton color="primary" :label="submitButton" @click="form?.submit()" />
+      <UButton
+        color="primary"
+        :label="submitButton"
+        :disabled="!formValid"
+        @click="form?.submit()"
+      />
     </template>
   </UModal>
 </template>
@@ -74,6 +81,7 @@ const submitButton = computed(
     props.submitLabel ||
     (props.item ? "Save" : "Create"),
 );
+const formValid = ref(props.item ? true : false);
 
 const handleSubmit = () => {
   emit("submit");

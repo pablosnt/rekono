@@ -3,6 +3,7 @@
     ref="form"
     :state="formData"
     :validate-on="['input', 'change']"
+    :validate="validate"
     :schema="config.formSchema"
     :loading="loading"
     class="space-y-4 mx-auto"
@@ -119,6 +120,7 @@ const props = defineProps<{
 }>();
 const emit = defineEmits<{
   submit: [data: Record<string, unknown>];
+  "validation-change": [isValid: boolean];
 }>();
 
 const utils = useUtils();
@@ -147,6 +149,17 @@ function initFormData() {
     }
   }
   return data;
+}
+
+function validate(data) {
+  if (props.config.formSchema) {
+    try {
+      props.config.formSchema?.parse(data);
+      emit("validation-change", true);
+    } catch {
+      emit("validation-change", false);
+    }
+  }
 }
 
 function save() {
