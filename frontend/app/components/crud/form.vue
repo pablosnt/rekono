@@ -39,9 +39,9 @@
           v-model="formData[field.key] as any"
           class="w-full"
           :placeholder="field.placeholder"
-          :options="getOptions(field)"
+          :items="getOptions(field)"
           value-key="value"
-          option-key="label"
+          label-key="label"
           :required="field.required"
           :multiple="field.type === 'multiselect'"
         />

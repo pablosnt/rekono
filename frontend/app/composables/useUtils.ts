@@ -15,6 +15,18 @@ export default function () {
     { label: "Exploitation", value: 5, icon: "i-lucide-flame" },
   ];
 
+  const intensityOptions = [
+    { value: 1, label: "Sneaky", color: "success" },
+    { value: 2, label: "Low", color: "info" },
+    { value: 3, label: "Normal", color: "neutral" },
+    { value: 4, label: "Hard", color: "warning" },
+    { value: 5, label: "Insane", color: "error" },
+  ];
+
+  const timeUnitOptions = ["Weeks", "Days", "Hours", "Minutes"];
+
+  const wordlistTypes = ["Endpoint", "Subdomain"];
+
   function getUserOptions(
     userOptionsRef: Ref<FilterOption[]>,
     queryParams?: Record<string, string> = {},
@@ -66,5 +78,13 @@ export default function () {
       });
   }
 
-  return { firstUpper, stageOptions, getUserOptions, getToolOptions };
+  return {
+    firstUpper,
+    stageOptions,
+    getUserOptions,
+    getToolOptions,
+    intensityOptions,
+    timeUnitOptions,
+    wordlistTypes,
+  };
 }

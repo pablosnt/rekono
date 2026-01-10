@@ -1,6 +1,10 @@
 <template>
   <div>
-    <CrudPage :config="config"> </CrudPage>
+    <CrudPage :config="config">
+      <template #actions="{ item }">
+        <TasksRunButton :process="item" />
+      </template>
+    </CrudPage>
     <UModal
       v-model:open="processModalOpen"
       :title="selectedProcess ? selectedProcess.name : undefined"
@@ -11,7 +15,6 @@
       </template>
     </UModal>
   </div>
-  <!-- TODO: Add Run button to the actions -->
 </template>
 
 <script setup lang="ts">
