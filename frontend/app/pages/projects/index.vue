@@ -1,6 +1,6 @@
 <template>
   <CrudPage :config="config" />
-  <!-- TODO: Add second step to the create form, to create targets for a the new project. However, for that to make sense, the form modal must redirect the user to the project or project targets page -->
+  <!-- TODO: Add second step to the create form, to create targets for a the new project -->
 </template>
 
 <script setup lang="ts">
@@ -149,7 +149,12 @@ const config: CrudConfig<Project> = reactive({
     description: validation.text("description"),
     tags: z.array(validation.name("tag", true, 100)).optional(),
   }),
-  onCreation: (data: Record<string, unknown>) => navigateTo(`projects/${data.id}`),
+  onCreation: (data: Record<string, unknown>) =>
+    navigateTo(
+      data.targets.length == 0
+        ? `projects/${data.id}`
+        : `projects/${data.id}/targets`,
+    ),
   deleteMessage: (project: Project) => [
     {
       component: h(

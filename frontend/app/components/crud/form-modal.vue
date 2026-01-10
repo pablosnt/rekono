@@ -1,5 +1,4 @@
 <template>
-  <!-- TODO: Allow redirection to the new entity page on submit, based on config -->
   <UModal
     :open="open"
     :title="modalTitle"
@@ -36,8 +35,11 @@
         color="primary"
         :label="submitButton"
         :disabled="!formValid"
-        @click="loading = true; form?.submit()"
         :loading="loading"
+        @click="
+          loading = true;
+          form?.submit();
+        "
       />
     </template>
   </UModal>
@@ -87,7 +89,7 @@ const loading = ref(false);
 
 const handleSubmit = (data: Record<string, unknown>) => {
   if (props.config.onCreation) {
-    props.config.onCreation(data)
+    props.config.onCreation(data);
   }
   emit("submit");
   emit("open", false);
