@@ -149,6 +149,7 @@ const config: CrudConfig<Project> = reactive({
     description: validation.text("description"),
     tags: z.array(validation.name("tag", true, 100)).optional(),
   }),
+  onCreation: (data: Record<string, unknown>) => navigateTo(`projects/${data.id}`),
   deleteMessage: (project: Project) => [
     {
       component: h(

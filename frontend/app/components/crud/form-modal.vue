@@ -17,7 +17,7 @@
         :api="api"
         :config="config"
         :entity="item"
-        @submit="handleSubmit"
+        @submit="(data) => handleSubmit(data)"
         @new-title="(newTitle: string) => (updatedTitle = newTitle)"
         @new-submit-label="
           (newSubmitLabel: string) => (updatedSubmitLabel = newSubmitLabel)
@@ -36,7 +36,8 @@
         color="primary"
         :label="submitButton"
         :disabled="!formValid"
-        @click="form?.submit()"
+        @click="loading = true; form?.submit()"
+        :loading="loading"
       />
     </template>
   </UModal>
@@ -82,11 +83,16 @@ const submitButton = computed(
     (props.item ? "Save" : "Create"),
 );
 const formValid = ref(props.item ? true : false);
+const loading = ref(false);
 
-const handleSubmit = () => {
+const handleSubmit = (data: Record<string, unknown>) => {
+  if (props.config.onCreation) {
+    props.config.onCreation(data)
+  }
   emit("submit");
   emit("open", false);
   updatedTitle.value = null;
   updatedSubmitLabel.value = null;
+  loading.value = false;
 };
 </script>
