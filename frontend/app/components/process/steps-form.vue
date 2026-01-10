@@ -79,11 +79,6 @@
           </template>
         </template>
         <template #item-trailing="{ item: configNode }">
-          <template
-            v-if="Object.hasOwn(configNode, 'default') && configNode.default"
-          >
-            <UBadge color="neutral" variant="subtle">Default</UBadge>
-          </template>
           <USwitch
             v-if="Object.hasOwn(configNode, 'id')"
             :model-value="configurations.includes(configNode.id)"
