@@ -1,5 +1,10 @@
 <template>
-  <UStepper v-model="stepper" :items="stepperItems">
+  <UStepper
+    ref="stepper"
+    v-model="stepperStep"
+    :items="stepperItems"
+    :linear="false"
+  >
     <template #content="{ item }">
       <UForm class="space-y-4 mx-auto mt-3">
         <template v-if="item.title === 'Target'">
@@ -19,7 +24,6 @@
               description-key="none"
               size="xl"
               required
-              leading
               @update:model-value="
                 (value) => {
                   project = value;
@@ -56,7 +60,6 @@
               size="xl"
               required
               :disabled="!project"
-              leading
               @update:model-value="
                 (value) => {
                   target = value;
@@ -100,7 +103,6 @@
               label-key="label"
               size="xl"
               :disabled="!target"
-              leading
               @update:model-value="(value) => (targetPort = value)"
             >
               <template #trailing>
@@ -121,7 +123,9 @@
             </USelectMenu>
           </UFormField>
         </template>
-        <template v-if="item.title === 'Tooling'"></template>
+        <template v-if="item.title === 'Tooling'">
+          <!-- TODO -->
+        </template>
         <template v-if="item.title === 'Intensity'">
           <UFormField required>
             <USlider
@@ -144,12 +148,99 @@
             />
           </UFormField>
         </template>
-        <template v-if="item.title === 'Wordlists'"></template>
-        <template v-if="item.title === 'Technologies'"></template>
-        <template v-if="item.title === 'Vulnerabilities'"></template>
-        <template v-if="item.title === 'Schedule'"></template>
-        <template v-if="item.title === 'Monitor'"></template>
+        <template v-if="item.title === 'Wordlists'">
+          <UFormField
+            v-if="wordlistOptions.length > 0"
+            :required="requiredWordlist"
+            label="Wordlists"
+          >
+            <USelectMenu
+              :model-value="wordlists"
+              multiple
+              class="w-full"
+              icon="i-lucide-file-text"
+              placeholder="Select the wordlists to use"
+              :items="wordlistOptions"
+              value-key="id"
+              label-key="name"
+              description-key="type"
+              :filter-fields="['name', 'type']"
+              size="xl"
+              :required="requiredWordlist"
+              @update:model-value="(value) => (wordlists = value)"
+            >
+              <template #trailing>
+                <UIcon
+                  v-if="project === null || project === undefined"
+                  class="group-data-[state=open]:rotate-180 transition-transform duration-200"
+                  name="i-lucide-chevron-down"
+                />
+                <UButton
+                  v-else
+                  icon="i-lucide-x"
+                  variant="ghost"
+                  color="neutral"
+                  size="sm"
+                  @click="wordlists = []"
+                />
+              </template>
+            </USelectMenu>
+          </UFormField>
+        </template>
+        <template v-if="item.title === 'Technologies'">
+          <!-- TODO -->
+        </template>
+        <template v-if="item.title === 'Vulnerabilities'">
+          <!-- TODO -->
+        </template>
+        <template v-if="item.title === 'Schedule'">
+          <!-- TODO -->
+          <UAlert title="Monitor" color="neutral">
+            <template #leading>
+              <USwitch
+                @update:model-value="
+                  (value) => {
+                    repeatIn = value ? 1 : null;
+                    repeatTimeUnit = value ? 'Days' : null;
+                  }
+                "
+              />
+            </template>
+            <template v-if="repeatIn !== null" #description>
+              <div class="flex items-center gap-2">
+                <span>Run this scan each</span
+                ><UInput
+                  v-model="repeatIn"
+                  type="number"
+                  min="1"
+                  class="w-20"
+                  required
+                />
+                <USelect
+                  v-model="repeatTimeUnit"
+                  :items="utils.timeUnitOptions"
+                  class="w-32"
+                  required
+                />
+              </div>
+            </template>
+          </UAlert>
+        </template>
       </UForm>
+      <div class="flex gap-2 justify-between mt-4">
+        <UButton
+          color="neutral"
+          leading-icon="i-lucide-chevron-left"
+          :disabled="!stepper?.hasPrev"
+          @click="stepper?.prev()"
+        />
+        <UButton
+          color="neutral"
+          trailing-icon="i-lucide-chevron-right"
+          :disabled="!stepper?.hasNext"
+          @click="stepper?.next()"
+        />
+      </div>
     </template>
   </UStepper>
 </template>
@@ -211,21 +302,15 @@ const stepperItems = computed(() => {
       icon: "i-lucide-shield-alert",
     });
   }
-  items.push(
-    {
-      title: "Schedule",
-      //   description: "Set execution time",
-      icon: "i-lucide-calendar",
-    },
-    {
-      title: "Monitor",
-      description: "Scan periodically",
-      icon: "i-lucide-repeat",
-    },
-  );
+  items.push({
+    title: "Schedule",
+    //   description: "Set execution time",
+    icon: "i-lucide-calendar",
+  });
   return items;
 });
-const stepper = ref(0);
+const stepperStep = ref(0);
+const stepper = useTemplateRef("stepper");
 const loading = ref(false);
 
 const project = ref(props.entity.project);
@@ -243,7 +328,6 @@ const configurationOptions = ref([]);
 const intensity = ref(3);
 const wordlists = ref([]);
 const wordlistOptions = ref([]);
-const wordlistType = ref();
 const requiredWordlist = ref(false);
 const inputTechnologies = ref([]);
 const inputTechnologyOptions = ref([]);
@@ -359,11 +443,9 @@ function onProcess() {
 }
 
 function loadWordlists() {
-  genericApi
-    .list("wordlists/", wordlistType.value ? { type: wordlistType } : {}, true)
-    .then((response) => {
-      wordlistOptions.value = response.items;
-    });
+  genericApi.list("wordlists/", {}, true).then((response) => {
+    wordlistOptions.value = response.items;
+  });
 }
 
 function validate(data: Record<string, unknown>): FormError[] {
@@ -374,7 +456,10 @@ function validate(data: Record<string, unknown>): FormError[] {
     intensity.value &&
     (wordlists.value.length > 0 || !requiredWordlist.value) &&
     (inputTechnologies.value.length > 0 || !requiredInputTechnology.value) &&
-    (inputVulnerabilities.value.length > 0 || !requiredInputVulnerability.value)
+    (inputVulnerabilities.value.length > 0 ||
+      !requiredInputVulnerability.value) &&
+    (!periodicMonitoring.value ||
+      (periodicMonitoring.value && repeatIn.value && repeatTimeUnit.value))
   ) {
     emit("validation-change", true);
   } else {
