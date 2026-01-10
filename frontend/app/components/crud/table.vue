@@ -20,6 +20,7 @@ import type { CrudConfig, CrudState } from "~/types/crud";
 const UIcon = resolveComponent("UIcon");
 const props = defineProps<{ config: CrudConfig; state: CrudState }>();
 const emit = defineEmits<{ edit: [item: object]; delete: [item: object] }>();
+const slots = useSlots();
 
 const columns = computed(() => {
   const cols =
@@ -77,20 +78,29 @@ const columns = computed(() => {
           onSelect: () => emit("delete", item),
         });
       }
-      if (actions.length === 0) return null;
-      return h(
-        resolveComponent("UDropdownMenu"),
-        {
-          items: actions,
-          content: { align: "end" },
-        },
-        () =>
-          h(resolveComponent("UButton"), {
-            icon: "i-lucide-ellipsis",
-            color: "neutral",
-            variant: "ghost",
-          }),
-      );
+      const elements = [];
+      if (slots.actions) {
+        elements.push(slots.actions({ item }));
+      }
+      if (actions.length > 0) {
+        elements.push(
+          h(
+            resolveComponent("UDropdownMenu"),
+            {
+              items: actions,
+              content: { align: "end" },
+            },
+            () =>
+              h(resolveComponent("UButton"), {
+                icon: "i-lucide-ellipsis",
+                color: "neutral",
+                variant: "ghost",
+              }),
+          ),
+        );
+      }
+      if (elements.length === 0) return null;
+      return h("div", { class: "flex items-center gap-2" }, elements);
     },
   });
   return cols;

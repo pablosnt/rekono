@@ -77,7 +77,11 @@
             openDeleteModal = true;
           }
         "
-      />
+      >
+        <template v-if="$slots.actions" #actions="slotProps">
+          <slot name="actions" v-bind="slotProps" />
+        </template>
+      </CrudTable>
 
       <!-- todo: Cards -->
 

@@ -1,5 +1,6 @@
 <template>
   <CrudPage :config="config" />
+  <!-- TODO: Add second step to the create form, to create targets for a the new project. However, for that to make sense, the form modal must redirect the user to the project or project targets page -->
 </template>
 
 <script setup lang="ts">
