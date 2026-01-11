@@ -3,10 +3,14 @@
     :open="open"
     :title="modalTitle"
     :fullscreen="config.formFullscreen ? true : false"
-    :ui="{
-      content: config.formFullscreen ? '' : 'sm:max-w-3xl sm:max-h-xl',
-      footer: 'justify-end',
-    }"
+    :ui="
+      ui
+        ? ui
+        : {
+            content: config.formFullscreen ? '' : 'sm:max-w-3xl sm:max-h-xl',
+            footer: 'justify-end',
+          }
+    "
     @update:open="(value: boolean) => $emit('open', value)"
   >
     <template #body>
@@ -56,6 +60,7 @@ const props = defineProps<{
   api: object;
   title?: string;
   submitLabel?: string;
+  ui?: Record<string, unknown>;
 }>();
 
 const emit = defineEmits<{

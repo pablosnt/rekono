@@ -28,6 +28,10 @@
             : 'Customize Scan'
     "
     submit-label="Run"
+    :ui="{
+      content: 'sm:max-w-6xl sm:max-h-xl',
+      footer: 'justify-end',
+    }"
     @open="(open: boolean) => (openModal = open)"
   />
 </template>
