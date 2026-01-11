@@ -134,9 +134,9 @@
             <USlider
               class="mt-8 mb-2"
               :model-value="intensity"
-              :min="1"
-              :max="5"
-              :default-value="3"
+              :min="minIntensity"
+              :max="maxIntensity"
+              :default-value="3 < maxIntensity ? 3 : maxIntensity"
               :tooltip="{
                 text: utils.intensityOptions[intensity - 1].label,
                 open: true,
@@ -415,6 +415,8 @@ const toolOptions = ref([]);
 const configuration = ref(props.entity.configuration);
 const configurationOptions = ref([]);
 const intensity = ref(3);
+const minIntensity = ref(1);
+const maxIntensity = ref(5);
 const wordlists = ref([]);
 const wordlistOptions = ref([]);
 const requiredWordlist = ref(false);
@@ -473,12 +475,17 @@ function onTool() {
   if (tool.value) {
     process.value = null;
     configuration.value = null;
+    genericApi.get(`tools/${tool.value}/`).then((response) => {
+      // TODO: Test this. Assumes intensities are sorted, and assumes the step between all of them is 1
+      minIntensity.value = response.intensities[0].value;
+      maxIntensity.value =
+        response.intensities[response.intensities.length - 1].value;
+    });
     genericApi
       .list("configurations/", { tool: tool.value }, true)
       .then((response) => {
         configurationOptions.value = response.items;
       });
-    // TODO: Adapt the intensityOptions to the intensities supported by the selected tool
   }
 }
 
@@ -522,6 +529,8 @@ function onProcess() {
   if (process.value) {
     tool.value = null;
     configuration.value = null;
+    minIntensity.value = 1;
+    maxIntensity.value = 5;
     genericApi.get(`processes/${process.value}/`).then((response) => {
       if (response.wordlists.supported) {
         if (wordlistOptions.value.length == 0) {
