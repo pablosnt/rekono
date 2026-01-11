@@ -210,7 +210,7 @@ onMounted(() => {
         },
         {
           label: "Wordlists",
-          icon: "i-lucide-file-text",
+          icon: "i-mdi-file-word",
           to: "/wordlists",
         },
       ],

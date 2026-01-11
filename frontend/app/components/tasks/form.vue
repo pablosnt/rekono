@@ -354,7 +354,6 @@ const genericApi = useApi("/api/");
 const utils = useUtils();
 const stepperItems = computed(() => {
   const items = [];
-  // TODO: Review icons
   if (!props.entity.targetPort) {
     items.push({
       title: "Target",
@@ -364,39 +363,37 @@ const stepperItems = computed(() => {
   if (!props.entity.configuration && !props.entity.process) {
     items.push({
       title: "Tooling",
-      description: "Choose tool or process",
+      description: "Tool or process to run",
       icon: "i-lucide-terminal",
     });
   }
   items.push({
     title: "Intensity",
-    icon: "i-lucide-zap",
+    icon: "i-lucide-database-zap",
   });
   if (wordlistOptions.value.length > 0) {
     items.push({
       title: "Wordlists",
-      description: "Customize wordlists",
-      icon: "i-lucide-list",
+      icon: "i-mdi-file-word",
     });
   }
   if (inputTechnologyOptions.value.length > 0) {
     items.push({
       title: "Technologies",
-      description: "Provide technologies to scan",
-      icon: "i-lucide-cpu",
+      description: "Provide input parameters",
+      icon: "i-lucide-code",
     });
   }
   if (inputVulnerabilityOptions.value.length > 0) {
     items.push({
       title: "Vulnerabilities",
-      description: "Provide vulnerabilities to scan",
-      icon: "i-lucide-shield-alert",
+      description: "Provide input parameters",
+      icon: "i-lucide-bug",
     });
   }
   items.push({
     title: "Schedule",
-    //   description: "Set execution time",
-    icon: "i-lucide-calendar",
+    icon: "i-lucide-calendar-days",
   });
   return items;
 });
