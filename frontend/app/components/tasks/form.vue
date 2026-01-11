@@ -149,6 +149,14 @@
               :color="utils.intensityOptions[intensity - 1]?.color"
               @update:model-value="(value) => (intensity = value)"
             />
+            <UAlert
+              v-if="process && intensity !== 5"
+              class="mt-10"
+              icon="i-lucide-info"
+              color="info"
+              title="Steps that only support higher intensities won't be executed"
+              variant="subtle"
+            />
           </UFormField>
         </template>
         <template v-if="item.title === 'Wordlists'">
