@@ -16,7 +16,7 @@
   "dependencies": {
     "@iconify-json/lucide": "^1.2.71",
     "@iconify-json/simple-icons": "^1.2.55",
-    "@nuxt/ui": "^4.1.0",
+    "@nuxt/ui": "^4.3.0",
     "@pinia/nuxt": "0.11.3",
     "jwt-decode": "^4.0.0",
     "nuxt": "^4.2.1",

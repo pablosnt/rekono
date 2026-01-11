@@ -6,7 +6,12 @@
     :linear="false"
   >
     <template #content="{ item }">
-      <UForm class="space-y-4 mx-auto mt-3">
+      <UForm
+        :validate-on="['input', 'change']"
+        :validate="validate"
+        :loading="loading"
+        class="space-y-4 mx-auto mt-3"
+      >
         <template v-if="item.title === 'Target'">
           <UFormField
             v-if="!entity.project && !entity.target"
@@ -23,7 +28,6 @@
               label-key="name"
               description-key="none"
               size="xl"
-              required
               @update:model-value="
                 (value) => {
                   project = value;
@@ -58,7 +62,6 @@
               value-key="id"
               label-key="target"
               size="xl"
-              required
               :disabled="!project"
               @update:model-value="
                 (value) => {
@@ -166,7 +169,6 @@
               description-key="type"
               :filter-fields="['name', 'type']"
               size="xl"
-              :required="requiredWordlist"
               @update:model-value="(value) => (wordlists = value)"
             >
               <template #trailing>
@@ -194,10 +196,99 @@
           <!-- TODO -->
         </template>
         <template v-if="item.title === 'Schedule'">
-          <!-- TODO -->
-          <UAlert title="Monitor" color="neutral">
+          <UFormField
+            label="Datetime"
+            hint="Schedule the execution start"
+            class="text-center"
+          >
+            <UInputDate
+              ref="inputScheduleDate"
+              v-model="scheduledAt"
+              class="w-100"
+              :min-value="now(getLocalTimeZone())"
+              size="xl"
+              variant="outline"
+              :hour-cycle="24"
+              granularity="minute"
+              @update:model-value="
+                (datetime) => {
+                  if (scheduledDate === null) {
+                    scheduledDate = today(getLocalTimeZone());
+                  }
+                  if (datetime.year) {
+                    scheduledDate.year = datetime.year;
+                  }
+                  if (datetime.month) {
+                    scheduledDate.month = datetime.month;
+                  }
+                  if (datetime.day) {
+                    scheduledDate.day = datetime.day;
+                  }
+                }
+              "
+            >
+              <template #leading>
+                <UPopover :reference="inputScheduleDate?.inputsRef[3]?.$el">
+                  <UButton
+                    color="neutral"
+                    variant="link"
+                    icon="i-lucide-calendar"
+                    aria-label="Select a date"
+                    class="px-0"
+                  />
+                  <template #content>
+                    <UCalendar
+                      v-model="scheduledDate"
+                      class="p-2"
+                      :min-value="today(getLocalTimeZone())"
+                      @update:model-value="
+                        (date) => {
+                          if (
+                            scheduledAt !== null &&
+                            scheduledAt.year === date.year &&
+                            scheduledAt.month === date.month &&
+                            scheduledAt.day === date.day
+                          ) {
+                            return;
+                          }
+                          const tz = getLocalTimeZone();
+                          scheduledAt = now(tz);
+                          scheduledAt.year = date.year;
+                          scheduledAt.month = date.month;
+                          scheduledAt.day = date.day;
+                          const _today = now(tz);
+                          if (
+                            scheduledAt.year === _today.year &&
+                            scheduledAt.month === _today.month &&
+                            scheduledAt.day === _today.day &&
+                            scheduledAt.hour === _today.hour
+                          ) {
+                            scheduledAt = scheduledAt.add({ hours: 1 });
+                          }
+                        }
+                      "
+                    />
+                  </template>
+                </UPopover>
+              </template>
+              <template v-if="scheduledAt !== null" #trailing>
+                <UButton
+                  color="neutral"
+                  variant="link"
+                  icon="i-lucide-x"
+                  aria-label="Clear selected date"
+                  @click="
+                    scheduledAt = null;
+                    scheduledDate = null;
+                  "
+                />
+              </template>
+            </UInputDate>
+          </UFormField>
+          <UAlert title="Monitor" color="neutral" class="mt-8">
             <template #leading>
               <USwitch
+                :model-value="false"
                 @update:model-value="
                   (value) => {
                     repeatIn = value ? 1 : null;
@@ -214,13 +305,11 @@
                   type="number"
                   min="1"
                   class="w-20"
-                  required
                 />
                 <USelect
                   v-model="repeatTimeUnit"
                   :items="utils.timeUnitOptions"
                   class="w-32"
-                  required
                 />
               </div>
             </template>
@@ -248,6 +337,7 @@
 <script setup lang="ts">
 import type { FormError } from "@nuxt/ui";
 import type { CrudConfig } from "~/types/crud";
+import { today, now, getLocalTimeZone } from "@internationalized/date";
 
 const props = defineProps<{
   api: object;
@@ -264,6 +354,7 @@ const genericApi = useApi("/api/");
 const utils = useUtils();
 const stepperItems = computed(() => {
   const items = [];
+  // TODO: Review icons
   if (!props.entity.targetPort) {
     items.push({
       title: "Target",
@@ -311,6 +402,7 @@ const stepperItems = computed(() => {
 });
 const stepperStep = ref(0);
 const stepper = useTemplateRef("stepper");
+const inputScheduleDate = useTemplateRef("inputScheduleDate");
 const loading = ref(false);
 
 const project = ref(props.entity.project);
@@ -335,8 +427,9 @@ const requiredInputTechnology = ref(false);
 const inputVulnerabilities = ref([]);
 const inputVulnerabilityOptions = ref([]);
 const requiredInputVulnerability = ref(false);
-const scheduledAt = ref();
-const repeatIn = ref();
+const scheduledDate = ref(null);
+const scheduledAt = ref(null);
+const repeatIn = ref(null);
 const repeatTimeUnit = ref("Days");
 
 function loadProjects() {
@@ -388,6 +481,7 @@ function onTool() {
       .then((response) => {
         configurationOptions.value = response.items;
       });
+    // TODO: Adapt the intensityOptions to the intensities supported by the selected tool
   }
 }
 
@@ -448,7 +542,8 @@ function loadWordlists() {
   });
 }
 
-function validate(data: Record<string, unknown>): FormError[] {
+function validate(): FormError[] {
+  // TODO: Return FormErrors and test if this is working
   if (
     project.value &&
     target.value &&
@@ -478,7 +573,7 @@ function submit() {
         process_id: process.value,
         configuration_id: configuration.value,
         intensity: utils.intensityOptions[intensity.value - 1]?.label,
-        scheduled_at: scheduledAt.value, // TODO: Review format
+        scheduled_at: scheduledAt.value.toString(),
         repeat_in: repeatIn.value,
         repeat_time_unit: repeatTimeUnit.value,
         wordlists: wordlists.value,
