@@ -173,7 +173,7 @@
             >
               <template #trailing>
                 <UIcon
-                  v-if="project === null || project === undefined"
+                  v-if="wordlists.length === 0"
                   class="group-data-[state=open]:rotate-180 transition-transform duration-200"
                   name="i-lucide-chevron-down"
                 />
