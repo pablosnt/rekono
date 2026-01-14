@@ -10,6 +10,7 @@
       :title="selectedProcess ? selectedProcess.name : undefined"
       fullscreen
     >
+      <!-- TODO: Add a run button on the title, before the close button -->
       <template #body>
         <ProcessStepsForm v-if="selectedProcess" :process="selectedProcess" />
       </template>
