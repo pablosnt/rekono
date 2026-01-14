@@ -5,12 +5,23 @@
         <TasksRunButton :process="item" />
       </template>
     </CrudPage>
-    <UModal
-      v-model:open="processModalOpen"
-      :title="selectedProcess ? selectedProcess.name : undefined"
-      fullscreen
-    >
-      <!-- TODO: Add a run button on the title, before the close button -->
+    <UModal v-model:open="processModalOpen" fullscreen>
+      <template #header>
+        <div class="flex items-center justify-between w-full">
+          <p class="text-gray-900 dark:text-white font-bold text-lg">
+            {{ selectedProcess ? selectedProcess.name : "" }}
+          </p>
+          <div class="flex items-center gap-2">
+            <TasksRunButton :process="selectedProcess" />
+            <UButton
+              icon="i-lucide-x"
+              variant="ghost"
+              color="neutral"
+              @click="processModalOpen = false"
+            />
+          </div>
+        </div>
+      </template>
       <template #body>
         <ProcessStepsForm v-if="selectedProcess" :process="selectedProcess" />
       </template>
