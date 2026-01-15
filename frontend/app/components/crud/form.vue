@@ -4,12 +4,12 @@
     :state="formData"
     :validate-on="['input', 'change']"
     :validate="validate"
-    :schema="config.formSchema"
+    :schema="formSchema"
     :loading="loading"
     class="space-y-4 mx-auto"
     @submit="save()"
   >
-    <template v-for="field in config.formFields" :key="field.key">
+    <template v-for="field in formFields" :key="field.key">
       <UFormField
         :name="field.key"
         :label="field.label"
@@ -124,9 +124,34 @@ const emit = defineEmits<{
 }>();
 
 const utils = useUtils();
-const formData = ref<Record<string, unknown>>(initFormData());
 const loading = ref(false);
 const form = ref();
+
+const formFields = computed(() => {
+  if (props.entity && props.config.editFormFields) {
+    return props.config.editFormFields;
+  } else if (!props.entity && props.config.createFormFields) {
+    return props.config.createFormFields;
+  } else {
+    return props.config.formFields || [];
+  }
+});
+
+const formSchema = computed(() => {
+  if (props.entity && props.config.editFormSchema) {
+    return props.config.editFormSchema;
+  } else if (!props.entity && props.config.createFormSchema) {
+    return props.config.createFormSchema;
+  } else {
+    return props.config.formSchema;
+  }
+});
+
+const formData = ref<Record<string, unknown>>({});
+
+watch([formFields, () => props.entity], () => {
+  formData.value = initFormData();
+}, { immediate: true });
 
 function getOptions(field: FormField): FilterOption[] {
   return Array.isArray(field.options) ? (field.options as FilterOption[]) : [];
@@ -134,7 +159,7 @@ function getOptions(field: FormField): FilterOption[] {
 
 function initFormData() {
   const data: Record<string, unknown> = {};
-  for (const field of props.config.formFields || []) {
+  for (const field of formFields.value) {
     if (field.type === "tags") {
       data[field.key] =
         props.entity && Array.isArray(props.entity[field.key])
@@ -152,9 +177,9 @@ function initFormData() {
 }
 
 function validate(data) {
-  if (props.config.formSchema) {
+  if (formSchema.value) {
     try {
-      props.config.formSchema?.parse(data);
+      formSchema.value?.parse(data);
       emit("validation-change", true);
     } catch {
       emit("validation-change", false);

@@ -12,18 +12,18 @@
           class="w-64"
           :avatar="
             (Array.isArray(filter.options)
-              ? filter.options.filter(
+              ? filter.options.find(
                   (option: FilterOption) =>
                     option.value === _filters[filter.key],
-                )?.[0]?.avatar
+                )?.avatar
               : undefined) || filter.avatar
           "
           :icon="
             (Array.isArray(filter.options)
-              ? filter.options.filter(
+              ? filter.options.find(
                   (option: FilterOption) =>
                     option.value === _filters[filter.key],
-                )?.[0]?.icon
+                )?.icon
               : undefined) || filter.icon
           "
           leading
@@ -57,13 +57,14 @@
           @update:model-value="(value) => updateFilter(filter.key, value)"
         />
         <UCheckbox
-          v-else-if="filter.type === 'boolean'"
+          v-else-if="filter.type === 'checkbox'"
           :model-value="
             (filter.value
               ? _filters[filter.key] === filter.value
               : _filters[filter.key]) as boolean
           "
           :label="filter.label"
+          :icon="filter.icon"
           class="w-64 items-center"
           @update:model-value="
             (value) =>

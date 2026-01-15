@@ -57,10 +57,6 @@ const config: CrudConfig<Process> = reactive({
   entityName: "Process",
   entityNamePlural: "Processes",
   icon: "i-lucide-workflow",
-  createForm: resolveComponent("ProcessForm"),
-  updateOnCreateModalOpen: true,
-  editForm: resolveComponent("ProcessForm"),
-  updateOnEditModalOpen: true,
   tableColumns: [
     {
       accessorKey: "id",
@@ -186,6 +182,12 @@ const config: CrudConfig<Process> = reactive({
             placeholder: "Filter by owner username...",
           },
         ]),
+    {
+      key: "like",
+      label: "Favourites",
+      icon: "i-lucide-heart",
+      type: "checkbox" as const,
+    },
   ],
   ordering: ["id", "name", "owner", { id: "likes_count", label: "Likes" }],
   defaultOrdering: "-id",
@@ -221,6 +223,10 @@ const config: CrudConfig<Process> = reactive({
     tags: z.array(validation.name("tag", true, 100)).optional(),
   }),
   formFullscreen: true,
+  createForm: resolveComponent("ProcessForm"),
+  updateOnCreateModalOpen: true,
+  editForm: resolveComponent("ProcessForm"),
+  updateOnEditModalOpen: true,
   deleteMessage: (process: Process) => [
     {
       component: h(

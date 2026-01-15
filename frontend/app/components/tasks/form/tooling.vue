@@ -167,14 +167,14 @@ function onTool(toolId) {
     emit("update-configuration", configuration.value);
     configurationOptions.value = [];
     props.api.get(`tools/${tool.value}/`).then((response) => {
-      minIntensity.value = utils.intensityOptions.filter(
+      minIntensity.value = utils.intensityOptions.find(
         (option) => option.label === response.intensities[0].value,
-      )[0].value;
-      maxIntensity.value = utils.intensityOptions.filter(
+      )?.value;
+      maxIntensity.value = utils.intensityOptions.find(
         (option) =>
           option.label ===
           response.intensities[response.intensities.length - 1].value,
-      )[0].value;
+      )?.value;
       emit("update-intensity", minIntensity.value, maxIntensity.value);
       if (response.icon) {
         toolingAvatar.value = { src: response.icon };
@@ -188,9 +188,9 @@ function onTool(toolId) {
       .list("configurations/", { tool: tool.value }, true)
       .then((response) => {
         configurationOptions.value = response.items;
-        defaultConfigurationObject.value = response.items.filter(
+        defaultConfigurationObject.value = response.items.find(
           (configuration) => configuration.default,
-        )[0];
+        );
         configuration.value = defaultConfigurationObject.value.id;
         emit("update-configuration", configuration.value);
         processConfiguration(defaultConfigurationObject.value);

@@ -19,7 +19,7 @@
     :icon="toolFilter ? undefined : 'i-lucide-square-terminal'"
     :avatar="
       toolFilter
-        ? { src: tools.filter((tool) => tool.id === toolFilter)?.[0]?.icon }
+        ? { src: tools.find((tool) => tool.id === toolFilter)?.icon }
         : undefined
     "
     leading

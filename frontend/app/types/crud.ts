@@ -90,9 +90,13 @@ export interface CrudConfig<T = unknown> {
   formFields?: FormField[];
   formSchema?: z.ZodType;
   formFullscreen?: boolean;
-  onCreation?: (data: Record<string, unknown>) => void;
+  createFormFields?: FormField[];
+  createFormSchema?: z.ZodType;
   createForm?: object;
   updateOnCreateModalOpen?: boolean;
+  onCreation?: (data: Record<string, unknown>) => void;
+  editFormFields?: FormField[];
+  editFormSchema?: z.ZodType;
   editForm?: object;
   updateOnEditModalOpen?: boolean;
   deleteMessage?: (item: T) => ComponentDetails[];

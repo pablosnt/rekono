@@ -66,8 +66,7 @@
         class="w-full"
         :icon="
           targetPort
-            ? targetPortOptions.filter((option) => option.id === targetPort)[0]
-                ?.icon
+            ? targetPortOptions.find((option) => option.id === targetPort)?.icon
             : 'i-lucide-network'
         "
         placeholder="Select a target port"

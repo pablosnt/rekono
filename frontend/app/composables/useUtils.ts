@@ -25,7 +25,18 @@ export default function () {
 
   const timeUnitOptions = ["Weeks", "Days", "Hours", "Minutes"];
 
-  const wordlistTypes = ["Endpoint", "Subdomain"];
+  const wordlistTypes = [
+    {
+      label: "Endpoint",
+      value: "Endpoint",
+      icon: "i-lucide-globe",
+    },
+    {
+      label: "Subdomain",
+      value: "Subdomain",
+      icon: "i-lucide-server",
+    },
+  ];
 
   function getUserOptions(
     userOptionsRef: Ref<FilterOption[]>,

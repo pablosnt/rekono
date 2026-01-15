@@ -25,7 +25,6 @@ const config: CrudConfig<Project> = reactive({
   entityName: "Project",
   entityNamePlural: "Projects",
   icon: "i-lucide-folder",
-  createForm: resolveComponent("ProjectCreationForm"),
   tableColumns: [
     {
       accessorKey: "id",
@@ -149,6 +148,7 @@ const config: CrudConfig<Project> = reactive({
     description: validation.text("description"),
     tags: z.array(validation.name("tag", true, 100)).optional(),
   }),
+  createForm: resolveComponent("ProjectCreationForm"),
   onCreation: (data: Record<string, unknown>) =>
     navigateTo(
       data.targets.length == 0
