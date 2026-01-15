@@ -56,5 +56,13 @@ export default function () {
     return regex(field, required, max, /^CVE-\d{4}-\d{1,7}$/);
   }
 
-  return { passwordPolicy, name, text, cve };
+  function target(
+    field: string = "target",
+    required: boolean = true,
+    max: number = 100,
+  ) {
+    return regex(field, required, max, /^[\w\d.:\-/]{1,100}$/);
+  }
+
+  return { passwordPolicy, name, text, cve, target };
 }

@@ -1,6 +1,5 @@
 <template>
   <CrudPage :config="config" />
-  <!-- TODO: Add second step to the create form, to create targets for a the new project -->
 </template>
 
 <script setup lang="ts">
@@ -26,6 +25,7 @@ const config: CrudConfig<Project> = reactive({
   entityName: "Project",
   entityNamePlural: "Projects",
   icon: "i-lucide-folder",
+  createForm: resolveComponent("ProjectCreationForm"),
   tableColumns: [
     {
       accessorKey: "id",

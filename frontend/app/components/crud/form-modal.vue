@@ -25,6 +25,7 @@
         @new-submit-label="
           (newSubmitLabel: string) => (updatedSubmitLabel = newSubmitLabel)
         "
+        @new-loading="(newLoading: boolean) => (loading = newLoading)"
         @validation-change="(isValid: boolean) => (formValid = isValid)"
       />
     </template>
@@ -69,8 +70,9 @@ const emit = defineEmits<{
 }>();
 
 const form = ref();
-const formComponent = ref(
-  (props.item ? props.config.editForm : props.config.createForm) ||
+const formComponent = computed(
+  () =>
+    (props.item ? props.config.editForm : props.config.createForm) ||
     resolveComponent("CrudForm"),
 );
 const updatedTitle = ref();

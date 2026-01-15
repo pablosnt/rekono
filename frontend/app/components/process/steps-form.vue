@@ -98,6 +98,9 @@ import type { Process } from "~/types/processes";
 import type { Configuration, Tool } from "~/types/tools";
 
 const props = defineProps<{ process: Process }>();
+const emit = defineEmits<{
+  "new-loading": [newLoading: boolean];
+}>();
 
 const utils = useUtils();
 const api = useApi("/api/");
@@ -140,6 +143,7 @@ function getStageTree(stage: string): Array {
 }
 
 function addStep(configuration: number) {
+  emit("new-loading", true);
   api
     .create(
       "steps/",
@@ -150,10 +154,12 @@ function addStep(configuration: number) {
       {},
       "Step",
     )
-    .then(() => configurations.value.push(configuration));
+    .then(() => configurations.value.push(configuration))
+    .finally(() => emit("new-loading", false));
 }
 
 function removeStep(configuration: number) {
+  emit("new-loading", true);
   api
     .list(
       "steps/",
@@ -173,7 +179,8 @@ function removeStep(configuration: number) {
             ),
           );
       }
-    });
+    })
+    .finally(() => emit("new-loading", false));
 }
 
 function fetch() {
