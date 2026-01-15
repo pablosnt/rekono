@@ -1,6 +1,6 @@
 <template>
   <div class="space-y-4 mx-auto mt-3">
-    <UFormField required>
+    <UFormField required name="intensity">
       <USlider
         v-model="intensity"
         class="mt-8 mb-2"
@@ -21,7 +21,7 @@
       <UAlert
         v-if="isProcessSelected && intensity < 5"
         class="mt-10"
-        icon="i-lucide-alert"
+        icon="i-lucide-zap"
         color="warning"
         title="Steps that only support higher intensities won't be executed"
         variant="subtle"

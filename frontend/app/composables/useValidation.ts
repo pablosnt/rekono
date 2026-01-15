@@ -18,29 +18,43 @@ export default function () {
       message: "Must be at least one symbol",
     });
 
+  function regex(
+    field: string,
+    required: boolean,
+    max: number | undefined,
+    regex: RegExp,
+  ) {
+    let policy = required
+      ? z.string(`${utils.firstUpper(field)} is required`).min(1)
+      : z.string();
+    if (max) {
+      policy = policy.max(max);
+    }
+    policy = policy.refine((value) => regex.test(value), {
+      message: `Invalid ${field.toLowerCase()}`,
+    });
+    return required ? policy : policy.optional();
+  }
+
   function name(
     field: string = "name",
     required: boolean = true,
     max: number = 120,
   ) {
-    const policy = required
-      ? z.string(`${utils.firstUpper(field)} is required`).min(1)
-      : z.string();
-    return policy
-      .max(max)
-      .refine((name) => /^[\wÀ-ÿ\s.:\-[\]()@]*$/.test(name), {
-        message: `Invalid ${field.toLowerCase()}`,
-      });
+    return regex(field, required, max, /^[\wÀ-ÿ\s.:\-[\]()@]*$/);
   }
 
   function text(field: string, required: boolean = true) {
-    const policy = required
-      ? z.string(`${utils.firstUpper(field)} is required`).min(1)
-      : z.string();
-    return policy.refine((text) => /^[^;<>]*$/.test(text), {
-      message: `Invalid ${field.toLowerCase()}`,
-    });
+    return regex(field, required, undefined, /^[^;<>]*$/);
   }
 
-  return { passwordPolicy, name, text };
+  function cve(
+    field: string = "cve",
+    required: boolean = true,
+    max: number = 20,
+  ) {
+    return regex(field, required, max, /^CVE-\d{4}-\d{1,7}$/);
+  }
+
+  return { passwordPolicy, name, text, cve };
 }

@@ -2,6 +2,7 @@
   <div class="space-y-4 mx-auto mt-3">
     <UFormField
       label="Datetime"
+      name="scheduledAt"
       hint="Schedule the execution start"
       class="text-center"
     >
@@ -92,41 +93,43 @@
         </template>
       </UInputDate>
     </UFormField>
-    <UAlert title="Monitor" color="neutral" class="mt-8">
-      <template #leading>
-        <USwitch
-          v-model="monitor"
-          @update:model-value="
-            (value) => {
-              repeatIn = value ? 1 : undefined;
-              repeatTimeUnit = value ? 'Days' : undefined;
-              $emit('update-repeat-in', repeatIn);
-              $emit('update-repeat-time-unit', repeatTimeUnit);
-            }
-          "
-        />
-      </template>
-      <template v-if="repeatIn" #description>
-        <div class="flex items-center gap-2">
-          <span>Run this scan each</span
-          ><UInput
-            v-model="repeatIn"
-            type="number"
-            min="1"
-            class="w-20"
-            @update:model-value="$emit('update-repeat-in', repeatIn)"
-          />
-          <USelect
-            v-model="repeatTimeUnit"
-            :items="utils.timeUnitOptions"
-            class="w-32"
+    <UFormField name="repeat">
+      <UAlert title="Monitor" color="neutral" class="mt-8">
+        <template #leading>
+          <USwitch
+            v-model="monitor"
             @update:model-value="
-              $emit('update-repeat-time-unit', repeatTimeUnit)
+              (value) => {
+                repeatIn = value ? 1 : undefined;
+                repeatTimeUnit = value ? 'Days' : undefined;
+                $emit('update-repeat-in', repeatIn);
+                $emit('update-repeat-time-unit', repeatTimeUnit);
+              }
             "
           />
-        </div>
-      </template>
-    </UAlert>
+        </template>
+        <template v-if="repeatIn" #description>
+          <div class="flex items-center gap-2">
+            <span>Run this scan each</span
+            ><UInput
+              v-model="repeatIn"
+              type="number"
+              min="1"
+              class="w-20"
+              @update:model-value="$emit('update-repeat-in', repeatIn)"
+            />
+            <USelect
+              v-model="repeatTimeUnit"
+              :items="utils.timeUnitOptions"
+              class="w-32"
+              @update:model-value="
+                $emit('update-repeat-time-unit', repeatTimeUnit)
+              "
+            />
+          </div>
+        </template>
+      </UAlert>
+    </UFormField>
   </div>
 </template>
 

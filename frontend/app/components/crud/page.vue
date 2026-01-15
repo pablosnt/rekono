@@ -131,20 +131,14 @@
     </template>
 
     <template v-else>
-      <UEmpty
-        class="mt-20"
-        title="Access Denied"
-        description="You do not have the necessary permissions to view this page"
-        icon="i-lucide-shield-ban"
-        :actions="[
-          {
-            icon: 'i-lucide-home',
-            label: 'Home',
-            to: '/',
-          },
-        ]"
-        size="xl"
-        variant="naked"
+      <UError
+        :error="{
+          statusCode: 403,
+          statusMessage: 'Access Denied',
+          message:
+            'You do not have the necessary permissions to view this page',
+        }"
+        redirect="/"
       />
     </template>
   </div>

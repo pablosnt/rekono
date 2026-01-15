@@ -1,6 +1,6 @@
 <template>
   <div class="space-y-4 mx-auto mt-3">
-    <UFormField required label="Tooling">
+    <UFormField required label="Tooling" name="tooling">
       <USelectMenu
         class="w-full"
         :icon="toolingIcon"
@@ -66,7 +66,7 @@
         </template>
       </USelectMenu>
     </UFormField>
-    <UFormField v-if="tool" required label="Configuration">
+    <UFormField v-if="tool" required label="Configuration" name="configuration">
       <USelectMenu
         :model-value="configuration"
         class="w-full"

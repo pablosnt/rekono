@@ -4,12 +4,13 @@
       v-if="supportedWordlist"
       :required="requiredWordlist"
       label="Wordlists"
+      name="wordlists"
     >
       <USelectMenu
         :model-value="wordlists"
         multiple
         class="w-full"
-        icon="i-lucide-file-text"
+        icon="i-mdi-file-word"
         placeholder="Select the wordlists to use"
         :items="wordlistOptions"
         value-key="id"

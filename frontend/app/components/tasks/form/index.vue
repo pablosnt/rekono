@@ -41,13 +41,26 @@
             (supported, required) => {
               supportedWordlist = supported;
               requiredWordlist = required;
+              if (!supported) {
+                wordlists = [];
+              }
             }
           "
           @update-input-technology="
-            (required) => (requiredInputTechnology = required)
+            (required) => {
+              requiredInputTechnology = required;
+              if (!required) {
+                inputTechnologies = [];
+              }
+            }
           "
           @update-input-vulnerability="
-            (required) => (requiredInputVulnerability = required)
+            (required) => {
+              requiredInputVulnerability = required;
+              if (!required) {
+                inputVulnerabilities = [];
+              }
+            }
           "
           @update-intensity="
             (newMinIntensity, newMaxIntensity) => {
@@ -73,12 +86,22 @@
           :required-wordlist="requiredWordlist"
           @update-wordlists="(newWordlists) => (wordlists = newWordlists)"
         />
-        <div v-show="item.title === 'Technologies'">
-          <!-- TODO -->
-        </div>
-        <div v-show="item.title === 'Vulnerabilities'">
-          <!-- TODO -->
-        </div>
+        <TasksFormTechnologies
+          v-show="item.title === 'Technologies'"
+          :api="genericApi"
+          :required="requiredInputTechnology"
+          @update-technologies="
+            (newTechnologies) => (inputTechnologies = newTechnologies)
+          "
+        />
+        <TasksFormVulnerabilities
+          v-show="item.title === 'Vulnerabilities'"
+          :api="genericApi"
+          :required="requiredInputVulnerability"
+          @update-vulnerabilities="
+            (newVulnerabilities) => (inputVulnerabilities = newVulnerabilities)
+          "
+        />
         <TasksFormSchedule
           v-show="item.title === 'Schedule'"
           @update-scheduled-at="
@@ -197,7 +220,6 @@ const repeatIn = ref(null);
 const repeatTimeUnit = ref("Days");
 
 function validate(): FormError[] {
-  // TODO: Return FormErrors and test if this is working
   if (
     project.value &&
     target.value &&

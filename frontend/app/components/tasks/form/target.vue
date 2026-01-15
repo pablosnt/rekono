@@ -1,6 +1,6 @@
 <template>
   <div class="space-y-4 mx-auto mt-3">
-    <UFormField v-if="!defaultProject" required label="Project">
+    <UFormField v-if="!defaultProject" required label="Project" name="project">
       <USelectMenu
         :model-value="project"
         class="w-full"
@@ -30,7 +30,7 @@
         </template>
       </USelectMenu>
     </UFormField>
-    <UFormField v-if="!defaultTarget" required label="Target">
+    <UFormField v-if="!defaultTarget" required label="Target" name="target">
       <USelectMenu
         :model-value="target"
         class="w-full"
@@ -60,21 +60,18 @@
         </template>
       </USelectMenu>
     </UFormField>
-    <UFormField label="Target Port">
-      <!-- TODO: Customize target port icon based on the port number as we did on the old frontend -->
+    <UFormField label="Target Port" name="targetPort">
       <USelectMenu
         :model-value="targetPort"
         class="w-full"
-        icon="i-lucide-network"
-        placeholder="Select a target port"
-        :items="
-          targetPortOptions.map((port) => ({
-            id: port.id,
-            label: port.path
-              ? `${port.port} - ${port.path}`
-              : port.port.toString(),
-          }))
+        :icon="
+          targetPort
+            ? targetPortOptions.filter((option) => option.id === targetPort)[0]
+                ?.icon
+            : 'i-lucide-network'
         "
+        placeholder="Select a target port"
+        :items="targetPortOptions"
         value-key="id"
         label-key="label"
         size="xl"
@@ -113,6 +110,7 @@ const emit = defineEmits<{
   "update-target-port": [newTargetPort: number | undefined];
 }>();
 
+const utils = useUtils();
 const project = ref(props.defaultProject);
 const projectOptions = ref([]);
 const target = ref(props.defaultTarget);
@@ -152,7 +150,13 @@ function onTarget(targetId: number | undefined) {
     props.api
       .list("target-ports/", { target: targetId }, true)
       .then((response) => {
-        targetPortOptions.value = response.items;
+        targetPortOptions.value = response.items.map((port) => ({
+          id: port.id,
+          label: port.path
+            ? `${port.port} - ${port.path}`
+            : port.port.toString(),
+          icon: utils.getPortIcon(port.port),
+        }));
       });
   }
 }
