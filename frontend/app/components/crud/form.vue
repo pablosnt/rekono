@@ -34,17 +34,53 @@
           :required="field.required"
           :rows="5"
         />
-        <USelect
+        <USelectMenu
           v-else-if="field.type === 'select' || field.type === 'multiselect'"
           v-model="formData[field.key] as any"
           class="w-full"
           :placeholder="field.placeholder"
-          :items="getOptions(field)"
+          :items="field.options"
           value-key="value"
           label-key="label"
           :required="field.required"
           :multiple="field.type === 'multiselect'"
-        />
+          :avatar="
+            (Array.isArray(field.options)
+              ? field.options.find(
+                  (option: FilterOption) =>
+                    option.value === formData[field.key],
+                )?.avatar
+              : undefined) || field.avatar
+          "
+          :icon="
+            (Array.isArray(field.options)
+              ? field.options.find(
+                  (option: FilterOption) =>
+                    option.value === formData[field.key],
+                )?.icon
+              : undefined) || field.icon
+          "
+          leading
+        >
+          <template v-if="field.clearable" #trailing>
+            <UIcon
+              v-if="
+                formData[field.key] === null ||
+                formData[field.key] === undefined
+              "
+              class="group-data-[state=open]:rotate-180 transition-transform duration-200"
+              name="i-lucide-chevron-down"
+            />
+            <UButton
+              v-else
+              icon="i-lucide-x"
+              variant="ghost"
+              color="neutral"
+              size="sm"
+              @click="formData[field.key] = null"
+            />
+          </template>
+        </USelectMenu>
         <UCheckbox
           v-else-if="field.type === 'checkbox'"
           v-model="formData[field.key] as any"
@@ -102,8 +138,12 @@
           v-model="formData[field.key]"
           :accept="field.accept"
           :label="field.fileUploadLabel"
-          variant="area"
+          :description="field.fileUploadDescription"
+          :required="field.required"
+          :file-icon="field.icon"
+          color="neutral"
           size="xl"
+          highlight
         />
       </UFormField>
     </template>
@@ -111,7 +151,7 @@
 </template>
 
 <script setup lang="ts">
-import type { FilterOption, CrudConfig, FormField } from "~/types/crud";
+import type { FilterOption, CrudConfig } from "~/types/crud";
 
 const props = defineProps<{
   api: typeof useApi;
@@ -121,11 +161,13 @@ const props = defineProps<{
 const emit = defineEmits<{
   submit: [data: Record<string, unknown>];
   "validation-change": [isValid: boolean];
+  "new-loading": [newLoading: boolean];
 }>();
 
 const utils = useUtils();
 const loading = ref(false);
 const form = ref();
+const isFileUpload = ref(false);
 
 const formFields = computed(() => {
   if (props.entity && props.config.editFormFields) {
@@ -149,13 +191,13 @@ const formSchema = computed(() => {
 
 const formData = ref<Record<string, unknown>>({});
 
-watch([formFields, () => props.entity], () => {
-  formData.value = initFormData();
-}, { immediate: true });
-
-function getOptions(field: FormField): FilterOption[] {
-  return Array.isArray(field.options) ? (field.options as FilterOption[]) : [];
-}
+watch(
+  [formFields, () => props.entity],
+  () => {
+    formData.value = initFormData();
+  },
+  { immediate: true },
+);
 
 function initFormData() {
   const data: Record<string, unknown> = {};
@@ -167,6 +209,7 @@ function initFormData() {
           : [];
     } else if (field.type === "file") {
       data[field.key] = null;
+      isFileUpload.value = true;
     } else {
       if (props.entity) {
         data[field.key] = props.entity[field.key] ?? "";
@@ -187,18 +230,30 @@ function validate(data) {
   }
 }
 
+function body() {
+  if (!isFileUpload.value) return formData.value;
+
+  const body = new FormData();
+  for (const field of formFields.value) {
+    if (field.key in formData.value) {
+      body.append(field.key, formData.value[field.key]);
+    }
+  }
+  return body;
+}
+
 function save() {
   loading.value = true;
   const request = props.entity
     ? props.api.update(
         `${props.entity.id}/`,
-        formData.value,
+        body(),
         {},
         utils.firstUpper(props.config.entityName),
       )
     : props.api.create(
         "",
-        formData.value,
+        body(),
         {},
         utils.firstUpper(props.config.entityName),
       );
@@ -208,6 +263,7 @@ function save() {
     })
     .finally(() => {
       loading.value = false;
+      emit("new-loading", false);
     });
 }
 

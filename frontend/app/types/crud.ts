@@ -24,20 +24,27 @@ export interface FormField {
   placeholder?: string;
   hint?: string;
   icon?: string;
+  avatar?: Record<string, unknown>;
   options?: FilterOption[];
+  clearable?: boolean;
   accept?: string;
   fileSize?: number;
   fileUploadLabel?: string;
+  fileUploadDescription?: string;
 }
 
 export interface FilterConfig {
   key: string;
   label: string;
   value?: unknown;
-  type: "select" | "text" | "boolean";
+  type: "select" | "text" | "boolean" | "range";
   options?: FilterOption[] | (() => Promise<FilterOption[]>);
   placeholder?: string;
   icon?: string;
+  min?: number;
+  max?: number;
+  step?: number;
+  multiple?: boolean;
 }
 
 export interface CardConfig {

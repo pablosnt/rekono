@@ -74,6 +74,54 @@
               )
           "
         />
+        <UFormField
+          v-else-if="filter.type === 'range'"
+          :label="filter.label"
+          class="w-64"
+        >
+          <USlider
+            :model-value="
+              filter.multiple
+                ? [
+                    _filters[`${filter.key}__gte`] || filter.min || 0,
+                    _filters[`${filter.key}__lte`] || filter.max || 100,
+                  ]
+                : _filters[filter.key]
+            "
+            :min="filter.min || 0"
+            :max="filter.max || 100"
+            :step="filter.step || 1"
+            :multiple="filter.multiple || false"
+            :tooltip="{
+              open: true,
+              content: {
+                side: 'bottom',
+                sideOffset: 8,
+                collisionPadding: 8,
+              },
+            }"
+            @update:model-value="
+              (value) => {
+                if (filter.multiple) {
+                  const isValueValid =
+                    value && Array.isArray(value) && value.length > 0;
+                  updateFilter(
+                    `${filter.key}__gte`,
+                    isValueValid ? Math.min.apply(Math, value) : undefined,
+                    isValueValid ? 300 : undefined,
+                  );
+                  updateFilter(
+                    `${filter.key}__lte`,
+                    isValueValid ? Math.max.apply(Math, value) : undefined,
+                    isValueValid ? 300 : undefined,
+                  );
+                } else {
+                  updateFilter(filter.key, value);
+                }
+              }
+            "
+          />
+        </UFormField>
       </template>
     </div>
   </div>
@@ -90,13 +138,31 @@ const emit = defineEmits<{
   filters: [filters: Record<string, unknown>];
 }>();
 const _filters = ref(props.state.filters);
+const updating = [];
+let delayTimeout: NodeJS.Timeout | null = null;
 
-function updateFilter(key: string, value: unknown) {
+function updateFilter(
+  key: string,
+  value: unknown,
+  delay: number | undefined = undefined,
+) {
+  updating.push(key);
   if (value !== null && value !== undefined && value !== "") {
     _filters.value[key] = value;
   } else {
     delete _filters.value[key];
   }
-  emit("filters", _filters.value);
+  updating.splice(updating.indexOf(key));
+  if (delay) {
+    if (delayTimeout) {
+      clearTimeout(delayTimeout);
+    }
+    delayTimeout = setTimeout(() => {
+      if (updating.includes(key)) return;
+      emit("filters", _filters.value);
+    }, delay);
+  } else {
+    emit("filters", _filters.value);
+  }
 }
 </script>
