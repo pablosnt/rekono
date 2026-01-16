@@ -1,9 +1,10 @@
 <template>
   <UButton
     :color="liked ? 'primary' : 'neutral'"
-    variant="subtle"
+    :variant="variant || 'subtle'"
+    :size="size || 'md'"
     class="gap-2"
-    @click="toggleLike()"
+    @click.stop="toggleLike()"
   >
     <UIcon name="i-lucide-heart" :class="liked ? 'fill-current' : ''" />
     <span>{{ count }}</span>
@@ -16,6 +17,8 @@ const props = defineProps<{
   endpoint: string;
   liked: boolean;
   count: number;
+  variant?: string;
+  size?: string;
 }>();
 
 const emit = defineEmits<{

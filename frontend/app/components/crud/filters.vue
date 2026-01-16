@@ -65,7 +65,7 @@
           "
           :label="filter.label"
           :icon="filter.icon"
-          class="w-64 items-center"
+          class="w-32 items-center"
           @update:model-value="
             (value) =>
               updateFilter(

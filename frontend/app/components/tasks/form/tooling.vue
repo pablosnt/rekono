@@ -1,6 +1,11 @@
 <template>
   <div class="space-y-4 mx-auto mt-3">
-    <UFormField required label="Tooling" name="tooling">
+    <UFormField
+      v-if="!defaultTool && !defaultProcess"
+      required
+      label="Tooling"
+      name="tooling"
+    >
       <USelectMenu
         class="w-full"
         :icon="toolingIcon"

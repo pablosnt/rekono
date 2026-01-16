@@ -35,12 +35,16 @@
         v-if="
           state.items.length === 0 &&
           !state.loading &&
-          Object.keys(state.filters).length === 0 &&
-          !state.searchQuery
+          ((Object.keys(state.filters).length === 0 && !state.searchQuery) ||
+            config.useGrid)
         "
         class="mt-10"
         :title="`No ${config.entityNamePlural.toLowerCase()} found`"
-        :description="`It looks like you don\'t have access to any ${config.entityName.toLowerCase()} yet. ${config.canCreate ? 'You can create one below.' : 'Please contact your administrator.'}`"
+        :description="
+          Object.keys(state.filters).length === 0 && !state.searchQuery
+            ? `It looks like you don\'t have access to any ${config.entityName.toLowerCase()} yet. ${config.canCreate ? 'You can create one below.' : 'Please contact your administrator.'}`
+            : `The current search criteria don't match any ${config.entityName.toLowerCase()}. Change your query and retry`
+        "
         :icon="config.icon"
         :actions="
           config.canCreate
@@ -60,7 +64,7 @@
       />
 
       <CrudTable
-        v-if="config.tableColumns"
+        v-if="config.tableColumns && !config.useGrid"
         v-show="state.items.length > 0 || state.loading"
         ref="tableRef"
         :config="config"
@@ -83,7 +87,29 @@
         </template>
       </CrudTable>
 
-      <!-- todo: Cards -->
+      <template v-if="config.useGrid">
+        <UProgress v-if="state.loading" />
+        <UPageGrid v-show="state.items.length > 0">
+          <slot
+            v-for="item in state.items"
+            :key="item.id"
+            name="item"
+            :item="item"
+            :on-edit="
+              () => {
+                selectedItem = item;
+                openEditModal = true;
+              }
+            "
+            :on-delete="
+              () => {
+                selectedItem = item;
+                openDeleteModal = true;
+              }
+            "
+          />
+        </UPageGrid>
+      </template>
 
       <CrudFormModal
         v-if="config.canEdit"

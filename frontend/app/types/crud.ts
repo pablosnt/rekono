@@ -47,26 +47,6 @@ export interface FilterConfig {
   multiple?: boolean;
 }
 
-export interface CardConfig {
-  title: string;
-  description?: string;
-  icon?: string;
-  avatar?: {
-    text: string;
-    class?: string;
-  };
-  badges?: Array<{
-    label: string;
-    color: string;
-  }>;
-  meta?: Array<{
-    label: string;
-    value: string;
-    icon?: string;
-  }>;
-  to?: string;
-}
-
 export type CrudTableColumn<T> = TableColumn<T> & {
   icon?: string;
 };
@@ -84,7 +64,7 @@ export interface CrudConfig<T = unknown> {
   breadcrumbs?: BreadcrumbItem[];
   tableColumns?: CrudTableColumn<T>[];
   tableColumnsVisibility?: Record<string, boolean>;
-  cardFormatter?: (item: T) => CardConfig;
+  useGrid?: boolean;
   itemLink?: (item: T) => string;
   onItemClick?: (item: T) => void;
   searchable: boolean;
