@@ -1,7 +1,7 @@
 <template>
   <UModal
     :open="open"
-    :title="`Delete ${config.entityName}`"
+    :title="`${config.deleteVerb || 'Delete'} ${config.entityName}`"
     :ui="{ content: 'sm:max-w-3xl sm:max-h-xl', footer: 'justify-end' }"
     :loading="loading"
     @update:open="(val) => $emit('open', val)"
@@ -33,7 +33,7 @@
       />
       <UButton
         color="primary"
-        label="Delete"
+        :label="config.deleteVerb || 'Delete'"
         :loading="loading"
         @click="remove"
       />

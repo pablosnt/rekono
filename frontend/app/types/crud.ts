@@ -87,6 +87,7 @@ export interface CrudConfig<T = unknown> {
   editForm?: object;
   updateOnEditModalOpen?: boolean;
   deleteMessage?: (item: T) => ComponentDetails[];
+  deleteVerb?: string;
   canRead: boolean;
   canCreate: boolean;
   canEdit: boolean | ((item: T) => boolean);

@@ -8,6 +8,7 @@ implement secure authentication workflows with comprehensive validation and logg
 from typing import Any
 
 from django.core.exceptions import ValidationError
+from django.utils import timezone
 from rest_framework import status
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.permissions import IsAuthenticated
@@ -55,6 +56,8 @@ class JwtAuthentication(LoggingEntity):
         """
         User.objects.invalidate_all_tokens(self.user)
         token = self.__class__.get_token(self.user)
+        self.user.last_login = timezone.now()
+        self.user.save(update_fields=["last_login"])
         SMTP().login_notification(self.user)
         self.logger.info(f"[Security] User {self.user.id} has logged in", extra={"user": self.user.id})
         return {"access": str(token.access_token), "refresh": str(token)}

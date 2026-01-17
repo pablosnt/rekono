@@ -4,7 +4,7 @@
       <UPageCard
         :title="item.name"
         :description="`./${item.command}${item.script ? ` ${item.script}` : ''}`"
-        variant="outline"
+        variant="subtle"
         spotlight
         class="cursor-pointer"
         @click="onCardClick($event.target, item.reference)"
