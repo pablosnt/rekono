@@ -1,7 +1,7 @@
 <template>
   <CrudPage :config="config">
     <template #item="{ item, onEdit, onDelete }">
-      <UPageCard variant="subtle">
+      <UPageCard variant="subtle" spotlight>
         <template #leading>
           <div class="flex justify-end gap-2 items-start">
             <UUser

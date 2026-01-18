@@ -4,11 +4,11 @@
         "pk": 1,
         "fields": {
             "key": "defectdojo",
-            "name": "Defect-Dojo",
+            "name": "DefectDojo",
             "description": "Vulnerability management platform where Rekono will import findings when synchronization is enabled at project level",
             "enabled": true,
             "reference": "https://www.defectdojo.com/",
-            "icon": "https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/master/docs/static/favicons/apple-touch-icon.png"
+            "icon": "https://defectdojo.com/hubfs/DefectDojo_Symbol_Color-1.png"
         }
     },
     {
@@ -31,8 +31,8 @@
             "name": "HackTricks",
             "description": "Wiki that includes extensive documentation about hacking techniques and tricks, and whose resources will be linked by Rekono",
             "enabled": true,
-            "reference": "https://book.hacktricks.xyz/",
-            "icon": "https://raw.githubusercontent.com/HackTricks-wiki/hacktricks/master/.gitbook/assets/HACKTRICKS-logo.svg"
+            "reference": "https://book.hacktricks.wiki/",
+            "icon": "https://book.hacktricks.wiki/en/favicon.svg"
         }
     },
     {
@@ -44,7 +44,7 @@
             "description": "Platform that identifies the most trending CVEs at the moment based on their impact on social networks, and whose data will be used by Rekono to check if the CVEs detected are trending or not",
             "enabled": true,
             "reference": "https://cvecrowd.com/",
-            "icon": "https://cvecrowd.com/icon-small-crowd.svg"
+            "icon": "https://cvecrowd.com/static/img/icon-small-crowd.svg"
         }
     },
     {

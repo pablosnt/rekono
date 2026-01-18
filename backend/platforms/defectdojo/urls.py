@@ -16,10 +16,10 @@ from platforms.defectdojo.views import (
 )
 
 router = SimpleRouter()
-router.register("defect-dojo/settings", DefectDojoSettingsViewSet)
-router.register("defect-dojo/sync", DefectDojoSyncViewSet)
-router.register("defect-dojo/product-types", DefectDojoProductTypeViewSet, basename="defect-dojo_product-type")
-router.register("defect-dojo/products", DefectDojoProductViewSet, basename="defect-dojo_product")
-router.register("defect-dojo/engagements", DefectDojoEngagementViewSet, basename="defect-dojo_engagement")
+router.register("defectdojo/settings", DefectDojoSettingsViewSet)
+router.register("defectdojo/sync", DefectDojoSyncViewSet)
+router.register("defectdojo/product-types", DefectDojoProductTypeViewSet, basename="defectdojo_product-type")
+router.register("defectdojo/products", DefectDojoProductViewSet, basename="defectdojo_product")
+router.register("defectdojo/engagements", DefectDojoEngagementViewSet, basename="defectdojo_engagement")
 
 urlpatterns = router.urls

@@ -131,7 +131,7 @@ class BaseDefectDojoSerializer(DefectDojoClientMixin, Serializer):
             ValidationError: If DefectDojo is unavailable or referenced entities don't exist
         """
         if not self.client.is_available():
-            raise ValidationError("Defect-Dojo integration is not configured", code="defect-dojo")
+            raise ValidationError("DefectDojo integration is not configured", code="defectdojo")
         attrs = super().validate(attrs)
         for entity in ["product_type", "product", "engagement"]:
             value = attrs.get(f"{entity}_id") or attrs.get(entity)
@@ -268,7 +268,7 @@ class DefectDojoProductSerializer(BaseDefectDojoSerializer):
         validators=[Validator(Regex.TEXT, code="description")],
         write_only=True,
     )
-    # Needed to add project tags to Defect-Dojo product
+    # Needed to add project tags to DefectDojo product
     project_id = PrimaryKeyRelatedField(
         required=True,
         queryset=Project.objects.all(),

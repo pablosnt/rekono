@@ -55,7 +55,7 @@ def exception(*args: Any, **kwargs: Any) -> Any:
 
 
 class DefectDojoEntitiesTest(ApiTest, TestCase):
-    endpoint = "/api/defect-dojo/"
+    endpoint = "/api/defectdojo/"
     valid = {"name": "test", "description": "test"}
     invalid = {"name": "te;st", "description": "te;st"}
     entity_cases = [
@@ -129,7 +129,7 @@ sync: dict[str, Any] = {"project": 1, "product_type_id": 1, "product_id": 1, "en
 
 
 class DefectDojoIntegrationTest(BaseTest, TestCase):
-    endpoint = "/api/defect-dojo/"
+    endpoint = "/api/defectdojo/"
     data = [SetupProject()]
 
     @mock.patch("platforms.defectdojo.integrations.DefectDojo.is_available", return_true)
@@ -215,7 +215,7 @@ invalid_settings = {
 
 
 class DefectDojoSettingsTest(ApiTestNoData, TestCase):
-    endpoint = "/api/defect-dojo/settings/1/"
+    endpoint = "/api/defectdojo/settings/1/"
     expected_string = "DefectDojoSettings"
     cases = [
         ApiTestCase([Role.AUDITOR, Role.READER], 403),
@@ -255,7 +255,7 @@ sync2 = {"project": 1, "product_type_id": 1, "product_id": 1, "engagement_id": N
 
 
 class DefectDojoSyncTest(ApiTest, TestCase):
-    endpoint = "/api/defect-dojo/sync/"
+    endpoint = "/api/defectdojo/sync/"
     expected_string = "Project 1 - 1 - 1 - 1"
     data = [SetupProject(targets_and_tasks=0)]
     cases = [

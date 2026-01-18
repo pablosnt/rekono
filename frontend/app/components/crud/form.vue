@@ -17,13 +17,24 @@
         :hint="field.hint"
       >
         <UInput
-          v-if="field.type === 'text' || field.type === 'number'"
-          v-model="formData[field.key] as any"
+          v-if="field.type === 'text' || field.type === 'password' || field.type === 'number'"
+          v-model="formData[field.key] as string"
           class="w-full"
           :placeholder="field.placeholder"
           :icon="field.icon"
           :required="field.required"
           :type="field.type"
+          size="lg"
+        />
+        <UInputNumber
+          v-if="field.type === 'number'"
+          v-model="formData[field.key] as number"
+          class="w-full"
+          :placeholder="field.placeholder"
+          :min="field.min"
+          :max="field.max"
+          :step="field.step"
+          :required="field.required"
           size="lg"
         />
         <UTextarea

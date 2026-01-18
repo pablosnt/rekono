@@ -12,7 +12,7 @@ from tests.framework.cases import ApiTestCase, PutApiTestCase
 
 class IntegrationTest(ApiTestNoData, TestCase):
     endpoint = "/api/integrations/"
-    expected_string = "Defect-Dojo"
+    expected_string = "DefectDojo"
     cases = [
         ApiTestCase(
             [Role.ADMIN, Role.AUDITOR, Role.READER],

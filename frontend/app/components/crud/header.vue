@@ -35,6 +35,7 @@
         />
 
         <UDropdownMenu
+          v-if="config.ordering?.length"
           :items="
             config.ordering?.map(
               (ordering: string | { id: string; label: string }) => {

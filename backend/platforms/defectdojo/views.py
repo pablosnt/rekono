@@ -101,7 +101,7 @@ class DefectDojoEntityViewSet(BaseViewSet):
             return Response({"id": response.get("id")}, status=status.HTTP_201_CREATED)
         except Exception:
             return Response(
-                {"defect-dojo": "Error creating instance on Defect-Dojo"}, status=status.HTTP_400_BAD_REQUEST
+                {"defectdojo": "Error creating instance on DefectDojo"}, status=status.HTTP_400_BAD_REQUEST
             )
 
 
