@@ -8,6 +8,7 @@ export default defineAppConfig({
     icons: {
       light: "i-lucide-sun",
       dark: "i-lucide-moon",
+      loading: "i-lucide-loader",
     },
   },
 });

@@ -54,7 +54,6 @@
       @submit="(data) => updateSettings(selectedIntegration.id, data)"
     >
       <template #before-close="{ loading }">
-        <!-- TODO: Use this loading-icon everywhere -->
         <UTooltip
           :text="
             currentIntegrationSettings?.item?.is_available
@@ -69,7 +68,6 @@
                 : 'error'
             "
             variant="ghost"
-            loading-icon="i-lucide-loader"
             :loading="loading"
             :icon="
               currentIntegrationSettings?.item?.is_available
