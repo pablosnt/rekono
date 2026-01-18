@@ -36,7 +36,7 @@ class CveCrowd(BaseIntegration):
     finding_types = [Vulnerability]
     url = "https://api.cvecrowd.com/api/v1/cves"
 
-    @cached_property
+    @property
     def settings(self) -> CveCrowdSettings:
         """Get CVE Crowd platform configuration settings from database.
 

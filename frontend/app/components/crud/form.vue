@@ -12,15 +12,12 @@
     <template v-for="field in formFields" :key="field.key">
       <UFormField
         :name="field.key"
-        :label="field.label"
+        :label="field.type !== 'checkbox' ? field.label : undefined"
         :required="field.required"
         :hint="field.hint"
       >
         <UInput
-          v-if="
-            field.type === 'text' ||
-            field.type === 'password'
-          "
+          v-if="field.type === 'text' || field.type === 'password'"
           v-model="formData[field.key] as string"
           class="w-full"
           :placeholder="field.placeholder"

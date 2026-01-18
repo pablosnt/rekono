@@ -64,5 +64,18 @@ export default function () {
     return regex(field, required, max, /^[\w\d.:\-/]{1,100}$/);
   }
 
-  return { passwordPolicy, name, text, cve, target };
+  function secret(
+    field: string = "secret",
+    required: boolean = true,
+    max: number = 500,
+  ) {
+    return regex(
+      field,
+      required,
+      max,
+      /^[\w\s./\-=+,:<>¿?¡!#&$()@%[\]{}*]{1,500}$/,
+    );
+  }
+
+  return { passwordPolicy, name, text, cve, target, secret };
 }

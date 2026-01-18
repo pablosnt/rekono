@@ -29,12 +29,15 @@
             {{ modalTitle }}
           </p>
         </div>
-        <UButton
-          icon="i-lucide-x"
-          variant="ghost"
-          color="neutral"
-          @click="close"
-        />
+        <div class="flex items-center gap-2">
+          <slot name="before-close" :loading="loading" />
+          <UButton
+            icon="i-lucide-x"
+            variant="ghost"
+            color="neutral"
+            @click="close"
+          />
+        </div>
       </div>
     </template>
     <template #body>
@@ -90,7 +93,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   open: [open: boolean];
-  submit: [];
+  submit: [data: Record<string, unknown>];
 }>();
 
 const form = ref();
@@ -136,7 +139,7 @@ const handleSubmit = (data: Record<string, unknown>) => {
   if (props.config.onCreation) {
     props.config.onCreation(data);
   }
-  emit("submit");
+  emit("submit", data);
   emit("open", false);
   updatedTitle.value = null;
   updatedSubmitLabel.value = null;

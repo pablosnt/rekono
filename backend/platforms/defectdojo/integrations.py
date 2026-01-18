@@ -58,7 +58,7 @@ class DefectDojo(BaseIntegration):
         Severity.CRITICAL: "S5",
     }
 
-    @cached_property
+    @property
     def settings(self) -> DefectDojoSettings:
         """Get DefectDojo integration configuration settings from database.
 

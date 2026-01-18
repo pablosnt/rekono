@@ -6,7 +6,6 @@ assessment for discovered hosts and domains. The integration automatically proce
 Host findings to enrich them with comprehensive threat intelligence data.
 """
 
-from functools import cached_property
 from typing import Any, Callable
 
 from executions.models import Execution
@@ -41,7 +40,7 @@ class VirusTotal(BaseIntegration):
     finding_types = [Host]
     url = "https://www.virustotal.com/api/v3/"
 
-    @cached_property
+    @property
     def settings(self) -> VirusTotalSettings:
         """Get VirusTotal platform configuration settings from database.
 

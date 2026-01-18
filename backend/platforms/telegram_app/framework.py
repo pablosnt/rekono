@@ -29,7 +29,7 @@ class BaseTelegram(LoggingEntity):
 
     date_format = "%Y-%m-%d %H:%M:%S"
 
-    @cached_property
+    @property
     def settings(self) -> TelegramSettings:
         """Get Telegram Bot configuration settings from database.
 

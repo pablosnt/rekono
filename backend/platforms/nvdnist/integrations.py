@@ -5,7 +5,6 @@ automated vulnerability enrichment, CVSS scoring, and security intelligence
 gathering during security assessments.
 """
 
-from functools import cached_property
 from typing import Any
 
 from executions.models import Execution
@@ -50,7 +49,7 @@ class NvdNist(BaseIntegration):
         Severity.INFO: (0, 2),
     }
 
-    @cached_property
+    @property
     def settings(self) -> NvdNistSettings:
         """Get NVD NIST platform configuration settings from database.
 
@@ -59,8 +58,7 @@ class NvdNist(BaseIntegration):
         """
         return NvdNistSettings.objects.first()
 
-    @property
-    def is_api_token_available(self) -> bool:
+    def is_available(self) -> bool:
         """Check if NVD API token is configured and functional.
 
         Tests the API token by making a request to retrieve information
@@ -69,8 +67,6 @@ class NvdNist(BaseIntegration):
         Returns:
             bool: True if API token is valid and functional, False otherwise
         """
-        if self.settings.secret is None:
-            return False
         try:
             # Test the API token by getting Log4Shell information
             self._get_cve("CVE-2021-44228")

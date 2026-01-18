@@ -52,7 +52,7 @@ class SMTP(BaseNotification):
     enable_field = "email_notifications"
     datetime_format = "%Y-%m-%d %H:%M %Z"
 
-    @cached_property
+    @property
     def settings(self) -> SMTPSettings:
         """Get SMTP server configuration settings from database.
 
