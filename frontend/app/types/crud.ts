@@ -86,6 +86,8 @@ export interface CrudConfig<T = unknown> {
   editFormSchema?: z.ZodType;
   editForm?: object;
   updateOnEditModalOpen?: boolean;
+  modalIcon?: string | ((item: T) => string);
+  modalAvatar?: (item: T) => Record<string, unknown>;
   deleteMessage?: (item: T) => ComponentDetails[];
   deleteVerb?: string;
   canRead: boolean;

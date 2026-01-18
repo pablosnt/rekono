@@ -236,7 +236,9 @@ const config: CrudConfig<User> = reactive({
     ),
   }),
   updateOnEditModalOpen: true,
-  deleteVerb: "Disable",
+  modalAvatar: (user: User) => ({
+    text: utils.getUserDisplayName(user).charAt(0).toUpperCase(),
+  }),
   deleteMessage: (user: User) => [
     {
       component: h(
@@ -256,6 +258,7 @@ const config: CrudConfig<User> = reactive({
       },
     },
   ],
+  deleteVerb: "Disable",
   canRead: userStore.is_admin,
   canCreate: userStore.is_admin,
   canEdit: userStore.is_admin,

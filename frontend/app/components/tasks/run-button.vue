@@ -37,13 +37,18 @@
 </template>
 
 <script setup lang="ts">
-defineProps<{
-  project?: number;
-  target?: number;
-  targetPort?: number;
-  tool?: number;
-  process?: number;
-  configuration?: number;
+import type { Process } from "~/types/processes";
+import type { Project } from "~/types/projects";
+import type { Configuration, Tool } from "~/types/tools";
+
+const props = defineProps<{
+  project?: Project;
+  // todo: typing
+  target?: object;
+  targetPort?: object;
+  tool?: Tool;
+  process?: Process;
+  configuration?: Configuration;
 }>();
 
 const api = useApi("/api/tasks/");
@@ -52,6 +57,10 @@ const config = {
   editForm: resolveComponent("TasksForm"),
   // todo: Redirection path is likely to be projects/project-id/scans/scan-id
   onCreation: (data: Record<string, unknown>) => navigateTo(`scans/${data.id}`),
+  modalAvatar: () =>
+    props.tool && props.tool.icon ? { src: props.tool.icon } : undefined,
+  modalIcon: () =>
+    props.tool && !props.tool.icon ? "i-lucide-square-terminal" : undefined,
 };
 const openModal = ref(false);
 </script>

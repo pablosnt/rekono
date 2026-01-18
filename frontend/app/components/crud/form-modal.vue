@@ -13,6 +13,30 @@
     "
     @update:open="(value: boolean) => $emit('open', value)"
   >
+    <template #header="{ close }">
+      <div
+        v-if="modalAvatar || modalIcon"
+        class="flex items-center justify-between w-full"
+      >
+        <div class="flex items-center gap-2">
+          <UAvatar v-if="modalAvatar" v-bind="modalAvatar" />
+          <UIcon
+            v-else-if="modalIcon"
+            :name="modalIcon"
+            class="text-xl text-primary"
+          />
+          <p class="text-gray-900 dark:text-white font-bold text-lg">
+            {{ modalTitle }}
+          </p>
+        </div>
+        <UButton
+          icon="i-lucide-x"
+          variant="ghost"
+          color="neutral"
+          @click="close"
+        />
+      </div>
+    </template>
     <template #body>
       <component
         :is="formComponent"
@@ -84,6 +108,20 @@ const modalTitle = computed(
       ? `Edit ${props.config.entityName}`
       : `New ${props.config.entityName}`),
 );
+const modalAvatar = computed(() => {
+  return props.config.modalAvatar && props.item
+    ? props.config.modalAvatar(props.item) || undefined
+    : undefined;
+});
+const modalIcon = computed(() => {
+  return props.config.modalIcon
+    ? typeof props.config.modalIcon === "string"
+      ? props.config.modalIcon
+      : props.item
+        ? props.config.modalIcon(props.item)
+        : undefined
+    : undefined;
+});
 const updatedSubmitLabel = ref();
 const submitButton = computed(
   () =>

@@ -17,7 +17,10 @@
         :hint="field.hint"
       >
         <UInput
-          v-if="field.type === 'text' || field.type === 'password' || field.type === 'number'"
+          v-if="
+            field.type === 'text' ||
+            field.type === 'password'
+          "
           v-model="formData[field.key] as string"
           class="w-full"
           :placeholder="field.placeholder"
