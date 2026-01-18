@@ -100,17 +100,10 @@ class DefectDojoSettingsSerializer(DefectDojoClientMixin, ModelSerializer):
         """
         attrs = super().validate(attrs)
         if attrs.get("server"):
-            if not attrs.get("secret"):
-                attrs["server"] = None
-                attrs["secret"] = None
-            else:
-                if "/api/v2" in attrs["server"]:
-                    attrs["server"] = attrs["server"].replace("/api/v2", "")
-                if attrs["server"][-1] == "/":
-                    attrs["server"] = attrs["server"][:-1]
-        else:
-            attrs["secret"] = None
-            attrs["server"] = None
+            if "/api/v2" in attrs["server"]:
+                attrs["server"] = attrs["server"].replace("/api/v2", "")
+            if attrs["server"][-1] == "/":
+                attrs["server"] = attrs["server"][:-1]
         return attrs
 
 

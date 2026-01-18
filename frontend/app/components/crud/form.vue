@@ -242,11 +242,28 @@ function validate(data) {
 }
 
 function body() {
-  if (!isFileUpload.value) return formData.value;
-
+  if (!isFileUpload.value) {
+    const data = { ...formData.value };
+    for (const field of formFields.value) {
+      if (field.type === "password" && typeof data[field.key] === "string") {
+        if (/^\*+$/.test(data[field.key])) {
+          delete data[field.key];
+        }
+      }
+    }
+    return data;
+  }
   const body = new FormData();
   for (const field of formFields.value) {
     if (field.key in formData.value) {
+      if (
+        field.type === "password" &&
+        typeof formData.value[field.key] === "string"
+      ) {
+        if (/^\*+$/.test(formData.value[field.key])) {
+          continue;
+        }
+      }
       body.append(field.key, formData.value[field.key]);
     }
   }

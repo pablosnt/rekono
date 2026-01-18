@@ -273,7 +273,6 @@ function getIntegrationState(item: Integration) {
 }
 
 function toggleIntegration(integration: Integration, enabled: boolean) {
-  // TODO: Whe the value only contains * the request must not be sent. Otherwise it overwrittes the value in the database, making it invalid
   if (
     integration.id in integrationsSettings.value &&
     !integrationsSettings.value[integration.id].item.is_available
