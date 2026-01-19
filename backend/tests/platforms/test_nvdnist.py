@@ -99,18 +99,18 @@ class NvdNistTest(BaseTest, TestCase):
         self._test(Severity.LOW, None, None, "test")
 
     @mock.patch("platforms.nvdnist.integrations.NvdNist._request", success_cvss_3)
-    def test_is_api_token_available(self) -> None:
-        self.assertTrue(self.nvdnist.is_api_token_available)
+    def test_is_available(self) -> None:
+        self.assertTrue(self.nvdnist.is_available())
 
     @mock.patch("platforms.nvdnist.integrations.NvdNist._request", success_cvss_3)
     def test_is_api_token_not_available_1(self) -> None:
         self.settings.secret = None
         self.settings.save(update_fields=["_api_token"])
-        self.assertFalse(self.nvdnist.is_api_token_available)
+        self.assertFalse(self.nvdnist.is_available())
 
     @mock.patch("platforms.nvdnist.integrations.NvdNist._request", not_found)
     def test_is_api_token_not_available_2(self) -> None:
-        self.assertFalse(self.nvdnist.is_api_token_available)
+        self.assertFalse(self.nvdnist.is_available())
 
 
 new_settings = {"api_token": "nvd-nist-token"}
