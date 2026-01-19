@@ -100,9 +100,7 @@ class DefectDojoEntityViewSet(BaseViewSet):
             response = serializer.create(serializer.validated_data)
             return Response({"id": response.get("id")}, status=status.HTTP_201_CREATED)
         except Exception:
-            return Response(
-                {"defectdojo": "Error creating instance on DefectDojo"}, status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response({"defectdojo": "Error creating instance on DefectDojo"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class DefectDojoProductTypeViewSet(DefectDojoEntityViewSet):
