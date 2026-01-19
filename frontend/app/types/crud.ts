@@ -87,6 +87,7 @@ export interface CrudConfig<T = unknown> {
   editForm?: object;
   updateOnEditModalOpen?: boolean;
   modalIcon?: string | ((item: T) => string);
+  modalIconClass?: string;
   modalAvatar?: (item: T) => Record<string, unknown>;
   deleteMessage?: (item: T) => ComponentDetails[];
   deleteVerb?: string;

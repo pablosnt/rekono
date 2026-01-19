@@ -36,8 +36,6 @@ class TelegramSettingsSerializer(ModelSerializer, LoggingEntity):
     bot = SerializerMethodField(read_only=True)
     is_available = SerializerMethodField(read_only=True)
 
-    client = Telegram()
-
     class Meta:
         """Meta configuration for TelegramSettingsSerializer.
 
@@ -48,6 +46,13 @@ class TelegramSettingsSerializer(ModelSerializer, LoggingEntity):
 
         model = TelegramSettings
         fields = ("id", "token", "bot", "is_available")
+
+    @property
+    def client(self) -> Telegram:
+        client = Telegram()
+        client.initialize()
+        client.settings = TelegramSettings.objects.first()
+        return client
 
     def get_bot(self, instance: TelegramSettings) -> str | None:
         """Get the Telegram Bot name from the client.
@@ -60,7 +65,6 @@ class TelegramSettingsSerializer(ModelSerializer, LoggingEntity):
         Returns:
             str | None: The Bot name if available, None otherwise.
         """
-        self.client.initialize()
         return self.client.bot_name
 
     def get_is_available(self, instance: TelegramSettings) -> bool:

@@ -14,16 +14,13 @@
     @update:open="(value: boolean) => $emit('open', value)"
   >
     <template #header="{ close }">
-      <div
-        v-if="modalAvatar || modalIcon"
-        class="flex items-center justify-between w-full"
-      >
+      <div class="flex items-center justify-between w-full">
         <div class="flex items-center gap-2">
           <UAvatar v-if="modalAvatar" v-bind="modalAvatar" />
           <UIcon
             v-else-if="modalIcon"
             :name="modalIcon"
-            class="text-xl text-primary"
+            :class="config.modalIconClass || 'text-xl text-primary'"
           />
           <p class="text-gray-900 dark:text-white font-bold text-lg">
             {{ modalTitle }}
