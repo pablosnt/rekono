@@ -223,9 +223,9 @@ onMounted(() => {
       defaultOpen: false,
       children: [
         {
-          label: "Settings",
+          label: "System",
           icon: "i-lucide-settings",
-          to: "/admin/settings",
+          to: "/admin/system",
         },
         {
           label: "Integrations",
