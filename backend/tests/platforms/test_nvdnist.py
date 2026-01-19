@@ -103,13 +103,13 @@ class NvdNistTest(BaseTest, TestCase):
         self.assertTrue(self.nvdnist.is_available())
 
     @mock.patch("platforms.nvdnist.integrations.NvdNist._request", success_cvss_3)
-    def test_is_api_token_not_available_1(self) -> None:
+    def test_is_available_1(self) -> None:
         self.settings.secret = None
         self.settings.save(update_fields=["_api_token"])
-        self.assertFalse(self.nvdnist.is_available())
+        self.assertTrue(self.nvdnist.is_available())
 
     @mock.patch("platforms.nvdnist.integrations.NvdNist._request", not_found)
-    def test_is_api_token_not_available_2(self) -> None:
+    def test_is_not_available(self) -> None:
         self.assertFalse(self.nvdnist.is_available())
 
 
