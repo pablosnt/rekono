@@ -49,6 +49,14 @@ class TelegramSettingsSerializer(ModelSerializer, LoggingEntity):
 
     @property
     def client(self) -> Telegram:
+        """Initialize and configure a Telegram client instance.
+
+        Creates a new Telegram client, initializes it, and configures it with
+        the first available TelegramSettings instance from the database.
+
+        Returns:
+            Telegram: Configured Telegram client instance ready for API operations.
+        """
         client = Telegram()
         client.initialize()
         client.settings = TelegramSettings.objects.first()

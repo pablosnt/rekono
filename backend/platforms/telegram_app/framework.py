@@ -25,6 +25,8 @@ class BaseTelegram(LoggingEntity):
 
     Attributes:
         date_format (str): Standard date format for message timestamps.
+        _app (Application | None): Telegram application client
+        _initialized (bool): Indicates if the Telegram bot has been initialized or not
     """
 
     date_format = "%Y-%m-%d %H:%M:%S"
