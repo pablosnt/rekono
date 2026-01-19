@@ -78,6 +78,7 @@
         </UTooltip>
       </template>
     </CrudFormModal>
+    <!-- TODO: Notifications -->
   </div>
 </template>
 
@@ -87,6 +88,7 @@ import type { Integration } from "~/types/integrations";
 import { useUserStore } from "~/store/user";
 import * as z from "zod";
 
+const toast = useToast();
 const userStore = useUserStore();
 const validation = useValidation();
 const api = useApi("/api/integrations/");
@@ -282,11 +284,14 @@ function toggleIntegration(integration: Integration, enabled: boolean) {
     selectedIntegration.value = integration;
     enableIfAvailable = integration;
   } else {
-    api
-      .update(`${integration.id}/`, { enabled: enabled }, {}, "Integration")
-      .then(() => {
-        integration.enabled = enabled;
+    api.update(`${integration.id}/`, { enabled: enabled }, {}).then(() => {
+      integration.enabled = enabled;
+      toast.add({
+        title: integration.name,
+        description: `${integration.name} integration has been ${enabled ? "enabled" : "disabled"}`,
+        color: enabled ? "success" : "warning",
       });
+    });
   }
 }
 
