@@ -58,13 +58,13 @@ const emit = defineEmits<{
   "update-technologies": [newTechnologies: Array<number>];
 }>();
 
-const validate = useValidation();
+const validation = useValidation();
 const toast = useToast();
 const technologies = ref([]);
 const technologyOptions = ref([]);
 const schema = z.object({
-  name: validate.name(),
-  version: validate.name("version", false),
+  name: validation.name(),
+  version: validation.name("version", false),
 });
 
 function loadTechnologies() {

@@ -132,7 +132,7 @@ import { useUserStore } from "~/store/user";
 
 const smtpApi = useApi("/api/smtp/");
 const telegramApi = useApi("/api/telegram/settings/");
-const validate = useValidation();
+const validation = useValidation();
 const userStore = useUserStore();
 const loadingSmtp = ref(false);
 const loadingTelegram = ref(false);
@@ -179,10 +179,10 @@ const smtpConfig = ref({
     },
   ],
   editFormSchema: z.object({
-    host: validate.target("host", false, 100).or(z.literal("")),
+    host: validation.target("host", false, 100).or(z.literal("")),
     port: z.number().min(0).max(65535).optional(),
-    username: validate.name("username", false, 100).or(z.literal("")),
-    password: validate.secret("password", false, 200).or(z.literal("")),
+    username: validation.name("username", false, 100).or(z.literal("")),
+    password: validation.secret("password", false, 200).or(z.literal("")),
     tls: z.boolean().optional(),
   }),
   modalIcon: "i-lucide-mail",
@@ -202,7 +202,7 @@ const telegramConfig = ref({
     },
   ],
   editFormSchema: z.object({
-    token: validate.secret("token", false, 200).or(z.literal("")),
+    token: validation.secret("token", false, 200).or(z.literal("")),
   }),
   modalIcon: "i-simple-icons-telegram",
   modalIconClass: "text-xl text-info",

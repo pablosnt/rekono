@@ -70,10 +70,12 @@ export interface CrudConfig<T = unknown> {
   searchable: boolean;
   searchPlaceholder?: string;
   filters?: FilterConfig[];
+  defaultFilters?: Record<string, string | number>;
   ordering?: Array<string | { id: string; label: string }>;
   defaultOrdering: string;
   pageSize?: number;
   pageSizeOptions?: number[];
+  defaultBody?: Record<string, string | number>;
   formFields?: FormField[];
   formSchema?: z.ZodType;
   formFullscreen?: boolean;

@@ -55,12 +55,12 @@ const emit = defineEmits<{
   "update-vulnerabilities": [newVulnerabilities: Array<number>];
 }>();
 
-const validate = useValidation();
+const validation = useValidation();
 const toast = useToast();
 const vulnerabilities = ref([]);
 const vulnerabilityOptions = ref([]);
 const schema = z.object({
-  cve: validate.cve(),
+  cve: validation.cve(),
 });
 
 function loadVulnerabilities() {

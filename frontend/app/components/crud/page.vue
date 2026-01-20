@@ -31,6 +31,8 @@
         @open-create="(open: boolean) => (openCreateModal = open)"
       />
 
+      <slot name="before" :state="state" />
+
       <slot name="content">
         <UEmpty
           v-if="
@@ -191,7 +193,7 @@ const state = reactive<CrudState>({
   loading: true,
   page: 1,
   pageSize: props.config.pageSize || 24,
-  filters: {},
+  filters: props.config.defaultFilters || {},
   ordering: props.config.defaultOrdering,
 });
 

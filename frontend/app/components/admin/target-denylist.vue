@@ -51,12 +51,13 @@ const config: CrudConfig<TargetDenylist> = reactive({
   tableColumnsVisibility: {
     id: false,
   },
-  searchable: false,
+  searchable: true,
+  searchPlaceholder: "Search denied targets...",
   filters: [],
   ordering: ["id", "target", "default"],
   defaultOrdering: "-id",
-  pageSize: 15,
-  pageSizeOptions: [15, 25, 50, 100],
+  pageSize: 5,
+  pageSizeOptions: [5, 25, 50, 100],
   formFields: [
     {
       key: "target",

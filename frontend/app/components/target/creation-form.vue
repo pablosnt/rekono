@@ -69,9 +69,9 @@ const emit = defineEmits<{
 
 const genericApi = useApi("/api/");
 const toast = useToast();
-const validate = useValidation();
+const validation = useValidation();
 const schema = z.object({
-  target: validate.target(),
+  target: validation.target(),
 });
 const targetInput = ref("");
 const targets = ref<string[]>([]);

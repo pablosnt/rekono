@@ -251,7 +251,7 @@ function validate(data) {
 
 function body() {
   if (!isFileUpload.value) {
-    const data = { ...formData.value };
+    const data = { ...formData.value, ...(props.config.defaultBody || {}) };
     for (const field of formFields.value) {
       if (field.type === "password" && typeof data[field.key] === "string") {
         if (/^\*+$/.test(data[field.key])) {
@@ -260,22 +260,26 @@ function body() {
       }
     }
     return data;
-  }
-  const body = new FormData();
-  for (const field of formFields.value) {
-    if (field.key in formData.value) {
-      if (
-        field.type === "password" &&
-        typeof formData.value[field.key] === "string"
-      ) {
-        if (/^\*+$/.test(formData.value[field.key])) {
-          continue;
-        }
-      }
-      body.append(field.key, formData.value[field.key]);
+  } else {
+    const body = new FormData();
+    for (const field of Object.keys(props.config.defaultBody || {})) {
+      body.append(field, props.config.defaultBody[field]);
     }
+    for (const field of formFields.value) {
+      if (field.key in formData.value) {
+        if (
+          field.type === "password" &&
+          typeof formData.value[field.key] === "string"
+        ) {
+          if (/^\*+$/.test(formData.value[field.key])) {
+            continue;
+          }
+        }
+        body.append(field.key, formData.value[field.key]);
+      }
+    }
+    return body;
   }
-  return body;
 }
 
 function save() {

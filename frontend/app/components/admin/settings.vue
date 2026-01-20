@@ -11,6 +11,7 @@
     }"
   >
     <template #content>
+      <UProgress v-if="loading" class="mb-5" />
       <CrudForm
         ref="form"
         :api="api"
@@ -130,9 +131,15 @@ const config = ref({
 });
 
 function fetch() {
-  api.get("1/").then((response) => {
-    settings.value = response;
-  });
+  loading.value = true;
+  api
+    .get("1/")
+    .then((response) => {
+      settings.value = response;
+    })
+    .then(() => {
+      loading.value = false;
+    });
 }
 
 onMounted(() => {
