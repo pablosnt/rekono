@@ -68,7 +68,7 @@ const config: CrudConfig = reactive({
     },
     {
       accessorKey: "key",
-      header: "Key",
+      header: "Header",
       icon: "i-lucide-case-sensitive",
       cell: ({ row }) =>
         h("span", { class: "font-medium" }, row.getValue("key")),
@@ -96,7 +96,7 @@ const config: CrudConfig = reactive({
   formFields: [
     {
       key: "key",
-      label: "Key",
+      label: "Header",
       type: "text",
       required: true,
       placeholder: "Content-Type",
