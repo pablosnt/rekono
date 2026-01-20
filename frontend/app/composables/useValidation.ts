@@ -64,6 +64,14 @@ export default function () {
     return regex(field, required, max, /^[\w\d.:\-/]{1,100}$/);
   }
 
+  function target_regex(
+    field: string = "target",
+    required: boolean = true,
+    max: number = 100,
+  ) {
+    return regex(field, required, max, /^[\w\d.,:\-/*?+()\\]{1,300}$/);
+  }
+
   function secret(
     field: string = "secret",
     required: boolean = true,
@@ -77,5 +85,5 @@ export default function () {
     );
   }
 
-  return { passwordPolicy, name, text, cve, target, secret };
+  return { passwordPolicy, name, text, cve, target, target_regex, secret };
 }

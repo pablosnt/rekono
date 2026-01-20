@@ -7,7 +7,6 @@
       canEdit: false,
       canDelete: false,
       canCreate: false,
-      showAccessDeniedError: false,
     }"
   >
     <template #content>
