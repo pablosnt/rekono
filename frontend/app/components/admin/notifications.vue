@@ -1,125 +1,139 @@
 <template>
-  <div>
-    <CrudHeader
-      :api="smtpApi"
-      :config="{ entityNamePlural: 'Notifications' }"
-    />
+  <CrudPage
+    :config="{
+      entityNamePlural: 'Notifications',
+      entityName: 'Notification',
+      canRead: userStore.is_admin,
+      canEdit: false,
+      canDelete: false,
+      canCreate: false,
+      showAccessDeniedError: false,
+    }"
+  >
+    <template #content>
+      <UProgress v-if="loadingSmtp || loadingTelegram" />
 
-    <UProgress v-if="loadingSmtp || loadingTelegram" />
-
-    <UPageGrid v-if="smtpSettings && telegramSettings">
-      <UPageCard
-        title="SMTP"
-        :description="
-          smtpSettings.is_available
-            ? smtpSettings.host
-            : 'Configure your SMTP server in order to send email messages'
-        "
-        variant="subtle"
-        spotlight
-        @click="
-          () => {
-            openModal = true;
-            selectedApi = smtpApi;
-            selectedSettings = smtpSettings;
-            selectedConfig = smtpConfig;
-            selectedTitle = 'SMTP';
-          }
+      <UPageGrid v-if="smtpSettings && telegramSettings">
+        <UPageCard
+          title="SMTP"
+          :description="
+            smtpSettings.is_available
+              ? smtpSettings.host
+              : 'Configure your SMTP server in order to send email messages'
+          "
+          variant="subtle"
+          spotlight
+          @click="
+            () => {
+              openModal = true;
+              selectedApi = smtpApi;
+              selectedSettings = smtpSettings;
+              selectedConfig = smtpConfig;
+              selectedTitle = 'SMTP';
+            }
+          "
+        >
+          <template #leading>
+            <div class="flex items-center justify-end">
+              <div class="w-45">
+                <UIcon name="i-lucide-mail" class="text-xl text-neutral" />
+              </div>
+              <div class="flex w-40 justify-end items-center gap-3">
+                <UtilsOkOrKo :ok="smtpSettings.is_available" />
+              </div>
+            </div>
+          </template>
+        </UPageCard>
+        <UPageCard
+          title="Telegram"
+          :description="
+            telegramSettings.is_available
+              ? `@${telegramSettings.bot}`
+              : 'Configure your Telegram token in order to enable the Rekono bot and receive Telegram notifications'
+          "
+          variant="subtle"
+          spotlight
+          @click="
+            () => {
+              openModal = true;
+              selectedApi = telegramApi;
+              selectedSettings = telegramSettings;
+              selectedConfig = telegramConfig;
+              selectedTitle = 'Telegram';
+            }
+          "
+        >
+          <template #leading>
+            <div class="flex items-center justify-end">
+              <div class="w-45">
+                <UIcon
+                  name="i-simple-icons-telegram"
+                  class="text-xl text-info"
+                />
+              </div>
+              <div class="flex w-40 justify-end items-center gap-3">
+                <UtilsOkOrKo :ok="telegramSettings.is_available" />
+                <UButton
+                  v-if="telegramSettings.is_available"
+                  icon="i-lucide-external-link"
+                  variant="ghost"
+                  color="gray"
+                  size="lg"
+                  :to="`https://t.me/${telegramSettings.bot}`"
+                  target="_blank"
+                  external
+                />
+              </div>
+            </div>
+          </template>
+          <template #description>
+            <ULink
+              v-if="telegramSettings.is_available"
+              :to="`https://t.me/${telegramSettings.bot}`"
+              target="_blank"
+              >@{{ telegramSettings.bot }}
+            </ULink>
+            <p v-else>
+              Configure your Telegram token in order to enable the Rekono bot
+              and receive Telegram notifications
+            </p>
+          </template>
+        </UPageCard>
+      </UPageGrid>
+      <CrudFormModal
+        v-if="selectedSettings"
+        :open="openModal"
+        :item="selectedSettings"
+        :config="selectedConfig"
+        :api="selectedApi"
+        :title="selectedTitle"
+        @open="(open) => (openModal = open)"
+        @submit="
+          (data) =>
+            selectedTitle === 'SMTP'
+              ? (smtpSettings = data)
+              : (telegramSettings = data)
         "
       >
-        <template #leading>
-          <div class="flex items-center justify-end">
-            <div class="w-45">
-              <UIcon name="i-lucide-mail" class="text-xl text-neutral" />
-            </div>
-            <div class="flex w-40 justify-end items-center gap-3">
-              <UtilsOkOrKo :ok="smtpSettings.is_available" />
-            </div>
-          </div>
+        <template #before-close="{ loading }">
+          <UtilsOkOrKo
+            :ok="selectedSettings?.is_available"
+            :loading="loading"
+          />
         </template>
-      </UPageCard>
-      <UPageCard
-        title="Telegram"
-        :description="
-          telegramSettings.is_available
-            ? `@${telegramSettings.bot}`
-            : 'Configure your Telegram token in order to enable the Rekono bot and receive Telegram notifications'
-        "
-        variant="subtle"
-        spotlight
-        @click="
-          () => {
-            openModal = true;
-            selectedApi = telegramApi;
-            selectedSettings = telegramSettings;
-            selectedConfig = telegramConfig;
-            selectedTitle = 'Telegram';
-          }
-        "
-      >
-        <template #leading>
-          <div class="flex items-center justify-end">
-            <div class="w-45">
-              <UIcon name="i-simple-icons-telegram" class="text-xl text-info" />
-            </div>
-            <div class="flex w-40 justify-end items-center gap-3">
-              <UtilsOkOrKo :ok="telegramSettings.is_available" />
-              <UButton
-                v-if="telegramSettings.is_available"
-                icon="i-lucide-external-link"
-                variant="ghost"
-                color="gray"
-                size="lg"
-                :to="`https://t.me/${telegramSettings.bot}`"
-                target="_blank"
-                external
-              />
-            </div>
-          </div>
-        </template>
-        <template #description>
-          <ULink
-            v-if="telegramSettings.is_available"
-            :to="`https://t.me/${telegramSettings.bot}`"
-            target="_blank"
-            >@{{ telegramSettings.bot }}
-          </ULink>
-          <p v-else>
-            Configure your Telegram token in order to enable the Rekono bot and
-            receive Telegram notifications
-          </p>
-        </template>
-      </UPageCard>
-    </UPageGrid>
-
-    <CrudFormModal
-      v-if="selectedSettings"
-      :open="openModal"
-      :item="selectedSettings"
-      :config="selectedConfig"
-      :api="selectedApi"
-      :title="selectedTitle"
-      @open="(open) => (openModal = open)"
-      @submit="
-        (data) =>
-          selectedTitle === 'SMTP'
-            ? (smtpSettings = data)
-            : (telegramSettings = data)
-      "
-    >
-      <template #before-close="{ loading }">
-        <UtilsOkOrKo :ok="selectedSettings?.is_available" :loading="loading" />
-      </template>
-    </CrudFormModal>
-  </div>
+      </CrudFormModal>
+    </template>
+  </CrudPage>
 </template>
 
 <script setup lang="ts">
 import * as z from "zod";
+import { useUserStore } from "~/store/user";
 
 const smtpApi = useApi("/api/smtp/");
 const telegramApi = useApi("/api/telegram/settings/");
 const validate = useValidation();
+const userStore = useUserStore();
 const loadingSmtp = ref(false);
 const loadingTelegram = ref(false);
 const openModal = ref(false);

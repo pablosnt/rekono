@@ -31,133 +31,136 @@
         @open-create="(open: boolean) => (openCreateModal = open)"
       />
 
-      <UEmpty
-        v-if="
-          state.items.length === 0 &&
-          !state.loading &&
-          ((Object.keys(state.filters).length === 0 && !state.searchQuery) ||
-            config.useGrid)
-        "
-        class="mt-10"
-        :title="`No ${config.entityNamePlural.toLowerCase()} found`"
-        :description="
-          Object.keys(state.filters).length === 0 && !state.searchQuery
-            ? `It looks like you don\'t have access to any ${config.entityName.toLowerCase()} yet. ${config.canCreate ? 'You can create one below.' : 'Please contact your administrator.'}`
-            : `The current search criteria don't match any ${config.entityName.toLowerCase()}. Change your query and retry`
-        "
-        :icon="config.icon"
-        :actions="
-          config.canCreate
-            ? [
-                {
-                  icon: 'i-lucide-plus',
-                  label: 'Create new',
-                  onClick: () => {
-                    openCreateModal = true;
+      <slot name="content">
+        <UEmpty
+          v-if="
+            state.items.length === 0 &&
+            !state.loading &&
+            ((Object.keys(state.filters).length === 0 && !state.searchQuery) ||
+              config.useGrid)
+          "
+          class="mt-10"
+          :title="`No ${config.entityNamePlural.toLowerCase()} found`"
+          :description="
+            Object.keys(state.filters).length === 0 && !state.searchQuery
+              ? `It looks like you don\'t have access to any ${config.entityName.toLowerCase()} yet. ${config.canCreate ? 'You can create one below.' : 'Please contact your administrator.'}`
+              : `The current search criteria don't match any ${config.entityName.toLowerCase()}. Change your query and retry`
+          "
+          :icon="config.icon"
+          :actions="
+            config.canCreate
+              ? [
+                  {
+                    icon: 'i-lucide-plus',
+                    label: 'Create new',
+                    onClick: () => {
+                      openCreateModal = true;
+                    },
                   },
-                },
-              ]
-            : []
-        "
-        size="xl"
-        variant="naked"
-      />
+                ]
+              : []
+          "
+          size="xl"
+          variant="naked"
+        />
 
-      <CrudTable
-        v-if="config.tableColumns && !config.useGrid"
-        v-show="state.items.length > 0 || state.loading"
-        ref="tableRef"
-        :config="config"
-        :state="state"
-        @edit="
-          (item) => {
-            selectedItem = item;
-            openEditModal = true;
-          }
-        "
-        @delete="
-          (item) => {
-            selectedItem = item;
-            openDeleteModal = true;
-          }
-        "
-      >
-        <template v-if="$slots.actions" #actions="slotProps">
-          <slot name="actions" v-bind="slotProps" />
+        <CrudTable
+          v-if="config.tableColumns && !config.useGrid"
+          v-show="state.items.length > 0 || state.loading"
+          ref="tableRef"
+          :config="config"
+          :state="state"
+          @edit="
+            (item) => {
+              selectedItem = item;
+              openEditModal = true;
+            }
+          "
+          @delete="
+            (item) => {
+              selectedItem = item;
+              openDeleteModal = true;
+            }
+          "
+        >
+          <template v-if="$slots.actions" #actions="slotProps">
+            <slot name="actions" v-bind="slotProps" />
+          </template>
+        </CrudTable>
+
+        <template v-if="config.useGrid">
+          <UProgress v-if="state.loading" />
+          <UPageGrid v-show="state.items.length > 0">
+            <slot
+              v-for="item in state.items"
+              :key="item.id"
+              name="item"
+              :item="item"
+              :on-edit="
+                () => {
+                  selectedItem = item;
+                  openEditModal = true;
+                }
+              "
+              :on-delete="
+                () => {
+                  selectedItem = item;
+                  openDeleteModal = true;
+                }
+              "
+            />
+          </UPageGrid>
         </template>
-      </CrudTable>
 
-      <template v-if="config.useGrid">
-        <UProgress v-if="state.loading" />
-        <UPageGrid v-show="state.items.length > 0">
-          <slot
-            v-for="item in state.items"
-            :key="item.id"
-            name="item"
-            :item="item"
-            :on-edit="
-              () => {
-                selectedItem = item;
-                openEditModal = true;
+        <CrudFormModal
+          v-if="config.canEdit"
+          :open="openEditModal"
+          :api="api"
+          :config="config"
+          :item="selectedItem"
+          @open="
+            (open: boolean) => {
+              openEditModal = open;
+              if (!open && config.updateOnEditModalOpen) {
+                fetch();
               }
-            "
-            :on-delete="
-              () => {
-                selectedItem = item;
-                openDeleteModal = true;
-              }
-            "
-          />
-        </UPageGrid>
-      </template>
+            }
+          "
+          @submit="fetch()"
+        />
 
-      <CrudFormModal
-        v-if="config.canEdit"
-        :open="openEditModal"
-        :api="api"
-        :config="config"
-        :item="selectedItem"
-        @open="
-          (open: boolean) => {
-            openEditModal = open;
-            if (!open && config.updateOnEditModalOpen) {
+        <CrudDeleteModal
+          v-if="config.canDelete"
+          :open="openDeleteModal"
+          :api="api"
+          :config="config"
+          :item="selectedItem"
+          @open="(open: boolean) => (openDeleteModal = open)"
+          @deleted="fetch()"
+        />
+
+        <CrudPagination
+          :config="config"
+          :state="state"
+          @page="
+            (page: number) => {
+              state.page = page;
               fetch();
             }
-          }
-        "
-        @submit="fetch()"
-      />
-
-      <CrudDeleteModal
-        v-if="config.canDelete"
-        :open="openDeleteModal"
-        :api="api"
-        :config="config"
-        :item="selectedItem"
-        @open="(open: boolean) => (openDeleteModal = open)"
-        @deleted="fetch()"
-      />
-
-      <CrudPagination
-        :config="config"
-        :state="state"
-        @page="
-          (page: number) => {
-            state.page = page;
-            fetch();
-          }
-        "
-        @page-size="
-          (size: number) => {
-            state.pageSize = size;
-            fetch();
-          }
-        "
-      />
+          "
+          @page-size="
+            (size: number) => {
+              state.pageSize = size;
+              fetch();
+            }
+          "
+        />
+      </slot>
     </template>
 
     <template v-else>
       <UError
+        v-if="[true, undefined].includes(config.showAccessDeniedError)"
         :error="{
           statusCode: 403,
           statusMessage: 'Access Denied',
@@ -219,7 +222,7 @@ function fetchFirstPage() {
 
 onMounted(() => {
   mounted.value = true;
-  if (props.config.canRead) {
+  if (props.config.canRead && props.config.endpoint) {
     fetch();
   }
 });

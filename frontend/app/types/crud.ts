@@ -95,6 +95,7 @@ export interface CrudConfig<T = unknown> {
   canCreate: boolean;
   canEdit: boolean | ((item: T) => boolean);
   canDelete: boolean | ((item: T) => boolean);
+  showAccessDeniedError?: boolean;
 }
 
 export interface CrudState<T = unknown> {
