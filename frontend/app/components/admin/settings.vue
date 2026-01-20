@@ -17,7 +17,12 @@
         :config="config"
         :entity="settings"
         grid-cols="grid-cols-1 md:grid-cols-2"
-        @submit="(data) => (settings = data)"
+        @submit="
+          (data) => {
+            settings = data;
+            valid = false;
+          }
+        "
         @validation-change="(isValid) => (valid = isValid)"
         @new-loading="(newLoading) => (loading = newLoading)"
       />
