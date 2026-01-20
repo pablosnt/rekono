@@ -1,4 +1,5 @@
 <template>
+  <!-- todo: this navigation menu is not responsive  -->
   <div class="flex flex-row w-full h-180 overflow-hidden">
     <div class="w-64 border-r border-default flex flex-col h-full">
       <UNavigationMenu
@@ -18,23 +19,34 @@
     </div>
 
     <div class="flex-1 overflow-y-auto">
-      <template v-if="active === 'profile'">
-        <ProfileInformation />
-      </template>
-      <template v-else-if="active === 'security'">
-        <ProfileSecurity />
-      </template>
-      <template v-else-if="active === 'telegram-bot'">
-        <ProfileTelegramBot />
-      </template>
-      <template v-else-if="active === 'http-headers'">
-        <ProfileHttpHeaders />
-      </template>
+      <UContainer>
+        <template v-if="active === 'profile'">
+          <ProfileInformation />
+        </template>
+        <template v-else-if="active === 'security'">
+          <ProfileSecurity />
+        </template>
+        <template v-else-if="active === 'telegram-bot'">
+          <ProfileTelegramBot />
+        </template>
+        <template v-else-if="active === 'http-headers'">
+          <HttpHeaders
+            :user="userStore.user"
+            :can-create="true"
+            :can-edit="true"
+            :can-delete="true"
+            :can-read="true"
+          />
+        </template>
+      </UContainer>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { useUserStore } from "~/store/user";
+
+const userStore = useUserStore();
 const api = useApi("/api/security/logout/", false);
 const tokens = useTokens();
 const active = ref("profile");
