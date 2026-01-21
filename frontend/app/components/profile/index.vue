@@ -1,5 +1,6 @@
 <template>
   <!-- todo: this navigation menu is not responsive  -->
+  <!-- todo: components where we use the class w- and a static number are not responsive -->
   <div class="flex flex-row w-full h-180 overflow-hidden">
     <div class="w-64 border-r border-default flex flex-col h-full">
       <UNavigationMenu
@@ -53,8 +54,8 @@ const active = ref("profile");
 
 const baseItems = [
   { label: "Profile", icon: "i-lucide-user", value: "profile" },
-  { label: "Security", icon: "i-lucide-lock", value: "security" },
   { label: "Telegram Bot", icon: "i-lucide-send", value: "telegram-bot" },
+  { label: "Security", icon: "i-lucide-lock", value: "security" },
   { label: "HTTP Headers", icon: "i-lucide-globe", value: "http-headers" },
 ];
 

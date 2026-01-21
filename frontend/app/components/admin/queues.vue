@@ -79,6 +79,36 @@
                 size="sm"
               />
             </div>
+            <div v-if="queue.name === 'monitor' && monitor">
+              <UFormField label="Monitor regularity in hours">
+                <template v-if="monitor.last_monitor" #hint>
+                  <UTooltip
+                    :text="`Last monitor was ${utils.formatRelativeDatetime(monitor.last_monitor)}`"
+                    :content="{
+                      side: 'top',
+                      sideOffset: 8,
+                      collisionPadding: 8,
+                    }"
+                  >
+                    <UButton
+                      icon="i-lucide-clock"
+                      size="sm"
+                      variant="ghost"
+                      color="neutral"
+                    />
+                  </UTooltip>
+                </template>
+                <UInputNumber
+                  v-model="monitor.hour_span"
+                  class="w-full"
+                  :min="24"
+                  :max="168"
+                  required
+                  size="lg"
+                  @change="() => updateMonitor()"
+                />
+              </UFormField>
+            </div>
           </template>
         </UPageCard>
       </UPageGrid>
@@ -89,11 +119,12 @@
 <script setup lang="ts">
 import { useUserStore } from "~/store/user";
 
-const api = useApi("/api/stats/rq/");
+const api = useApi("/api/");
 const userStore = useUserStore();
 const utils = useUtils();
 const loading = ref(false);
 const queueStats = ref<Array<Record<string, string | number>>>([]);
+const monitor = ref();
 const icons = {
   tasks: {
     icon: "i-lucide-scan-search",
@@ -116,7 +147,7 @@ const icons = {
 function fetch() {
   loading.value = true;
   api
-    .get("")
+    .get("stats/rq/")
     .then((response) => {
       queueStats.value = Object.keys(response).map((queue) => {
         return {
@@ -138,7 +169,20 @@ function fetch() {
     });
 }
 
+function fetchMonitor() {
+  api.get("monitor/1/").then((response) => {
+    monitor.value = response;
+  });
+}
+
+function updateMonitor() {
+  api
+    .update("monitor/1/", { hour_span: monitor.value.hour_span }, {})
+    .then((response) => (monitor.value = response));
+}
+
 onMounted(() => {
   fetch();
+  fetchMonitor();
 });
 </script>
