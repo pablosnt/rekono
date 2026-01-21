@@ -26,6 +26,7 @@
             :required="field.required"
             :type="field.type"
             size="lg"
+            :disabled="field.disabled === true"
           />
           <UInputNumber
             v-if="field.type === 'number'"
@@ -37,6 +38,7 @@
             :step="field.step"
             :required="field.required"
             size="lg"
+            :disabled="field.disabled === true"
           />
           <UTextarea
             v-else-if="field.type === 'textarea'"
@@ -45,6 +47,7 @@
             :placeholder="field.placeholder"
             :required="field.required"
             :rows="5"
+            :disabled="field.disabled === true"
           />
           <USelectMenu
             v-else-if="field.type === 'select' || field.type === 'multiselect'"
@@ -73,6 +76,7 @@
                 : undefined) || field.icon
             "
             leading
+            :disabled="field.disabled === true"
           >
             <template v-if="field.clearable" #trailing>
               <UIcon
@@ -106,6 +110,7 @@
               "
               :icon="field.icon"
               size="lg"
+              :disabled="field.disabled === true"
               @keydown.enter.prevent="
                 (e: Event) => {
                   const target = e.target as HTMLInputElement;
@@ -156,6 +161,7 @@
             color="neutral"
             size="xl"
             highlight
+            :disabled="field.disabled === true"
           />
         </UFormField>
       </template>
@@ -286,7 +292,11 @@ function save() {
   loading.value = true;
   const request = props.entity
     ? props.api.update(
-        `${props.entity.id}/`,
+        props.config.putEndpoint !== undefined
+          ? props.config.putEndpoint
+          : props.entity.id
+            ? `${props.entity.id}/`
+            : "",
         body(),
         {},
         utils.firstUpper(props.config.entityName),

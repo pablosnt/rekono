@@ -91,7 +91,7 @@
         </CrudTable>
 
         <template v-if="config.useGrid">
-          <UProgress v-if="state.loading" />
+          <UProgress v-show="state.loading" />
           <UPageGrid v-show="state.items.length > 0">
             <slot
               v-for="item in state.items"

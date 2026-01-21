@@ -95,6 +95,7 @@ import * as z from "zod";
 
 const userStore = useUserStore();
 const utils = useUtils();
+const validation = useValidation();
 const toast = useToast();
 const api = useApi("/api/users/");
 
@@ -214,7 +215,7 @@ const config: CrudConfig<User> = reactive({
     },
   ],
   createFormSchema: z.object({
-    email: z.email(),
+    email: validation.email(),
     role: z.enum(
       utils.roleOptions.map((t) => t.value) as [string, ...string[]],
     ),

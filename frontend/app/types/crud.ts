@@ -21,6 +21,7 @@ export interface FormField {
     | "tags"
     | "file";
   required?: boolean;
+  disabled?: boolean;
   placeholder?: string;
   hint?: string;
   icon?: string;
@@ -88,6 +89,7 @@ export interface CrudConfig<T = unknown> {
   editFormSchema?: z.ZodType;
   editForm?: object;
   updateOnEditModalOpen?: boolean;
+  putEndpoint?: string;
   modalIcon?: string | ((item: T) => string);
   modalIconClass?: string;
   modalAvatar?: (item: T) => Record<string, unknown>;

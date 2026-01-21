@@ -11,7 +11,7 @@
     }"
   >
     <template #content>
-      <UProgress v-if="loading" class="mb-5" />
+      <UProgress v-show="loading" class="mb-5" />
       <CrudForm
         ref="form"
         :api="api"

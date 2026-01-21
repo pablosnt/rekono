@@ -52,7 +52,6 @@
 </template>
 
 <script setup lang="ts">
-// todo: Now the entity passed is the project, but when used from a CrudPage, the entity will be undefined, as it's supposed to be the target. We will need a way to pass default data for the creation of entities
 import * as z from "zod";
 
 const props = defineProps<{

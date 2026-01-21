@@ -85,5 +85,18 @@ export default function () {
     );
   }
 
-  return { passwordPolicy, name, text, cve, target, target_regex, secret };
+  function email() {
+    return z.email("Valid email is required");
+  }
+
+  return {
+    passwordPolicy,
+    name,
+    text,
+    cve,
+    target,
+    target_regex,
+    secret,
+    email,
+  };
 }
