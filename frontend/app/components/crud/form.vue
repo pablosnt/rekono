@@ -25,7 +25,7 @@
             :icon="field.icon"
             :required="field.required"
             :type="field.type"
-            size="lg"
+            :size="field.size || 'lg'"
             :disabled="field.disabled === true"
           />
           <UInputNumber
@@ -37,7 +37,7 @@
             :max="field.max"
             :step="field.step"
             :required="field.required"
-            size="lg"
+            :size="field.size || 'lg'"
             :disabled="field.disabled === true"
           />
           <UTextarea
@@ -109,7 +109,7 @@
                 field.placeholder || 'Type and press Enter to add tag'
               "
               :icon="field.icon"
-              size="lg"
+              :size="field.size || 'lg'"
               :disabled="field.disabled === true"
               @keydown.enter.prevent="
                 (e: Event) => {
@@ -159,7 +159,7 @@
             :required="field.required"
             :file-icon="field.icon"
             color="neutral"
-            size="xl"
+            :size="field.size || 'xl'"
             highlight
             :disabled="field.disabled === true"
           />

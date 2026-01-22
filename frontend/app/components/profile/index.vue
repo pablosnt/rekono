@@ -28,7 +28,7 @@
           <ProfileSecurity />
         </template>
         <template v-else-if="active === 'telegram-bot'">
-          <ProfileTelegramBot />
+          <ProfileTelegramBot :settings="telegramSettings" />
         </template>
         <template v-else-if="active === 'http-headers'">
           <HttpHeaders
@@ -49,22 +49,37 @@ import { useUserStore } from "~/store/user";
 
 const userStore = useUserStore();
 const api = useApi("/api/security/logout/", false);
+const telegramSettingsApi = useApi("/api/telegram/settings/");
+const telegramSettings = ref();
 const tokens = useTokens();
 const active = ref("profile");
 
 const baseItems = [
   { label: "Profile", icon: "i-lucide-user", value: "profile" },
-  { label: "Telegram Bot", icon: "i-lucide-send", value: "telegram-bot" },
+  {
+    label: "Telegram Bot",
+    icon: "i-simple-icons-telegram",
+    value: "telegram-bot",
+  },
   { label: "Security", icon: "i-lucide-lock", value: "security" },
-  { label: "HTTP Headers", icon: "i-lucide-globe", value: "http-headers" },
+  {
+    label: "HTTP Headers",
+    icon: "i-lucide-globe",
+    value: "http-headers",
+  },
 ];
 
 const items = computed(() =>
-  baseItems.map((item) => ({
-    ...item,
-    active: active.value === item.value,
-    onSelect: () => (active.value = item.value),
-  })),
+  baseItems
+    .filter(
+      (item) =>
+        item.value !== "telegram-bot" || telegramSettings.value?.is_available,
+    )
+    .map((item) => ({
+      ...item,
+      active: active.value === item.value,
+      onSelect: () => (active.value = item.value),
+    })),
 );
 
 function logout() {
@@ -74,4 +89,10 @@ function logout() {
   }
   return api.forwardToLogin();
 }
+
+onMounted(() => {
+  telegramSettingsApi.get("1/").then((response) => {
+    telegramSettings.value = response;
+  });
+});
 </script>

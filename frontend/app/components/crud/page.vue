@@ -29,7 +29,11 @@
         "
         @create="fetch()"
         @open-create="(open: boolean) => (openCreateModal = open)"
-      />
+      >
+        <template v-if="$slots['header-actions']" #header-actions>
+          <slot name="header-actions" />
+        </template>
+      </CrudHeader>
 
       <slot name="before" :state="state" />
 

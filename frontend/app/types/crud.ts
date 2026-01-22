@@ -24,6 +24,7 @@ export interface FormField {
   disabled?: boolean;
   placeholder?: string;
   hint?: string;
+  size?: string;
   icon?: string;
   avatar?: Record<string, unknown>;
   options?: FilterOption[];
