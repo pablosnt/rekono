@@ -76,8 +76,8 @@
                   v-if="telegramSettings.is_available"
                   icon="i-lucide-external-link"
                   variant="ghost"
-                  color="gray"
-                  size="lg"
+                  color="neutral"
+                  size="xl"
                   :to="`https://t.me/${telegramSettings.bot}`"
                   target="_blank"
                   external

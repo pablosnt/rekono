@@ -31,8 +31,8 @@
                   v-if="item.reference"
                   icon="i-lucide-external-link"
                   variant="ghost"
-                  color="gray"
-                  size="lg"
+                  color="neutral"
+                  size="xl"
                   :to="item.reference"
                   target="_blank"
                   external

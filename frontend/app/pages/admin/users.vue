@@ -77,7 +77,7 @@
             <UButton
               icon="i-lucide-more-horizontal"
               variant="ghost"
-              color="gray"
+              color="neutral"
             />
           </UDropdownMenu>
         </div>
