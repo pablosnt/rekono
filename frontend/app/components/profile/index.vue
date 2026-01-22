@@ -25,7 +25,9 @@
           <ProfileInformation />
         </template>
         <template v-else-if="active === 'security'">
-          <ProfileSecurity />
+          <ProfileChangePassword />
+          <ProfileMfa />
+          <ProfileApiTokens />
         </template>
         <template v-else-if="active === 'telegram-bot'">
           <ProfileTelegramBot :settings="telegramSettings" />

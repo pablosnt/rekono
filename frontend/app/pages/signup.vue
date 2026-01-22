@@ -65,6 +65,7 @@ if (!otp.value) {
 }
 const schema = z
   .object({
+    // todo: replace custom z.string by useValidation methods
     username: z.string("Username is required"),
     firstname: z.string("First name is required"),
     lastname: z.string("Last name is required"),

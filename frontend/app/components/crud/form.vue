@@ -260,7 +260,7 @@ function body() {
     const data = { ...formData.value, ...(props.config.defaultBody || {}) };
     for (const field of formFields.value) {
       if (field.type === "password" && typeof data[field.key] === "string") {
-        if (/^\*+$/.test(data[field.key])) {
+        if (field.key === "confirmpassword" || /^\*+$/.test(data[field.key])) {
           delete data[field.key];
         }
       }
@@ -272,6 +272,7 @@ function body() {
       body.append(field, props.config.defaultBody[field]);
     }
     for (const field of formFields.value) {
+      if (field.key === "confirmpassword") continue;
       if (field.key in formData.value) {
         if (
           field.type === "password" &&
