@@ -69,9 +69,10 @@ export default function (
     extraHeaders?: object,
     raw?: boolean = false,
   ): Promise {
+    const requestUrl = url(endpoint);
     options.headers = headers(extraHeaders);
     return (
-      raw ? $fetch.raw(url(endpoint), options) : $fetch(url(endpoint), options)
+      raw ? $fetch.raw(requestUrl, options) : $fetch(requestUrl, options)
     ).catch((error) => {
       let message = "Unexpected error";
       switch (error.statusCode) {
@@ -81,13 +82,13 @@ export default function (
         }
         case 401: {
           if (
-            endpoint.includes("/api/security/refresh/") ||
+            requestUrl.includes("/api/security/refresh/") ||
             (error.data.detail &&
               error.data.detail === "Incorrect authentication credentials." &&
-              (endpoint.includes("/api/profile/mfa/enable/") ||
-                endpoint.includes("/api/profile/mfa/disable/") ||
-                endpoint.includes("/api/telegram/link/") ||
-                endpoint.includes("/api/profile/update-password/")))
+              (requestUrl.includes("/api/profile/mfa/enable/") ||
+                requestUrl.includes("/api/profile/mfa/disable/") ||
+                requestUrl.includes("/api/telegram/link/") ||
+                requestUrl.includes("/api/profile/update-password/")))
           ) {
             return Promise.reject(error);
           } else if (authentication) {

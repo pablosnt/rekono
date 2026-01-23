@@ -24,10 +24,36 @@
             :placeholder="field.placeholder"
             :icon="field.icon"
             :required="field.required"
-            :type="field.type"
+            :type="
+              field.type === 'text' || showPassword[field.key]
+                ? 'text'
+                : 'password'
+            "
             :size="field.size || 'lg'"
             :disabled="field.disabled === true"
-          />
+          >
+            <template v-if="field.type === 'password'" #trailing>
+              <UButton
+                color="neutral"
+                variant="link"
+                size="sm"
+                :icon="
+                  showPassword[field.key] ? 'i-lucide-eye-off' : 'i-lucide-eye'
+                "
+                :aria-label="
+                  showPassword[field.key] ? 'Hide password' : 'Show password'
+                "
+                :aria-pressed="showPassword[field.key]"
+                aria-controls="password"
+                @click="
+                  showPassword[field.key] =
+                    showPassword[field.key] !== undefined
+                      ? !showPassword[field.key]
+                      : true
+                "
+              />
+            </template>
+          </UInput>
           <UInputNumber
             v-if="field.type === 'number'"
             v-model="formData[field.key] as number"
@@ -187,10 +213,12 @@ const emit = defineEmits<{
   submit: [data: Record<string, unknown>];
   "validation-change": [isValid: boolean];
   "new-loading": [newLoading: boolean];
+  error: [error: object];
 }>();
 
 const utils = useUtils();
 const loading = ref(false);
+const showPassword = ref({});
 const form = ref();
 const isFileUpload = ref(false);
 
@@ -311,6 +339,9 @@ function save() {
   request
     .then((response) => {
       emit("submit", response);
+    })
+    .catch((error) => {
+      emit("error", error);
     })
     .finally(() => {
       loading.value = false;

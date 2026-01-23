@@ -1,16 +1,14 @@
 <template>
   <CrudPage
     :config="{
-      entityNamePlural: 'Change Password',
-      entityName: 'Change Password',
+      entityNamePlural: 'Update Password',
+      entityName: 'Update Password',
       canRead: true,
       canEdit: false,
       canDelete: false,
       canCreate: false,
     }"
   >
-    <!-- TODO: This endpoint might return 401 when the old password is not correct -->
-    <!-- TODO: The form must be cleared after the update -->
     <template #content>
       <CrudForm
         ref="form"
@@ -23,6 +21,17 @@
         "
         @validation-change="(isValid) => (valid = isValid)"
         @new-loading="(newLoading) => (loading = newLoading)"
+        @error="
+          (error) => {
+            if (error?.statusCode === 401) {
+              toast.add({
+                title: 'Error',
+                description: 'Invalid current password',
+                color: 'error',
+              });
+            }
+          }
+        "
       />
       <div class="mt-8 flex justify-end">
         <UButton
@@ -44,6 +53,7 @@ import * as z from "zod";
 
 const api = useApi("/api/profile/update-password/");
 const validation = useValidation();
+const toast = useToast();
 const form = ref();
 const valid = ref(false);
 const loading = ref(false);
@@ -58,6 +68,7 @@ const config = ref({
       placeholder: "Enter your current password",
       required: true,
       size: "xl",
+      icon: "i-lucide-key",
     },
     {
       key: "password",
@@ -66,6 +77,7 @@ const config = ref({
       placeholder: "Enter your new password",
       required: true,
       size: "xl",
+      icon: "i-lucide-key-round",
     },
     {
       key: "confirmpassword",
@@ -74,6 +86,7 @@ const config = ref({
       placeholder: "Repeat your new password",
       required: true,
       size: "xl",
+      icon: "i-lucide-key-round",
     },
   ],
   editFormSchema: z
@@ -85,6 +98,10 @@ const config = ref({
     .refine((data) => data.password === data.confirmpassword, {
       message: "Passwords don't match",
       path: ["confirmpassword"],
+    })
+    .refine((data) => data.password !== data.old_password, {
+      message: "New and current passwords are equal",
+      path: ["password"],
     }),
   putEndpoint: "",
 });
