@@ -25,7 +25,7 @@
           <ProfileInformation />
         </template>
         <template v-else-if="active === 'security'">
-          <ProfileChangePassword />
+          <ProfileUpdatePassword />
           <ProfileMfa />
           <ProfileApiTokens />
         </template>
