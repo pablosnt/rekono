@@ -30,6 +30,9 @@
         @create="fetch()"
         @open-create="(open: boolean) => (openCreateModal = open)"
       >
+        <template v-if="$slots['header-leading']" #header-leading>
+          <slot name="header-leading" />
+        </template>
         <template v-if="$slots['header-actions']" #header-actions>
           <slot name="header-actions" />
         </template>

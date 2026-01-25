@@ -20,6 +20,7 @@
     "@pinia/nuxt": "0.11.3",
     "jwt-decode": "^4.0.0",
     "nuxt": "^4.2.1",
+    "nuxt-qrcode": "^0.4.8",
     "pinia": "^3.0.4"
   },
   "devDependencies": {

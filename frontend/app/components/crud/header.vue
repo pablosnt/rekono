@@ -5,7 +5,8 @@
       :items="config.breadcrumbs"
     />
     <div class="flex flex-row items-center justify-between gap-4 w-full">
-      <div class="flex-none">
+      <div class="flex flex-row justify-start items-center gap-4">
+        <slot name="header-leading" />
         <h1
           class="text-2xl font-bold text-default truncate max-w-[300px] sm:max-w-none"
         >
