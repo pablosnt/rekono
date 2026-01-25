@@ -8,6 +8,7 @@
     :submit="submit"
     :loading="loading"
     loading-auto
+    :ui="{ otp: 'w-full flex justify-center' }"
     @submit="
       (data) => {
         $emit('submit', data);
@@ -28,6 +29,7 @@
       <slot name="password-hint" />
     </template>
   </UAuthForm>
+  <slot name="after-form" />
 </template>
 
 <script setup lang="ts">

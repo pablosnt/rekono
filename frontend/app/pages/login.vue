@@ -61,10 +61,7 @@ function submit(event: object) {
       } else {
         navigateTo("/mfa");
       }
-      loading.value = false;
     })
-    .catch(() => {
-      loading.value = false;
-    });
+    .finally(() => (loading.value = false));
 }
 </script>

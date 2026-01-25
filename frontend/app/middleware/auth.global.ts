@@ -3,7 +3,7 @@ import { useUserStore } from "~/store/user";
 export default defineNuxtRouteMiddleware((to, _) => {
   if (import.meta.server) return;
 
-  const publicRoutes = ["login", "signup", "reset-password"];
+  const publicRoutes = ["login", "signup", "reset-password", "mfa"];
   const userStore = useUserStore();
 
   userStore.check();
