@@ -13,7 +13,7 @@
       <template #header-leading>
         <USwitch
           :model-value="userStore.profile.mfa"
-          :loading="open"
+          :loading="loading"
           @change="(value) => handleSwitch(value)"
         />
       </template>
@@ -127,9 +127,11 @@ const url = ref();
 const method = ref("app");
 const appOtp = ref();
 const mailOtp = ref();
+const loading = ref(false);
 const open = ref(false);
 
 function enable(otp: strig) {
+  loading.value = true;
   api
     .create("enable/", { mfa: otp })
     .then((response) => {
@@ -141,12 +143,14 @@ function enable(otp: strig) {
       open.value = false;
     })
     .finally(() => {
+      loading.value = false;
       mailOtp.value = undefined;
       appOtp.value = undefined;
     });
 }
 
 function disable(otp: string) {
+  loading.value = true;
   api
     .create("disable/", { mfa: otp })
     .then((response) => {
@@ -158,6 +162,7 @@ function disable(otp: string) {
       open.value = false;
     })
     .finally(() => {
+      loading.value = false;
       mailOtp.value = undefined;
       appOtp.value = undefined;
     });
