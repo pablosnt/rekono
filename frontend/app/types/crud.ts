@@ -19,7 +19,8 @@ export interface FormField {
     | "multiselect"
     | "checkbox"
     | "tags"
-    | "file";
+    | "file"
+    | "datetime";
   required?: boolean;
   disabled?: boolean;
   placeholder?: string;
@@ -33,6 +34,8 @@ export interface FormField {
   fileSize?: number;
   fileUploadLabel?: string;
   fileUploadDescription?: string;
+  minValue?: unknown;
+  maxValue?: unknown;
 }
 
 export interface FilterConfig {
@@ -66,6 +69,7 @@ export interface CrudConfig<T = unknown> {
   breadcrumbs?: BreadcrumbItem[];
   tableColumns?: CrudTableColumn<T>[];
   tableColumnsVisibility?: Record<string, boolean>;
+  tableCopyId: boolean;
   useGrid?: boolean;
   itemLink?: (item: T) => string;
   onItemClick?: (item: T) => void;
@@ -95,6 +99,7 @@ export interface CrudConfig<T = unknown> {
   modalIconClass?: string;
   modalAvatar?: (item: T) => Record<string, unknown>;
   deleteMessage?: (item: T) => ComponentDetails[];
+  emptyMessage?: string;
   deleteVerb?: string;
   canRead: boolean;
   canCreate: boolean;

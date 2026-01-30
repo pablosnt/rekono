@@ -39,6 +39,7 @@ const config: CrudConfig<Project> = reactive({
       icon: "i-lucide-case-sensitive",
       cell: ({ row }) =>
         h("span", { class: "font-medium" }, row.getValue("name")),
+      // todo: if this doesn't work, remove
       enableResizing: true,
     },
     {

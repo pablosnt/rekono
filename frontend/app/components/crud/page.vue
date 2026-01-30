@@ -41,41 +41,16 @@
       <slot name="before" :state="state" />
 
       <slot name="content">
-        <UEmpty
-          v-if="
-            state.items.length === 0 &&
-            !state.loading &&
-            ((Object.keys(state.filters).length === 0 && !state.searchQuery) ||
-              config.useGrid)
-          "
+        <CrudEmptyState
+          v-if="state.items.length === 0 && !state.loading && config.useGrid"
+          :config="config"
+          :state="state"
           class="mt-10"
-          :title="`No ${config.entityNamePlural.toLowerCase()} found`"
-          :description="
-            Object.keys(state.filters).length === 0 && !state.searchQuery
-              ? `It looks like you don\'t have access to any ${config.entityName.toLowerCase()} yet. ${config.canCreate ? 'You can create one below.' : 'Please contact your administrator.'}`
-              : `The current search criteria don't match any ${config.entityName.toLowerCase()}. Change your query and retry`
-          "
-          :icon="config.icon"
-          :actions="
-            config.canCreate
-              ? [
-                  {
-                    icon: 'i-lucide-plus',
-                    label: 'Create new',
-                    onClick: () => {
-                      openCreateModal = true;
-                    },
-                  },
-                ]
-              : []
-          "
-          size="xl"
-          variant="naked"
+          @create-click="openCreateModal = true"
         />
 
         <CrudTable
           v-if="config.tableColumns && !config.useGrid"
-          v-show="state.items.length > 0 || state.loading"
           ref="tableRef"
           :config="config"
           :state="state"
@@ -94,6 +69,14 @@
         >
           <template v-if="$slots.actions" #actions="slotProps">
             <slot name="actions" v-bind="slotProps" />
+          </template>
+          <template #empty>
+            <CrudEmptyState
+              :config="config"
+              :state="state"
+              container-class="py-12"
+              @create-click="openCreateModal = true"
+            />
           </template>
         </CrudTable>
 

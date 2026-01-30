@@ -11,7 +11,11 @@
         ? { select: onTableSelect }
         : undefined
     "
-  />
+  >
+    <template #empty>
+      <slot name="empty" />
+    </template>
+  </UTable>
 </template>
 
 <script setup lang="ts">
@@ -21,6 +25,7 @@ const UIcon = resolveComponent("UIcon");
 const props = defineProps<{ config: CrudConfig; state: CrudState }>();
 const emit = defineEmits<{ edit: [item: object]; delete: [item: object] }>();
 const slots = useSlots();
+const toast = useToast();
 
 const columns = computed(() => {
   const cols =
@@ -55,13 +60,15 @@ const columns = computed(() => {
           onSelect: () => emit("edit", item),
         });
       }
-      if (props.config.tableColumns?.some((c) => c.accessorKey === "id")) {
+      if (
+        props.config.tableCopyId !== false &&
+        props.config.tableColumns?.some((c) => c.accessorKey === "id")
+      ) {
         actions.push({
           label: "Copy ID",
           icon: "i-lucide-copy",
           onSelect: () => {
             navigator.clipboard.writeText(String(item.id));
-            const toast = useToast();
             toast.add({ title: "ID copied to clipboard", color: "success" });
           },
         });

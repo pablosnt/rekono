@@ -230,6 +230,13 @@ export default function () {
     }
   }
 
+  function smartLowerCase(text: string): string {
+    return text.replace(
+      /\b(?!API|HTTP|URL|JSON|XML|HTML|CSS|JS|TS)\w+/g,
+      (match) => match.toLowerCase(),
+    );
+  }
+
   return {
     firstUpper,
     stageOptions,
@@ -243,5 +250,6 @@ export default function () {
     getUserDisplayName,
     truncateText,
     formatRelativeDatetime,
+    smartLowerCase,
   };
 }

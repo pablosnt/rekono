@@ -189,6 +189,44 @@
             highlight
             :disabled="field.disabled === true"
           />
+          <UInputDate
+            v-else-if="field.type === 'date'"
+            ref="inputDate"
+            v-model="formData[field.key]"
+            class="w-full"
+            :min-value="field.minValue || today(getLocalTimeZone())"
+            :size="field.size || 'lg'"
+            variant="outline"
+            :hour-cycle="24"
+          >
+            <template #leading>
+              <UPopover>
+                <UButton
+                  color="neutral"
+                  variant="link"
+                  icon="i-lucide-calendar"
+                  aria-label="Select a date"
+                  class="px-0"
+                />
+                <template #content>
+                  <UCalendar
+                    v-model="formData[field.key]"
+                    :min-value="field.minValue || today(getLocalTimeZone())"
+                    class="p-2"
+                  />
+                </template>
+              </UPopover>
+            </template>
+            <template v-if="formData[field.key]" #trailing>
+              <UButton
+                color="neutral"
+                variant="link"
+                icon="i-lucide-x"
+                aria-label="Clear selected date"
+                @click="delete formData[field.key]"
+              />
+            </template>
+          </UInputDate>
         </UFormField>
       </template>
     </div>
@@ -197,6 +235,7 @@
 
 <script setup lang="ts">
 import type { FilterOption, CrudConfig } from "~/types/crud";
+import { today, getLocalTimeZone } from "@internationalized/date";
 
 const props = withDefaults(
   defineProps<{
@@ -220,6 +259,7 @@ const utils = useUtils();
 const loading = ref(false);
 const showPassword = ref({});
 const form = ref();
+const inputDate = useTemplateRef("inputDate");
 const isFileUpload = ref(false);
 
 const formFields = computed(() => {
@@ -277,7 +317,8 @@ function validate(data) {
     try {
       formSchema.value?.parse(data);
       emit("validation-change", true);
-    } catch {
+    } catch (error) {
+      console.log(error);
       emit("validation-change", false);
     }
   }
@@ -287,7 +328,12 @@ function body() {
   if (!isFileUpload.value) {
     const data = { ...formData.value, ...(props.config.defaultBody || {}) };
     for (const field of formFields.value) {
-      if (field.type === "password" && typeof data[field.key] === "string") {
+      if (field.type === "date" && data[field.key]) {
+        data[field.key] = data[field.key].toString();
+      } else if (
+        field.type === "password" &&
+        typeof data[field.key] === "string"
+      ) {
         if (field.key === "confirmpassword" || /^\*+$/.test(data[field.key])) {
           delete data[field.key];
         }
@@ -309,8 +355,11 @@ function body() {
           if (/^\*+$/.test(formData.value[field.key])) {
             continue;
           }
+        } else if (field.type === "date" && data[field.key]) {
+          body.append(field.key, formData.value[field.key].toString());
+        } else {
+          body.append(field.key, formData.value[field.key]);
         }
-        body.append(field.key, formData.value[field.key]);
       }
     }
     return body;

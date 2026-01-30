@@ -14,7 +14,7 @@
               component: h(
                 'p',
                 { class: 'text-gray-900 dark:text-white font-medium' },
-                `Are you sure you want to delete this ${config.entityName.toLowerCase()}? This action can't be undone.`,
+                `Are you sure you want to delete this ${utils.smartLowerCase(config.entityName)}? This action can't be undone.`,
               ),
             },
           ]"
@@ -57,6 +57,7 @@ const emit = defineEmits<{
 }>();
 
 const loading = ref(false);
+const utils = useUtils();
 
 function remove() {
   loading.value = true;
