@@ -56,8 +56,8 @@ const api = useApi("/api/tasks/");
 const config = {
   entityName: "Scan",
   editForm: resolveComponent("TasksForm"),
-  // todo: Redirection path is likely to be projects/project-id/scans/scan-id
-  onCreation: (data: Record<string, unknown>) => navigateTo(`scans/${data.id}`),
+  onCreation: (data: Record<string, unknown>) =>
+    navigateTo(`projects/${data.target.project}/scans/${data.id}`),
   modalAvatar: () =>
     props.tool && props.tool.icon ? { src: props.tool.icon } : undefined,
   modalIcon: () =>
