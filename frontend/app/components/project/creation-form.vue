@@ -55,7 +55,7 @@
 import type { CrudConfig } from "~/types/crud";
 
 defineProps<{
-  api: object;
+  api: typeof useApi;
   config: CrudConfig;
   entity?: Record<string, unknown>;
 }>();

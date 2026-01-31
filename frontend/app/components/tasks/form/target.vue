@@ -99,7 +99,7 @@
 
 <script setup lang="ts">
 const props = defineProps<{
-  api: object;
+  api: typeof useApi;
   defaultProject: number | undefined;
   defaultTarget: number | undefined;
 }>();

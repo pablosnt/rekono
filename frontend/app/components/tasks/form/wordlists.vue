@@ -47,7 +47,7 @@
 
 <script setup lang="ts">
 const props = defineProps<{
-  api: object;
+  api: typeof useApi;
   supportedWordlist: boolean;
   requiredWordlist: boolean;
 }>();

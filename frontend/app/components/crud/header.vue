@@ -164,7 +164,7 @@
 import type { CrudConfig, CrudState } from "~/types/crud";
 
 defineProps<{
-  api: object;
+  api: typeof useApi;
   config: CrudConfig;
   state: CrudState;
   table: unknown;

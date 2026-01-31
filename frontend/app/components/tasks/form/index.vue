@@ -136,7 +136,7 @@ import type { FormError } from "@nuxt/ui";
 import type { CrudConfig } from "~/types/crud";
 
 const props = defineProps<{
-  api: object;
+  api: typeof useApi;
   config?: CrudConfig;
   entity?: Record<string, unknown>;
 }>();

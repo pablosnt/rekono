@@ -88,7 +88,7 @@
 
 <script setup lang="ts">
 const props = defineProps<{
-  api: object;
+  api: typeof useApi;
   defaultTool: number | undefined;
   defaultConfiguration: number | undefined;
   defaultProcess: number | undefined;

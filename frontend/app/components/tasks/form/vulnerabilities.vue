@@ -48,7 +48,7 @@
 import * as z from "zod";
 
 const props = defineProps<{
-  api: object;
+  api: typeof useApi;
   required: boolean;
 }>();
 const emit = defineEmits<{

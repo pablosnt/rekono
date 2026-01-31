@@ -39,7 +39,6 @@
 import type { CrudConfig } from "~/types/crud";
 
 defineProps<{
-  // todo: Apply this typing everywhere
   api: typeof useApi;
   config: CrudConfig;
 }>();

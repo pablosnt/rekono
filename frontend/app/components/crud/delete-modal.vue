@@ -48,7 +48,7 @@ const props = defineProps<{
   open: boolean;
   item: Record<string, string | number | boolean | null>;
   config: CrudConfig;
-  api: object;
+  api: typeof useApi;
 }>();
 
 const emit = defineEmits<{

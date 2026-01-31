@@ -55,7 +55,7 @@
 import * as z from "zod";
 
 const props = defineProps<{
-  api: object;
+  api: typeof useApi;
   config: object;
   entity?: Record<string, unknown>;
 }>();
