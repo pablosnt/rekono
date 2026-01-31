@@ -40,12 +40,13 @@
 import type { Process } from "~/types/processes";
 import type { Project } from "~/types/projects";
 import type { Configuration, Tool } from "~/types/tools";
+import type { Target } from "~/types/target";
+import type { TargetPort } from "~/types/target_ports";
 
 const props = defineProps<{
   project?: Project;
-  // todo: typing
-  target?: object;
-  targetPort?: object;
+  target?: Target;
+  targetPort?: TargetPort;
   tool?: Tool;
   process?: Process;
   configuration?: Configuration;
