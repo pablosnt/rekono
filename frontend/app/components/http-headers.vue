@@ -84,6 +84,7 @@ const config: CrudConfig = reactive({
   tableColumnsVisibility: {
     id: false,
   },
+  tableCopyId: false,
   searchable: true,
   searchPlaceholder: "Search HTTP headers...",
   filters: [],

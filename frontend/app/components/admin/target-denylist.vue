@@ -50,6 +50,7 @@ const config: CrudConfig<TargetDenylist> = reactive({
   tableColumnsVisibility: {
     id: false,
   },
+  tableCopyId: false,
   searchable: true,
   searchPlaceholder: "Search denied targets...",
   filters: [],
