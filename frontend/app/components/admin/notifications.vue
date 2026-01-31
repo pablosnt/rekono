@@ -11,7 +11,12 @@
     }"
   >
     <template #content>
-      <UProgress v-show="loadingSmtp || loadingTelegram" />
+      <UProgress
+        :class="[
+          loadingSmtp || loadingTelegram ? 'visible' : 'invisible',
+          'mb-1',
+        ]"
+      />
       <UPageGrid v-if="smtpSettings && telegramSettings">
         <UPageCard
           title="SMTP"

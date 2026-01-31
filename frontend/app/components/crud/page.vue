@@ -81,7 +81,9 @@
         </CrudTable>
 
         <template v-if="config.useGrid">
-          <UProgress v-show="state.loading" />
+          <UProgress
+            :class="[state.loading ? 'visible' : 'invisible', 'mb-1']"
+          />
           <UPageGrid v-show="state.items.length > 0">
             <slot
               v-for="item in state.items"

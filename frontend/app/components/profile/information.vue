@@ -10,8 +10,7 @@
     }"
   >
     <template #content>
-      <!-- todo: Improve the location of the progress bars? When appears, it moves down all the content a bit -->
-      <UProgress v-show="loading" class="mb-5" />
+      <UProgress :class="[loading ? 'visible' : 'invisible', 'mb-1']" />
       <CrudForm
         ref="form"
         :api="api"

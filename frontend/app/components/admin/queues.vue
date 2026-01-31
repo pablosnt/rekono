@@ -10,7 +10,7 @@
     }"
   >
     <template #content>
-      <UProgress v-show="loading" />
+      <UProgress :class="[loading ? 'visible' : 'invisible', 'mb-1']" />
       <UPageGrid
         v-if="queueStats && Object.keys(queueStats).length > 0"
         class="grid-cols-1 md:grid-cols-2 xl:grid-cols-4"
