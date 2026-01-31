@@ -243,10 +243,9 @@ onMounted(() => {
   api.get("stats/top-projects/").then((response: object) => {
     const children: NavigationItem[] = [];
     for (let i = 0; i < response.length; i++) {
-      // todo: Change this icon by each project avatar
       children.push({
         label: response[i].name,
-        icon: "i-lucide-folder",
+        avatar: { text: response[i].name.charAt(0).toUpperCase() },
         to: `/projects/${response[i].id}`,
       });
     }
