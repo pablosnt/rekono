@@ -72,11 +72,13 @@
           </template>
           <template #empty>
             <CrudEmptyState
+              v-if="!state.loading"
               :config="config"
               :state="state"
               container-class="py-12"
               @create-click="openCreateModal = true"
             />
+            <UButton v-else size="xl" loading variant="ghost" />
           </template>
         </CrudTable>
 
