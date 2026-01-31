@@ -220,7 +220,6 @@ const config: CrudConfig<User> = reactive({
       utils.roleOptions.map((t) => t.value) as [string, ...string[]],
     ),
   }),
-  updateOnCreateModalOpen: true,
   editFormFields: [
     {
       key: "role",
@@ -236,7 +235,6 @@ const config: CrudConfig<User> = reactive({
       utils.roleOptions.map((t) => t.value) as [string, ...string[]],
     ),
   }),
-  updateOnEditModalOpen: true,
   modalAvatar: (user: User) => ({
     text: utils.getUserDisplayName(user).charAt(0).toUpperCase(),
   }),

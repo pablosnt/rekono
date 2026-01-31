@@ -117,8 +117,6 @@ const config: CrudConfig = reactive({
         message: "Invalid value",
       }),
   }),
-  updateOnCreateModalOpen: true,
-  updateOnEditModalOpen: true,
   canRead: props.canRead,
   canCreate: props.canCreate,
   canEdit: props.canEdit,

@@ -71,6 +71,7 @@ const apiTokensConfig = ref({
       }),
   }),
   createForm: resolveComponent("ApiTokenForm"),
+  updateOnCreateModalOpen: true,
   deleteMessage: (token: ApiToken) => [
     {
       component: h(

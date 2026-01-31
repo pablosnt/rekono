@@ -317,8 +317,7 @@ function validate(data) {
     try {
       formSchema.value?.parse(data);
       emit("validation-change", true);
-    } catch (error) {
-      console.log(error);
+    } catch {
       emit("validation-change", false);
     }
   }

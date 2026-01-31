@@ -69,8 +69,6 @@ const config: CrudConfig<TargetDenylist> = reactive({
   formSchema: z.object({
     target: validation.target_regex("target", true, 100),
   }),
-  updateOnCreateModalOpen: true,
-  updateOnEditModalOpen: true,
   deleteMessage: (item: TargetDenylist) => [
     {
       component: h(

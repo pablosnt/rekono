@@ -210,7 +210,6 @@ const config: CrudConfig<Wordlist> = reactive({
         .mime("text/plain"),
     });
   },
-  updateOnCreateModalOpen: true,
   editFormFields: formFields,
   editFormSchema: z.object({
     name: validation.name("name", true, 100),
@@ -218,7 +217,6 @@ const config: CrudConfig<Wordlist> = reactive({
       utils.wordlistTypes.map((t) => t.value) as [string, ...string[]],
     ),
   }),
-  updateOnEditModalOpen: true,
   deleteMessage: (wordlist: Wordlist) => [
     {
       component: h(

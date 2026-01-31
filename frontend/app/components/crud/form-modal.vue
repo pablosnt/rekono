@@ -142,5 +142,4 @@ const handleSubmit = (data: Record<string, unknown>) => {
   updatedSubmitLabel.value = null;
   loading.value = false;
 };
-// todo: Add config option to update data on close. For example, for things like Api tokens and so on
 </script>
