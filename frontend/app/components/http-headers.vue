@@ -72,7 +72,6 @@ const config: CrudConfig = reactive({
       icon: "i-lucide-case-sensitive",
       cell: ({ row }) =>
         h("span", { class: "font-medium" }, row.getValue("key")),
-      enableResizing: true,
     },
     {
       accessorKey: "value",
@@ -80,7 +79,6 @@ const config: CrudConfig = reactive({
       icon: "i-lucide-text-cursor-input",
       cell: ({ row }) =>
         h("span", { class: "text-muted-foreground" }, row.getValue("value")),
-      enableResizing: true,
     },
   ],
   tableColumnsVisibility: {

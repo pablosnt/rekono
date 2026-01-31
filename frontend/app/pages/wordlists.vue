@@ -68,7 +68,6 @@ const config: CrudConfig<Wordlist> = reactive({
       icon: "i-lucide-case-sensitive",
       cell: ({ row }) =>
         h("span", { class: "font-medium" }, row.getValue("name")),
-      enableResizing: true,
     },
     {
       accessorKey: "type",
@@ -101,7 +100,6 @@ const config: CrudConfig<Wordlist> = reactive({
         const owner = row.getValue("owner") as Wordlist["owner"];
         return owner?.username ? `@${owner.username}` : "";
       },
-      enableResizing: true,
     },
     {
       accessorKey: "likes",

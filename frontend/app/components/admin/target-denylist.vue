@@ -31,7 +31,6 @@ const config: CrudConfig<TargetDenylist> = reactive({
       icon: "i-lucide-locate-fixed",
       cell: ({ row }) =>
         h("span", { class: "font-medium font-mono" }, row.getValue("target")),
-      enableResizing: true,
     },
     {
       accessorKey: "default",

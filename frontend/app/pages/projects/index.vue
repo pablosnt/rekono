@@ -39,8 +39,6 @@ const config: CrudConfig<Project> = reactive({
       icon: "i-lucide-case-sensitive",
       cell: ({ row }) =>
         h("span", { class: "font-medium" }, row.getValue("name")),
-      // todo: if this doesn't work, remove
-      enableResizing: true,
     },
     {
       accessorKey: "description",
@@ -48,7 +46,6 @@ const config: CrudConfig<Project> = reactive({
       icon: "i-lucide-align-left",
       cell: ({ row }) =>
         h("span", { class: "font-medium" }, row.getValue("description")),
-      enableResizing: true,
     },
     {
       accessorKey: "tags",
@@ -67,7 +64,6 @@ const config: CrudConfig<Project> = reactive({
           { class: "font-medium" },
           (row.getValue("targets") as Project["targets"]).length,
         ),
-      enableResizing: true,
     },
     {
       accessorKey: "owner",
@@ -77,7 +73,6 @@ const config: CrudConfig<Project> = reactive({
         const owner = row.getValue("owner") as Project["owner"];
         return owner?.username ? `@${owner.username}` : "";
       },
-      enableResizing: true,
     },
   ] as CrudTableColumn<Project>[],
   tableColumnsVisibility: {

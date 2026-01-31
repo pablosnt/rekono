@@ -71,7 +71,6 @@ const config: CrudConfig<Process> = reactive({
       icon: "i-lucide-case-sensitive",
       cell: ({ row }) =>
         h("span", { class: "font-medium" }, row.getValue("name")),
-      enableResizing: true,
     },
     {
       accessorKey: "description",
@@ -83,7 +82,6 @@ const config: CrudConfig<Process> = reactive({
           { class: "text-muted-foreground whitespace-pre-wrap py-1" },
           row.getValue("description"),
         ),
-      enableResizing: true,
     },
     {
       accessorKey: "tags",
@@ -109,7 +107,6 @@ const config: CrudConfig<Process> = reactive({
         const owner = row.getValue("owner") as Process["owner"];
         return owner?.username ? `@${owner.username}` : "";
       },
-      enableResizing: true,
     },
     {
       accessorKey: "likes",
