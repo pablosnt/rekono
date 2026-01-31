@@ -13,7 +13,7 @@
         autofocus: true,
       },
       {
-        name: 'firstname',
+        name: 'first_name',
         type: 'text',
         label: 'First name',
         placeholder: 'Enter your first name',
@@ -21,7 +21,7 @@
         size: 'xl',
       },
       {
-        name: 'lastname',
+        name: 'last_name',
         type: 'text',
         label: 'Last name',
         placeholder: 'Enter your last name',
@@ -65,10 +65,9 @@ if (!otp.value) {
 }
 const schema = z
   .object({
-    // todo: replace custom z.string by useValidation methods
-    username: z.string("Username is required"),
-    firstname: z.string("First name is required"),
-    lastname: z.string("Last name is required"),
+    username: validation.name("username", true, 100),
+    first_name: validation.name("first_name", true, 100),
+    last_name: validation.name("last_name", true, 100),
     password: validation.passwordPolicy,
     confirmpassword: z.string("Password must be confirmed"),
   })
@@ -82,8 +81,8 @@ function submit(event: object) {
   api
     .create("", {
       username: event.data.username,
-      first_name: event.data.firstname,
-      last_name: event.data.lastname,
+      first_name: event.data.first_name,
+      last_name: event.data.last_name,
       password: event.data.password,
       otp: otp.value,
     })

@@ -24,14 +24,15 @@ export default function () {
     max: number | undefined,
     regex: RegExp,
   ) {
+    const fieldName = field.replaceAll("_", " ");
     let policy = required
-      ? z.string(`${utils.firstUpper(field)} is required`).min(1)
+      ? z.string(`${utils.firstUpper(fieldName)} is required`).min(1)
       : z.string();
     if (max) {
       policy = policy.max(max);
     }
     policy = policy.refine((value) => regex.test(value), {
-      message: `Invalid ${field.toLowerCase()}`,
+      message: `Invalid ${fieldName.toLowerCase()}`,
     });
     return required ? policy : policy.optional();
   }
