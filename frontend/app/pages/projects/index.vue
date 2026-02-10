@@ -144,7 +144,7 @@ const config: CrudConfig<Project> = reactive({
     description: validation.text("description"),
     tags: z.array(validation.name("tag", true, 100)).optional(),
   }),
-  createForm: resolveComponent("ProjectCreationForm"),
+  createForm: resolveComponent("FormProject"),
   updateOnCreateModalOpen: true,
   onCreation: (data: Record<string, unknown>) =>
     navigateTo(

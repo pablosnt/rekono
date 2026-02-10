@@ -23,7 +23,7 @@
         </div>
       </template>
       <template #body>
-        <ProcessStepsForm v-if="selectedProcess" :process="selectedProcess" />
+        <FormSteps v-if="selectedProcess" :process="selectedProcess" />
       </template>
     </UModal>
   </div>
@@ -220,9 +220,9 @@ const config: CrudConfig<Process> = reactive({
     tags: z.array(validation.name("tag", true, 100)).optional(),
   }),
   formFullscreen: true,
-  createForm: resolveComponent("ProcessForm"),
+  createForm: resolveComponent("FormProcess"),
   updateOnCreateModalOpen: true,
-  editForm: resolveComponent("ProcessForm"),
+  editForm: resolveComponent("FormProcess"),
   updateOnEditModalOpen: true,
   deleteMessage: (process: Process) => [
     {

@@ -1,8 +1,8 @@
 <template>
-  <ProjectPanel v-if="$route.params.project_id">
+  <PanelProject v-if="$route.params.project_id">
     <slot />
-  </ProjectPanel>
-  <MainPanel v-else>
+  </PanelProject>
+  <PanelMain v-else>
     <slot />
-  </MainPanel>
+  </PanelMain>
 </template>

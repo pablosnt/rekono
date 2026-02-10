@@ -114,7 +114,7 @@
 <script setup lang="ts">
 import { useUserStore } from "~/store/user";
 
-const props = defineProps<{
+defineProps<{
   storageKey: string;
   navigationItems: Array<string, unknown>;
 }>();
