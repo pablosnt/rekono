@@ -1,5 +1,5 @@
 <template>
-  <UFooter class="relative bottom-0">
+  <UFooter>
     <template #left>
       <UNavigationMenu
         :items="[

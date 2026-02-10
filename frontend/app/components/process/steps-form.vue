@@ -123,13 +123,16 @@ function getToolConfigurationsPerStage(
 function getStageTree(stage: string): Array {
   const tree = [];
   tools.value.forEach((tool) => {
-    const configurations = getToolConfigurationsPerStage(tool, stage);
-    if (configurations.length > 0) {
+    const configurationsPerStage = getToolConfigurationsPerStage(tool, stage);
+    if (configurationsPerStage.length > 0) {
       tree.push({
         label: tool.name,
         avatar: tool.icon,
-        defaultExpanded: false,
-        children: configurations.map((configuration) => {
+        defaultExpanded:
+          configurationsPerStage.filter((configuration) =>
+            configurations.value.includes(configuration.id),
+          ).length > 0,
+        children: configurationsPerStage.map((configuration) => {
           return {
             label: configuration.name,
             id: configuration.id,

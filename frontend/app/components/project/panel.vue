@@ -1,0 +1,178 @@
+<template>
+  <Panel :navigation-items="items">
+    <template #header>
+      <UBreadcrumb class="m-5" :items="breadcrumb">
+        <template #dropdown="{ item }">
+          <UDropdownMenu :items="item.children">
+            <UButton
+              :avatar="item.avatar"
+              :label="item.label"
+              color="neutral"
+              variant="link"
+              class="p-0.5"
+            />
+          </UDropdownMenu>
+        </template>
+      </UBreadcrumb>
+    </template>
+    <slot />
+  </Panel>
+</template>
+
+<script setup lang="ts">
+import { useUserStore } from "~/store/user";
+
+const api = useApi();
+const route = useRoute();
+const userStore = useUserStore();
+const breadcrumb = ref([
+  {
+    label: "Home",
+    icon: "i-lucide-house",
+    to: "/",
+  },
+  {
+    label: "Projects",
+    icon: "i-lucide-folder",
+    to: "/projects/",
+  },
+]);
+const items = ref([
+  {
+    label: "Project",
+    icon: "i-lucide-folder",
+    to: `projects/${route.params.project_id}`,
+  },
+  {
+    label: "Targets",
+    icon: "i-lucide-locate-fixed",
+    to: `projects/${route.params.project_id}/targets`,
+  },
+  {
+    label: "Scans",
+    icon: "i-lucide-play",
+    to: `projects/${route.params.project_id}/scans`,
+  },
+  {
+    label: "Assets",
+    icon: "i-lucide-server",
+    to: `projects/${route.params.project_id}/assets`,
+  },
+  {
+    label: "Findings",
+    icon: "i-lucide-scan",
+    defaultOpen: true,
+    children: [
+      {
+        label: "OSINT",
+        icon: "i-lucide-globe",
+        to: `projects/${route.params.project_id}/osint`,
+      },
+      {
+        label: "Credentials",
+        icon: "i-lucide-key",
+        to: `projects/${route.params.project_id}/credentials`,
+      },
+      {
+        label: "Vulnerabilities",
+        icon: "i-lucide-bug",
+        to: `projects/${route.params.project_id}/vulnerabilities`,
+      },
+    ],
+  },
+  {
+    label: "Metrics",
+    icon: "i-lucide-chart-bar",
+    to: `projects/${route.params.project_id}/metrics`,
+  },
+  {
+    label: "Reports",
+    icon: "i-lucide-file-text",
+    to: `projects/${route.params.project_id}/reports`,
+  },
+
+  {
+    label: "Notes",
+    icon: "i-lucide-notebook",
+    to: `projects/${route.params.project_id}/notes`,
+  },
+  {
+    label: "Alerts",
+    icon: "i-lucide-triangle-alert",
+    to: `projects/${route.params.project_id}/alerts`,
+  },
+]);
+
+onMounted(() => {
+  api.get(`/api/projects/${route.params.project_id}/`).then((project) => {
+    api.get("stats/top-projects/").then((top_projects: object) => {
+      let children: NavigationItem[] = [];
+      let included = false;
+      for (let i = 0; i < top_projects.length; i++) {
+        if (top_projects[i].id === project.id) {
+          included = true;
+        }
+        children.push({
+          label: top_projects[i].name,
+          avatar: { text: top_projects[i].name.charAt(0).toUpperCase() },
+          to: `/projects/${top_projects[i].id}`,
+        });
+      }
+      if (!included) {
+        children = [
+          ...[
+            {
+              label: project.name,
+              avatar: { text: project.name.charAt(0).toUpperCase() },
+              to: `/projects/${project.id}`,
+            },
+          ],
+          ...children,
+        ];
+      }
+      breadcrumb.value.push({
+        slot: "dropdown",
+        label: project.name,
+        avatar: { text: project.name.charAt(0).toUpperCase() },
+        to: `/projects/${project.id}`,
+        children: children,
+      });
+    });
+  });
+  if (userStore.is_admin) {
+    items.value.push({
+      label: "Members",
+      icon: "i-lucide-users",
+      to: `projects/${route.params.project_id}/members`,
+    });
+  }
+  api
+    .list("hosts/", { project: route.params.project_id }, false, 1, 1)
+    .then((response: object) => {
+      if (items.value[3]) {
+        items.value[3].badge = response.total.toString();
+      }
+    });
+  api
+    .list("osint/", { project: route.params.project_id }, false, 1, 1)
+    .then((response: object) => {
+      if (items.value[4]?.children?.[0]) {
+        items.value[4].children[0].badge = response.total.toString();
+      }
+    });
+  api
+    .list("credentials/", { project: route.params.project_id }, false, 1, 1)
+    .then((response: object) => {
+      if (items.value[4]?.children?.[1]) {
+        items.value[4].children[1].badge = response.total.toString();
+      }
+    });
+  api
+    .list("vulnerabilities/", { project: route.params.project_id }, false, 1, 1)
+    .then((response: object) => {
+      if (items.value[4]?.children?.[2]) {
+        items.value[4].children[2].badge = response.total.toString();
+      }
+    });
+});
+</script>
