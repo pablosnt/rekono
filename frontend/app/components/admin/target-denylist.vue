@@ -7,7 +7,7 @@ import { h } from "vue";
 import type { CrudConfig } from "~/types/crud";
 import * as z from "zod";
 import { useUserStore } from "~/store/user";
-import type { TargetDenylist } from "~/types/target-denylist";
+import type { TargetDenylist } from "~/types/models";
 
 const userStore = useUserStore();
 const validation = useValidation();

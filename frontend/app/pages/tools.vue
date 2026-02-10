@@ -48,7 +48,7 @@
 <script setup lang="ts">
 import type { CrudConfig } from "~/types/crud";
 import { useUserStore } from "~/store/user";
-import type { Tool } from "~/types/tools";
+import type { Tool } from "~/types/models";
 
 const userStore = useUserStore();
 const utils = useUtils();

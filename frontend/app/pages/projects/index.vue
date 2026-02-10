@@ -7,7 +7,7 @@ import { h } from "vue";
 import type { CrudConfig, CrudTableColumn, FilterOption } from "~/types/crud";
 import { useUserStore } from "~/store/user";
 import * as z from "zod";
-import type { Project } from "~/types/projects";
+import type { Project } from "~/types/models";
 
 const userStore = useUserStore();
 const validation = useValidation();

@@ -65,7 +65,7 @@
 
 <script setup lang="ts">
 import type { CrudConfig } from "~/types/crud";
-import type { Integration } from "~/types/integrations";
+import type { Integration } from "~/types/models";
 import { useUserStore } from "~/store/user";
 import * as z from "zod";
 

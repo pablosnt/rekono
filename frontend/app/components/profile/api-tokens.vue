@@ -7,7 +7,7 @@ import * as z from "zod";
 import { h, resolveComponent } from "vue";
 import { today, getLocalTimeZone } from "@internationalized/date";
 import type { CrudTableColumn } from "~/types/crud";
-import type { ApiToken } from "~/types/api-tokens";
+import type { ApiToken } from "~/types/models";
 
 const validation = useValidation();
 

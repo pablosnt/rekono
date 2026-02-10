@@ -34,7 +34,7 @@ import { h, resolveComponent } from "vue";
 import type { CrudConfig, FilterOption } from "~/types/crud";
 import * as z from "zod";
 import { useUserStore } from "~/store/user";
-import type { Process } from "~/types/processes";
+import type { Process } from "~/types/models";
 
 const userStore = useUserStore();
 const validation = useValidation();

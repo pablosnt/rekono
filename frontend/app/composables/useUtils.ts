@@ -1,5 +1,5 @@
 import type { FilterOption } from "~/types/crud";
-import type { User } from "~/types/users";
+import type { User } from "~/types/models";
 import { useUserStore } from "~/store/user";
 
 export default function () {

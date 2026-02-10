@@ -89,7 +89,7 @@
 <script setup lang="ts">
 import { h } from "vue";
 import type { CrudConfig } from "~/types/crud";
-import type { User } from "~/types/users";
+import type { User } from "~/types/models";
 import { useUserStore } from "~/store/user";
 import * as z from "zod";
 

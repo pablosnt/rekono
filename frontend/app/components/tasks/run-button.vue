@@ -37,11 +37,14 @@
 </template>
 
 <script setup lang="ts">
-import type { Process } from "~/types/processes";
-import type { Project } from "~/types/projects";
-import type { Configuration, Tool } from "~/types/tools";
-import type { Target } from "~/types/target";
-import type { TargetPort } from "~/types/target_ports";
+import type {
+  Process,
+  Project,
+  Configuration,
+  Tool,
+  Target,
+  TargetPort,
+} from "~/types/models";
 
 const props = defineProps<{
   project?: Project;

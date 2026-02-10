@@ -94,8 +94,7 @@
 </template>
 
 <script setup lang="ts">
-import type { Process } from "~/types/processes";
-import type { Configuration, Tool } from "~/types/tools";
+import type { Configuration, Tool, Process } from "~/types/models";
 
 const props = defineProps<{ process: Process }>();
 const emit = defineEmits<{

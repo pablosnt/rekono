@@ -1,5 +1,5 @@
 import { jwtDecode, type JwtPayload } from "jwt-decode";
-import type { User } from "~/types/users";
+import type { User } from "~/types/models";
 
 interface UserPayload extends JwtPayload {
   user_id: number;
