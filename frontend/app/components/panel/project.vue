@@ -25,18 +25,7 @@ import { useUserStore } from "~/store/user";
 const api = useApi();
 const route = useRoute();
 const userStore = useUserStore();
-const breadcrumb = ref([
-  {
-    label: "Home",
-    icon: "i-lucide-house",
-    to: "/",
-  },
-  {
-    label: "Projects",
-    icon: "i-lucide-folder",
-    to: "/projects/",
-  },
-]);
+const breadcrumb = ref([]);
 const items = ref([
   {
     label: "Project",
@@ -103,7 +92,19 @@ const items = ref([
   },
 ]);
 
-onMounted(() => {
+const updateBreadcrumb = () => {
+  breadcrumb.value = [
+    {
+      label: "Home",
+      icon: "i-lucide-house",
+      to: "/",
+    },
+    {
+      label: "Projects",
+      icon: "i-lucide-folder",
+      to: "/projects/",
+    },
+  ];
   api.get(`/api/projects/${route.params.project_id}/`).then((project) => {
     api.get("stats/top-projects/").then((top_projects: object) => {
       const children: NavigationItem[] = [];
@@ -111,7 +112,6 @@ onMounted(() => {
         if (top_projects[i].id === project.id) {
           continue;
         }
-        // TODO: If this is clicked, the name of the breadcrum stays unchanged, even though the new project's page is loaded
         children.push({
           label: top_projects[i].name,
           avatar: { text: top_projects[i].name.charAt(0).toUpperCase() },
@@ -127,6 +127,17 @@ onMounted(() => {
       });
     });
   });
+};
+
+watch(
+  () => route.params.project_id,
+  () => {
+    updateBreadcrumb();
+  },
+);
+
+onMounted(() => {
+  updateBreadcrumb();
   if (userStore.is_admin) {
     items.value.push({
       label: "Members",

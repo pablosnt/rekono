@@ -1,4 +1,4 @@
-import type { TableColumn, BreadcrumbItem } from "@nuxt/ui";
+import type { TableColumn } from "@nuxt/ui";
 import type * as z from "zod";
 
 export interface FilterOption {
