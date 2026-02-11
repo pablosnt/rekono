@@ -17,29 +17,27 @@
           "
         >
           <template #leading>
-            <div class="flex items-center justify-end">
-              <div class="w-45">
-                <UAvatar :src="item.icon" />
-              </div>
-              <div class="flex w-40 justify-end items-center gap-3">
-                <USwitch
-                  :model-value="getIntegrationState(item)"
-                  @update:model-value="toggleIntegration(item, $event)"
-                  @click.stop
-                />
-                <UButton
-                  v-if="item.reference"
-                  icon="i-lucide-external-link"
-                  variant="ghost"
-                  color="neutral"
-                  size="xl"
-                  :to="item.reference"
-                  target="_blank"
-                  external
-                />
-              </div>
-            </div>
+            <UAvatar :src="item.icon" />
           </template>
+          <div class="absolute top-4 right-4">
+            <div class="flex items-center gap-3">
+              <USwitch
+                :model-value="getIntegrationState(item)"
+                @update:model-value="toggleIntegration(item, $event)"
+                @click.stop
+              />
+              <UButton
+                v-if="item.reference"
+                icon="i-lucide-external-link"
+                variant="ghost"
+                color="neutral"
+                size="xl"
+                :to="item.reference"
+                target="_blank"
+                external
+              />
+            </div>
+          </div>
         </UPageCard>
       </template>
     </CrudPage>

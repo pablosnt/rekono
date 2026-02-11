@@ -25,90 +25,84 @@
           spotlight
         >
           <template #leading>
-            <div class="flex items-center justify-end">
-              <div class="w-25">
-                <UIcon
-                  :name="queue.icon"
-                  :class="`${queue.icon_class} text-xl`"
-                />
-              </div>
-              <div class="flex w-30 justify-end items-center gap-3">
-                <UButton
-                  v-if="queue.started_jobs > 0"
-                  :label="queue.started_jobs"
-                  variant="ghost"
-                  color="warning"
-                  loading
-                />
-              </div>
-            </div>
+            <UIcon :name="queue.icon" :class="`${queue.icon_class} text-xl`" />
           </template>
-          <template #default>
-            <div class="flex">
-              <UButton
-                icon="i-lucide-calendar-check"
-                :label="`Scheduled: ${queue.scheduled_jobs}`"
-                variant="ghost"
-                color="neutral"
-                size="sm"
+          <div class="absolute top-4 right-4">
+            <UButton
+              v-if="queue.started_jobs > 0"
+              :label="queue.started_jobs"
+              variant="ghost"
+              color="warning"
+              size="xl"
+              loading
+            />
+          </div>
+          <div class="flex flex-wrap justify-between">
+            <UButton
+              icon="i-lucide-calendar-check"
+              :label="`Scheduled: ${queue.scheduled_jobs}`"
+              variant="ghost"
+              color="neutral"
+              size="sm"
+              class="flex-1 min-w-fit"
+            />
+            <UButton
+              icon="i-lucide-pause"
+              :label="`Waiting: ${queue.deferred_jobs}`"
+              variant="ghost"
+              color="neutral"
+              size="sm"
+              class="flex-1 min-w-fit"
+            />
+          </div>
+          <div class="text-center">
+            <UButton
+              v-if="queue.failed_jobs > 0"
+              icon="i-lucide-x"
+              :label="`${queue.failed_jobs}/${queue.jobs} jobs failed`"
+              variant="ghost"
+              color="error"
+              size="sm"
+            />
+            <UButton
+              v-else-if="queue.finished_jobs > 0"
+              icon="i-lucide-check"
+              :label="`${queue.finished_jobs} successful jobs`"
+              variant="ghost"
+              color="success"
+              size="sm"
+            />
+          </div>
+          <div v-if="queue.name === 'monitor' && monitor">
+            <UFormField label="Monitor regularity in hours">
+              <template v-if="monitor.last_monitor" #hint>
+                <UTooltip
+                  :text="`Last monitor was ${utils.formatRelativeDatetime(monitor.last_monitor)}`"
+                  :content="{
+                    side: 'top',
+                    sideOffset: 8,
+                    collisionPadding: 8,
+                  }"
+                >
+                  <UButton
+                    icon="i-lucide-clock"
+                    size="sm"
+                    variant="ghost"
+                    color="neutral"
+                  />
+                </UTooltip>
+              </template>
+              <UInputNumber
+                v-model="monitor.hour_span"
+                class="w-full"
+                :min="24"
+                :max="168"
+                required
+                size="lg"
+                @change="() => updateMonitor()"
               />
-              <UButton
-                icon="i-lucide-pause"
-                :label="`Waiting: ${queue.deferred_jobs}`"
-                variant="ghost"
-                color="neutral"
-                size="sm"
-              />
-            </div>
-            <div class="text-center">
-              <UButton
-                v-if="queue.failed_jobs > 0"
-                icon="i-lucide-x"
-                :label="`${queue.failed_jobs}/${queue.jobs} jobs failed`"
-                variant="ghost"
-                color="error"
-                size="sm"
-              />
-              <UButton
-                v-else-if="queue.finished_jobs > 0"
-                icon="i-lucide-check"
-                :label="`${queue.finished_jobs} successful jobs`"
-                variant="ghost"
-                color="success"
-                size="sm"
-              />
-            </div>
-            <div v-if="queue.name === 'monitor' && monitor">
-              <UFormField label="Monitor regularity in hours">
-                <template v-if="monitor.last_monitor" #hint>
-                  <UTooltip
-                    :text="`Last monitor was ${utils.formatRelativeDatetime(monitor.last_monitor)}`"
-                    :content="{
-                      side: 'top',
-                      sideOffset: 8,
-                      collisionPadding: 8,
-                    }"
-                  >
-                    <UButton
-                      icon="i-lucide-clock"
-                      size="sm"
-                      variant="ghost"
-                      color="neutral"
-                    />
-                  </UTooltip>
-                </template>
-                <UInputNumber
-                  v-model="monitor.hour_span"
-                  class="w-full"
-                  :min="24"
-                  :max="168"
-                  required
-                  size="lg"
-                  @change="() => updateMonitor()"
-                />
-              </UFormField>
-            </div>
-          </template>
+            </UFormField>
+          </div>
         </UPageCard>
       </UPageGrid>
     </template>

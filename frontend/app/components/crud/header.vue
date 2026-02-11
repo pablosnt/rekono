@@ -1,9 +1,5 @@
 <template>
   <div class="space-y-4 p-3">
-    <UBreadcrumb
-      v-if="config.breadcrumbs?.length"
-      :items="config.breadcrumbs"
-    />
     <div class="flex flex-row items-center justify-between gap-4 w-full">
       <div class="flex flex-row justify-start items-center gap-4">
         <slot name="header-leading" />

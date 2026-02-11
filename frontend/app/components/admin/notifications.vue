@@ -38,15 +38,11 @@
           "
         >
           <template #leading>
-            <div class="flex items-center justify-end">
-              <div class="w-45">
-                <UIcon name="i-lucide-mail" class="text-xl text-neutral" />
-              </div>
-              <div class="flex w-40 justify-end items-center gap-3">
-                <UtilsOkOrKo :ok="smtpSettings.is_available" />
-              </div>
-            </div>
+            <UIcon name="i-lucide-mail" class="text-xl text-neutral" />
           </template>
+          <div class="absolute top-4 right-4">
+            <UtilsOkOrKo :ok="smtpSettings.is_available" />
+          </div>
         </UPageCard>
         <UPageCard
           title="Telegram"
@@ -68,28 +64,23 @@
           "
         >
           <template #leading>
-            <div class="flex items-center justify-end">
-              <div class="w-45">
-                <UIcon
-                  name="i-simple-icons-telegram"
-                  class="text-xl text-info"
-                />
-              </div>
-              <div class="flex w-40 justify-end items-center gap-3">
-                <UtilsOkOrKo :ok="telegramSettings.is_available" />
-                <UButton
-                  v-if="telegramSettings.is_available"
-                  icon="i-lucide-external-link"
-                  variant="ghost"
-                  color="neutral"
-                  size="xl"
-                  :to="`https://t.me/${telegramSettings.bot}`"
-                  target="_blank"
-                  external
-                />
-              </div>
-            </div>
+            <UIcon name="i-simple-icons-telegram" class="text-xl text-info" />
           </template>
+          <div class="absolute top-4 right-4">
+            <div class="flex items-center gap-3">
+              <UtilsOkOrKo :ok="telegramSettings.is_available" />
+              <UButton
+                v-if="telegramSettings.is_available"
+                icon="i-lucide-external-link"
+                variant="ghost"
+                color="neutral"
+                size="xl"
+                :to="`https://t.me/${telegramSettings.bot}`"
+                target="_blank"
+                external
+              />
+            </div>
+          </div>
           <template #description>
             <ULink
               v-if="telegramSettings.is_available"

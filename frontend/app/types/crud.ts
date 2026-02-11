@@ -66,7 +66,6 @@ export interface CrudConfig<T = unknown> {
   entityName: string;
   entityNamePlural: string;
   icon?: string;
-  breadcrumbs?: BreadcrumbItem[];
   tableColumns?: CrudTableColumn<T>[];
   tableColumnsVisibility?: Record<string, boolean>;
   tableCopyId: boolean;

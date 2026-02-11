@@ -99,7 +99,6 @@
         <slot name="header" />
       </template>
       <template #body>
-        <!-- TODO: Fix the position of ad-hoc items in the page -->
         <div class="mx-10">
           <slot />
         </div>

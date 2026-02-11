@@ -3,50 +3,44 @@
     <template #item="{ item, onEdit, onDelete }">
       <UPageCard variant="subtle" spotlight>
         <template #leading>
-          <div class="flex justify-end gap-2 items-start">
-            <UUser
-              class="w-76"
-              :name="utils.truncateText(utils.getUserDisplayName(item), 28)"
-              :description="item.role"
-              :avatar="{
-                text: utils.getUserDisplayName(item).charAt(0).toUpperCase(),
-                class:
-                  item.id.toString() === userStore.user
-                    ? 'bg-primary-500 text-white'
-                    : '',
-              }"
-              size="xl"
-            />
-            <UTooltip
-              v-if="item.is_active && (item.last_login || item.date_joined)"
-              class="w-8"
-            >
-              <UButton icon="i-lucide-clock" color="neutral" variant="ghost" />
-              <template #content>
-                <div>
-                  <p v-if="item.last_login">
-                    Last login
-                    {{
-                      utils
-                        .formatRelativeDatetime(item.last_login)
-                        .toLowerCase()
-                    }}
-                  </p>
-                  <p v-if="item.date_joined">
-                    Joined
-                    {{
-                      utils
-                        .formatRelativeDatetime(item.date_joined)
-                        .toLowerCase()
-                    }}
-                  </p>
-                </div>
-              </template>
-            </UTooltip>
-          </div>
+          <UUser
+            :name="utils.truncateText(utils.getUserDisplayName(item), 15)"
+            :description="item.role"
+            :avatar="{
+              text: utils.getUserDisplayName(item).charAt(0).toUpperCase(),
+              class:
+                item.id.toString() === userStore.user
+                  ? 'bg-primary-500 text-white'
+                  : '',
+            }"
+            size="xl"
+          />
         </template>
-        <div class="flex items-center justify-between mt-4">
-          <div class="flex items-center gap-2">
+        <div class="absolute top-4 right-4">
+          <UTooltip
+            v-if="item.is_active && (item.last_login || item.date_joined)"
+          >
+            <UButton icon="i-lucide-clock" color="neutral" variant="ghost" />
+            <template #content>
+              <div>
+                <p v-if="item.last_login">
+                  Last login
+                  {{
+                    utils.formatRelativeDatetime(item.last_login).toLowerCase()
+                  }}
+                </p>
+                <p v-if="item.date_joined">
+                  Joined
+                  {{
+                    utils.formatRelativeDatetime(item.date_joined).toLowerCase()
+                  }}
+                </p>
+              </div>
+            </template>
+          </UTooltip>
+        </div>
+        <div class="flex items-center justify-between">
+          <div class="flex1">
             <UBadge
               v-if="item.is_active === true"
               icon="i-lucide-check-circle"
@@ -69,17 +63,18 @@
               variant="subtle"
             />
           </div>
-          <UDropdownMenu
-            v-if="item.id.toString() !== userStore.user"
-            :items="getUserActions(item, onEdit, onDelete)"
-            :content="{ align: 'end' }"
-          >
-            <UButton
-              icon="i-lucide-more-horizontal"
-              variant="ghost"
-              color="neutral"
-            />
-          </UDropdownMenu>
+          <div class="flex1">
+            <UDropdownMenu
+              v-if="item.id.toString() !== userStore.user"
+              :items="getUserActions(item, onEdit, onDelete)"
+            >
+              <UButton
+                icon="i-lucide-more-horizontal"
+                variant="ghost"
+                color="neutral"
+              />
+            </UDropdownMenu>
+          </div>
         </div>
       </UPageCard>
     </template>
