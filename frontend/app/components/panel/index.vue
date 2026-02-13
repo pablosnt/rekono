@@ -44,6 +44,7 @@
         :collapsed="sidebarCollapsed"
         :items="navigationItems"
         orientation="vertical"
+        tooltip
         popover
       />
       <template #footer>

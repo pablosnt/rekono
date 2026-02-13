@@ -187,7 +187,7 @@ const state = reactive<CrudState>({
   loading: true,
   page: 1,
   pageSize: props.config.pageSize || 24,
-  filters: props.config.defaultFilters || {},
+  filters: JSON.parse(JSON.stringify(props.config.defaultFilters)) || {},
   ordering: props.config.defaultOrdering,
 });
 

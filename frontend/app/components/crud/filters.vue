@@ -146,7 +146,7 @@ function updateFilter(
   value: unknown,
   delay: number | undefined = undefined,
 ) {
-  if (props.config.defaultFilters && key in props.config.default) return;
+  if (props.config.defaultFilters && key in props.config.defaultFilters) return;
   updating.push(key);
   if (value !== null && value !== undefined && value !== "") {
     _filters.value[key] = value;

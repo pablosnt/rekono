@@ -23,8 +23,9 @@
     </template>
     <template #content>
       <template v-if="userStore.profile?.telegram_chat">
-        <div class="flex justify-around">
+        <div class="flex flex-wrap justify-around">
           <UButton
+            class="mt-2"
             :label="`Go to @${settings.bot}`"
             icon="i-simple-icons-telegram"
             :to="`https://t.me/${settings.bot}`"
@@ -33,6 +34,7 @@
             size="xl"
           />
           <UButton
+            class="mt-2"
             :loading="loading"
             icon="i-lucide-unplug"
             color="error"

@@ -1,6 +1,8 @@
 <template>
   <div class="space-y-4 p-3">
-    <div class="flex flex-row items-center justify-between gap-4 w-full">
+    <div
+      class="flex flex-row flex-wrap items-center justify-between gap-4 w-full"
+    >
       <div class="flex flex-row justify-start items-center gap-4">
         <slot name="header-leading" />
         <h1
@@ -10,14 +12,14 @@
         </h1>
       </div>
 
-      <div class="flex items-center gap-3">
+      <div class="flex flex-wrap items-center gap-3">
         <slot name="header-actions">
           <UInput
             v-if="config.searchable"
             v-model="search"
             :placeholder="config.searchPlaceholder"
             icon="i-lucide-search"
-            class="w-64"
+            class="w-full min-w-48 sm:w-64"
             @update:model-value="$emit('search', search)"
           />
 
@@ -28,7 +30,9 @@
             variant="outline"
             @click="
               openFilters = !openFilters;
-              !openFilters ? emit('filters', {}) : null;
+              !openFilters
+                ? emit('filters', JSON.parse(JSON.stringify(config.defaultFilters)) || {})
+                : null;
             "
           />
 

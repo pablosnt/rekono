@@ -26,73 +26,12 @@ const api = useApi();
 const route = useRoute();
 const userStore = useUserStore();
 const breadcrumb = ref([]);
-const items = ref([
-  {
-    label: "Project",
-    icon: "i-lucide-folder",
-    to: `projects/${route.params.project_id}`,
-  },
-  {
-    label: "Targets",
-    icon: "i-lucide-locate-fixed",
-    to: `projects/${route.params.project_id}/targets`,
-  },
-  {
-    label: "Scans",
-    icon: "i-lucide-play",
-    to: `projects/${route.params.project_id}/scans`,
-  },
-  {
-    label: "Assets",
-    icon: "i-lucide-server",
-    to: `projects/${route.params.project_id}/assets`,
-  },
-  {
-    label: "Findings",
-    icon: "i-lucide-scan",
-    defaultOpen: true,
-    children: [
-      {
-        label: "OSINT",
-        icon: "i-lucide-globe",
-        to: `projects/${route.params.project_id}/osint`,
-      },
-      {
-        label: "Credentials",
-        icon: "i-lucide-key",
-        to: `projects/${route.params.project_id}/credentials`,
-      },
-      {
-        label: "Vulnerabilities",
-        icon: "i-lucide-bug",
-        to: `projects/${route.params.project_id}/vulnerabilities`,
-      },
-    ],
-  },
-  {
-    label: "Metrics",
-    icon: "i-lucide-chart-bar",
-    to: `projects/${route.params.project_id}/metrics`,
-  },
-  {
-    label: "Reports",
-    icon: "i-lucide-file-text",
-    to: `projects/${route.params.project_id}/reports`,
-  },
+const items = ref([]);
 
-  {
-    label: "Notes",
-    icon: "i-lucide-notebook",
-    to: `projects/${route.params.project_id}/notes`,
-  },
-  {
-    label: "Alerts",
-    icon: "i-lucide-triangle-alert",
-    to: `projects/${route.params.project_id}/alerts`,
-  },
-]);
-
-const updateBreadcrumb = () => {
+const update = () => {
+  if (!route.params.project_id) {
+    return;
+  }
   breadcrumb.value = [
     {
       label: "Home",
@@ -127,22 +66,76 @@ const updateBreadcrumb = () => {
       });
     });
   });
-};
+  items.value = [
+    {
+      label: "Project",
+      icon: "i-lucide-folder",
+      to: `/projects/${route.params.project_id}`,
+    },
+    {
+      label: "Targets",
+      icon: "i-lucide-locate-fixed",
+      to: `/projects/${route.params.project_id}/targets`,
+    },
+    {
+      label: "Scans",
+      icon: "i-lucide-play",
+      to: `/projects/${route.params.project_id}/scans`,
+    },
+    {
+      label: "Assets",
+      icon: "i-lucide-server",
+      to: `/projects/${route.params.project_id}/assets`,
+    },
+    {
+      label: "Findings",
+      icon: "i-lucide-scan",
+      defaultOpen: true,
+      children: [
+        {
+          label: "OSINT",
+          icon: "i-lucide-globe",
+          to: `/projects/${route.params.project_id}/osint`,
+        },
+        {
+          label: "Credentials",
+          icon: "i-lucide-key",
+          to: `/projects/${route.params.project_id}/credentials`,
+        },
+        {
+          label: "Vulnerabilities",
+          icon: "i-lucide-bug",
+          to: `/projects/${route.params.project_id}/vulnerabilities`,
+        },
+      ],
+    },
+    {
+      label: "Metrics",
+      icon: "i-lucide-chart-bar",
+      to: `/projects/${route.params.project_id}/metrics`,
+    },
+    {
+      label: "Reports",
+      icon: "i-lucide-file-text",
+      to: `/projects/${route.params.project_id}/reports`,
+    },
 
-watch(
-  () => route.params.project_id,
-  () => {
-    updateBreadcrumb();
-  },
-);
-
-onMounted(() => {
-  updateBreadcrumb();
+    {
+      label: "Notes",
+      icon: "i-lucide-notebook",
+      to: `/projects/${route.params.project_id}/notes`,
+    },
+    {
+      label: "Alerts",
+      icon: "i-lucide-triangle-alert",
+      to: `/projects/${route.params.project_id}/alerts`,
+    },
+  ];
   if (userStore.is_admin) {
     items.value.push({
       label: "Members",
       icon: "i-lucide-users",
-      to: `projects/${route.params.project_id}/members`,
+      to: `/projects/${route.params.project_id}/members`,
     });
   }
   api
@@ -173,5 +166,16 @@ onMounted(() => {
         items.value[4].children[2].badge = response.total.toString();
       }
     });
+};
+
+watch(
+  () => route.params.project_id,
+  () => {
+    update();
+  },
+);
+
+onMounted(() => {
+  update();
 });
 </script>

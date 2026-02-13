@@ -1,24 +1,17 @@
 <template>
-  <!-- todo: this navigation menu is not responsive  -->
-  <!-- todo: components where we use the class w- and a static number are not responsive -->
-  <div class="flex flex-row w-full h-180 overflow-hidden">
-    <div class="w-64 border-r border-default flex flex-col h-full">
-      <UNavigationMenu
-        :items="items"
-        orientation="vertical"
-        class="flex-1 p-2"
-      />
+  <div class="flex flex-row h-180 overflow-hidden -mx-4 sm:-mx-6">
+    <UDashboardSidebar class="md:w-48 flex flex-col ml-0" collapsible>
+      <UNavigationMenu :items="items" orientation="vertical" />
       <UButton
         icon="i-lucide-log-out"
         label="Logout"
         color="neutral"
         variant="ghost"
         size="lg"
-        class="m-2"
+        class="mt-130 justify-center"
         @click="logout()"
       />
-    </div>
-
+    </UDashboardSidebar>
     <div class="flex-1 overflow-y-auto">
       <UContainer>
         <template v-if="active === 'profile'">
