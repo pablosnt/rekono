@@ -31,7 +31,12 @@
             @click="
               openFilters = !openFilters;
               !openFilters
-                ? emit('filters', JSON.parse(JSON.stringify(config.defaultFilters)) || {})
+                ? emit(
+                    'filters',
+                    config.defaultFilters
+                      ? JSON.parse(JSON.stringify(config.defaultFilters))
+                      : {},
+                  )
                 : null;
             "
           />
@@ -130,6 +135,7 @@
             :open="openCreateModal"
             :api="api"
             :config="config"
+            :submit-label="config.createLabel"
             @open="
               (open: boolean) => {
                 $emit('openCreate', open);
