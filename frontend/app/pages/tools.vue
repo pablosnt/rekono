@@ -98,7 +98,7 @@ const config: CrudConfig<Tool> = reactive({
   ordering: ["id", "name", "command"],
   defaultOrdering: "-id",
   pageSize: 24,
-  pageSizeOptions: [24, 48, 96],
+  pageSizeOptions: [24, 50, 100],
   canRead: userStore.is_auditor,
   canCreate: false,
   canEdit: false,

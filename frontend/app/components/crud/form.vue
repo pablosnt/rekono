@@ -367,23 +367,23 @@ function body() {
 
 function save() {
   loading.value = true;
+  const data = body();
+  const entityName = utils.firstUpper(props.config.entityName);
   const request = props.entity
-    ? props.api.update(
-        props.config.putEndpoint !== undefined
-          ? props.config.putEndpoint
-          : props.entity.id
-            ? `${props.entity.id}/`
-            : "",
-        body(),
-        {},
-        utils.firstUpper(props.config.entityName),
-      )
-    : props.api.create(
-        "",
-        body(),
-        {},
-        utils.firstUpper(props.config.entityName),
-      );
+    ? props.config.putEndpoint
+      ? useApi("", true).update(
+          props.config.putEndpoint(props.entity),
+          data,
+          {},
+          entityName,
+        )
+      : props.api.update(
+          props.entity.id ? `${props.entity.id}/` : "",
+          data,
+          {},
+          entityName,
+        )
+    : props.api.create("", data, {}, entityName);
   request
     .then((response) => {
       emit("submit", response);

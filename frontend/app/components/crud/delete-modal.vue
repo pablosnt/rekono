@@ -61,8 +61,14 @@ const utils = useUtils();
 
 function remove() {
   loading.value = true;
-  props.api
-    .remove(`${props.item.id}/`, {}, props.config.entityName)
+  (props.config.deleteEndpoint
+    ? useApi("", true).remove(
+        props.config.deleteEndpoint(props.item),
+        {},
+        utils.firstUpper(props.config.entityName),
+      )
+    : props.api(`${props.item.id}/`, {}, props.config.entityName)
+  )
     .then(() => {
       emit("deleted");
       emit("open", false);

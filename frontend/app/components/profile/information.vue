@@ -118,6 +118,6 @@ const config = ref({
     email_notifications: z.boolean(),
     telegram_notifications: z.boolean(),
   }),
-  putEndpoint: "",
+  putEndpoint: () => "/api/profile/",
 });
 </script>

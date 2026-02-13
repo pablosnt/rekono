@@ -104,6 +104,6 @@ const config = ref({
       message: "New and current passwords are equal",
       path: ["password"],
     }),
-  putEndpoint: "",
+  putEndpoint: () => "/api/profile/update-password/",
 });
 </script>

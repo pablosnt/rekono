@@ -106,7 +106,7 @@ function removeTarget(index: number) {
   }
 }
 
-async function submit() {
+function submit() {
   if (targets.value.length > 0) {
     loading.value = true;
     emit("new-loading", loading.value);
