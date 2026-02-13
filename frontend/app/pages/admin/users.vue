@@ -1,44 +1,7 @@
 <template>
   <CrudPage :config="config">
     <template #item="{ item, onEdit, onDelete }">
-      <UPageCard variant="subtle" spotlight>
-        <template #leading>
-          <UUser
-            :name="utils.truncateText(utils.getUserDisplayName(item), 15)"
-            :description="item.role"
-            :avatar="{
-              text: utils.getUserDisplayName(item).charAt(0).toUpperCase(),
-              class:
-                item.id.toString() === userStore.user
-                  ? 'bg-primary-500 text-white'
-                  : '',
-            }"
-            size="xl"
-          />
-        </template>
-        <div class="absolute top-4 right-4">
-          <UTooltip
-            v-if="item.is_active && (item.last_login || item.date_joined)"
-          >
-            <UButton icon="i-lucide-clock" color="neutral" variant="ghost" />
-            <template #content>
-              <div>
-                <p v-if="item.last_login">
-                  Last login
-                  {{
-                    utils.formatRelativeDatetime(item.last_login).toLowerCase()
-                  }}
-                </p>
-                <p v-if="item.date_joined">
-                  Joined
-                  {{
-                    utils.formatRelativeDatetime(item.date_joined).toLowerCase()
-                  }}
-                </p>
-              </div>
-            </template>
-          </UTooltip>
-        </div>
+      <User :user="item">
         <div class="flex items-center justify-between">
           <div class="flex1">
             <UBadge
@@ -76,7 +39,7 @@
             </UDropdownMenu>
           </div>
         </div>
-      </UPageCard>
+      </User>
     </template>
   </CrudPage>
 </template>
@@ -189,7 +152,7 @@ const config: CrudConfig<User> = reactive({
   ],
   defaultOrdering: "-id",
   pageSize: 24,
-  pageSizeOptions: [24, 48, 96],
+  pageSizeOptions: [24, 50, 100],
   createFormFields: [
     {
       key: "email",
