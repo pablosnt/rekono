@@ -18,10 +18,13 @@
       <template #header>
         <div class="relative flex items-center justify-center w-full">
           <AppLogo v-if="!sidebarCollapsed" class="h-5 w-auto shrink-0" />
-          <UIcon
+          <UAvatar
             v-else
-            name="i-simple-icons-nuxtdotjs"
-            class="size-5 text-primary opacity-100 group-hover:opacity-0 transition-opacity duration-200"
+            src="/favicon.png"
+            alt="Rekono"
+            size="xl"
+            :ui="{ root: 'bg-transparent' }"
+            class="opacity-100 group-hover:opacity-0 transition-opacity duration-200"
           />
           <UButton
             v-if="largeScreen"
