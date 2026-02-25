@@ -35,12 +35,11 @@
 
     <template #default>
       <div class="flex items-center justify-center w-full sm:w-auto">
-        <UAvatar
-          src="/favicon.png"
-          alt="Rekono"
-          size="xs"
-          :ui="{ root: 'bg-transparent' }"
+        <UColorModeImage
+          light="/favicon.ico"
+          dark="/favicon-dark.ico"
           class="mr-2"
+          width="20"
         />
         <p class="text-sm text-muted text-center">
           Rekono Maintainers © {{ new Date().getFullYear() }}
