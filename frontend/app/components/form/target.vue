@@ -62,6 +62,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   submit: [data: Record<string, unknown>];
+  "new-submit-label": [newSubmitLabel: string];
   "validation-change": [isValid: boolean];
   "new-loading": [newLoading: boolean];
 }>();
@@ -79,6 +80,7 @@ const created = ref(0);
 
 function addTargetsFromInput() {
   if (!targetInput.value.trim()) return;
+  emit("new-submit-label", "Create");
   for (const target of targetInput.value
     .split(/[,\s\n]+/)
     .map((t) => t.trim())
@@ -150,6 +152,8 @@ function submit() {
           }
         });
     }
+  } else {
+    emit("submit", props.entity);
   }
 }
 

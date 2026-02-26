@@ -149,8 +149,8 @@ const config: CrudConfig<Project> = reactive({
   onCreation: (data: Record<string, unknown>) =>
     navigateTo(
       data.targets.length == 0
-        ? `projects/${data.id}`
-        : `projects/${data.id}/targets`,
+        ? `/projects/${data.id}`
+        : `/projects/${data.id}/targets`,
     ),
   deleteMessage: (project: Project) => [
     {

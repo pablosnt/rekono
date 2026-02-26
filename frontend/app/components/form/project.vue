@@ -29,6 +29,7 @@
                   project = data;
                   stepper = 1;
                   $emit('new-title', data.name);
+                  $emit('new-submit-label', 'Continue');
                   $emit('new-loading', false);
                 }
               "
@@ -43,6 +44,9 @@
               :api="targetApi"
               :entity="project"
               @submit="(data) => $emit('submit', data)"
+              @new-submit-label="
+                (newSubmitLabel) => $emit('new-submit-label', newSubmitLabel)
+              "
             />
           </template>
         </UContainer>
