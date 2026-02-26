@@ -26,7 +26,7 @@ invalid_filter_alert = {**filter_alert, "value": "inv;alid"}
 monitor_alert = {
     "project": 1,
     "item": AlertItem.TRENDING_CVE.value,
-    "value": None,
+    "value": str(True),
     "subscribe_all_members": False,
 }
 
@@ -256,7 +256,7 @@ class AlertTest(ApiTest, TestCase):
     def test_must_be_triggered(self) -> None:
         for alert, finding, expected in [
             (
-                Alert.objects.create(project=self.project, item=AlertItem.TRENDING_CVE),
+                Alert.objects.create(project=self.project, item=AlertItem.TRENDING_CVE, value=str(True)),
                 self.vulnerability,
                 False,
             ),

@@ -88,7 +88,7 @@ class ProjectSerializer(TaggitSerializer, RelatedNotesSerializer):
         alert = Alert.objects.create(
             project=project,
             item=AlertItem.TRENDING_CVE,
-            value=str(True).lower(),
+            value=str(True),
             enabled=True,
             owner=validated_data.get("owner"),
             subscribe_all_members=True,

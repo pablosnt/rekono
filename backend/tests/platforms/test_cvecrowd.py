@@ -46,7 +46,7 @@ class CveCrowdTest(BaseTest, TestCase):
         self.settings = CveCrowdSettings.objects.first()
         self.settings.secret = "fake-token"
         self.settings.save(update_fields=["_api_token"])
-        Alert.objects.create(project=self.project, item=AlertItem.TRENDING_CVE, enabled=True)
+        Alert.objects.create(project=self.project, item=AlertItem.TRENDING_CVE, value=str(True), enabled=True)
         self.cvecrowd = CveCrowd()
 
     @mock.patch("platforms.cvecrowd.integrations.CveCrowd._request", success)
