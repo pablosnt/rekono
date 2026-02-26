@@ -3,10 +3,6 @@ export default function () {
     return `${value.charAt(0).toUpperCase()}${value.slice(1)}`;
   }
 
-  // function getUserDisplayName(user: User): string {
-  //   return user.first_name ? user.first_name : user.username || user.email;
-  // }
-
   function truncateText(
     text: string,
     maxLength: number = 20,
@@ -49,7 +45,7 @@ export default function () {
 
   function smartLowerCase(text: string): string {
     return text.replace(
-      /\b(?!API|HTTP|URL|JSON|XML|HTML|CSS|JS|TS|OSINT|CVE)\w+/g,
+      /\b(?!API|HTTP|URL|JSON|XML|HTML|CSS|JS|TS|OSINT|CVE|IP)\w+/g,
       (match) => match.toLowerCase(),
     );
   }

@@ -101,6 +101,7 @@
                   )?.icon
                 : undefined) || field.icon
             "
+            :size="field.size || 'lg'"
             leading
             :disabled="field.disabled === true"
           >
@@ -367,6 +368,7 @@ function body() {
 
 function save() {
   loading.value = true;
+  emit("new-loading", true);
   const data = body();
   const entityName = utils.firstUpper(props.config.entityName);
   const request = props.entity

@@ -2,11 +2,9 @@
   <CrudPage ref="page" :config="config">
     <template #item="{ item, onEdit, onDelete }">
       <UPageCard
-        :title="`New ${utils.smartLowerCase(item.item)}`"
+        :title="utils.firstUpper(utils.smartLowerCase(item.item))"
         :description="
-          item.value && item.item !== 'Trending CVE'
-            ? `${backend.alerts.find((alert) => alert.item === item.item)?.field} == ${item.value}`
-            : undefined
+          item.value && item.item !== 'Trending CVE' ? item.value : undefined
         "
         variant="subtle"
         spotlight
