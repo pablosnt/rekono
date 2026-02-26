@@ -77,7 +77,7 @@ class AlertSerializer(ModelSerializer):
         """
         attrs = super().validate(attrs)
         if attrs.get("item"):
-            filter_field = Alert.mapping.get(attrs.get("item")).get("field")
+            filter_field = Alert.mapping.get(attrs.get("item"), {}).get("field")
             if not filter_field:
                 attrs["value"] = None
             if attrs["item"] == AlertItem.TRENDING_CVE:
