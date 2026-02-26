@@ -6,10 +6,10 @@ to/from JSON for API operations. Includes validation logic and computed fields.
 
 from typing import Any
 
-from backend.alerts.enums import AlertItem
 from django.db import transaction
 from rest_framework.serializers import ModelSerializer, SerializerMethodField
 
+from alerts.enums import AlertItem
 from alerts.models import Alert, MonitorSettings
 from users.serializers import SimpleUserSerializer
 

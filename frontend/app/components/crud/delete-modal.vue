@@ -67,7 +67,11 @@ function remove() {
         {},
         utils.firstUpper(props.config.entityName),
       )
-    : props.api(`${props.item.id}/`, {}, props.config.entityName)
+    : props.api.remove(
+        `${props.item.id}/`,
+        {},
+        utils.firstUpper(props.config.entityName),
+      )
   )
     .then(() => {
       emit("deleted");

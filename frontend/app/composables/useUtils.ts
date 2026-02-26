@@ -6,6 +6,19 @@ export default function () {
   function firstUpper(value: string) {
     return `${value.charAt(0).toUpperCase()}${value.slice(1)}`;
   }
+  // TODO: Clearly differentiate between utils and backend definitions
+
+  const alerts = [
+    { item: "OSINT", icon: "i-lucide-globe", field: null },
+    { item: "Host", icon: "i-lucide-server", field: "ip" },
+    { item: "Open Port", icon: "i-lucide-network", field: null },
+    { item: "Service", icon: "i-lucide-network", field: "service" },
+    { item: "Technology", icon: "i-lucide-layers", field: "name" },
+    { item: "Credential", icon: "i-lucide-key", field: null },
+    { item: "Vulnerability", icon: "i-lucide-bug", field: null },
+    { item: "CVE", icon: "i-lucide-bug", field: "cve" },
+    { item: "Trending CVE", icon: "i-lucide-bug", field: "trending" },
+  ];
 
   const stageOptions = [
     { label: "OSINT", value: 1, icon: "i-lucide-globe" },
@@ -232,12 +245,13 @@ export default function () {
 
   function smartLowerCase(text: string): string {
     return text.replace(
-      /\b(?!API|HTTP|URL|JSON|XML|HTML|CSS|JS|TS)\w+/g,
+      /\b(?!API|HTTP|URL|JSON|XML|HTML|CSS|JS|TS|OSINT|CVE)\w+/g,
       (match) => match.toLowerCase(),
     );
   }
 
   return {
+    alerts,
     firstUpper,
     stageOptions,
     getUserOptions,

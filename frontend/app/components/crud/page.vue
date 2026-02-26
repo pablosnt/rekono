@@ -224,4 +224,6 @@ onMounted(() => {
     fetch();
   }
 });
+
+defineExpose({ fetch });
 </script>
