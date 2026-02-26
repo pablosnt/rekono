@@ -103,7 +103,7 @@ const emit = defineEmits<{
   "update-intensity": [newMaxIntensity: number, newMinIntensity: number];
 }>();
 
-const utils = useUtils();
+const backend = useBackend();
 const toolingIcon = ref("i-lucide-terminal");
 const toolingAvatar = ref(undefined);
 const process = ref(props.defaultProcess);
@@ -172,10 +172,10 @@ function onTool(toolId) {
     emit("update-configuration", configuration.value);
     configurationOptions.value = [];
     props.api.get(`tools/${tool.value}/`).then((response) => {
-      minIntensity.value = utils.intensityOptions.find(
+      minIntensity.value = backend.intensities.find(
         (option) => option.label === response.intensities[0].value,
       )?.value;
-      maxIntensity.value = utils.intensityOptions.find(
+      maxIntensity.value = backend.intensities.find(
         (option) =>
           option.label ===
           response.intensities[response.intensities.length - 1].value,

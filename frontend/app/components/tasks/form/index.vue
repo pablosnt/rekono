@@ -147,7 +147,7 @@ const emit = defineEmits<{
 emit("validation-change", false);
 
 const genericApi = useApi("/api/");
-const utils = useUtils();
+const backend = useBackend();
 const stepperItems = computed(() => {
   const items = [];
   if (!props.entity.targetPort) {
@@ -245,7 +245,7 @@ function submit() {
         target_port: targetPort.value,
         process_id: process.value,
         configuration_id: configuration.value,
-        intensity: utils.intensityOptions[intensity.value - 1]?.label,
+        intensity: backend.intensities[intensity.value - 1]?.label,
         scheduled_at: scheduledAt.value ? scheduledAt.value.toString() : null,
         repeat_in: repeatIn.value,
         repeat_time_unit: repeatTimeUnit.value,

@@ -51,9 +51,9 @@ export const useUserStore = defineStore("user", {
         });
     },
     updateProfile(profile: User) {
-      const utils = useUtils();
+      const backend = useBackend();
       this.profile = profile;
-      this.name = utils.getUserDisplayName(profile);
+      this.name = backend.getUserDisplayName(profile);
     },
     isRole(role: string): boolean {
       return (this.role?.toLowerCase() ?? "") === role.toLowerCase();

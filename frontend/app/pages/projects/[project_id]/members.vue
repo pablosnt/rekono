@@ -26,7 +26,7 @@ import type { User } from "~/types/models";
 import { useUserStore } from "~/store/user";
 
 const userStore = useUserStore();
-const utils = useUtils();
+const backend = useBackend();
 const route = useRoute();
 
 const config: CrudConfig<User> = reactive({
@@ -43,7 +43,7 @@ const config: CrudConfig<User> = reactive({
       label: "Role",
       icon: "i-lucide-shield",
       type: "select" as const,
-      options: utils.roleOptions,
+      options: backend.roles,
     },
   ],
   ordering: [
@@ -74,7 +74,7 @@ const config: CrudConfig<User> = reactive({
       props: {
         color: "neutral",
         variant: "subtle",
-        description: utils.getUserDisplayName(user),
+        description: backend.getUserDisplayName(user),
         ui: { root: "text-center font-bold" },
         class: "mt-4",
       },

@@ -5,7 +5,7 @@
         :title="`New ${utils.smartLowerCase(item.item)}`"
         :description="
           item.value && item.item !== 'Trending CVE'
-            ? `${utils.alerts.find((alert) => alert.item === item.item)?.field} == ${item.value}`
+            ? `${backend.alerts.find((alert) => alert.item === item.item)?.field} == ${item.value}`
             : undefined
         "
         variant="subtle"
@@ -14,7 +14,9 @@
       >
         <template #leading>
           <UIcon
-            :name="utils.alerts.find((alert) => alert.item === item.item)?.icon"
+            :name="
+              backend.alerts.find((alert) => alert.item === item.item)?.icon
+            "
             :class="`text-2xl ${item.enabled ? 'text-success' : 'text-primary'}`"
           />
         </template>
@@ -57,6 +59,7 @@ import { useUserStore } from "~/store/user";
 
 const userStore = useUserStore();
 const api = useApi("/api/alerts/");
+const backend = useBackend();
 const utils = useUtils();
 const route = useRoute();
 const ownerOptions = ref([]);
@@ -113,11 +116,11 @@ const config: CrudConfig<Alert> = reactive({
 });
 
 onMounted(() => {
-  utils.getUserOptions(ownerOptions);
+  backend.getUserOptions(ownerOptions);
 });
 
 function canEdit(alert: Alert): boolean {
-  const field = utils.alerts.find(
+  const field = backend.alerts.find(
     (definition) => definition.item == alert.item,
   )?.field;
   return (

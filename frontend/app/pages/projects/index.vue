@@ -11,12 +11,12 @@ import type { Project } from "~/types/models";
 
 const userStore = useUserStore();
 const validation = useValidation();
-const utils = useUtils();
+const backend = useBackend();
 const userOptions = ref<FilterOption[]>([]);
 
 onMounted(() => {
   if (userStore.is_admin) {
-    utils.getUserOptions(userOptions, { role: "Admin" });
+    backend.getUserOptions(userOptions, { role: "Admin" });
   }
 });
 

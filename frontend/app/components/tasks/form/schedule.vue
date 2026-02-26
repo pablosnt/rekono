@@ -120,7 +120,7 @@
             />
             <USelect
               v-model="repeatTimeUnit"
-              :items="utils.timeUnitOptions"
+              :items="backend.timeUnits"
               class="w-32"
               @update:model-value="
                 $emit('update-repeat-time-unit', repeatTimeUnit)
@@ -143,7 +143,7 @@ defineEmits<{
   "update-repeat-time-unit": [newRepeatTimeUnit: string];
 }>();
 
-const utils = useUtils();
+const backend = useBackend();
 const inputDate = useTemplateRef("inputDate");
 const scheduledDate = ref();
 const scheduledAt = ref();

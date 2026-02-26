@@ -11,7 +11,7 @@ import type { Wordlist } from "~/types/models";
 
 const userStore = useUserStore();
 const validation = useValidation();
-const utils = useUtils();
+const backend = useBackend();
 const api = useApi("/api/");
 const maxMbSize = ref(1);
 const maxWordlistSize = ref(1000000);
@@ -30,7 +30,7 @@ const formFields = [
     type: "select",
     required: true,
     placeholder: "Select wordlist type",
-    options: utils.wordlistTypes,
+    options: backend.wordlistTypes,
   },
 ];
 
@@ -44,8 +44,8 @@ onMounted(() => {
       maxWordlistSize.value = response.items[0]?.size || maxWordlistSize.value;
     });
   if (userStore.is_auditor) {
-    utils.getUserOptions(userOptions, { role: "Admin" });
-    utils.getUserOptions(userOptions, { role: "Auditor" });
+    backend.getUserOptions(userOptions, { role: "Admin" });
+    backend.getUserOptions(userOptions, { role: "Auditor" });
   }
 });
 
@@ -78,7 +78,7 @@ const config: CrudConfig<Wordlist> = reactive({
         return h(resolveComponent("UBadge"), {
           color: "neutral",
           variant: "subtle",
-          icon: utils.wordlistTypes.find((item) => item.value === type)?.icon,
+          icon: backend.wordlistTypes.find((item) => item.value === type)?.icon,
           label: type,
         });
       },
@@ -133,7 +133,7 @@ const config: CrudConfig<Wordlist> = reactive({
         label: "Type",
         icon: "i-lucide-tag",
         type: "select" as const,
-        options: utils.wordlistTypes,
+        options: backend.wordlistTypes,
       },
       {
         key: "size",
@@ -202,7 +202,7 @@ const config: CrudConfig<Wordlist> = reactive({
     return z.object({
       name: validation.name("name", true, 100),
       type: z.enum(
-        utils.wordlistTypes.map((t) => t.value) as [string, ...string[]],
+        backend.wordlistTypes.map((t) => t.value) as [string, ...string[]],
       ),
       file: z
         .file("File is required")
@@ -214,7 +214,7 @@ const config: CrudConfig<Wordlist> = reactive({
   editFormSchema: z.object({
     name: validation.name("name", true, 100),
     type: z.enum(
-      utils.wordlistTypes.map((t) => t.value) as [string, ...string[]],
+      backend.wordlistTypes.map((t) => t.value) as [string, ...string[]],
     ),
   }),
   deleteMessage: (wordlist: Wordlist) => [

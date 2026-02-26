@@ -109,7 +109,7 @@ const emit = defineEmits<{
   "update-target-port": [newTargetPort: number | undefined];
 }>();
 
-const utils = useUtils();
+const backend = useBackend();
 const project = ref(props.defaultProject);
 const projectOptions = ref([]);
 const target = ref(props.defaultTarget);
@@ -154,7 +154,7 @@ function onTarget(targetId: number | undefined) {
           label: port.path
             ? `${port.port} - ${port.path}`
             : port.port.toString(),
-          icon: utils.getPortIcon(port.port),
+          icon: backend.getPortIcon(port.port),
         }));
       });
   }

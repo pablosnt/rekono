@@ -7,7 +7,7 @@
         :min="minIntensity"
         :max="maxIntensity"
         :tooltip="{
-          text: utils.intensityOptions[intensity - 1].label,
+          text: backend.intensities[intensity - 1].label,
           open: true,
           content: {
             side: 'top',
@@ -15,7 +15,7 @@
             collisionPadding: 8,
           },
         }"
-        :color="utils.intensityOptions[intensity - 1]?.color"
+        :color="backend.intensities[intensity - 1]?.color"
         @update:model-value="$emit('update-intensity', intensity)"
       />
       <UAlert
@@ -40,7 +40,7 @@ defineEmits<{
   "update-intensity": [newIntensity: number];
 }>();
 
-const utils = useUtils();
+const backend = useBackend();
 const intensity = ref(3);
 
 watch(

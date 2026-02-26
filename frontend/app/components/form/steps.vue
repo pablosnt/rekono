@@ -45,9 +45,9 @@
     </template>
   </USelectMenu>
   <UAccordion
-    :model-value="utils.stageOptions.map((stage) => stage.value)"
+    :model-value="backend.stages.map((stage) => stage.value)"
     :items="
-      utils.stageOptions.filter(
+      backend.stages.filter(
         (stage) =>
           tools.filter(
             (tool) =>
@@ -101,7 +101,7 @@ const emit = defineEmits<{
   "new-loading": [newLoading: boolean];
 }>();
 
-const utils = useUtils();
+const backend = useBackend();
 const api = useApi("/api/");
 const tools = ref<Array<Tool>>([]);
 const configurations = ref(

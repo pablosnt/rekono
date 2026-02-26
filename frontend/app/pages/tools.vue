@@ -51,7 +51,7 @@ import { useUserStore } from "~/store/user";
 import type { Tool } from "~/types/models";
 
 const userStore = useUserStore();
-const utils = useUtils();
+const backend = useBackend();
 
 function onCardClick(target: HTMLElement, reference: string) {
   if (target.closest("button") || target.closest('[role="button"]')) {
@@ -74,14 +74,14 @@ const config: CrudConfig<Tool> = reactive({
       label: "Stage",
       icon: "i-lucide-layers",
       type: "select" as const,
-      options: utils.stageOptions,
+      options: backend.stages,
     },
     {
       key: "intensity",
       label: "Intensity",
       icon: "i-lucide-database-zap",
       type: "select" as const,
-      options: utils.intensityOptions,
+      options: backend.intensities,
     },
     {
       key: "is_installed",

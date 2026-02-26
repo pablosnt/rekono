@@ -38,17 +38,17 @@ import type { Process } from "~/types/models";
 
 const userStore = useUserStore();
 const validation = useValidation();
-const utils = useUtils();
+const backend = useBackend();
 const toolOptions = ref<FilterOption[]>([]);
 const userOptions = ref<FilterOption[]>([]);
 const processModalOpen = ref(false);
 const selectedProcess = ref();
 
 onMounted(() => {
-  utils.getToolOptions(toolOptions);
+  backend.getToolOptions(toolOptions);
   if (userStore.is_auditor) {
-    utils.getUserOptions(userOptions, { role: "Admin" });
-    utils.getUserOptions(userOptions, { role: "Auditor" });
+    backend.getUserOptions(userOptions, { role: "Admin" });
+    backend.getUserOptions(userOptions, { role: "Auditor" });
   }
 });
 
@@ -150,7 +150,7 @@ const config: CrudConfig<Process> = reactive({
       label: "Stage",
       icon: "i-lucide-layers",
       type: "select" as const,
-      options: utils.stageOptions,
+      options: backend.stages,
     },
 
     {
