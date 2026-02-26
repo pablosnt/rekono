@@ -20,7 +20,7 @@
           <AppLogo v-if="!sidebarCollapsed" class="h-5 w-auto shrink-0" />
           <UColorModeImage
           v-else
-          light="/favicon.ico"
+          light="/favicon-light.ico"
           dark="/favicon-dark.ico"
           class="opacity-100 group-hover:opacity-0 transition-opacity duration-200"
         />
