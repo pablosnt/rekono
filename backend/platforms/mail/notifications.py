@@ -16,7 +16,7 @@ from django.core.mail.backends.smtp import EmailBackend
 from django.template.loader import get_template
 from django.utils import timezone
 
-from alerts.enums import AlertMode
+from alerts.enums import AlertItem
 from alerts.models import Alert
 from executions.models import Execution
 from findings.framework.models import Finding
@@ -199,15 +199,10 @@ class SMTP(BaseNotification):
             alert (Alert): The triggered alert configuration
             finding (Finding): The security finding that triggered the alert
         """
-        subjects = {
-            AlertMode.NEW: f"New {finding.__class__.__name__.lower()} detected",
-            AlertMode.FILTER: f"New {finding.__class__.__name__.lower()} matches alert criterion",
-            AlertMode.MONITOR: "New trending CVE",
-        }
         # This is called from findings queue which is already asynchronous
         self._notify(
             users,
-            f"[Rekono] {subjects[alert.mode]}",
+            f"[Rekono] {'New trending CVE' if alert.item == AlertItem.TRENDING_CVE else f'New {finding.__class__.__name__.lower()} detected'}",
             "alert_notification.html",
             {"alert": alert, "finding": finding},
             background=False,

@@ -8,7 +8,7 @@ processing and bulk monitoring capabilities for comprehensive threat intelligenc
 
 from functools import cached_property
 
-from alerts.enums import AlertItem, AlertMode
+from alerts.enums import AlertItem
 from alerts.models import Alert
 from executions.models import Execution
 from findings.enums import TriageStatus
@@ -131,7 +131,7 @@ class CveCrowd(BaseIntegration):
         Vulnerability.objects.filter(trending=False, cve__in=self.trending_cves).update(trending=True)
         notifications = [SMTP(), Telegram()]
         notified_vulnerabilities: list[int] = []
-        for alert in Alert.objects.filter(item=AlertItem.CVE, mode=AlertMode.MONITOR, enabled=True).all():
+        for alert in Alert.objects.filter(item=AlertItem.TRENDING_CVE, enabled=True).all():
             vulnerabilities = (
                 Vulnerability.objects.filter(
                     executions__task__target__project=alert.project,

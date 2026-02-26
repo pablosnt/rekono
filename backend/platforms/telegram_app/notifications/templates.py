@@ -4,7 +4,6 @@ Defines message templates and formatting for Telegram Bot notifications
 including execution reports, findings display, and alert formatting.
 """
 
-from alerts.enums import AlertMode
 from findings.models import OSINT, Credential, Exploit, Host, Path, Port, Technology, Vulnerability
 
 EXECUTION = """
@@ -111,8 +110,5 @@ _Reference_         {reference}
     },
 }
 
-ALERTS = {
-    AlertMode.NEW.value: "[ALERT] New {finding} detected",
-    AlertMode.FILTER.value: "[ALERT] New {finding} matches the criterion",
-    AlertMode.MONITOR.value: "[ALERT] New trending CVE 🔥",
-}
+ALERT_TRENDING_CVE = "[ALERT] New trending CVE 🔥"
+ALERT = "[ALERT] New {finding} detected"

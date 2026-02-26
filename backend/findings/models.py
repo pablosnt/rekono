@@ -294,10 +294,10 @@ class Path(Finding):
     _parse_mapping = {
         InputKeyword.ENDPOINT: lambda instance, target: instance.clean_path(instance.path),
         InputKeyword.URL: lambda instance, target: (
-            instance.get_url(target, instance.port.host.ip, instance.port.port, instance.clean_path(instance.path))
-        )
-        if instance.port and instance.port.host
-        else None,
+            (instance.get_url(target, instance.port.host.ip, instance.port.port, instance.clean_path(instance.path)))
+            if instance.port and instance.port.host
+            else None
+        ),
     }
     _parse_dependencies = ["port"]
     _defectdojo_finding_mapping = {
@@ -320,9 +320,9 @@ class Path(Finding):
     }
     _defectdojo_endpoint_mapping = {
         "protocol": lambda instance, target: instance.port.service if instance.port else None,
-        "host": lambda instance, target: instance.port.host.ip
-        if instance.port and instance.port.host
-        else target.target,
+        "host": lambda instance, target: (
+            instance.port.host.ip if instance.port and instance.port.host else target.target
+        ),
         "port": lambda instance, target: instance.port.port if instance.port else None,
         "path": "path",
     }
@@ -415,8 +415,10 @@ class Technology(Finding):
     _parse_dependencies = ["port"]
     _defectdojo_finding_mapping = {
         "title": lambda instance: f"Technology {instance.name} detected",
-        "description": lambda instance: (f"{instance.description}\n\n" if instance.description else "")
-        + "\n".join([f"{k}: {v}" for k, v in [("Technology", instance.name), ("Version", instance.version)] if v]),
+        "description": lambda instance: (
+            (f"{instance.description}\n\n" if instance.description else "")
+            + "\n".join([f"{k}: {v}" for k, v in [("Technology", instance.name), ("Version", instance.version)] if v])
+        ),
         "severity": Severity.LOW,
         "cwe": 200,  # CWE-200: Exposure of Sensitive Information to Unauthorized Actor
         "references": "reference",

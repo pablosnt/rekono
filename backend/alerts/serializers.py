@@ -6,11 +6,10 @@ to/from JSON for API operations. Includes validation logic and computed fields.
 
 from typing import Any
 
-from django.core.exceptions import ValidationError
+from backend.alerts.enums import AlertItem
 from django.db import transaction
 from rest_framework.serializers import ModelSerializer, SerializerMethodField
 
-from alerts.enums import AlertMode
 from alerts.models import Alert, MonitorSettings
 from users.serializers import SimpleUserSerializer
 
@@ -44,7 +43,6 @@ class AlertSerializer(ModelSerializer):
             "id",
             "project",
             "item",
-            "mode",
             "value",
             "enabled",
             "owner",
@@ -69,21 +67,20 @@ class AlertSerializer(ModelSerializer):
     def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
         """Validate the alert data.
 
-        Ensures that filter mode alerts have a value specified and sets
-        the alert as enabled by default.
+        Sets the alert as enabled by default.
 
         Args:
             attrs (dict): The attributes to validate
 
         Returns:
             dict: The validated attributes
-
-        Raises:
-            ValidationError: If filter mode is selected without a value
         """
         attrs = super().validate(attrs)
-        if attrs.get("mode") == AlertMode.FILTER and not attrs.get("value"):
-            raise ValidationError("Value is required when the alert mode is 'filter'", code="value")
+        filter_field = Alert.mapping[attrs["item"]].get("field")
+        if not filter_field:
+            attrs["value"] = None
+        if attrs["item"] == AlertItem.TRENDING_CVE:
+            attrs["value"] = str(True).lower()
         attrs["enabled"] = True
         return attrs
 
@@ -131,7 +128,6 @@ class EditAlertSerializer(AlertSerializer):
             "id",
             "project",
             "item",
-            "mode",
             "value",
             "enabled",
             "owner",
@@ -142,7 +138,6 @@ class EditAlertSerializer(AlertSerializer):
             "id",
             "project",
             "item",
-            "mode",
             "enabled",
             "owner",
             "subscribed",

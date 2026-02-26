@@ -9,7 +9,7 @@ from typing import Any
 from django.db import transaction
 from taggit.serializers import TaggitSerializer
 
-from alerts.enums import AlertItem, AlertMode
+from alerts.enums import AlertItem
 from alerts.models import Alert
 from framework.fields import TagField
 from framework.serializers import RelatedNotesSerializer
@@ -87,8 +87,8 @@ class ProjectSerializer(TaggitSerializer, RelatedNotesSerializer):
         # Create trending CVE monitor alert by default
         alert = Alert.objects.create(
             project=project,
-            item=AlertItem.CVE,
-            mode=AlertMode.MONITOR,
+            item=AlertItem.TRENDING_CVE,
+            value=str(True).lower(),
             enabled=True,
             owner=validated_data.get("owner"),
             subscribe_all_members=True,

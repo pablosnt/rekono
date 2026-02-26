@@ -2,7 +2,7 @@ from functools import cached_property
 
 from django.test import TestCase
 
-from alerts.enums import AlertItem, AlertMode
+from alerts.enums import AlertItem
 from alerts.models import Alert, MonitorSettings
 from security.authorization.roles import Role
 from tests.framework import ApiTest, ApiTestNoData
@@ -13,22 +13,19 @@ from tests.framework.cases import ApiTestCase, DeleteApiTestCase, PostApiTestCas
 new_alert = {
     "project": 1,
     "item": AlertItem.HOST.value,
-    "mode": AlertMode.NEW.value,
     "value": None,
     "subscribe_all_members": True,
 }
 filter_alert = {
     "project": 1,
     "item": AlertItem.SERVICE.value,
-    "mode": AlertMode.FILTER.value,
     "value": "ssh",
     "subscribe_all_members": False,
 }
-invalid_filter_alert = {**filter_alert, "value": None}
+invalid_filter_alert = {**filter_alert, "value": "inv;alid"}
 monitor_alert = {
     "project": 1,
-    "item": AlertItem.CVE.value,
-    "mode": AlertMode.MONITOR.value,
+    "item": AlertItem.TRENDING_CVE.value,
     "value": None,
     "subscribe_all_members": False,
 }
@@ -36,7 +33,7 @@ monitor_alert = {
 
 class AlertTest(ApiTest, TestCase):
     endpoint = "/api/alerts/"
-    expected_string = "Project 1 - Filter - CVE - CVE-2020-1111"
+    expected_string = "Project 1 - CVE - CVE-2020-1111"
     cases = [
         ApiTestCase([Role.ADMIN, Role.AUDITOR, Role.READER]),
         PostApiTestCase(["not_members"], 403, new_alert),
@@ -254,30 +251,28 @@ class AlertTest(ApiTest, TestCase):
 
     @cached_property
     def object(self) -> Alert:
-        return Alert.objects.create(
-            project=self.project, mode=AlertMode.FILTER, item=AlertItem.CVE, value="CVE-2020-1111"
-        )
+        return Alert.objects.create(project=self.project, item=AlertItem.CVE, value="CVE-2020-1111")
 
     def test_must_be_triggered(self) -> None:
         for alert, finding, expected in [
             (
-                Alert.objects.create(project=self.project, mode=AlertMode.MONITOR, item=AlertItem.CVE),
+                Alert.objects.create(project=self.project, item=AlertItem.TRENDING_CVE),
                 self.vulnerability,
                 False,
             ),
-            (Alert.objects.create(project=self.project, mode=AlertMode.NEW, item=AlertItem.HOST), self.host, True),
+            (Alert.objects.create(project=self.project, item=AlertItem.HOST), self.host, True),
             (
-                Alert.objects.create(project=self.project, mode=AlertMode.NEW, item=AlertItem.OPEN_PORT),
+                Alert.objects.create(project=self.project, item=AlertItem.OPEN_PORT),
                 self.host,
                 False,
             ),
             (
-                Alert.objects.create(project=self.project, mode=AlertMode.FILTER, item=AlertItem.SERVICE, value="ssh"),
+                Alert.objects.create(project=self.project, item=AlertItem.SERVICE, value="ssh"),
                 self.port,
                 False,
             ),
             (
-                Alert.objects.create(project=self.project, mode=AlertMode.FILTER, item=AlertItem.SERVICE, value="http"),
+                Alert.objects.create(project=self.project, item=AlertItem.SERVICE, value="http"),
                 self.port,
                 True,
             ),

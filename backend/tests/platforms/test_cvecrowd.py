@@ -4,7 +4,7 @@ from unittest import mock
 
 from django.test import TestCase
 
-from alerts.enums import AlertItem, AlertMode
+from alerts.enums import AlertItem
 from alerts.models import Alert
 from findings.enums import Severity
 from findings.models import Vulnerability
@@ -46,7 +46,7 @@ class CveCrowdTest(BaseTest, TestCase):
         self.settings = CveCrowdSettings.objects.first()
         self.settings.secret = "fake-token"
         self.settings.save(update_fields=["_api_token"])
-        Alert.objects.create(project=self.project, item=AlertItem.CVE, mode=AlertMode.MONITOR, enabled=True)
+        Alert.objects.create(project=self.project, item=AlertItem.TRENDING_CVE, enabled=True)
         self.cvecrowd = CveCrowd()
 
     @mock.patch("platforms.cvecrowd.integrations.CveCrowd._request", success)

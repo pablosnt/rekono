@@ -13,7 +13,7 @@ class AlertFilter(FilterSet):
     """Filter class for Alert model.
 
     Provides filtering capabilities for alert queries based on project,
-    item type, mode, value, enabled status, owner, and subscribers.
+    item type, value, enabled status, owner, and subscribers.
     """
 
     class Meta:
@@ -21,7 +21,6 @@ class AlertFilter(FilterSet):
         fields = {
             "project": ["exact"],
             "item": ["exact"],
-            "mode": ["exact"],
             "value": ["exact", "icontains"],
             "enabled": ["exact"],
             "owner": ["exact"],

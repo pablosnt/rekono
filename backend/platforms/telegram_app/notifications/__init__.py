@@ -8,12 +8,13 @@ from typing import Any
 
 from django.forms.models import model_to_dict
 
+from alerts.enums import AlertItem
 from alerts.models import Alert
 from executions.models import Execution
 from findings.framework.models import Finding
 from framework.platforms import BaseNotification
 from platforms.telegram_app.framework import BaseTelegram
-from platforms.telegram_app.notifications.templates import ALERTS, EXECUTION, FINDINGS, HEADER
+from platforms.telegram_app.notifications.templates import ALERT, ALERT_TRENDING_CVE, EXECUTION, FINDINGS, HEADER
 from rekono.settings import CONFIG
 from users.models import User
 
@@ -102,7 +103,9 @@ class Telegram(BaseNotification, BaseTelegram):
             users,
             HEADER.format(
                 icon=FINDINGS[finding.__class__].get("icon", ""),
-                title=ALERTS.get(alert.mode, "").format(finding=finding.__class__.__name__.lower()),
+                title=ALERT_TRENDING_CVE
+                if alert.item == AlertItem.TRENDING_CVE
+                else ALERT.format(finding=finding.__class__.__name__.lower()),
                 details=self._format_finding(finding),
             ),
         )
