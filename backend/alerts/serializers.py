@@ -6,6 +6,7 @@ to/from JSON for API operations. Includes validation logic and computed fields.
 
 from typing import Any
 
+from django.core.exceptions import ValidationError
 from django.db import transaction
 from rest_framework.serializers import ModelSerializer, SerializerMethodField
 
@@ -76,7 +77,10 @@ class AlertSerializer(ModelSerializer):
             dict: The validated attributes
         """
         attrs = super().validate(attrs)
-        filter_field = Alert.mapping[attrs["item"]].get("field")
+        alert = Alert.mapping.get(attrs.get("item"))
+        if not alert:
+            raise ValidationError("Invalid alert item", code="item")
+        filter_field = alert.get("field")
         if not filter_field:
             attrs["value"] = None
         if attrs["item"] == AlertItem.TRENDING_CVE:
