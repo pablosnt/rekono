@@ -56,6 +56,9 @@ const backend = useBackend();
 const validation = useValidation();
 const toast = useToast();
 const api = useApi("/api/users/");
+const roleOptions = backend.roles.map((role) => {
+  return { label: role, value: role };
+});
 
 function getUserActions(item: User, onEdit: () => void, onDelete: () => void) {
   const actions = [];
@@ -133,7 +136,7 @@ const config: CrudConfig<User> = reactive({
       label: "Role",
       icon: "i-lucide-shield",
       type: "select" as const,
-      options: backend.roles,
+      options: roleOptions,
     },
     {
       key: "is_active",
@@ -167,14 +170,14 @@ const config: CrudConfig<User> = reactive({
       label: "Role",
       type: "select",
       required: true,
-      options: backend.roles,
+      options: roleOptions,
       icon: "i-lucide-shield",
       placeholder: "Select the user role",
     },
   ],
   createFormSchema: z.object({
     email: validation.email(),
-    role: z.enum(backend.roles.map((t) => t.value) as [string, ...string[]]),
+    role: z.enum(backend.roles),
   }),
   editFormFields: [
     {
@@ -182,12 +185,12 @@ const config: CrudConfig<User> = reactive({
       label: "Role",
       type: "select",
       required: true,
-      options: backend.roles,
+      options: roleOptions,
       icon: "i-lucide-shield",
     },
   ],
   editFormSchema: z.object({
-    role: z.enum(backend.roles.map((t) => t.value) as [string, ...string[]]),
+    role: z.enum(backend.roles),
   }),
   modalAvatar: (user: User) => ({
     text: backend.getUserDisplayName(user).charAt(0).toUpperCase(),

@@ -7,8 +7,8 @@
           :model-value="_filters[filter.key]"
           :placeholder="filter.placeholder || filter.label"
           :items="Array.isArray(filter.options) ? filter.options : []"
-          value-key="value"
-          label-key="label"
+          :value-key="filter.valueKey || 'value'"
+          :label-key="filter.labelKey || 'label'"
           class="w-64"
           :avatar="
             (Array.isArray(filter.options)

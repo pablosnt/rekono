@@ -43,7 +43,9 @@ const config: CrudConfig<User> = reactive({
       label: "Role",
       icon: "i-lucide-shield",
       type: "select" as const,
-      options: backend.roles,
+      options: backend.roles.map((role) => {
+        return { label: role, value: role };
+      }),
     },
   ],
   ordering: [

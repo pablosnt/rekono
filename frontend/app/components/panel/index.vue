@@ -16,13 +16,24 @@
       "
     >
       <template #header>
-        <div class="relative flex items-center justify-center w-full">
-          <AppLogo v-if="!sidebarCollapsed" class="h-5 w-auto shrink-0" />
+        <div class="relative flex items-center w-full justify-between">
+          <div
+            v-if="!sidebarCollapsed"
+            class="flex items-center justify-center gap-2"
+          >
+            <UColorModeImage
+              light="/favicon-light.ico"
+              dark="/favicon-dark.ico"
+              width="30"
+            />
+            <AppLogo class="h-7 w-auto shrink-0" />
+          </div>
           <UColorModeImage
             v-else
             light="/favicon-light.ico"
             dark="/favicon-dark.ico"
             class="opacity-100 group-hover:opacity-0 transition-opacity duration-200"
+            width="30"
           />
           <UButton
             v-if="largeScreen"

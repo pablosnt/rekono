@@ -98,13 +98,23 @@ const config: CrudConfig<Alert> = reactive({
   defaultBody: { project: route.params.project_id },
   createForm: resolveComponent("FormAlert"),
   editForm: resolveComponent("FormAlert"),
-  deleteMessage: () => [
+  deleteMessage: (alert: Alert) => [
     {
       component: h(
         "p",
         { class: "text-gray-900 dark:text-white font-medium" },
         "Are you sure you want to delete this alert?",
       ),
+    },
+    {
+      component: resolveComponent("UAlert"),
+      props: {
+        color: "neutral",
+        variant: "subtle",
+        description: alert.item,
+        ui: { root: "text-center font-bold" },
+        class: "mt-4",
+      },
     },
   ],
   canRead: true,

@@ -36,6 +36,8 @@ export interface FormField {
   fileUploadDescription?: string;
   minValue?: unknown;
   maxValue?: unknown;
+  valueKey?: string;
+  labelKey?: string;
 }
 
 export interface FilterConfig {
@@ -43,6 +45,8 @@ export interface FilterConfig {
   label: string;
   value?: unknown;
   type: "select" | "text" | "boolean" | "range";
+  valueKey?: string;
+  labelKey?: string;
   options?: FilterOption[] | (() => Promise<FilterOption[]>);
   placeholder?: string;
   icon?: string;
