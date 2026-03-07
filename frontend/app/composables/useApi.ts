@@ -68,7 +68,11 @@ export default function (
     options?: object,
     extraHeaders?: object,
     raw?: boolean = false,
+    toastOnError: number[] | null = null,
   ): Promise {
+    if (toastOnError === null) {
+      toastOnError = [400, 401, 403, 404, 429, 500];
+    }
     const requestUrl = url(endpoint);
     options.headers = headers(extraHeaders);
     return (
@@ -100,7 +104,7 @@ export default function (
                     if (user.refreshing) {
                       return wait();
                     }
-                    request(endpoint, options, headers, raw)
+                    request(endpoint, options, headers, raw, toastOnError)
                       .then((response) => resolve(response))
                       .catch((error) => reject(error));
                   }, 500);
@@ -109,7 +113,7 @@ export default function (
               return wait();
             } else {
               return refresh().then(() => {
-                return request(endpoint, options, headers, raw);
+                return request(endpoint, options, headers, raw, toastOnError);
               });
             }
           } else {
@@ -133,11 +137,16 @@ export default function (
           break;
         }
       }
-      toast.add({
-        title: "Error",
-        description: message,
-        color: "error",
-      });
+      if (
+        toastOnError.includes(error.statusCode) ||
+        (toastOnError.includes(500) && message === "Unexpected error")
+      ) {
+        toast.add({
+          title: "Error",
+          description: message,
+          color: "error",
+        });
+      }
       return Promise.reject(error);
     });
   }
@@ -175,6 +184,7 @@ export default function (
     page: number = 1,
     size: number = 24,
     extraHeaders?: object,
+    toastOnError?: number[] | null = null,
     items: Array<object> = [],
   ): Promise {
     size = all ? 1000 : size;
@@ -185,6 +195,8 @@ export default function (
         params: Object.assign({}, params, { page: page, limit: size }),
       },
       extraHeaders,
+      false,
+      toastOnError,
     ).then((response) => {
       const total = response.count;
       if (all) {
@@ -207,20 +219,33 @@ export default function (
     });
   }
 
-  function get(endpoint: string, extraHeaders?: object): Promise {
-    return request(endpoint, { method: "GET" }, extraHeaders).then(
-      (response) => {
-        return Promise.resolve(response);
-      },
-    );
+  function get(
+    endpoint: string,
+    extraHeaders?: object,
+    toastOnError?: number[] | null = null,
+  ): Promise {
+    return request(
+      endpoint,
+      { method: "GET" },
+      extraHeaders,
+      false,
+      toastOnError,
+    ).then((response) => {
+      return Promise.resolve(response);
+    });
   }
 
-  function download(endpoint: string, extraHeaders?: object): Promise {
+  function download(
+    endpoint: string,
+    extraHeaders?: object,
+    toastOnError?: number[] | null = null,
+  ): Promise {
     return request(
       endpoint,
       { method: "GET", responseType: "blob" },
       extraHeaders,
       true,
+      toastOnError,
     ).then((response) => {
       const a = document.createElement("a");
       a.href = window.URL.createObjectURL(response._data);
@@ -237,18 +262,23 @@ export default function (
     body: object,
     extraHeaders?: object,
     entity?: string,
+    toastOnError?: number[] | null = null,
   ): Promise {
-    return request(endpoint, { method: "POST", body: body }, extraHeaders).then(
-      (response) => {
-        if (entity) {
-          toast.add({
-            description: `${entity} has been successfully created`,
-            color: "success",
-          });
-        }
-        return Promise.resolve(response);
-      },
-    );
+    return request(
+      endpoint,
+      { method: "POST", body: body },
+      extraHeaders,
+      false,
+      toastOnError,
+    ).then((response) => {
+      if (entity) {
+        toast.add({
+          description: `${entity} has been successfully created`,
+          color: "success",
+        });
+      }
+      return Promise.resolve(response);
+    });
   }
 
   function update(
@@ -256,26 +286,38 @@ export default function (
     body: object,
     extraHeaders?: object,
     entity?: string,
+    toastOnError?: number[] | null = null,
   ): Promise {
-    return request(endpoint, { method: "PUT", body: body }, extraHeaders).then(
-      (response) => {
-        if (entity) {
-          toast.add({
-            description: `${entity} has been successfully updated`,
-            color: "success",
-          });
-        }
-        return Promise.resolve(response);
-      },
-    );
+    return request(
+      endpoint,
+      { method: "PUT", body: body },
+      extraHeaders,
+      false,
+      toastOnError,
+    ).then((response) => {
+      if (entity) {
+        toast.add({
+          description: `${entity} has been successfully updated`,
+          color: "success",
+        });
+      }
+      return Promise.resolve(response);
+    });
   }
 
   function remove(
     endpoint: string,
     extraHeaders?: object,
     entity?: string,
+    toastOnError?: number[] | null = null,
   ): Promise {
-    return request(endpoint, { method: "DELETE" }, extraHeaders).then(() => {
+    return request(
+      endpoint,
+      { method: "DELETE" },
+      extraHeaders,
+      false,
+      toastOnError,
+    ).then(() => {
       if (entity) {
         toast.add({
           description: `${entity} has been deleted`,

@@ -2,7 +2,7 @@
   <div>
     <CrudPage :config="config">
       <template #actions="{ item }">
-        <TasksRunButton :process="item" />
+        <TasksButton :process="item" />
       </template>
     </CrudPage>
     <UModal v-model:open="processModalOpen" fullscreen>
@@ -12,7 +12,7 @@
             {{ selectedProcess ? selectedProcess.name : "" }}
           </p>
           <div class="flex items-center gap-2">
-            <TasksRunButton :process="selectedProcess" />
+            <TasksButton :process="selectedProcess" />
             <UButton
               icon="i-lucide-x"
               variant="ghost"

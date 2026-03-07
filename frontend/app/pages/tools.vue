@@ -25,7 +25,7 @@
           class="absolute top-4 right-4"
         />
         <div class="flex items-center justify-between mt-4">
-          <TasksRunButton :tool="item" />
+          <TasksButton :tool="item" />
           <CrudLikes
             size="lg"
             :item-id="item.id"
