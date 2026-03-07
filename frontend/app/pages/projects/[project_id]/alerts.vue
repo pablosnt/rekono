@@ -82,7 +82,7 @@ const config: CrudConfig<Alert> = reactive({
       label: "Owner",
       icon: "i-lucide-user",
       type: "select" as const,
-      options: () => Promise.resolve(ownerOptions.value),
+      options: ownerOptions,
     },
   ],
   defaultFilters: { project: route.params.project_id },
@@ -124,7 +124,7 @@ const config: CrudConfig<Alert> = reactive({
 });
 
 onMounted(() => {
-  backend.getUserOptions(ownerOptions);
+  backend.getUserOptions(ownerOptions, {is_active: true});
 });
 
 function canEdit(alert: Alert): boolean {

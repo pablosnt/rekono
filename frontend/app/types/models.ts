@@ -161,3 +161,58 @@ export interface Alert {
   subscribed: boolean;
   subscribers: number[];
 }
+
+export interface Report {
+  id: number;
+  project?: number;
+  target?: {
+    id: number;
+    target: string;
+  };
+  task?: {
+    id: number;
+  };
+  status: string;
+  format: string;
+  user?: {
+    id: number;
+    username: string;
+  };
+  date: string;
+}
+
+export interface Task {
+  id: number;
+  target?: {
+    id: number;
+    target: string;
+  };
+  process?: {
+    id: number;
+    name: string;
+  };
+  configuration?: {
+    id: number;
+    name: string;
+    tool: {
+      id: number;
+      name: string;
+      icon: string;
+    };
+  };
+  intensity: string;
+  executor: {
+    id: number;
+    username: string;
+    email: string;
+  };
+  scheduled_at?: string;
+  repeat_in?: number;
+  repeat_time_unit?: string;
+  start?: string;
+  end?: string;
+  target_port?: number; // TODO: Return an object instead of an ID
+  status: string;
+  executions: number[];
+  progress: number;
+}

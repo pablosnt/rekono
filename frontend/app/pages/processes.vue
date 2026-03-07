@@ -47,8 +47,8 @@ const selectedProcess = ref();
 onMounted(() => {
   backend.getToolOptions(toolOptions);
   if (userStore.is_auditor) {
-    backend.getUserOptions(userOptions, { role: "Admin" });
-    backend.getUserOptions(userOptions, { role: "Auditor" });
+    backend.getUserOptions(userOptions, { role: "Admin", is_active: true });
+    backend.getUserOptions(userOptions, { role: "Auditor", is_active: true });
   }
 });
 

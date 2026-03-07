@@ -16,7 +16,7 @@ const userOptions = ref<FilterOption[]>([]);
 
 onMounted(() => {
   if (userStore.is_admin) {
-    backend.getUserOptions(userOptions, { role: "Admin" });
+    backend.getUserOptions(userOptions, { role: "Admin", is_active: true });
   }
 });
 

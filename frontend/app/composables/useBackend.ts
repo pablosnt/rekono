@@ -1,5 +1,5 @@
 import type { FilterOption } from "~/types/crud";
-import type { User } from "~/types/models";
+import type { User, Target, Task, Tool } from "~/types/models";
 import { useUserStore } from "~/store/user";
 
 export default function () {
@@ -46,16 +46,36 @@ export default function () {
     },
   ];
 
-  const roles = [
-    { label: "Reader", value: "Reader" },
-    { label: "Auditor", value: "Auditor" },
-    { label: "Admin", value: "Admin" },
+  const roles = ["Reader", "Auditor", "Admin"];
+
+  const reportFormats = [
+    { label: "JSON", value: "json", icon: "i-lucide-braces" },
+    { label: "XML", value: "xml", icon: "i-lucide-code-xml" },
+    { label: "PDF", value: "pdf", icon: "i-lucide-file-text" },
+  ];
+
+  const reportStatuses = [
+    { value: "Ready", color: "success", icon: "i-lucide-check-circle" },
+    { value: "Pending", color: "warning", icon: "i-lucide-clock" },
+    { value: "Error", color: "error", icon: "i-lucide-x-circle" },
+  ];
+
+  const findingTypes = [
+    { value: "OSINT", icon: "i-lucide-globe" },
+    { value: "Host", icon: "i-lucide-server" },
+    { value: "Port", icon: "i-lucide-network" },
+    { value: "Path", icon: "i-lucide-route" },
+    { value: "Technology", icon: "i-lucide-layers" },
+    { value: "Credential", icon: "i-lucide-key" },
+    { value: "Vulnerability", icon: "i-lucide-bug" },
+    { value: "Exploit", icon: "i-lucide-flame" },
   ];
 
   function getUserOptions(
     userOptionsRef: Ref<FilterOption[]>,
     queryParams?: Record<string, string> = {},
   ) {
+    // TODO: Review the usage of this. There are some calls when the current user is not admin, so they wouldn't have access to the users endpoint
     const userStore = useUserStore();
     useApi("/api/users/")
       .list("", queryParams, true)
@@ -87,6 +107,8 @@ export default function () {
       });
   }
 
+  // TODO: Review the usage of options. Should we generate the options directly from where we need them?
+
   function getToolOptions(
     toolOptionsRef: Ref<FilterOption[]>,
     queryParams?: Record<string, string> = {},
@@ -99,6 +121,45 @@ export default function () {
           icon: tool.icon ? undefined : "i-lucide-square-terminal",
           label: tool.name,
           value: tool.id,
+        }));
+      });
+  }
+
+  function getTargetOptions(
+    targetOptionsRef: Ref<FilterOption[]>,
+    queryParams?: Record<string, string> = {},
+  ) {
+    useApi("/api/targets/")
+      .list("", queryParams, true)
+      .then((response) => {
+        targetOptionsRef.value = (response.items as Target[]).map((target) => ({
+          id: target.id,
+          target: target.target,
+        }));
+      });
+  }
+
+  function getTaskName(task: Task, includeTarget?: boolean) {
+    const utils = useUtils();
+    let tooling = task.process
+      ? task.process.name
+      : `${task.configuration?.tool.name} (${task.configuration?.name})`;
+    const text = includeTarget ? `${tooling} - ${task.target.target}` : tooling;
+    return task.start
+      ? `${text} - ${utils.formatRelativeDatetime(task.start)}`
+      : text;
+  }
+
+  function getTaskOptions(
+    taskOptionsRef: Ref<FilterOption[]>,
+    queryParams?: Record<string, string> = {},
+  ) {
+    useApi("/api/tasks/")
+      .list("", queryParams, true)
+      .then((response) => {
+        taskOptionsRef.value = (response.items as Task[]).map((task) => ({
+          label: getTaskName(task, true),
+          value: task.id,
         }));
       });
   }
@@ -205,8 +266,14 @@ export default function () {
     timeUnits,
     wordlistTypes,
     roles,
+    reportFormats,
+    reportStatuses,
+    findingTypes,
     getUserOptions,
     getToolOptions,
+    getTargetOptions,
+    getTaskName,
+    getTaskOptions,
     getPortIcon,
     getUserDisplayName,
   };
