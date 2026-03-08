@@ -16,10 +16,10 @@ from framework.serializers import RelatedNotesSerializer
 from input_types.enums import InputTypeName
 from processes.models import Process
 from processes.serializers import SimpleProcessSerializer
-from targets.models import Target
-from targets.serializers import SimpleTargetSerializer
 from target_ports.models import TargetPort
 from target_ports.serializers import TargetPortSerializer
+from targets.models import Target
+from targets.serializers import SimpleTargetSerializer
 from tasks.models import Task
 from tasks.queues import TasksQueue
 from tools.enums import Intensity as IntensityEnum

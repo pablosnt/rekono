@@ -1,7 +1,7 @@
 <template>
   <Panel :navigation-items="items" storage-key="project-panel">
     <template
-    #panel-header="{ sidebarCollapsed, largeScreen, switchCollapsed }"
+      #panel-header="{ sidebarCollapsed, largeScreen, switchCollapsed }"
     >
       <div class="relative flex items-center w-full justify-between">
         <div
@@ -71,7 +71,7 @@ const projectEntity = ref();
 
 const update = () => {
   if (!route.params.project_id) {
-    projectEntity.value = {name: 'Rekono'};
+    projectEntity.value = { name: "Rekono" };
     return;
   }
   breadcrumb.value = [

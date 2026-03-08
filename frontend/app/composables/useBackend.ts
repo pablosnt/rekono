@@ -138,7 +138,7 @@ export default function () {
 
   function getTaskName(task: Task, includeTarget?: boolean) {
     const utils = useUtils();
-    let tooling = task.process
+    const tooling = task.process
       ? task.process.name
       : `${task.configuration?.tool.name} (${task.configuration?.name})`;
     const text = includeTarget ? `${tooling} - ${task.target.target}` : tooling;

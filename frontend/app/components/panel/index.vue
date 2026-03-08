@@ -95,7 +95,7 @@
                   ? userStore.name.charAt(0).toUpperCase()
                   : '',
                 class: 'bg-primary-500 text-white',
-                ui: { fallback: 'text-white' }
+                ui: { fallback: 'text-white' },
               }"
               size="xl"
               :name="userStore.name || undefined"
