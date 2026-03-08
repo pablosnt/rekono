@@ -159,12 +159,12 @@ const config: CrudConfig<Process> = reactive({
       options: toolOptions,
     },
     {
-            key: "owner",
-            label: "Owner",
-            icon: "i-lucide-user",
-            type: "select" as const,
-            options: userOptions,
-          },
+      key: "owner",
+      label: "Owner",
+      icon: "i-lucide-user",
+      type: "select" as const,
+      options: userOptions,
+    },
     {
       key: "like",
       label: "Favourites",

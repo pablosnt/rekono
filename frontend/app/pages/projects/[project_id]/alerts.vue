@@ -124,7 +124,7 @@ const config: CrudConfig<Alert> = reactive({
 });
 
 onMounted(() => {
-  backend.getUserOptions(userOptions, {is_active: true});
+  backend.getUserOptions(userOptions, { is_active: true });
 });
 
 function canEdit(alert: Alert): boolean {

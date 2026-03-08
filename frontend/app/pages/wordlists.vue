@@ -43,8 +43,8 @@ onMounted(() => {
     .then((response) => {
       maxWordlistSize.value = response.items[0]?.size || maxWordlistSize.value;
     });
-    backend.getUserOptions(userOptions, { role: "Admin", is_active: true });
-    backend.getUserOptions(userOptions, { role: "Auditor", is_active: true });
+  backend.getUserOptions(userOptions, { role: "Admin", is_active: true });
+  backend.getUserOptions(userOptions, { role: "Auditor", is_active: true });
 });
 
 const config: CrudConfig<Wordlist> = reactive({
@@ -143,13 +143,13 @@ const config: CrudConfig<Wordlist> = reactive({
         step: 1000,
         multiple: true,
       },
-     {
-              key: "owner",
-              label: "Owner",
-              icon: "i-lucide-user",
-              type: "select" as const,
-              options: userOptions,
-            },
+      {
+        key: "owner",
+        label: "Owner",
+        icon: "i-lucide-user",
+        type: "select" as const,
+        options: userOptions,
+      },
       {
         key: "like",
         label: "Favourites",
