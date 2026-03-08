@@ -1,6 +1,46 @@
 <template>
   <Panel :navigation-items="items" storage-key="project-panel">
-    <template #header>
+    <template
+    #panel-header="{ sidebarCollapsed, largeScreen, switchCollapsed }"
+    >
+      <div class="relative flex items-center w-full justify-between">
+        <div
+          v-if="!sidebarCollapsed"
+          class="flex items-center justify-center gap-2"
+        >
+          <UAvatar
+            :text="projectEntity.name.charAt(0).toUpperCase()"
+            class="bg-primary-500"
+            :ui="{ fallback: 'text-white' }"
+            width="30"
+          />
+          <h1>{{ projectEntity.name }}</h1>
+        </div>
+        <UAvatar
+          v-else
+          :text="projectEntity.name.charAt(0).toUpperCase()"
+          width="30"
+          class="bg-primary-500 opacity-100 group-hover:opacity-0 transition-opacity duration-200"
+          :ui="{ fallback: 'text-white' }"
+        />
+        <UButton
+          v-if="largeScreen"
+          :icon="
+            sidebarCollapsed
+              ? 'i-lucide-chevrons-right'
+              : 'i-lucide-chevrons-left'
+          "
+          color="neutral"
+          variant="ghost"
+          :class="
+            'ml-auto opacity-0 group-hover:opacity-100 transition-opacity duration-200' +
+            (sidebarCollapsed ? ' absolute' : '')
+          "
+          @click="switchCollapsed()"
+        />
+      </div>
+    </template>
+    <template #content-header>
       <UBreadcrumb class="m-5" :items="breadcrumb">
         <template #dropdown="{ item }">
           <UDropdownMenu :items="item.children">
@@ -15,7 +55,7 @@
         </template>
       </UBreadcrumb>
     </template>
-    <slot />
+    <slot :project="projectEntity" />
   </Panel>
 </template>
 
@@ -27,9 +67,11 @@ const route = useRoute();
 const userStore = useUserStore();
 const breadcrumb = ref([]);
 const items = ref([]);
+const projectEntity = ref();
 
 const update = () => {
   if (!route.params.project_id) {
+    projectEntity.value = {name: 'Rekono'};
     return;
   }
   breadcrumb.value = [
@@ -45,6 +87,7 @@ const update = () => {
     },
   ];
   api.get(`/api/projects/${route.params.project_id}/`).then((project) => {
+    projectEntity.value = project;
     api.get("stats/top-projects/").then((top_projects: object) => {
       const children: NavigationItem[] = [];
       for (let i = 0; i < top_projects.length; i++) {
@@ -68,7 +111,7 @@ const update = () => {
   });
   items.value = [
     {
-      label: "Project",
+      label: "Details",
       icon: "i-lucide-folder",
       to: `/projects/${route.params.project_id}`,
     },

@@ -8,8 +8,9 @@
           text: backend.getUserDisplayName(user).charAt(0).toUpperCase(),
           class:
             user.id.toString() === userStore.user
-              ? 'bg-primary-500 text-white'
+              ? 'bg-primary-500'
               : '',
+          ui: user.id.toString() === userStore.user ? { fallback: 'text-white' } : {}
         }"
         size="xl"
       />

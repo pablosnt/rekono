@@ -16,41 +16,48 @@
       "
     >
       <template #header>
-        <div class="relative flex items-center w-full justify-between">
-          <div
-            v-if="!sidebarCollapsed"
-            class="flex items-center justify-center gap-2"
-          >
+        <slot
+          name="panel-header"
+          :sidebar-collapsed="sidebarCollapsed"
+          :large-screen="largeScreen"
+          :switch-collapsed="() => (sidebarCollapsed = !sidebarCollapsed)"
+        >
+          <div class="relative flex items-center w-full justify-between">
+            <div
+              v-if="!sidebarCollapsed"
+              class="flex items-center justify-center gap-2"
+            >
+              <UColorModeImage
+                light="/favicon-light.ico"
+                dark="/favicon-dark.ico"
+                width="30"
+              />
+              <AppLogo class="h-7 w-auto shrink-0" />
+            </div>
             <UColorModeImage
+              v-else
               light="/favicon-light.ico"
               dark="/favicon-dark.ico"
+              class="opacity-100 group-hover:opacity-0 transition-opacity duration-200"
               width="30"
             />
-            <AppLogo class="h-7 w-auto shrink-0" />
+            <UButton
+              v-if="largeScreen"
+              :icon="
+                sidebarCollapsed
+                  ? 'i-lucide-chevrons-right'
+                  : 'i-lucide-chevrons-left'
+              "
+              color="neutral"
+              variant="ghost"
+              :class="
+                'ml-auto opacity-0 group-hover:opacity-100 transition-opacity duration-200' +
+                (sidebarCollapsed ? ' absolute' : '')
+              "
+              @click="sidebarCollapsed = !sidebarCollapsed"
+            />
           </div>
-          <UColorModeImage
-            v-else
-            light="/favicon-light.ico"
-            dark="/favicon-dark.ico"
-            class="opacity-100 group-hover:opacity-0 transition-opacity duration-200"
-            width="30"
-          />
-          <UButton
-            v-if="largeScreen"
-            :icon="
-              sidebarCollapsed
-                ? 'i-lucide-chevrons-right'
-                : 'i-lucide-chevrons-left'
-            "
-            color="neutral"
-            variant="ghost"
-            :class="
-              'ml-auto opacity-0 group-hover:opacity-100 transition-opacity duration-200' +
-              (sidebarCollapsed ? ' absolute' : '')
-            "
-            @click="sidebarCollapsed = !sidebarCollapsed"
-          />
-        </div>
+        </slot>
       </template>
       <UNavigationMenu
         :collapsed="sidebarCollapsed"
@@ -69,7 +76,8 @@
               text: userStore.name
                 ? userStore.name.charAt(0).toUpperCase()
                 : '',
-              class: 'bg-primary-500 text-white',
+              class: 'bg-primary-500',
+              ui: { fallback: 'text-white' },
               size: 'lg',
             }"
             :label="sidebarCollapsed ? undefined : userStore.name || undefined"
@@ -87,6 +95,7 @@
                   ? userStore.name.charAt(0).toUpperCase()
                   : '',
                 class: 'bg-primary-500 text-white',
+                ui: { fallback: 'text-white' }
               }"
               size="xl"
               :name="userStore.name || undefined"
@@ -109,7 +118,7 @@
     </UDashboardSidebar>
     <UDashboardPanel>
       <template #header>
-        <slot name="header" />
+        <slot name="content-header" />
       </template>
       <template #body>
         <div class="mx-10">
