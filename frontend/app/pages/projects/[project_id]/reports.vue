@@ -2,12 +2,12 @@
   <CrudPage :config="config">
     <template #actions="{ item }">
       <UTooltip v-if="item.status === 'Ready'" text="Download">
-      <UButton
-        icon="i-lucide-download"
-        variant="ghost"
-        size="xl"
-        @click="api.download(`/api/reports/${item.id}/download/`)"
-      />
+        <UButton
+          icon="i-lucide-download"
+          variant="ghost"
+          size="xl"
+          @click="api.download(`/api/reports/${item.id}/download/`)"
+        />
       </UTooltip>
     </template>
   </CrudPage>
@@ -26,7 +26,7 @@ const targetOptions = ref<FilterOption[]>([]);
 const taskOptions = ref<FilterOption[]>([]);
 
 onMounted(() => {
-  backend.getUserOptions(userOptions, {is_active: true});
+  backend.getUserOptions(userOptions, { is_active: true });
   backend.getTargetOptions(targetOptions, { project: route.params.project_id });
   backend.getTaskOptions(taskOptions, { project: route.params.project_id });
 });
@@ -51,35 +51,43 @@ const config: CrudConfig<Report> = reactive({
       cell: ({ row }) => {
         const report = row.original as Report;
         if (report.task) {
-          return h("div", { class: "flex items-center gap-2 hover:text-primary" }, [
-            h(resolveComponent("UIcon"), {
-              name: "i-lucide-play",
-              class: "w-4 h-4 text-muted-foreground",
-            }),
-            h(
-              "a",
-              {
-                href: `/projects/${route.params.project_id}/scans/${report.task.id}`,
-                class: "hover:underline font-medium",
-              },
-              backend.getTaskName(report.task, true),
-            ),
-          ]);
+          return h(
+            "div",
+            { class: "flex items-center gap-2 hover:text-primary" },
+            [
+              h(resolveComponent("UIcon"), {
+                name: "i-lucide-play",
+                class: "w-4 h-4 text-muted-foreground",
+              }),
+              h(
+                "a",
+                {
+                  href: `/projects/${route.params.project_id}/scans/${report.task.id}`,
+                  class: "hover:underline font-medium",
+                },
+                backend.getTaskName(report.task, true),
+              ),
+            ],
+          );
         } else if (report.target) {
-          return h("div", { class: "flex items-center gap-2 hover:text-primary" }, [
-            h(resolveComponent("UIcon"), {
-              name: "i-lucide-locate-fixed",
-              class: "w-4 h-4 text-muted-foreground",
-            }),
-            h(
-              "a",
-              {
-                href: `/projects/${route.params.project_id}/targets/${report.target.id}`,
-                class: "hover:underline font-medium",
-              },
-              report.target.target,
-            ),
-          ]);
+          return h(
+            "div",
+            { class: "flex items-center gap-2 hover:text-primary" },
+            [
+              h(resolveComponent("UIcon"), {
+                name: "i-lucide-locate-fixed",
+                class: "w-4 h-4 text-muted-foreground",
+              }),
+              h(
+                "a",
+                {
+                  href: `/projects/${route.params.project_id}/targets/${report.target.id}`,
+                  class: "hover:underline font-medium",
+                },
+                report.target.target,
+              ),
+            ],
+          );
         }
         return h("div", { class: "flex items-center gap-2" }, [
           h(resolveComponent("UIcon"), {
@@ -235,7 +243,7 @@ const config: CrudConfig<Report> = reactive({
       props: {
         color: "neutral",
         variant: "subtle",
-        description: `${report.format.toUpperCase()} report with findings from ${report.task ? backend.getTaskName(report.task, true) : report.target ? report.target.target : 'full project'}`,
+        description: `${report.format.toUpperCase()} report with findings from ${report.task ? backend.getTaskName(report.task, true) : report.target ? report.target.target : "full project"}`,
         ui: { root: "text-center font-bold" },
         class: "mt-4",
       },

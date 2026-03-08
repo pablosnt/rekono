@@ -103,12 +103,17 @@
       />
     </UFormField>
     <UFormField name="include_findings_from_user_input" class="mt-3">
-        <UCheckbox
-          v-model="formData.include_findings_from_user_input"
-          label="Include findings derivated from manual inputs like targets, ports, etc."
-        />
+      <UCheckbox
+        v-model="formData.include_findings_from_user_input"
+        label="Include findings derivated from manual inputs like targets, ports, etc."
+      />
     </UFormField>
-    <UFormField v-if="formData.format !== 'pdf'" name="finding_types" label="Finding Types" class="mt-3">
+    <UFormField
+      v-if="formData.format !== 'pdf'"
+      name="finding_types"
+      label="Finding Types"
+      class="mt-3"
+    >
       <USelectMenu
         v-model="formData.finding_types"
         class="w-full"
@@ -196,7 +201,7 @@ onMounted(() => {
   if (formData.value.target) {
     onTargetChange(formData.value.target as number);
   }
-  validate(formData.value)
+  validate(formData.value);
 });
 
 function onTargetChange(targetId: number | undefined) {
