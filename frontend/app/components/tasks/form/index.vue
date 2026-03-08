@@ -242,7 +242,7 @@ function submit() {
       "",
       {
         target_id: target.value,
-        target_port: targetPort.value,
+        target_port_id: targetPort.value,
         process_id: process.value,
         configuration_id: configuration.value,
         intensity: backend.intensities[intensity.value - 1]?.label,

@@ -4,7 +4,7 @@ Provides filtering capabilities for report queries through REST API endpoints
 with support for exact matches and date range filtering.
 """
 
-from django_filters.rest_framework import FilterSet, CharFilter
+from django_filters.rest_framework import CharFilter, FilterSet
 
 from reporting.models import Report
 

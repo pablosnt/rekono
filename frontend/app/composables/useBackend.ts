@@ -106,8 +106,6 @@ export default function () {
       });
   }
 
-  // TODO: Review the usage of options. Should we generate the options directly from where we need them?
-
   function getToolOptions(
     toolOptionsRef: Ref<FilterOption[]>,
     queryParams?: Record<string, string> = {},

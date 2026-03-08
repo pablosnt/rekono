@@ -211,7 +211,7 @@ export interface Task {
   repeat_time_unit?: string;
   start?: string;
   end?: string;
-  target_port?: number; // TODO: Return an object instead of an ID
+  target_port?: TargetPort;
   status: string;
   executions: number[];
   progress: number;

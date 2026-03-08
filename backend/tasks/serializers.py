@@ -18,6 +18,8 @@ from processes.models import Process
 from processes.serializers import SimpleProcessSerializer
 from targets.models import Target
 from targets.serializers import SimpleTargetSerializer
+from target_ports.models import TargetPort
+from target_ports.serializers import TargetPortSerializer
 from tasks.models import Task
 from tasks.queues import TasksQueue
 from tools.enums import Intensity as IntensityEnum
@@ -41,6 +43,8 @@ class TaskSerializer(RelatedNotesSerializer):
         process (SimpleProcessSerializer): Serialized process information (read-only)
         configuration_id (PrimaryKeyRelatedField): Tool configuration ID for single-tool tasks (write-only, optional)
         configuration (ConfigurationSerializer): Serialized configuration information (read-only)
+        target_port_id (PrimaryKeyRelatedField): Target port ID for task execution (write-only, optional)
+        target_port (TargetPortSerializer): Serialized target port information (read-only)
         intensity (IntegerChoicesField): Execution intensity level
         executor (SimpleUserSerializer): Task creator information (read-only)
         status (SerializerMethodField): Computed task status based on execution states
@@ -59,6 +63,10 @@ class TaskSerializer(RelatedNotesSerializer):
         many=False, write_only=True, required=False, source="configuration", queryset=Configuration.objects.all()
     )
     configuration = ConfigurationSerializer(many=False, read_only=True)
+    target_port_id = PrimaryKeyRelatedField(
+        many=False, write_only=True, required=False, source="target_port", queryset=TargetPort.objects.all()
+    )
+    target_port = TargetPortSerializer(many=False, read_only=True)
     intensity = IntegerChoicesField(model=IntensityEnum, required=False)
     executor = SimpleUserSerializer(many=False, read_only=True)
     status = SerializerMethodField(read_only=True)
@@ -82,6 +90,8 @@ class TaskSerializer(RelatedNotesSerializer):
             "process",
             "configuration_id",
             "configuration",
+            "target_port_id",
+            "target_port",
             "intensity",
             "executor",
             "scheduled_at",
@@ -91,7 +101,6 @@ class TaskSerializer(RelatedNotesSerializer):
             "enqueued_at",
             "start",
             "end",
-            "target_port",
             "wordlists",
             "input_technologies",
             "input_vulnerabilities",
