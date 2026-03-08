@@ -15,9 +15,7 @@ const backend = useBackend();
 const userOptions = ref<FilterOption[]>([]);
 
 onMounted(() => {
-  if (userStore.is_admin) {
     backend.getUserOptions(userOptions, { role: "Admin", is_active: true });
-  }
 });
 
 const config: CrudConfig<Project> = reactive({
@@ -91,25 +89,13 @@ const config: CrudConfig<Project> = reactive({
       type: "text",
       placeholder: "Filter by tag...",
     },
-    ...(userStore.is_admin
-      ? [
-          {
+    {
             key: "owner",
             label: "Owner",
             icon: "i-lucide-user",
             type: "select" as const,
             options: userOptions,
-          },
-        ]
-      : [
-          {
-            key: "owner_username",
-            label: "Owner",
-            icon: "i-lucide-user",
-            type: "text" as const,
-            placeholder: "Filter by owner username...",
-          },
-        ]),
+          }
   ],
   ordering: ["id", "name"],
   defaultOrdering: "-id",

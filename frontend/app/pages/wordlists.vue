@@ -43,10 +43,8 @@ onMounted(() => {
     .then((response) => {
       maxWordlistSize.value = response.items[0]?.size || maxWordlistSize.value;
     });
-  if (userStore.is_auditor) {
     backend.getUserOptions(userOptions, { role: "Admin", is_active: true });
     backend.getUserOptions(userOptions, { role: "Auditor", is_active: true });
-  }
 });
 
 const config: CrudConfig<Wordlist> = reactive({
@@ -145,25 +143,13 @@ const config: CrudConfig<Wordlist> = reactive({
         step: 1000,
         multiple: true,
       },
-      ...(userStore.is_auditor
-        ? [
-            {
+     {
               key: "owner",
               label: "Owner",
               icon: "i-lucide-user",
               type: "select" as const,
               options: userOptions,
             },
-          ]
-        : [
-            {
-              key: "owner_username",
-              label: "Owner",
-              icon: "i-lucide-user",
-              type: "text" as const,
-              placeholder: "Filter by owner username...",
-            },
-          ]),
       {
         key: "like",
         label: "Favourites",

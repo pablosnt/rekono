@@ -26,7 +26,7 @@ const targetOptions = ref<FilterOption[]>([]);
 const taskOptions = ref<FilterOption[]>([]);
 
 onMounted(() => {
-  backend.getUserOptions(userOptions);
+  backend.getUserOptions(userOptions, {is_active: true});
   backend.getTargetOptions(targetOptions, { project: route.params.project_id });
   backend.getTaskOptions(taskOptions, { project: route.params.project_id });
 });
@@ -207,7 +207,7 @@ const config: CrudConfig<Report> = reactive({
       labelKey: "value",
       options: backend.reportStatuses,
     },
-    { // TODO: User options is not working
+    {
       key: "user",
       label: "User",
       icon: "i-lucide-user",

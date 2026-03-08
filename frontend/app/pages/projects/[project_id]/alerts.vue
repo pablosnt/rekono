@@ -60,7 +60,7 @@ const api = useApi("/api/alerts/");
 const backend = useBackend();
 const utils = useUtils();
 const route = useRoute();
-const ownerOptions = ref([]);
+const userOptions = ref([]);
 const page = ref();
 
 const config: CrudConfig<Alert> = reactive({
@@ -82,7 +82,7 @@ const config: CrudConfig<Alert> = reactive({
       label: "Owner",
       icon: "i-lucide-user",
       type: "select" as const,
-      options: ownerOptions,
+      options: userOptions,
     },
   ],
   defaultFilters: { project: route.params.project_id },
@@ -124,7 +124,7 @@ const config: CrudConfig<Alert> = reactive({
 });
 
 onMounted(() => {
-  backend.getUserOptions(ownerOptions, {is_active: true});
+  backend.getUserOptions(userOptions, {is_active: true});
 });
 
 function canEdit(alert: Alert): boolean {

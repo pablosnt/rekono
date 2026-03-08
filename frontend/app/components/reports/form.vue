@@ -239,7 +239,6 @@ function save() {
       emit("submit", response);
     })
     .catch((error) => {
-      console.log(error);
       if (error.statusCode === 404) {
         toast.add({
           title: "No Findings",

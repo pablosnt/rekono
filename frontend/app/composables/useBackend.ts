@@ -75,7 +75,6 @@ export default function () {
     userOptionsRef: Ref<FilterOption[]>,
     queryParams?: Record<string, string> = {},
   ) {
-    // TODO: Review the usage of this. There are some calls when the current user is not admin, so they wouldn't have access to the users endpoint
     const userStore = useUserStore();
     useApi("/api/users/")
       .list("", queryParams, true)
