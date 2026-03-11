@@ -78,14 +78,13 @@
                 : '',
               class: 'bg-primary-500',
               ui: { fallback: 'text-white' },
-              size: 'lg',
+              size: 'sm',
             }"
             :label="sidebarCollapsed ? undefined : userStore.name || undefined"
             color="neutral"
             variant="ghost"
             class="w-full"
             :block="sidebarCollapsed"
-            size="xl"
             @click="profileOpen = true"
           />
           <template #header>
@@ -97,7 +96,6 @@
                 class: 'bg-primary-500 text-white',
                 ui: { fallback: 'text-white' },
               }"
-              size="xl"
               :name="userStore.name || undefined"
               :description="userStore.role || undefined"
             />
