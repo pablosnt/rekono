@@ -67,9 +67,9 @@ const route = useRoute();
 const userStore = useUserStore();
 const breadcrumb = ref([]);
 const items = ref([]);
-const projectEntity = ref();
+const projectEntity = ref({ name: "Rekono" });
 
-const update = () => {
+function update() {
   if (!route.params.project_id) {
     projectEntity.value = { name: "Rekono" };
     return;
@@ -209,7 +209,7 @@ const update = () => {
         items.value[4].children[2].badge = response.total.toString();
       }
     });
-};
+}
 
 watch(
   () => route.params.project_id,
