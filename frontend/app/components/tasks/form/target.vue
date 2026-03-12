@@ -107,6 +107,7 @@ const emit = defineEmits<{
   "update-target": [newTarget: number | undefined];
   "update-project": [newProject: number | undefined];
   "update-target-port": [newTargetPort: number | undefined];
+  "update-target-port-options": [hasOptions: boolean];
 }>();
 
 const backend = useBackend();
@@ -130,6 +131,7 @@ function onProject(projectId: number | undefined) {
   emit("update-target", undefined);
   targetPort.value = undefined;
   emit("update-target-port", undefined);
+  emit("update-target-port-options", false);
   if (projectId) {
     props.api
       .list("targets/", { project: projectId }, true)
@@ -145,6 +147,7 @@ function onTarget(targetId: number | undefined) {
   targetPort.value = undefined;
   emit("update-target-port", undefined);
   targetPortOptions.value = [];
+  emit("update-target-port-options", false);
   if (targetId) {
     props.api
       .list("target-ports/", { target: targetId }, true)
@@ -156,6 +159,7 @@ function onTarget(targetId: number | undefined) {
             : port.port.toString(),
           icon: backend.getPortIcon(port.port),
         }));
+        emit("update-target-port-options", response.items.length > 0);
       });
   }
 }

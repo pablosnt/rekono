@@ -25,6 +25,9 @@
           @update-target-port="
             (newTargetPort: number | undefined) => (targetPort = newTargetPort)
           "
+          @update-target-port-options="
+            (hasOptions: boolean) => (hasTargetPortOptions = hasOptions)
+          "
         />
         <TasksFormTooling
           v-show="item.title === 'Tooling'"
@@ -150,7 +153,7 @@ const genericApi = useApi("/api/");
 const backend = useBackend();
 const stepperItems = computed(() => {
   const items = [];
-  if (!props.entity.targetPort) {
+  if ((!props.entity.targetPort && hasTargetPortOptions.value) || !props.entity.project || !props.entity.target) {
     items.push({
       title: "Target",
       icon: "i-lucide-locate-fixed",
@@ -202,6 +205,7 @@ const loading = ref(false);
 const project = ref(props.entity.project);
 const target = ref(props.entity.target);
 const targetPort = ref(props.entity.targetPort);
+const hasTargetPortOptions = ref(true);
 const process = ref(props.entity.process);
 const tool = ref(props.entity.tool);
 const configuration = ref(props.entity.configuration);
