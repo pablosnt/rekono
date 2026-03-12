@@ -1,18 +1,18 @@
 <template>
   <div>
-  <CrudPage :config="config">
-    <template #actions="{ item }">
-      <TasksButton
-        :project="{ id: parseInt(route.params.project_id) }"
-        :target="item"
-      />
-    </template>
-  </CrudPage>
-  <ReportsButton
-    v-model:open="showReportModal"
-    :target-id="selectedTargetForReport?.id"
-    :show="false"
-  />
+    <CrudPage :config="config">
+      <template #actions="{ item }">
+        <TasksButton
+          :project="{ id: parseInt(route.params.project_id) }"
+          :target="item"
+        />
+      </template>
+    </CrudPage>
+    <ReportsButton
+      v-model:open="showReportModal"
+      :target-id="selectedTargetForReport?.id"
+      :show="false"
+    />
   </div>
 </template>
 

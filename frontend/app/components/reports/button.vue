@@ -39,8 +39,7 @@ const route = useRoute();
 const config = ref({
   entityName: "Report",
   editForm: resolveComponent("ReportsForm"),
-  onCreation: () =>
-    navigateTo(`/projects/${route.params.project_id}/reports`),
+  onCreation: () => navigateTo(`/projects/${route.params.project_id}/reports`),
 });
 const openModal = ref(false);
 

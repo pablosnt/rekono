@@ -45,6 +45,7 @@
         <template #dropdown="{ item }">
           <UDropdownMenu :items="item.children">
             <UButton
+              :icon="item.icon"
               :avatar="item.avatar"
               :label="item.label"
               color="neutral"
@@ -61,15 +62,18 @@
 
 <script setup lang="ts">
 import { useUserStore } from "~/store/user";
+import type { Project } from "~/types/models";
 
 const api = useApi();
 const route = useRoute();
 const userStore = useUserStore();
+const backend = useBackend();
 const breadcrumb = ref([]);
 const items = ref([]);
 const projectEntity = ref({ name: "Rekono" });
+const allProjects = ref<Project[]>([]);
 
-function update() {
+function onProjectChange() {
   if (!route.params.project_id) {
     projectEntity.value = { name: "Rekono" };
     return;
@@ -87,27 +91,14 @@ function update() {
     },
   ];
   api.get(`/api/projects/${route.params.project_id}/`).then((project) => {
-    projectEntity.value = project;
-    api.get("stats/top-projects/").then((top_projects: object) => {
-      const children: NavigationItem[] = [];
-      for (let i = 0; i < top_projects.length; i++) {
-        if (top_projects[i].id === project.id) {
-          continue;
-        }
-        children.push({
-          label: top_projects[i].name,
-          avatar: { text: top_projects[i].name.charAt(0).toUpperCase() },
-          to: `/projects/${top_projects[i].id}`,
-        });
-      }
-      breadcrumb.value.push({
-        slot: "dropdown",
-        label: project.name,
-        avatar: { text: project.name.charAt(0).toUpperCase() },
-        to: `/projects/${project.id}`,
-        children: children,
+    if (allProjects.value.length === 0) {
+      api.list("/api/projects/", {}, true).then((response) => {
+        allProjects.value = response.items;
+        getProjectBreadcrum(project);
       });
-    });
+    } else {
+      getProjectBreadcrum(project);
+    }
   });
   items.value = [
     {
@@ -211,14 +202,90 @@ function update() {
     });
 }
 
+function getProjectBreadcrum(project: Project) {
+  const children: NavigationItem[] = [];
+  for (const projectOption of allProjects.value) {
+    if (projectOption.id !== project.id) {
+      children.push({
+        label: projectOption.name,
+        avatar: { text: projectOption.name.charAt(0).toUpperCase() },
+        to: `/projects/${projectOption.id}`,
+      });
+    }
+  }
+  breadcrumb.value.push({
+    slot: children.length > 0 ? "dropdown" : undefined,
+    label: project.name,
+    avatar: { text: project.name.charAt(0).toUpperCase() },
+    to: `/projects/${project.id}`,
+    children: children,
+  });
+  if (route.params.target_id) {
+    onTargetChange();
+  }
+}
+
+function onTargetChange() {
+  if (!route.params.target_id) {
+    if (breadcrumb.value.length > 3) {
+      breadcrumb.value = breadcrumb.value.slice(0, 3);
+    }
+    return;
+  }
+  if (breadcrumb.value.length > 3) {
+    breadcrumb.value = breadcrumb.value.slice(0, 4);
+  } else {
+    breadcrumb.value.push({
+      label: "Targets",
+      icon: "i-lucide-locate-fixed",
+      to: `/projects/${route.params.project_id}/targets`,
+    });
+  }
+  api
+    .list("/api/targets/", { project: route.params.project_id }, true)
+    .then((response) => {
+      let currentTarget = null;
+      const children: NavigationItem[] = [];
+      for (const targetOption of response.items) {
+        if (targetOption.id !== parseInt(route.params.target_id)) {
+          children.push({
+            label: targetOption.target,
+            icon: backend.targetTypes.find((t) => t.value === targetOption.type)
+              ?.icon,
+            to: `/projects/${route.params.project_id}/targets/${targetOption.id}`,
+          });
+        } else {
+          currentTarget = targetOption;
+        }
+      }
+      if (currentTarget) {
+        breadcrumb.value.push({
+          slot: children.length > 0 ? "dropdown" : undefined,
+          label: currentTarget.target,
+          icon: backend.targetTypes.find((t) => t.value === currentTarget.type)
+            ?.icon,
+          to: `/projects/${route.params.project_id}/targets/${route.params.target_id}`,
+          children: children,
+        });
+      }
+    });
+}
+
 watch(
   () => route.params.project_id,
   () => {
-    update();
+    onProjectChange();
+  },
+);
+
+watch(
+  () => route.params.target_id,
+  () => {
+    onTargetChange();
   },
 );
 
 onMounted(() => {
-  update();
+  onProjectChange();
 });
 </script>
