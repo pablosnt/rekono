@@ -1,6 +1,14 @@
 <template>
-  <CrudPage :config="config" />
-  <!-- TODO: Add actions -> Run scan button as main, and generate report + take note in the actions dropdown -->
+  <CrudPage :config="config">
+    <template #actions="{ item }">
+      <TasksButton :project="{ id: parseInt(route.params.project_id) }" :target="item" />
+    </template>
+  </CrudPage>
+  <ReportsButton
+    :target-id="selectedTargetForReport?.id"
+    v-model:open="showReportModal"
+    :show="false"
+  />
 </template>
 
 <script setup lang="ts">
@@ -12,7 +20,8 @@ import type { Target } from "~/types/models";
 const userStore = useUserStore();
 const route = useRoute();
 const backend = useBackend();
-
+const selectedTargetForReport = ref<Target | null>(null);
+const showReportModal = ref(false);
 
 function createTargetLink(targetId: string, count: number, path: string): any {
   if (count === 0) {
@@ -30,7 +39,7 @@ function createTargetLink(targetId: string, count: number, path: string): any {
     count.toString()
   );
 }
-
+// todo: add link to DefectDojo if sync is enabled
 const config: CrudConfig<Target> = reactive({
   endpoint: "/api/targets/",
   entityName: "Target",
@@ -185,5 +194,18 @@ const config: CrudConfig<Target> = reactive({
   canEdit: false,
   canCreate: userStore.is_auditor,
   canDelete: userStore.is_auditor,
+  // todo: add custom action to take notes on target
+  customDropdownActions: (target: Target) => {
+    return target.tasks && target.tasks.length > 0 ?
+      [{
+        label: "Generate a report",
+        icon: "i-lucide-file-text",
+        color: "info",
+        onSelect: (target: Target) => {
+          selectedTargetForReport.value = target;
+          showReportModal.value = true;
+        },
+      }] : []
+  },
 });
 </script>
