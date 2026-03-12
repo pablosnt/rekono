@@ -176,14 +176,10 @@ const formData = ref<Record<string, unknown>>({
   project: parseInt(route.params.project_id),
   target: props.entity ? props.entity.target : undefined,
   task: props.entity ? props.entity.task : undefined,
-  format: props.entity ? props.entity.format : "json",
-  only_true_positives: props.entity ? props.entity.only_true_positives : false,
-  include_findings_from_user_input: props.entity
-    ? props.entity.include_findings_from_user_input
-    : false,
-  finding_types: props.entity
-    ? props.entity.finding_types
-    : backend.findingTypes.map((t) => t.value),
+  format: "json",
+  only_true_positives: false,
+  include_findings_from_user_input: false,
+  finding_types: backend.findingTypes.map((t) => t.value),
 });
 const schema = z.object({
   target: z.number().optional(),

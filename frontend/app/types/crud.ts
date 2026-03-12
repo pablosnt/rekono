@@ -60,6 +60,13 @@ export type CrudTableColumn<T> = TableColumn<T> & {
   icon?: string;
 };
 
+export interface DropdownAction<T = unknown> {
+  label: string;
+  icon: string;
+  color?: string;
+  onSelect: (item: T) => void;
+}
+
 export interface ComponentDetails {
   component: unknown;
   props?: Record<string, unknown>;
@@ -73,6 +80,7 @@ export interface CrudConfig<T = unknown> {
   tableColumns?: CrudTableColumn<T>[];
   tableColumnsVisibility?: Record<string, boolean>;
   tableCopyId: boolean;
+  customDropdownActions?: (item: T) => DropdownAction<T>[];
   useGrid?: boolean;
   itemLink?: (item: T) => string;
   onItemClick?: (item: T) => void;

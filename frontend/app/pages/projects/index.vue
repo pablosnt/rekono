@@ -17,7 +17,7 @@ const userOptions = ref<FilterOption[]>([]);
 onMounted(() => {
   backend.getUserOptions(userOptions, { role: "Admin", is_active: true });
 });
-
+// todo: add link to DefectDojo if sync is enabled
 const config: CrudConfig<Project> = reactive({
   endpoint: "/api/projects/",
   entityName: "Project",

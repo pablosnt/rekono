@@ -49,17 +49,19 @@ const columns = computed(() => {
     cell: ({ row }: unknown) => {
       const actions = [];
       const item = row.original;
-      if (
-        typeof props.config.canEdit === "function"
-          ? props.config.canEdit(item)
-          : props.config.canEdit
-      ) {
-        actions.push({
-          label: "Edit",
-          icon: "i-lucide-pencil",
-          onSelect: () => emit("edit", item),
+
+      if (props.config.customDropdownActions) {
+        const customActions = props.config.customDropdownActions(item);
+        customActions.forEach((action) => {
+          actions.push({
+            label: action.label,
+            icon: action.icon,
+            color: action.color,
+            onSelect: () => action.onSelect(item),
+          });
         });
       }
+
       if (
         props.config.tableCopyId !== false &&
         props.config.tableColumns?.some((c) => c.accessorKey === "id")
@@ -71,6 +73,17 @@ const columns = computed(() => {
             navigator.clipboard.writeText(String(item.id));
             toast.add({ title: "ID copied to clipboard", color: "success" });
           },
+        });
+      }
+      if (
+        typeof props.config.canEdit === "function"
+          ? props.config.canEdit(item)
+          : props.config.canEdit
+      ) {
+        actions.push({
+          label: "Edit",
+          icon: "i-lucide-pencil",
+          onSelect: () => emit("edit", item),
         });
       }
       if (
