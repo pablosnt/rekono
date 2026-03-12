@@ -53,13 +53,13 @@
 
 <script setup lang="ts">
 import * as z from "zod";
+import type { Target } from "~/types/models";
 
 const props = defineProps<{
   api: typeof useApi;
   config: object;
   entity?: Record<string, unknown>;
 }>();
-
 const emit = defineEmits<{
   submit: [data: Record<string, unknown>];
   "new-submit-label": [newSubmitLabel: string];
@@ -70,6 +70,7 @@ const emit = defineEmits<{
 const genericApi = useApi("/api/");
 const toast = useToast();
 const validation = useValidation();
+const route = useRoute()
 const schema = z.object({
   target: validation.target(),
 });
@@ -77,6 +78,7 @@ const targetInput = ref("");
 const targets = ref<string[]>([]);
 const loading = ref(false);
 const created = ref(0);
+const project = ref(props.entity ? props.entity : route.params.project_id ? { id: route.params.project_id } : null)
 
 function addTargetsFromInput() {
   if (!targetInput.value.trim()) return;
@@ -109,14 +111,17 @@ function removeTarget(index: number) {
 }
 
 function submit() {
+  if (project.value) {
   if (targets.value.length > 0) {
     loading.value = true;
     emit("new-loading", loading.value);
+    let createdTargets: Target[] = []
     created.value = 0;
     let errors = 0;
     for (const target of targets.value) {
       props.api
-        .create("", { project: props.entity.id, target: target })
+        .create("", { project: project.value.id, target: target })
+        .then((response) => {createdTargets.push(response)})
         .catch(() => {
           errors++;
         })
@@ -146,15 +151,16 @@ function submit() {
             }
             loading.value = false;
             emit("new-loading", loading.value);
-            genericApi.get(`projects/${props.entity.id}/`).then((project) => {
-              emit("submit", project);
+            genericApi.get(`projects/${project.value.id}/`).then((response) => {
+              emit("submit", {project: response, targets: createdTargets});
             });
           }
         });
     }
   } else {
-    emit("submit", props.entity);
+    emit("submit", {project: project.value, targets: []});
   }
+}
 }
 
 defineExpose({ submit });

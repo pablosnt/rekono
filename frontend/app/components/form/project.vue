@@ -43,7 +43,7 @@
               ref="targetFormRef"
               :api="targetApi"
               :entity="project"
-              @submit="(data) => $emit('submit', data)"
+              @submit="(data) => $emit('submit', data.project)"
               @new-submit-label="
                 (newSubmitLabel) => $emit('new-submit-label', newSubmitLabel)
               "
