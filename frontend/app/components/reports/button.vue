@@ -10,7 +10,9 @@
     :open="open ?? openModal"
     :api="api"
     :config="config"
-    :item="taskId ? {task: taskId} : targetId ? {target: targetId} : undefined"
+    :item="
+      taskId ? { task: taskId } : targetId ? { target: targetId } : undefined
+    "
     title="Generate Report"
     submit-label="Generate"
     :ui="{
@@ -22,29 +24,28 @@
 </template>
 
 <script setup lang="ts">
-const props = defineProps<{
+defineProps<{
   targetId?: number;
   taskId?: number;
   open?: boolean;
   show?: boolean;
 }>();
-
 const emit = defineEmits<{
-  'update:open': [value: boolean];
+  "update:open": [value: boolean];
 }>();
 
 const api = useApi("/api/reports/");
-const route = useRoute()
+const route = useRoute();
 const config = ref({
   entityName: "Report",
   editForm: resolveComponent("ReportsForm"),
-  onCreation: (data: Record<string, unknown>) =>
+  onCreation: () =>
     navigateTo(`/projects/${route.params.project_id}/reports`),
 });
 const openModal = ref(false);
 
 function handleOpen(open: boolean) {
   openModal.value = open;
-  emit('update:open', open);
+  emit("update:open", open);
 }
 </script>

@@ -1,14 +1,19 @@
 <template>
+  <div>
   <CrudPage :config="config">
     <template #actions="{ item }">
-      <TasksButton :project="{ id: parseInt(route.params.project_id) }" :target="item" />
+      <TasksButton
+        :project="{ id: parseInt(route.params.project_id) }"
+        :target="item"
+      />
     </template>
   </CrudPage>
   <ReportsButton
-    :target-id="selectedTargetForReport?.id"
     v-model:open="showReportModal"
+    :target-id="selectedTargetForReport?.id"
     :show="false"
   />
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -23,7 +28,7 @@ const backend = useBackend();
 const selectedTargetForReport = ref<Target | null>(null);
 const showReportModal = ref(false);
 
-function createTargetLink(targetId: string, count: number, path: string): any {
+function createTargetLink(targetId: string, count: number, path: string) {
   if (count === 0) {
     return h("span", { class: "font-medium text-muted-foreground" }, "0");
   }
@@ -36,7 +41,7 @@ function createTargetLink(targetId: string, count: number, path: string): any {
       href,
       class: "font-medium text-primary hover:underline",
     },
-    count.toString()
+    count.toString(),
   );
 }
 // todo: add link to DefectDojo if sync is enabled
@@ -66,7 +71,7 @@ const config: CrudConfig<Target> = reactive({
       icon: "i-lucide-tag",
       cell: ({ row }) => {
         const type = row.getValue("type") as string;
-        const typeConfig = backend.targetTypes.find(t => t.value === type);
+        const typeConfig = backend.targetTypes.find((t) => t.value === type);
         return h(
           resolveComponent("UBadge"),
           {
@@ -91,7 +96,9 @@ const config: CrudConfig<Target> = reactive({
       header: "Target Ports",
       icon: "i-lucide-server",
       cell: ({ row }) => {
-        const targetPorts = row.getValue("target_ports") as Target["target_ports"];
+        const targetPorts = row.getValue(
+          "target_ports",
+        ) as Target["target_ports"];
         const count = targetPorts?.length || 0;
         return h("span", { class: "font-medium" }, count.toString());
       },
@@ -135,7 +142,8 @@ const config: CrudConfig<Target> = reactive({
     notes: false,
     reports: false,
   },
-  itemLink: (target: Target) => `/projects/${route.params.project_id}/targets/${target.id}`,
+  itemLink: (target: Target) =>
+    `/projects/${route.params.project_id}/targets/${target.id}`,
   searchable: true,
   searchPlaceholder: "Search targets...",
   filters: [
@@ -157,7 +165,9 @@ const config: CrudConfig<Target> = reactive({
   createForm: resolveComponent("FormTarget"),
   onCreation: (data: Record<string, unknown>) => {
     if (Array.isArray(data.targets) && data.targets.length === 1) {
-      navigateTo(`/projects/${route.params.project_id}/targets/${data.targets[0].id}`);
+      navigateTo(
+        `/projects/${route.params.project_id}/targets/${data.targets[0].id}`,
+      );
     }
   },
   deleteMessage: (target: Target) => [
@@ -196,16 +206,19 @@ const config: CrudConfig<Target> = reactive({
   canDelete: userStore.is_auditor,
   // todo: add custom action to take notes on target
   customDropdownActions: (target: Target) => {
-    return target.tasks && target.tasks.length > 0 ?
-      [{
-        label: "Generate a report",
-        icon: "i-lucide-file-text",
-        color: "info",
-        onSelect: (target: Target) => {
-          selectedTargetForReport.value = target;
-          showReportModal.value = true;
-        },
-      }] : []
+    return target.tasks && target.tasks.length > 0
+      ? [
+          {
+            label: "Generate a report",
+            icon: "i-lucide-file-text",
+            color: "info",
+            onSelect: (target: Target) => {
+              selectedTargetForReport.value = target;
+              showReportModal.value = true;
+            },
+          },
+        ]
+      : [];
   },
 });
 </script>

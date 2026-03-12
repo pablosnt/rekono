@@ -70,7 +70,7 @@ const emit = defineEmits<{
 const genericApi = useApi("/api/");
 const toast = useToast();
 const validation = useValidation();
-const route = useRoute()
+const route = useRoute();
 const schema = z.object({
   target: validation.target(),
 });
@@ -78,7 +78,13 @@ const targetInput = ref("");
 const targets = ref<string[]>([]);
 const loading = ref(false);
 const created = ref(0);
-const project = ref(props.entity ? props.entity : route.params.project_id ? { id: route.params.project_id } : null)
+const project = ref(
+  props.entity
+    ? props.entity
+    : route.params.project_id
+      ? { id: route.params.project_id }
+      : null,
+);
 
 function addTargetsFromInput() {
   if (!targetInput.value.trim()) return;
@@ -112,55 +118,62 @@ function removeTarget(index: number) {
 
 function submit() {
   if (project.value) {
-  if (targets.value.length > 0) {
-    loading.value = true;
-    emit("new-loading", loading.value);
-    let createdTargets: Target[] = []
-    created.value = 0;
-    let errors = 0;
-    for (const target of targets.value) {
-      props.api
-        .create("", { project: project.value.id, target: target })
-        .then((response) => {createdTargets.push(response)})
-        .catch(() => {
-          errors++;
-        })
-        .finally(() => {
-          created.value++;
-          if (created.value === targets.value.length) {
-            if (errors > 0) {
-              if (created.value > errors) {
-                toast.add({
-                  title: "Targets creation",
-                  description: `${created.value - errors} targets were created successfully and ${errors} failed`,
-                  color: "warning",
-                });
+    if (targets.value.length > 0) {
+      loading.value = true;
+      emit("new-loading", loading.value);
+      const createdTargets: Target[] = [];
+      created.value = 0;
+      let errors = 0;
+      for (const target of targets.value) {
+        props.api
+          .create("", { project: project.value.id, target: target })
+          .then((response) => {
+            createdTargets.push(response);
+          })
+          .catch(() => {
+            errors++;
+          })
+          .finally(() => {
+            created.value++;
+            if (created.value === targets.value.length) {
+              if (errors > 0) {
+                if (created.value > errors) {
+                  toast.add({
+                    title: "Targets creation",
+                    description: `${created.value - errors} targets were created successfully and ${errors} failed`,
+                    color: "warning",
+                  });
+                } else {
+                  toast.add({
+                    title: "Targets creation failed",
+                    description: `${errors} targets weren't created`,
+                    color: "error",
+                  });
+                }
               } else {
                 toast.add({
-                  title: "Targets creation failed",
-                  description: `${errors} targets weren't created`,
-                  color: "error",
+                  title: "Targets created successfully",
+                  description: `${targets.value.length} targets were created successfully`,
+                  color: "success",
                 });
               }
-            } else {
-              toast.add({
-                title: "Targets created successfully",
-                description: `${targets.value.length} targets were created successfully`,
-                color: "success",
-              });
+              loading.value = false;
+              emit("new-loading", loading.value);
+              genericApi
+                .get(`projects/${project.value.id}/`)
+                .then((response) => {
+                  emit("submit", {
+                    project: response,
+                    targets: createdTargets,
+                  });
+                });
             }
-            loading.value = false;
-            emit("new-loading", loading.value);
-            genericApi.get(`projects/${project.value.id}/`).then((response) => {
-              emit("submit", {project: response, targets: createdTargets});
-            });
-          }
-        });
+          });
+      }
+    } else {
+      emit("submit", { project: project.value, targets: [] });
     }
-  } else {
-    emit("submit", {project: project.value, targets: []});
   }
-}
 }
 
 defineExpose({ submit });

@@ -153,7 +153,11 @@ const genericApi = useApi("/api/");
 const backend = useBackend();
 const stepperItems = computed(() => {
   const items = [];
-  if ((!props.entity.targetPort && hasTargetPortOptions.value) || !props.entity.project || !props.entity.target) {
+  if (
+    (!props.entity.targetPort && hasTargetPortOptions.value) ||
+    !props.entity.project ||
+    !props.entity.target
+  ) {
     items.push({
       title: "Target",
       icon: "i-lucide-locate-fixed",
