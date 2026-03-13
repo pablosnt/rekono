@@ -11,7 +11,7 @@
     <ReportsButton
       v-model:open="showReportModal"
       :target-id="selectedTargetForReport?.id"
-      :show="false"
+      only-modal
     />
   </div>
 </template>

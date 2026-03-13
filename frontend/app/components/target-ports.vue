@@ -1,6 +1,14 @@
 <template>
   <div>
-    <CrudPage ref="page" :config="config" />
+    <CrudPage ref="page" :config="config">
+      <template v-if="userStore.is_auditor" #actions="{ item }">
+        <TasksButton
+          :project="{ id: parseInt(route.params.project_id) }"
+          :target="{ id: parseInt(route.params.target_id) }"
+          :target-port="item"
+        />
+      </template>
+    </CrudPage>
     <CrudDeleteModal
       :open="deleteAuthenticationOpen"
       :item="selectedTargetPort?.authentication"

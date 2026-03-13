@@ -5,7 +5,10 @@
     >
       <div class="flex flex-row justify-start items-center gap-4">
         <slot name="header-leading" />
-        <UIcon :name="config.headerIcon" :class="titleSizeClass ? titleSizeClass : 'text-2xl'" />
+        <UIcon
+          :name="config.headerIcon"
+          :class="titleSizeClass ? titleSizeClass : 'text-2xl'"
+        />
         <h1
           :class="`${titleSizeClass ? titleSizeClass : 'text-2xl'} font-bold text-default truncate max-w-[300px] sm:max-w-none`"
         >

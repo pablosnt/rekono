@@ -1,6 +1,6 @@
 <template>
   <UButton
-    v-if="show !== false"
+    v-if="!onlyModal"
     icon="i-lucide-file-text"
     color="info"
     variant="subtle"
@@ -28,7 +28,7 @@ defineProps<{
   targetId?: number;
   taskId?: number;
   open?: boolean;
-  show?: boolean;
+  onlyModal?: boolean;
 }>();
 const emit = defineEmits<{
   "update:open": [value: boolean];
