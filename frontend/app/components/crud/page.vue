@@ -41,7 +41,6 @@
       <slot name="before" :state="state" />
 
       <slot name="content">
-        <!-- TODO: Adapt the empty message, not to show the criteria message when the criteria is the default filters -->
         <CrudEmptyState
           v-if="state.items.length === 0 && !state.loading && config.useGrid"
           :config="config"

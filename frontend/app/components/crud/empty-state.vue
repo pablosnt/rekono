@@ -22,7 +22,7 @@ const emit = defineEmits<{
 const utils = useUtils();
 
 const description = computed(() => {
-  if (Object.keys(props.state.filters).length > 0 || props.state.searchQuery) {
+  if (Object.keys(props.state.filters).length > Object.keys(props.config.defaultFilters).length || props.state.searchQuery) {
     return `The current search criteria don't match any ${utils.smartLowerCase(props.config.entityName)}. Change your query and retry`;
   }
   const base =
