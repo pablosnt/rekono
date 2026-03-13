@@ -1,7 +1,7 @@
 <template>
   <div>
     <CrudPage :config="config">
-      <template #actions="{ item }">
+      <template v-if="userStore.is_auditor" #actions="{ item }">
         <TasksButton
           :project="{ id: parseInt(route.params.project_id) }"
           :target="item"
@@ -206,7 +206,7 @@ const config: CrudConfig<Target> = reactive({
   canDelete: userStore.is_auditor,
   // todo: add custom action to take notes on target
   customDropdownActions: (target: Target) => {
-    return target.tasks && target.tasks.length > 0
+    return target.tasks && target.tasks.length > 0 && userStore.is_auditor
       ? [
           {
             label: "Generate a report",

@@ -1,5 +1,4 @@
 <template>
-  <!-- TODO: Check usages and avoid showing anything related to create a report when the user is not auditor -->
   <UButton
     v-if="show !== false"
     icon="i-lucide-file-text"
