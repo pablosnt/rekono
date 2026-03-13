@@ -5,6 +5,7 @@
     >
       <div class="flex flex-row justify-start items-center gap-4">
         <slot name="header-leading" />
+        <UIcon :name="config.headerIcon" class="text-xl" />
         <h1
           class="text-2xl font-bold text-default truncate max-w-[300px] sm:max-w-none"
         >

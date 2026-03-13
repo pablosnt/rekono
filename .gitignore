@@ -55,7 +55,9 @@ rekono-kbx
 # Tools paths
 Result/
 
+# AI
+.claude/
+
 # TODO Temporal ignore
 migrations/
 frontend-old/
-CLAUDE.md

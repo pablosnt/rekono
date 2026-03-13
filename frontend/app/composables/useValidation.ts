@@ -86,6 +86,14 @@ export default function () {
     );
   }
 
+  function path(
+    field: string = "path",
+    required: boolean = true,
+    max: number = 500,
+  ) {
+    return regex(field, required, max, /^[\w\.\-_/\\]{0,500}/);
+  }
+
   function email() {
     return z.email("Valid email is required");
   }
@@ -98,6 +106,7 @@ export default function () {
     target,
     target_regex,
     secret,
+    path,
     email,
   };
 }

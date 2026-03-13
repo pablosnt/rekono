@@ -39,7 +39,7 @@ class AuthenticationViewSet(BaseViewSet):
     permission_classes = [
         IsAuthenticated,
         RekonoModelPermission,
-        ProjectMemberPermission,
+        ProjectMemberPermission
     ]
     search_fields = ["name"]
     ordering_fields = ["id", "name", "type"]

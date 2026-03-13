@@ -67,7 +67,7 @@
         :icon="
           targetPort
             ? targetPortOptions.find((option) => option.id === targetPort)?.icon
-            : 'i-lucide-network'
+            : 'i-lucide-ethernet-port'
         "
         placeholder="Select a target port"
         :items="targetPortOptions"

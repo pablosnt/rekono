@@ -6,8 +6,8 @@ export default function () {
   const alerts = [
     { item: "OSINT", icon: "i-lucide-globe", field: null },
     { item: "Host", icon: "i-lucide-server", field: "ip" },
-    { item: "Open Port", icon: "i-lucide-network", field: null },
-    { item: "Service", icon: "i-lucide-network", field: "service" },
+    { item: "Open Port", icon: "i-lucide-ethernet-port", field: null },
+    { item: "Service", icon: "i-lucide-ethernet-port", field: "service" },
     { item: "Technology", icon: "i-lucide-layers", field: "name" },
     { item: "Credential", icon: "i-lucide-key", field: null },
     { item: "Vulnerability", icon: "i-lucide-bug", field: null },
@@ -63,7 +63,7 @@ export default function () {
   const findingTypes = [
     { value: "OSINT", icon: "i-lucide-globe" },
     { value: "Host", icon: "i-lucide-server" },
-    { value: "Port", icon: "i-lucide-network" },
+    { value: "Port", icon: "i-lucide-ethernet-port" },
     { value: "Path", icon: "i-lucide-route" },
     { value: "Technology", icon: "i-lucide-layers" },
     { value: "Credential", icon: "i-lucide-key" },
@@ -72,26 +72,22 @@ export default function () {
   ];
 
   const targetTypes = [
-    {
-      value: "Private IP",
-      icon: "i-mdi-security-network",
-    },
-    {
-      value: "Public IP",
-      icon: "i-mdi-ip-network",
-    },
-    {
-      value: "Network",
-      icon: "i-lucide-network",
-    },
-    {
-      value: "IP range",
-      icon: "i-lucide-arrow-left-right",
-    },
-    {
-      value: "Domain",
-      icon: "i-lucide-globe",
-    },
+    { value: "Private IP", icon: "i-mdi-security-network" },
+    { value: "Public IP", icon: "i-mdi-ip-network" },
+    { value: "Network", icon: "i-lucide-network" },
+    { value: "IP range", icon: "i-lucide-arrow-left-right" },
+    { value: "Domain", icon: "i-lucide-globe" },
+  ];
+
+  const authenticationTypes = [
+    "None",
+    "Basic",
+    "Bearer",
+    "Cookie",
+    "Digest",
+    "JWT",
+    "NTLM",
+    "Token",
   ];
 
   function getUserOptions(
@@ -271,7 +267,7 @@ export default function () {
       case 2484:
         return "i-mdi-database";
       default:
-        return "i-lucide-network";
+        return "i-lucide-ethernet-port";
     }
   }
 
@@ -290,6 +286,7 @@ export default function () {
     reportStatuses,
     findingTypes,
     targetTypes,
+    authenticationTypes,
     getUserOptions,
     getToolOptions,
     getTargetOptions,
