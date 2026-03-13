@@ -5,9 +5,9 @@
     >
       <div class="flex flex-row justify-start items-center gap-4">
         <slot name="header-leading" />
-        <UIcon :name="config.headerIcon" class="text-xl" />
+        <UIcon :name="config.headerIcon" :class="titleSizeClass ? titleSizeClass : 'text-2xl'" />
         <h1
-          class="text-2xl font-bold text-default truncate max-w-[300px] sm:max-w-none"
+          :class="`${titleSizeClass ? titleSizeClass : 'text-2xl'} font-bold text-default truncate max-w-[300px] sm:max-w-none`"
         >
           {{ config.entityNamePlural }}
         </h1>
@@ -176,6 +176,7 @@ defineProps<{
   state: CrudState;
   table: unknown;
   openCreateModal: boolean;
+  titleSizeClass?: string;
 }>();
 const emit = defineEmits<{
   search: [search: string];

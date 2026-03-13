@@ -8,8 +8,9 @@
           ? backend.targetTypes.find((t) => t.value === target.type)?.icon
           : undefined,
       }"
+      title-size-class="text-3xl"
     />
-    <!-- TODO: Run tasks, links to tasks, notes and reports, add dropdown with generate report and take note -->
+    <!-- TODO: Run tasks (per target, and per target port), links to tasks, notes and reports, add dropdown with generate report and take note -->
     <div class="space-y-14">
       <TargetPorts />
       <HttpHeaders
