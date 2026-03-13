@@ -50,12 +50,12 @@
 <script setup lang="ts">
 import type { CrudConfig } from "~/types/crud";
 
-const props = defineProps<{
+defineProps<{
   api: typeof useApi;
   config: CrudConfig;
   entity?: Record<string, unknown>;
 }>();
-const emit = defineEmits<{
+defineEmits<{
   submit: [data: Record<string, unknown>];
   "new-submit-label": [newSubmitLabel: string];
   "new-loading": [newLoading: boolean];

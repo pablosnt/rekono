@@ -91,7 +91,7 @@ export default function () {
     required: boolean = true,
     max: number = 500,
   ) {
-    return regex(field, required, max, /^[\w\.\-_/\\]{0,500}/);
+    return regex(field, required, max, /^[\w.\-_/\\]{0,500}/);
   }
 
   function email() {

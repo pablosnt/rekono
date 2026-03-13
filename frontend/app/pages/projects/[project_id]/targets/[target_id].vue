@@ -33,29 +33,41 @@
           <UButton icon="i-lucide-plus" variant="solid" color="info" />
         </UDropdownMenu>
         <UDropdownMenu
-          v-if="target && target?.tasks.length + target?.notes.length + target?.reports.length > 0"
-          :items="[
-            target?.tasks.length > 0 ? {
-              label: `${target?.tasks.length} Scans`,
-              icon: 'i-lucide-play',
-              color: 'neutral',
-              to: `/projects/${$route.params.project_id}/scans?target=${route.params.target_id}`
-            }: {},
-            target?.reports.length > 0 ?
-            {
-              label: `${target?.reports.length} Reports`,
-              icon: 'i-lucide-file-text',
-              color: 'neutral',
-              to: `/projects/${$route.params.project_id}/reports?target=${route.params.target_id}`
-            } : {},
-            target?.notes.length > 0 ? 
-            {
-              label: `${target?.notes.length} Notes`,
-              icon: 'i-lucide-notebook',
-              color: 'neutral',
-              to: `/projects/${$route.params.project_id}/notes?target=${route.params.target_id}`
-            } : {},
-          ].filter((i) => Object.keys(i).length > 0)"
+          v-if="
+            target &&
+            target?.tasks.length +
+              target?.notes.length +
+              target?.reports.length >
+              0
+          "
+          :items="
+            [
+              target?.tasks.length > 0
+                ? {
+                    label: `${target?.tasks.length} Scans`,
+                    icon: 'i-lucide-play',
+                    color: 'neutral',
+                    to: `/projects/${$route.params.project_id}/scans?target=${route.params.target_id}`,
+                  }
+                : {},
+              target?.reports.length > 0
+                ? {
+                    label: `${target?.reports.length} Reports`,
+                    icon: 'i-lucide-file-text',
+                    color: 'neutral',
+                    to: `/projects/${$route.params.project_id}/reports?target=${route.params.target_id}`,
+                  }
+                : {},
+              target?.notes.length > 0
+                ? {
+                    label: `${target?.notes.length} Notes`,
+                    icon: 'i-lucide-notebook',
+                    color: 'neutral',
+                    to: `/projects/${$route.params.project_id}/notes?target=${route.params.target_id}`,
+                  }
+                : {},
+            ].filter((i) => Object.keys(i).length > 0)
+          "
         >
           <UButton icon="i-lucide-link" variant="solid" color="neutral" />
         </UDropdownMenu>

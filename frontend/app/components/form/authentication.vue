@@ -116,7 +116,7 @@ function validate(data) {
     try {
       formSchema.parse(data);
       emit("validation-change", true);
-    } catch (error) {
+    } catch {
       emit("validation-change", false);
     }
   }
