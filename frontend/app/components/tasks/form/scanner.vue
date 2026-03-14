@@ -3,13 +3,13 @@
     <UFormField
       v-if="!defaultTool && !defaultProcess"
       required
-      label="Tooling"
-      name="tooling"
+      label="Scanner"
+      name="scanner"
     >
       <USelectMenu
         class="w-full"
-        :icon="toolingIcon"
-        :avatar="toolingAvatar"
+        :icon="scannerIcon"
+        :avatar="scannerAvatar"
         :items="
           toolOptions
             .map((tool) => ({
@@ -20,7 +20,7 @@
             }))
             .concat(
               processOptions.map((process) => ({
-                id: process.id,
+                value: process.id,
                 label: process.name,
                 description: 'Process',
               })),
@@ -41,8 +41,8 @@
               onProcess(undefined);
               onConfiguration(undefined);
               configurationOptions = [];
-              toolingIcon = 'i-lucide-terminal';
-              toolingAvatar = undefined;
+              scannerIcon = 'i-lucide-terminal';
+              scannerAvatar = undefined;
             }
           }
         "
@@ -64,8 +64,8 @@
               onProcess(undefined);
               onConfiguration(undefined);
               configurationOptions = [];
-              toolingIcon = 'i-lucide-terminal';
-              toolingAvatar = undefined;
+              scannerIcon = 'i-lucide-terminal';
+              scannerAvatar = undefined;
             "
           />
         </template>
@@ -104,8 +104,8 @@ const emit = defineEmits<{
 }>();
 
 const backend = useBackend();
-const toolingIcon = ref("i-lucide-terminal");
-const toolingAvatar = ref(undefined);
+const scannerIcon = ref("i-lucide-terminal");
+const scannerAvatar = ref(undefined);
 const process = ref(props.defaultProcess);
 const processOptions = ref([]);
 const tool = ref(props.defaultTool);
@@ -120,7 +120,7 @@ const requiredWordlist = ref(false);
 const requiredInputTechnology = ref(false);
 const requiredInputVulnerability = ref(false);
 
-function loadTooling() {
+function loadScanners() {
   props.api.list("tools/", {}, true).then((response) => {
     toolOptions.value = response.items;
   });
@@ -182,11 +182,11 @@ function onTool(toolId) {
       )?.value;
       emit("update-intensity", minIntensity.value, maxIntensity.value);
       if (response.icon) {
-        toolingAvatar.value = { src: response.icon };
-        toolingIcon.value = undefined;
+        scannerAvatar.value = { src: response.icon };
+        scannerIcon.value = undefined;
       } else {
-        toolingAvatar.value = undefined;
-        toolingIcon.value = "i-lucide-square-terminal";
+        scannerAvatar.value = undefined;
+        scannerIcon.value = "i-lucide-square-terminal";
       }
     });
     props.api
@@ -226,18 +226,13 @@ function onProcess(processId) {
     configuration.value = undefined;
     emit("update-configuration", configuration.value);
     configurationOptions.value = [];
-    toolingAvatar.value = undefined;
-    toolingIcon.value = "i-lucide-workflow";
+    scannerAvatar.value = undefined;
+    scannerIcon.value = "i-lucide-workflow";
     props.api.get(`processes/${process.value}/`).then((response) => {
-      if (response.wordlists.supported) {
-        supportedWordlist.value = true;
-        requiredWordlist.value = response.wordlists.required;
-        emit(
-          "update-wordlist",
-          supportedWordlist.value,
-          requiredWordlist.value,
-        );
-      }
+      supportedWordlist.value = response.wordlists.supported;
+      requiredWordlist.value =
+        response.wordlists.supported && response.wordlists.required;
+      emit("update-wordlist", supportedWordlist.value, requiredWordlist.value);
     });
   }
 }
@@ -250,7 +245,7 @@ onMounted(() => {
   } else if (props.defaultProcess) {
     onProcess(props.defaultProcess);
   } else {
-    loadTooling();
+    loadScanners();
   }
 });
 </script>

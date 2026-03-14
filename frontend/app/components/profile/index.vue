@@ -57,11 +57,7 @@ const baseItems = [
     value: "telegram-bot",
   },
   { label: "Security", icon: "i-lucide-lock", value: "security" },
-  {
-    label: "HTTP Headers",
-    icon: "i-lucide-globe",
-    value: "http-headers",
-  },
+  { label: "HTTP Headers", icon: "i-lucide-globe", value: "http-headers" },
 ];
 
 const items = computed(() =>

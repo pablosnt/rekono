@@ -36,6 +36,9 @@
         <template v-if="$slots['header-actions']" #header-actions>
           <slot name="header-actions" />
         </template>
+        <template v-if="$slots['create-button']" #create-button>
+          <slot name="create-button" />
+        </template>
       </CrudHeader>
 
       <slot name="before" :state="state" />

@@ -79,7 +79,7 @@ const config: CrudConfig<Tool> = reactive({
     {
       key: "intensity",
       label: "Intensity",
-      icon: "i-lucide-database-zap",
+      icon: "i-lucide-gauge",
       type: "select" as const,
       options: backend.intensities,
     },

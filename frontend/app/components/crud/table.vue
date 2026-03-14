@@ -26,6 +26,7 @@ const props = defineProps<{ config: CrudConfig; state: CrudState }>();
 const emit = defineEmits<{ edit: [item: object]; delete: [item: object] }>();
 const slots = useSlots();
 const toast = useToast();
+const utils = useUtils();
 
 const columns = computed(() => {
   const cols =
@@ -92,8 +93,8 @@ const columns = computed(() => {
           : props.config.canDelete
       ) {
         actions.push({
-          label: "Delete",
-          icon: "i-lucide-trash",
+          label: utils.firstUpper(props.config.deleteVerb || "Delete"),
+          icon: props.config.deleteIcon || "i-lucide-trash",
           color: "error",
           onSelect: () => emit("delete", item),
         });

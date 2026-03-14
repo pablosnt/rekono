@@ -183,9 +183,10 @@ export interface Report {
 
 export interface Task {
   id: number;
-  target?: {
+  target: {
     id: number;
     target: string;
+    type: string;
   };
   process?: {
     id: number;

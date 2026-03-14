@@ -60,7 +60,11 @@
         </template>
       </USelectMenu>
     </UFormField>
-    <UFormField label="Target Port" name="targetPort">
+    <UFormField
+      v-if="targetPortOptions.length > 0"
+      label="Target Port"
+      name="targetPort"
+    >
       <USelectMenu
         :model-value="targetPort"
         class="w-full"

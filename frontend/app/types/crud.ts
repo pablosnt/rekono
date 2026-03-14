@@ -115,6 +115,7 @@ export interface CrudConfig<T = unknown> {
   deleteEndpoint?: (item: T) => string;
   emptyMessage?: string;
   deleteVerb?: string;
+  deleteIcon?: string;
   canRead: boolean;
   canCreate: boolean;
   canEdit: boolean | ((item: T) => boolean);

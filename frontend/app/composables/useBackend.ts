@@ -1,10 +1,17 @@
 import type { FilterOption } from "~/types/crud";
-import type { User, Target, Task, Tool } from "~/types/models";
+import type {
+  User,
+  Target,
+  Task,
+  Tool,
+  Configuration,
+  Process,
+} from "~/types/models";
 import { useUserStore } from "~/store/user";
 
 export default function () {
   const alerts = [
-    { item: "OSINT", icon: "i-lucide-globe", field: null },
+    { item: "OSINT", icon: "i-lucide-rss", field: null },
     { item: "Host", icon: "i-lucide-server", field: "ip" },
     { item: "Open Port", icon: "i-lucide-ethernet-port", field: null },
     { item: "Service", icon: "i-lucide-ethernet-port", field: "service" },
@@ -16,7 +23,7 @@ export default function () {
   ];
 
   const stages = [
-    { label: "OSINT", value: 1, icon: "i-lucide-globe" },
+    { label: "OSINT", value: 1, icon: "i-lucide-rss" },
     { label: "Enumeration", value: 2, icon: "i-lucide-network" },
     { label: "Vulnerabilities", value: 3, icon: "i-lucide-bug" },
     { label: "Services", value: 4, icon: "i-lucide-server" },
@@ -61,7 +68,7 @@ export default function () {
   ];
 
   const findingTypes = [
-    { value: "OSINT", icon: "i-lucide-globe" },
+    { value: "OSINT", icon: "i-lucide-rss" },
     { value: "Host", icon: "i-lucide-server" },
     { value: "Port", icon: "i-lucide-ethernet-port" },
     { value: "Path", icon: "i-lucide-route" },
@@ -88,6 +95,15 @@ export default function () {
     "JWT",
     "NTLM",
     "Token",
+  ];
+
+  const executionStatuses = [
+    { color: "warning", icon: "i-lucide-loader", value: "Running" },
+    { color: "success", icon: "i-lucide-circle-check", value: "Completed" },
+    { color: "error", icon: "i-lucide-circle-x", value: "Error" },
+    { color: "neutral", icon: "i-lucide-ban", value: "Cancelled" },
+    { color: "neutral", icon: "i-lucide-skip-forward", value: "Skipped" },
+    { color: "info", icon: "i-lucide-clock", value: "Requested" },
   ];
 
   function getUserOptions(
@@ -141,6 +157,39 @@ export default function () {
       });
   }
 
+  function getConfigurationOptions(
+    configurationOptionsRef: Ref<FilterOption[]>,
+    queryParams?: Record<string, string> = {},
+  ) {
+    useApi("/api/configurations/")
+      .list("", queryParams, true)
+      .then((response) => {
+        configurationOptionsRef.value = (response.items as Configuration[]).map(
+          (configuration) => ({
+            label: configuration.name,
+            description: configuration.tool.name,
+            value: configuration.id,
+          }),
+        );
+      });
+  }
+
+  function getProcessOptions(
+    processOptionsRef: Ref<FilterOption[]>,
+    queryParams?: Record<string, string> = {},
+  ) {
+    useApi("/api/processes/")
+      .list("", queryParams, true)
+      .then((response) => {
+        processOptionsRef.value = (response.items as Process[]).map(
+          (process) => ({
+            label: process.name,
+            value: process.id,
+          }),
+        );
+      });
+  }
+
   function getTargetOptions(
     targetOptionsRef: Ref<FilterOption[]>,
     queryParams?: Record<string, string> = {},
@@ -156,13 +205,16 @@ export default function () {
   }
 
   function getTaskName(task: Task, includeTarget?: boolean) {
-    const utils = useUtils();
-    const tooling = task.process
+    const scanner = task.process
       ? task.process.name
       : `${task.configuration?.tool.name} (${task.configuration?.name})`;
-    const text = includeTarget ? `${tooling} - ${task.target.target}` : tooling;
+    const target_port = task.target_port
+      ? `:${task.target_port.port}${task.target_port.path ? (task.target_port.path[0] === "/" ? task.target_port.path : `/${task.target_port.path}`) : ""}`
+      : "";
+    const target = `${task.target.target}${target_port}`;
+    const text = includeTarget ? `${scanner} - ${target}` : scanner;
     return task.start
-      ? `${text} - ${utils.formatRelativeDatetime(task.start)}`
+      ? `${text} - ${new Date(task.start).toLocaleString()}`
       : text;
   }
 
@@ -287,8 +339,11 @@ export default function () {
     findingTypes,
     targetTypes,
     authenticationTypes,
+    executionStatuses,
     getUserOptions,
     getToolOptions,
+    getConfigurationOptions,
+    getProcessOptions,
     getTargetOptions,
     getTaskName,
     getTaskOptions,

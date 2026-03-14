@@ -29,8 +29,8 @@
             (hasOptions: boolean) => (hasTargetPortOptions = hasOptions)
           "
         />
-        <TasksFormTooling
-          v-show="item.title === 'Tooling'"
+        <TasksFormScanner
+          v-show="item.title === 'Scanner'"
           :api="genericApi"
           :default-tool="entity.tool"
           :default-configuration="entity.configuration"
@@ -165,7 +165,7 @@ const stepperItems = computed(() => {
   }
   if (!props.entity.configuration && !props.entity.process) {
     items.push({
-      title: "Tooling",
+      title: "Scanner",
       description: "Tool or process to run",
       icon: "i-lucide-terminal",
     });
@@ -173,7 +173,7 @@ const stepperItems = computed(() => {
   if (minIntensity.value < maxIntensity.value) {
     items.push({
       title: "Intensity",
-      icon: "i-lucide-database-zap",
+      icon: "i-lucide-gauge",
     });
   }
   if (supportedWordlist.value) {

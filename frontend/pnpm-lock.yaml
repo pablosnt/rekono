@@ -8,8 +8,8 @@ importers:
   .:
     dependencies:
       "@iconify-json/lucide":
-        specifier: ^1.2.71
-        version: 1.2.71
+        specifier: ^1.2.97
+        version: 1.2.97
       "@iconify-json/simple-icons":
         specifier: ^1.2.55
         version: 1.2.55
@@ -955,10 +955,10 @@ packages:
       }
     engines: { node: ">=18.18" }
 
-  "@iconify-json/lucide@1.2.71":
+  "@iconify-json/lucide@1.2.97":
     resolution:
       {
-        integrity: sha512-KL+3JHW+wN8QqT3CN+7e1SzTe+gIunFBuUICtVmdCmdVRx+MdGNkX4xJhXoYHfhYO2azrEhoGPG+It9k30aZkw==,
+        integrity: sha512-Za6N/B2Nz1Lbr43f7+FOy6ZbxWACJanqZcrA3Gk1QE7ubQ/YCT1iKPLe5iJQImd60BBPPUvIwD5LmJkVeGHAxg==,
       }
 
   "@iconify-json/simple-icons@1.2.55":
@@ -8970,7 +8970,7 @@ snapshots:
 
   "@humanwhocodes/retry@0.4.3": {}
 
-  "@iconify-json/lucide@1.2.71":
+  "@iconify-json/lucide@1.2.97":
     dependencies:
       "@iconify/types": 2.0.0
 

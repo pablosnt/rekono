@@ -91,6 +91,7 @@ function onProjectChange() {
     },
   ];
   api.get(`/api/projects/${route.params.project_id}/`).then((project) => {
+    projectEntity.value = project;
     if (allProjects.value.length === 0) {
       api.list("/api/projects/", {}, true).then((response) => {
         allProjects.value = response.items;
@@ -128,7 +129,7 @@ function onProjectChange() {
       children: [
         {
           label: "OSINT",
-          icon: "i-lucide-globe",
+          icon: "i-lucide-rss",
           to: `/projects/${route.params.project_id}/osint`,
         },
         {

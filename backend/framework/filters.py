@@ -8,7 +8,7 @@ from typing import Any
 
 from django.db.models import Q, QuerySet
 from django_filters.rest_framework import FilterSet
-from django_filters.rest_framework.filters import BooleanFilter, CharFilter, Filter, NumberFilter
+from django_filters.rest_framework.filters import BooleanFilter, CharFilter, Filter, NumberFilter, ModelChoiceFilter
 
 
 class LikeFilter(FilterSet):
@@ -112,6 +112,24 @@ class MultipleCharFilter(MultipleFieldFilter, CharFilter):
         ```python
         class MyFilterSet(MultipleFieldFilterSet):
             name_search = MultipleCharFilter(fields=["name", "title", "description"])
+        ```
+    """
+
+    pass
+
+class MultipleModelFilter(MultipleFieldFilter, ModelChoiceFilter):
+    """Multiple field filter for model object values.
+
+    Combines MultipleFieldFilter with ModelChoiceFilter to enable
+    filtering by a model instance across multiple relationship fields.
+
+    Example:
+        ```python
+        class MyFilterSet(MultipleFieldFilterSet):
+            tool_search = MultipleModelFilter(
+                queryset=Tool.objects.all(),
+                fields=["configuration__tool", "process__steps__configuration__tool"],
+            )
         ```
     """
 

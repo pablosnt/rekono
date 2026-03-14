@@ -14,32 +14,46 @@ export default function () {
       : `${text.slice(0, maxLength)}...`;
   }
 
-  function formatRelativeDatetime(dateString: string): string {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffTime = now.getTime() - date.getTime();
-    const diffSeconds = Math.floor(diffTime / 1000);
-    const diffMinutes = Math.floor(diffSeconds / 60);
-    const diffHours = Math.floor(diffMinutes / 60);
-    const diffDays = Math.floor(diffHours / 24);
-    const diffWeeks = Math.floor(diffDays / 7);
-    const diffMonths = Math.floor(diffDays / 30);
-    const diffYears = Math.floor(diffDays / 365);
+  function duration(startDateString: string, endDateString: string): string {
+    const ms =
+      new Date(endDateString).getTime() - new Date(startDateString).getTime();
+    const totalSeconds = Math.floor(ms / 1000);
+    const days = Math.floor(totalSeconds / 86400);
+    const hours = Math.floor((totalSeconds % 86400) / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+    const parts = [];
+    if (days > 0) parts.push(`${days}d`);
+    if (hours > 0) parts.push(`${hours}h`);
+    if (minutes > 0) parts.push(`${minutes}m`);
+    parts.push(`${seconds}s`);
+    return parts.join(" ");
+  }
+
+  function formatRelativeDatetime(startDateString: string): string {
+    const ms = new Date().getTime() - new Date(startDateString).getTime();
+    const seconds = Math.floor(ms / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
+    const weeks = Math.floor(days / 7);
+    const months = Math.floor(weeks / 30);
+    const years = Math.floor(months / 365);
     const rtf = new Intl.RelativeTimeFormat("en", { numeric: "auto" });
-    if (Math.abs(diffYears) >= 1) {
-      return rtf.format(-diffYears, "year");
-    } else if (Math.abs(diffMonths) >= 1) {
-      return rtf.format(-diffMonths, "month");
-    } else if (Math.abs(diffWeeks) >= 1) {
-      return rtf.format(-diffWeeks, "week");
-    } else if (Math.abs(diffDays) >= 1) {
-      return rtf.format(-diffDays, "day");
-    } else if (Math.abs(diffHours) >= 1) {
-      return rtf.format(-diffHours, "hour");
-    } else if (Math.abs(diffMinutes) >= 1) {
-      return rtf.format(-diffMinutes, "minute");
+    if (Math.abs(years) >= 1) {
+      return rtf.format(-years, "year");
+    } else if (Math.abs(months) >= 1) {
+      return rtf.format(-months, "month");
+    } else if (Math.abs(weeks) >= 1) {
+      return rtf.format(-weeks, "week");
+    } else if (Math.abs(days) >= 1) {
+      return rtf.format(-days, "day");
+    } else if (Math.abs(hours) >= 1) {
+      return rtf.format(-hours, "hour");
+    } else if (Math.abs(minutes) >= 1) {
+      return rtf.format(-minutes, "minute");
     } else {
-      return rtf.format(-diffSeconds, "second");
+      return rtf.format(-seconds, "second");
     }
   }
 
@@ -53,6 +67,7 @@ export default function () {
   return {
     firstUpper,
     truncateText,
+    duration,
     formatRelativeDatetime,
     smartLowerCase,
   };

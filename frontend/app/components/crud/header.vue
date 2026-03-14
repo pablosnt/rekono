@@ -134,27 +134,24 @@
             />
           </UDropdownMenu>
 
-          <CrudFormModal
-            v-if="config.canCreate"
-            :open="openCreateModal"
-            :api="api"
-            :config="config"
-            :submit-label="config.createLabel"
-            @open="
-              (open: boolean) => {
-                $emit('openCreate', open);
-                if (!open && config.updateOnCreateModalOpen) {
-                  $emit('create');
+          <slot v-if="config.canCreate" name="create-button">
+            <CrudFormModal
+              :open="openCreateModal"
+              :api="api"
+              :config="config"
+              :submit-label="config.createLabel"
+              @open="
+                (open: boolean) => {
+                  $emit('openCreate', open);
+                  if (!open && config.updateOnCreateModalOpen) {
+                    $emit('create');
+                  }
                 }
-              }
-            "
-            @submit="emit('create')"
-          />
-          <UButton
-            v-if="config.canCreate"
-            icon="i-lucide-plus"
-            @click="$emit('openCreate', true)"
-          />
+              "
+              @submit="emit('create')"
+            />
+            <UButton icon="i-lucide-plus" @click="$emit('openCreate', true)" />
+          </slot>
         </slot>
       </div>
     </div>

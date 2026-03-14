@@ -35,7 +35,7 @@ const items = ref([
     children: [
       {
         label: "OSINT",
-        icon: "i-lucide-globe",
+        icon: "i-lucide-rss",
         to: "/osint",
       },
       {
@@ -60,8 +60,8 @@ const items = ref([
 onMounted(() => {
   if (userStore.is_auditor) {
     items.value.push({
-      label: "Tooling",
-      icon: "i-lucide-terminal",
+      label: "Toolkit",
+      icon: "i-lucide-tool-case",
       defaultOpen: false,
       children: [
         {
