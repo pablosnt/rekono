@@ -18,6 +18,7 @@ import { h } from "vue";
 import type { CrudConfig, CrudTableColumn, FilterOption } from "~/types/crud";
 import type { Report } from "~/types/models";
 
+definePageMeta({ layout: "project" });
 const backend = useBackend();
 const api = useApi();
 const route = useRoute();

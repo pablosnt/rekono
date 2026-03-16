@@ -22,6 +22,7 @@ import type { CrudConfig, CrudTableColumn } from "~/types/crud";
 import { useUserStore } from "~/store/user";
 import type { Target } from "~/types/models";
 
+definePageMeta({ layout: "project" });
 const userStore = useUserStore();
 const route = useRoute();
 const backend = useBackend();

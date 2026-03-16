@@ -176,6 +176,7 @@
 import type { CrudConfig, CrudState } from "~/types/crud";
 
 const props = defineProps<{ config: CrudConfig }>();
+const emit = defineEmits<{ fetched: [items: any[]] }>();
 const api = useApi(props.config.endpoint);
 const tableRef = ref();
 const openCreateModal = ref(false);
@@ -210,6 +211,7 @@ function fetch() {
     .then((response: object) => {
       state.items = response.items;
       state.total = response.total;
+      emit("fetched", response.items);
     })
     .finally(() => {
       state.loading = false;

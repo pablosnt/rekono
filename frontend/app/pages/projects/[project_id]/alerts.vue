@@ -55,6 +55,7 @@ import type { CrudConfig } from "~/types/crud";
 import type { Alert } from "~/types/models";
 import { useUserStore } from "~/store/user";
 
+definePageMeta({ layout: "project" });
 const userStore = useUserStore();
 const api = useApi("/api/alerts/");
 const backend = useBackend();

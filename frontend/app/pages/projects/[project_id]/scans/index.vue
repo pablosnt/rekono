@@ -1,10 +1,9 @@
 <template>
-  <CrudPage ref="page" :config="config">
+  <CrudPage ref="page" :config="config" @fetched="onFetched">
     <template #create-button>
       <TasksButton :project="{ id: parseInt(route.params.project_id) }" />
     </template>
   </CrudPage>
-  <!-- TODO: If there is any Requested or Running task, refresh the page periodically -->
 </template>
 
 <script setup lang="ts">
@@ -13,18 +12,28 @@ import type { CrudConfig, CrudTableColumn, FilterOption } from "~/types/crud";
 import type { Task } from "~/types/models";
 import { useUserStore } from "~/store/user";
 
+definePageMeta({ layout: "project" });
 const userStore = useUserStore();
 const route = useRoute();
 const backend = useBackend();
 const utils = useUtils();
 const api = useApi("/api/tasks/");
 const page = ref();
-
+const refresh = ref<ReturnType<typeof setTimeout> | null>(null);
 const targetOptions = ref<FilterOption[]>([]);
 const executorOptions = ref<FilterOption[]>([]);
 const toolOptions = ref<FilterOption[]>([]);
 const configurationOptions = ref<FilterOption[]>([]);
 const processOptions = ref<FilterOption[]>([]);
+
+function onFetched(items: Task[]) {
+  if (items.some((task) => task.status === "Running" || task.status === "Requested")) {
+    refresh.value = setTimeout(() => { page.value?.fetch() }, 10000);
+  } else if (refresh.value) {
+    clearTimeout(refresh.value);
+    refresh.value = null;
+  }
+}
 
 onMounted(() => {
   backend.getTargetOptions(targetOptions, {
@@ -34,6 +43,12 @@ onMounted(() => {
   backend.getToolOptions(toolOptions);
   backend.getConfigurationOptions(configurationOptions, { ordering: "-tool" });
   backend.getProcessOptions(processOptions);
+});
+
+onUnmounted(() => {
+  if (refresh.value) {
+    clearInterval(refresh.value);
+  }
 });
 
 const config: CrudConfig<Task> = reactive({

@@ -1,5 +1,5 @@
 <template>
-  <PanelMain>
+  <PanelProject>
     <slot />
-  </PanelMain>
+  </PanelProject>
 </template>
