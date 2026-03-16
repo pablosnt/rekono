@@ -52,7 +52,7 @@
       @submit="(data) => updateSettings(selectedIntegration.id, data)"
     >
       <template #before-close="{ loading }">
-        <UtilsOkOrKo
+        <AvailabilityButton
           :ok="currentIntegrationSettings?.item?.is_available"
           :loading="loading"
         />

@@ -4,32 +4,32 @@
       v-model="stepper"
       :items="[
         {
-          title: 'Project',
-          description: 'Define project details',
-          icon: 'i-lucide-folder',
+          title: 'Process',
+          description: 'Define process details',
+          icon: 'i-lucide-workflow',
         },
         {
-          title: 'Targets',
-          description: 'Add targets to the project',
-          icon: 'i-lucide-locate-fixed',
+          title: 'Steps',
+          description: 'Configure process steps',
+          icon: 'i-lucide-play-circle',
         },
       ]"
-      :disabled="!project"
+      :disabled="!process"
     >
       <template #content="{ item }">
         <UContainer>
-          <template v-if="item.title === 'Project'">
+          <template v-if="item.title === 'Process'">
             <CrudForm
-              ref="projectFormRef"
+              ref="processFormRef"
               :api="api"
               :config="config"
-              :entity="project"
+              :entity="process || entity"
               @submit="
                 (data) => {
-                  project = data;
+                  process = data;
                   stepper = 1;
+                  $emit('new-submit-label', 'Save');
                   $emit('new-title', data.name);
-                  $emit('new-submit-label', 'Continue');
                   $emit('new-loading', false);
                 }
               "
@@ -39,14 +39,9 @@
             />
           </template>
           <template v-else>
-            <FormTarget
-              ref="targetFormRef"
-              :api="targetApi"
-              :entity="project"
-              @submit="(data) => $emit('submit', data.project)"
-              @new-submit-label="
-                (newSubmitLabel) => $emit('new-submit-label', newSubmitLabel)
-              "
+            <StepsForm
+              :process="process"
+              @new-loading="(newLoading) => $emit('new-loading', newLoading)"
             />
           </template>
         </UContainer>
@@ -58,12 +53,13 @@
 <script setup lang="ts">
 import type { CrudConfig } from "~/types/crud";
 
-defineProps<{
+const props = defineProps<{
   api: typeof useApi;
   config: CrudConfig;
   entity?: Record<string, unknown>;
 }>();
-defineEmits<{
+
+const emit = defineEmits<{
   submit: [data: Record<string, unknown>];
   "new-title": [newTitle: string];
   "new-submit-label": [newSubmitLabel: string];
@@ -71,17 +67,15 @@ defineEmits<{
   "validation-change": [isValid: boolean];
 }>();
 
-const targetApi = useApi("/api/targets/");
-const projectFormRef = ref();
-const targetFormRef = ref();
+const processFormRef = ref();
 const stepper = ref(0);
-const project = ref(null);
+const process = ref(props.entity || null);
 
-async function submit() {
+function submit() {
   if (stepper.value === 0) {
-    projectFormRef.value.submit();
+    processFormRef.value.submit();
   } else {
-    targetFormRef.value.submit();
+    emit("submit", process.value);
   }
 }
 

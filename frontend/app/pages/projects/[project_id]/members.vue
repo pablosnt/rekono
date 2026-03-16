@@ -62,7 +62,7 @@ const config: CrudConfig<User> = reactive({
   defaultOrdering: "-id",
   pageSize: 24,
   pageSizeOptions: [24, 50, 100],
-  createForm: resolveComponent("FormProjectMembers"),
+  createForm: resolveComponent("ProjectsMembersForm"),
   createLabel: "Add",
   deleteMessage: (user: User) => [
     {

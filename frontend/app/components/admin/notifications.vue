@@ -41,7 +41,7 @@
             <UIcon name="i-lucide-mail" class="text-xl text-neutral" />
           </template>
           <div class="absolute top-4 right-4">
-            <UtilsOkOrKo :ok="smtpSettings.is_available" />
+            <AvailabilityButton :ok="smtpSettings.is_available" />
           </div>
         </UPageCard>
         <UPageCard
@@ -68,7 +68,7 @@
           </template>
           <div class="absolute top-4 right-4">
             <div class="flex items-center gap-3">
-              <UtilsOkOrKo :ok="telegramSettings.is_available" />
+              <AvailabilityButton :ok="telegramSettings.is_available" />
               <UButton
                 v-if="telegramSettings.is_available"
                 icon="i-lucide-external-link"
@@ -111,7 +111,7 @@
         "
       >
         <template #before-close="{ loading }">
-          <UtilsOkOrKo
+          <AvailabilityButton
             :ok="selectedSettings?.is_available"
             :loading="loading"
           />

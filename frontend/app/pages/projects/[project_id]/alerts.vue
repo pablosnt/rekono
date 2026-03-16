@@ -97,8 +97,8 @@ const config: CrudConfig<Alert> = reactive({
   pageSize: 24,
   pageSizeOptions: [24, 50, 100],
   defaultBody: { project: route.params.project_id },
-  createForm: resolveComponent("FormAlert"),
-  editForm: resolveComponent("FormAlert"),
+  createForm: resolveComponent("AlertsForm"),
+  editForm: resolveComponent("AlertsForm"),
   deleteMessage: (alert: Alert) => [
     {
       component: h(

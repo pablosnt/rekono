@@ -70,7 +70,7 @@ const apiTokensConfig = ref({
         message: `Invalid expiration date`,
       }),
   }),
-  createForm: resolveComponent("FormApiToken"),
+  createForm: resolveComponent("ApiTokensForm"),
   updateOnCreateModalOpen: true,
   deleteMessage: (token: ApiToken) => [
     {

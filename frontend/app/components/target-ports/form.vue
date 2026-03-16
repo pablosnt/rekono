@@ -28,8 +28,8 @@
           />
         </template>
         <template v-else>
-          <FormAuthentication
-            ref="authenticationForm"
+          <AuthenticationsForm
+            ref="authenticationsForm"
             :entity="targetPort"
             :config="{
               endpoint: '/api/authentications/',
@@ -64,14 +64,14 @@ defineEmits<{
 
 const stepper = ref(0);
 const targetPortForm = ref();
-const authenticationForm = ref();
+const authenticationsForm = ref();
 const targetPort = ref();
 
 function submit() {
   if (stepper.value === 0) {
     targetPortForm.value.submit();
   } else {
-    authenticationForm.value.submit();
+    authenticationsForm.value.submit();
   }
 }
 
