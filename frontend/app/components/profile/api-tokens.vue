@@ -28,12 +28,10 @@ const apiTokensConfig = ref({
       accessorKey: "expiration",
       header: "Expiration",
       icon: "i-lucide-calendar",
-      cell: ({ row }) =>
-        h(
-          "span",
-          { class: "font-medium" },
-          new Date(row.getValue("expiration")).toDateString(),
-        ),
+      cell: ({ row }) => {
+        const expiration = row.getValue("expiration") as string;
+        return h("span", { class: "font-medium" }, expiration ? new Date(expiration).toDateString() : "—");
+      },
     },
   ] as CrudTableColumn<ApiToken>[],
   tableCopyId: false,

@@ -161,7 +161,7 @@ const config: CrudConfig<Report> = reactive({
       icon: "i-lucide-user",
       cell: ({ row }) => {
         const user = row.getValue("user") as Report["user"];
-        return user?.username ? `@${user.username}` : "";
+        return h("span", { class: "font-medium" }, user?.username ? `@${user.username}` : "—");
       },
     },
     {

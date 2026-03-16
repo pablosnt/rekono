@@ -95,7 +95,7 @@ const config: CrudConfig<TargetPort> = reactive({
       icon: "i-lucide-slash",
       cell: ({ row }) => {
         const path = row.getValue("path") as string;
-        return h("span", { class: "font-medium" }, path);
+        return h("span", { class: "font-medium" }, path ? path : "—");
       },
     },
     {

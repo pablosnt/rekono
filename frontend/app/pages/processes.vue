@@ -103,7 +103,7 @@ const config: CrudConfig<Process> = reactive({
       icon: "i-lucide-user",
       cell: ({ row }) => {
         const owner = row.getValue("owner") as Process["owner"];
-        return owner?.username ? `@${owner.username}` : "";
+        return h("span", { class: "font-medium" }, owner?.username ? `@${owner.username}` : "—");
       },
     },
     {
