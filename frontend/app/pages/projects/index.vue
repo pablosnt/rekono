@@ -69,7 +69,11 @@ const config: CrudConfig<Project> = reactive({
       icon: "i-lucide-user",
       cell: ({ row }) => {
         const owner = row.getValue("owner") as Project["owner"];
-        return h("span", { class: "font-medium" }, owner?.username ? `@${owner.username}` : "—");
+        return h(
+          "span",
+          { class: "font-medium" },
+          owner?.username ? `@${owner.username}` : "—",
+        );
       },
     },
   ] as CrudTableColumn<Project>[],
