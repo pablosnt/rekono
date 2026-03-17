@@ -30,6 +30,7 @@ export default function () {
     return parts.join(" ");
   }
 
+  // TODO: Replace by useTimeAgo https://ui.nuxt.com/docs/components/timeline#with-slots
   function formatRelativeDatetime(startDateString: string): string {
     const ms = new Date().getTime() - new Date(startDateString).getTime();
     const seconds = Math.floor(ms / 1000);

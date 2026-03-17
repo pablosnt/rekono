@@ -27,8 +27,14 @@ const configurationOptions = ref<FilterOption[]>([]);
 const processOptions = ref<FilterOption[]>([]);
 
 function onFetched(items: Task[]) {
-  if (items.some((task) => task.status === "Running" || task.status === "Requested")) {
-    refresh.value = setTimeout(() => { page.value?.fetch() }, 10000);
+  if (
+    items.some(
+      (task) => task.status === "Running" || task.status === "Requested"  || task.executions.length === 0,
+    )
+  ) {
+    refresh.value = setTimeout(() => {
+      page.value?.fetch();
+    }, 10000);
   } else if (refresh.value) {
     clearTimeout(refresh.value);
     refresh.value = null;
@@ -265,6 +271,8 @@ const config: CrudConfig<Task> = reactive({
     end: false,
     scheduled: false,
   },
+  itemLink: (item: Task) =>
+    `/projects/${route.params.project_id}/scans/${item.id}`,
   searchable: true,
   searchPlaceholder: "Search scans...",
   filters: [

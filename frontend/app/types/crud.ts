@@ -77,6 +77,7 @@ export interface CrudConfig<T = unknown> {
   entityName: string;
   entityNamePlural: string;
   headerIcon?: string;
+  headerHideTitle?: boolean;
   icon?: string;
   tableColumns?: CrudTableColumn<T>[];
   tableColumnsVisibility?: Record<string, boolean>;

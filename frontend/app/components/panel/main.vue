@@ -61,7 +61,7 @@ onMounted(() => {
   if (userStore.is_auditor) {
     items.value.push({
       label: "Toolkit",
-      icon: "i-lucide-tool-case",
+      icon: "i-lucide-toolbox",
       defaultOpen: false,
       children: [
         {

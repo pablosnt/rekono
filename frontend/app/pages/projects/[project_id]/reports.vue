@@ -119,7 +119,7 @@ const config: CrudConfig<Report> = reactive({
             default: () => [
               h(resolveComponent("UIcon"), {
                 name: statusConfig?.icon || "i-lucide-circle",
-                class: "w-3 h-3 mr-1",
+                class: "mr-1 text-lg",
               }),
               statusConfig?.label || status,
             ],
@@ -147,7 +147,7 @@ const config: CrudConfig<Report> = reactive({
             default: () => [
               h(resolveComponent("UIcon"), {
                 name: formatConfig?.icon || "i-lucide-file",
-                class: "w-3 h-3 mr-1",
+                class: "mr-1 text-lg",
               }),
               format.toUpperCase(),
             ],

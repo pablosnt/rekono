@@ -217,3 +217,26 @@ export interface Task {
   executions: number[];
   progress: number;
 }
+
+export interface Execution {
+  id: number;
+  configuration?: {
+    id: number;
+    name: string;
+    tool: { id: number; name: string; icon?: string };
+  };
+  output_plain?: string;
+  skipped_reason?: string;
+  has_report: boolean;
+  status: string;
+  start?: string;
+  end?: string;
+  osint: number[];
+  host: number[];
+  port: number[];
+  path: number[];
+  technology: number[];
+  credential: number[];
+  vulnerability: number[];
+  exploit: number[];
+}

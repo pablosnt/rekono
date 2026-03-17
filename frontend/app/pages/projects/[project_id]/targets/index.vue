@@ -84,7 +84,7 @@ const config: CrudConfig<Target> = reactive({
             default: () => [
               h(resolveComponent("UIcon"), {
                 name: typeConfig?.icon || "i-lucide-locate-fixed",
-                class: "w-3 h-3 mr-1",
+                class: "mr-1 text-lg",
               }),
               type,
             ],
