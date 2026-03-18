@@ -1,6 +1,5 @@
 <template>
   <div class="w-full">
-    <!-- TODO: Add scan's items to the breadcrum -->
     <!-- TODO: Here and on target, we are getting entity's data twice. We should find a way to solve it -->
     <UPageCard v-if="task" variant="naked" class="mb-10">
       <div class="flex flex-wrap items-center justify-between gap-4">
@@ -15,7 +14,9 @@
             <UIcon
               v-else
               :name="
-                task.process ? 'i-lucide-workflow' : 'i-lucide-square-terminal'
+                task.process
+                  ? 'i-lucide-workflow'
+                  : 'i-lucide-square-terminal'
               "
               class="text-xl text-highlighted text-primary"
             />
@@ -23,13 +24,17 @@
           <div class="min-w-0">
             <h1 class="text-xl font-bold font-mono tracking-tight truncate">
               {{
-                task.process ? task.process.name : task.configuration?.tool.name
+                task.process
+                  ? task.process.name
+                  : task.configuration?.tool.name
               }}
             </h1>
             <p v-if="task.configuration" class="text-sm text-muted">
               {{ task.configuration.name }}
             </p>
-            <p v-else-if="task.process" class="text-sm text-muted">Process</p>
+            <p v-else-if="task.process" class="text-sm text-muted">
+              Process
+            </p>
           </div>
         </div>
         <div class="flex items-center gap-2 flex-wrap">
@@ -50,8 +55,9 @@
           >
             <UIcon
               :name="
-                backend.executionStatuses.find((s) => s.value === task.status)
-                  .icon
+                backend.executionStatuses.find(
+                  (s) => s.value === task.status,
+                ).icon
               "
               class="text-lg"
             />
@@ -131,8 +137,9 @@
           >
             <UIcon
               :name="
-                backend.targetTypes.find((t) => t.value === task?.target.type)
-                  .icon
+                backend.targetTypes.find(
+                  (t) => t.value === task?.target.type,
+                ).icon
               "
             />
             <span
@@ -169,7 +176,9 @@
         </div>
         <div>
           <p class="text-xs text-muted uppercase tracking-wider mb-1.5">
-            {{ !task.start && task.scheduled_at ? "Scheduled" : "Started" }}
+            {{
+              !task.start && task.scheduled_at ? "Scheduled" : "Started"
+            }}
           </p>
           <p class="font-medium">
             {{
@@ -223,16 +232,6 @@
               { class: 'text-gray-900 dark:text-white font-medium' },
               'Are you sure you want to cancel this scan?',
             ),
-          },
-          {
-            component: resolveComponent('UAlert'),
-            props: {
-              color: 'neutral',
-              variant: 'subtle',
-              description: backend.getTaskName(task, true),
-              ui: { root: 'text-center font-bold' },
-              class: 'mt-4',
-            },
           },
         ],
         deleteVerb: 'Cancel',
@@ -331,7 +330,8 @@ const backend = useBackend();
 const utils = useUtils();
 const cancelOpen = ref(false);
 const reportOpen = ref(false);
-const task = ref<Task | null>(null);
+const task = ref<Task | null>();
+const currentTask = useState<Task | null>("currentTask", () => null);
 const outputOpen = ref(false);
 const selectedExecution = ref<Execution | null>(null);
 const executionsPage = ref();
@@ -346,25 +346,39 @@ function repeatScan() {
     );
 }
 
+function processTask(data?: Task) {
+  if (!data) return;
+  task.value = data;
+  currentTask.value = data;
+  if (
+    data.status === "Running" ||
+    data.status === "Requested" ||
+    data.executions.length === 0
+  ) {
+    if (refresh.value) clearTimeout(refresh.value);
+    refresh.value = setTimeout(() => {
+      fetchTask();
+      executionsPage.value?.fetch();
+    }, 10000);
+  }
+}
+
 function fetchTask() {
+  console.log("SCAN PAGE");
   tasksApi.get(`${route.params.scan_id}/`).then((response: Task) => {
-    task.value = response;
-    if (
-      response.status === "Running" ||
-      response.status === "Requested" ||
-      response.executions.length === 0
-    ) {
-      if (refresh.value) clearTimeout(refresh.value);
-      refresh.value = setTimeout(() => {
-        fetchTask();
-        executionsPage.value?.fetch();
-      }, 10000);
-    }
+    processTask(response);
   });
 }
 
 onMounted(() => {
-  fetchTask();
+  console.log("MOUNTED");
+  if (props.task) {
+    console.log("SCAN FROM PARENT");
+    processTask(props.task);
+  } else {
+    console.log("SCAN FROM FETCH");
+    fetchTask();
+  }
   backend.getToolOptions(toolOptions);
 });
 

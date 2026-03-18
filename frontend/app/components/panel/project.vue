@@ -56,7 +56,7 @@
         </template>
       </UBreadcrumb>
     </template>
-    <slot :project="projectEntity" />
+    <slot />
   </Panel>
 </template>
 
@@ -71,6 +71,7 @@ const backend = useBackend();
 const breadcrumb = ref([]);
 const items = ref([]);
 const projectEntity = ref({ name: "Rekono" });
+const currentTask = useState<Task | null>("currentTask", () => null);
 const allProjects = ref<Project[]>([]);
 
 function onProjectChange() {
@@ -224,6 +225,9 @@ function getProjectBreadcrum(project: Project) {
   if (route.params.target_id) {
     onTargetChange();
   }
+  if (route.params.scan_id) {
+    onScanChange();
+  }
 }
 
 function onTargetChange() {
@@ -272,6 +276,38 @@ function onTargetChange() {
     });
 }
 
+function onScanChange() {
+  if (!route.params.scan_id) {
+    if (breadcrumb.value.length > 3) {
+      breadcrumb.value = breadcrumb.value.slice(0, 3);
+    }
+    return;
+  }
+  if (breadcrumb.value.length > 3) {
+    breadcrumb.value = breadcrumb.value.slice(0, 4);
+  } else {
+    breadcrumb.value.push({
+      label: "Scans",
+      icon: "i-lucide-play",
+      to: `/projects/${route.params.project_id}/scans`,
+    });
+  }
+  breadcrumb.value.push({
+    label: currentTask.value?.process
+      ? currentTask.value.process.name
+      : currentTask.value?.configuration?.tool?.name,
+    icon: currentTask.value.process
+      ? "i-lucide-workflow"
+      : currentTask.value.configuration?.tool?.icon
+        ? undefined
+        : "i-lucide-square-terminal",
+    avatar: currentTask.value.configuration?.tool?.icon
+      ? { src: currentTask.value.configuration?.tool?.icon }
+      : undefined,
+    to: `/projects/${route.params.project_id}/scans/${route.params.scan_id}`,
+  });
+}
+
 watch(
   () => route.params.project_id,
   () => {
@@ -283,6 +319,13 @@ watch(
   () => route.params.target_id,
   () => {
     onTargetChange();
+  },
+);
+
+watch(
+  () => route.params.scan_id,
+  () => {
+    onScanChange();
   },
 );
 
