@@ -29,7 +29,10 @@ const processOptions = ref<FilterOption[]>([]);
 function onFetched(items: Task[]) {
   if (
     items.some(
-      (task) => task.status === "Running" || task.status === "Requested"  || task.executions.length === 0,
+      (task) =>
+        task.status === "Running" ||
+        task.status === "Requested" ||
+        task.executions.length === 0,
     )
   ) {
     refresh.value = setTimeout(() => {

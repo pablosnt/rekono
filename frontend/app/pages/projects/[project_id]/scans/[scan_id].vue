@@ -251,7 +251,12 @@
       only-modal
     />
 
-    <USlideover v-model:open="outputOpen" inset portal>
+    <USlideover
+      v-model:open="outputOpen"
+      inset
+      portal
+      :ui="{ content: 'sm:max-w-5xl' }"
+    >
       <template #header="{ close }">
         <div class="flex items-center gap-3">
           <div
@@ -301,9 +306,10 @@
         </div>
       </template>
       <template #body>
-        <!-- TODO: Make the body bigger -->
-        <!-- TODO: Format the plain_output text with a terminal style -->
-        <Placeholder class="w-300" />
+        <pre
+          class="font-mono text-sm whitespace-pre-wrap break-all bg-neutral-950 text-neutral-100 p-4 rounded-lg overflow-auto h-full leading-relaxed"
+          >{{ selectedExecution?.output_plain }}</pre
+        >
       </template>
     </USlideover>
   </div>
@@ -343,7 +349,11 @@ function repeatScan() {
 function fetchTask() {
   tasksApi.get(`${route.params.scan_id}/`).then((response: Task) => {
     task.value = response;
-    if (response.status === "Running" || response.status === "Requested" || response.executions.length === 0) {
+    if (
+      response.status === "Running" ||
+      response.status === "Requested" ||
+      response.executions.length === 0
+    ) {
       if (refresh.value) clearTimeout(refresh.value);
       refresh.value = setTimeout(() => {
         fetchTask();
