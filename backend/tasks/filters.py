@@ -4,14 +4,13 @@ Provides filtering capabilities for task API endpoints with support for
 project, tool, stage, and various time-based filtering operations.
 """
 
-from django.db.models import Q
 from django_filters.filters import ChoiceFilter, ModelChoiceFilter
-from framework.filters import MultipleModelFilter, MultipleFieldFilterSet
 
+from framework.filters import MultipleFieldFilterSet, MultipleModelFilter
 from projects.models import Project
 from tasks.models import Task
 from tools.enums import Stage
-from tools.models import Tool, Configuration
+from tools.models import Configuration, Tool
 
 
 class TaskFilter(MultipleFieldFilterSet):
@@ -29,8 +28,12 @@ class TaskFilter(MultipleFieldFilterSet):
     """
 
     project = ModelChoiceFilter(queryset=Project.objects.all(), field_name="target__project")
-    executed_configuration = MultipleModelFilter(queryset=Configuration.objects.all(), fields=["configuration", "process__steps__configuration"])
-    executed_tool = MultipleModelFilter(queryset=Tool.objects.all(), fields=["configuration__tool", "process__steps__configuration__tool"])
+    executed_configuration = MultipleModelFilter(
+        queryset=Configuration.objects.all(), fields=["configuration", "process__steps__configuration"]
+    )
+    executed_tool = MultipleModelFilter(
+        queryset=Tool.objects.all(), fields=["configuration__tool", "process__steps__configuration__tool"]
+    )
     tool = ModelChoiceFilter(queryset=Tool.objects.all(), field_name="configuration__tool")
     stage = ChoiceFilter(field_name="configuration__stage", choices=Stage.choices)
 

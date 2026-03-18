@@ -176,7 +176,7 @@
 import type { CrudConfig, CrudState } from "~/types/crud";
 
 const props = defineProps<{ config: CrudConfig }>();
-const emit = defineEmits<{ fetched: [items: any[]] }>();
+const emit = defineEmits<{ fetched: [items: unknown[]] }>();
 const api = useApi(props.config.endpoint);
 const tableRef = ref();
 const openCreateModal = ref(false);

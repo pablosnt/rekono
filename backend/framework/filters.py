@@ -8,7 +8,7 @@ from typing import Any
 
 from django.db.models import Q, QuerySet
 from django_filters.rest_framework import FilterSet
-from django_filters.rest_framework.filters import BooleanFilter, CharFilter, Filter, NumberFilter, ModelChoiceFilter
+from django_filters.rest_framework.filters import BooleanFilter, CharFilter, Filter, ModelChoiceFilter, NumberFilter
 
 
 class LikeFilter(FilterSet):
@@ -116,6 +116,7 @@ class MultipleCharFilter(MultipleFieldFilter, CharFilter):
     """
 
     pass
+
 
 class MultipleModelFilter(MultipleFieldFilter, ModelChoiceFilter):
     """Multiple field filter for model object values.

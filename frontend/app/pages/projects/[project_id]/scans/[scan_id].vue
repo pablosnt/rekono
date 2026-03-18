@@ -14,9 +14,7 @@
             <UIcon
               v-else
               :name="
-                task.process
-                  ? 'i-lucide-workflow'
-                  : 'i-lucide-square-terminal'
+                task.process ? 'i-lucide-workflow' : 'i-lucide-square-terminal'
               "
               class="text-xl text-highlighted text-primary"
             />
@@ -24,17 +22,13 @@
           <div class="min-w-0">
             <h1 class="text-xl font-bold font-mono tracking-tight truncate">
               {{
-                task.process
-                  ? task.process.name
-                  : task.configuration?.tool.name
+                task.process ? task.process.name : task.configuration?.tool.name
               }}
             </h1>
             <p v-if="task.configuration" class="text-sm text-muted">
               {{ task.configuration.name }}
             </p>
-            <p v-else-if="task.process" class="text-sm text-muted">
-              Process
-            </p>
+            <p v-else-if="task.process" class="text-sm text-muted">Process</p>
           </div>
         </div>
         <div class="flex items-center gap-2 flex-wrap">
@@ -55,9 +49,8 @@
           >
             <UIcon
               :name="
-                backend.executionStatuses.find(
-                  (s) => s.value === task.status,
-                ).icon
+                backend.executionStatuses.find((s) => s.value === task.status)
+                  .icon
               "
               class="text-lg"
             />
@@ -137,9 +130,8 @@
           >
             <UIcon
               :name="
-                backend.targetTypes.find(
-                  (t) => t.value === task?.target.type,
-                ).icon
+                backend.targetTypes.find((t) => t.value === task?.target.type)
+                  .icon
               "
             />
             <span
@@ -176,9 +168,7 @@
         </div>
         <div>
           <p class="text-xs text-muted uppercase tracking-wider mb-1.5">
-            {{
-              !task.start && task.scheduled_at ? "Scheduled" : "Started"
-            }}
+            {{ !task.start && task.scheduled_at ? "Scheduled" : "Started" }}
           </p>
           <p class="font-medium">
             {{
