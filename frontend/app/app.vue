@@ -1,4 +1,7 @@
-<script setup>
+<script setup lang="ts">
+const route = useRoute();
+const layout = computed(() => (route.meta.layout as string) ?? "default");
+
 useHead({
   meta: [{ name: "viewport", content: "width=device-width, initial-scale=1" }],
   link: [{ rel: "icon", href: "/favicon-light.ico" }],
@@ -25,10 +28,8 @@ useSeoMeta({
 
 <template>
   <UApp :toaster="{ position: 'bottom-right', expand: false }">
-    <NuxtLayout>
-      <UMain>
-        <NuxtPage />
-      </UMain>
+    <NuxtLayout :name="layout">
+      <NuxtPage />
     </NuxtLayout>
   </UApp>
 </template>
