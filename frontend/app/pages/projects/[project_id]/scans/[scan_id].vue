@@ -354,21 +354,13 @@ function processTask(data?: Task) {
 }
 
 function fetchTask() {
-  console.log("SCAN PAGE");
   tasksApi.get(`${route.params.scan_id}/`).then((response: Task) => {
     processTask(response);
   });
 }
 
 onMounted(() => {
-  console.log("MOUNTED");
-  if (props.task) {
-    console.log("SCAN FROM PARENT");
-    processTask(props.task);
-  } else {
-    console.log("SCAN FROM FETCH");
-    fetchTask();
-  }
+  fetchTask();
   backend.getToolOptions(toolOptions);
 });
 
