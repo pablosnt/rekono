@@ -1,5 +1,4 @@
 <template>
-  <!-- TODO: 15/0 jobs failed -->
   <CrudPage
     :config="{
       entityNamePlural: 'RQ queues',
@@ -40,38 +39,40 @@
           </div>
           <div class="flex flex-wrap justify-between">
             <UButton
+              v-if="queue.scheduled_jobs > 0"
               icon="i-lucide-calendar-check"
-              :label="`Scheduled: ${queue.scheduled_jobs}`"
+              :label="`Scheduled: ${queue.scheduled_jobs} jobs`"
               variant="ghost"
               color="neutral"
               size="sm"
               class="flex-1 min-w-fit"
             />
             <UButton
+              v-if="queue.deferred_jobs + queue.jobs > 0"
               icon="i-lucide-pause"
-              :label="`Waiting: ${queue.deferred_jobs}`"
+              :label="`Waiting: ${queue.deferred_jobs + queue.jobs} jobs`"
               variant="ghost"
               color="neutral"
               size="sm"
               class="flex-1 min-w-fit"
             />
-          </div>
-          <div class="text-center">
             <UButton
-              v-if="queue.failed_jobs > 0"
-              icon="i-lucide-x"
-              :label="`${queue.failed_jobs}/${queue.jobs} jobs failed`"
-              variant="ghost"
-              color="error"
-              size="sm"
-            />
-            <UButton
-              v-else-if="queue.finished_jobs > 0"
+              v-if="queue.finished_jobs > 0"
               icon="i-lucide-check"
-              :label="`${queue.finished_jobs} successful jobs`"
+              :label="`Succeed: ${queue.finished_jobs} jobs`"
               variant="ghost"
               color="success"
               size="sm"
+              class="flex-1 min-w-fit"
+            />
+            <UButton
+            v-if="queue.failed_jobs > 0"
+              icon="i-lucide-x"
+              :label="`Failed: ${queue.failed_jobs} jobs`"
+              variant="ghost"
+              color="error"
+              size="sm"
+              class="flex-1 min-w-fit"
             />
           </div>
           <div v-if="queue.name === 'monitor' && monitor">
