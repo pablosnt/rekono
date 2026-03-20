@@ -28,8 +28,10 @@ useSeoMeta({
 
 <template>
   <UApp :toaster="{ position: 'bottom-right', expand: false }">
-    <NuxtLayout :name="layout">
-      <NuxtPage />
+    <NuxtLayout :name="layout">ç
+      <UMain>
+        <NuxtPage />
+      </UMain>
     </NuxtLayout>
   </UApp>
 </template>
