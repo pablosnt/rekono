@@ -115,12 +115,13 @@ jobs:
             LABEL_VERSION=${{ github.event.release.name }}
             LABEL_REVISION=${{ github.sha }}
 
-      - name: Trivy
-        uses: aquasecurity/trivy-action@0.30.0
-        with:
-          image-ref: ${{ secrets.DOCKER_USER }}/${{ matrix.image }}:unstable
-          format: table
-          exit-code: 0
+      # TODO: Disabling Trivy for now due to their action compromise
+      # - name: Trivy
+      #   uses: aquasecurity/trivy-action@0.30.0
+      #   with:
+      #     image-ref: ${{ secrets.DOCKER_USER }}/${{ matrix.image }}:unstable
+      #     format: table
+      #     exit-code: 0
       
       - name: Dockle
         uses: goodwithtech/dockle-action@e30e6af832aad6ea7dca2a248d31a85eab6dbd68
