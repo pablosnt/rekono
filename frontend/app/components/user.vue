@@ -22,11 +22,11 @@
           <div>
             <p v-if="user.last_login">
               Last login
-              {{ utils.formatRelativeDatetime(user.last_login).toLowerCase() }}
+              {{ useTimeAgo(new Date(user.last_login)) }}
             </p>
             <p v-if="user.date_joined">
               Joined
-              {{ utils.formatRelativeDatetime(user.date_joined).toLowerCase() }}
+              {{ useTimeAgo(new Date(user.date_joined)) }}
             </p>
           </div>
         </template>
@@ -39,6 +39,7 @@
 <script setup lang="ts">
 import type { User } from "~/types/models";
 import { useUserStore } from "~/store/user";
+import { useTimeAgo } from '@vueuse/core'
 
 defineProps<{ user: User }>();
 const userStore = useUserStore();

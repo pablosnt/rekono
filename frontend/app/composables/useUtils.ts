@@ -30,34 +30,6 @@ export default function () {
     return parts.join(" ");
   }
 
-  // TODO: Replace by useTimeAgo https://ui.nuxt.com/docs/components/timeline#with-slots
-  function formatRelativeDatetime(startDateString: string): string {
-    const ms = new Date().getTime() - new Date(startDateString).getTime();
-    const seconds = Math.floor(ms / 1000);
-    const minutes = Math.floor(seconds / 60);
-    const hours = Math.floor(minutes / 60);
-    const days = Math.floor(hours / 24);
-    const weeks = Math.floor(days / 7);
-    const months = Math.floor(weeks / 30);
-    const years = Math.floor(months / 365);
-    const rtf = new Intl.RelativeTimeFormat("en", { numeric: "auto" });
-    if (Math.abs(years) >= 1) {
-      return rtf.format(-years, "year");
-    } else if (Math.abs(months) >= 1) {
-      return rtf.format(-months, "month");
-    } else if (Math.abs(weeks) >= 1) {
-      return rtf.format(-weeks, "week");
-    } else if (Math.abs(days) >= 1) {
-      return rtf.format(-days, "day");
-    } else if (Math.abs(hours) >= 1) {
-      return rtf.format(-hours, "hour");
-    } else if (Math.abs(minutes) >= 1) {
-      return rtf.format(-minutes, "minute");
-    } else {
-      return rtf.format(-seconds, "second");
-    }
-  }
-
   function smartLowerCase(text: string): string {
     return text.replace(
       /\b(?!API|HTTP|URL|JSON|XML|HTML|CSS|JS|TS|OSINT|CVE|IP)\w+/g,
@@ -65,11 +37,5 @@ export default function () {
     );
   }
 
-  return {
-    firstUpper,
-    truncateText,
-    duration,
-    formatRelativeDatetime,
-    smartLowerCase,
-  };
+  return { firstUpper, truncateText, duration, smartLowerCase };
 }

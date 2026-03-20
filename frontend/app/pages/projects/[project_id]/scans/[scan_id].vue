@@ -1,6 +1,5 @@
 <template>
   <div class="w-full">
-    <!-- TODO: Here and on target, we are getting entity's data twice. We should find a way to solve it -->
     <UPageCard v-if="task" variant="naked" class="mb-10">
       <div class="flex flex-wrap items-center justify-between gap-4">
         <div class="flex items-center gap-3">
@@ -115,7 +114,7 @@
           >
             <UButton icon="i-lucide-link" variant="solid" color="neutral" />
           </UDropdownMenu>
-          <!-- TODO: Links to OSINT, credentials, assets and vulnerabilities, at task and execution level -->
+          <!-- todo: Links (or custom finding's view) to OSINT, credentials, assets and vulnerabilities, at task and execution level -->
         </div>
       </div>
       <USeparator />

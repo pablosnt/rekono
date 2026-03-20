@@ -1,4 +1,5 @@
 <template>
+  <!-- TODO: 15/0 jobs failed -->
   <CrudPage
     :config="{
       entityNamePlural: 'RQ queues',
@@ -77,7 +78,7 @@
             <UFormField label="Monitor regularity in hours">
               <template v-if="monitor.last_monitor" #hint>
                 <UTooltip
-                  :text="`Last monitor was ${utils.formatRelativeDatetime(monitor.last_monitor)}`"
+                  :text="`Last monitor was ${useTimeAgo(new Date(monitor.last_monitor))}`"
                   :content="{
                     side: 'top',
                     sideOffset: 8,
@@ -111,6 +112,7 @@
 
 <script setup lang="ts">
 import { useUserStore } from "~/store/user";
+import { useTimeAgo } from '@vueuse/core'
 
 const api = useApi("/api/");
 const userStore = useUserStore();
