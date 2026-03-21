@@ -147,7 +147,7 @@ function switchVisibility(note: Note) {
       tags: note.tags,
       public: !note.public,
     })
-    .then((response) => {
+    .then(() => {
       note.public = !note.public;
     });
 }
