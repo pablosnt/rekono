@@ -66,7 +66,7 @@
               class="flex-1 min-w-fit"
             />
             <UButton
-            v-if="queue.failed_jobs > 0"
+              v-if="queue.failed_jobs > 0"
               icon="i-lucide-x"
               :label="`Failed: ${queue.failed_jobs} jobs`"
               variant="ghost"
@@ -113,7 +113,7 @@
 
 <script setup lang="ts">
 import { useUserStore } from "~/store/user";
-import { useTimeAgo } from '@vueuse/core'
+import { useTimeAgo } from "@vueuse/core";
 
 const api = useApi("/api/");
 const userStore = useUserStore();

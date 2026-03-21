@@ -100,7 +100,7 @@ function addTargetsFromInput() {
     } catch {
       toast.add({
         title: "Invalid target",
-        description: `Target '${target}' is not valid and has been discarded `,
+        description: `Target '${target}' is not valid and has been discarded`,
         color: "error",
       });
     }

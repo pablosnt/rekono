@@ -39,7 +39,7 @@
 <script setup lang="ts">
 import type { User } from "~/types/models";
 import { useUserStore } from "~/store/user";
-import { useTimeAgo } from '@vueuse/core'
+import { useTimeAgo } from "@vueuse/core";
 
 defineProps<{ user: User }>();
 const userStore = useUserStore();
