@@ -16,21 +16,28 @@
           :project="{ id: parseInt($route.params.project_id) }"
           :target="{ id: parseInt($route.params.target_id) }"
         />
-        <!-- todo: add entry for taking a note -->
         <UDropdownMenu
           v-if="userStore.is_auditor"
-          :items="[
-            {
-              label: 'Generate a report',
-              icon: 'i-lucide-file-text',
-              color: 'info',
-              onSelect: () => {
-                showReportModal = true;
+          :items="
+            [
+              {
+                label: 'Generate a report',
+                icon: 'i-lucide-file-text',
+                color: 'neutral',
+                onSelect: () => {
+                  showReportModal = true;
+                },
               },
-            },
-          ]"
+              {
+                label: 'Take a note',
+                icon: 'i-lucide-notebook',
+                color: 'neutral',
+                onSelect: () => notesButton.createNote(),
+              },
+            ].filter((i) => Object.keys(i).length > 0)
+          "
         >
-          <UButton icon="i-lucide-plus" variant="solid" color="info" />
+          <UButton icon="i-lucide-plus" variant="solid" color="neutral" />
         </UDropdownMenu>
         <UDropdownMenu
           v-if="
@@ -76,6 +83,10 @@
           :target-id="parseInt($route.params.target_id)"
           only-modal
         />
+        <NotesButton
+          ref="notesButton"
+          :target="parseInt($route.params.target_id)"
+        />
       </template>
     </CrudHeader>
     <div class="space-y-14">
@@ -101,6 +112,7 @@ const route = useRoute();
 const backend = useBackend();
 const api = useApi("/api/");
 const target = ref();
+const notesButton = ref();
 const showReportModal = ref(false);
 
 onMounted(() => {

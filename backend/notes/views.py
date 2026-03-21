@@ -134,7 +134,6 @@ class NoteViewSet(LikeViewSet):
                 project=note.project,
                 target=note.target,
                 task=note.task,
-                execution=note.execution,
                 osint=note.osint,
                 host=note.host,
                 port=note.port,

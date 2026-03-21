@@ -10,8 +10,13 @@
     </CrudPage>
     <ReportsButton
       v-model:open="showReportModal"
-      :target-id="selectedTargetForReport?.id"
+      :target-id="selectedTarget?.id"
       only-modal
+    />
+    <NotesButton
+      v-if="selectedTarget"
+      ref="notesButton"
+      :target="selectedTarget?.id"
     />
   </div>
 </template>
@@ -26,8 +31,9 @@ definePageMeta({ layout: "project" });
 const userStore = useUserStore();
 const route = useRoute();
 const backend = useBackend();
-const selectedTargetForReport = ref<Target | null>(null);
+const selectedTarget = ref<Target | null>(null);
 const showReportModal = ref(false);
+const notesButton = ref();
 
 function createTargetLink(targetId: string, count: number, path: string) {
   if (count === 0) {
@@ -205,20 +211,30 @@ const config: CrudConfig<Target> = reactive({
   canEdit: false,
   canCreate: userStore.is_auditor,
   canDelete: userStore.is_auditor,
-  // todo: add custom action to take notes on target
   customDropdownActions: (target: Target) => {
-    return target.tasks && target.tasks.length > 0 && userStore.is_auditor
+    return userStore.is_auditor
       ? [
+          target.tasks && target.tasks.length > 0
+            ? {
+                label: "Generate a report",
+                icon: "i-lucide-file-text",
+                color: "neutral",
+                onSelect: (target: Target) => {
+                  selectedTarget.value = target;
+                  showReportModal.value = true;
+                },
+              }
+            : {},
           {
-            label: "Generate a report",
-            icon: "i-lucide-file-text",
-            color: "info",
-            onSelect: (target: Target) => {
-              selectedTargetForReport.value = target;
-              showReportModal.value = true;
+            label: "Take a note",
+            icon: "i-lucide-notebook",
+            color: "neutral",
+            onSelect: () => {
+              selectedTarget.value = target;
+              notesButton.value.createNote();
             },
           },
-        ]
+        ].filter((i) => Object.keys(i).length > 0)
       : [];
   },
 });

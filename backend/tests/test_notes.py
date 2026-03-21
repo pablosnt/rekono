@@ -14,7 +14,6 @@ private_note = {
     "project": 1,
     "target": None,
     "task": None,
-    "execution": None,
     "osint": None,
     "host": None,
     "port": None,

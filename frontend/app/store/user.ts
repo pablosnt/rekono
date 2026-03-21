@@ -63,7 +63,7 @@ export const useUserStore = defineStore("user", {
         entity[field] !== null &&
         entity[field] !== undefined &&
         ((entity[field] as Record<string, number | unknown>).id as number) ===
-          this.user
+          parseInt(this.user)
       );
     },
   },

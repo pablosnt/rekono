@@ -229,8 +229,8 @@ const config: CrudConfig<Wordlist> = reactive({
   canRead: userStore.is_auditor,
   canCreate: userStore.is_auditor,
   canEdit: (wordlist: Wordlist) =>
-    userStore.is_admin || userStore.isOwner(wordlist, "owner"),
+    userStore.is_admin || userStore.isOwner(wordlist),
   canDelete: (wordlist: Wordlist) =>
-    userStore.is_admin || userStore.isOwner(wordlist, "owner"),
+    userStore.is_admin || userStore.isOwner(wordlist),
 });
 </script>

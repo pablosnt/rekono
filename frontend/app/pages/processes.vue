@@ -236,8 +236,8 @@ const config: CrudConfig<Process> = reactive({
   canRead: userStore.is_auditor,
   canCreate: userStore.is_auditor,
   canEdit: (process: Process) =>
-    userStore.is_admin || userStore.isOwner(process, "owner"),
+    userStore.is_admin || userStore.isOwner(process),
   canDelete: (process: Process) =>
-    userStore.is_admin || userStore.isOwner(process, "owner"),
+    userStore.is_admin || userStore.isOwner(process),
 });
 </script>

@@ -218,6 +218,33 @@ export interface Task {
   progress: number;
 }
 
+export interface Note {
+  id: number;
+  project: number;
+  target?: number;
+  task?: number;
+  osint?: number;
+  host?: number;
+  port?: number;
+  path?: number;
+  credential?: number;
+  technology?: number;
+  vulnerability?: number;
+  exploit?: number;
+  title: string;
+  body?: string;
+  tags: string[];
+  owner?: { id: number; username: string };
+  public: boolean;
+  forked: boolean;
+  forked_from?: number;
+  forks: number[];
+  created_at: string;
+  updated_at: string;
+  liked: boolean;
+  likes: number;
+}
+
 export interface Execution {
   id: number;
   configuration?: {

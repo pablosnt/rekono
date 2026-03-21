@@ -75,7 +75,6 @@ class NoteFilter(LikeFilter, MultipleFieldFilterSet):
             "project": ["exact"],
             "target": ["exact"],
             "task": ["exact"],
-            "execution": ["exact"],
             "osint": ["exact"],
             "host": ["exact"],
             "port": ["exact"],

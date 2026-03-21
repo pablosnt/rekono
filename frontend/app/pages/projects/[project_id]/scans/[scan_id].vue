@@ -73,21 +73,28 @@
               />
             </UTooltip>
           </template>
-          <!-- todo: add entry for taking a note -->
           <UDropdownMenu
             v-if="userStore.is_auditor"
-            :items="[
-              task.progress === 100
-                ? {
-                    label: 'Generate a report',
-                    icon: 'i-lucide-file-text',
-                    color: 'info',
-                    onSelect: () => (reportOpen = true),
-                  }
-                : {},
-            ]"
+            :items="
+              [
+                task.progress === 100
+                  ? {
+                      label: 'Generate a report',
+                      icon: 'i-lucide-file-text',
+                      color: 'neutral',
+                      onSelect: () => (reportOpen = true),
+                    }
+                  : {},
+                {
+                  label: 'Take a note',
+                  icon: 'i-lucide-notebook',
+                  color: 'neutral',
+                  onSelect: () => notesButton.createNote(),
+                },
+              ].filter((i) => Object.keys(i).length > 0)
+            "
           >
-            <UButton icon="i-lucide-plus" variant="solid" color="info" />
+            <UButton icon="i-lucide-plus" variant="solid" color="neutral" />
           </UDropdownMenu>
           <UDropdownMenu
             v-if="task.notes.length + task.reports.length > 0"
@@ -239,6 +246,8 @@
       only-modal
     />
 
+    <NotesButton v-if="task" ref="notesButton" :task="task.id" />
+
     <USlideover
       v-model:open="outputOpen"
       inset
@@ -324,6 +333,7 @@ const currentTask = useState<Task | null>("currentTask", () => null);
 const outputOpen = ref(false);
 const selectedExecution = ref<Execution | null>(null);
 const executionsPage = ref();
+const notesButton = ref();
 const refresh = ref<ReturnType<typeof setTimeout> | null>(null);
 const toolOptions = ref<FilterOption[]>([]);
 
