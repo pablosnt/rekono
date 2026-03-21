@@ -21,6 +21,7 @@
         <UTooltip
           :text="item.subscribed ? 'Unsubscribe' : 'Subscribe'"
           class="absolute top-4 right-4"
+          :content="{ side: 'left', sideOffset: 8, collisionPadding: 8 }"
         >
           <UButton
             variant="subtle"

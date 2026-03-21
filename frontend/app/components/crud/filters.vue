@@ -92,14 +92,7 @@
             :max="filter.max || 100"
             :step="filter.step || 1"
             :multiple="filter.multiple || false"
-            :tooltip="{
-              open: true,
-              content: {
-                side: 'bottom',
-                sideOffset: 8,
-                collisionPadding: 8,
-              },
-            }"
+            :tooltip="{ open: true }"
             @update:model-value="
               (value) => {
                 if (filter.multiple) {

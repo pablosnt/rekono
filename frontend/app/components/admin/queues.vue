@@ -79,7 +79,7 @@
             <UFormField label="Monitor regularity in hours">
               <template v-if="monitor.last_monitor" #hint>
                 <UTooltip
-                  :text="`Last monitor was ${useTimeAgo(new Date(monitor.last_monitor))}`"
+                  :text="`Last monitor was ${useTimeAgo(new Date(monitor.last_monitor)).value}`"
                   :content="{
                     side: 'top',
                     sideOffset: 8,

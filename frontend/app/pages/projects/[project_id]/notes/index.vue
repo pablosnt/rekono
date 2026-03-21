@@ -15,7 +15,6 @@
         "
       >
         <template #leading>
-          <!-- TODO: Review the position of the tooltip text everywhere -->
           <UTooltip
             :text="item.public ? 'Public' : 'Private'"
             :content="{ side: 'right', sideOffset: 8, collisionPadding: 8 }"

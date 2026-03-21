@@ -440,7 +440,10 @@ const config: CrudConfig<Execution> = reactive({
         const isRunning = execution.status === "Running";
         return h(
           resolveComponent("UTooltip"),
-          { text: execution.status },
+          {
+            text: execution.status,
+            content: { side: "left", sideOffset: 8, collisionPadding: 8 },
+          },
           {
             default: () =>
               h(resolveComponent("UButton"), {

@@ -1,6 +1,7 @@
 <template>
   <UTooltip
     :text="ok ? 'Available' : 'Not available. Change connection settings'"
+    :content="{ side: 'left', sideOffset: 8, collisionPadding: 8 }"
   >
     <UButton
       :color="ok ? 'success' : 'error'"

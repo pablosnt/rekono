@@ -6,7 +6,10 @@
           v-if="item.id.toString() !== userStore.user"
           class="flex justify-end"
         >
-          <UTooltip text="Delete member">
+          <UTooltip
+            text="Delete member"
+            :content="{ side: 'left', sideOffset: 8, collisionPadding: 8 }"
+          >
             <UButton
               icon="i-lucide-x"
               variant="subtle"
