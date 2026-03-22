@@ -200,6 +200,7 @@ export default function () {
         targetOptionsRef.value = (response.items as Target[]).map((target) => ({
           id: target.id,
           target: target.target,
+          icon: targetTypes.find((t) => t.value === target.type)?.icon,
         }));
       });
   }

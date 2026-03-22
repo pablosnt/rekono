@@ -277,44 +277,16 @@ const config: CrudConfig<Note> = reactive({
   useGrid: true,
   searchable: true,
   searchPlaceholder: "Search notes...",
-  // TODO: Test that all the new filters are loaded correctly and are working
   get filters() {
     return [
-      {
-        key: "tag",
-        label: "Tag",
-        icon: "i-lucide-tag",
-        type: "text" as const,
-      },
-      {
-        key: "owner",
-        label: "Owner",
-        icon: "i-lucide-user",
-        type: "select" as const,
-        options: userOptions,
-      },
-      {
-        key: "public",
-        label: "Public",
-        type: "checkbox" as const,
-      },
-      {
-        key: "is_fork",
-        label: "Forks",
-        type: "checkbox" as const,
-      },
-      {
-        key: "like",
-        label: "Favourites",
-        icon: "i-lucide-heart",
-        type: "checkbox" as const,
-      },
       {
         key: "related_target",
         label: "Target",
         icon: "i-lucide-locate-fixed",
         type: "select" as const,
         options: targetOptions,
+        valueKey: "id",
+        labelKey: "target",
       },
       {
         key: "related_task",
@@ -364,6 +336,35 @@ const config: CrudConfig<Note> = reactive({
         icon: "i-lucide-flame",
         type: "select" as const,
         options: exploitOptions,
+      },
+      {
+        key: "tag",
+        label: "Tag",
+        icon: "i-lucide-tag",
+        type: "text" as const,
+      },
+      {
+        key: "owner",
+        label: "Owner",
+        icon: "i-lucide-user",
+        type: "select" as const,
+        options: userOptions,
+      },
+      {
+        key: "public",
+        label: "Public",
+        type: "checkbox" as const,
+      },
+      {
+        key: "is_fork",
+        label: "Forks",
+        type: "checkbox" as const,
+      },
+      {
+        key: "like",
+        label: "Favourites",
+        icon: "i-lucide-heart",
+        type: "checkbox" as const,
       },
     ];
   },
@@ -432,6 +433,7 @@ onMounted(() => {
     return {
       label: port.host ? `${port.host?.ip}:${port.port}` : port.port.toString(),
       value: port.id,
+      icon: backend.getPortIcon(port.port, port.service),
     };
   });
   getFindingOptions("technologies/", technologyOptions, (technology) => {

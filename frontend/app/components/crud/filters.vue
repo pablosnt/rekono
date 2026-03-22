@@ -10,21 +10,11 @@
           :value-key="filter.valueKey || 'value'"
           :label-key="filter.labelKey || 'label'"
           class="w-64"
-          :avatar="
-            (Array.isArray(filter.options)
-              ? filter.options.find(
-                  (option: FilterOption) =>
-                    option.value === _filters[filter.key],
-                )?.avatar
-              : undefined) || filter.avatar
-          "
+          :avatar="getSelectConfig(filter)?.avatar"
           :icon="
-            (Array.isArray(filter.options)
-              ? filter.options.find(
-                  (option: FilterOption) =>
-                    option.value === _filters[filter.key],
-                )?.icon
-              : undefined) || filter.icon
+            getSelectConfig(filter)?.avatar
+              ? undefined
+              : getSelectConfig(filter)?.icon
           "
           leading
           @update:model-value="(value) => updateFilter(filter.key, value)"
@@ -121,7 +111,7 @@
 </template>
 
 <script setup lang="ts">
-import type { CrudConfig, CrudState } from "~/types/crud";
+import type { CrudConfig, CrudState, FilterConfig } from "~/types/crud";
 
 const props = defineProps<{
   config: CrudConfig;
@@ -133,6 +123,16 @@ const emit = defineEmits<{
 const _filters = ref(props.state.filters);
 const updating = [];
 let delayTimeout: NodeJS.Timeout | null = null;
+
+function getSelectConfig(filter: FilterConfig) {
+  return _filters.value[filter.key]
+    ? filter.options.find(
+        (option: FilterOption) =>
+          (filter.valueKey ? option[filter.valueKey] : option.value) ===
+          _filters.value[filter.key],
+      )
+    : filter;
+}
 
 function updateFilter(
   key: string,
