@@ -6,8 +6,11 @@ complex relationship filters, tag-based filtering, and fork detection.
 
 from django_filters.filters import BooleanFilter, CharFilter
 
-from framework.filters import LikeFilter, MultipleFieldFilterSet, MultipleNumberFilter
+from findings.models import Host, Port, Technology, Vulnerability
+from framework.filters import LikeFilter, MultipleFieldFilterSet, MultipleModelFilter
 from notes.models import Note
+from targets.models import Target
+from tasks.models import Task
 
 
 class NoteFilter(LikeFilter, MultipleFieldFilterSet):
@@ -17,8 +20,21 @@ class NoteFilter(LikeFilter, MultipleFieldFilterSet):
     relationship queries, tag filtering, and fork detection capabilities.
 
     Attributes:
-        related_target (MultipleNumberFilter): Complex target relationship filter
-        related_task (MultipleNumberFilter): Complex task relationship filter
+        related_target (MultipleModelFilter): Complex target relationship filter covering
+            direct target links and indirect paths through tasks and finding executions
+        related_task (MultipleModelFilter): Complex task relationship filter covering
+            direct task links and indirect paths through finding executions
+        related_host (MultipleModelFilter): Complex host relationship filter covering
+            direct host links and indirect paths through ports, paths, technologies,
+            vulnerabilities, and exploits
+        related_port (MultipleModelFilter): Complex port relationship filter covering
+            direct port links and indirect paths through paths, technologies,
+            vulnerabilities, and exploits
+        related_technology (MultipleModelFilter): Complex technology relationship filter
+            covering direct technology links and indirect paths through vulnerabilities
+            and exploits
+        related_vulnerability (MultipleModelFilter): Complex vulnerability relationship
+            filter covering direct vulnerability links and indirect paths through exploits
         tag (CharFilter): Tag name filter
         is_fork (BooleanFilter): Fork detection filter
     """
@@ -26,7 +42,8 @@ class NoteFilter(LikeFilter, MultipleFieldFilterSet):
     # Complex filter that searches for notes related to a target through
     # multiple relationship paths, including indirect relationships through
     # executions and tasks
-    related_target = MultipleNumberFilter(
+    related_target = MultipleModelFilter(
+        queryset=Target.objects.all(),
         fields=[
             "target",
             "task__target",
@@ -38,12 +55,13 @@ class NoteFilter(LikeFilter, MultipleFieldFilterSet):
             "technology__executions__task__target",
             "vulnerability__executions__task__target",
             "exploit__executions__task__target",
-        ]
+        ],
     )
     # Complex filter that searches for notes related to a task through
     # multiple relationship paths, including indirect relationships through
     # executions
-    related_task = MultipleNumberFilter(
+    related_task = MultipleModelFilter(
+        queryset=Task.objects.all(),
         fields=[
             "task",
             "osint__executions__task",
@@ -54,7 +72,58 @@ class NoteFilter(LikeFilter, MultipleFieldFilterSet):
             "technology__executions__task",
             "vulnerability__executions__task",
             "exploit__executions__task",
-        ]
+        ],
+    )
+    # Complex filter that searches for notes related to a host through
+    # multiple relationship paths, including indirect relationships through
+    # ports, paths, technologies, vulnerabilities, and exploits
+    related_host = MultipleModelFilter(
+        queryset=Host.objects.all(),
+        fields=[
+            "host",
+            "port__host",
+            "path__port__host",
+            "credential__technology__port__host",
+            "technology__port__host",
+            "vulnerability__port__host",
+            "vulnerability__technology__port__host",
+            "exploit__vulnerability__technology__port__host",
+            "exploit__technology__port__host",
+        ],
+    )
+    # Complex filter that searches for notes related to a port through
+    # multiple relationship paths, including indirect relationships through
+    # paths, technologies, vulnerabilities, and exploits
+    related_port = MultipleModelFilter(
+        queryset=Port.objects.all(),
+        fields=[
+            "port",
+            "path__port",
+            "credential__technology__port",
+            "technology__port",
+            "vulnerability__port",
+            "vulnerability__technology__port",
+            "exploit__vulnerability__technology__port",
+            "exploit__technology__port",
+        ],
+    )
+    # Complex filter that searches for notes related to a technology through
+    # multiple relationship paths, including indirect relationships through
+    # credentials, vulnerabilities and exploits
+    related_technology = MultipleModelFilter(
+        queryset=Technology.objects.all(),
+        fields=[
+            "technology",
+            "credential__technology",
+            "vulnerability__technology",
+            "exploit__vulnerability__technology",
+            "exploit__technology",
+        ],
+    )
+    # Complex filter that searches for notes related to a vulnerability through
+    # multiple relationship paths, including indirect relationships through exploits
+    related_vulnerability = MultipleModelFilter(
+        queryset=Vulnerability.objects.all(), fields=["vulnerability", "exploit__vulnerability"]
     )
     # Filter notes by tag names
     tag = CharFilter(field_name="tags__name")

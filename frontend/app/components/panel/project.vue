@@ -62,7 +62,7 @@
 
 <script setup lang="ts">
 import { useUserStore } from "~/store/user";
-import type { Project } from "~/types/models";
+import type { Note, Task, Project } from "~/types/models";
 
 const api = useApi();
 const route = useRoute();
@@ -72,6 +72,8 @@ const breadcrumb = ref([]);
 const items = ref([]);
 const projectEntity = ref({ name: "Rekono" });
 const currentTask = useState<Task | null>("currentTask", () => null);
+const currentNote = useState<Note | null>("currentNote", () => null);
+const mounting = ref(false);
 const allProjects = ref<Project[]>([]);
 
 function onProjectChange() {
@@ -222,30 +224,39 @@ function getProjectBreadcrum(project: Project) {
     to: `/projects/${project.id}`,
     children: children,
   });
-  if (route.params.target_id) {
-    onTargetChange();
+  if (mounting.value) {
+    if (route.params.target_id) onTargetChange();
+    if (route.params.scan_id) onScanChange();
+    if (route.params.note_id) onNoteChange();
   }
-  if (route.params.scan_id) {
-    onScanChange();
-  }
+  mounting.value = false;
 }
 
-function onTargetChange() {
-  if (!route.params.target_id) {
+function cleanSecondaryLinks(
+  entityId: number,
+  entitiesLink: Record<string, string>,
+): boolean {
+  if (!entityId) {
     if (breadcrumb.value.length > 3) {
       breadcrumb.value = breadcrumb.value.slice(0, 3);
     }
-    return;
+    return false;
   }
   if (breadcrumb.value.length > 3) {
     breadcrumb.value = breadcrumb.value.slice(0, 4);
   } else {
-    breadcrumb.value.push({
-      label: "Targets",
-      icon: "i-lucide-locate-fixed",
-      to: `/projects/${route.params.project_id}/targets`,
-    });
+    breadcrumb.value.push(entitiesLink);
   }
+  return true;
+}
+
+function onTargetChange() {
+  const conclusion = cleanSecondaryLinks(route.params.target_id, {
+    label: "Targets",
+    icon: "i-lucide-locate-fixed",
+    to: `/projects/${route.params.project_id}/targets`,
+  });
+  if (!conclusion) return;
   api
     .list("/api/targets/", { project: route.params.project_id }, true)
     .then((response) => {
@@ -277,21 +288,12 @@ function onTargetChange() {
 }
 
 function onScanChange() {
-  if (!route.params.scan_id) {
-    if (breadcrumb.value.length > 3) {
-      breadcrumb.value = breadcrumb.value.slice(0, 3);
-    }
-    return;
-  }
-  if (breadcrumb.value.length > 3) {
-    breadcrumb.value = breadcrumb.value.slice(0, 4);
-  } else {
-    breadcrumb.value.push({
-      label: "Scans",
-      icon: "i-lucide-play",
-      to: `/projects/${route.params.project_id}/scans`,
-    });
-  }
+  const conclusion = cleanSecondaryLinks(route.params.scan_id, {
+    label: "Scans",
+    icon: "i-lucide-play",
+    to: `/projects/${route.params.project_id}/scans`,
+  });
+  if (!conclusion) return;
   breadcrumb.value.push({
     label: currentTask.value?.process
       ? currentTask.value.process.name
@@ -308,28 +310,49 @@ function onScanChange() {
   });
 }
 
-watch(
-  () => route.params.project_id,
-  () => {
-    onProjectChange();
-  },
-);
+function onNoteChange() {
+  const conclusion = cleanSecondaryLinks(route.params.note_id, {
+    label: "Notes",
+    icon: "i-lucide-notebook",
+    to: `/projects/${route.params.project_id}/notes`,
+  });
+  if (!conclusion) return;
+  breadcrumb.value.push({
+    label: currentNote.value?.title,
+    to: `/projects/${route.params.project_id}/notes/${route.params.note_id}`,
+  });
+}
 
-watch(
-  () => route.params.target_id,
-  () => {
-    onTargetChange();
-  },
-);
+function watchIfNotMounting(callable: () => void) {
+  if (mounting.value) return;
+  callable();
+}
 
+function watchIfNotMountingOrNotId(entityId: number, callable: () => void) {
+  if (entityId) return;
+  watchIfNotMounting(callable);
+}
+
+watch(() => route.params.project_id, onProjectChange);
+watch(() => route.params.target_id, onTargetChange);
+watch(
+  () => currentTask.value,
+  () => watchIfNotMounting(onScanChange),
+);
 watch(
   () => route.params.scan_id,
-  () => {
-    onScanChange();
-  },
+  () => watchIfNotMountingOrNotId(route.params.scan_id, onScanChange),
 );
-
+watch(
+  () => currentNote.value,
+  () => watchIfNotMounting(onNoteChange),
+);
+watch(
+  () => route.params.note_id,
+  () => watchIfNotMountingOrNotId(route.params.note_id, onNoteChange),
+);
 onMounted(() => {
+  mounting.value = true;
   onProjectChange();
 });
 </script>

@@ -122,12 +122,31 @@ class HostSerializer(FindingSerializer):
         )
 
 
+class PortWithHostSerializer(PortSerializer):
+    """Serializer for network port findings with nested host data.
+
+    Extends PortSerializer to replace the host FK with a full nested
+    HostSerializer, used in contexts where host details are needed
+    alongside port information.
+
+    Attributes:
+        host (HostSerializer): Nested host object (read-only)
+    """
+
+    host = HostSerializer(many=False, read_only=True)
+
+
 class PathSerializer(FindingSerializer):
     """Serializer for web path findings.
 
     Handles JSON conversion for web path findings with endpoint
     and file share classification for web application analysis.
+
+    Attributes:
+        port (PortSerializer): Nested port relationship (read-only)
     """
+
+    port = PortSerializer(many=False, read_only=True)
 
     class Meta:
         """Meta configuration for PathSerializer.
@@ -193,10 +212,12 @@ class TechnologySerializer(FindingSerializer):
     credential relationship serialization for technology stack analysis.
 
     Attributes:
-        credential (CredentialSerializer): Nested credential relationships
+        credential (CredentialSerializer): Nested credential relationships (read-only)
+        port (PortWithHostSerializer): Nested port relationship (read-only)
     """
 
     credential = CredentialSerializer(many=True, read_only=True)
+    port = PortWithHostSerializer(many=False, read_only=True)
 
     class Meta:
         """Meta configuration for TechnologySerializer.
@@ -325,7 +346,12 @@ class ExploitSerializer(TriageFindingSerializer):
 
     Handles JSON conversion for exploit findings with read-only
     restrictions for exploit database references and links.
+
+    Attributes:
+        technology (TechnologySerializer): Nested technology relationship (read-only)
     """
+
+    technology = TechnologySerializer(many=False, read_only=True)
 
     class Meta:
         """Meta configuration for ExploitSerializer.
