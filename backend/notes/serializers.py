@@ -78,7 +78,7 @@ class NoteSerializer(TaggitSerializer, LikeSerializer):
     Attributes:
         owner (SimpleUserSerializer): Serialized user information for note owner
         tags (TagField): Tag field for note categorization
-        forked (SerializerMethodField): Whether current user has forked this note
+        forked (SerializerMethodField): Current user's fork of this note, if any
         target_id (PrimaryKeyRelatedField): Target ID for write operations (write-only)
         target (SimpleTargetSerializer): Target entity for read operations (read-only)
         task_id (PrimaryKeyRelatedField): Task ID for write operations (write-only)
@@ -223,16 +223,17 @@ class NoteSerializer(TaggitSerializer, LikeSerializer):
             "likes",
         )
 
-    def get_forked(self, instance: Any) -> bool:
+    def get_forked(self, instance: Any) -> int | None:
         """Check if the current user has forked this note.
 
         Args:
             instance (Note): The note instance being serialized
 
         Returns:
-            bool: True if the current user has forked this note, False otherwise
+            int | None: ID note of the current user's fork, if any
         """
-        return instance.forks.filter(owner=self.context.get("request").user).exists()
+        forks = instance.forks.filter(owner=self.context.get("request").user)
+        return forks.first().id if forks.exists() else None
 
     def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
         """Validate note data and ensure single entity association.

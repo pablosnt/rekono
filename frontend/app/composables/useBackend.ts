@@ -5,6 +5,7 @@ import type {
   Task,
   Tool,
   Configuration,
+  Note,
   Process,
 } from "~/types/models";
 import { useUserStore } from "~/store/user";
@@ -328,6 +329,100 @@ export default function () {
     return user.first_name ? user.first_name : user.username || user.email;
   }
 
+  function getNoteRelatedEntity(
+    note: Note,
+  ): Record<string, string | undefined> | null {
+    const route = useRoute();
+    const baseTo = `/projects/${route.params.project_id}/`;
+    for (const definition of [
+      {
+        entity: note.exploit,
+        to: note.exploit?.vulnerability
+          ? `${baseTo}vulnerabilities/${note.exploit?.vulnerability}`
+          : note.exploit?.technology?.port?.host?.id
+            ? `${baseTo}assets/${note.exploit?.technology?.port?.host?.id}`
+            : undefined,
+        label: note.exploit?.title,
+        icon: "i-lucide-flame",
+      },
+      {
+        entity: note.vulnerability,
+        to: `${baseTo}vulnerabilities/${note.vulnerability?.id}`,
+        label: note.vulnerability?.name,
+        icon: "i-lucide-bug",
+      },
+      // todo: We might have to include credentials on the technologies page, instead of on a custom view. If so, we can split the views on OSINT, Assets and Vulnerabilities
+      {
+        entity: note.credential,
+        to: `${baseTo}credentials/${note.credential?.id}`,
+        icon: "i-lucide-key",
+        label:
+          note.credential?.username ||
+          note.credential?.email ||
+          `#${note.credential?.id}`,
+      },
+      {
+        entity: note.technology,
+        to: note.technology?.port?.host?.id
+          ? `${baseTo}assets/${note.technology?.port?.host?.id}`
+          : undefined,
+        label: note.technology?.name,
+        icon: "i-lucide-code",
+      },
+      {
+        entity: note.path,
+        to: note.path?.port?.host?.id
+          ? `${baseTo}assets/${note.path?.port?.host?.id}`
+          : undefined,
+        label: note.path?.path,
+        icon: "i-lucide-slash",
+      },
+      {
+        entity: note.port,
+        to: `${baseTo}assets/${note.port?.host}`,
+        icon: "i-lucide-keethernet-porty",
+        label: `${note.port?.host?.ip}:${note.port?.port}`,
+      },
+      {
+        entity: note.host,
+        to: `${baseTo}assets/${note.host?.id}`,
+        icon: "i-lucide-server",
+        label: note.host?.ip,
+      },
+      {
+        entity: note.osint,
+        to: `${baseTo}osint/${note.osint?.id}`,
+        icon: "i-lucide-rss",
+        label: note.osint?.data,
+      },
+      {
+        entity: note.task,
+        to: `${baseTo}scans/${note.task?.id}`,
+        icon: "i-lucide-play",
+        label: note.task?.process
+          ? note.task.process.name
+          : note.task?.configuration?.tool.name,
+      },
+      {
+        entity: note.target,
+        to: `${baseTo}targets/${note.target?.id}`,
+        icon: note.target
+          ? targetTypes.find((t) => t.value === note.target?.type)?.icon
+          : "i-lucide-locate-fixed",
+        label: note.target?.target,
+      },
+    ]) {
+      if (definition.entity) {
+        return {
+          to: definition.to,
+          icon: definition.icon,
+          label: definition.label || "",
+        };
+      }
+    }
+    return null;
+  }
+
   return {
     alerts,
     stages,
@@ -350,5 +445,6 @@ export default function () {
     getTaskOptions,
     getPortIcon,
     getUserDisplayName,
+    getNoteRelatedEntity,
   };
 }

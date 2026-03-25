@@ -34,7 +34,7 @@ function createNote() {
       vulnerability_id: props.vulnerability,
       exploit_id: props.exploit,
       title: "Title",
-      body: "# Subtitle",
+      body: "",
       tags: [],
       public: false,
     })

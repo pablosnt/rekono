@@ -127,8 +127,12 @@ class NoteViewSet(LikeViewSet):
             are always created as public and belong to the requesting user.
         """
         note = self.get_object()
-        # Only allow forking of public notes that the user doesn't own
-        if note.public and note.owner.id != self.request.user.id:
+        # Only allow forking of public notes that the user doesn't own once
+        if (
+            note.public
+            and note.owner.id != self.request.user.id
+            and not note.forks.filter(owner=self.request.user).exists()
+        ):
             # Create a new note with all the same content and relationships
             fork = Note.objects.create(
                 project=note.project,

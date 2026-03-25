@@ -4,7 +4,9 @@
     :config="config"
     @fetched="
       (items) =>
-        items.forEach((item) => (item.related_entity = getRelatedEntity(item)))
+        items.forEach(
+          (item) => (item.related_entity = backend.getNoteRelatedEntity(item)),
+        )
     "
   >
     <template #create-button>
@@ -100,17 +102,24 @@
               v-else
               icon="i-lucide-git-fork"
               color="neutral"
-              variant="subtle"
+              :variant="item.forked ? 'solid' : 'subtle'"
               :label="`${item.forks.length} Forks`"
+              :to="
+                item.forked
+                  ? `/projects/${$route.params.project_id}/notes/${item.forked}`
+                  : undefined
+              "
               @click="
-                apiNotes.create(`${item.id}/fork/`, {}).then(() => {
-                  page.fetch();
-                  toast.add({
-                    title: 'Note Forked',
-                    description: `Note '${item.title}' has been forked`,
-                    color: 'success',
-                  });
-                })
+                item.forked
+                  ? undefined
+                  : apiNotes.create(`${item.id}/fork/`, {}).then(() => {
+                      page.fetch();
+                      toast.add({
+                        title: 'Note Forked',
+                        description: `Note '${item.title}' has been forked`,
+                        color: 'success',
+                      });
+                    })
               "
             />
           </template>
@@ -150,99 +159,6 @@ function getNoteDescription(note: Note): string {
   const created_ago = useTimeAgo(new Date(note.created_at)).value;
   const updated_ago = useTimeAgo(new Date(note.updated_at)).value;
   return `Created ${created_ago} by @${note.owner.username}${created_ago === updated_ago ? "" : `. Updated ${updated_ago}`}`;
-}
-
-function getRelatedEntity(
-  note: Note,
-): Record<string, string | undefined> | null {
-  const baseTo = `/projects/${route.params.project_id}/`;
-  for (const definition of [
-    {
-      entity: note.exploit,
-      to: note.exploit?.vulnerability
-        ? `${baseTo}vulnerabilities/${note.exploit?.vulnerability}`
-        : note.exploit?.technology?.port?.host?.id
-          ? `${baseTo}assets/${note.exploit?.technology?.port?.host?.id}`
-          : undefined,
-      label: note.exploit?.title,
-      icon: "i-lucide-flame",
-    },
-    {
-      entity: note.vulnerability,
-      to: `${baseTo}vulnerabilities/${note.vulnerability?.id}`,
-      label: note.vulnerability?.name,
-      icon: "i-lucide-bug",
-    },
-    // todo: We might have to include credentials on the technologies page, instead of on a custom view. If so, we can split the views on OSINT, Assets and Vulnerabilities
-    {
-      entity: note.credential,
-      to: `${baseTo}/credentials/${note.credential?.id}`,
-      icon: "i-lucide-key",
-      label:
-        note.credential?.username ||
-        note.credential?.email ||
-        `#${note.credential?.id}`,
-    },
-    {
-      entity: note.technology,
-      to: note.technology?.port?.host?.id
-        ? `${baseTo}assets/${note.technology?.port?.host?.id}`
-        : undefined,
-      label: note.technology?.name,
-      icon: "i-lucide-code",
-    },
-    {
-      entity: note.path,
-      to: note.path?.port?.host?.id
-        ? `${baseTo}assets/${note.path?.port?.host?.id}`
-        : undefined,
-      label: note.path?.path,
-      icon: "i-lucide-slash",
-    },
-    {
-      entity: note.port,
-      to: `${baseTo}/assets/${note.port?.host}`,
-      icon: "i-lucide-keethernet-porty",
-      label: `${note.port?.host?.ip}:${note.port?.port}`,
-    },
-    {
-      entity: note.host,
-      to: `${baseTo}/assets/${note.host?.id}`,
-      icon: "i-lucide-server",
-      label: note.host?.ip,
-    },
-    {
-      entity: note.osint,
-      to: `${baseTo}/osint/${note.osint?.id}`,
-      icon: "i-lucide-rss",
-      label: note.osint?.data,
-    },
-    {
-      entity: note.task,
-      to: `${baseTo}/scans/${note.task?.id}`,
-      icon: "i-lucide-play",
-      label: note.task?.process
-        ? note.task.process.name
-        : note.task?.configuration?.tool.name,
-    },
-    {
-      entity: note.target,
-      to: `${baseTo}/targets/${note.target?.id}`,
-      icon: note.target
-        ? backend.targetTypes.find((t) => t.value === note.target?.type)?.icon
-        : "i-lucide-locate-fixed",
-      label: note.target?.target,
-    },
-  ]) {
-    if (definition.entity) {
-      return {
-        to: definition.to,
-        icon: definition.icon,
-        label: definition.label || "",
-      };
-    }
-  }
-  return null;
 }
 
 function switchVisibility(note: Note) {
@@ -422,7 +338,7 @@ onMounted(() => {
   backend.getUserOptions(userOptions, { role: "Auditor", is_active: true });
   backend.getTargetOptions(targetOptions, { project: route.params.project_id });
   backend.getTaskOptions(taskOptions, { project: route.params.project_id });
-  // todo: Ellaborate options more with icons, avatars, etc and define types
+  // todo: Define types
   getFindingOptions("osint/", osintOptions, (osint) => {
     return { label: osint.data, value: osint.id };
   });

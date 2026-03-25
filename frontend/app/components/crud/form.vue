@@ -129,54 +129,14 @@
             v-model="formData[field.key] as any"
             :label="field.label"
           />
-          <template v-else-if="field.type === 'tags'">
-            <UInput
-              class="w-full"
-              :placeholder="
-                field.placeholder || 'Type and press Enter to add tag'
-              "
-              :icon="field.icon"
-              :size="field.size || 'lg'"
-              :disabled="field.disabled === true"
-              @keydown.enter.prevent="
-                (e: Event) => {
-                  const target = e.target as HTMLInputElement;
-                  const val = target.value.trim();
-                  if (val) {
-                    if (!formData[field.key]) formData[field.key] = [];
-                    if (!(formData[field.key] as string[]).includes(val)) {
-                      (formData[field.key] as string[]).push(val);
-                    }
-                    target.value = '';
-                  }
-                }
-              "
-            />
-            <div
-              v-if="
-                Array.isArray(formData[field.key]) &&
-                (formData[field.key] as string[]).length
-              "
-              class="flex flex-wrap gap-2 mt-2"
-            >
-              <UBadge
-                v-for="(tag, index) in formData[field.key] as string[]"
-                :key="index"
-                color="neutral"
-                variant="subtle"
-              >
-                {{ tag }}
-                <UButton
-                  icon="i-lucide-x"
-                  size="xs"
-                  color="neutral"
-                  variant="ghost"
-                  class="ml-1 -mr-1"
-                  @click="(formData[field.key] as string[]).splice(index, 1)"
-                />
-              </UBadge>
-            </div>
-          </template>
+          <CrudTagsForm
+            v-else-if="field.type === 'tags'"
+            v-model="formData[field.key] as string[]"
+            :placeholder="field.placeholder"
+            :icon="field.icon"
+            :size="field.size"
+            :disabled="field.disabled === true"
+          />
           <UFileUpload
             v-else-if="field.type === 'file'"
             v-model="formData[field.key]"
