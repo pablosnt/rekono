@@ -1,5 +1,6 @@
 <template>
   <div class="w-full">
+    <!-- TODO: outline better? -->
     <UPageCard v-if="task" variant="naked" class="mb-10">
       <div class="flex flex-wrap items-center justify-between gap-4">
         <div class="flex items-center gap-3">
@@ -56,7 +57,10 @@
             <span>{{ task.status }}</span>
           </UBadge>
           <template v-if="userStore.is_auditor">
-            <UTooltip v-if="task.progress !== 100" text="Cancel">
+            <UTooltip
+              v-if="task.status === 'Running' || task.status === 'Requested'"
+              text="Cancel"
+            >
               <UButton
                 icon="i-lucide-x"
                 color="error"
@@ -235,7 +239,10 @@
       }"
       :api="tasksApi"
       @open="(open) => (cancelOpen = open)"
-      @deleted="fetchTask()"
+      @deleted="
+        fetchTask();
+        executionsPage.fetch();
+      "
     />
 
     <ReportsButton
@@ -352,7 +359,7 @@ function processTask(data?: Task) {
   if (
     data.status === "Running" ||
     data.status === "Requested" ||
-    data.executions.length === 0
+    (data.executions.length === 0 && data.status !== "Cancelled")
   ) {
     if (refresh.value) clearTimeout(refresh.value);
     refresh.value = setTimeout(() => {

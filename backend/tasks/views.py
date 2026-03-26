@@ -114,11 +114,8 @@ class TaskViewSet(BaseViewSet):
             execution.status = Status.CANCELLED
             execution.end = timezone.now()
             execution.save(update_fields=["status", "end"])
-        if has_executions:
-            task.end = timezone.now()
-            task.save(update_fields=["end"])
-        else:
-            task.delete()
+        task.end = timezone.now()
+        task.save(update_fields=["end"])
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @extend_schema(request=None, responses={200: TaskSerializer})
