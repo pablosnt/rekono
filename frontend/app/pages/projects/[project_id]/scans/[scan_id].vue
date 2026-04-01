@@ -1,7 +1,6 @@
 <template>
   <div class="w-full">
-    <!-- TODO: outline better? -->
-    <UPageCard v-if="task" variant="naked" class="mb-10">
+    <UPageCard v-if="task" variant="outline" class="mb-10">
       <div class="flex flex-wrap items-center justify-between gap-4">
         <div class="flex items-center gap-3">
           <div
@@ -117,7 +116,7 @@
                       label: `${task.notes.length} Notes`,
                       icon: 'i-lucide-notebook',
                       color: 'neutral',
-                      to: `/projects/${$route.params.project_id}/notes?target=${task.target.id}&task=${task.id}`,
+                      to: `/projects/${$route.params.project_id}/notes?related_task=${task.id}`,
                     }
                   : {},
               ].filter((i) => Object.keys(i).length > 0)

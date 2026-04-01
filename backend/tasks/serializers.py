@@ -145,6 +145,8 @@ class TaskSerializer(RelatedNotesSerializer):
             return Status.COMPLETED
         if instance.executions.count() == 0 and instance.end:
             return Status.CANCELLED
+        if instance.executions.exclude(status=Status.REQUESTED).count() > 0:
+            return Status.RUNNING
         return Status.REQUESTED
 
     def get_progress(self, instance: Any) -> int:
