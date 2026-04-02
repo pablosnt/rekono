@@ -123,7 +123,29 @@ function onProjectChange() {
     {
       label: "Assets",
       icon: "i-lucide-server",
-      to: `/projects/${route.params.project_id}/assets`,
+      defaultOpen: true,
+      children: [
+        {
+          label: "Hosts",
+          icon: "i-lucide-server",
+          to: `/projects/${route.params.project_id}/hosts`,
+        },
+        {
+          label: "Ports",
+          icon: "i-lucide-ethernet-port",
+          to: `/projects/${route.params.project_id}/ports`,
+        },
+        {
+          label: "Technologies",
+          icon: "i-lucide-layers",
+          to: `/projects/${route.params.project_id}/technologies`,
+        },
+        {
+          label: "Paths",
+          icon: "i-lucide-slash",
+          to: `/projects/${route.params.project_id}/paths`,
+        },
+      ],
     },
     {
       label: "Findings",
@@ -144,6 +166,11 @@ function onProjectChange() {
           label: "Vulnerabilities",
           icon: "i-lucide-bug",
           to: `/projects/${route.params.project_id}/vulnerabilities`,
+        },
+        {
+          label: "Exploits",
+          icon: "i-lucide-flame",
+          to: `/projects/${route.params.project_id}/exploits`,
         },
       ],
     },
@@ -179,8 +206,29 @@ function onProjectChange() {
   api
     .list("hosts/", { project: route.params.project_id }, false, 1, 1)
     .then((response: object) => {
-      if (items.value[3]) {
-        items.value[3].badge = response.total.toString();
+      if (items.value[3]?.children?.[0]) {
+        items.value[3].children[0].badge = response.total.toString();
+      }
+    });
+  api
+    .list("ports/", { project: route.params.project_id }, false, 1, 1)
+    .then((response: object) => {
+      if (items.value[3]?.children?.[1]) {
+        items.value[3].children[1].badge = response.total.toString();
+      }
+    });
+  api
+    .list("technologies/", { project: route.params.project_id }, false, 1, 1)
+    .then((response: object) => {
+      if (items.value[3]?.children?.[2]) {
+        items.value[3].children[2].badge = response.total.toString();
+      }
+    });
+  api
+    .list("paths/", { project: route.params.project_id }, false, 1, 1)
+    .then((response: object) => {
+      if (items.value[3]?.children?.[3]) {
+        items.value[3].children[3].badge = response.total.toString();
       }
     });
   api
@@ -202,6 +250,13 @@ function onProjectChange() {
     .then((response: object) => {
       if (items.value[4]?.children?.[2]) {
         items.value[4].children[2].badge = response.total.toString();
+      }
+    });
+  api
+    .list("exploits/", { project: route.params.project_id }, false, 1, 1)
+    .then((response: object) => {
+      if (items.value[4]?.children?.[3]) {
+        items.value[4].children[3].badge = response.total.toString();
       }
     });
 }

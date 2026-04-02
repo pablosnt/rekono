@@ -58,6 +58,7 @@ class FindingSerializer(RelatedNotesSerializer):
         read_only_fields = (
             "id",
             "executions",
+            "is_fixed",
             "auto_fixed",
             "fixed_date",
             "fixed_by",

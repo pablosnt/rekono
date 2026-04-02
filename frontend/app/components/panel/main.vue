@@ -26,7 +26,29 @@ const items = ref([
   {
     label: "Assets",
     icon: "i-lucide-server",
-    to: "/assets",
+    defaultOpen: true,
+    children: [
+      {
+        label: "Hosts",
+        icon: "i-lucide-server",
+        to: "/hosts",
+      },
+      {
+        label: "Ports",
+        icon: "i-lucide-ethernet-port",
+        to: "/ports",
+      },
+      {
+        label: "Technologies",
+        icon: "i-lucide-layers",
+        to: "/technologies",
+      },
+      {
+        label: "Paths",
+        icon: "i-lucide-slash",
+        to: "/paths",
+      },
+    ],
   },
   {
     label: "Findings",
@@ -47,6 +69,11 @@ const items = ref([
         label: "Vulnerabilities",
         icon: "i-lucide-bug",
         to: "/vulnerabilities",
+      },
+      {
+        label: "Exploits",
+        icon: "i-lucide-flame",
+        to: "/exploits",
       },
     ],
   },
@@ -135,8 +162,23 @@ onMounted(() => {
     }
   });
   api.list("hosts/", {}, false, 1, 1).then((response: object) => {
-    if (items.value[2]) {
-      items.value[2].badge = response.total.toString();
+    if (items.value[2]?.children?.[0]) {
+      items.value[2].children[0].badge = response.total.toString();
+    }
+  });
+  api.list("ports/", {}, false, 1, 1).then((response: object) => {
+    if (items.value[2]?.children?.[1]) {
+      items.value[2].children[1].badge = response.total.toString();
+    }
+  });
+  api.list("technologies/", {}, false, 1, 1).then((response: object) => {
+    if (items.value[2]?.children?.[2]) {
+      items.value[2].children[2].badge = response.total.toString();
+    }
+  });
+  api.list("paths/", {}, false, 1, 1).then((response: object) => {
+    if (items.value[2]?.children?.[3]) {
+      items.value[2].children[3].badge = response.total.toString();
     }
   });
   api.list("osint/", {}, false, 1, 1).then((response: object) => {
@@ -152,6 +194,11 @@ onMounted(() => {
   api.list("vulnerabilities/", {}, false, 1, 1).then((response: object) => {
     if (items.value[3]?.children?.[2]) {
       items.value[3].children[2].badge = response.total.toString();
+    }
+  });
+  api.list("exploits/", {}, false, 1, 1).then((response: object) => {
+    if (items.value[3]?.children?.[3]) {
+      items.value[3].children[3].badge = response.total.toString();
     }
   });
 });

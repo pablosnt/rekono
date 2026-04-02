@@ -72,7 +72,7 @@ export default function () {
     { value: "OSINT", icon: "i-lucide-rss" },
     { value: "Host", icon: "i-lucide-server" },
     { value: "Port", icon: "i-lucide-ethernet-port" },
-    { value: "Path", icon: "i-lucide-route" },
+    { value: "Path", icon: "i-lucide-slash" },
     { value: "Technology", icon: "i-lucide-layers" },
     { value: "Credential", icon: "i-lucide-key" },
     { value: "Vulnerability", icon: "i-lucide-bug" },

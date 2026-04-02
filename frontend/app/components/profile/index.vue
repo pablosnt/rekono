@@ -1,4 +1,5 @@
 <template>
+  <!-- todo: the addition of telegram section is moving everything, not only the menu items, but also the logout button in the bottom -->
   <div class="flex flex-row h-180 overflow-hidden -mx-4 sm:-mx-6">
     <UDashboardSidebar class="md:w-48 flex flex-col ml-0" collapsible>
       <UNavigationMenu :items="items" orientation="vertical" />
