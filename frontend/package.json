@@ -1,5 +1,5 @@
 {
-  "name": "frontend-poc",
+  "name": "frontend",
   "private": true,
   "type": "module",
   "scripts": {
@@ -14,28 +14,34 @@
     "typecheck": "nuxt typecheck"
   },
   "dependencies": {
-    "@iconify-json/lucide": "^1.2.97",
-    "@iconify-json/simple-icons": "^1.2.55",
-    "@nuxt/ui": "^4.5.1",
+    "@iconify-json/lucide": "^1.2.101",
+    "@iconify-json/simple-icons": "^1.2.76",
+    "@nuxt/ui": "^4.6.0",
     "@pinia/nuxt": "0.11.3",
-    "@tiptap/extension-emoji": "^3.20.4",
-    "@tiptap/extension-text-align": "^3.20.4",
-    "@tiptap/pm": "^3.20.4",
-    "@tiptap/starter-kit": "^3.20.4",
-    "@tiptap/vue-3": "^3.20.4",
+    "@tiptap/core": "^3.22.1",
+    "@tiptap/extension-emoji": "^3.22.1",
+    "@tiptap/extension-table": "^3.22.1",
+    "@tiptap/extension-text-align": "^3.22.1",
+    "@tiptap/pm": "^3.22.1",
+    "@tiptap/starter-kit": "^3.22.1",
+    "@tiptap/vue-3": "^3.22.1",
+    "@tiptap/y-tiptap": "^3.0.2",
     "jwt-decode": "^4.0.0",
-    "nuxt": "^4.2.1",
-    "nuxt-qrcode": "^0.4.8",
-    "pinia": "^3.0.4"
+    "nuxt": "^4.4.2",
+    "nuxt-qrcode": "^0.4.10",
+    "pinia": "^3.0.4",
+    "shiki": "^4.0.2",
+    "tiptap-extension-code-block-shiki": "^1.1.0",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
-    "@nuxt/eslint": "^1.9.0",
-    "@types/node": "^25.0.3",
-    "eslint": "^9.38.0",
+    "@nuxt/eslint": "^1.15.2",
+    "@types/node": "^25.5.2",
+    "eslint": "^10.1.0",
     "eslint-config-prettier": "^10.1.8",
-    "prettier": "^3.6.2",
-    "typescript": "^5.9.3",
-    "vue-tsc": "^3.1.2"
+    "prettier": "^3.8.1",
+    "typescript": "^5.6.3",
+    "vue-tsc": "^3.2.6"
   },
-  "packageManager": "pnpm@10.19.0"
+  "packageManager": "pnpm@10.33.0"
 }

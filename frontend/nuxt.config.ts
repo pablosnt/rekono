@@ -22,6 +22,15 @@ export default defineNuxtConfig({
   compatibilityDate: "2025-01-15",
 
   vite: {
+    resolve: {
+      dedupe: [
+        "prosemirror-state",
+        "prosemirror-tables",
+        "prosemirror-model",
+        "prosemirror-view",
+        "prosemirror-transform",
+      ],
+    },
     server: {
       proxy:
         process.env.NODE_ENV === "development"
@@ -32,6 +41,16 @@ export default defineNuxtConfig({
               },
             }
           : {},
+    },
+    optimizeDeps: {
+      include: [
+        "@nuxt/ui > prosemirror-state",
+        "@nuxt/ui > prosemirror-tables",
+        "@nuxt/ui > prosemirror-transform",
+        "@nuxt/ui > prosemirror-model",
+        "@nuxt/ui > prosemirror-view",
+        "@nuxt/ui > prosemirror-gapcursor",
+      ],
     },
   },
 

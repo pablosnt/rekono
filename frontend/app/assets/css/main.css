@@ -16,3 +16,9 @@
   --color-green-900: #0a5331;
   --color-green-950: #052e16;
 }
+
+.dark .tiptap .shiki,
+.dark .tiptap .shiki span {
+  color: var(--shiki-dark) !important;
+  background-color: var(--shiki-dark-bg) !important;
+}

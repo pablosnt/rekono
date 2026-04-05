@@ -1,30 +1,28 @@
 <template>
   <UForm
     v-if="note"
-    ref="noteForm"
     class="space-y-4 p-3"
     :schema="schema"
     :state="noteState"
     :validate-on="['input', 'change']"
   >
     <div
-      class="flex flex-row flex-wrap items-center justify-between gap-4 w-full"
+      class="flex flex-row flex-wrap items-center justify-between w-full gap-2"
     >
-      <div class="flex flex-row justify-start items-center gap-4">
-        <UFormField name="title">
-          <UInput
-            v-model="note.title"
-            class="w-full min-w-64"
-            placeholder="Title"
-            required
-            type="text"
-            variant="ghost"
-            size="xl"
-            :disabled="!canEdit"
-            :ui="{ base: 'text-4xl font-bold' }"
-          />
-        </UFormField>
-      </div>
+      <UFormField name="title" class="flex-1 min-w-0">
+        <UInput
+          v-model="note.title"
+          class="w-full"
+          placeholder="Title"
+          required
+          type="text"
+          variant="ghost"
+          size="xl"
+          :disabled="!canEdit"
+          :ui="{ base: 'text-4xl font-bold' }"
+          @update:model-value="updateNote()"
+        />
+      </UFormField>
       <div class="flex flex-wrap items-center gap-3">
         <UButton
           v-if="note.related_entity"
@@ -51,7 +49,7 @@
           :to="`/projects/${$route.params.project_id}/notes/${note.forked_from}`"
         />
         <UButton
-          v-else-if="!canEdit"
+          v-else-if="!canEdit && userStore.is_auditor"
           icon="i-lucide-git-fork"
           color="neutral"
           variant="subtle"
@@ -86,13 +84,9 @@
           v-if="canEdit"
           :items="[
             {
-              label: note.public ? 'Make private' : 'Publish',
-              icon: note.public ? 'i-lucide-globe-lock' : 'i-lucide-globe',
-              color: note.public ? 'neutral' : 'warning',
-              onSelect: () => {
-                note.public = !note.public;
-                updateNote();
-              },
+              label: 'Copy link',
+              icon: 'i-lucide-copy',
+              onSelect: copyNoteLink,
             },
             {
               label: 'Delete',
@@ -118,193 +112,59 @@
         />
       </div>
     </div>
-    <UFormField v-if="canEdit" name="tags">
+    <div class="flex items-center gap-4 text-sm text-muted flex-wrap">
+      <span
+        v-if="!canEdit && note.updated_at"
+        class="flex items-center gap-1.5"
+      >
+        <UIcon name="i-lucide-clock-4" class="size-3 shrink-0" />
+        {{
+          new Date(note.updated_at).toLocaleString(undefined, {
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+          })
+        }}
+      </span>
+      <UButton
+        v-if="canEdit"
+        :label="note.public ? 'Public' : 'Private'"
+        :color="note.public ? 'warning' : 'neutral'"
+        :icon="note.public ? 'i-lucide-globe' : 'i-lucide-lock'"
+        variant="subtle"
+        size="xs"
+        @click="
+          note.public = !note.public;
+          updateNote();
+        "
+      />
+      <span v-else-if="note.owner?.username" class="flex items-center gap-1.5">
+        <UIcon name="i-lucide-user" class="size-3 shrink-0" />
+        {{ note.owner.username }}
+      </span>
+      <span v-if="note.body.length > 0" class="flex items-center gap-1.5">
+        <UIcon name="i-lucide-file-text" class="size-3 shrink-0" />
+        {{ note.body?.match(/[a-zA-Z0-9\u00C0-\u024F]+/g)?.length ?? 0 }} words
+      </span>
+      <CrudTags v-if="!canEdit && note.tags?.length" :tags="note.tags" />
+    </div>
+    <UFormField v-if="canEdit" class="mt-5" name="tags">
       <CrudTagsForm v-model="note.tags" @update:model-value="updateNote()" />
     </UFormField>
-    <CrudTags v-else class="ml-3" :tags="note.tags" />
-    <UEditor
-      v-slot="{ editor }"
+    <USeparator class="mb-6 mt-6" />
+    <NotesEditor
       v-model="note.body"
-      placeholder="Type / for commands..."
-      content-type="markdown"
-      :mention="false"
-      :editable="canEdit"
-      class="w-full"
-      :starter-kit="{
-        blockquote: true,
-        link: {
-          openOnClick: true,
-        },
-      }"
+      :entity-id="note.id"
+      :can-edit="canEdit"
       @update:model-value="updateNote"
-    >
-      <UEditorDragHandle :editor="editor" />
-      <!-- TODO: https://ui.nuxt.com/docs/components/editor-drag-handle#with-dropdown-menu -->
-      <!-- TODO: https://ui.nuxt.com/docs/components/editor-drag-handle#with-dropdown-menu -->
-      <UEditorEmojiMenu
-        :editor="editor"
-        :items="gitHubEmojis"
-        :append-to="appendToBody"
-      />
-      <UEditorSuggestionMenu
-        :editor="editor"
-        :items="[
-          [
-            { type: 'label', label: 'Text' },
-            { kind: 'paragraph', label: 'Paragraph', icon: 'i-lucide-type' },
-            {
-              kind: 'heading',
-              level: 1,
-              label: 'Heading 1',
-              icon: 'i-lucide-heading-1',
-            },
-            {
-              kind: 'heading',
-              level: 2,
-              label: 'Heading 2',
-              icon: 'i-lucide-heading-2',
-            },
-            {
-              kind: 'heading',
-              level: 3,
-              label: 'Heading 3',
-              icon: 'i-lucide-heading-3',
-            },
-            {
-              kind: 'heading',
-              level: 4,
-              label: 'Heading 4',
-              icon: 'i-lucide-heading-4',
-            },
-          ],
-          [
-            { type: 'label', label: 'Lists' },
-            {
-              kind: 'bulletList',
-              label: 'Bullet List',
-              icon: 'i-lucide-list',
-            },
-            {
-              kind: 'orderedList',
-              label: 'Numbered List',
-              icon: 'i-lucide-list-ordered',
-            },
-            {
-              kind: 'taskList',
-              label: 'To-Do List',
-              icon: 'i-lucide-list-todo',
-            },
-          ],
-          [
-            { type: 'label', label: 'Insert' },
-            { kind: 'imageUpload', icon: 'i-lucide-image', label: 'Image' },
-            {
-              kind: 'blockquote',
-              label: 'Blockquote',
-              icon: 'i-lucide-text-quote',
-            },
-            {
-              kind: 'codeBlock',
-              label: 'Code Block',
-              icon: 'i-lucide-square-code',
-            },
-            { kind: 'link', label: 'Link', icon: 'i-lucide-link' },
-            {
-              kind: 'horizontalRule',
-              label: 'Divider',
-              icon: 'i-lucide-separator-horizontal',
-            },
-          ],
-        ]"
-        :append-to="appendToBody"
-      />
-      <UEditorToolbar
-        :editor="editor"
-        :items="[
-          [
-            {
-              icon: 'i-lucide-text',
-              content: { align: 'start' },
-              items: [
-                {
-                  kind: 'paragraph',
-                  label: 'Paragraph',
-                  icon: 'i-lucide-type',
-                },
-                {
-                  kind: 'heading',
-                  level: 1,
-                  icon: 'i-lucide-heading-1',
-                  label: 'Heading 1',
-                },
-                {
-                  kind: 'heading',
-                  level: 2,
-                  icon: 'i-lucide-heading-2',
-                  label: 'Heading 2',
-                },
-                {
-                  kind: 'heading',
-                  level: 3,
-                  icon: 'i-lucide-heading-3',
-                  label: 'Heading 3',
-                },
-                {
-                  kind: 'heading',
-                  level: 4,
-                  icon: 'i-lucide-heading-4',
-                  label: 'Heading 4',
-                },
-              ],
-            },
-          ],
-          [
-            { kind: 'mark', mark: 'bold', icon: 'i-lucide-bold' },
-            { kind: 'mark', mark: 'italic', icon: 'i-lucide-italic' },
-            { kind: 'mark', mark: 'underline', icon: 'i-lucide-underline' },
-            { kind: 'mark', mark: 'strike', icon: 'i-lucide-strikethrough' },
-            { kind: 'mark', mark: 'code', icon: 'i-lucide-code' },
-          ],
-          [
-            { kind: 'textAlign', align: 'left', icon: 'i-lucide-align-left' },
-            {
-              kind: 'textAlign',
-              align: 'center',
-              icon: 'i-lucide-align-center',
-            },
-            {
-              kind: 'textAlign',
-              align: 'right',
-              icon: 'i-lucide-align-right',
-            },
-          ],
-          [
-            { kind: 'bulletList', icon: 'i-lucide-list' },
-            { kind: 'orderedList', icon: 'i-lucide-list-ordered' },
-            { kind: 'taskList', icon: 'i-lucide-list-todo' },
-          ],
-          [
-            { kind: 'imageUpload', icon: 'i-lucide-image' },
-            { kind: 'codeBlock', icon: 'i-lucide-file-code' },
-            { kind: 'mark', mark: 'link', icon: 'i-lucide-link' },
-          ],
-          [
-            { kind: 'undo', icon: 'i-lucide-undo' },
-            { kind: 'redo', icon: 'i-lucide-redo' },
-          ],
-        ]"
-        class="border border-muted py-2 px-8 sm:px-16 overflow-x-auto mb-5"
-      />
-      <!-- TODO: https://ui.nuxt.com/docs/components/editor-toolbar#items -->
-      <!-- TODO: https://ui.nuxt.com/docs/components/editor-toolbar#layout -->
-      <!-- TODO: https://ui.nuxt.com/docs/components/editor-toolbar#with-link-popover -->
-    </UEditor>
+    />
   </UForm>
 </template>
 
 <script setup lang="ts">
 import type { Note } from "~/types/models";
-import { gitHubEmojis } from "@tiptap/extension-emoji";
 import { useUserStore } from "~/store/user";
 import * as z from "zod";
 
@@ -318,7 +178,6 @@ const validation = useValidation();
 const note = ref();
 const canEdit = ref(false);
 const deleteOpen = ref(false);
-const noteForm = ref();
 const schema = z.object({
   title: validation.name("title"),
   tags: z.array(validation.name("tag", true, 100)).optional(),
@@ -352,7 +211,13 @@ const deleteConfig = {
   ],
 };
 const currentNote = useState<Note | null>("currentNote", () => null);
-const appendToBody = import.meta.client ? () => document.body : undefined;
+
+function copyNoteLink() {
+  navigator.clipboard.writeText(
+    `/projects/${route.params.project_id}/notes/${route.params.note_id}`,
+  );
+  toast.add({ title: "Link copied to clipboard", color: "success" });
+}
 
 function fetchNote() {
   api.get(`${route.params.note_id}/`).then((response) => {
