@@ -226,7 +226,7 @@ const config: CrudConfig<Target> = reactive({
               }
             : {},
           {
-            label: "Take a note",
+            label: "Take note",
             icon: "i-lucide-notebook",
             color: "neutral",
             onSelect: () => {

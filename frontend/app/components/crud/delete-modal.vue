@@ -65,12 +65,16 @@ function remove() {
     ? useApi("", true).remove(
         props.config.deleteEndpoint(props.item),
         {},
-        utils.firstUpper(props.config.entityName),
+        props.config.deleteVerb
+          ? undefined
+          : utils.firstUpper(props.config.entityName),
       )
     : props.api.remove(
         `${props.item.id}/`,
         {},
-        utils.firstUpper(props.config.entityName),
+        props.config.deleteVerb
+          ? undefined
+          : utils.firstUpper(props.config.entityName),
       )
   )
     .then(() => {

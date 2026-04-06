@@ -45,8 +45,12 @@ export default function () {
     return regex(field, required, max, /^[\wÀ-ÿ\s.:\-[\]()@]*$/);
   }
 
-  function text(field: string, required: boolean = true) {
-    return regex(field, required, undefined, /^[^;<>]*$/);
+  function text(
+    field: string,
+    required: boolean = true,
+    max: number | undefined = undefined,
+  ) {
+    return regex(field, required, max, /^[^;<>]*$/);
   }
 
   function cve(

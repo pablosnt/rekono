@@ -31,14 +31,19 @@ const utils = useUtils();
 const columns = computed(() => {
   const cols =
     props.config.tableColumns?.map((column: unknown) => {
-      return column.icon
+      return column.icon || column.avatar
         ? {
             ...column,
             header: h("div", { class: "flex items-center gap-1.5" }, [
-              h(UIcon, {
-                name: column.icon,
-                class: "w-4 h-4 text-gray-500 dark:text-gray-400",
-              }),
+              column.icon
+                ? h(UIcon, {
+                    name: column.icon,
+                    class: "w-4 h-4 text-gray-500 dark:text-gray-400",
+                  })
+                : h(resolveComponent("UAvatar"), {
+                    ...column.avatar,
+                    size: "3xs",
+                  }),
               h("span", column.header as string),
             ]),
           }

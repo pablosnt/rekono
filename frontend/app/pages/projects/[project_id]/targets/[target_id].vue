@@ -29,7 +29,7 @@
                 },
               },
               {
-                label: 'Take a note',
+                label: 'Take note',
                 icon: 'i-lucide-notebook',
                 color: 'neutral',
                 onSelect: () => notesButton.createNote(),

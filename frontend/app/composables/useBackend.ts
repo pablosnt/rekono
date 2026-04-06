@@ -79,6 +79,28 @@ export default function () {
     { value: "Exploit", icon: "i-lucide-flame" },
   ];
 
+  const triageStatuses = [
+    { value: "Untriaged", color: "neutral", icon: "i-lucide-circle-help" },
+    { value: "True Positive", color: "success", icon: "i-lucide-circle-alert" },
+    {
+      value: "False Positive",
+      color: "error",
+      icon: "i-lucide-circle-x",
+    },
+    { value: "Won't Fix", color: "warning", icon: "i-lucide-circle-minus" },
+  ];
+
+  const osintDataTypes = [
+    { value: "IP", icon: "i-lucide-server" },
+    { value: "Domain", icon: "i-lucide-globe" },
+    { value: "VHOST", icon: "i-lucide-globe" },
+    { value: "URL", icon: "i-lucide-link" },
+    { value: "Email", icon: "i-lucide-mail" },
+    { value: "ASN", icon: "i-lucide-network" },
+    { value: "Username", icon: "i-lucide-user" },
+    { value: "Password", icon: "i-lucide-key" },
+  ];
+
   const targetTypes = [
     { value: "Private IP", icon: "i-mdi-security-network" },
     { value: "Public IP", icon: "i-mdi-ip-network" },
@@ -433,6 +455,8 @@ export default function () {
     reportFormats,
     reportStatuses,
     findingTypes,
+    triageStatuses,
+    osintDataTypes,
     targetTypes,
     authenticationTypes,
     executionStatuses,

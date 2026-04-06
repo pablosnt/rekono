@@ -58,6 +58,7 @@ export interface FilterConfig {
 
 export type CrudTableColumn<T> = TableColumn<T> & {
   icon?: string;
+  avatar?: { src: string };
 };
 
 export interface DropdownAction<T = unknown> {
