@@ -50,7 +50,7 @@ class OSINTSerializer(TriageFindingSerializer):
         )
 
 
-class PortSerializer(FindingSerializer):
+class PortBaseSerializer(FindingSerializer):
     """Serializer for network port findings.
 
     Handles JSON conversion for network port findings with nested
@@ -81,7 +81,7 @@ class PortSerializer(FindingSerializer):
         )
 
 
-class HostSerializer(FindingSerializer):
+class HostBaseSerializer(FindingSerializer):
     """Serializer for network host findings.
 
     Handles JSON conversion for network host findings with nested
@@ -91,7 +91,7 @@ class HostSerializer(FindingSerializer):
         port (PortSerializer): Nested port relationships (read-only)
     """
 
-    port = PortSerializer(many=True, read_only=True)
+    # port = PortBaseSerializer(many=True, read_only=True)
 
     class Meta:
         """Meta configuration for HostSerializer.
@@ -122,7 +122,11 @@ class HostSerializer(FindingSerializer):
         )
 
 
-class PortWithHostSerializer(PortSerializer):
+class HostSerializer(HostBaseSerializer):
+    port = PortBaseSerializer(many=True, read_only=True)
+
+
+class PortSerializer(PortBaseSerializer):
     """Serializer for network port findings with nested host data.
 
     Extends PortSerializer to replace the host FK with a full nested
@@ -133,7 +137,7 @@ class PortWithHostSerializer(PortSerializer):
         host (HostSerializer): Nested host object (read-only)
     """
 
-    host = HostSerializer(many=False, read_only=True)
+    host = HostBaseSerializer(many=False, read_only=True)
 
 
 class PathSerializer(FindingSerializer):
@@ -169,7 +173,7 @@ class PathSerializer(FindingSerializer):
         )
 
 
-class CredentialSerializer(TriageFindingSerializer):
+class CredentialBaseSerializer(TriageFindingSerializer):
     """Serializer for credential findings.
 
     Handles JSON conversion for credential findings with read-only
@@ -213,11 +217,11 @@ class TechnologySerializer(FindingSerializer):
 
     Attributes:
         credential (CredentialSerializer): Nested credential relationships (read-only)
-        port (PortWithHostSerializer): Nested port relationship (read-only)
+        port (PortSerializer): Nested port relationship (read-only)
     """
 
-    credential = CredentialSerializer(many=True, read_only=True)
-    port = PortWithHostSerializer(many=False, read_only=True)
+    credential = CredentialBaseSerializer(many=True, read_only=True)
+    port = PortSerializer(many=False, read_only=True)
 
     class Meta:
         """Meta configuration for TechnologySerializer.
@@ -243,6 +247,10 @@ class TechnologySerializer(FindingSerializer):
         )
 
 
+class CredentialSerializer(CredentialBaseSerializer):
+    technology = TechnologySerializer(many=False, read_only=True)
+
+
 class VulnerabilitySerializer(TriageFindingSerializer):
     """Serializer for vulnerability findings.
 
@@ -253,6 +261,8 @@ class VulnerabilitySerializer(TriageFindingSerializer):
         severity (IntegerChoicesField): Severity level choice field
     """
 
+    port = PortSerializer(many=False, read_only=True)
+    technology = TechnologySerializer(many=False, read_only=True)
     severity = IntegerChoicesField(model=Severity, required=False)
 
     class Meta:
@@ -351,6 +361,7 @@ class ExploitSerializer(TriageFindingSerializer):
         technology (TechnologySerializer): Nested technology relationship (read-only)
     """
 
+    vulnerability = VulnerabilitySerializer(many=False, read_only=True)
     technology = TechnologySerializer(many=False, read_only=True)
 
     class Meta:

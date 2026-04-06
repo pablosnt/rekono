@@ -32,7 +32,7 @@ from findings.serializers import (
     HostSerializer,
     OSINTSerializer,
     PathSerializer,
-    PortWithHostSerializer,
+    PortSerializer,
     TechnologySerializer,
     VulnerabilitySerializer,
 )
@@ -88,7 +88,7 @@ class NoteSerializer(TaggitSerializer, LikeSerializer):
         host_id (PrimaryKeyRelatedField): Host ID for write operations (write-only)
         host (HostSerializer): Host entity for read operations (read-only)
         port_id (PrimaryKeyRelatedField): Port ID for write operations (write-only)
-        port (PortWithHostSerializer): Port entity for read operations (read-only)
+        port (PortSerializer): Port entity for read operations (read-only)
         path_id (PrimaryKeyRelatedField): Path ID for write operations (write-only)
         path (PathSerializer): Path entity for read operations (read-only)
         credential_id (PrimaryKeyRelatedField): Credential ID for write operations (write-only)
@@ -123,7 +123,7 @@ class NoteSerializer(TaggitSerializer, LikeSerializer):
     port_id = PrimaryKeyRelatedField(
         many=False, write_only=True, required=False, allow_null=True, source="port", queryset=Port.objects.all()
     )
-    port = PortWithHostSerializer(many=False, read_only=True)
+    port = PortSerializer(many=False, read_only=True)
     path_id = PrimaryKeyRelatedField(
         many=False, write_only=True, required=False, allow_null=True, source="path", queryset=Path.objects.all()
     )

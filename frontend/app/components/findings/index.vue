@@ -131,6 +131,7 @@ const config: CrudConfig<Finding> = reactive({
   entityName: props.entityName,
   entityNamePlural: props.entityNamePlural,
   icon: props.icon,
+  // TODO: Get project_id per finding from the backend, so we only maintain one finding page per project in the frontend. Adapt the links to the related findings in existing finding pages
   itemLink: (finding: Finding) =>
     route.params.project_id
       ? `/projects/${route.params.project_id}/${props.entityNamePlural.toLowerCase()}/${finding.id}`

@@ -16,7 +16,7 @@
       },
     ]"
     :ordering="['id', 'data', ('data_type', 'Type'), 'source']"
-    :is-triageable="true"
+    is-triageable
     :extra-dropdown-actions="
       (item: Finding) =>
         ['IP', 'Domain'].includes(item.data_type)
