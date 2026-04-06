@@ -131,6 +131,10 @@ const config: CrudConfig<Finding> = reactive({
   entityName: props.entityName,
   entityNamePlural: props.entityNamePlural,
   icon: props.icon,
+  itemLink: (finding: Finding) =>
+    route.params.project_id
+      ? `/projects/${route.params.project_id}/${props.entityNamePlural.toLowerCase()}/${finding.id}`
+      : `/${props.entityNamePlural.toLowerCase()}/${finding.id}`,
   tableColumns: [
     {
       accessorKey: "id",
