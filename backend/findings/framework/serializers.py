@@ -8,13 +8,13 @@ with standardized functionality for execution history and status tracking.
 from typing import Any
 
 from django.utils import timezone
+from rest_framework.serializers import SerializerMethodField
 
-from findings.framework.models import Finding
 from executions.serializers import SimpleExecutionSerializer
+from findings.framework.models import Finding
 from findings.models import OSINT, Host
 from framework.serializers import RelatedNotesSerializer
 from users.serializers import SimpleUserSerializer
-from rest_framework.serializers import SerializerMethodField
 
 
 class FindingSerializer(RelatedNotesSerializer):
@@ -72,7 +72,7 @@ class FindingSerializer(RelatedNotesSerializer):
             "created_from_user_input",
             "notes",
         )
-    
+
     def get_project(self, instance: Finding) -> int:
         """Return the ID of the project the finding belongs to.
 

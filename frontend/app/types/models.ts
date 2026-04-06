@@ -312,6 +312,7 @@ export interface Execution {
 
 export interface Finding {
   id: number;
+  project: number;
   executions: Execution[];
   is_fixed: boolean;
   auto_fixed: boolean;
