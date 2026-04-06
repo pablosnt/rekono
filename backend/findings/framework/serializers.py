@@ -9,10 +9,12 @@ from typing import Any
 
 from django.utils import timezone
 
+from findings.framework.models import Finding
 from executions.serializers import SimpleExecutionSerializer
 from findings.models import OSINT, Host
 from framework.serializers import RelatedNotesSerializer
 from users.serializers import SimpleUserSerializer
+from rest_framework.serializers import SerializerMethodField
 
 
 class FindingSerializer(RelatedNotesSerializer):
@@ -23,10 +25,12 @@ class FindingSerializer(RelatedNotesSerializer):
     proper field restrictions and nested relationships.
 
     Attributes:
+        project (SerializerMethodField): Project ID the finding belongs to (read-only)
         executions (SimpleExecutionSerializer): Nested execution history (read-only)
         fixed_by (SimpleUserSerializer): User who fixed the finding (read-only)
     """
 
+    project = SerializerMethodField(read_only=True)
     executions = SimpleExecutionSerializer(many=True, read_only=True)
     fixed_by = SimpleUserSerializer(many=False, read_only=True)
 
@@ -45,6 +49,7 @@ class FindingSerializer(RelatedNotesSerializer):
         model = Host  # It's needed to define a non-abstract model as default. It will be overwritten
         fields = (
             "id",
+            "project",
             "executions",
             "is_fixed",
             "auto_fixed",
@@ -67,6 +72,17 @@ class FindingSerializer(RelatedNotesSerializer):
             "created_from_user_input",
             "notes",
         )
+    
+    def get_project(self, instance: Finding) -> int:
+        """Return the ID of the project the finding belongs to.
+
+        Args:
+            instance (Finding): The finding instance being serialized.
+
+        Returns:
+            int: The ID of the parent project.
+        """
+        return instance.parent_project.id
 
 
 class TriageFindingSerializer(FindingSerializer):

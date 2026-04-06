@@ -4,10 +4,7 @@
     <CrudPage ref="page" :config="config">
       <template #actions="{ item }">
         <UDropdownMenu
-          v-if="
-            $route.params.project_id &&
-            (userStore.is_auditor || item.notes.length > 0)
-          "
+          v-if="userStore.is_auditor || item.notes.length > 0"
           :items="
             [
               item.notes.length > 0
@@ -15,7 +12,7 @@
                     label: `${item.notes.length} Notes`,
                     icon: 'i-lucide-notebook',
                     color: 'neutral',
-                    to: `/projects/${$route.params.project_id}/notes?${entityNamePlural.toLowerCase()}=${item.id}`,
+                    to: `/projects/${item.project}/notes?${entityNamePlural.toLowerCase()}=${item.id}`,
                   }
                 : {},
               userStore.is_auditor
@@ -131,11 +128,7 @@ const config: CrudConfig<Finding> = reactive({
   entityName: props.entityName,
   entityNamePlural: props.entityNamePlural,
   icon: props.icon,
-  // TODO: Get project_id per finding from the backend, so we only maintain one finding page per project in the frontend. Adapt the links to the related findings in existing finding pages
-  itemLink: (finding: Finding) =>
-    route.params.project_id
-      ? `/projects/${route.params.project_id}/${props.entityNamePlural.toLowerCase()}/${finding.id}`
-      : `/${props.entityNamePlural.toLowerCase()}/${finding.id}`,
+  itemLink: (finding: Finding) => `/projects/${finding.project}/${props.entityNamePlural.toLowerCase()}/${finding.id}`,
   tableColumns: [
     {
       accessorKey: "id",

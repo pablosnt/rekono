@@ -58,7 +58,7 @@ class PortBaseSerializer(FindingSerializer):
     """
 
     class Meta:
-        """Meta configuration for PortSerializer.
+        """Meta configuration for PortBaseSerializer.
 
         Defines field inclusion for port findings serialization
         with nested relationships for complete port information.
@@ -84,17 +84,13 @@ class PortBaseSerializer(FindingSerializer):
 class HostBaseSerializer(FindingSerializer):
     """Serializer for network host findings.
 
-    Handles JSON conversion for network host findings with nested
-    port relationship serialization for complete host inventory.
-
-    Attributes:
-        port (PortSerializer): Nested port relationships (read-only)
+    Handles JSON conversion for network host findings for complete
+    host inventory. Does not include nested port data; use HostSerializer
+    when port relationships are needed.
     """
 
-    # port = PortBaseSerializer(many=True, read_only=True)
-
     class Meta:
-        """Meta configuration for HostSerializer.
+        """Meta configuration for HostBaseSerializer.
 
         Defines field inclusion for host findings serialization
         including geolocation and nested port relationships.
@@ -123,18 +119,27 @@ class HostBaseSerializer(FindingSerializer):
 
 
 class HostSerializer(HostBaseSerializer):
+    """Serializer for network host findings with nested port data.
+
+    Extends HostBaseSerializer to include nested port relationships
+    for complete host inventory with all associated ports.
+
+    Attributes:
+        port (PortBaseSerializer): Nested port relationships (read-only)
+    """
+
     port = PortBaseSerializer(many=True, read_only=True)
 
 
 class PortSerializer(PortBaseSerializer):
     """Serializer for network port findings with nested host data.
 
-    Extends PortSerializer to replace the host FK with a full nested
-    HostSerializer, used in contexts where host details are needed
+    Extends PortBaseSerializer to replace the host FK with a full nested
+    HostBaseSerializer, used in contexts where host details are needed
     alongside port information.
 
     Attributes:
-        host (HostSerializer): Nested host object (read-only)
+        host (HostBaseSerializer): Nested host object (read-only)
     """
 
     host = HostBaseSerializer(many=False, read_only=True)
@@ -177,11 +182,13 @@ class CredentialBaseSerializer(TriageFindingSerializer):
     """Serializer for credential findings.
 
     Handles JSON conversion for credential findings with read-only
-    restrictions for sensitive authentication data protection.
+    restrictions for sensitive authentication data protection. Does not
+    include nested technology data; use CredentialSerializer when the
+    related technology is needed.
     """
 
     class Meta:
-        """Meta configuration for CredentialSerializer.
+        """Meta configuration for CredentialBaseSerializer.
 
         Defines field inclusion and read-only restrictions for credential
         findings to prevent unauthorized modification of sensitive data.
@@ -248,6 +255,15 @@ class TechnologySerializer(FindingSerializer):
 
 
 class CredentialSerializer(CredentialBaseSerializer):
+    """Serializer for credential findings with nested technology data.
+
+    Extends CredentialBaseSerializer to include the related technology
+    for contexts where technology details are needed alongside credentials.
+
+    Attributes:
+        technology (TechnologySerializer): Nested technology object (read-only)
+    """
+
     technology = TechnologySerializer(many=False, read_only=True)
 
 
@@ -258,6 +274,8 @@ class VulnerabilitySerializer(TriageFindingSerializer):
     field handling and automatic exploit triage on status updates.
 
     Attributes:
+        port (PortSerializer): Nested port relationship (read-only)
+        technology (TechnologySerializer): Nested technology relationship (read-only)
         severity (IntegerChoicesField): Severity level choice field
     """
 
@@ -358,6 +376,7 @@ class ExploitSerializer(TriageFindingSerializer):
     restrictions for exploit database references and links.
 
     Attributes:
+        vulnerability (VulnerabilitySerializer): Nested vulnerability relationship (read-only)
         technology (TechnologySerializer): Nested technology relationship (read-only)
     """
 

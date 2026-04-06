@@ -5,6 +5,7 @@
 <script setup lang="ts">
 const props = defineProps<{
   show?: boolean;
+  project?: number;
   target?: number;
   task?: number;
   osint?: number;
@@ -22,7 +23,7 @@ const route = useRoute();
 function createNote() {
   api
     .create("", {
-      project: route.params.project_id,
+      project: props.project || route.params.project_id,
       target_id: props.target,
       task_id: props.task,
       osint_id: props.osint,
