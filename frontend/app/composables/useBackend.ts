@@ -10,6 +10,8 @@ import type {
 } from "~/types/models";
 import { useUserStore } from "~/store/user";
 
+// TODO: We have to split this in different composables. It's not sustainable
+
 export default function () {
   const alerts = [
     { item: "OSINT", icon: "i-lucide-rss", field: null },
@@ -90,6 +92,11 @@ export default function () {
     { value: "Won't Fix", color: "warning", icon: "i-lucide-circle-minus" },
   ];
 
+  const pathTypes = [
+    { value: "Endpoint", icon: "i-lucide-globe" },
+    { value: "Share", icon: "i-lucide-folder-open" },
+  ];
+
   const osintDataTypes = [
     { value: "IP", icon: "i-lucide-server" },
     { value: "Domain", icon: "i-lucide-globe" },
@@ -100,6 +107,26 @@ export default function () {
     { value: "Username", icon: "i-lucide-user" },
     { value: "Password", icon: "i-lucide-key" },
   ];
+
+  const hostOS = [
+    { value: "Linux", icon: "simple-icons:linux", color: "warning" },
+    { value: "Windows", icon: "lineicons:microsoft", color: "info" },
+    { value: "MacOS", icon: "lineicons:apple-brand", color: "neutral" },
+    { value: "iOS", icon: "lineicons:apple-brand", color: "neutral" },
+    { value: "Android", icon: "lineicons:android-original", color: "success" },
+    { value: "Solaris", icon: "simple-icons:oracle", color: "error" },
+    { value: "FreeBSD", icon: "simple-icons:freebsd", color: "error" },
+    { value: "Other", icon: "i-lucide-server", color: "neutral" },
+  ];
+
+  const portStatuses = [
+    { value: "Open", color: "success", icon: "i-lucide-square-check" },
+    { value: "Open - Filtered", color: "warning", icon: "i-lucide-brick-wall" },
+    { value: "Filtered", color: "warning", icon: "i-lucide-brick-wall-shield" },
+    { value: "Closed", color: "error", icon: "i-lucide-square-x" },
+  ];
+
+  const portProtocols = ["TCP", "UDP"];
 
   const targetTypes = [
     { value: "Private IP", icon: "i-mdi-security-network" },
@@ -128,6 +155,14 @@ export default function () {
     { color: "neutral", icon: "i-lucide-skip-forward", value: "Skipped" },
     { color: "info", icon: "i-lucide-clock", value: "Requested" },
   ];
+
+  function httpStatusColor(status: number): string {
+    if (status >= 200 && status < 300) return "success";
+    if (status >= 300 && status < 400) return "info";
+    if (status >= 400 && status < 500) return "warning";
+    if (status >= 500) return "error";
+    return "neutral";
+  }
 
   function getUserOptions(
     userOptionsRef: Ref<FilterOption[]>,
@@ -456,10 +491,15 @@ export default function () {
     reportStatuses,
     findingTypes,
     triageStatuses,
+    pathTypes,
     osintDataTypes,
+    hostOS,
+    portStatuses,
+    portProtocols,
     targetTypes,
     authenticationTypes,
     executionStatuses,
+    httpStatusColor,
     getUserOptions,
     getToolOptions,
     getConfigurationOptions,

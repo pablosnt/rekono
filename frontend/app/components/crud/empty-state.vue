@@ -23,8 +23,8 @@ const utils = useUtils();
 
 const description = computed(() => {
   if (
-    Object.keys(props.state.filters).length >
-      Object.keys(props.config.defaultFilters).length ||
+    Object.keys(props.state.filters as object).length >
+      Object.keys(props.config.defaultFilters || {}).length ||
     props.state.searchQuery
   ) {
     return `The current search criteria don't match any ${utils.smartLowerCase(props.config.entityName)}. Change your query and retry`;

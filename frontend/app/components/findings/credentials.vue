@@ -22,7 +22,6 @@
 import { h } from "vue";
 import type { CrudTableColumn } from "~/types/crud";
 
-const route = useRoute();
 const backend = useBackend();
 const columns: CrudTableColumn<Record<string, unknown>>[] = [
   {
@@ -31,30 +30,32 @@ const columns: CrudTableColumn<Record<string, unknown>>[] = [
     icon: "i-lucide-server",
     cell: ({ row }) => {
       const finding = row.original;
-      return finding.technology?.port?.host
-        ? h(
-            "a",
-            {
-              href: route.params.project_id
-                ? `/projects/${route.params.project_id}/hosts/${finding.technology?.port?.host.id}`
-                : `/hosts/${finding.technology?.port?.host.id}`,
-              target: "_blank",
-              rel: "noopener noreferrer",
-              class:
-                "flex items-center gap-2 font-medium hover:text-primary hover:underline",
-              onClick: (e: Event) => e.stopPropagation(),
-            },
-            [
-              // TODO: Icon per host OS
-              h(resolveComponent("UIcon"), {
-                name: "i-lucide-server",
-                class: "text-lg",
-              }),
-              finding.technology?.port?.host.ip ||
-                finding.technology?.port?.host.domain,
-            ],
-          )
-        : h("span", { class: "text-sm" }, "—");
+      if (finding.technology?.port?.host) {
+        const config = backend.hostOS.find(
+          (c) => c.value === finding.host?.os_type,
+        );
+        return h(
+          "a",
+          {
+            href: `/projects/${finding.project}/hosts/${finding.technology?.port?.host.id}`,
+            target: "_blank",
+            rel: "noopener noreferrer",
+            class:
+              "flex items-center gap-2 font-medium hover:text-primary hover:underline",
+            onClick: (e: Event) => e.stopPropagation(),
+          },
+          [
+            h(resolveComponent("UIcon"), {
+              name: config?.icon || "i-lucide-server",
+              class: `text-lg text-${config?.color || "neutral"}`,
+            }),
+            finding.technology?.port?.host.ip ||
+              finding.technology?.port?.host.domain,
+          ],
+        );
+      } else {
+        return h("span", { class: "text-sm" }, "—");
+      }
     },
   },
   {
@@ -67,13 +68,11 @@ const columns: CrudTableColumn<Record<string, unknown>>[] = [
         ? h(
             "a",
             {
-              href: route.params.project_id
-                ? `/projects/${route.params.project_id}/ports/${finding.technology?.port.id}`
-                : `/ports/${finding.technology?.port.id}`,
+              href: `/projects/${finding.project}/ports/${finding.technology?.port.id}`,
               target: "_blank",
               rel: "noopener noreferrer",
               class:
-                "flex items-center gap-2 font-medium hover:text-primary hover:underline",
+                "flex items-center gap-2 hover:text-primary hover:underline",
               onClick: (e: Event) => e.stopPropagation(),
             },
             [
@@ -82,7 +81,7 @@ const columns: CrudTableColumn<Record<string, unknown>>[] = [
                   finding.technology?.port.port,
                   finding.technology?.port.service,
                 ),
-                class: "text-lg",
+                class: "text-xl",
               }),
               finding.technology?.port.port,
             ],
@@ -100,9 +99,7 @@ const columns: CrudTableColumn<Record<string, unknown>>[] = [
         ? h(
             "a",
             {
-              href: route.params.project_id
-                ? `/projects/${route.params.project_id}/technologies/${finding.technology.id}`
-                : `/technologies/${finding.technology.id}`,
+              href: `/projects/${finding.project}/technologies/${finding.technology.id}`,
               target: "_blank",
               rel: "noopener noreferrer",
               class: "font-medium hover:text-primary hover:underline",

@@ -167,7 +167,7 @@ const config: CrudConfig<Finding> = reactive({
                 }),
             },
           );
-        } else {
+        } else if (props.isTriageable) {
           const config = backend.triageStatuses.find(
             (s) => s.value === finding.triage_status,
           );
@@ -193,7 +193,7 @@ const config: CrudConfig<Finding> = reactive({
                 resolveComponent("UBadge"),
                 {
                   color: config?.color,
-                  variant: "subtle",
+                  variant: "ghost",
                   class: "font-medium",
                 },
                 {
@@ -202,10 +202,28 @@ const config: CrudConfig<Finding> = reactive({
                       name: config?.icon,
                       class: "mr-1 text-lg",
                     }),
-                    config.value,
+                    config?.value,
                   ],
                 },
               );
+        } else {
+          return h(
+            resolveComponent("UBadge"),
+            {
+              color: "neutral",
+              variant: "ghost",
+              class: "font-medium",
+            },
+            {
+              default: () => [
+                h(resolveComponent("UIcon"), {
+                  name: "i-lucide-shield-alert",
+                  class: "mr-1 text-lg",
+                }),
+                "Active",
+              ],
+            },
+          );
         }
       },
     },
