@@ -81,7 +81,7 @@ const columns: CrudTableColumn<Record<string, unknown>>[] = [
                   finding.technology?.port.port,
                   finding.technology?.port.service,
                 ),
-                class: "text-xl",
+                class: "text-2xl",
               }),
               finding.technology?.port.port,
             ],

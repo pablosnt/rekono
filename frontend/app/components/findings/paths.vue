@@ -78,14 +78,13 @@ const columns: CrudTableColumn<Record<string, unknown>>[] = [
               onClick: (e: Event) => e.stopPropagation(),
             },
             [
-              // TODO: This kind of icon should be bigger
               // TODO: This kind of cell should be a component. We are duplicating a lot of HTML code, as TS
               h(resolveComponent("UIcon"), {
                 name: backend.getPortIcon(
                   finding.port.port,
                   finding.port.service,
                 ),
-                class: "text-xl",
+                class: "text-2xl",
               }),
               finding.port.port,
             ],
