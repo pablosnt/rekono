@@ -23,6 +23,7 @@
       },
     ]"
     :ordering="['id', 'host', 'port', 'status', 'protocol', 'service']"
+    :visibility="{paths: false, technologies: false, vulnerabilities: false}"
   />
 </template>
 
@@ -30,6 +31,7 @@
 import { h } from "vue";
 import type { CrudTableColumn } from "~/types/crud";
 
+const route = useRoute();
 const backend = useBackend();
 
 const columns: CrudTableColumn<Record<string, unknown>>[] = [
@@ -45,6 +47,7 @@ const columns: CrudTableColumn<Record<string, unknown>>[] = [
         );
         return h(
           "a",
+          // TODO: Review all this kind of links. We usually don't want new tabs, and we don't care about noreferrer between internal endpoints
           {
             href: `/projects/${finding.project}/hosts/${finding.host.id}`,
             target: "_blank",
@@ -129,6 +132,72 @@ const columns: CrudTableColumn<Record<string, unknown>>[] = [
             status,
           ],
         },
+      );
+    },
+  },
+  {
+    accessorKey: "paths",
+    header: "Paths",
+    icon: "i-lucide-slash",
+    cell: ({ row }) => {
+      const finding = row.original;
+      if (finding?.path?.length === 0) {
+        return h("span", { class: "font-medium text-muted-foreground" }, "0");
+      }
+      const basePath = `/paths?port=${finding.id}`;
+      return h(
+        "a",
+        {
+          href: route.params.project_id
+            ? `/projects/${route.params.project_id}${basePath}`
+            : basePath,
+          class: "font-medium text-primary hover:underline",
+        },
+        finding?.path?.length.toString(),
+      );
+    },
+  },
+  {
+    accessorKey: "technologies",
+    header: "Technologies",
+    icon: "i-lucide-layers",
+    cell: ({ row }) => {
+      const finding = row.original;
+      if (finding?.technology?.length === 0) {
+        return h("span", { class: "font-medium text-muted-foreground" }, "0");
+      }
+      const basePath = `/technologies?port=${finding.id}`;
+      return h(
+        "a",
+        {
+          href: route.params.project_id
+            ? `/projects/${route.params.project_id}${basePath}`
+            : basePath,
+          class: "font-medium text-primary hover:underline",
+        },
+        finding?.technology?.length.toString(),
+      );
+    },
+  },
+  {
+    accessorKey: "vulnerabilities",
+    header: "Vulnerabilities",
+    icon: "i-lucide-bug",
+    cell: ({ row }) => {
+      const finding = row.original;
+      if (finding?.vulnerability?.length === 0) {
+        return h("span", { class: "font-medium text-muted-foreground" }, "0");
+      }
+      const basePath = `/vulnerabilities?port=${finding.id}`;
+      return h(
+        "a",
+        {
+          href: route.params.project_id
+            ? `/projects/${route.params.project_id}${basePath}`
+            : basePath,
+          class: "font-medium text-primary hover:underline",
+        },
+        finding?.vulnerability?.length.toString(),
       );
     },
   },

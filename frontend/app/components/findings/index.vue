@@ -80,6 +80,7 @@ const props = defineProps<{
   columns: CrudConfig["tableColumns"];
   filters: CrudConfig["filters"];
   ordering: CrudConfig["ordering"];
+  visibility: CrudConfig["tableColumnsVisibility"];
   isTriageable?: boolean;
   isAsset?: boolean;
   extraDropdownActions?: (
@@ -328,11 +329,11 @@ const config: CrudConfig<Finding> = reactive({
       },
     },
   ],
-  tableColumnsVisibility: {
+  tableColumnsVisibility: Object.assign({}, props.visibility || {}, {
     id: false,
     triage: false,
     hacktricks: false,
-  },
+  }),
   searchable: true,
   searchPlaceholder: `Search ${utils.smartLowerCase(props.entityNamePlural)}...`,
   filters: [
