@@ -93,6 +93,7 @@ const userStore = useUserStore();
 const options = useOptions();
 const route = useRoute();
 const api = useApi(props.endpoint);
+const table = useTable();
 const page = ref();
 const selectedItem = ref();
 const triageModalOpen = ref(false);
@@ -136,8 +137,7 @@ const config: CrudConfig<Finding> = reactive({
       accessorKey: "id",
       header: "ID",
       icon: "i-lucide-hash",
-      cell: ({ row }) =>
-        h("span", { class: "font-medium" }, row.getValue("id")),
+      cell: ({ row }) => table.valueCell(row.getValue("id")),
     },
     ...props.columns,
     {
@@ -190,40 +190,18 @@ const config: CrudConfig<Finding> = reactive({
                     }),
                 },
               )
-            : h(
-                resolveComponent("UBadge"),
-                {
-                  color: config?.color,
-                  variant: "ghost",
-                  class: "font-medium",
-                },
-                {
-                  default: () => [
-                    h(resolveComponent("UIcon"), {
-                      name: config?.icon,
-                      class: "mr-1 text-lg",
-                    }),
-                    config?.value,
-                  ],
-                },
+            : table.badgeCell(
+                config?.value,
+                config?.icon,
+                config?.color,
+                "ghost",
               );
         } else {
-          return h(
-            resolveComponent("UBadge"),
-            {
-              color: "neutral",
-              variant: "ghost",
-              class: "font-medium",
-            },
-            {
-              default: () => [
-                h(resolveComponent("UIcon"), {
-                  name: "i-lucide-shield-alert",
-                  class: "mr-1 text-lg",
-                }),
-                "Active",
-              ],
-            },
+          return table.badgeCell(
+            "Active",
+            "i-lucide-shield-alert",
+            "neutral",
+            "ghost",
           );
         }
       },
@@ -232,8 +210,7 @@ const config: CrudConfig<Finding> = reactive({
       accessorKey: "triage",
       header: "Triage Comment",
       icon: "i-lucide-message-circle-more",
-      cell: ({ row }) =>
-        h("span", { class: "font-medium" }, row.original.triage_comment),
+      cell: ({ row }) => table.valueCell(row.original.triage_comment),
     },
     {
       accessorKey: "scanners",
@@ -307,26 +284,11 @@ const config: CrudConfig<Finding> = reactive({
       accessorKey: "hacktricks",
       header: "HackTricks",
       avatar: { src: "https://book.hacktricks.wiki/en/favicon.svg" },
-      cell: ({ row }) => {
-        const link = row.original.hacktricks_link as string;
-        if (!link) return null;
-        return h(
-          "a",
-          {
-            href: link,
-            target: "_blank",
-            rel: "noopener noreferrer",
-            class: "text-primary hover:underline",
-            onClick: (e: Event) => e.stopPropagation(),
-          },
-          [
-            h(resolveComponent("UIcon"), {
-              name: "i-lucide-external-link",
-              class: "text-lg",
-            }),
-          ],
-        );
-      },
+      cell: ({ row }) =>
+        table.externalLinkCell(
+          row.original.hacktricks_link,
+          "i-lucide-external-link",
+        ),
     },
   ],
   tableColumnsVisibility: Object.assign({}, props.visibility || {}, {

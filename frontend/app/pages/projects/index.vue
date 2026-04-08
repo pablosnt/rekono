@@ -12,6 +12,7 @@ import type { Project } from "~/types/models";
 const userStore = useUserStore();
 const validation = useValidation();
 const options = useOptions();
+const table = useTable();
 const userOptions = ref<FilterOption[]>([]);
 
 onMounted(() => {
@@ -29,22 +30,19 @@ const config: CrudConfig<Project> = reactive({
       accessorKey: "id",
       header: "ID",
       icon: "i-lucide-hash",
-      cell: ({ row }) =>
-        h("span", { class: "font-medium" }, row.getValue("id")),
+      cell: ({ row }) => table.valueCell(row.getValue("id")),
     },
     {
       accessorKey: "name",
       header: "Name",
       icon: "i-lucide-case-sensitive",
-      cell: ({ row }) =>
-        h("span", { class: "font-medium" }, row.getValue("name")),
+      cell: ({ row }) => table.valueCell(row.getValue("name")),
     },
     {
       accessorKey: "description",
       header: "Description",
       icon: "i-lucide-align-left",
-      cell: ({ row }) =>
-        h("span", { class: "font-medium" }, row.getValue("description")),
+      cell: ({ row }) => table.valueCell(row.getValue("description")),
     },
     {
       accessorKey: "tags",
@@ -57,25 +55,13 @@ const config: CrudConfig<Project> = reactive({
       accessorKey: "targets",
       header: "Targets",
       icon: "i-lucide-locate-fixed",
-      cell: ({ row }) =>
-        h(
-          "span",
-          { class: "font-medium" },
-          (row.getValue("targets") as Project["targets"]).length,
-        ),
+      cell: ({ row }) => table.valueCell(row.getValue("targets").length),
     },
     {
       accessorKey: "owner",
       header: "Owner",
       icon: "i-lucide-user",
-      cell: ({ row }) => {
-        const owner = row.getValue("owner") as Project["owner"];
-        return h(
-          "span",
-          { class: "font-medium" },
-          owner?.username ? `@${owner.username}` : "—",
-        );
-      },
+      cell: ({ row }) => table.usernameCell(row.getValue("owner")),
     },
   ] as CrudTableColumn<Project>[],
   tableColumnsVisibility: {
@@ -143,36 +129,13 @@ const config: CrudConfig<Project> = reactive({
         ? `/projects/${data.id}`
         : `/projects/${data.id}/targets`,
     ),
-  deleteMessage: (project: Project) => [
-    {
-      component: h(
-        "p",
-        { class: "text-gray-900 dark:text-white font-medium" },
-        "Are you sure you want to delete this project?",
-      ),
-    },
-    {
-      component: resolveComponent("UAlert"),
-      props: {
-        color: "neutral",
-        variant: "subtle",
-        description: project.name,
-        ui: { root: "text-center font-bold" },
-        class: "mt-4",
-      },
-    },
-    {
-      component: resolveComponent("UAlert"),
-      props: {
-        color: "error",
-        icon: "i-lucide-triangle-alert",
-        title: "Permanent deletion",
-        description:
-          "All associated data including assets, findings, and scans will be permanently deleted. This action cannot be undone.",
-        class: "mt-4",
-      },
-    },
-  ],
+  deleteMessage: (project: Project) =>
+    buildDeleteMessage(
+      "project",
+      project.name,
+      "Permanent deletion",
+      "All associated data including assets, findings, and scans will be permanently deleted. This action cannot be undone.",
+    ),
   canRead: true,
   canCreate: userStore.is_admin,
   canEdit: (_project: Project) => userStore.is_admin,

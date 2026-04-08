@@ -25,7 +25,6 @@
 </template>
 
 <script setup lang="ts">
-import { h } from "vue";
 import type { CrudConfig } from "~/types/crud";
 import * as z from "zod";
 
@@ -39,6 +38,7 @@ const props = defineProps<{
   showAccessDeniedError?: boolean;
 }>();
 
+const table = useTable();
 const validation = useValidation();
 
 let defaultBody = {};
@@ -63,22 +63,20 @@ const config: CrudConfig = reactive({
       accessorKey: "id",
       header: "ID",
       icon: "i-lucide-hash",
-      cell: ({ row }) =>
-        h("span", { class: "font-medium" }, row.getValue("id")),
+      cell: ({ row }) => table.valueCell(row.getValue("id")),
     },
     {
       accessorKey: "key",
       header: "Header",
       icon: "i-lucide-case-sensitive",
-      cell: ({ row }) =>
-        h("span", { class: "font-medium" }, row.getValue("key")),
+      cell: ({ row }) => table.valueCell(row.getValue("key")),
     },
     {
       accessorKey: "value",
       header: "Value",
       icon: "i-lucide-text-cursor-input",
       cell: ({ row }) =>
-        h("span", { class: "text-muted-foreground" }, row.getValue("value")),
+        table.valueCell(row.getValue("value"), "text-muted-foreground"),
     },
   ],
   tableColumnsVisibility: {

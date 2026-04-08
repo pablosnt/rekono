@@ -28,11 +28,11 @@
 </template>
 
 <script setup lang="ts">
-import { h } from "vue";
 import type { CrudTableColumn } from "~/types/crud";
-import { hostOS, portProtocols, portStatuses } from "~/constants";
+import { portProtocols, portStatuses } from "~/constants";
 
 const route = useRoute();
+const table = useTable();
 const columns: CrudTableColumn<Record<string, unknown>>[] = [
   {
     accessorKey: "host",
@@ -40,67 +40,30 @@ const columns: CrudTableColumn<Record<string, unknown>>[] = [
     icon: "i-lucide-server",
     cell: ({ row }) => {
       const finding = row.original;
-      if (finding.host) {
-        const config = hostOS.find((c) => c.value === finding.host?.os_type);
-        return h(
-          "a",
-          {
-            href: `/projects/${finding.project}/hosts/${finding.host.id}`,
-            class:
-              "flex items-center gap-2 font-medium hover:text-primary hover:underline",
-            onClick: (e: Event) => e.stopPropagation(),
-          },
-          [
-            h(resolveComponent("UIcon"), {
-              name: config?.icon || "i-lucide-server",
-              color: config?.color || "neutral",
-              class: "text-lg",
-            }),
-            finding.host.ip || finding.host.domain,
-          ],
-        );
-      } else {
-        return h("span", { class: "text-sm" }, "—");
-      }
+      return table.hostCell(finding.host, finding.project);
     },
   },
   {
     accessorKey: "port",
     header: "Port",
     icon: "i-lucide-ethernet-port",
-    cell: ({ row }) => {
-      const finding = row.original;
-      return h("span", { class: "text-sm" }, String(finding.port));
-    },
+    cell: ({ row }) => table.valueCell(String(row.original.port)),
   },
   {
     accessorKey: "protocol",
     header: "Protocol",
     icon: "i-lucide-network",
-    cell: ({ row }) => {
-      const protocol = row.getValue("protocol") as string;
-      if (!protocol) return h("span", { class: "text-sm" }, "—");
-      return h(
-        resolveComponent("UBadge"),
-        { color: "neutral", variant: "subtle" },
-        { default: () => protocol },
-      );
-    },
+    cell: ({ row }) => table.badgeCell(row.getValue("protocol")),
   },
   {
     accessorKey: "service",
     header: "Service",
     icon: "i-lucide-layers",
-    cell: ({ row }) => {
-      const finding = row.original;
-      const service = finding.service as string | undefined;
-      const port = finding.port as number;
-      const icon = getPortIcon(port, service);
-      return h("span", { class: "flex items-center gap-2 text-sm" }, [
-        h(resolveComponent("UIcon"), { name: icon, class: "text-lg shrink-0" }),
-        service ? service : h("span", { class: "text-muted" }, "—"),
-      ]);
-    },
+    cell: ({ row }) =>
+      table.iconAndValueCell(
+        row.original.service,
+        getPortIcon(row.original.port, row.original.service),
+      ),
   },
   {
     accessorKey: "portStatus",
@@ -108,25 +71,8 @@ const columns: CrudTableColumn<Record<string, unknown>>[] = [
     icon: "i-lucide-chevrons-left-right-ellipsis",
     cell: ({ row }) => {
       const status = row.getValue("status") as string;
-      if (!status) return h("span", { class: "text-sm" }, "—");
       const config = portStatuses.find((s) => s.value === status);
-      return h(
-        resolveComponent("UBadge"),
-        {
-          color: config?.color,
-          variant: "subtle",
-          class: "font-medium",
-        },
-        {
-          default: () => [
-            h(resolveComponent("UIcon"), {
-              name: config?.icon,
-              class: "mr-1 text-lg",
-            }),
-            status,
-          ],
-        },
-      );
+      return table.badgeCell(status, config?.icon, config?.color);
     },
   },
   {
@@ -135,19 +81,12 @@ const columns: CrudTableColumn<Record<string, unknown>>[] = [
     icon: "i-lucide-slash",
     cell: ({ row }) => {
       const finding = row.original;
-      if (finding?.path?.length === 0) {
-        return h("span", { class: "font-medium text-muted-foreground" }, "0");
-      }
       const basePath = `/paths?port=${finding.id}`;
-      return h(
-        "a",
-        {
-          href: route.params.project_id
-            ? `/projects/${route.params.project_id}${basePath}`
-            : basePath,
-          class: "font-medium text-primary hover:underline",
-        },
-        finding?.path?.length.toString(),
+      return table.counterCell(
+        finding?.path?.length,
+        route.params.project_id
+          ? `/projects/${route.params.project_id}${basePath}`
+          : basePath,
       );
     },
   },
@@ -157,19 +96,12 @@ const columns: CrudTableColumn<Record<string, unknown>>[] = [
     icon: "i-lucide-layers",
     cell: ({ row }) => {
       const finding = row.original;
-      if (finding?.technology?.length === 0) {
-        return h("span", { class: "font-medium text-muted-foreground" }, "0");
-      }
       const basePath = `/technologies?port=${finding.id}`;
-      return h(
-        "a",
-        {
-          href: route.params.project_id
-            ? `/projects/${route.params.project_id}${basePath}`
-            : basePath,
-          class: "font-medium text-primary hover:underline",
-        },
-        finding?.technology?.length.toString(),
+      return table.counterCell(
+        finding?.technology?.length,
+        route.params.project_id
+          ? `/projects/${route.params.project_id}${basePath}`
+          : basePath,
       );
     },
   },
@@ -179,19 +111,12 @@ const columns: CrudTableColumn<Record<string, unknown>>[] = [
     icon: "i-lucide-bug",
     cell: ({ row }) => {
       const finding = row.original;
-      if (finding?.vulnerability?.length === 0) {
-        return h("span", { class: "font-medium text-muted-foreground" }, "0");
-      }
       const basePath = `/vulnerabilities?port=${finding.id}`;
-      return h(
-        "a",
-        {
-          href: route.params.project_id
-            ? `/projects/${route.params.project_id}${basePath}`
-            : basePath,
-          class: "font-medium text-primary hover:underline",
-        },
-        finding?.vulnerability?.length.toString(),
+      return table.counterCell(
+        finding?.vulnerability?.length,
+        route.params.project_id
+          ? `/projects/${route.params.project_id}${basePath}`
+          : basePath,
       );
     },
   },

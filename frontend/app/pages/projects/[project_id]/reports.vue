@@ -14,7 +14,6 @@
 </template>
 
 <script setup lang="ts">
-import { h } from "vue";
 import type { CrudConfig, CrudTableColumn, FilterOption } from "~/types/crud";
 import type { Report } from "~/types/models";
 import { reportFormats, reportStatuses } from "~/constants";
@@ -23,6 +22,7 @@ definePageMeta({ layout: "project" });
 const options = useOptions();
 const api = useApi();
 const route = useRoute();
+const table = useTable();
 const userOptions = ref<FilterOption[]>([]);
 const targetOptions = ref<FilterOption[]>([]);
 const taskOptions = ref<FilterOption[]>([]);
@@ -43,8 +43,7 @@ const config: CrudConfig<Report> = reactive({
       accessorKey: "id",
       header: "ID",
       icon: "i-lucide-hash",
-      cell: ({ row }) =>
-        h("span", { class: "font-medium" }, row.getValue("id")),
+      cell: ({ row }) => table.valueCell(row.getValue("id")),
     },
     {
       accessorKey: "source",
@@ -53,51 +52,19 @@ const config: CrudConfig<Report> = reactive({
       cell: ({ row }) => {
         const report = row.original as Report;
         if (report.task) {
-          return h(
-            "div",
-            { class: "flex items-center gap-2 hover:text-primary" },
-            [
-              h(resolveComponent("UIcon"), {
-                name: "i-lucide-play",
-                class: "w-4 h-4 text-muted-foreground",
-              }),
-              h(
-                "a",
-                {
-                  href: `/projects/${route.params.project_id}/scans/${report.task.id}`,
-                  class: "hover:underline font-medium",
-                },
-                getTaskName(report.task, true),
-              ),
-            ],
+          return table.linkCell(
+            `/projects/${route.params.project_id}/scans/${report.task.id}`,
+            "i-lucide-play",
+            getTaskName(report.task, true),
           );
         } else if (report.target) {
-          return h(
-            "div",
-            { class: "flex items-center gap-2 hover:text-primary" },
-            [
-              h(resolveComponent("UIcon"), {
-                name: "i-lucide-locate-fixed",
-                class: "w-4 h-4 text-muted-foreground",
-              }),
-              h(
-                "a",
-                {
-                  href: `/projects/${route.params.project_id}/targets/${report.target.id}`,
-                  class: "hover:underline font-medium",
-                },
-                report.target.target,
-              ),
-            ],
+          return table.linkCell(
+            `/projects/${route.params.project_id}/targets/${report.target.id}`,
+            "i-lucide-locate-fixed",
+            report.target.target,
           );
         }
-        return h("div", { class: "flex items-center gap-2" }, [
-          h(resolveComponent("UIcon"), {
-            name: "i-lucide-folder",
-            class: "w-4 h-4 text-muted-foreground",
-          }),
-          h("span", { class: "text-muted-foreground" }, "Full project"),
-        ]);
+        return table.iconAndValueCell("Full project", "i-lucide-folder");
       },
     },
     {
@@ -107,22 +74,10 @@ const config: CrudConfig<Report> = reactive({
       cell: ({ row }) => {
         const status = row.getValue("status") as string;
         const statusConfig = reportStatuses.find((s) => s.value === status);
-        return h(
-          resolveComponent("UBadge"),
-          {
-            color: statusConfig?.color || "neutral",
-            variant: "subtle",
-            class: "font-medium",
-          },
-          {
-            default: () => [
-              h(resolveComponent("UIcon"), {
-                name: statusConfig?.icon || "i-lucide-circle",
-                class: "mr-1 text-lg",
-              }),
-              statusConfig?.label || status,
-            ],
-          },
+        return table.badgeCell(
+          statusConfig?.label || status,
+          statusConfig?.icon || "i-lucide-circle",
+          statusConfig?.color || "neutral",
         );
       },
     },
@@ -133,22 +88,9 @@ const config: CrudConfig<Report> = reactive({
       cell: ({ row }) => {
         const format = row.getValue("format") as string;
         const formatConfig = reportFormats.find((f) => f.value === format);
-        return h(
-          resolveComponent("UBadge"),
-          {
-            color: "neutral",
-            variant: "subtle",
-            class: "font-medium",
-          },
-          {
-            default: () => [
-              h(resolveComponent("UIcon"), {
-                name: formatConfig?.icon || "i-lucide-file",
-                class: "mr-1 text-lg",
-              }),
-              format.toUpperCase(),
-            ],
-          },
+        return table.badgeCell(
+          format.toUpperCase(),
+          formatConfig?.icon || "i-lucide-file",
         );
       },
     },
@@ -156,27 +98,14 @@ const config: CrudConfig<Report> = reactive({
       accessorKey: "user",
       header: "User",
       icon: "i-lucide-user",
-      cell: ({ row }) => {
-        const user = row.getValue("user") as Report["user"];
-        return h(
-          "span",
-          { class: "font-medium" },
-          user?.username ? `@${user.username}` : "—",
-        );
-      },
+      cell: ({ row }) => table.usernameCell(row.getValue("user")),
     },
     {
       accessorKey: "date",
       header: "Date",
       icon: "i-lucide-calendar",
-      cell: ({ row }) => {
-        const date = row.getValue("date") as string;
-        return h(
-          "span",
-          { class: "font-medium" },
-          new Date(date).toLocaleDateString(),
-        );
-      },
+      cell: ({ row }) =>
+        table.valueCell(new Date(row.getValue("date")).toLocaleDateString()),
     },
   ] as CrudTableColumn<Report>[],
   tableColumnsVisibility: {
@@ -230,25 +159,11 @@ const config: CrudConfig<Report> = reactive({
   pageSizeOptions: [25, 50, 100],
   defaultBody: { project: route.params.project_id },
   createForm: resolveComponent("ReportsForm"),
-  deleteMessage: (report: Report) => [
-    {
-      component: h(
-        "p",
-        { class: "text-gray-900 dark:text-white font-medium" },
-        "Are you sure you want to delete this report?",
-      ),
-    },
-    {
-      component: resolveComponent("UAlert"),
-      props: {
-        color: "neutral",
-        variant: "subtle",
-        description: `${report.format.toUpperCase()} report with findings from ${report.task ? getTaskName(report.task, true) : report.target ? report.target.target : "full project"}`,
-        ui: { root: "text-center font-bold" },
-        class: "mt-4",
-      },
-    },
-  ],
+  deleteMessage: (report: Report) =>
+    buildDeleteMessage(
+      "report",
+      `${report.format.toUpperCase()} report with findings from ${report.task ? getTaskName(report.task, true) : report.target ? report.target.target : "full project"}`,
+    ),
   canRead: true,
   canCreate: true,
   canEdit: false,

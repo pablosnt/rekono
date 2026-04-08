@@ -11,6 +11,7 @@ import type { TargetDenylist } from "~/types/models";
 
 const userStore = useUserStore();
 const validation = useValidation();
+const table = useTable();
 
 const config: CrudConfig<TargetDenylist> = reactive({
   endpoint: "/api/target-denylist/",
@@ -22,15 +23,13 @@ const config: CrudConfig<TargetDenylist> = reactive({
       accessorKey: "id",
       header: "ID",
       icon: "i-lucide-hash",
-      cell: ({ row }) =>
-        h("span", { class: "font-medium" }, row.getValue("id")),
+      cell: ({ row }) => table.valueCell(row.getValue("id")),
     },
     {
       accessorKey: "target",
       header: "Target",
       icon: "i-lucide-locate-fixed",
-      cell: ({ row }) =>
-        h("span", { class: "font-medium font-mono" }, row.getValue("target")),
+      cell: ({ row }) => table.valueCell(row.getValue("target"), "font-mono"),
     },
     {
       accessorKey: "default",
@@ -39,9 +38,7 @@ const config: CrudConfig<TargetDenylist> = reactive({
         const isDefault = row.getValue("default");
         return h(
           "span",
-          {
-            class: isDefault ? "text-gray-600 font-medium" : "text-green-500",
-          },
+          { class: isDefault ? "text-gray-600 font-medium" : "text-green-500" },
           isDefault ? "Yes" : "No",
         );
       },
@@ -70,35 +67,13 @@ const config: CrudConfig<TargetDenylist> = reactive({
   formSchema: z.object({
     target: validation.target_regex("target", true, 100),
   }),
-  deleteMessage: (item: TargetDenylist) => [
-    {
-      component: h(
-        "p",
-        { class: "text-gray-900 dark:text-white font-medium" },
-        "Are you sure you want to delete this denied target pattern?",
-      ),
-    },
-    {
-      component: resolveComponent("UAlert"),
-      props: {
-        color: "neutral",
-        variant: "subtle",
-        description: item.target,
-        ui: { root: "text-center font-bold" },
-        class: "mt-4",
-      },
-    },
-    {
-      component: resolveComponent("UAlert"),
-      props: {
-        color: "warning",
-        icon: "i-lucide-triangle-alert",
-        description:
-          "Targets matching this denied pattern could be created after the deletion",
-        class: "mt-4",
-      },
-    },
-  ],
+  deleteMessage: (item: TargetDenylist) =>
+    buildDeleteMessage(
+      "denied target pattern",
+      item.target,
+      undefined,
+      "Targets matching this denied pattern could be created after the deletion",
+    ),
   canRead: userStore.is_admin,
   canEdit: (item: TargetDenylist) => userStore.is_admin && !item.default,
   canDelete: (item: TargetDenylist) => userStore.is_admin && !item.default,

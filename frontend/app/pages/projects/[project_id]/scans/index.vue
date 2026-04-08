@@ -23,6 +23,7 @@ const userStore = useUserStore();
 const route = useRoute();
 const options = useOptions();
 const api = useApi("/api/tasks/");
+const table = useTable();
 const page = ref();
 const refresh = ref<ReturnType<typeof setTimeout> | null>(null);
 const targetOptions = ref<FilterOption[]>([]);
@@ -74,8 +75,7 @@ const config: CrudConfig<Task> = reactive({
       accessorKey: "id",
       header: "ID",
       icon: "i-lucide-hash",
-      cell: ({ row }) =>
-        h("span", { class: "font-medium" }, row.getValue("id")),
+      cell: ({ row }) => table.valueCell(row.getValue("id")),
     },
     {
       id: "scanner",
@@ -83,26 +83,9 @@ const config: CrudConfig<Task> = reactive({
       icon: "i-lucide-terminal",
       cell: ({ row }) => {
         const task = row.original as Task;
-        if (task.process) {
-          return h("span", { class: "font-medium" }, task.process.name);
-        } else {
-          return h("div", { class: "flex items-center gap-2" }, [
-            task.configuration?.tool.icon
-              ? h(resolveComponent("UAvatar"), {
-                  src: task.configuration?.tool.icon,
-                  size: "2xs",
-                })
-              : h(resolveComponent("UIcon"), {
-                  name: "i-lucide-square-terminal",
-                  class: "w-4 h-4 text-muted-foreground shrink-0",
-                }),
-            h(
-              "span",
-              { class: "font-medium" },
-              `${task.configuration?.tool.name}: ${task.configuration?.name}`,
-            ),
-          ]);
-        }
+        return task.process
+          ? table.valueCell(task.process.name)
+          : table.toolCell(task.configuration?.tool, task.configuration);
       },
     },
     {
@@ -121,22 +104,11 @@ const config: CrudConfig<Task> = reactive({
                 : `/${task.target_port.path}`;
           }
         }
-        return h(
-          "a",
-          {
-            class:
-              "flex items-center gap-2 font-medium hover:text-primary hover:underline",
-            href: `/projects/${route.params.project_id}/targets/${task.target?.id}`,
-          },
-          [
-            h(resolveComponent("UIcon"), {
-              class: "w-4 h-4 text-muted-foreground shrink-0",
-              name:
-                targetTypes.find((t) => t.value === task.target?.type)?.icon ||
-                "i-lucide-locate-fixed",
-            }),
-            h("span", { class: "font-medium" }, label),
-          ],
+        return table.linkCell(
+          `/projects/${route.params.project_id}/targets/${task.target?.id}`,
+          targetTypes.find((t) => t.value === task.target?.type)?.icon ||
+            "i-lucide-locate-fixed",
+          label,
         );
       },
     },
@@ -154,17 +126,7 @@ const config: CrudConfig<Task> = reactive({
               max: 100,
               color: "warning",
             })
-          : h(
-              resolveComponent("UBadge"),
-              { variant: "subtle", color: status.color },
-              [
-                h(resolveComponent("UIcon"), {
-                  name: status.icon,
-                  class: "text-lg",
-                }),
-                h("span", { class: "font-medium" }, status.value),
-              ],
-            );
+          : table.badgeCell(status?.value, status?.icon, status.color);
       },
     },
     {
@@ -173,15 +135,11 @@ const config: CrudConfig<Task> = reactive({
       icon: "i-lucide-gauge",
       cell: ({ row }) => {
         const intensityValue = row.getValue("intensity") as string;
-        const intensity = intensities.find((i) => i.label === intensityValue);
-        return h(
-          resolveComponent("UBadge"),
-          {
-            color: intensity?.color || "neutral",
-            variant: "subtle",
-            class: "font-medium",
-          },
-          { default: () => intensityValue },
+        return table.badgeCell(
+          intensityValue,
+          undefined,
+          intensities.find((i) => i.label === intensityValue)?.color ||
+            "neutral",
         );
       },
     },
@@ -189,14 +147,7 @@ const config: CrudConfig<Task> = reactive({
       accessorKey: "executor",
       header: "Executor",
       icon: "i-lucide-user",
-      cell: ({ row }) => {
-        const executor = row.getValue("executor") as Task["executor"];
-        return h(
-          "span",
-          { class: "font-medium" },
-          executor?.username ? `@${executor.username}` : "—",
-        );
-      },
+      cell: ({ row }) => table.usernameCell(row.getValue("executor")),
     },
     {
       accessorKey: "start",
@@ -204,10 +155,8 @@ const config: CrudConfig<Task> = reactive({
       icon: "i-lucide-play-circle",
       cell: ({ row }) => {
         const start = row.getValue("start") as Task["start"];
-        return h(
-          "span",
-          { class: "font-medium" },
-          start ? new Date(start).toLocaleString() : "—",
+        return table.valueCell(
+          start ? new Date(start).toLocaleString() : undefined,
         );
       },
     },
@@ -217,10 +166,8 @@ const config: CrudConfig<Task> = reactive({
       icon: "i-lucide-stop-circle",
       cell: ({ row }) => {
         const end = row.getValue("end") as Task["end"];
-        return h(
-          "span",
-          { class: "font-medium" },
-          end ? new Date(end).toLocaleString() : "—",
+        return table.valueCell(
+          end ? new Date(end).toLocaleString() : undefined,
         );
       },
     },
@@ -228,44 +175,34 @@ const config: CrudConfig<Task> = reactive({
       id: "duration",
       header: "Duration",
       icon: "i-lucide-timer",
-      cell: ({ row }) => {
-        const task = row.original as Task;
-        return h(
-          "span",
-          { class: "font-medium tabular-nums" },
-          task.start && task.end ? duration(task.start, task.end) : "—",
-        );
-      },
+      cell: ({ row }) =>
+        table.valueCell(
+          row.original.start && row.original.end
+            ? duration(row.original.start, row.original.end)
+            : undefined,
+        ),
     },
     {
       id: "scheduled",
       header: "Scheduled",
       icon: "i-lucide-calendar-clock",
-      cell: ({ row }) => {
-        const task = row.original as Task;
-        return h(
-          "span",
-          { class: "font-medium" },
-          !task.start && task.scheduled_at
-            ? new Date(task.scheduled_at).toLocaleString()
-            : "—",
-        );
-      },
+      cell: ({ row }) =>
+        table.valueCell(
+          !row.original.start && row.original.scheduled_at
+            ? new Date(row.original.scheduled_at).toLocaleString()
+            : undefined,
+        ),
     },
     {
       id: "repeat",
       header: "Monitor",
       icon: "i-lucide-repeat",
-      cell: ({ row }) => {
-        const task = row.original as Task;
-        return h(
-          "span",
-          { class: "font-medium" },
-          task.repeat_in && task.repeat_time_unit
-            ? `Every ${task.repeat_in} ${task.repeat_time_unit}`
-            : "—",
-        );
-      },
+      cell: ({ row }) =>
+        table.valueCell(
+          row.original.repeat_in && row.original.repeat_time_unit
+            ? `Every ${row.original.repeat_in} ${row.original.repeat_time_unit}`
+            : undefined,
+        ),
     },
   ] as CrudTableColumn<Task>[],
   tableColumnsVisibility: {
@@ -364,25 +301,14 @@ const config: CrudConfig<Task> = reactive({
     }
     return actions;
   },
-  deleteMessage: (task: Task) => [
-    {
-      component: h(
-        "p",
-        { class: "text-gray-900 dark:text-white font-medium" },
-        "Are you sure you want to cancel this scan?",
-      ),
-    },
-    {
-      component: resolveComponent("UAlert"),
-      props: {
-        color: "neutral",
-        variant: "subtle",
-        description: getTaskName(task, true),
-        ui: { root: "text-center font-bold" },
-        class: "mt-4",
-      },
-    },
-  ],
+  deleteMessage: (task: Task) =>
+    buildDeleteMessage(
+      "scan",
+      getTaskName(task, true),
+      undefined,
+      undefined,
+      "cancel",
+    ),
   deleteVerb: "Cancel",
   deleteIcon: "i-lucide-x",
   canRead: userStore.is_auditor,

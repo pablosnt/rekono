@@ -4,12 +4,13 @@
 
 <script setup lang="ts">
 import * as z from "zod";
-import { h, resolveComponent } from "vue";
+import { resolveComponent } from "vue";
 import { today, getLocalTimeZone } from "@internationalized/date";
 import type { CrudTableColumn } from "~/types/crud";
 import type { ApiToken } from "~/types/models";
 
 const validation = useValidation();
+const table = useTable();
 
 const apiTokensConfig = ref({
   endpoint: "/api/api-tokens/",
@@ -21,8 +22,7 @@ const apiTokensConfig = ref({
       accessorKey: "name",
       header: "Name",
       icon: "i-lucide-key",
-      cell: ({ row }) =>
-        h("span", { class: "font-medium" }, row.getValue("name")),
+      cell: ({ row }) => table.valueCell(row.getValue("name")),
     },
     {
       accessorKey: "expiration",
@@ -30,10 +30,8 @@ const apiTokensConfig = ref({
       icon: "i-lucide-calendar",
       cell: ({ row }) => {
         const expiration = row.getValue("expiration") as string;
-        return h(
-          "span",
-          { class: "font-medium" },
-          expiration ? new Date(expiration).toDateString() : "—",
+        return table.valueCell(
+          expiration ? new Date(expiration).toDateString() : undefined,
         );
       },
     },
@@ -74,25 +72,8 @@ const apiTokensConfig = ref({
   }),
   createForm: resolveComponent("ApiTokensForm"),
   updateOnCreateModalOpen: true,
-  deleteMessage: (token: ApiToken) => [
-    {
-      component: h(
-        "p",
-        { class: "text-gray-900 dark:text-white font-medium" },
-        "Are you sure you want to delete this API token?",
-      ),
-    },
-    {
-      component: resolveComponent("UAlert"),
-      props: {
-        color: "neutral",
-        variant: "subtle",
-        description: token.name,
-        ui: { root: "text-center font-bold" },
-        class: "mt-4",
-      },
-    },
-  ],
+  deleteMessage: (token: ApiToken) =>
+    buildDeleteMessage("API token", token.name),
   emptyMessage: "You don't have any API token yet",
   canRead: true,
   canEdit: false,

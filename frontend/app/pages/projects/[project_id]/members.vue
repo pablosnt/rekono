@@ -67,35 +67,13 @@ const config: CrudConfig<User> = reactive({
   pageSizeOptions: [24, 50, 100],
   createForm: resolveComponent("ProjectsMembersForm"),
   createLabel: "Add",
-  deleteMessage: (user: User) => [
-    {
-      component: h(
-        "p",
-        { class: "text-gray-900 dark:text-white font-medium" },
-        "Are you sure you want to delete this project member?",
-      ),
-    },
-    {
-      component: resolveComponent("UAlert"),
-      props: {
-        color: "neutral",
-        variant: "subtle",
-        description: getUserDisplayName(user),
-        ui: { root: "text-center font-bold" },
-        class: "mt-4",
-      },
-    },
-    {
-      component: resolveComponent("UAlert"),
-      props: {
-        color: "warning",
-        icon: "i-lucide-triangle-alert",
-        description:
-          "The user will lose access to the project and its resources immediately",
-        class: "mt-4",
-      },
-    },
-  ],
+  deleteMessage: (user: User) =>
+    buildDeleteMessage(
+      "project member",
+      getUserDisplayName(user),
+      undefined,
+      "The user will lose access to the project and its resources immediately",
+    ),
   deleteEndpoint: (user: User) =>
     `/api/projects/${route.params.project_id}/members/${user.id}/`,
   canRead: userStore.is_admin,

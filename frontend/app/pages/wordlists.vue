@@ -14,6 +14,7 @@ const userStore = useUserStore();
 const validation = useValidation();
 const options = useOptions();
 const api = useApi("/api/");
+const table = useTable();
 const maxMbSize = ref(1);
 const maxWordlistSize = ref(1000000);
 const userOptions = ref<FilterOption[]>([]);
@@ -59,15 +60,13 @@ const config: CrudConfig<Wordlist> = reactive({
       accessorKey: "id",
       header: "ID",
       icon: "i-lucide-hash",
-      cell: ({ row }) =>
-        h("span", { class: "font-medium" }, row.getValue("id")),
+      cell: ({ row }) => table.valueCell(row.getValue("id")),
     },
     {
       accessorKey: "name",
       header: "Name",
       icon: "i-lucide-case-sensitive",
-      cell: ({ row }) =>
-        h("span", { class: "font-medium" }, row.getValue("name")),
+      cell: ({ row }) => table.valueCell(row.getValue("name")),
     },
     {
       accessorKey: "type",
@@ -75,35 +74,24 @@ const config: CrudConfig<Wordlist> = reactive({
       icon: "i-lucide-tag",
       cell: ({ row }) => {
         const type = row.getValue("type");
-        return h(resolveComponent("UBadge"), {
-          color: "neutral",
-          variant: "subtle",
-          icon: wordlistTypes.find((item) => item.value === type)?.icon,
-          label: type,
-        });
+        return table.badgeCell(
+          type,
+          wordlistTypes.find((item) => item.value === type)?.icon,
+        );
       },
     },
     {
       accessorKey: "size",
       header: "Words",
       icon: "i-lucide-file-text",
-      cell: ({ row }) => {
-        const size = row.getValue("size") as number;
-        return h("span", { class: "font-medium" }, size?.toLocaleString());
-      },
+      cell: ({ row }) =>
+        table.valueCell(row.getValue("size")?.toLocaleString()),
     },
     {
       accessorKey: "owner",
       header: "Owner",
       icon: "i-lucide-user",
-      cell: ({ row }) => {
-        const owner = row.getValue("owner") as Wordlist["owner"];
-        return h(
-          "span",
-          { class: "font-medium" },
-          owner?.username ? `@${owner.username}` : "—",
-        );
-      },
+      cell: ({ row }) => table.usernameCell(row.getValue("owner")),
     },
     {
       accessorKey: "likes",
@@ -206,25 +194,8 @@ const config: CrudConfig<Wordlist> = reactive({
     name: validation.name("name", true, 100),
     type: z.enum(wordlistTypes.map((t) => t.value) as [string, ...string[]]),
   }),
-  deleteMessage: (wordlist: Wordlist) => [
-    {
-      component: h(
-        "p",
-        { class: "text-gray-900 dark:text-white font-medium" },
-        "Are you sure you want to delete this wordlist?",
-      ),
-    },
-    {
-      component: resolveComponent("UAlert"),
-      props: {
-        color: "neutral",
-        variant: "subtle",
-        description: wordlist.name,
-        ui: { root: "text-center font-bold" },
-        class: "mt-4",
-      },
-    },
-  ],
+  deleteMessage: (wordlist: Wordlist) =>
+    buildDeleteMessage("wordlist", wordlist.name),
   canRead: userStore.is_auditor,
   canCreate: userStore.is_auditor,
   canEdit: (wordlist: Wordlist) =>

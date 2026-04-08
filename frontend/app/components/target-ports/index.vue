@@ -14,15 +14,8 @@
       :item="selectedTargetPort?.authentication"
       :config="{
         entityName: 'Authentication',
-        deleteMessage: (authentication: Authentication) => [
-          {
-            component: h(
-              'p',
-              { class: 'text-gray-900 dark:text-white font-medium' },
-              `Are you sure you want to delete the authentication ${authentication.name} for the target port ${selectedTargetPort.port}?`,
-            ),
-          },
-        ],
+        deleteMessage: (authentication: Authentication) =>
+          buildDeleteMessage('authentication', authentication.name),
       }"
       :api="authenticationApi"
       @open="(open) => (deleteAuthenticationOpen = open)"
@@ -50,6 +43,7 @@ const userStore = useUserStore();
 const route = useRoute();
 const validation = useValidation();
 const authenticationApi = useApi("/api/authentications/");
+const table = useTable();
 const page = ref();
 const deleteAuthenticationOpen = ref(false);
 const addAuthenticationOpen = ref(false);
@@ -70,8 +64,7 @@ const config: CrudConfig<TargetPort> = reactive({
       accessorKey: "id",
       header: "ID",
       icon: "i-lucide-hash",
-      cell: ({ row }) =>
-        h("span", { class: "font-medium" }, row.getValue("id")),
+      cell: ({ row }) => table.valueCell(row.getValue("id")),
     },
     {
       accessorKey: "port",
@@ -79,23 +72,14 @@ const config: CrudConfig<TargetPort> = reactive({
       icon: "i-lucide-ethernet-port",
       cell: ({ row }) => {
         const port = row.getValue("port") as number;
-        return h("div", { class: "flex items-center gap-2" }, [
-          h(resolveComponent("UIcon"), {
-            name: getPortIcon(port),
-            class: "w-4 h-4",
-          }),
-          h("span", { class: "font-medium" }, port.toString()),
-        ]);
+        return table.iconAndValueCell(port.toString(), getPortIcon(port));
       },
     },
     {
       accessorKey: "path",
       header: "Path",
       icon: "i-lucide-slash",
-      cell: ({ row }) => {
-        const path = row.getValue("path") as string;
-        return h("span", { class: "font-medium" }, path ? path : "—");
-      },
+      cell: ({ row }) => table.valueCell(row.getValue("path")),
     },
     {
       accessorKey: "authentication.type",
@@ -103,8 +87,9 @@ const config: CrudConfig<TargetPort> = reactive({
       icon: "i-lucide-key",
       cell: ({ row }) => {
         const targetPort = row.original as TargetPort;
-        const auth = targetPort.authentication;
-        return h("span", { class: "font-medium" }, auth ? auth.type : "None");
+        return table.valueCell(
+          targetPort.authentication ? targetPort.authentication.type : "None",
+        );
       },
     },
   ] as CrudTableColumn<TargetPort>[],
@@ -141,36 +126,13 @@ const config: CrudConfig<TargetPort> = reactive({
   canEdit: false,
   canCreate: userStore.is_auditor,
   canDelete: userStore.is_auditor,
-  deleteMessage: (targetPort: TargetPort) => [
-    {
-      component: h(
-        "p",
-        { class: "text-gray-900 dark:text-white font-medium" },
-        "Are you sure you want to delete this target port?",
-      ),
-    },
-    {
-      component: resolveComponent("UAlert"),
-      props: {
-        color: "neutral",
-        variant: "subtle",
-        description: `Port ${targetPort.port}`,
-        ui: { root: "text-center font-bold" },
-        class: "mt-4",
-      },
-    },
-    {
-      component: resolveComponent("UAlert"),
-      props: {
-        color: "error",
-        icon: "i-lucide-triangle-alert",
-        title: "Permanent deletion",
-        description:
-          "All associated data including assets, findings, and scans will be permanently deleted. This action cannot be undone.",
-        class: "mt-4",
-      },
-    },
-  ],
+  deleteMessage: (targetPort: TargetPort) =>
+    buildDeleteMessage(
+      "target port",
+      `Port ${targetPort.port}`,
+      "Permanent deletion",
+      "All associated data including assets, findings, and scans will be permanently deleted. This action cannot be undone.",
+    ),
   customDropdownActions: (TargetPort: TargetPort) => {
     if (!userStore.is_auditor) return [];
     return [

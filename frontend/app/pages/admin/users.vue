@@ -45,7 +45,6 @@
 </template>
 
 <script setup lang="ts">
-import { h } from "vue";
 import type { CrudConfig } from "~/types/crud";
 import type { User } from "~/types/models";
 import { useUserStore } from "~/store/user";
@@ -195,25 +194,14 @@ const config: CrudConfig<User> = reactive({
   modalAvatar: (user: User) => ({
     text: getUserDisplayName(user).charAt(0).toUpperCase(),
   }),
-  deleteMessage: (user: User) => [
-    {
-      component: h(
-        "p",
-        { class: "text-gray-900 dark:text-white font-medium" },
-        "Are you sure you want to disable this user?",
-      ),
-    },
-    {
-      component: resolveComponent("UAlert"),
-      props: {
-        color: "neutral",
-        variant: "subtle",
-        description: getUserDisplayName(user),
-        ui: { root: "text-center font-bold" },
-        class: "mt-4",
-      },
-    },
-  ],
+  deleteMessage: (user: User) =>
+    buildDeleteMessage(
+      "user",
+      getUserDisplayName(user),
+      undefined,
+      undefined,
+      "disable",
+    ),
   deleteVerb: "Disable",
   canRead: userStore.is_admin,
   canCreate: userStore.is_admin,

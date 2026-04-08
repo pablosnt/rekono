@@ -42,18 +42,17 @@
 </template>
 
 <script setup lang="ts">
-import { h } from "vue";
 import type { CrudTableColumn, FilterOption } from "~/types/crud";
 import { osintDataTypes } from "~/constants";
 
 const api = useApi("/api/osint/");
+const table = useTable();
 const columns: CrudTableColumn<Record<string, unknown>>[] = [
   {
     accessorKey: "data",
     header: "Data",
     icon: "i-lucide-database-search",
-    cell: ({ row }) =>
-      h("span", { class: "font-medium" }, row.getValue("data")),
+    cell: ({ row }) => table.valueCell(row.getValue("data")),
   },
   {
     accessorKey: "type",
@@ -61,19 +60,9 @@ const columns: CrudTableColumn<Record<string, unknown>>[] = [
     icon: "i-lucide-tag",
     cell: ({ row }) => {
       const type = row.original.data_type as string;
-      const config = osintDataTypes.find((t) => t.value === type);
-      return h(
-        resolveComponent("UBadge"),
-        { color: "neutral", variant: "subtle" },
-        {
-          default: () => [
-            h(resolveComponent("UIcon"), {
-              name: config?.icon || "i-lucide-rss",
-              class: "mr-1 text-lg",
-            }),
-            type,
-          ],
-        },
+      return table.badgeCell(
+        type,
+        osintDataTypes.find((t) => t.value === type)?.icon || "i-lucide-rss",
       );
     },
   },
@@ -81,11 +70,7 @@ const columns: CrudTableColumn<Record<string, unknown>>[] = [
     accessorKey: "source",
     header: "Source",
     icon: "i-lucide-search",
-    cell: ({ row }) => {
-      const source = row.getValue("source") as string;
-      if (!source) return null;
-      return h("span", { class: "text-sm" }, source);
-    },
+    cell: ({ row }) => table.valueCell(row.getValue("source")),
   },
 ];
 </script>

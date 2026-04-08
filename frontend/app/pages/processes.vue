@@ -40,6 +40,7 @@ import { stages } from "~/constants";
 const userStore = useUserStore();
 const validation = useValidation();
 const options = useOptions();
+const table = useTable();
 const toolOptions = ref<FilterOption[]>([]);
 const userOptions = ref<FilterOption[]>([]);
 const processModalOpen = ref(false);
@@ -61,25 +62,22 @@ const config: CrudConfig<Process> = reactive({
       accessorKey: "id",
       header: "ID",
       icon: "i-lucide-hash",
-      cell: ({ row }) =>
-        h("span", { class: "font-medium" }, row.getValue("id")),
+      cell: ({ row }) => table.valueCell(row.getValue("id")),
     },
     {
       accessorKey: "name",
       header: "Name",
       icon: "i-lucide-case-sensitive",
-      cell: ({ row }) =>
-        h("span", { class: "font-medium" }, row.getValue("name")),
+      cell: ({ row }) => table.valueCell(row.getValue("name")),
     },
     {
       accessorKey: "description",
       header: "Description",
       icon: "i-lucide-align-left",
       cell: ({ row }) =>
-        h(
-          "div",
-          { class: "text-muted-foreground whitespace-pre-wrap py-1" },
+        table.valueCell(
           row.getValue("description"),
+          "text-muted-foreground whitespace-pre-wrap py-1",
         ),
     },
     {
@@ -93,23 +91,14 @@ const config: CrudConfig<Process> = reactive({
       accessorKey: "steps",
       header: "Steps",
       icon: "i-lucide-list",
-      cell: ({ row }) => {
-        const steps = (row.original as Process).steps;
-        return h("span", {}, steps?.length || 0);
-      },
+      cell: ({ row }) =>
+        table.valueCell((row.original.steps?.length || 0).toString()),
     },
     {
       accessorKey: "owner",
       header: "Owner",
       icon: "i-lucide-user",
-      cell: ({ row }) => {
-        const owner = row.getValue("owner") as Process["owner"];
-        return h(
-          "span",
-          { class: "font-medium" },
-          owner?.username ? `@${owner.username}` : "—",
-        );
-      },
+      cell: ({ row }) => table.usernameCell(row.getValue("owner")),
     },
     {
       accessorKey: "likes",
@@ -215,25 +204,8 @@ const config: CrudConfig<Process> = reactive({
   updateOnCreateModalOpen: true,
   editForm: resolveComponent("ProcessesForm"),
   updateOnEditModalOpen: true,
-  deleteMessage: (process: Process) => [
-    {
-      component: h(
-        "p",
-        { class: "text-gray-900 dark:text-white font-medium" },
-        "Are you sure you want to delete this process?",
-      ),
-    },
-    {
-      component: resolveComponent("UAlert"),
-      props: {
-        color: "neutral",
-        variant: "subtle",
-        description: process.name,
-        ui: { root: "text-center font-bold" },
-        class: "mt-4",
-      },
-    },
-  ],
+  deleteMessage: (process: Process) =>
+    buildDeleteMessage("process", process.name),
   canRead: userStore.is_auditor,
   canCreate: userStore.is_auditor,
   canEdit: (process: Process) =>

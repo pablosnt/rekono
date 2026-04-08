@@ -22,7 +22,6 @@
 </template>
 
 <script setup lang="ts">
-import { h } from "vue";
 import type { CrudConfig, CrudTableColumn } from "~/types/crud";
 import { useUserStore } from "~/store/user";
 import type { Target } from "~/types/models";
@@ -31,26 +30,11 @@ import { targetTypes } from "~/constants";
 definePageMeta({ layout: "project" });
 const userStore = useUserStore();
 const route = useRoute();
+const table = useTable();
 const selectedTarget = ref<Target | null>(null);
 const showReportModal = ref(false);
 const notesButton = ref();
 
-function createTargetLink(targetId: string, count: number, path: string) {
-  if (count === 0) {
-    return h("span", { class: "font-medium text-muted-foreground" }, "0");
-  }
-  const linkPath = `/projects/${route.params.project_id}/${path}`;
-  const queryParam = `target=${targetId}`;
-  const href = `${linkPath}?${queryParam}`;
-  return h(
-    "a",
-    {
-      href,
-      class: "font-medium text-primary hover:underline",
-    },
-    count.toString(),
-  );
-}
 // todo: add link to DefectDojo if sync is enabled
 const config: CrudConfig<Target> = reactive({
   endpoint: "/api/targets/",
@@ -62,15 +46,13 @@ const config: CrudConfig<Target> = reactive({
       accessorKey: "id",
       header: "ID",
       icon: "i-lucide-hash",
-      cell: ({ row }) =>
-        h("span", { class: "font-medium" }, row.getValue("id")),
+      cell: ({ row }) => table.valueCell(row.getValue("id")),
     },
     {
       accessorKey: "target",
       header: "Target",
       icon: "i-lucide-locate-fixed",
-      cell: ({ row }) =>
-        h("span", { class: "font-medium" }, row.getValue("target")),
+      cell: ({ row }) => table.valueCell(row.getValue("target")),
     },
     {
       accessorKey: "type",
@@ -79,22 +61,9 @@ const config: CrudConfig<Target> = reactive({
       cell: ({ row }) => {
         const type = row.getValue("type") as string;
         const typeConfig = targetTypes.find((t) => t.value === type);
-        return h(
-          resolveComponent("UBadge"),
-          {
-            color: "neutral",
-            variant: "subtle",
-            class: "font-medium",
-          },
-          {
-            default: () => [
-              h(resolveComponent("UIcon"), {
-                name: typeConfig?.icon || "i-lucide-locate-fixed",
-                class: "mr-1 text-lg",
-              }),
-              type,
-            ],
-          },
+        return table.badgeCell(
+          type,
+          typeConfig?.icon || "i-lucide-locate-fixed",
         );
       },
     },
@@ -102,46 +71,41 @@ const config: CrudConfig<Target> = reactive({
       accessorKey: "target_ports",
       header: "Target Ports",
       icon: "i-lucide-server",
-      cell: ({ row }) => {
-        const targetPorts = row.getValue(
-          "target_ports",
-        ) as Target["target_ports"];
-        const count = targetPorts?.length || 0;
-        return h("span", { class: "font-medium" }, count.toString());
-      },
+      cell: ({ row }) =>
+        table.valueCell((row.getValue("target_ports").length || 0).toString()),
     },
     {
       accessorKey: "tasks",
       header: "Scans",
       icon: "i-lucide-play",
-      cell: ({ row }) => {
-        const tasks = row.getValue("tasks") as Target["tasks"];
-        const count = tasks?.length || 0;
-        const targetId = (row.original as Target).id;
-        return createTargetLink(targetId.toString(), count, "scans");
-      },
+      cell: ({ row }) =>
+        table.linkCell(
+          `/projects/${route.params.project_id}/scans?target=${row.original.id}`,
+          undefined,
+          (row.getValue("tasks").length || 0).toString(),
+        ),
     },
     {
       accessorKey: "notes",
       header: "Notes",
       icon: "i-lucide-notebook",
-      cell: ({ row }) => {
-        const notes = row.getValue("notes") as Target["notes"];
-        const count = notes?.length || 0;
-        const targetId = (row.original as Target).id;
-        return createTargetLink(targetId.toString(), count, "notes");
-      },
+      cell: ({ row }) =>
+        table.linkCell(
+          `/projects/${route.params.project_id}/notes?target=${row.original.id}`,
+          undefined,
+          (row.getValue("notes").length || 0).toString(),
+        ),
     },
     {
       accessorKey: "reports",
       header: "Reports",
       icon: "i-lucide-file-text",
-      cell: ({ row }) => {
-        const reports = row.getValue("reports") as Target["reports"];
-        const count = reports?.length || 0;
-        const targetId = (row.original as Target).id;
-        return createTargetLink(targetId.toString(), count, "reports");
-      },
+      cell: ({ row }) =>
+        table.linkCell(
+          `/projects/${route.params.project_id}/reports?target=${row.original.id}`,
+          undefined,
+          (row.getValue("reports").length || 0).toString(),
+        ),
     },
   ] as CrudTableColumn<Target>[],
   tableColumnsVisibility: {
@@ -177,36 +141,13 @@ const config: CrudConfig<Target> = reactive({
       );
     }
   },
-  deleteMessage: (target: Target) => [
-    {
-      component: h(
-        "p",
-        { class: "text-gray-900 dark:text-white font-medium" },
-        "Are you sure you want to delete this target?",
-      ),
-    },
-    {
-      component: resolveComponent("UAlert"),
-      props: {
-        color: "neutral",
-        variant: "subtle",
-        description: target.target,
-        ui: { root: "text-center font-bold" },
-        class: "mt-4",
-      },
-    },
-    {
-      component: resolveComponent("UAlert"),
-      props: {
-        color: "error",
-        icon: "i-lucide-triangle-alert",
-        title: "Permanent deletion",
-        description:
-          "All associated data including assets, findings, and scans will be permanently deleted. This action cannot be undone.",
-        class: "mt-4",
-      },
-    },
-  ],
+  deleteMessage: (target: Target) =>
+    buildDeleteMessage(
+      "target",
+      target.target,
+      "Permanent deletion",
+      "All associated data including assets, findings, and scans will be permanently deleted. This action cannot be undone.",
+    ),
   canRead: true,
   canEdit: false,
   canCreate: userStore.is_auditor,

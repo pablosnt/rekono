@@ -221,15 +221,8 @@
       :item="task"
       :config="{
         entityName: 'Scan',
-        deleteMessage: () => [
-          {
-            component: h(
-              'p',
-              { class: 'text-gray-900 dark:text-white font-medium' },
-              'Are you sure you want to cancel this scan?',
-            ),
-          },
-        ],
+        deleteMessage: () =>
+          buildDeleteMessage('scan', undefined, undefined, undefined, 'cancel'),
         deleteVerb: 'Cancel',
         deleteIcon: 'i-lucide-x',
       }"
@@ -334,6 +327,7 @@ const tasksApi = useApi("/api/tasks/");
 const executionsApi = useApi("/api/executions/");
 const userStore = useUserStore();
 const options = useOptions();
+const table = useTable();
 const cancelOpen = ref(false);
 const reportOpen = ref(false);
 const task = ref<Task | null>();
@@ -396,45 +390,19 @@ const config: CrudConfig<Execution> = reactive({
       accessorKey: "id",
       header: "ID",
       icon: "i-lucide-hash",
-      cell: ({ row }) =>
-        h("span", { class: "font-medium" }, row.getValue("id")),
+      cell: ({ row }) => table.valueCell(row.getValue("id")),
     },
     {
       id: "tool",
       header: "Tool",
       icon: "i-lucide-square-terminal",
-      cell: ({ row }) => {
-        const execution = row.original as Execution;
-        return h("div", { class: "flex items-center gap-2" }, [
-          execution.configuration?.tool.icon
-            ? h(resolveComponent("UAvatar"), {
-                src: execution.configuration.tool.icon,
-                size: "sm",
-              })
-            : h(resolveComponent("UIcon"), {
-                name: "i-lucide-square-terminal",
-                class: "text-2xl text-muted-foreground text-primary shrink-0",
-              }),
-          h(
-            "span",
-            { class: "font-medium" },
-            execution.configuration?.tool.name,
-          ),
-        ]);
-      },
+      cell: ({ row }) => table.toolCell(row.original.configuration.tool),
     },
     {
       accessorKey: "configuration",
       header: "Configuration",
       icon: "i-lucide-file-code-corner",
-      cell: ({ row }) => {
-        const execution = row.original as Execution;
-        return h(
-          "span",
-          { class: "font-medium" },
-          execution.configuration.name,
-        );
-      },
+      cell: ({ row }) => table.valueCell(row.original.configuration.name),
     },
     {
       id: "status",
@@ -471,10 +439,8 @@ const config: CrudConfig<Execution> = reactive({
       icon: "i-lucide-play-circle",
       cell: ({ row }) => {
         const start = row.getValue("start") as Execution["start"];
-        return h(
-          "span",
-          { class: "font-medium" },
-          start ? new Date(start).toLocaleString() : "—",
+        return table.valueCell(
+          start ? new Date(start).toLocaleString() : undefined,
         );
       },
     },
@@ -484,14 +450,12 @@ const config: CrudConfig<Execution> = reactive({
       icon: "i-lucide-timer",
       cell: ({ row }) => {
         const execution = row.original as Execution;
-        return h(
-          "span",
-          { class: "font-medium tabular-nums" },
+        return table.valueCell(
           execution.start && execution.end
             ? duration(execution.start, execution.end)
             : execution.start
               ? duration(execution.start, new Date().toISOString())
-              : "—",
+              : undefined,
         );
       },
     },
@@ -499,14 +463,7 @@ const config: CrudConfig<Execution> = reactive({
       id: "skipped",
       header: "Skipped",
       icon: "i-lucide-skip-forward",
-      cell: ({ row }) => {
-        const execution = row.original as Execution;
-        return h(
-          "span",
-          { class: "font-medium" },
-          execution.skipped_reason || "—",
-        );
-      },
+      cell: ({ row }) => table.valueCell(row.original.skipped_reason),
     },
   ] as CrudTableColumn<Execution>[],
   tableColumnsVisibility: {

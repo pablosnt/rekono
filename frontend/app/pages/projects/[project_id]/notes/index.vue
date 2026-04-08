@@ -293,25 +293,7 @@ const config: CrudConfig<Note> = reactive({
   defaultOrdering: "-id",
   defaultFilters: { project: route.params.project_id },
   defaultBody: { project: route.params.project_id },
-  deleteMessage: (note: Note) => [
-    {
-      component: h(
-        "p",
-        { class: "text-gray-900 dark:text-white font-medium" },
-        "Are you sure you want to delete this note?",
-      ),
-    },
-    {
-      component: resolveComponent("UAlert"),
-      props: {
-        color: "neutral",
-        variant: "subtle",
-        description: note.title,
-        ui: { root: "text-center font-bold" },
-        class: "mt-4",
-      },
-    },
-  ],
+  deleteMessage: (note: Note) => buildDeleteMessage("note", note.title),
   canRead: true,
   canCreate: userStore.is_auditor,
   canEdit: false,
