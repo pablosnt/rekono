@@ -2,7 +2,7 @@
   <CrudPage ref="page" :config="config">
     <template #item="{ item, onEdit, onDelete }">
       <UPageCard
-        :title="utils.firstUpper(utils.smartLowerCase(item.item))"
+        :title="firstUpper(smartLowerCase(item.item))"
         :description="
           item.value && item.item !== 'Trending CVE' ? item.value : undefined
         "
@@ -12,9 +12,7 @@
       >
         <template #leading>
           <UIcon
-            :name="
-              backend.alerts.find((alert) => alert.item === item.item)?.icon
-            "
+            :name="alertItems.find((alert) => alert.item === item.item)?.icon"
             :class="`text-2xl ${item.enabled ? 'text-success' : 'text-primary'}`"
           />
         </template>
@@ -55,12 +53,12 @@
 import type { CrudConfig } from "~/types/crud";
 import type { Alert } from "~/types/models";
 import { useUserStore } from "~/store/user";
+import { alertItems } from "~/constants";
 
 definePageMeta({ layout: "project" });
 const userStore = useUserStore();
 const api = useApi("/api/alerts/");
-const backend = useBackend();
-const utils = useUtils();
+const options = useOptions();
 const route = useRoute();
 const userOptions = ref([]);
 const page = ref();
@@ -126,11 +124,11 @@ const config: CrudConfig<Alert> = reactive({
 });
 
 onMounted(() => {
-  backend.getUserOptions(userOptions, { is_active: true });
+  options.users(userOptions, { is_active: true });
 });
 
 function canEdit(alert: Alert): boolean {
-  const field = backend.alerts.find(
+  const field = alertItems.find(
     (definition) => definition.item == alert.item,
   )?.field;
   return (

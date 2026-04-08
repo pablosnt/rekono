@@ -42,14 +42,12 @@
           <UBadge
             v-else
             :color="
-              backend.executionStatuses.find((s) => s.value === task.status)
-                .color
+              executionStatuses.find((s) => s.value === task.status).color
             "
           >
             <UIcon
               :name="
-                backend.executionStatuses.find((s) => s.value === task.status)
-                  .icon
+                executionStatuses.find((s) => s.value === task.status).icon
               "
               class="text-lg"
             />
@@ -139,8 +137,7 @@
           >
             <UIcon
               :name="
-                backend.targetTypes.find((t) => t.value === task?.target.type)
-                  .icon
+                targetTypes.find((t) => t.value === task?.target.type).icon
               "
             />
             <span
@@ -159,8 +156,8 @@
           </p>
           <UBadge
             :color="
-              backend.intensities.find((i) => i.label === task?.intensity)
-                ?.color || 'neutral'
+              intensities.find((i) => i.label === task?.intensity)?.color ||
+              'neutral'
             "
             variant="subtle"
           >
@@ -196,9 +193,9 @@
           <p class="font-medium">
             {{
               task.start && task.end
-                ? utils.duration(task.start, task.end)
+                ? duration(task.start, task.end)
                 : task.status === "Running" && task.start
-                  ? utils.duration(task.start, new Date().toISOString())
+                  ? duration(task.start, new Date().toISOString())
                   : "—"
             }}
           </p>
@@ -323,6 +320,12 @@ import { h } from "vue";
 import { useUserStore } from "~/store/user";
 import type { CrudConfig, CrudTableColumn, FilterOption } from "~/types/crud";
 import type { Task, Execution } from "~/types/models";
+import {
+  stages,
+  intensities,
+  targetTypes,
+  executionStatuses,
+} from "~/constants";
 
 definePageMeta({ layout: "project" });
 
@@ -330,8 +333,7 @@ const route = useRoute();
 const tasksApi = useApi("/api/tasks/");
 const executionsApi = useApi("/api/executions/");
 const userStore = useUserStore();
-const backend = useBackend();
-const utils = useUtils();
+const options = useOptions();
 const cancelOpen = ref(false);
 const reportOpen = ref(false);
 const task = ref<Task | null>();
@@ -376,7 +378,7 @@ function fetchTask() {
 
 onMounted(() => {
   fetchTask();
-  backend.getToolOptions(toolOptions);
+  options.tools(toolOptions);
 });
 
 onUnmounted(() => {
@@ -440,7 +442,7 @@ const config: CrudConfig<Execution> = reactive({
       icon: "i-lucide-activity",
       cell: ({ row }) => {
         const execution = row.original as Execution;
-        const status = backend.executionStatuses.find(
+        const status = executionStatuses.find(
           (s) => s.value === execution.status,
         );
         const isRunning = execution.status === "Running";
@@ -486,9 +488,9 @@ const config: CrudConfig<Execution> = reactive({
           "span",
           { class: "font-medium tabular-nums" },
           execution.start && execution.end
-            ? utils.duration(execution.start, execution.end)
+            ? duration(execution.start, execution.end)
             : execution.start
-              ? utils.duration(execution.start, new Date().toISOString())
+              ? duration(execution.start, new Date().toISOString())
               : "—",
         );
       },
@@ -532,14 +534,14 @@ const config: CrudConfig<Execution> = reactive({
       label: "Stage",
       icon: "i-lucide-layers",
       type: "select" as const,
-      options: backend.stages,
+      options: stages,
     },
     {
       key: "status",
       label: "Status",
       icon: "i-lucide-activity",
       type: "select" as const,
-      options: backend.executionStatuses,
+      options: executionStatuses,
       labelKey: "value",
     },
   ],

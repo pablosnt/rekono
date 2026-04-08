@@ -35,19 +35,20 @@ import type { CrudConfig, FilterOption } from "~/types/crud";
 import * as z from "zod";
 import { useUserStore } from "~/store/user";
 import type { Process } from "~/types/models";
+import { stages } from "~/constants";
 
 const userStore = useUserStore();
 const validation = useValidation();
-const backend = useBackend();
+const options = useOptions();
 const toolOptions = ref<FilterOption[]>([]);
 const userOptions = ref<FilterOption[]>([]);
 const processModalOpen = ref(false);
 const selectedProcess = ref();
 
 onMounted(() => {
-  backend.getToolOptions(toolOptions);
-  backend.getUserOptions(userOptions, { role: "Admin", is_active: true });
-  backend.getUserOptions(userOptions, { role: "Auditor", is_active: true });
+  options.tools(toolOptions);
+  options.users(userOptions, { role: "Admin", is_active: true });
+  options.users(userOptions, { role: "Auditor", is_active: true });
 });
 
 const config: CrudConfig<Process> = reactive({
@@ -152,7 +153,7 @@ const config: CrudConfig<Process> = reactive({
       label: "Stage",
       icon: "i-lucide-layers",
       type: "select" as const,
-      options: backend.stages,
+      options: stages,
     },
 
     {

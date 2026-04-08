@@ -21,8 +21,8 @@
 <script setup lang="ts">
 import { h } from "vue";
 import type { CrudTableColumn } from "~/types/crud";
+import { hostOS } from "~/constants";
 
-const backend = useBackend();
 const columns: CrudTableColumn<Record<string, unknown>>[] = [
   {
     accessorKey: "host",
@@ -31,15 +31,11 @@ const columns: CrudTableColumn<Record<string, unknown>>[] = [
     cell: ({ row }) => {
       const finding = row.original;
       if (finding.technology?.port?.host) {
-        const config = backend.hostOS.find(
-          (c) => c.value === finding.host?.os_type,
-        );
+        const config = hostOS.find((c) => c.value === finding.host?.os_type);
         return h(
           "a",
           {
             href: `/projects/${finding.project}/hosts/${finding.technology?.port?.host.id}`,
-            target: "_blank",
-            rel: "noopener noreferrer",
             class:
               "flex items-center gap-2 font-medium hover:text-primary hover:underline",
             onClick: (e: Event) => e.stopPropagation(),
@@ -69,15 +65,13 @@ const columns: CrudTableColumn<Record<string, unknown>>[] = [
             "a",
             {
               href: `/projects/${finding.project}/ports/${finding.technology?.port.id}`,
-              target: "_blank",
-              rel: "noopener noreferrer",
               class:
                 "flex items-center gap-2 hover:text-primary hover:underline",
               onClick: (e: Event) => e.stopPropagation(),
             },
             [
               h(resolveComponent("UIcon"), {
-                name: backend.getPortIcon(
+                name: getPortIcon(
                   finding.technology?.port.port,
                   finding.technology?.port.service,
                 ),
@@ -100,8 +94,6 @@ const columns: CrudTableColumn<Record<string, unknown>>[] = [
             "a",
             {
               href: `/projects/${finding.project}/technologies/${finding.technology.id}`,
-              target: "_blank",
-              rel: "noopener noreferrer",
               class: "font-medium hover:text-primary hover:underline",
               onClick: (e: Event) => e.stopPropagation(),
             },

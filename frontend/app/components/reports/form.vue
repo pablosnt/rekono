@@ -84,12 +84,11 @@
         class="w-full"
         :icon="
           formData.format
-            ? backend.reportFormats.find((f) => f.value === formData.format)
-                ?.icon
+            ? reportFormats.find((f) => f.value === formData.format)?.icon
             : 'i-lucide-file-type'
         "
         placeholder="Select format"
-        :items="backend.reportFormats"
+        :items="reportFormats"
         value-key="value"
         label-key="label"
         size="lg"
@@ -119,7 +118,7 @@
         class="w-full"
         icon="i-lucide-layers"
         placeholder="Select finding types"
-        :items="backend.findingTypes"
+        :items="findingTypes"
         value-key="value"
         label-key="value"
         multiple
@@ -137,10 +136,10 @@
               size="sm"
             >
               <UIcon
-                :name="backend.findingTypes.find((f) => f.value === type)?.icon"
+                :name="findingTypes.find((f) => f.value === type)?.icon"
                 class="w-3 h-3 mr-1"
               />
-              {{ backend.findingTypes.find((f) => f.value === type)?.label }}
+              {{ findingTypes.find((f) => f.value === type)?.label }}
             </UBadge>
           </div>
         </template>
@@ -152,6 +151,7 @@
 <script setup lang="ts">
 import type { CrudConfig } from "~/types/crud";
 import * as z from "zod";
+import { reportFormats, findingTypes } from "~/constants";
 
 const props = defineProps<{
   api: typeof useApi;
@@ -165,9 +165,8 @@ const emit = defineEmits<{
   error: [error: object];
 }>();
 
-const backend = useBackend();
+const options = useOptions();
 const route = useRoute();
-const utils = useUtils();
 const toast = useToast();
 const genericApi = useApi("/api/", true);
 const targetOptions = ref([]);
@@ -179,7 +178,7 @@ const formData = ref<Record<string, unknown>>({
   format: "json",
   only_true_positives: false,
   include_findings_from_user_input: false,
-  finding_types: backend.findingTypes.map((t) => t.value),
+  finding_types: findingTypes.map((t) => t.value),
 });
 const schema = z.object({
   target: z.number().optional(),
@@ -193,7 +192,7 @@ const loading = ref(false);
 const form = ref();
 
 onMounted(() => {
-  backend.getTargetOptions(targetOptions, { project: route.params.project_id });
+  options.targets(targetOptions, { project: route.params.project_id });
   if (formData.value.target) {
     onTargetChange(formData.value.target as number);
   }
@@ -208,7 +207,7 @@ function onTargetChange(targetId: number | undefined) {
     genericApi.list("tasks/", { target: targetId }, true).then((response) => {
       taskOptions.value = response.items.map((task) => ({
         id: task.id,
-        label: backend.getTaskName(task, false),
+        label: getTaskName(task, false),
       }));
     });
   }
@@ -233,7 +232,7 @@ function save() {
       "",
       formData.value,
       {},
-      utils.firstUpper(props.config.entityName),
+      firstUpper(props.config.entityName),
       [400, 401, 403, 429, 500],
     )
     .then((response) => {

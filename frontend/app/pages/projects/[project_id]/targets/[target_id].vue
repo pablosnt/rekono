@@ -1,11 +1,12 @@
 <template>
   <div>
+    <!-- TODO: Add dropdown with delete and copy link button -->
     <CrudHeader
       :api="api"
       :config="{
         entityNamePlural: target?.target,
         headerIcon: target
-          ? backend.targetTypes.find((t) => t.value === target.type)?.icon
+          ? targetTypes.find((t) => t.value === target.type)?.icon
           : undefined,
       }"
       title-size-class="text-3xl"
@@ -105,11 +106,11 @@
 
 <script setup lang="ts">
 import { useUserStore } from "~/store/user";
+import { targetTypes } from "~/constants";
 
 definePageMeta({ layout: "project" });
 const userStore = useUserStore();
 const route = useRoute();
-const backend = useBackend();
 const api = useApi("/api/");
 const target = ref();
 const notesButton = ref();

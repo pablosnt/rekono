@@ -6,7 +6,7 @@ export default function (
 ) {
   const config = useRuntimeConfig();
   const toast = useToast();
-  const utils = useUtils();
+
   const defaultHeaders = { Accept: "application/json" };
 
   function url(endpoint: string): string {
@@ -57,7 +57,7 @@ export default function (
     const field = Object.keys(error.data)[0];
     let value = Object.values(error.data)[0];
     value = Array.isArray(value) ? value[0] : value;
-    const message = utils.firstUpper(value);
+    const message = firstUpper(value);
     return field !== "non_field_errors" && include_field
       ? `${field}: ${message}`
       : message;

@@ -17,7 +17,7 @@
       @update:model-value="$emit('validation-change', newMembers.length > 0)"
     >
       <template #item-label="{ item }">
-        {{ backend.getUserDisplayName(item) }}
+        {{ getUserDisplayName(item) }}
       </template>
     </USelectMenu>
   </UFormField>
@@ -41,7 +41,6 @@ const emit = defineEmits<{
   "validation-change": [isValid: boolean];
   "new-loading": [newLoading: boolean];
 }>();
-const backend = useBackend();
 const route = useRoute();
 const addApi = useApi(`/api/projects/${route.params.project_id}/members/`);
 const toast = useToast();

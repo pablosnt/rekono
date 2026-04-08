@@ -1,7 +1,7 @@
 <template>
   <UModal
     :open="open"
-    :title="utils.firstUpper(verb)"
+    :title="firstUpper(verb)"
     :ui="{ content: 'sm:max-w-3xl sm:max-h-xl', footer: 'justify-end' }"
     :loading="loading"
     @update:open="(value) => $emit('open', value)"
@@ -9,7 +9,7 @@
     <template #body>
       <p class="text-gray-900 dark:text-white font-medium">
         {{
-          `Are you sure you want to ${verb.toLowerCase()} this ${utils.smartLowerCase(entityName)} ${isAsset ? "asset" : "finding"}?`
+          `Are you sure you want to ${verb.toLowerCase()} this ${smartLowerCase(entityName)} ${isAsset ? "asset" : "finding"}?`
         }}
       </p>
       <UAlert
@@ -60,7 +60,7 @@ const emit = defineEmits<{
   open: [open: boolean];
   switched: [];
 }>();
-const utils = useUtils();
+
 const toast = useToast();
 const loading = ref(false);
 const verb = computed(() =>
@@ -75,7 +75,7 @@ function switchFix() {
       emit("switched");
       emit("open", false);
       toast.add({
-        title: `${utils.firstUpper(utils.smartLowerCase(props.entityName))} ${props.isAsset ? "asset" : "finding"} ${verb.value.toLowerCase()}ed`,
+        title: `${firstUpper(smartLowerCase(props.entityName))} ${props.isAsset ? "asset" : "finding"} ${verb.value.toLowerCase()}ed`,
         color: props.finding.is_fixed ? "warning" : "success",
       });
     })

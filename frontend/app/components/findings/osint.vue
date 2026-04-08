@@ -11,7 +11,7 @@
         label: 'Type',
         icon: 'i-lucide-tag',
         type: 'select',
-        options: backend.osintDataTypes as FilterOption[],
+        options: osintDataTypes as FilterOption[],
         labelKey: 'value',
       },
     ]"
@@ -44,9 +44,9 @@
 <script setup lang="ts">
 import { h } from "vue";
 import type { CrudTableColumn, FilterOption } from "~/types/crud";
+import { osintDataTypes } from "~/constants";
 
 const api = useApi("/api/osint/");
-const backend = useBackend();
 const columns: CrudTableColumn<Record<string, unknown>>[] = [
   {
     accessorKey: "data",
@@ -61,7 +61,7 @@ const columns: CrudTableColumn<Record<string, unknown>>[] = [
     icon: "i-lucide-tag",
     cell: ({ row }) => {
       const type = row.original.data_type as string;
-      const config = backend.osintDataTypes.find((t) => t.value === type);
+      const config = osintDataTypes.find((t) => t.value === type);
       return h(
         resolveComponent("UBadge"),
         { color: "neutral", variant: "subtle" },

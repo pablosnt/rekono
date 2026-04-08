@@ -152,7 +152,6 @@
           />
           <UInputDate
             v-else-if="field.type === 'date'"
-            ref="inputDate"
             v-model="formData[field.key]"
             class="w-full"
             :min-value="field.minValue || today(getLocalTimeZone())"
@@ -216,11 +215,9 @@ const emit = defineEmits<{
   error: [error: object];
 }>();
 
-const utils = useUtils();
 const loading = ref(false);
 const showPassword = ref({});
 const form = ref();
-const inputDate = useTemplateRef("inputDate");
 const isFileUpload = ref(false);
 
 const formFields = computed(() => {
@@ -330,7 +327,7 @@ function save() {
   loading.value = true;
   emit("new-loading", true);
   const data = body();
-  const entityName = utils.firstUpper(props.config.entityName);
+  const entityName = firstUpper(props.config.entityName);
   const request = props.entity
     ? props.config.putEndpoint
       ? useApi("", true).update(

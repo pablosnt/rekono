@@ -53,6 +53,7 @@
 import { useTimeAgo } from "@vueuse/core";
 import type { Finding } from "~/types/models";
 import * as z from "zod";
+import { triageStatuses } from "~/constants";
 
 const props = defineProps<{
   open: boolean;
@@ -65,12 +66,10 @@ defineEmits<{
   triaged: [];
 }>();
 
-const backend = useBackend();
 const validation = useValidation();
 const loading = ref(false);
 const valid = ref(false);
 const form = ref();
-
 const config = {
   entityName: props.entityName,
   editFormFields: [
@@ -79,7 +78,7 @@ const config = {
       label: "Triage status",
       type: "select",
       required: true,
-      options: backend.triageStatuses,
+      options: triageStatuses,
       labelKey: "value",
     },
     {
@@ -92,7 +91,7 @@ const config = {
   ],
   editFormSchema: z.object({
     triage_status: z.enum(
-      backend.triageStatuses.map((s) => s.value) as [string, ...string[]],
+      triageStatuses.map((s) => s.value) as [string, ...string[]],
     ),
     triage_comment: validation.text("triage_comment", false, 300).optional(),
   }),

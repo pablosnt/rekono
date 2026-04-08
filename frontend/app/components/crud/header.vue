@@ -57,7 +57,7 @@
                     typeof ordering === 'string'
                       ? ordering === 'id'
                         ? 'ID'
-                        : utils.firstUpper(ordering)
+                        : firstUpper(ordering)
                       : ordering.label;
                   return { id, label };
                 },
@@ -112,8 +112,7 @@
                 ?.getAllColumns()
                 .filter((column) => column.getCanHide())
                 .map((column) => ({
-                  label:
-                    column.id === 'id' ? 'ID' : utils.firstUpper(column.id),
+                  label: column.id === 'id' ? 'ID' : firstUpper(column.id),
                   type: 'checkbox' as const,
                   checked: column.getIsVisible(),
                   onUpdateChecked(checked: boolean) {
@@ -186,7 +185,6 @@ const emit = defineEmits<{
   create: [];
   openCreate: [open: boolean];
 }>();
-const utils = useUtils();
 const search = ref("");
 const openFilters = ref(false);
 </script>

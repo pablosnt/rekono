@@ -11,7 +11,7 @@
         label: 'Port Status',
         icon: 'i-lucide-chevrons-left-right-ellipsis',
         type: 'select',
-        options: backend.portStatuses,
+        options: portStatuses,
         labelKey: 'value',
       },
       {
@@ -19,21 +19,20 @@
         label: 'Protocol',
         icon: 'i-lucide-network',
         type: 'select',
-        options: backend.portProtocols,
+        options: portProtocols,
       },
     ]"
     :ordering="['id', 'host', 'port', 'status', 'protocol', 'service']"
-    :visibility="{paths: false, technologies: false, vulnerabilities: false}"
+    :visibility="{ paths: false, technologies: false, vulnerabilities: false }"
   />
 </template>
 
 <script setup lang="ts">
 import { h } from "vue";
 import type { CrudTableColumn } from "~/types/crud";
+import { hostOS, portProtocols, portStatuses } from "~/constants";
 
 const route = useRoute();
-const backend = useBackend();
-
 const columns: CrudTableColumn<Record<string, unknown>>[] = [
   {
     accessorKey: "host",
@@ -42,16 +41,11 @@ const columns: CrudTableColumn<Record<string, unknown>>[] = [
     cell: ({ row }) => {
       const finding = row.original;
       if (finding.host) {
-        const config = backend.hostOS.find(
-          (c) => c.value === finding.host?.os_type,
-        );
+        const config = hostOS.find((c) => c.value === finding.host?.os_type);
         return h(
           "a",
-          // TODO: Review all this kind of links. We usually don't want new tabs, and we don't care about noreferrer between internal endpoints
           {
             href: `/projects/${finding.project}/hosts/${finding.host.id}`,
-            target: "_blank",
-            rel: "noopener noreferrer",
             class:
               "flex items-center gap-2 font-medium hover:text-primary hover:underline",
             onClick: (e: Event) => e.stopPropagation(),
@@ -101,7 +95,7 @@ const columns: CrudTableColumn<Record<string, unknown>>[] = [
       const finding = row.original;
       const service = finding.service as string | undefined;
       const port = finding.port as number;
-      const icon = backend.getPortIcon(port, service);
+      const icon = getPortIcon(port, service);
       return h("span", { class: "flex items-center gap-2 text-sm" }, [
         h(resolveComponent("UIcon"), { name: icon, class: "text-lg shrink-0" }),
         service ? service : h("span", { class: "text-muted" }, "—"),
@@ -115,7 +109,7 @@ const columns: CrudTableColumn<Record<string, unknown>>[] = [
     cell: ({ row }) => {
       const status = row.getValue("status") as string;
       if (!status) return h("span", { class: "text-sm" }, "—");
-      const config = backend.portStatuses.find((s) => s.value === status);
+      const config = portStatuses.find((s) => s.value === status);
       return h(
         resolveComponent("UBadge"),
         {

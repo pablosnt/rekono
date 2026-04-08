@@ -71,6 +71,7 @@ import type { CrudConfig, DropdownAction } from "~/types/crud";
 import { useUserStore } from "~/store/user";
 import { useTimeAgo } from "@vueuse/core";
 import type { Finding } from "~/types/models";
+import { triageStatuses } from "~/constants";
 
 const props = defineProps<{
   endpoint: string;
@@ -89,8 +90,7 @@ const props = defineProps<{
 }>();
 
 const userStore = useUserStore();
-const backend = useBackend();
-const utils = useUtils();
+const options = useOptions();
 const route = useRoute();
 const api = useApi(props.endpoint);
 const page = ref();
@@ -105,15 +105,15 @@ const taskOptions = ref();
 const toolOptions = ref();
 
 onMounted(() => {
-  backend.getTargetOptions(
+  options.targets(
     targetOptions,
     route.params.project_id ? { project: route.params.project_id } : undefined,
   );
-  backend.getTaskOptions(
+  options.tasks(
     taskOptions,
     route.params.project_id ? { project: route.params.project_id } : undefined,
   );
-  backend.getToolOptions(toolOptions);
+  options.tools(toolOptions);
 });
 
 const noteProps = computed(() => {
@@ -169,7 +169,7 @@ const config: CrudConfig<Finding> = reactive({
             },
           );
         } else if (props.isTriageable) {
-          const config = backend.triageStatuses.find(
+          const config = triageStatuses.find(
             (s) => s.value === finding.triage_status,
           );
           return finding.triage_by && finding.triage_date
@@ -335,7 +335,7 @@ const config: CrudConfig<Finding> = reactive({
     hacktricks: false,
   }),
   searchable: true,
-  searchPlaceholder: `Search ${utils.smartLowerCase(props.entityNamePlural)}...`,
+  searchPlaceholder: `Search ${smartLowerCase(props.entityNamePlural)}...`,
   filters: [
     {
       key: "target",
@@ -343,8 +343,6 @@ const config: CrudConfig<Finding> = reactive({
       icon: "i-lucide-locate-fixed",
       type: "select" as const,
       options: targetOptions,
-      valueKey: "id",
-      labelKey: "target",
     },
     {
       key: "task",
@@ -366,7 +364,7 @@ const config: CrudConfig<Finding> = reactive({
       label: "Triage Status",
       icon: "i-lucide-shield-check",
       type: "select",
-      options: backend.triageStatuses,
+      options: triageStatuses,
       labelKey: "value",
     },
     {

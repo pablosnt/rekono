@@ -1,7 +1,6 @@
 import * as z from "zod";
 
 export default function () {
-  const utils = useUtils();
   const passwordPolicy = z
     .string("Password is required")
     .min(12, "Must be at least 12 characters")
@@ -26,7 +25,7 @@ export default function () {
   ) {
     const fieldName = field.replaceAll("_", " ");
     let policy = required
-      ? z.string(`${utils.firstUpper(fieldName)} is required`).min(1)
+      ? z.string(`${firstUpper(fieldName)} is required`).min(1)
       : z.string();
     if (max) {
       policy = policy.max(max);

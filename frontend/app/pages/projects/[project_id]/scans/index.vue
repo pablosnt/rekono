@@ -11,12 +11,17 @@ import { h } from "vue";
 import type { CrudConfig, CrudTableColumn, FilterOption } from "~/types/crud";
 import type { Task } from "~/types/models";
 import { useUserStore } from "~/store/user";
+import {
+  stages,
+  intensities,
+  targetTypes,
+  executionStatuses,
+} from "~/constants";
 
 definePageMeta({ layout: "project" });
 const userStore = useUserStore();
 const route = useRoute();
-const backend = useBackend();
-const utils = useUtils();
+const options = useOptions();
 const api = useApi("/api/tasks/");
 const page = ref();
 const refresh = ref<ReturnType<typeof setTimeout> | null>(null);
@@ -45,13 +50,12 @@ function onFetched(items: Task[]) {
 }
 
 onMounted(() => {
-  backend.getTargetOptions(targetOptions, {
-    project: route.params.project_id as string,
-  });
-  backend.getUserOptions(executorOptions, { is_active: true, role: "Auditor" });
-  backend.getToolOptions(toolOptions);
-  backend.getConfigurationOptions(configurationOptions, { ordering: "-tool" });
-  backend.getProcessOptions(processOptions);
+  options.targets(targetOptions, { project: route.params.project_id });
+  options.users(executorOptions, { is_active: true, role: "Admin" });
+  options.users(executorOptions, { is_active: true, role: "Auditor" });
+  options.tools(toolOptions);
+  options.configurations(configurationOptions, { ordering: "-tool" });
+  options.processes(processOptions);
 });
 
 onUnmounted(() => {
@@ -128,8 +132,8 @@ const config: CrudConfig<Task> = reactive({
             h(resolveComponent("UIcon"), {
               class: "w-4 h-4 text-muted-foreground shrink-0",
               name:
-                backend.targetTypes.find((t) => t.value === task.target?.type)
-                  ?.icon || "i-lucide-locate-fixed",
+                targetTypes.find((t) => t.value === task.target?.type)?.icon ||
+                "i-lucide-locate-fixed",
             }),
             h("span", { class: "font-medium" }, label),
           ],
@@ -142,9 +146,7 @@ const config: CrudConfig<Task> = reactive({
       icon: "i-lucide-activity",
       cell: ({ row }) => {
         const task = row.original as Task;
-        const status = backend.executionStatuses.find(
-          (s) => s.value === task.status,
-        );
+        const status = executionStatuses.find((s) => s.value === task.status);
         return task.status === "Running"
           ? h(resolveComponent("UProgress"), {
               status: true,
@@ -171,9 +173,7 @@ const config: CrudConfig<Task> = reactive({
       icon: "i-lucide-gauge",
       cell: ({ row }) => {
         const intensityValue = row.getValue("intensity") as string;
-        const intensity = backend.intensities.find(
-          (i) => i.label === intensityValue,
-        );
+        const intensity = intensities.find((i) => i.label === intensityValue);
         return h(
           resolveComponent("UBadge"),
           {
@@ -233,7 +233,7 @@ const config: CrudConfig<Task> = reactive({
         return h(
           "span",
           { class: "font-medium tabular-nums" },
-          task.start && task.end ? utils.duration(task.start, task.end) : "—",
+          task.start && task.end ? duration(task.start, task.end) : "—",
         );
       },
     },
@@ -285,8 +285,6 @@ const config: CrudConfig<Task> = reactive({
       icon: "i-lucide-locate-fixed",
       type: "select" as const,
       options: targetOptions,
-      valueKey: "id",
-      labelKey: "target",
     },
     {
       key: "process",
@@ -314,14 +312,14 @@ const config: CrudConfig<Task> = reactive({
       label: "Stage",
       icon: "i-lucide-layers",
       type: "select" as const,
-      options: backend.stages,
+      options: stages,
     },
     {
       key: "intensity",
       label: "Intensity",
       icon: "i-lucide-gauge",
       type: "select" as const,
-      options: backend.intensities,
+      options: intensities,
     },
     {
       key: "executor",
@@ -379,7 +377,7 @@ const config: CrudConfig<Task> = reactive({
       props: {
         color: "neutral",
         variant: "subtle",
-        description: backend.getTaskName(task, true),
+        description: getTaskName(task, true),
         ui: { root: "text-center font-bold" },
         class: "mt-4",
       },

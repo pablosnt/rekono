@@ -49,9 +49,9 @@
 import type { CrudConfig } from "~/types/crud";
 import { useUserStore } from "~/store/user";
 import type { Tool } from "~/types/models";
+import { stages, intensities } from "~/constants";
 
 const userStore = useUserStore();
-const backend = useBackend();
 
 function onCardClick(target: HTMLElement, reference: string) {
   if (target.closest("button") || target.closest('[role="button"]')) {
@@ -74,14 +74,14 @@ const config: CrudConfig<Tool> = reactive({
       label: "Stage",
       icon: "i-lucide-layers",
       type: "select" as const,
-      options: backend.stages,
+      options: stages,
     },
     {
       key: "intensity",
       label: "Intensity",
       icon: "i-lucide-gauge",
       type: "select" as const,
-      options: backend.intensities,
+      options: intensities,
     },
     {
       key: "is_installed",

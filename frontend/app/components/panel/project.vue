@@ -63,11 +63,11 @@
 <script setup lang="ts">
 import { useUserStore } from "~/store/user";
 import type { Note, Task, Project } from "~/types/models";
+import { targetTypes } from "~/constants";
 
 const api = useApi();
 const route = useRoute();
 const userStore = useUserStore();
-const backend = useBackend();
 const breadcrumb = ref([]);
 const items = ref([]);
 const projectEntity = ref({ name: "Rekono" });
@@ -321,8 +321,7 @@ function onTargetChange() {
         if (targetOption.id !== parseInt(route.params.target_id)) {
           children.push({
             label: targetOption.target,
-            icon: backend.targetTypes.find((t) => t.value === targetOption.type)
-              ?.icon,
+            icon: targetTypes.find((t) => t.value === targetOption.type)?.icon,
             to: `/projects/${route.params.project_id}/targets/${targetOption.id}`,
           });
         } else {
@@ -333,8 +332,7 @@ function onTargetChange() {
         breadcrumb.value.push({
           slot: children.length > 0 ? "dropdown" : undefined,
           label: currentTarget.target,
-          icon: backend.targetTypes.find((t) => t.value === currentTarget.type)
-            ?.icon,
+          icon: targetTypes.find((t) => t.value === currentTarget.type)?.icon,
           to: `/projects/${route.params.project_id}/targets/${route.params.target_id}`,
           children: children,
         });

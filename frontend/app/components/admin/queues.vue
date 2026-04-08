@@ -18,7 +18,7 @@
         <UPageCard
           v-for="queue in queueStats"
           :key="queue.name"
-          :title="utils.firstUpper(queue.name)"
+          :title="firstUpper(queue.name)"
           :description="`${queue.workers} workers`"
           :icon="queue.icon"
           variant="subtle"
@@ -117,7 +117,6 @@ import { useTimeAgo } from "@vueuse/core";
 
 const api = useApi("/api/");
 const userStore = useUserStore();
-const utils = useUtils();
 const loading = ref(false);
 const queueStats = ref<Array<Record<string, string | number>>>([]);
 const monitor = ref();

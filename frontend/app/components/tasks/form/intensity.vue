@@ -7,7 +7,7 @@
         :min="minIntensity"
         :max="maxIntensity"
         :tooltip="{
-          text: backend.intensities[intensity - 1].label,
+          text: intensities[intensity - 1].label,
           open: true,
           content: {
             side: 'top',
@@ -15,7 +15,7 @@
             collisionPadding: 8,
           },
         }"
-        :color="backend.intensities[intensity - 1]?.color"
+        :color="intensities[intensity - 1]?.color"
         @update:model-value="$emit('update-intensity', intensity)"
       />
       <UAlert
@@ -31,6 +31,8 @@
 </template>
 
 <script setup lang="ts">
+import { intensities } from "~/constants";
+
 const props = defineProps<{
   minIntensity: number;
   maxIntensity: number;
@@ -40,7 +42,6 @@ defineEmits<{
   "update-intensity": [newIntensity: number];
 }>();
 
-const backend = useBackend();
 const intensity = ref(3);
 
 watch(

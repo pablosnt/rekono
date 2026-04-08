@@ -172,7 +172,6 @@ definePageMeta({ layout: "project" });
 const route = useRoute();
 const userStore = useUserStore();
 const toast = useToast();
-const backend = useBackend();
 const api = useApi("/api/notes/");
 const validation = useValidation();
 const note = ref();
@@ -221,7 +220,7 @@ function copyNoteLink() {
 
 function fetchNote() {
   api.get(`${route.params.note_id}/`).then((response) => {
-    response.related_entity = backend.getNoteRelatedEntity(response);
+    response.related_entity = getNoteRelatedEntity(response);
     note.value = response;
     currentNote.value = response;
     canEdit.value = userStore.isOwner(note.value);

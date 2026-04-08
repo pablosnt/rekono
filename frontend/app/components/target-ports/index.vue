@@ -47,7 +47,6 @@ import type { CrudConfig, CrudTableColumn } from "~/types/crud";
 import { useUserStore } from "~/store/user";
 
 const userStore = useUserStore();
-const backend = useBackend();
 const route = useRoute();
 const validation = useValidation();
 const authenticationApi = useApi("/api/authentications/");
@@ -82,7 +81,7 @@ const config: CrudConfig<TargetPort> = reactive({
         const port = row.getValue("port") as number;
         return h("div", { class: "flex items-center gap-2" }, [
           h(resolveComponent("UIcon"), {
-            name: backend.getPortIcon(port),
+            name: getPortIcon(port),
             class: "w-4 h-4",
           }),
           h("span", { class: "font-medium" }, port.toString()),

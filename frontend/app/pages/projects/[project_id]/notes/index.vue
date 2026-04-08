@@ -5,7 +5,7 @@
     @fetched="
       (items) =>
         items.forEach(
-          (item) => (item.related_entity = backend.getNoteRelatedEntity(item)),
+          (item) => (item.related_entity = getNoteRelatedEntity(item)),
         )
     "
   >
@@ -112,7 +112,7 @@
               @click="
                 item.forked
                   ? undefined
-                  : apiNotes.create(`${item.id}/fork/`, {}).then(() => {
+                  : api.create(`${item.id}/fork/`, {}).then(() => {
                       page.fetch();
                       toast.add({
                         title: 'Note Forked',
@@ -138,11 +138,10 @@ import { useTimeAgo } from "@vueuse/core";
 definePageMeta({ layout: "project" });
 
 const userStore = useUserStore();
-const backend = useBackend();
+const options = useOptions();
 const route = useRoute();
 const toast = useToast();
-const api = useApi("/api/");
-const apiNotes = useApi("/api/notes/");
+const api = useApi("/api/notes/");
 const page = ref();
 const userOptions = ref<FilterOption[]>([]);
 const targetOptions = ref();
@@ -162,7 +161,7 @@ function getNoteDescription(note: Note): string {
 }
 
 function switchVisibility(note: Note) {
-  apiNotes
+  api
     .update(`${note.id}/`, {
       project: note.project,
       target_id: note.target?.id,
@@ -201,8 +200,6 @@ const config: CrudConfig<Note> = reactive({
         icon: "i-lucide-locate-fixed",
         type: "select" as const,
         options: targetOptions,
-        valueKey: "id",
-        labelKey: "target",
       },
       {
         key: "related_task",
@@ -321,63 +318,83 @@ const config: CrudConfig<Note> = reactive({
   canDelete: (note: Note) => userStore.isOwner(note),
 });
 
-function getFindingOptions(
-  endpoint: string,
-  variable: Ref,
-  parser: (i: unknown) => unknown,
-) {
-  api
-    .list(endpoint, { project: route.params.project_id }, true)
-    .then(
-      (response) => (variable.value = response.items.map((i) => parser(i))),
-    );
-}
-
 onMounted(() => {
-  backend.getUserOptions(userOptions, { role: "Admin", is_active: true });
-  backend.getUserOptions(userOptions, { role: "Auditor", is_active: true });
-  backend.getTargetOptions(targetOptions, { project: route.params.project_id });
-  backend.getTaskOptions(taskOptions, { project: route.params.project_id });
-  // todo: Define types
-  getFindingOptions("osint/", osintOptions, (osint) => {
-    return { label: osint.data, value: osint.id };
-  });
-  getFindingOptions("hosts/", hostOptions, (host) => {
-    return { label: host.ip, value: host.id };
-  });
-  getFindingOptions("ports/", portOptions, (port) => {
-    return {
-      label: port.host ? `${port.host?.ip}:${port.port}` : port.port.toString(),
-      value: port.id,
-      icon: backend.getPortIcon(port.port, port.service),
-    };
-  });
-  getFindingOptions("technologies/", technologyOptions, (technology) => {
-    return {
-      label: technology.version
-        ? `${technology.name} ${technology.version}`
-        : technology.name,
-      value: technology.id,
-    };
-  });
-  getFindingOptions("credentials/", credentialOptions, (credential) => {
-    return {
-      label:
-        credential.email ||
-        credential.username ||
-        `Credential #${credential.id}`,
-      value: credential.id,
-    };
-  });
-  getFindingOptions(
-    "vulnerabilities/",
-    vulnerabilityOptions,
+  options.users(userOptions, { role: "Admin", is_active: true });
+  options.users(userOptions, { role: "Auditor", is_active: true });
+  options.targets(targetOptions, { project: route.params.project_id });
+  options.tasks(taskOptions, { project: route.params.project_id });
+  options.findings(
+    "osint",
+    (osint) => {
+      return { label: osint.data, value: osint.id };
+    },
+    osintOptions,
+    { project: route.params.project_id },
+  );
+  options.findings(
+    "hosts",
+    (host) => {
+      return { label: host.ip, value: host.id };
+    },
+    hostOptions,
+    { project: route.params.project_id },
+  );
+  options.findings(
+    "ports",
+    (port) => {
+      return {
+        label: port.host
+          ? `${port.host?.ip}:${port.port}`
+          : port.port.toString(),
+        value: port.id,
+        icon: getPortIcon(port.port, port.service),
+      };
+    },
+    portOptions,
+    { project: route.params.project_id },
+  );
+  options.findings(
+    "technologies",
+    (technology) => {
+      return {
+        label: technology.version
+          ? `${technology.name} ${technology.version}`
+          : technology.name,
+        value: technology.id,
+      };
+    },
+    technologyOptions,
+    { project: route.params.project_id },
+  );
+  options.findings(
+    "credentials",
+    (credential) => {
+      return {
+        label:
+          credential.email ||
+          credential.username ||
+          `Credential #${credential.id}`,
+        value: credential.id,
+      };
+    },
+    credentialOptions,
+    { project: route.params.project_id },
+  );
+  options.findings(
+    "vulnerabilities",
     (vulnerability) => {
       return { label: vulnerability.name, value: vulnerability.id };
     },
+    vulnerabilityOptions,
+    { project: route.params.project_id },
   );
-  getFindingOptions("exploits/", exploitOptions, (exploit) => {
-    return { label: exploit.title, value: exploit.id };
-  });
+  options.findings(
+    "exploits",
+    (exploit) => {
+      return { label: exploit.title, value: exploit.id };
+    },
+    exploitOptions,
+    { project: route.params.project_id },
+  );
 });
 </script>

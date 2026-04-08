@@ -21,14 +21,13 @@
         v-model="formData['item'] as any"
         class="w-full"
         placeholder="Select entity to receive alerts about"
-        :items="backend.alerts"
+        :items="alertItems"
         value-key="item"
         label-key="item"
         required
         :icon="
           formData['item']
-            ? backend.alerts.find((alert) => alert.item === formData['item'])
-                ?.icon
+            ? alertItems.find((alert) => alert.item === formData['item'])?.icon
             : undefined
         "
         leading
@@ -40,8 +39,8 @@
       v-if="
         formData['item'] &&
         ![null, 'trending'].includes(
-          backend.alerts.find((alert) => alert.item == formData['item'])
-            ?.field || null,
+          alertItems.find((alert) => alert.item == formData['item'])?.field ||
+            null,
         )
       "
       class="mt-3"
@@ -51,7 +50,7 @@
       <UInput
         v-model="formData['value'] as string"
         class="w-full"
-        :placeholder="`Filter by ${utils.smartLowerCase((backend.alerts.find((alert) => alert.item == formData['item'])?.field || '').toUpperCase())}`"
+        :placeholder="`Filter by ${smartLowerCase((alertItems.find((alert) => alert.item == formData['item'])?.field || '').toUpperCase())}`"
         size="lg"
       />
     </UFormField>
@@ -67,6 +66,7 @@
 
 <script setup lang="ts">
 import type { CrudConfig } from "~/types/crud";
+import { alertItems } from "~/constants";
 import * as z from "zod";
 
 const props = defineProps<{
@@ -81,8 +81,6 @@ const emit = defineEmits<{
   error: [error: object];
 }>();
 
-const backend = useBackend();
-const utils = useUtils();
 const route = useRoute();
 const validation = useValidation();
 const formData = ref<Record<string, unknown>>({
@@ -113,7 +111,7 @@ function validate(data) {
 function save() {
   loading.value = true;
   emit("new-loading", true);
-  const entityName = utils.firstUpper(props.config.entityName);
+  const entityName = firstUpper(props.config.entityName);
   const request = props.entity
     ? props.api.update(
         props.entity.id ? `${props.entity.id}/` : "",

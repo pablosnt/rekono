@@ -114,7 +114,6 @@ const emit = defineEmits<{
   "update-target-port-options": [hasOptions: boolean];
 }>();
 
-const backend = useBackend();
 const project = ref(props.defaultProject);
 const projectOptions = ref([]);
 const target = ref(props.defaultTarget);
@@ -161,7 +160,7 @@ function onTarget(targetId: number | undefined) {
           label: port.path
             ? `${port.port} - ${port.path}`
             : port.port.toString(),
-          icon: backend.getPortIcon(port.port),
+          icon: getPortIcon(port.port),
         }));
         emit("update-target-port-options", response.items.length > 0);
       });

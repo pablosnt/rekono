@@ -14,7 +14,7 @@
               component: h(
                 'p',
                 { class: 'text-gray-900 dark:text-white font-medium' },
-                `Are you sure you want to delete this ${utils.smartLowerCase(config.entityName)}? This action can't be undone.`,
+                `Are you sure you want to delete this ${smartLowerCase(config.entityName)}? This action can't be undone.`,
               ),
             },
           ]"
@@ -50,14 +50,12 @@ const props = defineProps<{
   config: CrudConfig;
   api: typeof useApi;
 }>();
-
 const emit = defineEmits<{
   open: [open: boolean];
   deleted: [];
 }>();
 
 const loading = ref(false);
-const utils = useUtils();
 
 function remove() {
   loading.value = true;
@@ -67,14 +65,14 @@ function remove() {
         {},
         props.config.deleteVerb
           ? undefined
-          : utils.firstUpper(props.config.entityName),
+          : firstUpper(props.config.entityName),
       )
     : props.api.remove(
         `${props.item.id}/`,
         {},
         props.config.deleteVerb
           ? undefined
-          : utils.firstUpper(props.config.entityName),
+          : firstUpper(props.config.entityName),
       )
   )
     .then(() => {

@@ -26,11 +26,11 @@ import { h } from "vue";
 import type { CrudConfig, CrudTableColumn } from "~/types/crud";
 import { useUserStore } from "~/store/user";
 import type { Target } from "~/types/models";
+import { targetTypes } from "~/constants";
 
 definePageMeta({ layout: "project" });
 const userStore = useUserStore();
 const route = useRoute();
-const backend = useBackend();
 const selectedTarget = ref<Target | null>(null);
 const showReportModal = ref(false);
 const notesButton = ref();
@@ -78,7 +78,7 @@ const config: CrudConfig<Target> = reactive({
       icon: "i-lucide-tag",
       cell: ({ row }) => {
         const type = row.getValue("type") as string;
-        const typeConfig = backend.targetTypes.find((t) => t.value === type);
+        const typeConfig = targetTypes.find((t) => t.value === type);
         return h(
           resolveComponent("UBadge"),
           {
@@ -159,7 +159,7 @@ const config: CrudConfig<Target> = reactive({
       label: "Type",
       icon: "i-lucide-tag",
       type: "select" as const,
-      options: backend.targetTypes,
+      options: targetTypes,
       labelKey: "value",
     },
   ],

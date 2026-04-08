@@ -50,13 +50,13 @@ import type { CrudConfig } from "~/types/crud";
 import type { User } from "~/types/models";
 import { useUserStore } from "~/store/user";
 import * as z from "zod";
+import { roles } from "~/constants";
 
 const userStore = useUserStore();
-const backend = useBackend();
 const validation = useValidation();
 const toast = useToast();
 const api = useApi("/api/users/");
-const roleOptions = backend.roles.map((role) => {
+const roleOptions = roles.map((role) => {
   return { label: role, value: role };
 });
 
@@ -70,7 +70,7 @@ function getUserActions(item: User, onEdit: () => void, onDelete: () => void) {
         api.create(`${item.id}/enable/`, {}).then(() => {
           toast.add({
             title: "User enabled",
-            description: `${backend.getUserDisplayName(item)} has been enabled successfully`,
+            description: `${getUserDisplayName(item)} has been enabled successfully`,
             color: "success",
           });
           item.is_active = true;
@@ -86,7 +86,7 @@ function getUserActions(item: User, onEdit: () => void, onDelete: () => void) {
         api.create(`${item.id}/resend/`, {}).then(() => {
           toast.add({
             title: "Invitation sent",
-            description: `Invitation has been resent to ${backend.getUserDisplayName(item)}`,
+            description: `Invitation has been resent to ${getUserDisplayName(item)}`,
             color: "success",
           });
         });
@@ -177,7 +177,7 @@ const config: CrudConfig<User> = reactive({
   ],
   createFormSchema: z.object({
     email: validation.email(),
-    role: z.enum(backend.roles),
+    role: z.enum(roles),
   }),
   editFormFields: [
     {
@@ -190,10 +190,10 @@ const config: CrudConfig<User> = reactive({
     },
   ],
   editFormSchema: z.object({
-    role: z.enum(backend.roles),
+    role: z.enum(roles),
   }),
   modalAvatar: (user: User) => ({
-    text: backend.getUserDisplayName(user).charAt(0).toUpperCase(),
+    text: getUserDisplayName(user).charAt(0).toUpperCase(),
   }),
   deleteMessage: (user: User) => [
     {
@@ -208,7 +208,7 @@ const config: CrudConfig<User> = reactive({
       props: {
         color: "neutral",
         variant: "subtle",
-        description: backend.getUserDisplayName(user),
+        description: getUserDisplayName(user),
         ui: { root: "text-center font-bold" },
         class: "mt-4",
       },

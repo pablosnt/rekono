@@ -11,7 +11,7 @@
         label: 'Type',
         icon: 'i-lucide-tag',
         type: 'select',
-        options: backend.pathTypes as FilterOption[],
+        options: pathTypes as FilterOption[],
         labelKey: 'value',
       },
     ]"
@@ -22,8 +22,7 @@
 <script setup lang="ts">
 import { h } from "vue";
 import type { CrudTableColumn, FilterOption } from "~/types/crud";
-
-const backend = useBackend();
+import { hostOS, pathTypes } from "~/constants";
 
 const columns: CrudTableColumn<Record<string, unknown>>[] = [
   {
@@ -33,15 +32,13 @@ const columns: CrudTableColumn<Record<string, unknown>>[] = [
     cell: ({ row }) => {
       const finding = row.original;
       if (finding.port?.host) {
-        const config = backend.hostOS.find(
+        const config = hostOS.find(
           (c) => c.value === finding.port?.host?.os_type,
         );
         return h(
           "a",
           {
             href: `/projects/${finding.project}/hosts/${finding.port?.host.id}`,
-            target: "_blank",
-            rel: "noopener noreferrer",
             class:
               "flex items-center gap-2 font-medium hover:text-primary hover:underline",
             onClick: (e: Event) => e.stopPropagation(),
@@ -71,8 +68,6 @@ const columns: CrudTableColumn<Record<string, unknown>>[] = [
             "a",
             {
               href: `/projects/${finding.project}/ports/${finding.port.id}`,
-              target: "_blank",
-              rel: "noopener noreferrer",
               class:
                 "flex items-center gap-2 font-medium hover:text-primary hover:underline",
               onClick: (e: Event) => e.stopPropagation(),
@@ -80,10 +75,7 @@ const columns: CrudTableColumn<Record<string, unknown>>[] = [
             [
               // TODO: This kind of cell should be a component. We are duplicating a lot of HTML code, as TS
               h(resolveComponent("UIcon"), {
-                name: backend.getPortIcon(
-                  finding.port.port,
-                  finding.port.service,
-                ),
+                name: getPortIcon(finding.port.port, finding.port.service),
                 class: "text-2xl",
               }),
               finding.port.port,
@@ -107,7 +99,7 @@ const columns: CrudTableColumn<Record<string, unknown>>[] = [
     cell: ({ row }) => {
       const type = row.getValue("type") as string;
       if (!type) return h("span", { class: "text-sm" }, "—");
-      const config = backend.pathTypes.find((t) => t.value === type);
+      const config = pathTypes.find((t) => t.value === type);
       return h(
         resolveComponent("UBadge"),
         { color: "neutral", variant: "subtle" },
@@ -132,7 +124,7 @@ const columns: CrudTableColumn<Record<string, unknown>>[] = [
       if (!status) return h("span", { class: "text-sm" }, "—");
       return h(
         resolveComponent("UBadge"),
-        { color: backend.httpStatusColor(status), variant: "subtle" },
+        { color: httpStatusColor(status), variant: "subtle" },
         { default: () => String(status) },
       );
     },

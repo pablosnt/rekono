@@ -169,7 +169,7 @@ import { CellSelection } from "@tiptap/pm/tables";
 defineProps<{ entityId: string | number; canEdit: boolean }>();
 defineEmits<{ "update:modelValue": [value: string[]] }>();
 const modelValue = defineModel<string>();
-const utils = useUtils();
+
 const selectedNode = ref<{ node: JSONContent; pos: number }>();
 const appendToBody = import.meta.client ? () => document.body : undefined;
 const customHandlers = {
@@ -460,7 +460,7 @@ function dragHandleItems(editor: Editor) {
   if (!selectedNode.value?.node?.type) return [];
   const label = {
     type: "label",
-    label: utils.firstUpper(selectedNode.value.node.type),
+    label: firstUpper(selectedNode.value.node.type),
   };
   const modificable = !["image", "table"].includes(
     selectedNode.value?.node?.type,

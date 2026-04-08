@@ -148,7 +148,7 @@ class PathTest(FindingTest, TestCase):
     endpoint = "/api/paths/"
     expected_defectdojo = {
         "title": "Path discovered",
-        "description": "Host: 10.10.10.10\nPort: 80\nPath: /index.html\nType: ENDPOINT\nStatus: 200",
+        "description": "Host: 10.10.10.10\nPort: 80\nPath: /index.html\nType: Endpoint\nStatus: 200",
         "severity": Severity.INFO,
     }
     expected_string = f"10.10.10.10 - 80 - {TransportProtocol.TCP.value} - /index.html"

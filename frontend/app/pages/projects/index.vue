@@ -11,12 +11,13 @@ import type { Project } from "~/types/models";
 
 const userStore = useUserStore();
 const validation = useValidation();
-const backend = useBackend();
+const options = useOptions();
 const userOptions = ref<FilterOption[]>([]);
 
 onMounted(() => {
-  backend.getUserOptions(userOptions, { role: "Admin", is_active: true });
+  options.users(userOptions, { role: "Admin", is_active: true });
 });
+
 // todo: add link to DefectDojo if sync is enabled
 const config: CrudConfig<Project> = reactive({
   endpoint: "/api/projects/",

@@ -13,7 +13,7 @@
       <UFormField label="Authentication Type" name="type" :required="true">
         <USelectMenu
           v-model="formData.type"
-          :items="backend.authenticationTypes"
+          :items="authenticationTypes"
           class="w-full"
           size="lg"
           required
@@ -65,6 +65,7 @@
 import * as z from "zod";
 import type { CrudConfig } from "~/types/crud";
 import type { TargetPort } from "~/types/models";
+import { authenticationTypes } from "~/constants";
 
 const props = defineProps<{ entity: TargetPort; config: CrudConfig }>();
 const emit = defineEmits<{
@@ -75,8 +76,6 @@ const emit = defineEmits<{
 }>();
 
 const validation = useValidation();
-const backend = useBackend();
-const utils = useUtils();
 const form = ref();
 const formData = ref({
   target_port: props.entity.id,
@@ -86,7 +85,7 @@ const formData = ref({
 });
 emit("validation-change", true);
 const formSchema = z.object({
-  type: z.enum(backend.authenticationTypes),
+  type: z.enum(authenticationTypes),
   name: validation.name("name", formData.value.type !== "None", 100),
   secret: validation.secret("secret", formData.value.type !== "None", 500),
 });
@@ -127,7 +126,7 @@ function save() {
     loading.value = true;
     emit("new-loading", true);
     useApi(props.config.endpoint)
-      .create("", formData.value, {}, utils.firstUpper(props.config.entityName))
+      .create("", formData.value, {}, firstUpper(props.config.entityName))
       .then((response) => {
         emit("submit", response);
       })

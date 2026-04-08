@@ -8,10 +8,11 @@ import type { CrudConfig, FilterOption } from "~/types/crud";
 import * as z from "zod";
 import { useUserStore } from "~/store/user";
 import type { Wordlist } from "~/types/models";
+import { wordlistTypes } from "~/constants";
 
 const userStore = useUserStore();
 const validation = useValidation();
-const backend = useBackend();
+const options = useOptions();
 const api = useApi("/api/");
 const maxMbSize = ref(1);
 const maxWordlistSize = ref(1000000);
@@ -30,7 +31,8 @@ const formFields = [
     type: "select",
     required: true,
     placeholder: "Select wordlist type",
-    options: backend.wordlistTypes,
+    options: wordlistTypes,
+    labelKey: "value",
   },
 ];
 
@@ -43,8 +45,8 @@ onMounted(() => {
     .then((response) => {
       maxWordlistSize.value = response.items[0]?.size || maxWordlistSize.value;
     });
-  backend.getUserOptions(userOptions, { role: "Admin", is_active: true });
-  backend.getUserOptions(userOptions, { role: "Auditor", is_active: true });
+  options.users(userOptions, { role: "Admin", is_active: true });
+  options.users(userOptions, { role: "Auditor", is_active: true });
 });
 
 const config: CrudConfig<Wordlist> = reactive({
@@ -76,7 +78,7 @@ const config: CrudConfig<Wordlist> = reactive({
         return h(resolveComponent("UBadge"), {
           color: "neutral",
           variant: "subtle",
-          icon: backend.wordlistTypes.find((item) => item.value === type)?.icon,
+          icon: wordlistTypes.find((item) => item.value === type)?.icon,
           label: type,
         });
       },
@@ -135,7 +137,8 @@ const config: CrudConfig<Wordlist> = reactive({
         label: "Type",
         icon: "i-lucide-tag",
         type: "select" as const,
-        options: backend.wordlistTypes,
+        options: wordlistTypes,
+        labelKey: "value",
       },
       {
         key: "size",
@@ -191,9 +194,7 @@ const config: CrudConfig<Wordlist> = reactive({
   get createFormSchema() {
     return z.object({
       name: validation.name("name", true, 100),
-      type: z.enum(
-        backend.wordlistTypes.map((t) => t.value) as [string, ...string[]],
-      ),
+      type: z.enum(wordlistTypes.map((t) => t.value) as [string, ...string[]]),
       file: z
         .file("File is required")
         .max(maxMbSize.value * 1024 * 1024)
@@ -203,9 +204,7 @@ const config: CrudConfig<Wordlist> = reactive({
   editFormFields: formFields,
   editFormSchema: z.object({
     name: validation.name("name", true, 100),
-    type: z.enum(
-      backend.wordlistTypes.map((t) => t.value) as [string, ...string[]],
-    ),
+    type: z.enum(wordlistTypes.map((t) => t.value) as [string, ...string[]]),
   }),
   deleteMessage: (wordlist: Wordlist) => [
     {

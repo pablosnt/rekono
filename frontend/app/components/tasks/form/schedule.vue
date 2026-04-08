@@ -120,7 +120,7 @@
             />
             <USelect
               v-model="repeatTimeUnit"
-              :items="backend.timeUnits"
+              :items="timeUnits"
               class="w-32"
               @update:model-value="
                 $emit('update-repeat-time-unit', repeatTimeUnit)
@@ -136,6 +136,7 @@
 <script setup lang="ts">
 import type { ZonedDateTime } from "@internationalized/date";
 import { today, now, getLocalTimeZone } from "@internationalized/date";
+import { timeUnits } from "~/constants";
 
 defineEmits<{
   "update-scheduled-at": [newScheduledAt: ZonedDateTime | undefined];
@@ -143,7 +144,6 @@ defineEmits<{
   "update-repeat-time-unit": [newRepeatTimeUnit: string];
 }>();
 
-const backend = useBackend();
 const inputDate = useTemplateRef("inputDate");
 const scheduledDate = ref();
 const scheduledAt = ref();

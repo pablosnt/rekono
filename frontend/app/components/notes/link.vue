@@ -12,7 +12,6 @@
         :disabled="disabled"
       />
     </UTooltip>
-
     <template #content>
       <UInput
         v-model="url"
@@ -39,9 +38,7 @@
             title="Apply link"
             @click="setLink"
           />
-
           <USeparator orientation="vertical" class="h-6 mx-1" />
-
           <UButton
             icon="i-lucide-external-link"
             color="neutral"
@@ -51,7 +48,6 @@
             title="Open in new window"
             @click="openLink"
           />
-
           <UButton
             icon="i-lucide-trash"
             color="neutral"
@@ -120,24 +116,18 @@ watch(active, (isActive) => {
 
 function setLink() {
   if (!url.value) return;
-
   const { selection } = props.editor.state;
   const isEmpty = selection.empty;
   const hasCode = props.editor.isActive("code");
-
   let chain = props.editor.chain().focus();
-
-  // When linking code, extend the code mark range first to select the full code
   if (hasCode && !isEmpty) {
     chain = chain.extendMarkRange("code").setLink({ href: url.value });
   } else {
     chain = chain.extendMarkRange("link").setLink({ href: url.value });
-
     if (isEmpty) {
       chain = chain.insertContent({ type: "text", text: url.value });
     }
   }
-
   chain.run();
   open.value = false;
 }

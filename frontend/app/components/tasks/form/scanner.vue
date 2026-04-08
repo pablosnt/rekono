@@ -87,6 +87,8 @@
 </template>
 
 <script setup lang="ts">
+import { intensities } from "~/constants";
+
 const props = defineProps<{
   api: typeof useApi;
   defaultTool: number | undefined;
@@ -103,7 +105,6 @@ const emit = defineEmits<{
   "update-intensity": [newMaxIntensity: number, newMinIntensity: number];
 }>();
 
-const backend = useBackend();
 const scannerIcon = ref("i-lucide-terminal");
 const scannerAvatar = ref(undefined);
 const process = ref(props.defaultProcess);
@@ -172,10 +173,10 @@ function onTool(toolId) {
     emit("update-configuration", configuration.value);
     configurationOptions.value = [];
     props.api.get(`tools/${tool.value}/`).then((response) => {
-      minIntensity.value = backend.intensities.find(
+      minIntensity.value = intensities.find(
         (option) => option.label === response.intensities[0].value,
       )?.value;
-      maxIntensity.value = backend.intensities.find(
+      maxIntensity.value = intensities.find(
         (option) =>
           option.label ===
           response.intensities[response.intensities.length - 1].value,

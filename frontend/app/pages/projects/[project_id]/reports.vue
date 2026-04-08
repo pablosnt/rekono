@@ -17,9 +17,10 @@
 import { h } from "vue";
 import type { CrudConfig, CrudTableColumn, FilterOption } from "~/types/crud";
 import type { Report } from "~/types/models";
+import { reportFormats, reportStatuses } from "~/constants";
 
 definePageMeta({ layout: "project" });
-const backend = useBackend();
+const options = useOptions();
 const api = useApi();
 const route = useRoute();
 const userOptions = ref<FilterOption[]>([]);
@@ -27,9 +28,9 @@ const targetOptions = ref<FilterOption[]>([]);
 const taskOptions = ref<FilterOption[]>([]);
 
 onMounted(() => {
-  backend.getUserOptions(userOptions, { is_active: true });
-  backend.getTargetOptions(targetOptions, { project: route.params.project_id });
-  backend.getTaskOptions(taskOptions, { project: route.params.project_id });
+  options.users(userOptions, { is_active: true });
+  options.targets(targetOptions, { project: route.params.project_id });
+  options.tasks(taskOptions, { project: route.params.project_id });
 });
 
 const config: CrudConfig<Report> = reactive({
@@ -66,7 +67,7 @@ const config: CrudConfig<Report> = reactive({
                   href: `/projects/${route.params.project_id}/scans/${report.task.id}`,
                   class: "hover:underline font-medium",
                 },
-                backend.getTaskName(report.task, true),
+                getTaskName(report.task, true),
               ),
             ],
           );
@@ -105,9 +106,7 @@ const config: CrudConfig<Report> = reactive({
       icon: "i-lucide-activity",
       cell: ({ row }) => {
         const status = row.getValue("status") as string;
-        const statusConfig = backend.reportStatuses.find(
-          (s) => s.value === status,
-        );
+        const statusConfig = reportStatuses.find((s) => s.value === status);
         return h(
           resolveComponent("UBadge"),
           {
@@ -133,9 +132,7 @@ const config: CrudConfig<Report> = reactive({
       icon: "i-lucide-file-type",
       cell: ({ row }) => {
         const format = row.getValue("format") as string;
-        const formatConfig = backend.reportFormats.find(
-          (f) => f.value === format,
-        );
+        const formatConfig = reportFormats.find((f) => f.value === format);
         return h(
           resolveComponent("UBadge"),
           {
@@ -202,15 +199,13 @@ const config: CrudConfig<Report> = reactive({
       icon: "i-lucide-locate-fixed",
       type: "select" as const,
       options: targetOptions,
-      valueKey: "id",
-      labelKey: "target",
     },
     {
       key: "report_format",
       label: "Format",
       icon: "i-lucide-file-type",
       type: "select" as const,
-      options: backend.reportFormats,
+      options: reportFormats,
     },
     {
       key: "status",
@@ -218,7 +213,7 @@ const config: CrudConfig<Report> = reactive({
       icon: "i-lucide-activity",
       type: "select" as const,
       labelKey: "value",
-      options: backend.reportStatuses,
+      options: reportStatuses,
     },
     {
       key: "user",
@@ -248,7 +243,7 @@ const config: CrudConfig<Report> = reactive({
       props: {
         color: "neutral",
         variant: "subtle",
-        description: `${report.format.toUpperCase()} report with findings from ${report.task ? backend.getTaskName(report.task, true) : report.target ? report.target.target : "full project"}`,
+        description: `${report.format.toUpperCase()} report with findings from ${report.task ? getTaskName(report.task, true) : report.target ? report.target.target : "full project"}`,
         ui: { root: "text-center font-bold" },
         class: "mt-4",
       },

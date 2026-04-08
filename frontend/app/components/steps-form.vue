@@ -45,9 +45,9 @@
     </template>
   </USelectMenu>
   <UAccordion
-    :model-value="backend.stages.map((stage) => stage.value)"
+    :model-value="stages.map((stage) => stage.value)"
     :items="
-      backend.stages.filter(
+      stages.filter(
         (stage) =>
           tools.filter(
             (tool) =>
@@ -95,13 +95,13 @@
 
 <script setup lang="ts">
 import type { Configuration, Tool, Process } from "~/types/models";
+import { stages } from "~/constants";
 
 const props = defineProps<{ process: Process }>();
 const emit = defineEmits<{
   "new-loading": [newLoading: boolean];
 }>();
 
-const backend = useBackend();
 const api = useApi("/api/");
 const tools = ref<Array<Tool>>([]);
 const configurations = ref(

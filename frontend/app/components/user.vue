@@ -2,10 +2,10 @@
   <UPageCard variant="subtle" spotlight>
     <template #leading>
       <UUser
-        :name="utils.truncateText(backend.getUserDisplayName(user), 15)"
+        :name="truncateText(getUserDisplayName(user), 15)"
         :description="user.role"
         :avatar="{
-          text: backend.getUserDisplayName(user).charAt(0).toUpperCase(),
+          text: getUserDisplayName(user).charAt(0).toUpperCase(),
           class: user.id.toString() === userStore.user ? 'bg-primary-500' : '',
           ui:
             user.id.toString() === userStore.user
@@ -43,6 +43,4 @@ import { useTimeAgo } from "@vueuse/core";
 
 defineProps<{ user: User }>();
 const userStore = useUserStore();
-const backend = useBackend();
-const utils = useUtils();
 </script>

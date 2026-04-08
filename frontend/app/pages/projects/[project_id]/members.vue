@@ -27,10 +27,10 @@
 import type { CrudConfig } from "~/types/crud";
 import type { User } from "~/types/models";
 import { useUserStore } from "~/store/user";
+import { roles } from "~/constants";
 
 definePageMeta({ layout: "project" });
 const userStore = useUserStore();
-const backend = useBackend();
 const route = useRoute();
 
 const config: CrudConfig<User> = reactive({
@@ -47,7 +47,7 @@ const config: CrudConfig<User> = reactive({
       label: "Role",
       icon: "i-lucide-shield",
       type: "select" as const,
-      options: backend.roles.map((role) => {
+      options: roles.map((role) => {
         return { label: role, value: role };
       }),
     },
@@ -80,7 +80,7 @@ const config: CrudConfig<User> = reactive({
       props: {
         color: "neutral",
         variant: "subtle",
-        description: backend.getUserDisplayName(user),
+        description: getUserDisplayName(user),
         ui: { root: "text-center font-bold" },
         class: "mt-4",
       },
