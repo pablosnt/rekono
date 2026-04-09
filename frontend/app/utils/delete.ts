@@ -1,6 +1,5 @@
 import type { ComponentDetails } from "~/types/crud";
-
-// TODO: Test
+import { UAlert } from "#components";
 
 export function buildDeleteMessage(
   entityType: string,
@@ -19,7 +18,7 @@ export function buildDeleteMessage(
     },
     targetEntity
       ? {
-          component: resolveComponent("UAlert"),
+          component: UAlert,
           props: {
             color: "neutral",
             variant: "subtle",
@@ -31,7 +30,7 @@ export function buildDeleteMessage(
       : {},
     warningTitle || warningDescription
       ? {
-          component: resolveComponent("UAlert"),
+          component: UAlert,
           props: {
             color: "error",
             icon: "i-lucide-triangle-alert",

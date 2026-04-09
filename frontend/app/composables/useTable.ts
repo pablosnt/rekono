@@ -1,8 +1,7 @@
 import type { Configuration, Finding, Tool, User } from "~/types/models";
 import { hostOS } from "~/constants";
 import { h } from "vue";
-
-// TODO: Test all the Cells
+import { UAvatar, UBadge, UIcon } from "#components";
 
 export default function () {
   const noDataCell = valueCell();
@@ -24,13 +23,12 @@ export default function () {
   ) {
     return value
       ? h("div", { class: "flex items-center gap-2" }, [
-          h(resolveComponent("UIcon"), { name: icon, class: "w-4 h-4" }),
+          h(UIcon, { name: icon, class: "w-4 h-4" }),
           valueCell(value),
         ])
       : noDataCell;
   }
 
-  // TODO: Badges are not shown right
   function badgeCell(
     value: string | number | undefined,
     icon: string | undefined = undefined,
@@ -39,13 +37,13 @@ export default function () {
   ) {
     return value
       ? h(
-          resolveComponent("UBadge"),
+          UBadge,
           { color: color, variant: variant },
           {
             default: () =>
               icon
                 ? [
-                    h(resolveComponent("UIcon"), {
+                    h(UIcon, {
                       name: icon,
                       class: "mr-1 text-lg",
                     }),
@@ -69,7 +67,7 @@ export default function () {
           onClick: (e: Event) => e.stopPropagation(),
         },
         [
-          h(resolveComponent("UIcon"), {
+          h(UIcon, {
             name: config?.icon || "i-lucide-server",
             class: `text-lg text-${config?.color || "neutral"}`,
           }),
@@ -91,7 +89,7 @@ export default function () {
             onClick: (e: Event) => e.stopPropagation(),
           },
           [
-            h(resolveComponent("UIcon"), {
+            h(UIcon, {
               name: getPortIcon(port.port, port.service),
               class: "text-2xl",
             }),
@@ -118,11 +116,11 @@ export default function () {
   function toolCell(tool: Tool, configuration: Configuration | undefined) {
     return h("div", { class: "flex items-center gap-2" }, [
       tool.icon
-        ? h(resolveComponent("UAvatar"), {
+        ? h(UAvatar, {
             src: tool.icon,
             size: "2xs",
           })
-        : h(resolveComponent("UIcon"), {
+        : h(UIcon, {
             name: "i-lucide-square-terminal",
             class: "w-4 h-4 text-muted-foreground shrink-0",
           }),
@@ -132,14 +130,10 @@ export default function () {
     ]);
   }
 
-  function counterCell(count: number, link: string) {
+  function counterCell(count: number, link: string, internal: boolean = true) {
     return count === 0
       ? valueCell("0", "text-muted-foreground")
-      : h(
-          "a",
-          { href: link, class: "font-medium text-primary hover:underline" },
-          count.toString(),
-        );
+      : linkCell(link, undefined, count.toString(), internal);
   }
 
   function linkCell(
@@ -149,7 +143,7 @@ export default function () {
     internal: boolean = true,
   ) {
     const iconItem = icon
-      ? h(resolveComponent("UIcon"), {
+      ? h(UIcon, {
           name: icon,
           class: "text-lg",
         })

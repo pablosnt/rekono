@@ -79,10 +79,9 @@ const config: CrudConfig<Target> = reactive({
       header: "Scans",
       icon: "i-lucide-play",
       cell: ({ row }) =>
-        table.linkCell(
+        table.counterCell(
+          row.getValue("tasks").length || 0,
           `/projects/${route.params.project_id}/scans?target=${row.original.id}`,
-          undefined,
-          (row.getValue("tasks").length || 0).toString(),
         ),
     },
     {
@@ -90,10 +89,9 @@ const config: CrudConfig<Target> = reactive({
       header: "Notes",
       icon: "i-lucide-notebook",
       cell: ({ row }) =>
-        table.linkCell(
+        table.counterCell(
+          row.getValue("notes").length || 0,
           `/projects/${route.params.project_id}/notes?target=${row.original.id}`,
-          undefined,
-          (row.getValue("notes").length || 0).toString(),
         ),
     },
     {
