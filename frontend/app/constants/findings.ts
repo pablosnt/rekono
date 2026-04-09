@@ -37,7 +37,7 @@ export const osintDataTypes = [
 ];
 
 export const hostOS = [
-  { value: "Linux", icon: "simple-icons:linux", color: "warning" },
+  { value: "Linux", icon: "simple-icons:linux", color: "linux" },
   { value: "Windows", icon: "lineicons:microsoft", color: "info" },
   { value: "MacOS", icon: "lineicons:apple-brand", color: "neutral" },
   { value: "iOS", icon: "lineicons:apple-brand", color: "neutral" },

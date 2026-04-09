@@ -22,3 +22,7 @@
   color: var(--shiki-dark) !important;
   background-color: var(--shiki-dark-bg) !important;
 }
+
+.text-linux {
+  color: #f97316;
+}

@@ -20,10 +20,11 @@ export default function () {
   function iconAndValueCell(
     value: string | number | undefined = undefined,
     icon: string,
+    color: string = "neutral",
   ) {
     return value
       ? h("div", { class: "flex items-center gap-2" }, [
-          h(UIcon, { name: icon, class: "w-4 h-4" }),
+          h(UIcon, { name: icon, class: `w-4 h-4 text-${color}` }),
           valueCell(value),
         ])
       : noDataCell;
