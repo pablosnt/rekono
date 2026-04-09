@@ -127,9 +127,18 @@ class VirusTotal(BaseIntegration):
                 data = self._request(self.session.get, f"ip_addresses/{finding.ip}")
             data = data.get("data", {}).get("attributes", {})
             finding.reputation = data.get("reputation")
-            finding.harmless_votes = data.get("total_votes", {}).get("harmless")
-            finding.malicious_votes = data.get("total_votes", {}).get("malicious")
+            stats = data.get("last_analysis_stats", {})
+            finding.malicious_analysis = stats.get("malicious", 0)
+            finding.suspicious_analysis = stats.get("suspicious", 0)
+            finding.total_analysis = (
+                stats.get("harmless", 0)
+                + stats.get("malicious", 0)
+                + stats.get("suspicious", 0)
+                + stats.get("undetected", 0)
+            )
             finding.whois = data.get("whois")
-            finding.save(update_fields=["reputation", "harmless_votes", "malicious_votes", "whois"])
+            finding.save(
+                update_fields=["reputation", "malicious_analysis", "suspicious_analysis", "total_analysis", "whois"]
+            )
         except Exception:
             pass

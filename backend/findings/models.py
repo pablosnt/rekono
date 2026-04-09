@@ -126,8 +126,9 @@ class Host(Finding):
     latitude = models.FloatField(blank=True, null=True)
     longitude = models.FloatField(blank=True, null=True)
     reputation = models.IntegerField(blank=True, null=True)
-    harmless_votes = models.IntegerField(blank=True, null=True)
-    malicious_votes = models.IntegerField(blank=True, null=True)
+    malicious_analysis = models.IntegerField(blank=True, null=True)
+    suspicious_analysis = models.IntegerField(blank=True, null=True)
+    total_analysis = models.IntegerField(blank=True, null=True)
     whois = models.TextField(blank=True, null=True)
 
     unique_fields = ["ip"]

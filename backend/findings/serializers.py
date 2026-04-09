@@ -111,8 +111,9 @@ class HostBaseSerializer(FindingSerializer):
             "latitude",
             "longitude",
             "reputation",
-            "harmless_votes",
-            "malicious_votes",
+            "malicious_analysis",
+            "suspicious_analysis",
+            "total_analysis",
             "whois",
             "port",
         )
