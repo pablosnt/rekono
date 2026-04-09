@@ -1,6 +1,5 @@
 <template>
   <div>
-    <!-- TODO: Add dropdown with delete and copy link button -->
     <CrudHeader
       :api="api"
       :config="{
@@ -38,7 +37,7 @@
             ].filter((i) => Object.keys(i).length > 0)
           "
         >
-          <UButton icon="i-lucide-plus" variant="solid" color="neutral" />
+          <UButton icon="i-lucide-plus" variant="subtle" color="neutral" />
         </UDropdownMenu>
         <UDropdownMenu
           v-if="
@@ -77,7 +76,7 @@
             ].filter((i) => Object.keys(i).length > 0)
           "
         >
-          <UButton icon="i-lucide-link" variant="solid" color="neutral" />
+          <UButton icon="i-lucide-link" variant="subtle" color="neutral" />
         </UDropdownMenu>
         <ReportsButton
           v-model:open="showReportModal"
@@ -87,6 +86,36 @@
         <NotesButton
           ref="notesButton"
           :target="parseInt($route.params.target_id)"
+        />
+        <UDropdownMenu
+          v-if="userStore.is_auditor"
+          :items="[
+            {
+              label: 'Copy link',
+              icon: 'i-lucide-copy',
+              onSelect: copyLink,
+            },
+            {
+              label: 'Delete',
+              icon: 'i-lucide-trash',
+              color: 'error',
+              onSelect: () => (deleteOpen = true),
+            },
+          ]"
+        >
+          <UButton
+            icon="i-lucide-more-horizontal"
+            variant="subtle"
+            color="neutral"
+          />
+        </UDropdownMenu>
+        <CrudDeleteModal
+          :open="deleteOpen"
+          :item="target"
+          :config="deleteConfig"
+          :api="api"
+          @open="(open) => (deleteOpen = open)"
+          @deleted="navigateTo(`/projects/${$route.params.project_id}/targets`)"
         />
       </template>
     </CrudHeader>
@@ -111,13 +140,18 @@ import { targetTypes } from "~/constants";
 definePageMeta({ layout: "project" });
 const userStore = useUserStore();
 const route = useRoute();
-const api = useApi("/api/");
+const api = useApi("/api/targets/");
 const target = ref();
 const notesButton = ref();
 const showReportModal = ref(false);
+const deleteOpen = ref(false);
+const deleteConfig = {
+  entityName: "Target",
+  deleteMessage: () => buildDeleteMessage("target", target.value?.target),
+};
 
 onMounted(() => {
-  api.get(`targets/${route.params.target_id}/`).then((response) => {
+  api.get(`${route.params.target_id}/`).then((response) => {
     target.value = response;
   });
 });

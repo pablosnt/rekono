@@ -37,3 +37,10 @@ export function smartLowerCase(text: string): string {
     (match) => match.toLowerCase(),
   );
 }
+
+export function copyLink() {
+  const url = useRequestURL();
+  const toast = useToast();
+  navigator.clipboard.writeText(`${url.origin}${url.pathname}`);
+  toast.add({ title: "Link copied to clipboard", color: "success" });
+}

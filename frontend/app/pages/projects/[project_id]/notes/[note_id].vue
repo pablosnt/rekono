@@ -86,7 +86,7 @@
             {
               label: 'Copy link',
               icon: 'i-lucide-copy',
-              onSelect: copyNoteLink,
+              onSelect: copyLink,
             },
             {
               label: 'Delete',
@@ -98,7 +98,7 @@
         >
           <UButton
             icon="i-lucide-more-horizontal"
-            variant="ghost"
+            variant="subtle"
             color="neutral"
           />
         </UDropdownMenu>
@@ -187,36 +187,9 @@ const noteState = computed(() => ({
 }));
 const deleteConfig = {
   entityName: "Note",
-  deleteMessage: () => [
-    {
-      component: h(
-        "p",
-        { class: "text-gray-900 dark:text-white font-medium" },
-        "Are you sure you want to delete this note?",
-      ),
-    },
-    {
-      component: resolveComponent("UAlert"),
-      props: {
-        color: "neutral",
-        variant: "subtle",
-        get description() {
-          return note.value?.title;
-        },
-        ui: { root: "text-center font-bold" },
-        class: "mt-4",
-      },
-    },
-  ],
+  deleteMessage: () => buildDeleteMessage("note", note.value?.title),
 };
 const currentNote = useState<Note | null>("currentNote", () => null);
-
-function copyNoteLink() {
-  navigator.clipboard.writeText(
-    `/projects/${route.params.project_id}/notes/${route.params.note_id}`,
-  );
-  toast.add({ title: "Link copied to clipboard", color: "success" });
-}
 
 function fetchNote() {
   api.get(`${route.params.note_id}/`).then((response) => {
