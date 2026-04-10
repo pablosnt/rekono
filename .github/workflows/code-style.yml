@@ -71,6 +71,8 @@ jobs:
 
       - name: Install PNPM
         uses: pnpm/action-setup@6e7bdbda5fe05107efc88b23b7ed00aa05f84ca0
+        with:
+          version: 10.33.0
 
       - name: Install Node dependencies
         if: ${{ steps.changes.outputs.frontend == 'true' || github.event_name != 'pull_request' }}
