@@ -77,7 +77,7 @@ jobs:
       - name: Install Node dependencies
         if: ${{ steps.changes.outputs.frontend == 'true' || github.event_name != 'pull_request' }}
         working-directory: frontend
-        run: pnpm install --ignore-scripts
+        run: pnpm install . --ignore-scripts
 
       - name: ESLint
         if: ${{ steps.changes.outputs.frontend == 'true' || github.event_name != 'pull_request' }}
