@@ -9,8 +9,8 @@
     "postinstall": "nuxt prepare",
     "eslint": "eslint .",
     "eslint:fix": "eslint . --fix",
-    "prettier": "prettier --check --ignore-path=../.gitignore .",
-    "prettier:fix": "prettier --write --list-different --ignore-path=../.gitignore .",
+    "prettier": "prettier --check .",
+    "prettier:fix": "prettier --write --list-different .",
     "typecheck": "nuxt typecheck"
   },
   "dependencies": {
