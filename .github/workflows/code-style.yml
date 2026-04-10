@@ -69,23 +69,20 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install node
-        if: ${{ steps.changes.outputs.frontend == 'true' || github.event_name != 'pull_request' }}
-        uses: actions/setup-node@v6
-        with:
-          node-version: 22
+      - name: Install PNPM
+        uses: pnpm/action-setup@v5
 
-      - name: Install NPM dependencies
+      - name: Install Node dependencies
         if: ${{ steps.changes.outputs.frontend == 'true' || github.event_name != 'pull_request' }}
         working-directory: frontend
-        run: npm install .
+        run: pnpm install --ignore-scripts
 
       - name: ESLint
         if: ${{ steps.changes.outputs.frontend == 'true' || github.event_name != 'pull_request' }}
         working-directory: frontend/
-        run: npm run eslint
+        run: pnpm run eslint
 
       - name: Prettier
         if: ${{ (steps.changes.outputs.frontend == 'true' || github.event_name != 'pull_request') && !cancelled() }}
         working-directory: frontend/
-        run: npm run prettier
+        run: pnpm run prettier
