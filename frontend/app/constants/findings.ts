@@ -37,7 +37,7 @@ export const osintDataTypes = [
 ];
 
 export const hostOS = [
-  { value: "Linux", icon: "simple-icons:linux", color: "linux" },
+  { value: "Linux", icon: "simple-icons:linux", color: "orange" },
   { value: "Windows", icon: "lineicons:microsoft", color: "info" },
   { value: "MacOS", icon: "lineicons:apple-brand", color: "neutral" },
   { value: "iOS", icon: "lineicons:apple-brand", color: "neutral" },
@@ -55,3 +55,11 @@ export const portStatuses = [
 ];
 
 export const portProtocols = ["TCP", "UDP"];
+
+export const severities = [
+  { value: "Info", color: "neutral", icon: "i-lucide-chevrons-down" },
+  { value: "Low", color: "info", icon: "i-lucide-chevron-down" },
+  { value: "Medium", color: "warning", icon: "i-lucide-chevron-minus" },
+  { value: "High", color: "orange", icon: "i-lucide-chevron-up" },
+  { value: "Critical", color: "error", icon: "i-lucide-chevrons-up" },
+];

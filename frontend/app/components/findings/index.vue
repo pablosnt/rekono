@@ -78,10 +78,10 @@ const props = defineProps<{
   entityName: string;
   entityNamePlural: string;
   icon: string;
-  columns: CrudConfig["tableColumns"];
-  filters: CrudConfig["filters"];
-  ordering: CrudConfig["ordering"];
-  visibility: CrudConfig["tableColumnsVisibility"];
+  columns?: CrudConfig["tableColumns"];
+  filters?: CrudConfig["filters"];
+  ordering?: CrudConfig["ordering"];
+  visibility?: CrudConfig["tableColumnsVisibility"];
   isTriageable?: boolean;
   isAsset?: boolean;
   extraDropdownActions?: (
@@ -139,7 +139,7 @@ const config: CrudConfig<Finding> = reactive({
       icon: "i-lucide-hash",
       cell: ({ row }) => table.valueCell(row.getValue("id")),
     },
-    ...props.columns,
+    ...(props.columns || []),
     {
       accessorKey: "status",
       header: "Status",
@@ -320,7 +320,7 @@ const config: CrudConfig<Finding> = reactive({
       type: "select" as const,
       options: toolOptions,
     },
-    ...props.filters,
+    ...(props.filters || []),
     {
       key: "triage_status",
       label: "Triage Status",
@@ -348,7 +348,7 @@ const config: CrudConfig<Finding> = reactive({
   defaultFilters: route.params.project_id
     ? { project: route.params.project_id }
     : undefined,
-  ordering: props.ordering,
+  ordering: props.ordering || [],
   defaultOrdering: "-id",
   pageSize: 25,
   pageSizeOptions: [25, 50, 100],

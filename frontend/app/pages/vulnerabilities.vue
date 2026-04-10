@@ -1,3 +1,3 @@
 <template>
-  <div />
+  <FindingsVulnerabilities />
 </template>

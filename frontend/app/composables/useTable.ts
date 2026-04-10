@@ -56,62 +56,73 @@ export default function () {
       : noDataCell;
   }
 
+  function findingCell(
+    entity: Finding | undefined,
+    subpath: string,
+    value: string | undefined,
+    project: number,
+    icon: string | undefined = undefined,
+    color: string = "neutral",
+  ) {
+    return entity
+      ? h(
+          "a",
+          {
+            href: `/projects/${project}/${subpath}/${entity.id}`,
+            class:
+              "flex items-center gap-2 font-medium hover:text-primary hover:underline",
+            onClick: (e: Event) => e.stopPropagation(),
+          },
+          icon
+            ? [h(UIcon, { name: icon, class: `text-lg text-${color}` }), value]
+            : [value],
+        )
+      : noDataCell;
+  }
+
   function hostCell(host: Finding | undefined, project: number) {
-    if (host) {
-      const config = hostOS.find((c) => c.value === host.os_type);
-      return h(
-        "a",
-        {
-          href: `/projects/${project}/hosts/${host.id}`,
-          class:
-            "flex items-center gap-2 font-medium hover:text-primary hover:underline",
-          onClick: (e: Event) => e.stopPropagation(),
-        },
-        [
-          h(UIcon, {
-            name: config?.icon || "i-lucide-server",
-            class: `text-lg text-${config?.color || "neutral"}`,
-          }),
-          host.ip || host.domain,
-        ],
-      );
-    } else {
-      return noDataCell;
-    }
+    const config = host
+      ? hostOS.find((c) => c.value === host.os_type)
+      : undefined;
+    return findingCell(
+      host,
+      "hosts",
+      host?.ip || host?.domain,
+      project,
+      config?.icon || "i-lucide-server",
+      config?.color || "neutral",
+    );
   }
 
   function portCell(port: Finding | undefined, project: number) {
-    return port
-      ? h(
-          "a",
-          {
-            href: `/projects/${project}/ports/${port.id}`,
-            class: "flex items-center gap-2 hover:text-primary hover:underline",
-            onClick: (e: Event) => e.stopPropagation(),
-          },
-          [
-            h(UIcon, {
-              name: getPortIcon(port.port, port.service),
-              class: "text-2xl",
-            }),
-            port.port,
-          ],
-        )
-      : noDataCell;
+    return findingCell(
+      port,
+      "ports",
+      port?.port ? port?.port.toString() : undefined,
+      project,
+      port ? getPortIcon(port.port, port.service) : undefined,
+    );
   }
 
   function technologyCell(technology: Finding | undefined, project: number) {
-    return technology
-      ? h(
-          "a",
-          {
-            href: `/projects/${project}/technologies/${technology.id}`,
-            class: "font-medium hover:text-primary hover:underline",
-            onClick: (e: Event) => e.stopPropagation(),
-          },
-          [`${technology.name} - ${technology.version}`],
-        )
-      : noDataCell;
+    return findingCell(
+      technology,
+      "technologies",
+      technology ? `${technology.name} - ${technology.version}` : undefined,
+      project,
+    );
+  }
+
+  function vulnerabilityCell(
+    vulnerability: Finding | undefined,
+    project: number,
+  ) {
+    return findingCell(
+      vulnerability,
+      "vulnerabilities",
+      vulnerability?.name,
+      project,
+    );
   }
 
   function toolCell(tool: Tool, configuration: Configuration | undefined) {
@@ -152,13 +163,10 @@ export default function () {
     const textItem = text ? valueCell(text) : undefined;
     const linkConfig = {
       href: link,
-      class: `hover:underline ${iconItem && textItem ? "flex items-center gap-2" : ""}`,
+      class: `hover:text-primary hover:underline ${iconItem && textItem ? "flex items-center gap-2" : ""}`,
       onClick: (e: Event) => e.stopPropagation(),
     };
-    if (internal) {
-      linkConfig["class"] = `hover:text-primary ${linkConfig["class"]}`;
-    } else {
-      linkConfig["class"] = `text-primary ${linkConfig["class"]}`;
+    if (!internal) {
       linkConfig["target"] = "_blank";
       linkConfig["rel"] = "noopener noreferrer";
     }
@@ -191,6 +199,7 @@ export default function () {
     hostCell,
     portCell,
     technologyCell,
+    vulnerabilityCell,
     toolCell,
     counterCell,
     linkCell,

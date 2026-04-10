@@ -8,6 +8,20 @@ export default defineNuxtConfig({
 
   css: ["~/assets/css/main.css"],
 
+  ui: {
+    theme: {
+      colors: [
+        "primary",
+        "secondary",
+        "info",
+        "success",
+        "warning",
+        "error",
+        "orange",
+      ],
+    },
+  },
+
   runtimeConfig: {
     public: {
       backendUrl: "",

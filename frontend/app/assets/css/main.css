@@ -1,6 +1,10 @@
 @import "tailwindcss";
 @import "@nuxt/ui";
 
+:root {
+  --ui-orange: var(--color-orange-500);
+}
+
 @theme static {
   --font-sans: "Public Sans", sans-serif;
 
@@ -21,8 +25,4 @@
 .dark .tiptap .shiki span {
   color: var(--shiki-dark) !important;
   background-color: var(--shiki-dark-bg) !important;
-}
-
-.text-linux {
-  color: #f97316;
 }
