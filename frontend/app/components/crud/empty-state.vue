@@ -30,11 +30,8 @@ const description = computed(() => {
   }
   const base =
     props.config.emptyMessage ||
-    `It looks like you don't have access to any ${smartLowerCase(props.config.entityName)} yet`;
-  const createText = props.config.canCreate
-    ? "You can create one below."
-    : "Please contact your administrator.";
-  return `${base}. ${createText}`;
+    `It looks like there are no ${smartLowerCase(props.config.entityNamePlural)} yet`;
+  return props.config.canCreate ? `${base}. You can create one below` : base;
 });
 const actions = computed(() => {
   return props.config.canCreate
