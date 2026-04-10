@@ -79,16 +79,12 @@ jobs:
         working-directory: frontend
         run: |
           pnpm install . --ignore-scripts
-          ls -la
-          ls -la .nuxt/ | grep eslint
+          pnpm nuxt prepare
 
       - name: ESLint
         if: ${{ steps.changes.outputs.frontend == 'true' || github.event_name != 'pull_request' }}
         working-directory: frontend/
-        run: |
-          ls -la
-          ls -la .nuxt/ | grep eslint
-          pnpm run eslint
+        run: pnpm run eslint
 
       - name: Prettier
         if: ${{ (steps.changes.outputs.frontend == 'true' || github.event_name != 'pull_request') && !cancelled() }}
