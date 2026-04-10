@@ -108,6 +108,7 @@ const config: CrudConfig<Task> = reactive({
           `/projects/${route.params.project_id}/targets/${task.target?.id}`,
           targetTypes.find((t) => t.value === task.target?.type)?.icon ||
             "i-lucide-locate-fixed",
+          undefined,
           label,
         );
       },

@@ -15,7 +15,7 @@
         labelKey: 'value',
       },
     ]"
-    :ordering="['id', 'data', ('data_type', 'Type'), 'source']"
+    :ordering="['id', 'data', { id: 'data_type', label: 'Type' }, 'source']"
     is-triageable
     :extra-dropdown-actions="
       (item: Finding) =>

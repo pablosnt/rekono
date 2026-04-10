@@ -27,8 +27,8 @@
       'port',
       'name',
       'severity',
-      ('cve', 'CVE'),
-      ('cwe', 'CWE'),
+      { id: 'cve', label: 'CVE' },
+      { id: 'cwe', label: 'CWE' },
     ]"
     :visibility="{
       description: false,
@@ -147,11 +147,7 @@ const columns: CrudTableColumn<Record<string, unknown>>[] = [
     header: "Reference",
     icon: "i-lucide-link",
     cell: ({ row }) =>
-      table.externalLinkCell(
-        row.original.reference as string | undefined,
-        "i-lucide-external-link",
-        undefined,
-      ),
+      table.externalLinkCell(row.original.reference, "i-lucide-external-link"),
   },
   {
     accessorKey: "exploit",

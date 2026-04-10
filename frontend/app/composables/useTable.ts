@@ -150,10 +150,12 @@ export default function () {
 
   function linkCell(
     link: string | undefined,
-    icon: string | undefined,
-    text: string | undefined,
+    icon: string | undefined = undefined,
+    avatar: string | undefined = undefined,
+    text: string | undefined = undefined,
     internal: boolean = true,
   ) {
+    if (!link) return noDataCell;
     const iconItem = icon
       ? h(UIcon, {
           name: icon,
@@ -170,21 +172,24 @@ export default function () {
       linkConfig["target"] = "_blank";
       linkConfig["rel"] = "noopener noreferrer";
     }
-    return link
-      ? h(
-          "a",
-          linkConfig,
-          [iconItem, textItem].filter((i) => i !== undefined),
-        )
-      : noDataCell;
+    return h(
+      "a",
+      linkConfig,
+      [
+        iconItem,
+        avatar ? h(UAvatar, { src: avatar }) : undefined,
+        textItem,
+      ].filter((i) => i !== undefined),
+    );
   }
 
   function externalLinkCell(
     link: string | undefined,
-    icon: string | undefined,
-    text: string | undefined,
+    icon: string | undefined = undefined,
+    avatar: string | undefined = undefined,
+    text: string | undefined = undefined,
   ) {
-    return linkCell(link, icon, text, false);
+    return linkCell(link, icon, avatar, text, false);
   }
 
   function usernameCell(user: User) {

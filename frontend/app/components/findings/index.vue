@@ -287,14 +287,14 @@ const config: CrudConfig<Finding> = reactive({
       cell: ({ row }) =>
         table.externalLinkCell(
           row.original.hacktricks_link,
-          "i-lucide-external-link",
+          undefined,
+          "https://book.hacktricks.wiki/en/favicon.svg",
         ),
     },
   ],
   tableColumnsVisibility: Object.assign({}, props.visibility || {}, {
     id: false,
     triage: false,
-    hacktricks: false,
   }),
   searchable: true,
   searchPlaceholder: `Search ${smartLowerCase(props.entityNamePlural)}...`,

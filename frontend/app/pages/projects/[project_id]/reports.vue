@@ -55,12 +55,14 @@ const config: CrudConfig<Report> = reactive({
           return table.linkCell(
             `/projects/${route.params.project_id}/scans/${report.task.id}`,
             "i-lucide-play",
+            undefined,
             getTaskName(report.task, true),
           );
         } else if (report.target) {
           return table.linkCell(
             `/projects/${route.params.project_id}/targets/${report.target.id}`,
             "i-lucide-locate-fixed",
+            undefined,
             report.target.target,
           );
         }

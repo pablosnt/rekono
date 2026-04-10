@@ -15,7 +15,14 @@
         labelKey: 'value',
       },
     ]"
-    :ordering="['id', 'port', ('port__host', 'Host'), 'path', 'status', 'type']"
+    :ordering="[
+      'id',
+      'port',
+      { id: 'port__host', label: 'Host' },
+      'path',
+      'status',
+      'type',
+    ]"
   />
 </template>
 

@@ -15,7 +15,14 @@
         labelKey: 'value',
       },
     ]"
-    :ordering="['id', 'ip', 'domain', ('os_type', 'OS'), 'country', 'city']"
+    :ordering="[
+      'id',
+      'ip',
+      'domain',
+      { id: 'os_type', label: 'OS' },
+      'country',
+      'city',
+    ]"
     :visibility="{ whois: false, ports: false }"
   />
 </template>

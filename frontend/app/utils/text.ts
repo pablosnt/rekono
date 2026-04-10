@@ -33,7 +33,7 @@ export function duration(
 
 export function smartLowerCase(text: string): string {
   return text.replace(
-    /\b(?!API|HTTP|URL|JSON|XML|HTML|CSS|JS|TS|OSINT|CVE|IP)\w+/g,
+    /\b(?!API|HTTP|URL|JSON|XML|HTML|CSS|JS|TS|OSINT|CVE|IP|EDB)\w+/g,
     (match) => match.toLowerCase(),
   );
 }

@@ -5,7 +5,13 @@
     entity-name-plural="Technologies"
     icon="i-lucide-layers"
     :columns="columns"
-    :ordering="['id', ('port__host', 'Host'), 'port', 'name', 'version']"
+    :ordering="[
+      'id',
+      { id: 'port__host', label: 'Host' },
+      'port',
+      'name',
+      'version',
+    ]"
     :visibility="{
       description: false,
       credential: false,

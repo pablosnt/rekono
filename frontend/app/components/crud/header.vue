@@ -55,9 +55,7 @@
                     typeof ordering === 'string' ? ordering : ordering.id;
                   const label =
                     typeof ordering === 'string'
-                      ? ordering === 'id'
-                        ? 'ID'
-                        : firstUpper(ordering)
+                      ? firstUpper(smartLowerCase(ordering))
                       : ordering.label;
                   return { id, label };
                 },
@@ -112,7 +110,7 @@
                 ?.getAllColumns()
                 .filter((column) => column.getCanHide())
                 .map((column) => ({
-                  label: column.id === 'id' ? 'ID' : firstUpper(column.id),
+                  label: firstUpper(smartLowerCase(column.id)),
                   type: 'checkbox' as const,
                   checked: column.getIsVisible(),
                   onUpdateChecked(checked: boolean) {

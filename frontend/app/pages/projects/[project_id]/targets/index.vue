@@ -102,6 +102,7 @@ const config: CrudConfig<Target> = reactive({
         table.linkCell(
           `/projects/${route.params.project_id}/reports?target=${row.original.id}`,
           undefined,
+          undefined,
           (row.getValue("reports").length || 0).toString(),
         ),
     },
