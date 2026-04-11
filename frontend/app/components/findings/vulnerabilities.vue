@@ -43,13 +43,13 @@ import { h } from "vue";
 import { UTooltip, UIcon } from "#components";
 import type { CrudTableColumn } from "~/types/crud";
 import { severities } from "~/constants";
-import type { Finding } from "~/types/models";
+import type { Vulnerability } from "~/types/models";
 
 const route = useRoute();
 const table = useTable();
 const toast = useToast();
 
-const columns: CrudTableColumn<Record<string, unknown>>[] = [
+const columns: CrudTableColumn<Vulnerability>[] = [
   {
     accessorKey: "host",
     header: "Host",
@@ -114,8 +114,8 @@ const columns: CrudTableColumn<Record<string, unknown>>[] = [
     icon: "i-lucide-hash",
     cell: ({ row }) => {
       const cve = row.original.cve as string | undefined;
-      if (row.original.trending) {
-        return cve
+      return row.original.trending
+        ? cve
           ? h("div", { class: "flex items-center gap-2" }, [
               h(
                 UTooltip,
@@ -130,10 +130,8 @@ const columns: CrudTableColumn<Record<string, unknown>>[] = [
               ),
               table.valueCell(cve),
             ])
-          : table.noDataCell;
-      } else {
-        return table.valueCell(cve);
-      }
+          : table.noDataCell
+        : table.valueCell(cve);
     },
   },
   {
@@ -154,10 +152,9 @@ const columns: CrudTableColumn<Record<string, unknown>>[] = [
     header: "Exploits",
     icon: "i-lucide-flame",
     cell: ({ row }) => {
-      const finding = row.original;
-      const basePath = `/exploits?vulnerability=${finding.id}`;
+      const basePath = `/exploits?vulnerability=${row.original.id}`;
       return table.counterCell(
-        finding.exploit?.length || 0,
+        row.original.exploit?.length || 0,
         route.params.project_id
           ? `/projects/${route.params.project_id}${basePath}`
           : basePath,
@@ -166,7 +163,7 @@ const columns: CrudTableColumn<Record<string, unknown>>[] = [
   },
 ];
 
-function dropdownActions(item: Finding) {
+function dropdownActions(item: Vulnerability) {
   return [
     item.cve
       ? {

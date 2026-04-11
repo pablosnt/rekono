@@ -29,26 +29,22 @@
 <script setup lang="ts">
 import type { CrudTableColumn, FilterOption } from "~/types/crud";
 import { pathTypes } from "~/constants";
+import type { Path } from "~/types/models";
 
 const table = useTable();
-const columns: CrudTableColumn<Record<string, unknown>>[] = [
+const columns: CrudTableColumn<Path>[] = [
   {
     accessorKey: "host",
     header: "Host",
     icon: "i-lucide-server",
-    cell: ({ row }) => {
-      const finding = row.original;
-      return table.hostCell(finding.port?.host, finding.project);
-    },
+    cell: ({ row }) =>
+      table.hostCell(row.original.port?.host, row.original.project),
   },
   {
     accessorKey: "Port",
     header: "Port",
     icon: "i-lucide-ethernet-port",
-    cell: ({ row }) => {
-      const finding = row.original;
-      return table.portCell(finding.port, finding.project);
-    },
+    cell: ({ row }) => table.portCell(row.original.port, row.original.project),
   },
   {
     accessorKey: "path",
@@ -60,13 +56,12 @@ const columns: CrudTableColumn<Record<string, unknown>>[] = [
     accessorKey: "type",
     header: "Type",
     icon: "i-lucide-tag",
-    cell: ({ row }) => {
-      const type = row.getValue("type") as string;
-      return table.badgeCell(
-        type,
-        pathTypes.find((t) => t.value === type)?.icon || "i-lucide-slash",
-      );
-    },
+    cell: ({ row }) =>
+      table.badgeCell(
+        row.original.type,
+        pathTypes.find((t) => t.value === row.original.type)?.icon ||
+          "i-lucide-slash",
+      ),
   },
   {
     accessorKey: "httpStatus",
@@ -75,7 +70,7 @@ const columns: CrudTableColumn<Record<string, unknown>>[] = [
     cell: ({ row }) => {
       const status = row.getValue("status") as number | null;
       return table.badgeCell(
-        status ? status.toString() : status,
+        status ? status.toString() : undefined,
         undefined,
         status ? httpStatusColor(status) : "neutral",
       );

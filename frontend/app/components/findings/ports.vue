@@ -30,18 +30,16 @@
 <script setup lang="ts">
 import type { CrudTableColumn } from "~/types/crud";
 import { portProtocols, portStatuses } from "~/constants";
+import type { Port } from "~/types/models";
 
 const route = useRoute();
 const table = useTable();
-const columns: CrudTableColumn<Record<string, unknown>>[] = [
+const columns: CrudTableColumn<Port>[] = [
   {
     accessorKey: "host",
     header: "Host",
     icon: "i-lucide-server",
-    cell: ({ row }) => {
-      const finding = row.original;
-      return table.hostCell(finding.host, finding.project);
-    },
+    cell: ({ row }) => table.hostCell(row.original.host, row.original.project),
   },
   {
     accessorKey: "port",
@@ -80,10 +78,9 @@ const columns: CrudTableColumn<Record<string, unknown>>[] = [
     header: "Paths",
     icon: "i-lucide-slash",
     cell: ({ row }) => {
-      const finding = row.original;
-      const basePath = `/paths?port=${finding.id}`;
+      const basePath = `/paths?port=${row.original.id}`;
       return table.counterCell(
-        finding?.path?.length,
+        row.original?.path?.length,
         route.params.project_id
           ? `/projects/${route.params.project_id}${basePath}`
           : basePath,
@@ -95,10 +92,9 @@ const columns: CrudTableColumn<Record<string, unknown>>[] = [
     header: "Technologies",
     icon: "i-lucide-layers",
     cell: ({ row }) => {
-      const finding = row.original;
-      const basePath = `/technologies?port=${finding.id}`;
+      const basePath = `/technologies?port=${row.original.id}`;
       return table.counterCell(
-        finding?.technology?.length,
+        row.original?.technology?.length,
         route.params.project_id
           ? `/projects/${route.params.project_id}${basePath}`
           : basePath,
@@ -110,10 +106,9 @@ const columns: CrudTableColumn<Record<string, unknown>>[] = [
     header: "Vulnerabilities",
     icon: "i-lucide-bug",
     cell: ({ row }) => {
-      const finding = row.original;
-      const basePath = `/vulnerabilities?port=${finding.id}`;
+      const basePath = `/vulnerabilities?port=${row.original.id}`;
       return table.counterCell(
-        finding?.vulnerability?.length,
+        row.original?.vulnerability?.length,
         route.params.project_id
           ? `/projects/${route.params.project_id}${basePath}`
           : basePath,

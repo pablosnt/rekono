@@ -409,15 +409,14 @@ const config: CrudConfig<Execution> = reactive({
       header: "Status",
       icon: "i-lucide-activity",
       cell: ({ row }) => {
-        const execution = row.original as Execution;
         const status = executionStatuses.find(
-          (s) => s.value === execution.status,
+          (s) => s.value === row.original.status,
         );
-        const isRunning = execution.status === "Running";
+        const isRunning = row.original.status === "Running";
         return h(
           resolveComponent("UTooltip"),
           {
-            text: execution.status,
+            text: row.original.status,
             content: { side: "left", sideOffset: 8, collisionPadding: 8 },
           },
           {
@@ -448,16 +447,14 @@ const config: CrudConfig<Execution> = reactive({
       id: "duration",
       header: "Duration",
       icon: "i-lucide-timer",
-      cell: ({ row }) => {
-        const execution = row.original as Execution;
-        return table.valueCell(
-          execution.start && execution.end
-            ? duration(execution.start, execution.end)
-            : execution.start
-              ? duration(execution.start, new Date().toISOString())
+      cell: ({ row }) =>
+        table.valueCell(
+          row.original.start && row.original.end
+            ? duration(row.original.start, row.original.end)
+            : row.original.start
+              ? duration(row.original.start, new Date().toISOString())
               : undefined,
-        );
-      },
+        ),
     },
     {
       id: "skipped",

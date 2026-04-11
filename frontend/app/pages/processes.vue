@@ -104,19 +104,17 @@ const config: CrudConfig<Process> = reactive({
       accessorKey: "likes",
       header: "Likes",
       icon: "i-lucide-thumbs-up",
-      cell: ({ row }) => {
-        const item = row.original as Process;
-        return h(resolveComponent("CrudLikes"), {
-          itemId: item.id,
+      cell: ({ row }) =>
+        h(resolveComponent("CrudLikes"), {
+          itemId: row.original.id,
           endpoint: "/api/processes/",
-          liked: item.liked,
-          count: item.likes,
+          liked: row.original.liked,
+          count: row.original.likes,
           onUpdate: (liked: boolean, count: number) => {
-            item.liked = liked;
-            item.likes = count;
+            row.original.liked = liked;
+            row.original.likes = count;
           },
-        });
-      },
+        }),
     },
   ],
   tableColumnsVisibility: {

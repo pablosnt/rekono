@@ -23,27 +23,23 @@
 
 <script setup lang="ts">
 import type { CrudTableColumn } from "~/types/crud";
+import type { Technology } from "~/types/models";
 
 const route = useRoute();
 const table = useTable();
-const columns: CrudTableColumn<Record<string, unknown>>[] = [
+const columns: CrudTableColumn<Technology>[] = [
   {
     accessorKey: "host",
     header: "Host",
     icon: "i-lucide-server",
-    cell: ({ row }) => {
-      const finding = row.original;
-      return table.hostCell(finding.port?.host, finding.project);
-    },
+    cell: ({ row }) =>
+      table.hostCell(row.original.port?.host, row.original.project),
   },
   {
     accessorKey: "port",
     header: "Port",
     icon: "i-lucide-ethernet-port",
-    cell: ({ row }) => {
-      const finding = row.original;
-      return table.portCell(finding.port, finding.project);
-    },
+    cell: ({ row }) => table.portCell(row.original.port, row.original.project),
   },
   {
     accessorKey: "name",
@@ -75,10 +71,9 @@ const columns: CrudTableColumn<Record<string, unknown>>[] = [
     header: "Credentials",
     icon: "i-lucide-key",
     cell: ({ row }) => {
-      const finding = row.original;
-      const basePath = `/credentials?technology=${finding.id}`;
+      const basePath = `/credentials?technology=${row.original.id}`;
       return table.counterCell(
-        finding?.credential?.length,
+        row.original?.credential?.length,
         route.params.project_id
           ? `/projects/${route.params.project_id}${basePath}`
           : basePath,
@@ -90,10 +85,9 @@ const columns: CrudTableColumn<Record<string, unknown>>[] = [
     header: "Vulnerabilities",
     icon: "i-lucide-bug",
     cell: ({ row }) => {
-      const finding = row.original;
-      const basePath = `/vulnerabilities?technology=${finding.id}`;
+      const basePath = `/vulnerabilities?technology=${row.original.id}`;
       return table.counterCell(
-        finding?.vulnerability?.length,
+        row.original?.vulnerability?.length,
         route.params.project_id
           ? `/projects/${route.params.project_id}${basePath}`
           : basePath,
@@ -105,10 +99,9 @@ const columns: CrudTableColumn<Record<string, unknown>>[] = [
     header: "Exploits",
     icon: "i-lucide-flame",
     cell: ({ row }) => {
-      const finding = row.original;
-      const basePath = `/exploits?technology=${finding.id}`;
+      const basePath = `/exploits?technology=${row.original.id}`;
       return table.counterCell(
-        finding?.exploit?.length,
+        row.original?.exploit?.length,
         route.params.project_id
           ? `/projects/${route.params.project_id}${basePath}`
           : basePath,

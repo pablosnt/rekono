@@ -145,20 +145,19 @@ const config: CrudConfig<Finding> = reactive({
       header: "Status",
       icon: "i-lucide-activity",
       cell: ({ row }) => {
-        const finding = row.original;
-        if (finding.is_fixed) {
+        if (row.original.is_fixed) {
           return h(
             resolveComponent("UTooltip"),
             {
-              text: finding.auto_fixed
+              text: row.original.auto_fixed
                 ? "Auto-Fixed"
-                : `Fixed by ${finding.fixed_by.username} ${useTimeAgo(new Date(finding.fixed_date)).value}`,
+                : `Fixed by ${row.original.fixed_by.username} ${useTimeAgo(new Date(row.original.fixed_date)).value}`,
               content: { side: "left", sideOffset: 8, collisionPadding: 8 },
             },
             {
               default: () =>
                 h(resolveComponent("UButton"), {
-                  icon: finding.auto_fixed
+                  icon: row.original.auto_fixed
                     ? "i-lucide-bot"
                     : "i-lucide-badge-check",
                   color: "success",
@@ -170,13 +169,13 @@ const config: CrudConfig<Finding> = reactive({
           );
         } else if (props.isTriageable) {
           const config = triageStatuses.find(
-            (s) => s.value === finding.triage_status,
+            (s) => s.value === row.original.triage_status,
           );
-          return finding.triage_by && finding.triage_date
+          return row.original.triage_by && row.original.triage_date
             ? h(
                 resolveComponent("UTooltip"),
                 {
-                  text: `Triaged by ${finding.triage_by.username} ${useTimeAgo(new Date(finding.triage_date)).value}`,
+                  text: `Triaged by ${row.original.triage_by.username} ${useTimeAgo(new Date(row.original.triage_date)).value}`,
                   content: { side: "left", sideOffset: 8, collisionPadding: 8 },
                 },
                 {
@@ -217,8 +216,7 @@ const config: CrudConfig<Finding> = reactive({
       header: "Scanners",
       icon: "i-lucide-toolbox",
       cell: ({ row }) => {
-        const finding = row.original;
-        if (finding.created_from_user_input) {
+        if (row.original.created_from_user_input) {
           return h(
             resolveComponent("UTooltip"),
             {
@@ -236,7 +234,7 @@ const config: CrudConfig<Finding> = reactive({
             },
           );
         }
-        const scanners = finding.executions
+        const scanners = row.original.executions
           .map((e) => {
             return {
               name: e.configuration.tool.name,
@@ -254,7 +252,7 @@ const config: CrudConfig<Finding> = reactive({
             h(
               resolveComponent("UChip"),
               {
-                text: finding.executions
+                text: row.original.executions
                   .filter((e) => e.configuration?.tool.name === s.name)
                   .length.toString(),
                 size: "3xl",

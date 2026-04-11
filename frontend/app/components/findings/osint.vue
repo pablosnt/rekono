@@ -18,7 +18,7 @@
     :ordering="['id', 'data', { id: 'data_type', label: 'Type' }, 'source']"
     is-triageable
     :extra-dropdown-actions="
-      (item: Finding) =>
+      (item: OSINT) =>
         ['IP', 'Domain'].includes(item.data_type)
           ? [
               {
@@ -44,10 +44,11 @@
 <script setup lang="ts">
 import type { CrudTableColumn, FilterOption } from "~/types/crud";
 import { osintDataTypes } from "~/constants";
+import type { OSINT } from "~/types/models";
 
 const api = useApi("/api/osint/");
 const table = useTable();
-const columns: CrudTableColumn<Record<string, unknown>>[] = [
+const columns: CrudTableColumn<OSINT>[] = [
   {
     accessorKey: "data",
     header: "Data",
@@ -59,7 +60,7 @@ const columns: CrudTableColumn<Record<string, unknown>>[] = [
     header: "Type",
     icon: "i-lucide-tag",
     cell: ({ row }) => {
-      const type = row.original.data_type as string;
+      const type = row.original.data_type;
       return table.badgeCell(
         type,
         osintDataTypes.find((t) => t.value === type)?.icon || "i-lucide-rss",

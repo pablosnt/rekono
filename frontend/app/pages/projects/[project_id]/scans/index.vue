@@ -81,33 +81,33 @@ const config: CrudConfig<Task> = reactive({
       id: "scanner",
       header: "Scanner",
       icon: "i-lucide-terminal",
-      cell: ({ row }) => {
-        const task = row.original as Task;
-        return task.process
-          ? table.valueCell(task.process.name)
-          : table.toolCell(task.configuration?.tool, task.configuration);
-      },
+      cell: ({ row }) =>
+        row.original.process
+          ? table.valueCell(row.original.process.name)
+          : table.toolCell(
+              row.original.configuration?.tool,
+              row.original.configuration,
+            ),
     },
     {
       id: "target",
       header: "Target",
       icon: "i-lucide-locate-fixed",
       cell: ({ row }) => {
-        const task = row.original as Task;
-        let label = task.target?.target;
-        if (task.target_port) {
-          label += `:${task.target_port.port}`;
-          if (task.target_port.path) {
+        let label = row.original.target?.target;
+        if (row.original.target_port) {
+          label += `:${row.original.target_port.port}`;
+          if (row.original.target_port.path) {
             label +=
-              task.target_port.path[0] === "/"
-                ? task.target_port.path
-                : `/${task.target_port.path}`;
+              row.original.target_port.path[0] === "/"
+                ? row.original.target_port.path
+                : `/${row.original.target_port.path}`;
           }
         }
         return table.linkCell(
-          `/projects/${route.params.project_id}/targets/${task.target?.id}`,
-          targetTypes.find((t) => t.value === task.target?.type)?.icon ||
-            "i-lucide-locate-fixed",
+          `/projects/${route.params.project_id}/targets/${row.original.target?.id}`,
+          targetTypes.find((t) => t.value === row.original.target?.type)
+            ?.icon || "i-lucide-locate-fixed",
           undefined,
           label,
         );
@@ -118,12 +118,13 @@ const config: CrudConfig<Task> = reactive({
       header: "Status",
       icon: "i-lucide-activity",
       cell: ({ row }) => {
-        const task = row.original as Task;
-        const status = executionStatuses.find((s) => s.value === task.status);
-        return task.status === "Running"
+        const status = executionStatuses.find(
+          (s) => s.value === row.original.status,
+        );
+        return row.original.status === "Running"
           ? h(resolveComponent("UProgress"), {
               status: true,
-              modelValue: task.progress,
+              modelValue: row.original.progress,
               max: 100,
               color: "warning",
             })

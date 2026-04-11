@@ -20,35 +20,30 @@
 
 <script setup lang="ts">
 import type { CrudTableColumn } from "~/types/crud";
+import type { Credential } from "~/types/models";
 
 const table = useTable();
-const columns: CrudTableColumn<Record<string, unknown>>[] = [
+const columns: CrudTableColumn<Credential>[] = [
   {
     accessorKey: "host",
     header: "Host",
     icon: "i-lucide-server",
-    cell: ({ row }) => {
-      const finding = row.original;
-      return table.hostCell(finding.technology?.port?.host, finding.project);
-    },
+    cell: ({ row }) =>
+      table.hostCell(row.original.technology?.port?.host, row.original.project),
   },
   {
     accessorKey: "Port",
     header: "Port",
     icon: "i-lucide-ethernet-port",
-    cell: ({ row }) => {
-      const finding = row.original;
-      return table.portCell(finding.technology?.port, finding.project);
-    },
+    cell: ({ row }) =>
+      table.portCell(row.original.technology?.port, row.original.project),
   },
   {
     accessorKey: "technology",
     header: "Technology",
     icon: "i-lucide-layers",
-    cell: ({ row }) => {
-      const finding = row.original;
-      return table.technologyCell(finding.technology, finding.project);
-    },
+    cell: ({ row }) =>
+      table.technologyCell(row.original.technology, row.original.project),
   },
   {
     accessorKey: "email",

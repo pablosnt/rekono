@@ -85,12 +85,12 @@ const config: CrudConfig<TargetPort> = reactive({
       accessorKey: "authentication.type",
       header: "Authentication",
       icon: "i-lucide-key",
-      cell: ({ row }) => {
-        const targetPort = row.original as TargetPort;
-        return table.valueCell(
-          targetPort.authentication ? targetPort.authentication.type : "None",
-        );
-      },
+      cell: ({ row }) =>
+        table.valueCell(
+          row.original.authentication
+            ? row.original.authentication.type
+            : "None",
+        ),
     },
   ] as CrudTableColumn<TargetPort>[],
   tableColumnsVisibility: { id: false },

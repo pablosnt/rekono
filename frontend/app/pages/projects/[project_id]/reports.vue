@@ -50,20 +50,19 @@ const config: CrudConfig<Report> = reactive({
       header: "Source",
       icon: "i-lucide-link",
       cell: ({ row }) => {
-        const report = row.original as Report;
-        if (report.task) {
+        if (row.original.task) {
           return table.linkCell(
-            `/projects/${route.params.project_id}/scans/${report.task.id}`,
+            `/projects/${route.params.project_id}/scans/${row.original.task.id}`,
             "i-lucide-play",
             undefined,
-            getTaskName(report.task, true),
+            getTaskName(row.original.task, true),
           );
-        } else if (report.target) {
+        } else if (row.original.target) {
           return table.linkCell(
-            `/projects/${route.params.project_id}/targets/${report.target.id}`,
+            `/projects/${route.params.project_id}/targets/${row.original.target.id}`,
             "i-lucide-locate-fixed",
             undefined,
-            report.target.target,
+            row.original.target.target,
           );
         }
         return table.iconAndValueCell("Full project", "i-lucide-folder");

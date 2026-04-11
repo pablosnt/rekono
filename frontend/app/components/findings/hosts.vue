@@ -31,10 +31,11 @@
 import { h } from "vue";
 import type { CrudTableColumn } from "~/types/crud";
 import { hostOS } from "~/constants";
+import type { Host } from "~/types/models";
 
 const route = useRoute();
 const table = useTable();
-const columns: CrudTableColumn<Record<string, unknown>>[] = [
+const columns: CrudTableColumn<Host>[] = [
   {
     accessorKey: "ip",
     header: "IP",
@@ -84,12 +85,9 @@ const columns: CrudTableColumn<Record<string, unknown>>[] = [
     header: "Malware Analysis",
     icon: "i-lucide-search-code",
     cell: ({ row }) => {
-      const finding = row.original;
-      const m = (finding.malicious_analysis as number) ?? 0;
-      const s = (finding.suspicious_analysis as number) ?? 0;
-      const total = finding.total_analysis as number | null | undefined;
-      const clean = Math.max(0, total - m - s);
-
+      const m = row.original.malicious_analysis || 0;
+      const s = row.original.suspicious_analysis || 0;
+      const total = row.original.total_analysis as number | null | undefined;
       if (!total) return table.noDataCell;
       else if (m === 0 && s === 0)
         return table.iconAndValueCell(
@@ -97,7 +95,7 @@ const columns: CrudTableColumn<Record<string, unknown>>[] = [
           "i-lucide-shield-check",
           "success",
         );
-
+      const clean = Math.max(0, total - m - s);
       return h("div", { class: "flex flex-col gap-1 min-w-[4.5rem]" }, [
         h(
           "div",
@@ -134,7 +132,7 @@ const columns: CrudTableColumn<Record<string, unknown>>[] = [
     header: "Reputation",
     icon: "i-lucide-badge-check",
     cell: ({ row }) => {
-      const rep = row.original.reputation as number | null;
+      const rep = row.original.reputation || 0;
       return table.iconAndValueCell(
         rep.toString(),
         rep > 0
@@ -150,33 +148,32 @@ const columns: CrudTableColumn<Record<string, unknown>>[] = [
     accessorKey: "whois",
     header: "Whois",
     icon: "i-lucide-database-search",
-    cell: ({ row }) => {
-      const whois = row.original.whois as string | null;
-      if (!whois) return table.noDataCell;
-      return h(
-        resolveComponent("UPopover"),
-        {},
-        {
-          default: () =>
-            h(resolveComponent("UButton"), {
-              icon: "i-lucide-info",
-              label: "WHOIS",
-              variant: "ghost",
-              color: "neutral",
-              size: "xs",
-            }),
-          content: () =>
-            h(
-              "pre",
-              {
-                class:
-                  "text-xs p-3 max-h-64 overflow-y-auto whitespace-pre-wrap max-w-xs font-mono",
-              },
-              whois,
-            ),
-        },
-      );
-    },
+    cell: ({ row }) =>
+      row.original.whois
+        ? h(
+            resolveComponent("UPopover"),
+            {},
+            {
+              default: () =>
+                h(resolveComponent("UButton"), {
+                  icon: "i-lucide-info",
+                  label: "WHOIS",
+                  variant: "ghost",
+                  color: "neutral",
+                  size: "xs",
+                }),
+              content: () =>
+                h(
+                  "pre",
+                  {
+                    class:
+                      "text-xs p-3 max-h-64 overflow-y-auto whitespace-pre-wrap max-w-xs font-mono",
+                  },
+                  row.original.whois,
+                ),
+            },
+          )
+        : table.noDataCell,
   },
   {
     accessorKey: "ports",
