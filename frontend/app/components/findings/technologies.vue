@@ -5,6 +5,7 @@
     entity-name-plural="Technologies"
     icon="i-lucide-layers"
     :columns="columns"
+    :filters="filters"
     :ordering="[
       'id',
       { id: 'port__host', label: 'Host' },
@@ -27,6 +28,25 @@ import type { Technology } from "~/types/models";
 
 const route = useRoute();
 const table = useTable();
+const options = useOptions();
+const hostOptions = ref();
+const portOptions = ref();
+const filters = computed(() => [
+  {
+    key: "port__host",
+    label: "Host",
+    icon: "i-lucide-server",
+    type: "select" as const,
+    options: hostOptions,
+  },
+  {
+    key: "port",
+    label: "Port",
+    icon: "i-lucide-ethernet-port",
+    type: "select" as const,
+    options: portOptions,
+  },
+]);
 const columns: CrudTableColumn<Technology>[] = [
   {
     accessorKey: "host",
@@ -109,4 +129,12 @@ const columns: CrudTableColumn<Technology>[] = [
     },
   },
 ];
+
+onMounted(() => {
+  const query = route.params.project_id
+    ? { project: route.params.project_id }
+    : {};
+  options.hosts(hostOptions, query);
+  options.ports(portOptions, query);
+});
 </script>

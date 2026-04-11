@@ -5,14 +5,7 @@
     entity-name-plural="Credentials"
     icon="i-lucide-key"
     :columns="columns"
-    :filters="[
-      {
-        key: 'technology__name__icontains',
-        label: 'Technology',
-        icon: 'i-lucide-layers',
-        type: 'text',
-      },
-    ]"
+    :filters="filters"
     :ordering="['id', 'technology', 'email', 'username', 'secret']"
     is-triageable
   />
@@ -22,7 +15,35 @@
 import type { CrudTableColumn } from "~/types/crud";
 import type { Credential } from "~/types/models";
 
+const route = useRoute();
 const table = useTable();
+const options = useOptions();
+const hostOptions = ref();
+const portOptions = ref();
+const technologyOptions = ref();
+const filters = computed(() => [
+  {
+    key: "host",
+    label: "Host",
+    icon: "i-lucide-server",
+    type: "select" as const,
+    options: hostOptions,
+  },
+  {
+    key: "port",
+    label: "Port",
+    icon: "i-lucide-ethernet-port",
+    type: "select" as const,
+    options: portOptions,
+  },
+  {
+    key: "technology",
+    label: "Technology",
+    icon: "i-lucide-layers",
+    type: "select" as const,
+    options: technologyOptions,
+  },
+]);
 const columns: CrudTableColumn<Credential>[] = [
   {
     accessorKey: "host",
@@ -70,4 +91,13 @@ const columns: CrudTableColumn<Credential>[] = [
     cell: ({ row }) => table.valueCell(row.getValue("context")),
   },
 ];
+
+onMounted(() => {
+  const query = route.params.project_id
+    ? { project: route.params.project_id }
+    : {};
+  options.hosts(hostOptions, query);
+  options.ports(portOptions, query);
+  options.technologies(technologyOptions, query);
+});
 </script>

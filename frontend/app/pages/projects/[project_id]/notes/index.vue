@@ -305,78 +305,14 @@ onMounted(() => {
   options.users(userOptions, { role: "Auditor", is_active: true });
   options.targets(targetOptions, { project: route.params.project_id });
   options.tasks(taskOptions, { project: route.params.project_id });
-  options.findings(
-    "osint",
-    (osint) => {
-      return { label: osint.data, value: osint.id };
-    },
-    osintOptions,
-    { project: route.params.project_id },
-  );
-  options.findings(
-    "hosts",
-    (host) => {
-      return { label: host.ip, value: host.id };
-    },
-    hostOptions,
-    { project: route.params.project_id },
-  );
-  options.findings(
-    "ports",
-    (port) => {
-      return {
-        label: port.host
-          ? `${port.host?.ip}:${port.port}`
-          : port.port.toString(),
-        value: port.id,
-        icon: getPortIcon(port.port, port.service),
-      };
-    },
-    portOptions,
-    { project: route.params.project_id },
-  );
-  options.findings(
-    "technologies",
-    (technology) => {
-      return {
-        label: technology.version
-          ? `${technology.name} ${technology.version}`
-          : technology.name,
-        value: technology.id,
-      };
-    },
-    technologyOptions,
-    { project: route.params.project_id },
-  );
-  options.findings(
-    "credentials",
-    (credential) => {
-      return {
-        label:
-          credential.email ||
-          credential.username ||
-          `Credential #${credential.id}`,
-        value: credential.id,
-      };
-    },
-    credentialOptions,
-    { project: route.params.project_id },
-  );
-  options.findings(
-    "vulnerabilities",
-    (vulnerability) => {
-      return { label: vulnerability.name, value: vulnerability.id };
-    },
-    vulnerabilityOptions,
-    { project: route.params.project_id },
-  );
-  options.findings(
-    "exploits",
-    (exploit) => {
-      return { label: exploit.title, value: exploit.id };
-    },
-    exploitOptions,
-    { project: route.params.project_id },
-  );
+  options.osint(osintOptions, { project: route.params.project_id });
+  options.hosts(hostOptions, { project: route.params.project_id });
+  options.ports(portOptions, { project: route.params.project_id });
+  options.technologies(technologyOptions, { project: route.params.project_id });
+  options.credentials(credentialOptions, { project: route.params.project_id });
+  options.vulnerabilities(vulnerabilityOptions, {
+    project: route.params.project_id,
+  });
+  options.exploits(exploitOptions, { project: route.params.project_id });
 });
 </script>

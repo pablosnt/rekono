@@ -5,16 +5,7 @@
     entity-name-plural="Paths"
     icon="i-lucide-slash"
     :columns="columns"
-    :filters="[
-      {
-        key: 'type',
-        label: 'Type',
-        icon: 'i-lucide-tag',
-        type: 'select',
-        options: pathTypes as FilterOption[],
-        labelKey: 'value',
-      },
-    ]"
+    :filters="filters"
     :ordering="[
       'id',
       'port',
@@ -27,11 +18,31 @@
 </template>
 
 <script setup lang="ts">
-import type { CrudTableColumn, FilterOption } from "~/types/crud";
+import type { CrudTableColumn } from "~/types/crud";
 import { pathTypes } from "~/constants";
 import type { Path } from "~/types/models";
 
+const route = useRoute();
 const table = useTable();
+const options = useOptions();
+const hostOptions = ref();
+const portOptions = ref();
+const filters = computed(() => [
+  {
+    key: "host",
+    label: "Host",
+    icon: "i-lucide-server",
+    type: "select" as const,
+    options: hostOptions,
+  },
+  {
+    key: "port",
+    label: "Port",
+    icon: "i-lucide-ethernet-port",
+    type: "select" as const,
+    options: portOptions,
+  },
+]);
 const columns: CrudTableColumn<Path>[] = [
   {
     accessorKey: "host",
@@ -83,4 +94,12 @@ const columns: CrudTableColumn<Path>[] = [
     cell: ({ row }) => table.valueCell(row.getValue("extra_info")),
   },
 ];
+
+onMounted(() => {
+  const query = route.params.project_id
+    ? { project: route.params.project_id }
+    : {};
+  options.hosts(hostOptions, query);
+  options.ports(portOptions, query);
+});
 </script>

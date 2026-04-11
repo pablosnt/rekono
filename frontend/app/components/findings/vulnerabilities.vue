@@ -5,22 +5,7 @@
     entity-name-plural="Vulnerabilities"
     icon="i-lucide-bug"
     :columns="columns"
-    :filters="[
-      {
-        key: 'severity',
-        label: 'Severity',
-        icon: 'i-lucide-shield',
-        type: 'select',
-        options: severities,
-        labelKey: 'value',
-      },
-      {
-        key: 'trending',
-        label: 'Trending',
-        icon: 'i-lucide-trending-up',
-        type: 'boolean',
-      },
-    ]"
+    :filters="filters"
     :ordering="[
       'id',
       'technology',
@@ -45,10 +30,50 @@ import type { CrudTableColumn } from "~/types/crud";
 import { severities } from "~/constants";
 import type { Vulnerability } from "~/types/models";
 
+const toast = useToast();
 const route = useRoute();
 const table = useTable();
-const toast = useToast();
-
+const options = useOptions();
+const hostOptions = ref();
+const portOptions = ref();
+const technologyOptions = ref();
+const filters = computed(() => [
+  {
+    key: "host",
+    label: "Host",
+    icon: "i-lucide-server",
+    type: "select" as const,
+    options: hostOptions,
+  },
+  {
+    key: "port",
+    label: "Port",
+    icon: "i-lucide-ethernet-port",
+    type: "select" as const,
+    options: portOptions,
+  },
+  {
+    key: "technology",
+    label: "Technology",
+    icon: "i-lucide-layers",
+    type: "select" as const,
+    options: technologyOptions,
+  },
+  {
+    key: "severity",
+    label: "Severity",
+    icon: "i-lucide-shield",
+    type: "select",
+    options: severities,
+    labelKey: "value",
+  },
+  {
+    key: "trending",
+    label: "Trending",
+    icon: "i-lucide-trending-up",
+    type: "checkbox",
+  },
+]);
 const columns: CrudTableColumn<Vulnerability>[] = [
   {
     accessorKey: "host",
@@ -195,4 +220,13 @@ function dropdownActions(item: Vulnerability) {
       : {},
   ].filter((i) => Object.keys(i).length > 0);
 }
+
+onMounted(() => {
+  const query = route.params.project_id
+    ? { project: route.params.project_id }
+    : {};
+  options.hosts(hostOptions, query);
+  options.ports(portOptions, query);
+  options.technologies(technologyOptions, query);
+});
 </script>

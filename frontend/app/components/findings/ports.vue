@@ -5,23 +5,7 @@
     entity-name-plural="Ports"
     icon="i-lucide-ethernet-port"
     :columns="columns"
-    :filters="[
-      {
-        key: 'status',
-        label: 'Port Status',
-        icon: 'i-lucide-chevrons-left-right-ellipsis',
-        type: 'select',
-        options: portStatuses,
-        labelKey: 'value',
-      },
-      {
-        key: 'protocol',
-        label: 'Protocol',
-        icon: 'i-lucide-network',
-        type: 'select',
-        options: portProtocols,
-      },
-    ]"
+    :filters="filters"
     :ordering="['id', 'host', 'port', 'status', 'protocol', 'service']"
     :visibility="{ paths: false, technologies: false, vulnerabilities: false }"
   />
@@ -34,6 +18,32 @@ import type { Port } from "~/types/models";
 
 const route = useRoute();
 const table = useTable();
+const options = useOptions();
+const hostOptions = ref();
+const filters = computed(() => [
+  {
+    key: "host",
+    label: "Host",
+    icon: "i-lucide-server",
+    type: "select" as const,
+    options: hostOptions,
+  },
+  {
+    key: "status",
+    label: "Port Status",
+    icon: "i-lucide-chevrons-left-right-ellipsis",
+    type: "select",
+    options: portStatuses,
+    labelKey: "value",
+  },
+  {
+    key: "protocol",
+    label: "Protocol",
+    icon: "i-lucide-network",
+    type: "select",
+    options: portProtocols,
+  },
+]);
 const columns: CrudTableColumn<Port>[] = [
   {
     accessorKey: "host",
@@ -116,4 +126,11 @@ const columns: CrudTableColumn<Port>[] = [
     },
   },
 ];
+
+onMounted(() => {
+  options.hosts(
+    hostOptions,
+    route.params.project_id ? { project: route.params.project_id } : {},
+  );
+});
 </script>

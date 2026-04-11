@@ -129,5 +129,134 @@ export default function () {
     });
   }
 
-  return { users, tools, configurations, processes, targets, tasks, findings };
+  function osint(
+    optionsRef: Ref<FilterOption[]>,
+    queryParams?: Record<string, string> = {},
+  ) {
+    findings(
+      "osint",
+      (osint) => {
+        return { label: osint.data, value: osint.id };
+      },
+      optionsRef,
+      queryParams,
+    );
+  }
+
+  function hosts(
+    optionsRef: Ref<FilterOption[]>,
+    queryParams?: Record<string, string> = {},
+  ) {
+    findings(
+      "hosts",
+      (host) => {
+        return { label: host.ip, value: host.id };
+      },
+      optionsRef,
+      queryParams,
+    );
+  }
+
+  function ports(
+    optionsRef: Ref<FilterOption[]>,
+    queryParams?: Record<string, string> = {},
+  ) {
+    findings(
+      "ports",
+      (port) => {
+        return {
+          label: port.host
+            ? `${port.host?.ip}:${port.port}`
+            : port.port.toString(),
+          value: port.id,
+          icon: getPortIcon(port.port, port.service),
+        };
+      },
+      optionsRef,
+      queryParams,
+    );
+  }
+
+  function technologies(
+    optionsRef: Ref<FilterOption[]>,
+    queryParams?: Record<string, string> = {},
+  ) {
+    findings(
+      "technologies",
+      (technology) => {
+        return {
+          label: technology.version
+            ? `${technology.name} ${technology.version}`
+            : technology.name,
+          value: technology.id,
+        };
+      },
+      optionsRef,
+      queryParams,
+    );
+  }
+
+  function credentials(
+    optionsRef: Ref<FilterOption[]>,
+    queryParams?: Record<string, string> = {},
+  ) {
+    findings(
+      "credentials",
+      (credential) => {
+        return {
+          label:
+            credential.email ||
+            credential.username ||
+            `Credential #${credential.id}`,
+          value: credential.id,
+        };
+      },
+      optionsRef,
+      queryParams,
+    );
+  }
+
+  function vulnerabilities(
+    optionsRef: Ref<FilterOption[]>,
+    queryParams?: Record<string, string> = {},
+  ) {
+    findings(
+      "vulnerabilities",
+      (vulnerability) => {
+        return { label: vulnerability.name, value: vulnerability.id };
+      },
+      optionsRef,
+      queryParams,
+    );
+  }
+
+  function exploits(
+    optionsRef: Ref<FilterOption[]>,
+    queryParams?: Record<string, string> = {},
+  ) {
+    findings(
+      "exploits",
+      (exploit) => {
+        return { label: exploit.title, value: exploit.id };
+      },
+      optionsRef,
+      queryParams,
+    );
+  }
+
+  return {
+    users,
+    tools,
+    configurations,
+    processes,
+    targets,
+    tasks,
+    osint,
+    hosts,
+    ports,
+    technologies,
+    credentials,
+    vulnerabilities,
+    exploits,
+  };
 }

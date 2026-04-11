@@ -296,53 +296,55 @@ const config: CrudConfig<Finding> = reactive({
   }),
   searchable: true,
   searchPlaceholder: `Search ${smartLowerCase(props.entityNamePlural)}...`,
-  filters: [
-    {
-      key: "target",
-      label: "Target",
-      icon: "i-lucide-locate-fixed",
-      type: "select" as const,
-      options: targetOptions,
-    },
-    {
-      key: "task",
-      label: "Task",
-      icon: "i-lucide-play",
-      type: "select" as const,
-      options: taskOptions,
-    },
-    {
-      key: "tool",
-      label: "Tool",
-      icon: "i-lucide-square-terminal",
-      type: "select" as const,
-      options: toolOptions,
-    },
-    ...(props.filters || []),
-    {
-      key: "triage_status",
-      label: "Triage Status",
-      icon: "i-lucide-shield-check",
-      type: "select",
-      options: triageStatuses,
-      labelKey: "value",
-    },
-    {
-      key: "is_fixed",
-      label: "Fixed",
-      type: "checkbox",
-    },
-    {
-      key: "auto_fixed",
-      label: "Auto-Fixed",
-      type: "checkbox",
-    },
-    {
-      key: "created_from_user_input",
-      label: "From user input",
-      type: "checkbox",
-    },
-  ],
+  get filters() {
+    return [
+      {
+        key: "target",
+        label: "Target",
+        icon: "i-lucide-locate-fixed",
+        type: "select" as const,
+        options: targetOptions,
+      },
+      {
+        key: "task",
+        label: "Task",
+        icon: "i-lucide-play",
+        type: "select" as const,
+        options: taskOptions,
+      },
+      {
+        key: "tool",
+        label: "Tool",
+        icon: "i-lucide-square-terminal",
+        type: "select" as const,
+        options: toolOptions,
+      },
+      ...(props.filters || []),
+      {
+        key: "triage_status",
+        label: "Triage Status",
+        icon: "i-lucide-shield-check",
+        type: "select",
+        options: triageStatuses,
+        labelKey: "value",
+      },
+      {
+        key: "is_fixed",
+        label: "Fixed",
+        type: "checkbox",
+      },
+      {
+        key: "auto_fixed",
+        label: "Auto-Fixed",
+        type: "checkbox",
+      },
+      {
+        key: "created_from_user_input",
+        label: "From user input",
+        type: "checkbox",
+      },
+    ];
+  },
   defaultFilters: route.params.project_id
     ? { project: route.params.project_id }
     : undefined,
