@@ -27,13 +27,11 @@ class ProjectSerializer(TaggitSerializer, RelatedNotesSerializer):
     including owner membership and default security monitoring alerts.
 
     Attributes:
-        targets (SimpleTargetSerializer): Nested target information for project
         owner (SimpleUserSerializer): Serialized user information for project owner
         tags (TagField): Project organizational tags with tagging support
         defectdojo_sync (DefectDojoSyncSerializer): DefectDojo integration configuration
     """
 
-    targets = SimpleTargetSerializer(read_only=True, many=True)
     owner = SimpleUserSerializer(many=False, read_only=True)
     tags = TagField()  # Tags
     defectdojo_sync = DefectDojoSyncSerializer(many=False, read_only=True)
