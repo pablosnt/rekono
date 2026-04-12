@@ -80,6 +80,7 @@ const columns: CrudTableColumn<Host>[] = [
     icon: "i-lucide-map-pin",
     cell: ({ row }) => table.valueCell(row.getValue("city")),
   },
+  // TODO: Add tooltip for the badges, so the user see the difference between malicious and suspicious
   {
     accessorKey: "analysis",
     header: "Malware Analysis",

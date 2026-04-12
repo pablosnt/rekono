@@ -8,6 +8,7 @@
     { "path": "./.nuxt/tsconfig.node.json" }
   ],
   "compilerOptions": {
-    "types": ["node"]
+    "types": ["node", "topojson-client"],
+    "allowSyntheticDefaultImports": true
   }
 }

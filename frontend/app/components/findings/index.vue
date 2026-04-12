@@ -62,6 +62,13 @@
       @open="(open) => (fixModalOpen = open)"
       @switched="page?.fetch()"
     />
+    <FindingsModalExposure
+      v-if="selectedItemExposureWindow"
+      :open="exposureModalOpen"
+      :finding="selectedItem"
+      :dates="selectedItemExposureWindow"
+      @open="(open) => (exposureModalOpen = open)"
+    />
   </div>
 </template>
 
@@ -96,8 +103,10 @@ const api = useApi(props.endpoint);
 const table = useTable();
 const page = ref();
 const selectedItem = ref();
+const selectedItemExposureWindow = ref();
 const triageModalOpen = ref(false);
 const fixModalOpen = ref(false);
+const exposureModalOpen = ref(false);
 const fixVerb = ref(props.isAsset ? "Dismiss" : "Fix");
 const unfixVerb = ref(props.isAsset ? "Restore" : "Reopen");
 const notesButton = ref();
@@ -122,7 +131,6 @@ const noteProps = computed(() => {
   return { [props.entityName.toLowerCase()]: selectedItem.value.id };
 });
 
-// TODO: First and last execution date (maybe a column "Exposure Window" that opens a modal with an evolution graph of executions detecting it per date)
 // todo: DefectDojo link
 
 const config: CrudConfig<Finding> = reactive({
@@ -276,6 +284,29 @@ const config: CrudConfig<Finding> = reactive({
             ),
           ),
         );
+      },
+    },
+    {
+      accessorKey: "exposure",
+      header: "Exposure Window",
+      icon: "i-lucide-history",
+      cell: ({ row }) => {
+        const dates = getExposureWindow(row.original);
+        if (dates.length === 0) return table.noDataCell;
+        else if (dates.length === 1)
+          return table.valueCell(dates[0].date.toDateString());
+        else {
+          return h(resolveComponent("UButton"), {
+            label: `${dates[0].date.toDateString()} - ${dates[dates.length - 1].date.toDateString()}`,
+            color: "neutral",
+            variant: "ghost",
+            onClick: () => {
+              selectedItem.value = row.original;
+              selectedItemExposureWindow.value = dates;
+              exposureModalOpen.value = true;
+            },
+          });
+        }
       },
     },
     {
