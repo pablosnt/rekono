@@ -15,7 +15,6 @@ from framework.fields import TagField
 from framework.serializers import RelatedNotesSerializer
 from platforms.defectdojo.serializers import DefectDojoSyncSerializer
 from projects.models import Project
-from targets.serializers import SimpleTargetSerializer
 from users.serializers import SimpleUserSerializer
 
 

@@ -1,22 +1,12 @@
 <template>
-  <UModal
-    title="Exposure Window"
-    description="Dates when the finding has been detected"
-    :open="open"
-    :ui="{ content: 'sm:max-w-3xl sm:max-h-xl' }"
-    @update:open="(value) => $emit('open', value)"
-  >
-    <template #body>
-      <VisXYContainer :data="timeline" :x-domain="xDomain" :height="100">
-        <VisTimeline :x="(d) => d.timestamp" :color="(d) => d.color" />
-        <VisAxis
-          type="x"
-          :tick-format="(d: number) => new Date(d).toDateString()"
-        />
-        <VisTooltip :triggers="tooltipTriggers" />
-      </VisXYContainer>
-    </template>
-  </UModal>
+  <VisXYContainer :data="timeline" :x-domain="xDomain" :height="100">
+    <VisTimeline :x="(d) => d.timestamp" :color="(d) => d.color" />
+    <VisAxis
+      type="x"
+      :tick-format="(d: number) => new Date(d).toDateString()"
+    />
+    <VisTooltip :triggers="tooltipTriggers" />
+  </VisXYContainer>
 </template>
 
 <script setup lang="ts">
@@ -25,11 +15,9 @@ import { Timeline } from "@unovis/ts";
 import type { Finding } from "~/types/models";
 
 const props = defineProps<{
-  open: boolean;
   finding?: Finding;
   dates?: Date[];
 }>();
-defineEmits<{ open: [open: boolean] }>();
 
 const dailyMs = 60 * 60 * 24 * 1000;
 

@@ -62,13 +62,18 @@
       @open="(open) => (fixModalOpen = open)"
       @switched="page?.fetch()"
     />
-    <FindingsModalExposure
+    <FindingsModal
       v-if="selectedItemExposureWindow"
+      title="Exposure Window"
+      description="Dates when the finding has been detected"
       :open="exposureModalOpen"
-      :finding="selectedItem"
-      :dates="selectedItemExposureWindow"
       @open="(open) => (exposureModalOpen = open)"
-    />
+    >
+      <FindingsMetricsExposure
+        :finding="selectedItem"
+        :dates="selectedItemExposureWindow"
+      />
+    </FindingsModal>
   </div>
 </template>
 

@@ -1,30 +1,41 @@
 <template>
-  <Findings
-    endpoint="/api/hosts/"
-    entity-name="Host"
-    entity-name-plural="Hosts"
-    icon="i-lucide-server"
-    :columns="columns"
-    :filters="[
-      {
-        key: 'os_type',
-        label: 'OS',
-        icon: 'i-lucide-monitor',
-        type: 'select',
-        options: hostOS,
-        labelKey: 'value',
-      },
-    ]"
-    :ordering="[
-      'id',
-      'ip',
-      'domain',
-      { id: 'os_type', label: 'OS' },
-      'country',
-      'city',
-    ]"
-    :visibility="{ whois: false, ports: false }"
-  />
+  <div>
+    <Findings
+      endpoint="/api/hosts/"
+      entity-name="Host"
+      entity-name-plural="Hosts"
+      icon="i-lucide-server"
+      :columns="columns"
+      :filters="[
+        {
+          key: 'os_type',
+          label: 'OS',
+          icon: 'i-lucide-monitor',
+          type: 'select',
+          options: hostOS,
+          labelKey: 'value',
+        },
+      ]"
+      :ordering="[
+        'id',
+        'ip',
+        'domain',
+        { id: 'os_type', label: 'OS' },
+        'country',
+        'city',
+      ]"
+      :visibility="{ whois: false, ports: false }"
+    />
+    <FindingsModal
+      v-if="selectedHost"
+      title="Geolocation"
+      :description="selectedHost.country"
+      :open="locationModalOpen"
+      @open="(open) => (locationModalOpen = open)"
+    >
+      <FindingsMetricsLocations :hosts="[selectedHost]" />
+    </FindingsModal>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -35,6 +46,8 @@ import type { Host } from "~/types/models";
 
 const route = useRoute();
 const table = useTable();
+const locationModalOpen = ref(false);
+const selectedHost = ref();
 const columns: CrudTableColumn<Host>[] = [
   {
     accessorKey: "ip",
@@ -78,9 +91,20 @@ const columns: CrudTableColumn<Host>[] = [
     accessorKey: "city",
     header: "City",
     icon: "i-lucide-map-pin",
-    cell: ({ row }) => table.valueCell(row.getValue("city")),
+    cell: ({ row }) => {
+      return row.original.latitude && row.original.longitude
+        ? h(resolveComponent("UButton"), {
+            label: row.original.city,
+            color: "neutral",
+            variant: "ghost",
+            onClick: () => {
+              selectedHost.value = row.original;
+              locationModalOpen.value = true;
+            },
+          })
+        : table.valueCell(row.original.city);
+    },
   },
-  // TODO: Add tooltip for the badges, so the user see the difference between malicious and suspicious
   {
     accessorKey: "analysis",
     header: "Malware Analysis",
@@ -120,8 +144,26 @@ const columns: CrudTableColumn<Host>[] = [
           "div",
           { class: "flex items-center gap-1" },
           [
-            m > 0 ? table.badgeCell(m.toString(), undefined, "error") : null,
-            s > 0 ? table.badgeCell(s.toString(), undefined, "warning") : null,
+            m > 0
+              ? h(
+                  resolveComponent("UTooltip"),
+                  { text: "Malicious" },
+                  {
+                    default: () =>
+                      table.badgeCell(m.toString(), undefined, "error"),
+                  },
+                )
+              : null,
+            s > 0
+              ? h(
+                  resolveComponent("UTooltip"),
+                  { text: "Suspicious" },
+                  {
+                    default: () =>
+                      table.badgeCell(s.toString(), undefined, "warning"),
+                  },
+                )
+              : null,
             table.valueCell(`/ ${total}`),
           ].filter(Boolean),
         ),
