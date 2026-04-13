@@ -1,5 +1,5 @@
 <template>
-  <Findings
+  <FindingsMultiple
     endpoint="/api/ports/"
     entity-name="Port"
     entity-name-plural="Ports"

@@ -1,5 +1,5 @@
 <template>
-  <Findings
+  <FindingsMultiple
     endpoint="/api/credentials/"
     entity-name="Credential"
     entity-name-plural="Credentials"

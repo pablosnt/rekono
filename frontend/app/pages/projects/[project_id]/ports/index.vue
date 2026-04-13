@@ -1,5 +1,5 @@
 <template>
-  <FindingsPorts />
+  <FindingsPortsMultiple />
 </template>
 
 <script setup lang="ts">

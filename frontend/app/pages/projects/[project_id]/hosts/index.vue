@@ -1,5 +1,5 @@
 <template>
-  <FindingsHosts />
+  <FindingsHostsMultiple />
 </template>
 
 <script setup lang="ts">

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <Findings
+    <FindingsMultiple
       endpoint="/api/hosts/"
       entity-name="Host"
       entity-name-plural="Hosts"
@@ -26,15 +26,17 @@
       ]"
       :visibility="{ whois: false, ports: false }"
     />
-    <FindingsModal
+    <UModal
       v-if="selectedHost"
+      v-model:open="locationModalOpen"
       title="Geolocation"
       :description="selectedHost.country"
-      :open="locationModalOpen"
-      @open="(open) => (locationModalOpen = open)"
+      :ui="{ content: 'sm:max-w-3xl sm:max-h-xl' }"
     >
-      <FindingsMetricsLocations :hosts="[selectedHost]" />
-    </FindingsModal>
+      <template #body>
+        <FindingsHostsMetricsLocations :hosts="[selectedHost]" />
+      </template>
+    </UModal>
   </div>
 </template>
 

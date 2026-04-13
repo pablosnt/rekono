@@ -1,3 +1,3 @@
 <template>
-  <FindingsCredentials />
+  <FindingsCredentialsMultiple />
 </template>

@@ -1,5 +1,5 @@
 <template>
-  <FindingsTechnologies />
+  <FindingsTechnologiesMultiple />
 </template>
 
 <script setup lang="ts">

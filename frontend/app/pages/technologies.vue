@@ -1,3 +1,3 @@
 <template>
-  <FindingsTechnologies />
+  <FindingsTechnologiesMultiple />
 </template>

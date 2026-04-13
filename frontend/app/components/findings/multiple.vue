@@ -62,18 +62,20 @@
       @open="(open) => (fixModalOpen = open)"
       @switched="page?.fetch()"
     />
-    <FindingsModal
+    <UModal
       v-if="selectedItemExposureWindow"
+      v-model:open="exposureModalOpen"
       title="Exposure Window"
       description="Dates when the finding has been detected"
-      :open="exposureModalOpen"
-      @open="(open) => (exposureModalOpen = open)"
+      :ui="{ content: 'sm:max-w-3xl sm:max-h-xl' }"
     >
-      <FindingsMetricsExposure
-        :finding="selectedItem"
-        :dates="selectedItemExposureWindow"
-      />
-    </FindingsModal>
+      <template #body>
+        <FindingsMetricsExposure
+          :finding="selectedItem"
+          :dates="selectedItemExposureWindow"
+        />
+      </template>
+    </UModal>
   </div>
 </template>
 

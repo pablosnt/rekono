@@ -1,5 +1,5 @@
 <template>
-  <Findings
+  <FindingsMultiple
     endpoint="/api/paths/"
     entity-name="Path"
     entity-name-plural="Paths"

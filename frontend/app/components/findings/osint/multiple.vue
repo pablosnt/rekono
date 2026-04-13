@@ -1,5 +1,5 @@
 <template>
-  <Findings
+  <FindingsMultiple
     endpoint="/api/osint/"
     entity-name="OSINT"
     entity-name-plural="OSINT"

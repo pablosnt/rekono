@@ -1,5 +1,5 @@
 <template>
-  <Findings
+  <FindingsMultiple
     endpoint="/api/vulnerabilities/"
     entity-name="Vulnerability"
     entity-name-plural="Vulnerabilities"

@@ -1,3 +1,3 @@
 <template>
-  <FindingsVulnerabilities />
+  <FindingsVulnerabilitiesMultiple />
 </template>

@@ -1,3 +1,3 @@
 <template>
-  <FindingsHosts />
+  <FindingsHostsMultiple />
 </template>
