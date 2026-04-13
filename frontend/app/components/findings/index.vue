@@ -118,6 +118,7 @@ const notesButton = ref();
 const targetOptions = ref();
 const taskOptions = ref();
 const toolOptions = ref();
+const hacktricks = ref();
 
 onMounted(() => {
   options.targets(
@@ -129,6 +130,9 @@ onMounted(() => {
     route.params.project_id ? { project: route.params.project_id } : undefined,
   );
   options.tools(toolOptions);
+  useApi("/api/integrations/")
+    .get("3/")
+    .then((response) => (hacktricks.value = response));
 });
 
 const noteProps = computed(() => {
@@ -136,7 +140,7 @@ const noteProps = computed(() => {
   return { [props.entityName.toLowerCase()]: selectedItem.value.id };
 });
 
-// todo: DefectDojo link
+// todo: DefectDojo link (if integration enabled and available. Get defectdojo server from settings)
 
 const config: CrudConfig<Finding> = reactive({
   endpoint: props.endpoint,
@@ -145,187 +149,197 @@ const config: CrudConfig<Finding> = reactive({
   icon: props.icon,
   itemLink: (finding: Finding) =>
     `/projects/${finding.project}/${props.entityNamePlural.toLowerCase()}/${finding.id}`,
-  tableColumns: [
-    {
-      accessorKey: "id",
-      header: "ID",
-      icon: "i-lucide-hash",
-      cell: ({ row }) => table.valueCell(row.getValue("id")),
-    },
-    ...(props.columns || []),
-    {
-      accessorKey: "status",
-      header: "Status",
-      icon: "i-lucide-activity",
-      cell: ({ row }) => {
-        if (row.original.is_fixed) {
-          return h(
-            resolveComponent("UTooltip"),
-            {
-              text: row.original.auto_fixed
-                ? "Auto-Fixed"
-                : `Fixed by ${row.original.fixed_by.username} ${useTimeAgo(new Date(row.original.fixed_date)).value}`,
-              content: { side: "left", sideOffset: 8, collisionPadding: 8 },
-            },
-            {
-              default: () =>
-                h(resolveComponent("UButton"), {
-                  icon: row.original.auto_fixed
-                    ? "i-lucide-bot"
-                    : "i-lucide-badge-check",
-                  color: "success",
-                  variant: "ghost",
-                  label: "Fixed",
-                  class: "font-medium text-sm",
-                }),
-            },
-          );
-        } else if (props.isTriageable) {
-          const config = triageStatuses.find(
-            (s) => s.value === row.original.triage_status,
-          );
-          return row.original.triage_by && row.original.triage_date
-            ? h(
-                resolveComponent("UTooltip"),
-                {
-                  text: `Triaged by ${row.original.triage_by.username} ${useTimeAgo(new Date(row.original.triage_date)).value}`,
-                  content: { side: "left", sideOffset: 8, collisionPadding: 8 },
-                },
-                {
-                  default: () =>
-                    h(resolveComponent("UButton"), {
-                      icon: config?.icon,
-                      color: config?.color,
-                      variant: "ghost",
-                      label: config?.value,
-                      class: "font-medium text-sm",
-                    }),
-                },
-              )
-            : table.badgeCell(
-                config?.value,
-                config?.icon,
-                config?.color,
-                "ghost",
-              );
-        } else {
-          return table.badgeCell(
-            "Active",
-            "i-lucide-shield-alert",
-            "neutral",
-            "ghost",
-          );
-        }
+  get tableColumns() {
+    return [
+      {
+        accessorKey: "id",
+        header: "ID",
+        icon: "i-lucide-hash",
+        cell: ({ row }) => table.valueCell(row.getValue("id")),
       },
-    },
-    {
-      accessorKey: "triage",
-      header: "Triage Comment",
-      icon: "i-lucide-message-circle-more",
-      cell: ({ row }) => table.valueCell(row.original.triage_comment),
-    },
-    {
-      accessorKey: "scanners",
-      header: "Scanners",
-      icon: "i-lucide-toolbox",
-      cell: ({ row }) => {
-        if (row.original.created_from_user_input) {
-          return h(
-            resolveComponent("UTooltip"),
-            {
-              text: `${props.isAsset ? "Asset" : "Finding"} automatically created from user-provided data to keep relationships between findings consistent`,
-            },
-            {
-              default: () =>
-                h(resolveComponent("UButton"), {
-                  icon: "i-lucide-user-cog",
-                  color: "neutral",
-                  variant: "ghost",
-                  label: "User input",
-                  class: "font-medium text-sm",
-                }),
-            },
-          );
-        }
-        const scanners = row.original.executions
-          .map((e) => {
-            return {
-              name: e.configuration.tool.name,
-              icon: e.configuration.tool.icon,
-            };
-          })
-          .filter(
-            (value, index, self) =>
-              index === self.findIndex((e) => e.name === value.name),
-          );
-        return h(
-          "div",
-          { class: "flex items-center gap-1.5" },
-          scanners.map((s) =>
-            h(
-              resolveComponent("UChip"),
+      ...(props.columns || []),
+      {
+        accessorKey: "status",
+        header: "Status",
+        icon: "i-lucide-activity",
+        cell: ({ row }) => {
+          if (row.original.is_fixed) {
+            return h(
+              resolveComponent("UTooltip"),
               {
-                text: row.original.executions
-                  .filter((e) => e.configuration?.tool.name === s.name)
-                  .length.toString(),
-                size: "3xl",
-                color: "neutral",
-                variant: "ghost",
+                text: row.original.auto_fixed
+                  ? "Auto-Fixed"
+                  : `Fixed by ${row.original.fixed_by.username} ${useTimeAgo(new Date(row.original.fixed_date)).value}`,
+                content: { side: "left", sideOffset: 8, collisionPadding: 8 },
               },
               {
                 default: () =>
-                  h(
-                    resolveComponent("UTooltip"),
-                    { text: s.name },
-                    {
-                      default: () =>
-                        h(resolveComponent("UButton"), {
-                          avatar: s.icon ? { src: s.icon } : undefined,
-                          icon: s.icon ? undefined : "i-lucide-square-terminal",
-                        }),
-                    },
-                  ),
+                  h(resolveComponent("UButton"), {
+                    icon: row.original.auto_fixed
+                      ? "i-lucide-bot"
+                      : "i-lucide-badge-check",
+                    color: "success",
+                    variant: "ghost",
+                    label: "Fixed",
+                    class: "font-medium text-sm",
+                  }),
               },
+            );
+          } else if (props.isTriageable) {
+            const config = triageStatuses.find(
+              (s) => s.value === row.original.triage_status,
+            );
+            return row.original.triage_by && row.original.triage_date
+              ? h(
+                  resolveComponent("UTooltip"),
+                  {
+                    text: `Triaged by ${row.original.triage_by.username} ${useTimeAgo(new Date(row.original.triage_date)).value}`,
+                    content: {
+                      side: "left",
+                      sideOffset: 8,
+                      collisionPadding: 8,
+                    },
+                  },
+                  {
+                    default: () =>
+                      h(resolveComponent("UButton"), {
+                        icon: config?.icon,
+                        color: config?.color,
+                        variant: "ghost",
+                        label: config?.value,
+                        class: "font-medium text-sm",
+                      }),
+                  },
+                )
+              : table.badgeCell(
+                  config?.value,
+                  config?.icon,
+                  config?.color,
+                  "ghost",
+                );
+          } else {
+            return table.badgeCell(
+              "Active",
+              "i-lucide-shield-alert",
+              "neutral",
+              "ghost",
+            );
+          }
+        },
+      },
+      {
+        accessorKey: "triage",
+        header: "Triage Comment",
+        icon: "i-lucide-message-circle-more",
+        cell: ({ row }) => table.valueCell(row.original.triage_comment),
+      },
+      {
+        accessorKey: "scanners",
+        header: "Scanners",
+        icon: "i-lucide-toolbox",
+        cell: ({ row }) => {
+          if (row.original.created_from_user_input) {
+            return h(
+              resolveComponent("UTooltip"),
+              {
+                text: `${props.isAsset ? "Asset" : "Finding"} automatically created from user-provided data to keep relationships between findings consistent`,
+              },
+              {
+                default: () =>
+                  h(resolveComponent("UButton"), {
+                    icon: "i-lucide-user-cog",
+                    color: "neutral",
+                    variant: "ghost",
+                    label: "User input",
+                    class: "font-medium text-sm",
+                  }),
+              },
+            );
+          }
+          const scanners = row.original.executions
+            .map((e) => {
+              return {
+                name: e.configuration.tool.name,
+                icon: e.configuration.tool.icon,
+              };
+            })
+            .filter(
+              (value, index, self) =>
+                index === self.findIndex((e) => e.name === value.name),
+            );
+          return h(
+            "div",
+            { class: "flex items-center gap-1.5" },
+            scanners.map((s) =>
+              h(
+                resolveComponent("UChip"),
+                {
+                  text: row.original.executions
+                    .filter((e) => e.configuration?.tool.name === s.name)
+                    .length.toString(),
+                  size: "3xl",
+                  color: "neutral",
+                  variant: "ghost",
+                },
+                {
+                  default: () =>
+                    h(
+                      resolveComponent("UTooltip"),
+                      { text: s.name },
+                      {
+                        default: () =>
+                          h(resolveComponent("UButton"), {
+                            avatar: s.icon ? { src: s.icon } : undefined,
+                            icon: s.icon
+                              ? undefined
+                              : "i-lucide-square-terminal",
+                          }),
+                      },
+                    ),
+                },
+              ),
             ),
-          ),
-        );
+          );
+        },
       },
-    },
-    {
-      accessorKey: "exposure",
-      header: "Exposure Window",
-      icon: "i-lucide-history",
-      cell: ({ row }) => {
-        const dates = getExposureWindow(row.original);
-        if (dates.length === 0) return table.noDataCell;
-        else if (dates.length === 1)
-          return table.valueCell(dates[0].date.toDateString());
-        else {
-          return h(resolveComponent("UButton"), {
-            label: `${dates[0].date.toDateString()} - ${dates[dates.length - 1].date.toDateString()}`,
-            color: "neutral",
-            variant: "ghost",
-            onClick: () => {
-              selectedItem.value = row.original;
-              selectedItemExposureWindow.value = dates;
-              exposureModalOpen.value = true;
-            },
-          });
-        }
+      {
+        accessorKey: "exposure",
+        header: "Exposure Window",
+        icon: "i-lucide-history",
+        cell: ({ row }) => {
+          const dates = getExposureWindow(row.original);
+          if (dates.length === 0) return table.noDataCell;
+          else if (dates.length === 1)
+            return table.valueCell(dates[0].date.toDateString());
+          else {
+            return h(resolveComponent("UButton"), {
+              label: `${dates[0].date.toDateString()} - ${dates[dates.length - 1].date.toDateString()}`,
+              color: "neutral",
+              variant: "ghost",
+              onClick: () => {
+                selectedItem.value = row.original;
+                selectedItemExposureWindow.value = dates;
+                exposureModalOpen.value = true;
+              },
+            });
+          }
+        },
       },
-    },
-    {
-      accessorKey: "hacktricks",
-      header: "HackTricks",
-      avatar: { src: "https://book.hacktricks.wiki/en/favicon.svg" },
-      cell: ({ row }) =>
-        table.externalLinkCell(
-          row.original.hacktricks_link,
-          undefined,
-          "https://book.hacktricks.wiki/en/favicon.svg",
-        ),
-    },
-  ],
+      hacktricks.value?.enabled
+        ? {
+            accessorKey: "hacktricks",
+            header: "HackTricks",
+            avatar: { src: hacktricks.value.icon },
+            cell: ({ row }) =>
+              table.externalLinkCell(
+                row.original.hacktricks_link,
+                undefined,
+                hacktricks.value.icon,
+              ),
+          }
+        : {},
+    ].filter((i) => Object.keys(i).length > 0);
+  },
   tableColumnsVisibility: Object.assign({}, props.visibility || {}, {
     id: false,
     triage: false,
