@@ -71,12 +71,11 @@ const userStore = useUserStore();
 const breadcrumb = ref([]);
 const items = ref([]);
 const projectEntity = ref({ name: "Rekono" });
-const currentTask = useState<Task | null>("currentTask", () => null);
-const currentNote = useState<Note | null>("currentNote", () => null);
 const mounting = ref(false);
 const allProjects = ref<Project[]>([]);
 
 function onProjectChange() {
+  console.log("onProjectChange");
   if (!route.params.project_id) {
     projectEntity.value = { name: "Rekono" };
     return;
@@ -291,18 +290,15 @@ function cleanSecondaryLinks(
   entityId: number,
   entitiesLink: Record<string, string>,
 ): boolean {
-  if (!entityId) {
-    if (breadcrumb.value.length > 3) {
-      breadcrumb.value = breadcrumb.value.slice(0, 3);
-    }
-    return false;
-  }
   if (breadcrumb.value.length > 3) {
-    breadcrumb.value = breadcrumb.value.slice(0, 4);
+    breadcrumb.value = breadcrumb.value.slice(0, 3);
+  }
+  if (!entityId) {
+    return false;
   } else {
     breadcrumb.value.push(entitiesLink);
+    return true;
   }
-  return true;
 }
 
 function onTargetChange() {
@@ -341,69 +337,26 @@ function onTargetChange() {
 }
 
 function onScanChange() {
-  const conclusion = cleanSecondaryLinks(route.params.scan_id, {
+  cleanSecondaryLinks(route.params.scan_id, {
     label: "Scans",
     icon: "i-lucide-play",
     to: `/projects/${route.params.project_id}/scans`,
   });
-  if (!conclusion) return;
-  breadcrumb.value.push({
-    label: currentTask.value?.process
-      ? currentTask.value.process.name
-      : currentTask.value?.configuration?.tool?.name,
-    icon: currentTask.value.process
-      ? "i-lucide-workflow"
-      : currentTask.value.configuration?.tool?.icon
-        ? undefined
-        : "i-lucide-square-terminal",
-    avatar: currentTask.value.configuration?.tool?.icon
-      ? { src: currentTask.value.configuration?.tool?.icon }
-      : undefined,
-    to: `/projects/${route.params.project_id}/scans/${route.params.scan_id}`,
-  });
 }
 
 function onNoteChange() {
-  const conclusion = cleanSecondaryLinks(route.params.note_id, {
+  cleanSecondaryLinks(route.params.note_id, {
     label: "Notes",
     icon: "i-lucide-notebook",
     to: `/projects/${route.params.project_id}/notes`,
   });
-  if (!conclusion) return;
-  breadcrumb.value.push({
-    label: currentNote.value?.title,
-    to: `/projects/${route.params.project_id}/notes/${route.params.note_id}`,
-  });
-}
-
-function watchIfNotMounting(callable: () => void) {
-  if (mounting.value) return;
-  callable();
-}
-
-function watchIfNotMountingOrNotId(entityId: number, callable: () => void) {
-  if (entityId) return;
-  watchIfNotMounting(callable);
 }
 
 watch(() => route.params.project_id, onProjectChange);
 watch(() => route.params.target_id, onTargetChange);
-watch(
-  () => currentTask.value,
-  () => watchIfNotMounting(onScanChange),
-);
-watch(
-  () => route.params.scan_id,
-  () => watchIfNotMountingOrNotId(route.params.scan_id, onScanChange),
-);
-watch(
-  () => currentNote.value,
-  () => watchIfNotMounting(onNoteChange),
-);
-watch(
-  () => route.params.note_id,
-  () => watchIfNotMountingOrNotId(route.params.note_id, onNoteChange),
-);
+watch(() => route.params.scan_id, onScanChange);
+watch(() => route.params.note_id, onNoteChange);
+
 onMounted(() => {
   mounting.value = true;
   onProjectChange();
