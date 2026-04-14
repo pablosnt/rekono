@@ -149,7 +149,7 @@ class Target(BaseInput):
         from findings.models import Host
 
         if self.type == TargetType.DOMAIN:
-            fields["ip"] = socket.gethostbyname(self.target.target)
+            fields["ip"] = socket.gethostbyname(self.target)
             fields["domain"] = self.target
         elif self.type in [TargetType.PRIVATE_IP, TargetType.PUBLIC_IP]:
             fields["ip"] = self.target
