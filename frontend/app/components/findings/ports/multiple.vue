@@ -8,6 +8,7 @@
     :filters="filters"
     :ordering="['id', 'host', 'port', 'status', 'protocol', 'service']"
     :visibility="{ paths: false, technologies: false, vulnerabilities: false }"
+    is-asset
   />
 </template>
 

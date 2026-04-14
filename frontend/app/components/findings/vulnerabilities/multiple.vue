@@ -144,7 +144,10 @@ const columns: CrudTableColumn<Vulnerability>[] = [
           ? h("div", { class: "flex items-center gap-2" }, [
               h(
                 UTooltip,
-                { text: "Trending" },
+                {
+                  text: "Trending",
+                  content: { side: "left", sideOffset: 8, collisionPadding: 8 },
+                },
                 {
                   default: () =>
                     h(UIcon, {

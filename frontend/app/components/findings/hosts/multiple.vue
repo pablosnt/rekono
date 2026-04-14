@@ -25,6 +25,7 @@
         'city',
       ]"
       :visibility="{ whois: false, ports: false }"
+      is-asset
     />
     <UModal
       v-if="selectedHost"

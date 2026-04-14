@@ -16,10 +16,9 @@
       },
     ]"
     :ordering="['id', 'data', { id: 'data_type', label: 'Type' }, 'source']"
-    is-triageable
     :extra-dropdown-actions="
       (item: OSINT) =>
-        ['IP', 'Domain'].includes(item.data_type)
+        userStore.is_auditor && ['IP', 'Domain'].includes(item.data_type)
           ? [
               {
                 label: 'Create target',
@@ -38,6 +37,8 @@
             ]
           : []
     "
+    is-triageable
+    custom-fix-verb="Discard"
   />
 </template>
 
@@ -45,9 +46,11 @@
 import type { CrudTableColumn, FilterOption } from "~/types/crud";
 import { osintDataTypes } from "~/constants";
 import type { OSINT } from "~/types/models";
+import { useUserStore } from "~/store/user";
 
 const api = useApi("/api/osint/");
 const table = useTable();
+const userStore = useUserStore();
 const columns: CrudTableColumn<OSINT>[] = [
   {
     accessorKey: "data",

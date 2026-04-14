@@ -35,7 +35,15 @@
         :icon="
           finding.is_fixed ? 'i-lucide-rotate-ccw' : 'i-lucide-check-circle'
         "
-        :color="finding.is_fixed ? 'primary' : 'success'"
+        :color="
+          fixVerb === 'Fix'
+            ? finding.is_fixed
+              ? 'primary'
+              : 'success'
+            : finding.is_fixed
+              ? 'success'
+              : 'primary'
+        "
         :label="verb"
         :loading="loading"
         @click="switchFix"

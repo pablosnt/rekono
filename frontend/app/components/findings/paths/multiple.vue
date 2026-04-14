@@ -14,6 +14,7 @@
       'status',
       'type',
     ]"
+    is-asset
   />
 </template>
 

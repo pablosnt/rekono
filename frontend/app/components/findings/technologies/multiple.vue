@@ -19,6 +19,7 @@
       vulnerability: false,
       exploit: false,
     }"
+    is-asset
   />
 </template>
 

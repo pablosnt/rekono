@@ -86,7 +86,7 @@ import { useUserStore } from "~/store/user";
 import { useTimeAgo } from "@vueuse/core";
 import type { Finding } from "~/types/models";
 import { triageStatuses } from "~/constants";
-
+// TODO: Review asset tooltips and fix position
 const props = defineProps<{
   endpoint: string;
   entityName: string;
@@ -98,6 +98,7 @@ const props = defineProps<{
   visibility?: CrudConfig["tableColumnsVisibility"];
   isTriageable?: boolean;
   isAsset?: boolean;
+  customFixVerb?: string;
   extraDropdownActions?: (
     item: Record<string, unknown>,
   ) => DropdownAction<Record<string, unknown>>[];
@@ -114,8 +115,12 @@ const selectedItemExposureWindow = ref();
 const triageModalOpen = ref(false);
 const fixModalOpen = ref(false);
 const exposureModalOpen = ref(false);
-const fixVerb = ref(props.isAsset ? "Dismiss" : "Fix");
-const unfixVerb = ref(props.isAsset ? "Restore" : "Reopen");
+const fixVerb = computed(() =>
+  props.customFixVerb ? props.customFixVerb : props.isAsset ? "Dismiss" : "Fix",
+);
+const unfixVerb = computed(() =>
+  fixVerb.value === "Fix" ? "Reopen" : "Restore",
+);
 const notesButton = ref();
 const targetOptions = ref();
 const taskOptions = ref();
@@ -170,8 +175,8 @@ const config: CrudConfig<Finding> = reactive({
               resolveComponent("UTooltip"),
               {
                 text: row.original.auto_fixed
-                  ? "Auto-Fixed"
-                  : `Fixed by ${row.original.fixed_by.username} ${useTimeAgo(new Date(row.original.fixed_date)).value}`,
+                  ? `Auto-${fixVerb.value}ed`
+                  : `${fixVerb.value}ed by ${row.original.fixed_by.username} ${useTimeAgo(new Date(row.original.fixed_date)).value}`,
                 content: { side: "left", sideOffset: 8, collisionPadding: 8 },
               },
               {
@@ -179,11 +184,14 @@ const config: CrudConfig<Finding> = reactive({
                   h(resolveComponent("UButton"), {
                     icon: row.original.auto_fixed
                       ? "i-lucide-bot"
-                      : "i-lucide-badge-check",
-                    color: "success",
-                    variant: "ghost",
-                    label: "Fixed",
-                    class: "font-medium text-sm",
+                      : fixVerb.value === "Fix"
+                        ? "i-lucide-badge-check"
+                        : "i-lucide-eye-off",
+                    color: fixVerb.value === "Fix" ? "success" : "neutral",
+                    variant: "subtle",
+                    label: `${fixVerb.value}ed`,
+                    class: "font-medium",
+                    size: "sm",
                   }),
               },
             );
@@ -207,9 +215,10 @@ const config: CrudConfig<Finding> = reactive({
                       h(resolveComponent("UButton"), {
                         icon: config?.icon,
                         color: config?.color,
-                        variant: "ghost",
+                        variant: "subtle",
                         label: config?.value,
-                        class: "font-medium text-sm",
+                        class: "font-medium",
+                        size: "sm",
                       }),
                   },
                 )
@@ -217,24 +226,26 @@ const config: CrudConfig<Finding> = reactive({
                   config?.value,
                   config?.icon,
                   config?.color,
-                  "ghost",
+                  "subtle",
                 );
           } else {
             return table.badgeCell(
               "Active",
               "i-lucide-shield-alert",
-              "neutral",
-              "ghost",
+              fixVerb.value === "Fix" ? "neutral" : "success",
+              "subtle",
             );
           }
         },
       },
-      {
-        accessorKey: "triage",
-        header: "Triage Comment",
-        icon: "i-lucide-message-circle-more",
-        cell: ({ row }) => table.valueCell(row.original.triage_comment),
-      },
+      props.isTriageable
+        ? {
+            accessorKey: "triage",
+            header: "Triage Comment",
+            icon: "i-lucide-message-circle-more",
+            cell: ({ row }) => table.valueCell(row.original.triage_comment),
+          }
+        : {},
       {
         accessorKey: "scanners",
         header: "Scanners",
@@ -287,7 +298,14 @@ const config: CrudConfig<Finding> = reactive({
                   default: () =>
                     h(
                       resolveComponent("UTooltip"),
-                      { text: s.name },
+                      {
+                        text: s.name,
+                        content: {
+                          side: "right",
+                          sideOffset: 8,
+                          collisionPadding: 8,
+                        },
+                      },
                       {
                         default: () =>
                           h(resolveComponent("UButton"), {
@@ -372,22 +390,24 @@ const config: CrudConfig<Finding> = reactive({
         options: toolOptions,
       },
       ...(props.filters || []),
-      {
-        key: "triage_status",
-        label: "Triage Status",
-        icon: "i-lucide-shield-check",
-        type: "select",
-        options: triageStatuses,
-        labelKey: "value",
-      },
+      props.isTriageable
+        ? {
+            key: "triage_status",
+            label: "Triage Status",
+            icon: "i-lucide-shield-check",
+            type: "select",
+            options: triageStatuses,
+            labelKey: "value",
+          }
+        : {},
       {
         key: "is_fixed",
-        label: "Fixed",
+        label: `${fixVerb.value}ed`,
         type: "checkbox",
       },
       {
         key: "auto_fixed",
-        label: "Auto-Fixed",
+        label: `Auto-${fixVerb.value}ed`,
         type: "checkbox",
       },
       {
@@ -395,7 +415,7 @@ const config: CrudConfig<Finding> = reactive({
         label: "From user input",
         type: "checkbox",
       },
-    ];
+    ].filter((i) => Object.keys(i).length > 0);
   },
   defaultFilters: route.params.project_id
     ? { project: route.params.project_id }
@@ -411,15 +431,15 @@ const config: CrudConfig<Finding> = reactive({
   canDelete: false,
   customDropdownActions: (item: Finding) => {
     const actions: DropdownAction<Record<string, unknown>>[] = [];
-    if (props.extraDropdownActions) {
-      actions.push(...props.extraDropdownActions(item));
-    }
     if (userStore.is_auditor) {
       if (!item.is_fixed) {
         actions.push({
           label: fixVerb.value,
-          icon: props.isAsset ? "i-lucide-eye-off" : "i-lucide-check-circle",
-          color: "success",
+          icon:
+            fixVerb.value === "Fix"
+              ? "i-lucide-check-circle"
+              : "i-lucide-eye-off",
+          color: fixVerb.value === "Fix" ? "success" : "neutral",
           onSelect: (item) => {
             selectedItem.value = item;
             fixModalOpen.value = true;
@@ -428,8 +448,9 @@ const config: CrudConfig<Finding> = reactive({
       } else if (!item.auto_fixed) {
         actions.push({
           label: unfixVerb.value,
-          icon: props.isAsset ? "i-lucide-eye" : "i-lucide-rotate-ccw",
-          color: "neutral",
+          icon:
+            fixVerb.value === "Fix" ? "i-lucide-rotate-ccw" : "i-lucide-eye",
+          color: fixVerb.value === "Fix" ? "neutral" : "success",
           onSelect: (item) => {
             selectedItem.value = item;
             fixModalOpen.value = true;
@@ -446,6 +467,9 @@ const config: CrudConfig<Finding> = reactive({
           },
         });
       }
+    }
+    if (props.extraDropdownActions) {
+      actions.push(...props.extraDropdownActions(item));
     }
     return actions;
   },
