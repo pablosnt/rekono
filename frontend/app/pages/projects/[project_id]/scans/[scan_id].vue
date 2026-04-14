@@ -331,7 +331,6 @@ const table = useTable();
 const cancelOpen = ref(false);
 const reportOpen = ref(false);
 const task = ref<Task | null>();
-const currentTask = useState<Task | null>("currentTask", () => null);
 const outputOpen = ref(false);
 const selectedExecution = ref<Execution | null>(null);
 const executionsPage = ref();
@@ -350,7 +349,6 @@ function repeatScan() {
 function processTask(data?: Task) {
   if (!data) return;
   task.value = data;
-  currentTask.value = data;
   if (
     data.status === "Running" ||
     data.status === "Requested" ||

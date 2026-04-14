@@ -189,13 +189,11 @@ const deleteConfig = {
   entityName: "Note",
   deleteMessage: () => buildDeleteMessage("note", note.value?.title),
 };
-const currentNote = useState<Note | null>("currentNote", () => null);
 
 function fetchNote() {
   api.get(`${route.params.note_id}/`).then((response) => {
     response.related_entity = getNoteRelatedEntity(response);
     note.value = response;
-    currentNote.value = response;
     canEdit.value = userStore.isOwner(note.value);
   });
 }
@@ -220,11 +218,6 @@ function updateNote() {
       tags: note.value?.tags,
       public: note.value?.public,
     })
-    .then((response) => {
-      if (response.title !== currentNote.value.title) {
-        currentNote.value = response;
-      }
-    });
 }
 
 onMounted(fetchNote);
