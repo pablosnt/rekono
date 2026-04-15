@@ -1,5 +1,5 @@
 <template>
-  <FindingsVulnerabilitiesMultiple />
+  <FindingsVulnerabilities />
 </template>
 
 <script setup lang="ts">

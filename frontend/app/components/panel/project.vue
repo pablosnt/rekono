@@ -62,7 +62,7 @@
 
 <script setup lang="ts">
 import { useUserStore } from "~/store/user";
-import type { Note, Task, Project } from "~/types/models";
+import type { Project } from "~/types/models";
 import { targetTypes } from "~/constants";
 
 const api = useApi();

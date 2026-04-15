@@ -1,3 +1,3 @@
 <template>
-  <FindingsPortsMultiple />
+  <FindingsPorts />
 </template>

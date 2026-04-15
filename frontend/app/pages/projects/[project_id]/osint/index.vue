@@ -1,5 +1,5 @@
 <template>
-  <FindingsOsintMultiple />
+  <FindingsOsint />
 </template>
 
 <script setup lang="ts">

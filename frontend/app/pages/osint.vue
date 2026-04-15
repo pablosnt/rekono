@@ -1,3 +1,3 @@
 <template>
-  <FindingsOsintMultiple />
+  <FindingsOsint />
 </template>

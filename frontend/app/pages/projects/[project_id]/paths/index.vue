@@ -1,5 +1,5 @@
 <template>
-  <FindingsPathsMultiple />
+  <FindingsPaths />
 </template>
 
 <script setup lang="ts">

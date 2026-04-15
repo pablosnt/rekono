@@ -476,4 +476,6 @@ const config: CrudConfig<Finding> = reactive({
 });
 
 defineExpose({ fetch: () => page.value?.fetch() });
+
+// TODO: Replace copy id by copy link
 </script>

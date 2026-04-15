@@ -164,7 +164,6 @@
 </template>
 
 <script setup lang="ts">
-import type { Note } from "~/types/models";
 import { useUserStore } from "~/store/user";
 import * as z from "zod";
 
@@ -200,24 +199,23 @@ function fetchNote() {
 
 function updateNote() {
   if (!schema.safeParse(noteState.value).success) return;
-  api
-    .update(`${route.params.note_id}/`, {
-      project: note.value?.project,
-      target_id: note.value?.target?.id,
-      task_id: note.value?.task?.id,
-      osint_id: note.value?.osint?.id,
-      host_id: note.value?.host?.id,
-      port_id: note.value?.port?.id,
-      path_id: note.value?.path?.id,
-      credential_id: note.value?.credential?.id,
-      technology_id: note.value?.technology?.id,
-      vulnerability_id: note.value?.vulnerability?.id,
-      exploit_id: note.value?.exploit?.id,
-      title: note.value?.title,
-      body: note.value?.body,
-      tags: note.value?.tags,
-      public: note.value?.public,
-    })
+  api.update(`${route.params.note_id}/`, {
+    project: note.value?.project,
+    target_id: note.value?.target?.id,
+    task_id: note.value?.task?.id,
+    osint_id: note.value?.osint?.id,
+    host_id: note.value?.host?.id,
+    port_id: note.value?.port?.id,
+    path_id: note.value?.path?.id,
+    credential_id: note.value?.credential?.id,
+    technology_id: note.value?.technology?.id,
+    vulnerability_id: note.value?.vulnerability?.id,
+    exploit_id: note.value?.exploit?.id,
+    title: note.value?.title,
+    body: note.value?.body,
+    tags: note.value?.tags,
+    public: note.value?.public,
+  });
 }
 
 onMounted(fetchNote);

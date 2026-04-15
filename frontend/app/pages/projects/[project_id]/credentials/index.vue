@@ -1,5 +1,5 @@
 <template>
-  <FindingsCredentialsMultiple />
+  <FindingsCredentials />
 </template>
 
 <script setup lang="ts">
