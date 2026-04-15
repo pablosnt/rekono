@@ -86,7 +86,7 @@ import { useUserStore } from "~/store/user";
 import { useTimeAgo } from "@vueuse/core";
 import type { Finding } from "~/types/models";
 import { triageStatuses } from "~/constants";
-// TODO: Review asset tooltips and fix position
+
 const props = defineProps<{
   endpoint: string;
   entityName: string;
@@ -476,6 +476,4 @@ const config: CrudConfig<Finding> = reactive({
 });
 
 defineExpose({ fetch: () => page.value?.fetch() });
-
-// TODO: Replace copy id by copy link
 </script>

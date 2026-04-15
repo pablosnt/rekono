@@ -26,6 +26,7 @@ const props = defineProps<{ config: CrudConfig; state: CrudState }>();
 const emit = defineEmits<{ edit: [item: object]; delete: [item: object] }>();
 const slots = useSlots();
 const toast = useToast();
+const url = useRequestURL();
 
 const columns = computed(() => {
   const cols =
@@ -67,19 +68,36 @@ const columns = computed(() => {
         });
       }
 
-      if (
-        props.config.tableCopyId !== false &&
-        props.config.tableColumns?.some((c) => c.accessorKey === "id")
-      ) {
-        actions.push({
-          label: "Copy ID",
-          icon: "i-lucide-copy",
-          onSelect: () => {
-            navigator.clipboard.writeText(String(item.id));
-            toast.add({ title: "ID copied to clipboard", color: "success" });
-          },
-        });
+      if (props.config.tableCopyId !== false) {
+        if (
+          props.config.tableColumns?.some((c) => c.accessorKey === "id") &&
+          !props.config.itemLink
+        ) {
+          actions.push({
+            label: "Copy ID",
+            icon: "i-lucide-copy",
+            onSelect: () => {
+              navigator.clipboard.writeText(String(item.id));
+              toast.add({ title: "ID copied to clipboard", color: "success" });
+            },
+          });
+        } else if (props.config.itemLink) {
+          actions.push({
+            label: "Copy link",
+            icon: "i-lucide-copy",
+            onSelect: () => {
+              navigator.clipboard.writeText(
+                `${url.origin}${String(props.config.itemLink(item))}`,
+              );
+              toast.add({
+                title: "Link copied to clipboard",
+                color: "success",
+              });
+            },
+          });
+        }
       }
+
       if (
         typeof props.config.canEdit === "function"
           ? props.config.canEdit(item)
