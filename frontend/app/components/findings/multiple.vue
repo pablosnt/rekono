@@ -3,44 +3,10 @@
     <slot name="stats" />
     <CrudPage ref="page" :config="config">
       <template #actions="{ item }">
-        <UDropdownMenu
-          v-if="userStore.is_auditor || item.notes.length > 0"
-          :items="
-            [
-              item.notes.length > 0
-                ? {
-                    label: `${item.notes.length} Notes`,
-                    icon: 'i-lucide-notebook',
-                    color: 'neutral',
-                    to: `/projects/${item.project}/notes?${entityNamePlural.toLowerCase()}=${item.id}`,
-                  }
-                : {},
-              userStore.is_auditor
-                ? {
-                    label: 'Take note',
-                    icon: 'i-lucide-plus',
-                    color: 'neutral',
-                    onSelect: () => {
-                      selectedItem = item;
-                      nextTick(() => notesButton.value?.createNote());
-                    },
-                  }
-                : {},
-            ].filter((i) => Object.keys(i).length > 0)
-          "
-          :content="{ align: 'end' }"
-        >
-          <UButton icon="i-lucide-notebook" variant="ghost" color="neutral" />
-        </UDropdownMenu>
+        <FindingsUtilsNotes :finding="item" :entity-name="entityName" />
         <slot name="extra-actions" :item="item" />
       </template>
     </CrudPage>
-    <NotesButton
-      v-if="selectedItem && userStore.is_auditor"
-      ref="notesButton"
-      :show="false"
-      v-bind="noteProps"
-    />
     <FindingsModalTriage
       v-if="isTriageable && userStore.is_auditor"
       :open="triageModalOpen"
@@ -83,7 +49,6 @@
 import { h } from "vue";
 import type { CrudConfig, DropdownAction } from "~/types/crud";
 import { useUserStore } from "~/store/user";
-import { useTimeAgo } from "@vueuse/core";
 import type { Finding } from "~/types/models";
 import { triageStatuses } from "~/constants";
 
@@ -121,7 +86,6 @@ const fixVerb = computed(() =>
 const unfixVerb = computed(() =>
   fixVerb.value === "Fix" ? "Reopen" : "Restore",
 );
-const notesButton = ref();
 const targetOptions = ref();
 const taskOptions = ref();
 const toolOptions = ref();
@@ -140,11 +104,6 @@ onMounted(() => {
   useApi("/api/integrations/")
     .get("3/")
     .then((response) => (hacktricks.value = response));
-});
-
-const noteProps = computed(() => {
-  if (!selectedItem.value) return {};
-  return { [props.entityName.toLowerCase()]: selectedItem.value.id };
 });
 
 // todo: DefectDojo link (if integration enabled and available. Get defectdojo server from settings)
@@ -169,74 +128,12 @@ const config: CrudConfig<Finding> = reactive({
         accessorKey: "status",
         header: "Status",
         icon: "i-lucide-activity",
-        cell: ({ row }) => {
-          if (row.original.is_fixed) {
-            return h(
-              resolveComponent("UTooltip"),
-              {
-                text: row.original.auto_fixed
-                  ? `Auto-${fixVerb.value}ed`
-                  : `${fixVerb.value}ed by ${row.original.fixed_by.username} ${useTimeAgo(new Date(row.original.fixed_date)).value}`,
-                content: { side: "left", sideOffset: 8, collisionPadding: 8 },
-              },
-              {
-                default: () =>
-                  h(resolveComponent("UButton"), {
-                    icon: row.original.auto_fixed
-                      ? "i-lucide-bot"
-                      : fixVerb.value === "Fix"
-                        ? "i-lucide-badge-check"
-                        : "i-lucide-eye-off",
-                    color: fixVerb.value === "Fix" ? "success" : "neutral",
-                    variant: "subtle",
-                    label: `${fixVerb.value}ed`,
-                    class: "font-medium",
-                    size: "sm",
-                  }),
-              },
-            );
-          } else if (props.isTriageable) {
-            const config = triageStatuses.find(
-              (s) => s.value === row.original.triage_status,
-            );
-            return row.original.triage_by && row.original.triage_date
-              ? h(
-                  resolveComponent("UTooltip"),
-                  {
-                    text: `Triaged by ${row.original.triage_by.username} ${useTimeAgo(new Date(row.original.triage_date)).value}`,
-                    content: {
-                      side: "left",
-                      sideOffset: 8,
-                      collisionPadding: 8,
-                    },
-                  },
-                  {
-                    default: () =>
-                      h(resolveComponent("UButton"), {
-                        icon: config?.icon,
-                        color: config?.color,
-                        variant: "subtle",
-                        label: config?.value,
-                        class: "font-medium",
-                        size: "sm",
-                      }),
-                  },
-                )
-              : table.badgeCell(
-                  config?.value,
-                  config?.icon,
-                  config?.color,
-                  "subtle",
-                );
-          } else {
-            return table.badgeCell(
-              "Active",
-              "i-lucide-shield-alert",
-              fixVerb.value === "Fix" ? "neutral" : "success",
-              "subtle",
-            );
-          }
-        },
+        cell: ({ row }) =>
+          h(resolveComponent("FindingsUtilsStatus"), {
+            finding: row.original,
+            isTriageable: props.isTriageable,
+            fixVerb: fixVerb.value,
+          }),
       },
       props.isTriageable
         ? {
@@ -430,44 +327,26 @@ const config: CrudConfig<Finding> = reactive({
   canEdit: false,
   canDelete: false,
   customDropdownActions: (item: Finding) => {
-    const actions: DropdownAction<Record<string, unknown>>[] = [];
-    if (userStore.is_auditor) {
-      if (!item.is_fixed) {
-        actions.push({
-          label: fixVerb.value,
-          icon:
-            fixVerb.value === "Fix"
-              ? "i-lucide-check-circle"
-              : "i-lucide-eye-off",
-          color: fixVerb.value === "Fix" ? "success" : "neutral",
-          onSelect: (item) => {
+    const actions = userStore.is_auditor
+      ? getFindingDropdownActions(
+          item,
+          fixVerb.value,
+          unfixVerb.value,
+          props.isTriageable,
+          (item) => {
             selectedItem.value = item;
             fixModalOpen.value = true;
           },
-        });
-      } else if (!item.auto_fixed) {
-        actions.push({
-          label: unfixVerb.value,
-          icon:
-            fixVerb.value === "Fix" ? "i-lucide-rotate-ccw" : "i-lucide-eye",
-          color: fixVerb.value === "Fix" ? "neutral" : "success",
-          onSelect: (item) => {
+          (item) => {
             selectedItem.value = item;
             fixModalOpen.value = true;
           },
-        });
-      }
-      if (props.isTriageable && !item.is_fixed) {
-        actions.push({
-          label: "Triage",
-          icon: "i-lucide-shield-check",
-          onSelect: (item) => {
+          (item) => {
             selectedItem.value = item;
             triageModalOpen.value = true;
           },
-        });
-      }
-    }
+        )
+      : [];
     if (props.extraDropdownActions) {
       actions.push(...props.extraDropdownActions(item));
     }

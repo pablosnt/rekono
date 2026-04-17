@@ -75,7 +75,6 @@ const mounting = ref(false);
 const allProjects = ref<Project[]>([]);
 
 function onProjectChange() {
-  console.log("onProjectChange");
   if (!route.params.project_id) {
     projectEntity.value = { name: "Rekono" };
     return;
@@ -282,6 +281,7 @@ function getProjectBreadcrum(project: Project) {
     if (route.params.target_id) onTargetChange();
     if (route.params.scan_id) onScanChange();
     if (route.params.note_id) onNoteChange();
+    if (route.params.osint_id) onOsintChange();
   }
   mounting.value = false;
 }
@@ -293,7 +293,7 @@ function cleanSecondaryLinks(
   if (breadcrumb.value.length > 3) {
     breadcrumb.value = breadcrumb.value.slice(0, 3);
   }
-  if (!entityId) {
+  if (!route.params.project_id || !entityId) {
     return false;
   } else {
     breadcrumb.value.push(entitiesLink);
@@ -352,10 +352,19 @@ function onNoteChange() {
   });
 }
 
+function onOsintChange() {
+  cleanSecondaryLinks(route.params.osint_id, {
+    label: "OSINT",
+    icon: "i-lucide-rss",
+    to: `/projects/${route.params.project_id}/osint`,
+  });
+}
+
 watch(() => route.params.project_id, onProjectChange);
 watch(() => route.params.target_id, onTargetChange);
 watch(() => route.params.scan_id, onScanChange);
 watch(() => route.params.note_id, onNoteChange);
+watch(() => route.params.osint_id, onOsintChange);
 
 onMounted(() => {
   mounting.value = true;

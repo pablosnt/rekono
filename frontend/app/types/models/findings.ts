@@ -15,6 +15,7 @@ export interface Finding {
   triage_comment?: string;
   triage_date?: string;
   triage_by?: { id: number; username: string };
+  notes: number[];
 }
 
 export interface OSINT extends Finding {

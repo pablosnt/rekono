@@ -1,5 +1,10 @@
 <template>
-  <VisXYContainer :data="timeline" :x-domain="xDomain" :height="100">
+  <VisXYContainer
+    v-if="timeline.length > 1"
+    :data="timeline"
+    :x-domain="xDomain"
+    :height="100"
+  >
     <VisTimeline :x="(d) => d.timestamp" :color="(d) => d.color" />
     <VisAxis
       type="x"
@@ -15,7 +20,7 @@ import { Timeline } from "@unovis/ts";
 import type { Finding } from "~/types/models";
 
 const props = defineProps<{
-  finding?: Finding;
+  finding: Finding;
   dates?: Date[];
 }>();
 

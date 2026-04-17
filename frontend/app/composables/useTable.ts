@@ -125,21 +125,35 @@ export default function () {
     );
   }
 
-  function toolCell(tool: Tool, configuration: Configuration | undefined) {
-    return h("div", { class: "flex items-center gap-2" }, [
-      tool.icon
-        ? h(UAvatar, {
-            src: tool.icon,
-            size: "2xs",
-          })
-        : h(UIcon, {
-            name: "i-lucide-square-terminal",
-            class: "w-4 h-4 text-muted-foreground shrink-0",
-          }),
-      valueCell(
-        configuration ? `${tool.name}: ${configuration.name}` : tool.name,
-      ),
-    ]);
+  function toolCell(
+    tool: Tool,
+    configuration: Configuration | undefined,
+    link: string | undefined = undefined,
+  ) {
+    const baseClass = "flex items-center gap-2";
+    return h(
+      link ? "a" : "div",
+      link
+        ? {
+            class: `${baseClass} hover:text-primary hover:underline`,
+            href: link,
+          }
+        : { class: baseClass },
+      [
+        tool.icon
+          ? h(UAvatar, {
+              src: tool.icon,
+              size: "2xs",
+            })
+          : h(UIcon, {
+              name: "i-lucide-square-terminal",
+              class: "w-4 h-4 text-muted-foreground shrink-0",
+            }),
+        valueCell(
+          configuration ? `${tool.name}: ${configuration.name}` : tool.name,
+        ),
+      ],
+    );
   }
 
   function counterCell(count: number, link: string, internal: boolean = true) {

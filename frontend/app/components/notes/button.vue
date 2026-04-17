@@ -40,7 +40,7 @@ function createNote() {
       public: false,
     })
     .then((response) =>
-      navigateTo(`/projects/${route.params.project_id}/notes/${response.id}`),
+      navigateTo(`/projects/${response.project}/notes/${response.id}`),
     );
 }
 
