@@ -6,8 +6,19 @@
     icon="i-lucide-ethernet-port"
     :columns="columns"
     :filters="filters"
-    :ordering="['id', 'host', 'port', 'status', 'protocol', 'service']"
+    :ordering="
+      [
+        'id',
+        host ? undefined : 'host',
+        'port',
+        'status',
+        'protocol',
+        'service',
+      ].filter((i) => Boolean(i))
+    "
     :visibility="{ paths: false, technologies: false, vulnerabilities: false }"
+    :custom-default-filters="host ? { host: host } : undefined"
+    :header-hide-title="Boolean(host)"
     is-asset
   />
 </template>
@@ -17,41 +28,52 @@ import type { CrudTableColumn } from "~/types/crud";
 import { portProtocols, portStatuses } from "~/constants";
 import type { Port } from "~/types/models";
 
+const props = defineProps<{
+  host?: number;
+}>();
+
 const route = useRoute();
 const table = useTable();
 const options = useOptions();
 const hostOptions = ref();
-const filters = computed(() => [
-  {
-    key: "host",
-    label: "Host",
-    icon: "i-lucide-server",
-    type: "select" as const,
-    options: hostOptions,
-  },
-  {
-    key: "status",
-    label: "Port Status",
-    icon: "i-lucide-chevrons-left-right-ellipsis",
-    type: "select",
-    options: portStatuses,
-    labelKey: "value",
-  },
-  {
-    key: "protocol",
-    label: "Protocol",
-    icon: "i-lucide-network",
-    type: "select",
-    options: portProtocols,
-  },
-]);
+const filters = computed(() =>
+  [
+    props.host
+      ? {}
+      : {
+          key: "host",
+          label: "Host",
+          icon: "i-lucide-server",
+          type: "select" as const,
+          options: hostOptions,
+        },
+    {
+      key: "status",
+      label: "Port Status",
+      icon: "i-lucide-chevrons-left-right-ellipsis",
+      type: "select",
+      options: portStatuses,
+      labelKey: "value",
+    },
+    {
+      key: "protocol",
+      label: "Protocol",
+      icon: "i-lucide-network",
+      type: "select",
+      options: portProtocols,
+    },
+  ].filter((f) => Object.keys(f).length > 0),
+);
 const columns: CrudTableColumn<Port>[] = [
-  {
-    accessorKey: "host",
-    header: "Host",
-    icon: "i-lucide-server",
-    cell: ({ row }) => table.hostCell(row.original.host, row.original.project),
-  },
+  props.host
+    ? {}
+    : {
+        accessorKey: "host",
+        header: "Host",
+        icon: "i-lucide-server",
+        cell: ({ row }) =>
+          table.hostCell(row.original.host, row.original.project),
+      },
   {
     accessorKey: "port",
     header: "Port",
@@ -126,7 +148,7 @@ const columns: CrudTableColumn<Port>[] = [
       );
     },
   },
-];
+].filter((c) => Object.keys(c).length > 0);
 
 onMounted(() => {
   options.hosts(

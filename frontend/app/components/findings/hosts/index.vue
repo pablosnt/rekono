@@ -31,11 +31,29 @@
       v-if="selectedHost"
       v-model:open="locationModalOpen"
       title="Geolocation"
-      :description="selectedHost.country"
+      :description="
+        selectedHost.city ? selectedHost.city : selectedHost.country
+      "
+      :ui="{ content: 'sm:max-w-3xl sm:max-h-xl' }"
+    >
+      <template v-if="selectedHost.country && selectedHost.city" #description>
+        <div class="flex items-center gap-2">
+          <UIcon :name="`cif:${selectedHost.country.toLowerCase()}`" />
+          <span class="text-base">{{ selectedHost.city }}</span>
+        </div>
+      </template>
+      <template #body>
+        <FindingsHostsMetricsLocations :hosts="[selectedHost]" />
+      </template>
+    </UModal>
+    <UModal
+      v-if="selectedHost"
+      v-model:open="malwareModalOpen"
+      title="Malware Analysis"
       :ui="{ content: 'sm:max-w-3xl sm:max-h-xl' }"
     >
       <template #body>
-        <FindingsHostsMetricsLocations :hosts="[selectedHost]" />
+        <FindingsHostsMetricsMalware :host="selectedHost" />
       </template>
     </UModal>
   </div>
@@ -50,6 +68,7 @@ const table = useTable();
 const api = useApi("/api/integrations/");
 const virusTotal = ref();
 const locationModalOpen = ref(false);
+const malwareModalOpen = ref(false);
 const selectedHost = ref();
 const columns = ref();
 
@@ -129,77 +148,32 @@ onMounted(() => {
             header: "Malware Analysis",
             icon: "i-lucide-search-code",
             cell: ({ row }) => {
-              const m = row.original.malicious_analysis || 0;
-              const s = row.original.suspicious_analysis || 0;
-              const total = row.original.total_analysis as
-                | number
-                | null
-                | undefined;
-              if (!total) return table.noDataCell;
-              else if (m === 0 && s === 0)
-                return table.iconAndValueCell(
-                  total.toString(),
-                  "i-lucide-shield-check",
-                  "success",
-                );
-              const clean = Math.max(0, total - m - s);
-              return h("div", { class: "flex flex-col gap-1 min-w-[4.5rem]" }, [
-                h(
-                  "div",
-                  {
-                    class:
-                      "flex w-full h-1.5 rounded-full overflow-hidden bg-neutral-200 dark:bg-neutral-700",
+              if ((row.original.total_analysis ?? 0) > 0) {
+                const percentage =
+                  (Math.max(
+                    0,
+                    (row.original.total_analysis ?? 0) -
+                      (row.original.malicious_analysis ?? 0) -
+                      (row.original.suspicious_analysis ?? 0),
+                  ) *
+                    100) /
+                  row.original.total_analysis;
+                return h(resolveComponent("UButton"), {
+                  label: `${percentage.toPrecision(3)}% Legitimate`,
+                  color:
+                    percentage > 50
+                      ? "success"
+                      : percentage < 20
+                        ? "error"
+                        : "warning",
+                  variant: "subtle",
+                  onClick: () => {
+                    selectedHost.value = row.original;
+                    malwareModalOpen.value = true;
                   },
-                  [
-                    m > 0
-                      ? h("div", {
-                          style: `flex: ${m}`,
-                          class: "h-full bg-red-500",
-                        })
-                      : null,
-                    s > 0
-                      ? h("div", {
-                          style: `flex: ${s}`,
-                          class: "h-full bg-amber-400",
-                        })
-                      : null,
-                    clean > 0
-                      ? h("div", { style: `flex: ${clean}`, class: "h-full" })
-                      : null,
-                  ].filter(Boolean),
-                ),
-                h(
-                  "div",
-                  { class: "flex items-center gap-1" },
-                  [
-                    m > 0
-                      ? h(
-                          resolveComponent("UTooltip"),
-                          { text: "Malicious" },
-                          {
-                            default: () =>
-                              table.badgeCell(m.toString(), undefined, "error"),
-                          },
-                        )
-                      : null,
-                    s > 0
-                      ? h(
-                          resolveComponent("UTooltip"),
-                          { text: "Suspicious" },
-                          {
-                            default: () =>
-                              table.badgeCell(
-                                s.toString(),
-                                undefined,
-                                "warning",
-                              ),
-                          },
-                        )
-                      : null,
-                    table.valueCell(`/ ${total}`),
-                  ].filter(Boolean),
-                ),
-              ]);
+                });
+              }
+              return table.noDataCell;
             },
           }
         : {},

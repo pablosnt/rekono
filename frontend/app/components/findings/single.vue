@@ -1,13 +1,18 @@
 <template>
-  <div>
+  <div class="space-y-5">
     <UPageCard variant="subtle" :ui="{ header: 'w-full' }">
       <template #header>
         <div class="flex flex-wrap justify-between w-full mb-4">
           <div class="flex items-center gap-2">
-            <UIcon v-if="icon" :name="icon" />
+            <UIcon
+              v-if="icon"
+              :name="icon"
+              :class="`text-${iconColor || 'neutral'} text-xl`"
+            />
             <span class="text-base font-semibold text-xl text-highlighted">{{
               title
             }}</span>
+            <slot name="post-title" />
           </div>
           <div class="flex items-center gap-2">
             <FindingsUtilsStatus
@@ -16,6 +21,7 @@
               :fix-verb="fixVerb"
             />
             <!-- todo: DefectDojo link -->
+            <!-- TODO: Add a badge with the number of existing notes to the Notes button everywhere. Only if greater than 0 -->
             <FindingsUtilsNotes :finding="finding" :entity-name="entityName" />
             <UDropdownMenu
               v-if="
@@ -67,7 +73,6 @@
       <slot name="top-custom" />
     </UPageCard>
     <slot name="custom" />
-    <slot name="relatedEntities" />
     <UPageCard
       v-if="!finding.created_from_user_input"
       class="mt-5"
@@ -111,9 +116,10 @@
 import { useUserStore } from "~/store/user";
 import type { Execution, Finding } from "~/types/models";
 
-const prosp = defineProps<{
+const props = defineProps<{
   api: typeof useApi;
   icon?: string;
+  iconColor?: string;
   title: string;
   finding: Finding;
   entityName: string;
@@ -125,7 +131,7 @@ defineEmits<{ update: [] }>();
 
 const userStore = useUserStore();
 const unfixVerb = computed(() =>
-  prosp.fixVerb === "Fix" ? "Reopen" : "Restore",
+  props.fixVerb === "Fix" ? "Reopen" : "Restore",
 );
 const triageModalOpen = ref(false);
 const fixModalOpen = ref(false);
@@ -134,10 +140,10 @@ const refresh = ref();
 const hacktricks = ref();
 const dropdownActions = computed(() =>
   getFindingDropdownActions(
-    prosp.finding,
-    prosp.fixVerb,
+    props.finding,
+    props.fixVerb,
     unfixVerb.value,
-    prosp.isTriageable,
+    props.isTriageable,
     () => (fixModalOpen.value = true),
     () => (fixModalOpen.value = true),
     () => (triageModalOpen.value = true),

@@ -67,6 +67,8 @@ const props = defineProps<{
   extraDropdownActions?: (
     item: Record<string, unknown>,
   ) => DropdownAction<Record<string, unknown>>[];
+  customDefaultFilters?: Rercord<string, unknown>;
+  headerHideTitle?: boolean;
 }>();
 
 const userStore = useUserStore();
@@ -113,6 +115,7 @@ const config: CrudConfig<Finding> = reactive({
   entityName: props.entityName,
   entityNamePlural: props.entityNamePlural,
   icon: props.icon,
+  headerHideTitle: props.headerHideTitle || false,
   itemLink: (finding: Finding) =>
     `/projects/${finding.project}/${props.entityNamePlural.toLowerCase()}/${finding.id}`,
   get tableColumns() {
@@ -314,9 +317,10 @@ const config: CrudConfig<Finding> = reactive({
       },
     ].filter((i) => Object.keys(i).length > 0);
   },
-  defaultFilters: route.params.project_id
-    ? { project: route.params.project_id }
-    : undefined,
+  defaultFilters:
+    props.customDefaultFilters || route.params.project_id
+      ? { project: route.params.project_id }
+      : undefined,
   ordering: props.ordering || [],
   defaultOrdering: "-id",
   pageSize: 25,

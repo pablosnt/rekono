@@ -282,6 +282,7 @@ function getProjectBreadcrum(project: Project) {
     if (route.params.scan_id) onScanChange();
     if (route.params.note_id) onNoteChange();
     if (route.params.osint_id) onOsintChange();
+    if (route.params.host_id) onHostChange();
   }
   mounting.value = false;
 }
@@ -360,11 +361,20 @@ function onOsintChange() {
   });
 }
 
+function onHostChange() {
+  cleanSecondaryLinks(route.params.host_id, {
+    label: "Hosts",
+    icon: "i-lucide-server",
+    to: `/projects/${route.params.project_id}/hosts`,
+  });
+}
+
 watch(() => route.params.project_id, onProjectChange);
 watch(() => route.params.target_id, onTargetChange);
 watch(() => route.params.scan_id, onScanChange);
 watch(() => route.params.note_id, onNoteChange);
 watch(() => route.params.osint_id, onOsintChange);
+watch(() => route.params.host_id, onHostChange);
 
 onMounted(() => {
   mounting.value = true;

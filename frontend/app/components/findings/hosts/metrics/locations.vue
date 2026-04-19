@@ -1,5 +1,8 @@
 <template>
-  <VisSingleContainer :data="data">
+  <VisSingleContainer
+    :data="data"
+    :padding="{ top: 0, bottom: 0, left: 0, right: 0 }"
+  >
     <VisTopoJSONMap
       :topojson="WorldMapTopoJSON"
       :point-label="(d) => d.label"

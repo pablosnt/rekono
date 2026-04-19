@@ -4,19 +4,19 @@
     :api="api"
     :title="osint.data"
     :finding="osint"
-    entity-name="osint"
+    entity-name="OSINT"
     is-triageable
     fix-verb="Discard"
     @update="fetch()"
   >
     <template #metadata>
-      <div class="flex items-center gap-2">
+      <div v-if="osint.data_type" class="flex items-center gap-2">
         <span class="text-muted">Data type:</span>
         <UBadge :icon="typeConfig?.icon" variant="subtle" color="neutral">{{
           osint.data_type
         }}</UBadge>
       </div>
-      <div class="flex items-center gap-2">
+      <div v-if="osint.source" class="flex items-center gap-2">
         <span class="text-muted">Source:</span>
         <span class="text-base">{{ osint.source }}</span>
       </div>
