@@ -6,7 +6,17 @@
     icon="i-lucide-key"
     :columns="columns"
     :filters="filters"
-    :ordering="['id', 'technology', 'email', 'username', 'secret']"
+    :ordering="[
+      'id',
+      ...(technology ? [] : ['technology']),
+      'email',
+      'username',
+      'secret',
+    ]"
+    :custom-default-filters="
+      technology ? { technology: technology } : undefined
+    "
+    :header-hide-title="Boolean(technology)"
     is-triageable
   />
 </template>
@@ -15,57 +25,72 @@
 import type { CrudTableColumn } from "~/types/crud";
 import type { Credential } from "~/types/models";
 
+const props = defineProps<{
+  technology?: number;
+}>();
+
 const route = useRoute();
 const table = useTable();
 const options = useOptions();
 const hostOptions = ref();
 const portOptions = ref();
 const technologyOptions = ref();
-const filters = computed(() => [
-  {
-    key: "host",
-    label: "Host",
-    icon: "i-lucide-server",
-    type: "select" as const,
-    options: hostOptions,
-  },
-  {
-    key: "port",
-    label: "Port",
-    icon: "i-lucide-ethernet-port",
-    type: "select" as const,
-    options: portOptions,
-  },
-  {
-    key: "technology",
-    label: "Technology",
-    icon: "i-lucide-layers",
-    type: "select" as const,
-    options: technologyOptions,
-  },
-]);
+const filters = computed(() =>
+  props.technology
+    ? []
+    : [
+        {
+          key: "host",
+          label: "Host",
+          icon: "i-lucide-server",
+          type: "select" as const,
+          options: hostOptions,
+        },
+        {
+          key: "port",
+          label: "Port",
+          icon: "i-lucide-ethernet-port",
+          type: "select" as const,
+          options: portOptions,
+        },
+        {
+          key: "technology",
+          label: "Technology",
+          icon: "i-lucide-layers",
+          type: "select" as const,
+          options: technologyOptions,
+        },
+      ],
+);
 const columns: CrudTableColumn<Credential>[] = [
-  {
-    accessorKey: "host",
-    header: "Host",
-    icon: "i-lucide-server",
-    cell: ({ row }) =>
-      table.hostCell(row.original.technology?.port?.host, row.original.project),
-  },
-  {
-    accessorKey: "Port",
-    header: "Port",
-    icon: "i-lucide-ethernet-port",
-    cell: ({ row }) =>
-      table.portCell(row.original.technology?.port, row.original.project),
-  },
-  {
-    accessorKey: "technology",
-    header: "Technology",
-    icon: "i-lucide-layers",
-    cell: ({ row }) =>
-      table.technologyCell(row.original.technology, row.original.project),
-  },
+  ...(props.technology
+    ? []
+    : [
+        {
+          accessorKey: "host",
+          header: "Host",
+          icon: "i-lucide-server",
+          cell: ({ row }) =>
+            table.hostCell(
+              row.original.technology?.port?.host,
+              row.original.project,
+            ),
+        },
+        {
+          accessorKey: "Port",
+          header: "Port",
+          icon: "i-lucide-ethernet-port",
+          cell: ({ row }) =>
+            table.portCell(row.original.technology?.port, row.original.project),
+        },
+        {
+          accessorKey: "technology",
+          header: "Technology",
+          icon: "i-lucide-layers",
+          cell: ({ row }) =>
+            table.technologyCell(row.original.technology, row.original.project),
+        },
+      ]),
   {
     accessorKey: "email",
     header: "Mail",
@@ -93,6 +118,7 @@ const columns: CrudTableColumn<Credential>[] = [
 ];
 
 onMounted(() => {
+  if (props.technology) return;
   const query = route.params.project_id
     ? { project: route.params.project_id }
     : {};

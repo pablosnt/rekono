@@ -8,7 +8,7 @@
     :filters="filters"
     :ordering="[
       'id',
-      ...(port ? [] : ['technology', 'port']),
+      ...(port || technology ? [] : ['technology', 'port']),
       'name',
       'severity',
       { id: 'cve', label: 'CVE' },
@@ -18,8 +18,14 @@
       description: false,
     }"
     :extra-dropdown-actions="dropdownActions"
-    :custom-default-filters="port ? { port: port } : undefined"
-    :header-hide-title="Boolean(port)"
+    :custom-default-filters="
+      port
+        ? { port: port }
+        : technology
+          ? { technology: technology }
+          : undefined
+    "
+    :header-hide-title="Boolean(port) || Boolean(technology)"
     is-triageable
   />
 </template>
@@ -33,9 +39,9 @@ import type { Vulnerability } from "~/types/models";
 
 const props = defineProps<{
   port?: number;
+  technology?: number;
 }>();
 
-const toast = useToast();
 const route = useRoute();
 const table = useTable();
 const options = useOptions();
@@ -43,7 +49,7 @@ const hostOptions = ref();
 const portOptions = ref();
 const technologyOptions = ref();
 const filters = computed(() => [
-  ...(props.port
+  ...(props.port || props.technology
     ? []
     : [
         {
@@ -84,7 +90,7 @@ const filters = computed(() => [
   },
 ]);
 const columns: CrudTableColumn<Vulnerability>[] = [
-  ...(props.port
+  ...(props.port || props.technology
     ? []
     : [
         {
@@ -138,7 +144,7 @@ const columns: CrudTableColumn<Vulnerability>[] = [
     },
   },
   {
-    accessorKey: "cvss_base_score",
+    accessorKey: "cvss",
     header: "CVSS",
     icon: "i-lucide-gauge",
     cell: ({ row }) => {
@@ -210,35 +216,22 @@ function dropdownActions(item: Vulnerability) {
       ? {
           label: "Copy CVE",
           icon: "i-lucide-hash",
-          onSelect: () => {
-            navigator.clipboard.writeText(item.cve);
-            toast.add({
-              title: "CVE copied to clipboard",
-              color: "success",
-              icon: "i-lucide-clipboard-check",
-            });
-          },
+          onSelect: () => copyText(item.cve, "CVE copied to clipboard"),
         }
       : {},
     item.cvss_vector
       ? {
           label: "Copy CVSS vector",
           icon: "i-lucide-gauge",
-          onSelect: () => {
-            navigator.clipboard.writeText(item.cvss_vector);
-            toast.add({
-              title: "CVSS vector copied to clipboard",
-              color: "success",
-              icon: "i-lucide-clipboard-check",
-            });
-          },
+          onSelect: () =>
+            copyText(item.cvss_vector, "CVSS vector copied to clipboard"),
         }
       : {},
   ].filter((i) => Object.keys(i).length > 0);
 }
 
 onMounted(() => {
-  if (props.port) return;
+  if (props.port || props.technology) return;
   const query = route.params.project_id
     ? { project: route.params.project_id }
     : {};
