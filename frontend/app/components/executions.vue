@@ -189,7 +189,7 @@ const config: CrudConfig<Execution> = reactive({
       icon: "i-lucide-skip-forward",
       cell: ({ row }) => table.valueCell(row.original.skipped_reason),
     },
-  ].filter((i) => Object.keys(i).length > 0) as CrudTableColumn<Execution>[],
+  ] as CrudTableColumn<Execution>[],
   tableColumnsVisibility: {
     skipped: false,
     id: false,

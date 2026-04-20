@@ -77,49 +77,51 @@
           </template>
           <UDropdownMenu
             v-if="userStore.is_auditor"
-            :items="
-              [
-                task.progress === 100
-                  ? {
+            :items="[
+              ...(task.progress === 100
+                ? [
+                    {
                       label: 'Generate a report',
                       icon: 'i-lucide-file-text',
                       color: 'neutral',
                       onSelect: () => (reportOpen = true),
-                    }
-                  : {},
-                {
-                  label: 'Take note',
-                  icon: 'i-lucide-notebook',
-                  color: 'neutral',
-                  onSelect: () => notesButton.createNote(),
-                },
-              ].filter((i) => Object.keys(i).length > 0)
-            "
+                    },
+                  ]
+                : []),
+              {
+                label: 'Take note',
+                icon: 'i-lucide-notebook',
+                color: 'neutral',
+                onSelect: () => notesButton.createNote(),
+              },
+            ]"
           >
             <UButton icon="i-lucide-plus" variant="subtle" color="neutral" />
           </UDropdownMenu>
           <UDropdownMenu
             v-if="task.notes.length + task.reports.length > 0"
-            :items="
-              [
-                task.reports.length > 0
-                  ? {
+            :items="[
+              ...(task.reports.length > 0
+                ? [
+                    {
                       label: `${task.reports.length} Reports`,
                       icon: 'i-lucide-file-text',
                       color: 'neutral',
                       to: `/projects/${$route.params.project_id}/reports?target=${task.target.id}&task=${task.id}`,
-                    }
-                  : {},
-                task.notes.length > 0
-                  ? {
+                    },
+                  ]
+                : []),
+              ...(task.notes.length > 0
+                ? [
+                    {
                       label: `${task.notes.length} Notes`,
                       icon: 'i-lucide-notebook',
                       color: 'neutral',
                       to: `/projects/${$route.params.project_id}/notes?related_task=${task.id}`,
-                    }
-                  : {},
-              ].filter((i) => Object.keys(i).length > 0)
-            "
+                    },
+                  ]
+                : []),
+            ]"
           >
             <UButton icon="i-lucide-link" variant="subtle" color="neutral" />
           </UDropdownMenu>

@@ -154,17 +154,19 @@ const config: CrudConfig<Target> = reactive({
   customDropdownActions: (target: Target) => {
     return userStore.is_auditor
       ? [
-          target.tasks && target.tasks.length > 0
-            ? {
-                label: "Generate a report",
-                icon: "i-lucide-file-text",
-                color: "neutral",
-                onSelect: (target: Target) => {
-                  selectedTarget.value = target;
-                  showReportModal.value = true;
+          ...(target.tasks && target.tasks.length > 0
+            ? [
+                {
+                  label: "Generate a report",
+                  icon: "i-lucide-file-text",
+                  color: "neutral",
+                  onSelect: (target: Target) => {
+                    selectedTarget.value = target;
+                    showReportModal.value = true;
+                  },
                 },
-              }
-            : {},
+              ]
+            : []),
           {
             label: "Take note",
             icon: "i-lucide-notebook",
@@ -174,7 +176,7 @@ const config: CrudConfig<Target> = reactive({
               notesButton.value.createNote();
             },
           },
-        ].filter((i) => Object.keys(i).length > 0)
+        ]
       : [];
   },
 });

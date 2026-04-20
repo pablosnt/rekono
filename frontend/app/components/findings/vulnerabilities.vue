@@ -212,22 +212,26 @@ const columns: CrudTableColumn<Vulnerability>[] = [
 
 function dropdownActions(item: Vulnerability) {
   return [
-    item.cve
-      ? {
-          label: "Copy CVE",
-          icon: "i-lucide-hash",
-          onSelect: () => copyText(item.cve, "CVE copied to clipboard"),
-        }
-      : {},
-    item.cvss_vector
-      ? {
-          label: "Copy CVSS vector",
-          icon: "i-lucide-gauge",
-          onSelect: () =>
-            copyText(item.cvss_vector, "CVSS vector copied to clipboard"),
-        }
-      : {},
-  ].filter((i) => Object.keys(i).length > 0);
+    ...(item.cve
+      ? [
+          {
+            label: "Copy CVE",
+            icon: "i-lucide-hash",
+            onSelect: () => copyText(item.cve, "CVE copied to clipboard"),
+          },
+        ]
+      : []),
+    ...(item.cvss_vector
+      ? [
+          {
+            label: "Copy CVSS vector",
+            icon: "i-lucide-gauge",
+            onSelect: () =>
+              copyText(item.cvss_vector, "CVSS vector copied to clipboard"),
+          },
+        ]
+      : []),
+  ];
 }
 
 onMounted(() => {

@@ -64,31 +64,29 @@
           <template v-if="userStore.is_auditor">
             <UDropdownMenu
               v-if="userStore.isOwner(item)"
-              :items="
-                [
-                  item.forked_from
-                    ? {
-                        label: `Forked from #${item.forked_from}`,
-                        icon: 'i-lucide-link',
-                        color: 'neutral',
-                        to: `/projects/${$route.params.project_id}/notes/${item.forked_from}`,
-                      }
-                    : {
-                        label: item.public ? 'Make private' : 'Publish',
-                        icon: item.public
-                          ? 'i-lucide-globe-lock'
-                          : 'i-lucide-globe',
-                        color: item.public ? 'neutral' : 'warning',
-                        onSelect: () => switchVisibility(item),
-                      },
-                  {
-                    label: 'Delete',
-                    icon: 'i-lucide-trash',
-                    color: 'error',
-                    onSelect: onDelete,
-                  },
-                ].filter((i) => Object.keys(i).length > 0)
-              "
+              :items="[
+                item.forked_from
+                  ? {
+                      label: `Forked from #${item.forked_from}`,
+                      icon: 'i-lucide-link',
+                      color: 'neutral',
+                      to: `/projects/${$route.params.project_id}/notes/${item.forked_from}`,
+                    }
+                  : {
+                      label: item.public ? 'Make private' : 'Publish',
+                      icon: item.public
+                        ? 'i-lucide-globe-lock'
+                        : 'i-lucide-globe',
+                      color: item.public ? 'neutral' : 'warning',
+                      onSelect: () => switchVisibility(item),
+                    },
+                {
+                  label: 'Delete',
+                  icon: 'i-lucide-trash',
+                  color: 'error',
+                  onSelect: onDelete,
+                },
+              ]"
               @click.stop
             >
               <UButton

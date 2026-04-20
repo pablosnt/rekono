@@ -138,14 +138,16 @@ const config: CrudConfig<Finding> = reactive({
             fixVerb: fixVerb.value,
           }),
       },
-      props.isTriageable
-        ? {
-            accessorKey: "triage",
-            header: "Triage Comment",
-            icon: "i-lucide-message-circle-more",
-            cell: ({ row }) => table.valueCell(row.original.triage_comment),
-          }
-        : {},
+      ...(props.isTriageable
+        ? [
+            {
+              accessorKey: "triage",
+              header: "Triage Comment",
+              icon: "i-lucide-message-circle-more",
+              cell: ({ row }) => table.valueCell(row.original.triage_comment),
+            },
+          ]
+        : []),
       {
         accessorKey: "scanners",
         header: "Scanners",
@@ -245,20 +247,22 @@ const config: CrudConfig<Finding> = reactive({
           }
         },
       },
-      hacktricks.value?.enabled
-        ? {
-            accessorKey: "hacktricks",
-            header: "HackTricks",
-            avatar: { src: hacktricks.value.icon },
-            cell: ({ row }) =>
-              table.externalLinkCell(
-                row.original.hacktricks_link,
-                undefined,
-                hacktricks.value.icon,
-              ),
-          }
-        : {},
-    ].filter((i) => Object.keys(i).length > 0);
+      ...(hacktricks.value?.enabled
+        ? [
+            {
+              accessorKey: "hacktricks",
+              header: "HackTricks",
+              avatar: { src: hacktricks.value.icon },
+              cell: ({ row }) =>
+                table.externalLinkCell(
+                  row.original.hacktricks_link,
+                  undefined,
+                  hacktricks.value.icon,
+                ),
+            },
+          ]
+        : []),
+    ];
   },
   tableColumnsVisibility: Object.assign({}, props.visibility || {}, {
     id: false,
@@ -290,16 +294,18 @@ const config: CrudConfig<Finding> = reactive({
         options: toolOptions,
       },
       ...(props.filters || []),
-      props.isTriageable
-        ? {
-            key: "triage_status",
-            label: "Triage Status",
-            icon: "i-lucide-shield-check",
-            type: "select",
-            options: triageStatuses,
-            labelKey: "value",
-          }
-        : {},
+      ...(props.isTriageable
+        ? [
+            {
+              key: "triage_status",
+              label: "Triage Status",
+              icon: "i-lucide-shield-check",
+              type: "select",
+              options: triageStatuses,
+              labelKey: "value",
+            },
+          ]
+        : []),
       {
         key: "is_fixed",
         label: `${fixVerb.value}ed`,
@@ -315,7 +321,7 @@ const config: CrudConfig<Finding> = reactive({
         label: "From user input",
         type: "checkbox",
       },
-    ].filter((i) => Object.keys(i).length > 0);
+    ];
   },
   defaultFilters:
     props.customDefaultFilters || route.params.project_id

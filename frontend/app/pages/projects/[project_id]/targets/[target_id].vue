@@ -18,24 +18,22 @@
         />
         <UDropdownMenu
           v-if="userStore.is_auditor"
-          :items="
-            [
-              {
-                label: 'Generate a report',
-                icon: 'i-lucide-file-text',
-                color: 'neutral',
-                onSelect: () => {
-                  showReportModal = true;
-                },
+          :items="[
+            {
+              label: 'Generate a report',
+              icon: 'i-lucide-file-text',
+              color: 'neutral',
+              onSelect: () => {
+                showReportModal = true;
               },
-              {
-                label: 'Take note',
-                icon: 'i-lucide-notebook',
-                color: 'neutral',
-                onSelect: () => notesButton.createNote(),
-              },
-            ].filter((i) => Object.keys(i).length > 0)
-          "
+            },
+            {
+              label: 'Take note',
+              icon: 'i-lucide-notebook',
+              color: 'neutral',
+              onSelect: () => notesButton.createNote(),
+            },
+          ]"
         >
           <UButton icon="i-lucide-plus" variant="subtle" color="neutral" />
         </UDropdownMenu>
@@ -47,34 +45,38 @@
               target?.reports.length >
               0
           "
-          :items="
-            [
-              target?.tasks.length > 0
-                ? {
+          :items="[
+            ...(target?.tasks.length > 0
+              ? [
+                  {
                     label: `${target?.tasks.length} Scans`,
                     icon: 'i-lucide-play',
                     color: 'neutral',
                     to: `/projects/${$route.params.project_id}/scans?target=${route.params.target_id}`,
-                  }
-                : {},
-              target?.reports.length > 0
-                ? {
+                  },
+                ]
+              : []),
+            ...(target?.reports.length > 0
+              ? [
+                  {
                     label: `${target?.reports.length} Reports`,
                     icon: 'i-lucide-file-text',
                     color: 'neutral',
                     to: `/projects/${$route.params.project_id}/reports?target=${route.params.target_id}`,
-                  }
-                : {},
-              target?.notes.length > 0
-                ? {
+                  },
+                ]
+              : []),
+            ...(target?.notes.length > 0
+              ? [
+                  {
                     label: `${target?.notes.length} Notes`,
                     icon: 'i-lucide-notebook',
                     color: 'neutral',
                     to: `/projects/${$route.params.project_id}/notes?target=${route.params.target_id}`,
-                  }
-                : {},
-            ].filter((i) => Object.keys(i).length > 0)
-          "
+                  },
+                ]
+              : []),
+          ]"
         >
           <UButton icon="i-lucide-link" variant="subtle" color="neutral" />
         </UDropdownMenu>

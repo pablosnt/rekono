@@ -16,29 +16,33 @@ export function buildDeleteMessage(
         `Are you sure you want to ${verb} this ${smartLowerCase(entityType)}?`,
       ),
     },
-    targetEntity
-      ? {
-          component: UAlert,
-          props: {
-            color: "neutral",
-            variant: "subtle",
-            description: targetEntity,
-            ui: { root: "text-center font-bold" },
-            class: "mt-4",
+    ...(targetEntity
+      ? [
+          {
+            component: UAlert,
+            props: {
+              color: "neutral",
+              variant: "subtle",
+              description: targetEntity,
+              ui: { root: "text-center font-bold" },
+              class: "mt-4",
+            },
           },
-        }
-      : {},
-    warningTitle || warningDescription
-      ? {
-          component: UAlert,
-          props: {
-            color: "error",
-            icon: "i-lucide-triangle-alert",
-            title: warningTitle,
-            description: warningDescription,
-            class: "mt-4",
+        ]
+      : []),
+    ...(warningTitle || warningDescription
+      ? [
+          {
+            component: UAlert,
+            props: {
+              color: "error",
+              icon: "i-lucide-triangle-alert",
+              title: warningTitle,
+              description: warningDescription,
+              class: "mt-4",
+            },
           },
-        }
-      : {},
-  ].filter((i) => Object.keys(i).length > 0);
+        ]
+      : []),
+  ];
 }

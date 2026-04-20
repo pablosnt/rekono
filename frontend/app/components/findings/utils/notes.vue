@@ -2,26 +2,28 @@
   <div>
     <UDropdownMenu
       v-if="userStore.is_auditor || finding.notes.length > 0"
-      :items="
-        [
-          finding.notes.length > 0
-            ? {
+      :items="[
+        ...(finding.notes.length > 0
+          ? [
+              {
                 label: `${finding.notes.length} Notes`,
                 icon: 'i-lucide-notebook',
                 color: 'neutral',
                 to: `/projects/${finding.project}/notes?${entityName.toLowerCase()}=${finding.id}`,
-              }
-            : {},
-          userStore.is_auditor
-            ? {
+              },
+            ]
+          : []),
+        ...(userStore.is_auditor
+          ? [
+              {
                 label: 'Take note',
                 icon: 'i-lucide-plus',
                 color: 'neutral',
                 onSelect: () => nextTick(() => notesButton?.createNote()),
-              }
-            : {},
-        ].filter((i) => Object.keys(i).length > 0)
-      "
+              },
+            ]
+          : []),
+      ]"
       :content="{ align: 'end' }"
     >
       <UButton icon="i-lucide-notebook" variant="ghost" color="neutral" />

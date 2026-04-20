@@ -42,26 +42,28 @@
                   finding.reference ||
                   finding.defectdojo_id
                 "
-                :items="
-                  [
-                    finding.hacktricks_link && hacktricks.enabled
-                      ? {
+                :items="[
+                  ...(finding.hacktricks_link && hacktricks.enabled
+                    ? [
+                        {
                           label: 'HackTricks',
                           avatar: { src: hacktricks.icon },
                           to: finding.hacktricks_link,
                           target: '_blank',
-                        }
-                      : {},
-                    finding.reference
-                      ? {
+                        },
+                      ]
+                    : []),
+                  ...(finding.reference
+                    ? [
+                        {
                           label: 'Reference',
                           icon: 'i-lucide-external-link',
                           to: finding.reference,
                           target: '_blank',
-                        }
-                      : {},
-                  ].filter((i) => Object.keys(i).length > 0)
-                "
+                        },
+                      ]
+                    : []),
+                ]"
                 :content="{ align: 'end' }"
               >
                 <UButton icon="i-lucide-link" color="neutral" variant="ghost" />

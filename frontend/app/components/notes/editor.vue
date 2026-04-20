@@ -492,7 +492,7 @@ function dragHandleItems(editor: Editor) {
         ]
       : [],
     [
-      !modificable ? label : {},
+      ...(!modificable ? [label] : []),
       {
         kind: "duplicate",
         pos: selectedNode.value?.pos,
@@ -511,17 +511,15 @@ function dragHandleItems(editor: Editor) {
         label: "Move down",
         icon: "i-lucide-arrow-down",
       },
-    ].filter(
-      (i) => Object.keys(i).length > 0,
-      [
-        {
-          kind: "delete",
-          pos: selectedNode.value?.pos,
-          label: "Delete",
-          icon: "i-lucide-trash",
-        },
-      ],
-    ),
-  ]) as DropdownMenuItem[][];
+    ],
+    [
+      {
+        kind: "delete",
+        pos: selectedNode.value?.pos,
+        label: "Delete",
+        icon: "i-lucide-trash",
+      },
+    ],
+  ] as DropdownMenuItem[][]);
 }
 </script>
