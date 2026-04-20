@@ -1,4 +1,4 @@
-import type { Finding } from "~/types/models";
+import type { Finding, OSINT } from "~/types/models";
 import type { DropdownAction } from "~/types/crud";
 
 export function getFindingDropdownActions(
@@ -35,6 +35,24 @@ export function getFindingDropdownActions(
     });
   }
   return actions;
+}
+
+export function getOSINTDropdownActions(
+  finding: OSINT,
+  api: typeof useApi,
+): DropdownAction {
+  return {
+    label: "Create target",
+    icon: "i-lucide-locate-fixed",
+    color: "error",
+    onSelect: () => {
+      api
+        .create(`${finding.id}/target/`, {}, {}, "Target")
+        .then((response) =>
+          navigateTo(`/projects/${response.project}/targets/${response.id}`),
+        );
+    },
+  };
 }
 
 export function getExposureWindow(finding: Finding) {

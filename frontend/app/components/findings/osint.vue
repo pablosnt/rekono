@@ -19,22 +19,7 @@
     :extra-dropdown-actions="
       (item: OSINT) =>
         userStore.is_auditor && ['IP', 'Domain'].includes(item.data_type)
-          ? [
-              {
-                label: 'Create target',
-                icon: 'i-lucide-locate-fixed',
-                color: 'error',
-                onSelect: (item) => {
-                  api
-                    .create(`${item.id}/target/`, {}, {}, 'Target')
-                    .then((response) =>
-                      navigateTo(
-                        `/projects/${response.project}/targets/${response.id}`,
-                      ),
-                    );
-                },
-              },
-            ]
+          ? [getOSINTDropdownActions(item, api)]
           : []
     "
     is-triageable
