@@ -8,22 +8,11 @@
     entity-name="Port"
     is-asset
     fix-verb="Discard"
+    disable-title-copy
     @update="fetch()"
   >
     <template #metadata>
-      <div v-if="port.host" class="flex items-center gap-2">
-        <span class="text-muted">Host:</span>
-        <a
-          class="flex items-center gap-2 hover:text-primary hover:underline"
-          :href="`/projects/${$route.params.project_id}/hosts/${port.host.id}`"
-        >
-          <UIcon
-            :name="osConfig?.icon || 'i-lucide-server'"
-            :class="`text-${osConfig?.color || 'neutral'}`"
-          />
-          <span class="text-base">{{ port.host.domain || port.host.ip }}</span>
-        </a>
-      </div>
+      <FindingsMetadataHost :host="port.host" />
       <div v-if="port.service" class="flex items-center gap-2">
         <span class="text-muted">Service:</span>
         <span class="text-base">{{ port.service }}</span>
@@ -59,7 +48,7 @@
 </template>
 
 <script setup lang="ts">
-import { portStatuses, hostOS } from "~/constants";
+import { portStatuses } from "~/constants";
 
 definePageMeta({ layout: "project" });
 
@@ -67,13 +56,11 @@ const api = useApi("/api/ports/");
 const route = useRoute();
 const port = ref();
 const portStatus = ref();
-const osConfig = ref();
 
 function fetch() {
   api.get(`${route.params.port_id}/`).then((response) => {
     port.value = response;
     portStatus.value = portStatuses.find((s) => s.value === response.status);
-    osConfig.value = hostOS.find((o) => o.value === response.host?.os_type);
   });
 }
 

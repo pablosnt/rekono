@@ -11,16 +11,6 @@
     fix-verb="Discard"
     @update="fetch()"
   >
-    <!-- TODO: Move this to the FindingsSingle by default and allow disabling it? -->
-    <template #post-title>
-      <UButton
-        icon="i-lucide-copy"
-        color="neutral"
-        variant="ghost"
-        size="xs"
-        @click="copy(host.domain || host.ip)"
-      />
-    </template>
     <template #metadata>
       <div v-if="host.domain && host.ip" class="flex items-center gap-2">
         <span class="text-muted">IP:</span>
@@ -30,7 +20,7 @@
           color="neutral"
           variant="ghost"
           size="xs"
-          @click="copy(host.ip)"
+          @click="copyText(host.ip)"
         />
       </div>
       <div v-if="host.os" class="flex items-center gap-2">
@@ -143,15 +133,9 @@ definePageMeta({ layout: "project" });
 
 const api = useApi("/api/hosts/");
 const route = useRoute();
-const toast = useToast();
 const host = ref();
 const osConfig = ref();
 const virusTotal = ref();
-
-function copy(value: string) {
-  navigator.clipboard.writeText(value);
-  toast.add({ title: `${value} copied to clipboard`, color: "success" });
-}
 
 function fetch() {
   api.get(`${route.params.host_id}/`).then((response) => {

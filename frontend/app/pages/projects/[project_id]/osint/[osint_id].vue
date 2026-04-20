@@ -1,22 +1,24 @@
 <template>
   <FindingsSingle
     v-if="osint"
+    :icon="typeConfig?.icon"
     :api="api"
     :title="osint.data"
     :finding="osint"
     entity-name="OSINT"
     is-triageable
     fix-verb="Discard"
+    :custom-dropdown-actions="
+      userStore.is_auditor && ['IP', 'Domain'].includes(osint.data_type)
+        ? [getOSINTDropdownActions(osint, api)]
+        : []
+    "
     @update="fetch()"
   >
-  <!-- TODO: Move the icon to the FindingsSingle, and keep the type field simple -->
-  <!-- TODO: Add create target button to the page actions -->
     <template #metadata>
       <div v-if="osint.data_type" class="flex items-center gap-2">
         <span class="text-muted">Data type:</span>
-        <UBadge :icon="typeConfig?.icon" variant="subtle" color="neutral">{{
-          osint.data_type
-        }}</UBadge>
+        <span class="text-base">{{ osint.data_type }}</span>
       </div>
       <div v-if="osint.source" class="flex items-center gap-2">
         <span class="text-muted">Source:</span>
@@ -28,11 +30,13 @@
 
 <script setup lang="ts">
 import { osintDataTypes } from "~/constants";
+import { useUserStore } from "~/store/user";
 
 definePageMeta({ layout: "project" });
 
 const api = useApi("/api/osint/");
 const route = useRoute();
+const userStore = useUserStore();
 const osint = ref();
 const typeConfig = ref();
 
