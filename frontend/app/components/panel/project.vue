@@ -283,6 +283,12 @@ function getProjectBreadcrum(project: Project) {
     if (route.params.note_id) onNoteChange();
     if (route.params.osint_id) onOsintChange();
     if (route.params.host_id) onHostChange();
+    if (route.params.port_id) onPortChange();
+    if (route.params.path_id) onPathChange();
+    if (route.params.credential_id) onCredentialChange();
+    if (route.params.technology_id) onTechnologyChange();
+    if (route.params.vulnerability_id) onVulnerabilityChange();
+    if (route.params.exploit_id) onExploitChange();
   }
   mounting.value = false;
 }
@@ -369,12 +375,66 @@ function onHostChange() {
   });
 }
 
+function onPortChange() {
+  cleanSecondaryLinks(route.params.port_id, {
+    label: "Ports",
+    icon: "i-lucide-ethernet-port",
+    to: `/projects/${route.params.project_id}/ports`,
+  });
+}
+
+function onPathChange() {
+  cleanSecondaryLinks(route.params.path_id, {
+    label: "Paths",
+    icon: "i-lucide-slash",
+    to: `/projects/${route.params.project_id}/paths`,
+  });
+}
+
+function onCredentialChange() {
+  cleanSecondaryLinks(route.params.credential_id, {
+    label: "Credentials",
+    icon: "i-lucide-key",
+    to: `/projects/${route.params.project_id}/credentials`,
+  });
+}
+
+function onTechnologyChange() {
+  cleanSecondaryLinks(route.params.technology_id, {
+    label: "Technologies",
+    icon: "i-lucide-layers",
+    to: `/projects/${route.params.project_id}/technologies`,
+  });
+}
+
+function onVulnerabilityChange() {
+  cleanSecondaryLinks(route.params.vulnerability_id, {
+    label: "Vulnerabilities",
+    icon: "i-lucide-bug",
+    to: `/projects/${route.params.project_id}/vulnerabilities`,
+  });
+}
+
+function onExploitChange() {
+  cleanSecondaryLinks(route.params.exploit_id, {
+    label: "Exploits",
+    icon: "i-lucide-flame",
+    to: `/projects/${route.params.project_id}/exploits`,
+  });
+}
+
 watch(() => route.params.project_id, onProjectChange);
 watch(() => route.params.target_id, onTargetChange);
 watch(() => route.params.scan_id, onScanChange);
 watch(() => route.params.note_id, onNoteChange);
 watch(() => route.params.osint_id, onOsintChange);
 watch(() => route.params.host_id, onHostChange);
+watch(() => route.params.port_id, onPortChange);
+watch(() => route.params.path_id, onPathChange);
+watch(() => route.params.credential_id, onCredentialChange);
+watch(() => route.params.technology_id, onTechnologyChange);
+watch(() => route.params.vulnerability_id, onVulnerabilityChange);
+watch(() => route.params.exploit_id, onExploitChange);
 
 onMounted(() => {
   mounting.value = true;
