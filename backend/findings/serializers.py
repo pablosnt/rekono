@@ -261,7 +261,12 @@ class CredentialSerializer(TriageFindingSerializer):
 
     Handles JSON conversion for credential findings with read-only
     restrictions for sensitive authentication data protection.
+
+    Attributes:
+        technology (SimpleTechnologySerializer): Nested technology relationship (read-only)
     """
+
+    technology = SimpleTechnologySerializer(many=False, read_only=True)
 
     class Meta:
         """Meta configuration for CredentialSerializer.
