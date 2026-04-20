@@ -73,6 +73,7 @@ class SimpleHostSerializer(ModelSerializer):
 
         model = Host
         fields = (
+            "id",
             "ip",
             "domain",
             "os",
@@ -133,6 +134,7 @@ class SimplePortSerializer(ModelSerializer):
 
         model = Port
         fields = (
+            "id",
             "host",
             "port",
             "status",
@@ -224,7 +226,7 @@ class SimpleTechnologySerializer(ModelSerializer):
         """
 
         model = Technology
-        fields = ("port", "name", "version", "description")
+        fields = ("id", "port", "name", "version", "description")
 
 
 class TechnologySerializer(FindingSerializer, SimpleTechnologySerializer):
@@ -321,6 +323,7 @@ class SimpleVulnerabilitySerializer(ModelSerializer):
 
         model = Vulnerability
         fields = (
+            "id",
             "port",
             "technology",
             "name",

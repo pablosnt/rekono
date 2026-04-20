@@ -8,8 +8,7 @@
     :filters="filters"
     :ordering="[
       'id',
-      { id: 'port__host', label: 'Host' },
-      'port',
+      ...(port ? [] : [{ id: 'port__host', label: 'Host' }, 'port']),
       'name',
       'version',
     ]"
@@ -19,6 +18,8 @@
       vulnerability: false,
       exploit: false,
     }"
+    :custom-default-filters="port ? { port: port } : undefined"
+    :header-hide-title="Boolean(port)"
     is-asset
   />
 </template>
@@ -27,41 +28,54 @@
 import type { CrudTableColumn } from "~/types/crud";
 import type { Technology } from "~/types/models";
 
+const props = defineProps<{
+  port?: number;
+}>();
+
 const route = useRoute();
 const table = useTable();
 const options = useOptions();
 const hostOptions = ref();
 const portOptions = ref();
-const filters = computed(() => [
-  {
-    key: "port__host",
-    label: "Host",
-    icon: "i-lucide-server",
-    type: "select" as const,
-    options: hostOptions,
-  },
-  {
-    key: "port",
-    label: "Port",
-    icon: "i-lucide-ethernet-port",
-    type: "select" as const,
-    options: portOptions,
-  },
-]);
+const filters = computed(() =>
+  props.port
+    ? []
+    : [
+        {
+          key: "port__host",
+          label: "Host",
+          icon: "i-lucide-server",
+          type: "select" as const,
+          options: hostOptions,
+        },
+        {
+          key: "port",
+          label: "Port",
+          icon: "i-lucide-ethernet-port",
+          type: "select" as const,
+          options: portOptions,
+        },
+      ],
+);
 const columns: CrudTableColumn<Technology>[] = [
-  {
-    accessorKey: "host",
-    header: "Host",
-    icon: "i-lucide-server",
-    cell: ({ row }) =>
-      table.hostCell(row.original.port?.host, row.original.project),
-  },
-  {
-    accessorKey: "port",
-    header: "Port",
-    icon: "i-lucide-ethernet-port",
-    cell: ({ row }) => table.portCell(row.original.port, row.original.project),
-  },
+  ...(props.port
+    ? []
+    : [
+        {
+          accessorKey: "host",
+          header: "Host",
+          icon: "i-lucide-server",
+          cell: ({ row }) =>
+            table.hostCell(row.original.port?.host, row.original.project),
+        },
+        {
+          accessorKey: "port",
+          header: "Port",
+          icon: "i-lucide-ethernet-port",
+          cell: ({ row }) =>
+            table.portCell(row.original.port, row.original.project),
+        },
+      ]),
   {
     accessorKey: "name",
     header: "Name",
@@ -132,6 +146,7 @@ const columns: CrudTableColumn<Technology>[] = [
 ];
 
 onMounted(() => {
+  if (props.port) return;
   const query = route.params.project_id
     ? { project: route.params.project_id }
     : {};

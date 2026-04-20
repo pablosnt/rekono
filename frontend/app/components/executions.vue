@@ -1,5 +1,6 @@
 <template>
   <div>
+    <!-- TODO: Duration, at least in executions page is calculated wrong in a cancelled execution -->
     <CrudPage
       ref="page"
       :config="config"

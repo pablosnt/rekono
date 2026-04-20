@@ -8,12 +8,13 @@
     :filters="filters"
     :ordering="[
       'id',
-      'port',
-      { id: 'port__host', label: 'Host' },
+      ...(port ? [] : ['port', { id: 'port__host', label: 'Host' }]),
       'path',
       'status',
       'type',
     ]"
+    :custom-default-filters="port ? { port: port } : undefined"
+    :header-hide-title="Boolean(port)"
     is-asset
   />
 </template>
@@ -23,41 +24,54 @@ import type { CrudTableColumn } from "~/types/crud";
 import { pathTypes } from "~/constants";
 import type { Path } from "~/types/models";
 
+const props = defineProps<{
+  port?: number;
+}>();
+
 const route = useRoute();
 const table = useTable();
 const options = useOptions();
 const hostOptions = ref();
 const portOptions = ref();
-const filters = computed(() => [
-  {
-    key: "host",
-    label: "Host",
-    icon: "i-lucide-server",
-    type: "select" as const,
-    options: hostOptions,
-  },
-  {
-    key: "port",
-    label: "Port",
-    icon: "i-lucide-ethernet-port",
-    type: "select" as const,
-    options: portOptions,
-  },
-]);
+const filters = computed(() =>
+  props.port
+    ? []
+    : [
+        {
+          key: "host",
+          label: "Host",
+          icon: "i-lucide-server",
+          type: "select" as const,
+          options: hostOptions,
+        },
+        {
+          key: "port",
+          label: "Port",
+          icon: "i-lucide-ethernet-port",
+          type: "select" as const,
+          options: portOptions,
+        },
+      ],
+);
 const columns: CrudTableColumn<Path>[] = [
-  {
-    accessorKey: "host",
-    header: "Host",
-    icon: "i-lucide-server",
-    cell: ({ row }) =>
-      table.hostCell(row.original.port?.host, row.original.project),
-  },
-  {
-    accessorKey: "Port",
-    header: "Port",
-    icon: "i-lucide-ethernet-port",
-    cell: ({ row }) => table.portCell(row.original.port, row.original.project),
-  },
+  ...(props.port
+    ? []
+    : [
+        {
+          accessorKey: "host",
+          header: "Host",
+          icon: "i-lucide-server",
+          cell: ({ row }) =>
+            table.hostCell(row.original.port?.host, row.original.project),
+        },
+        {
+          accessorKey: "Port",
+          header: "Port",
+          icon: "i-lucide-ethernet-port",
+          cell: ({ row }) =>
+            table.portCell(row.original.port, row.original.project),
+        },
+      ]),
   {
     accessorKey: "path",
     header: "Path",
@@ -97,6 +111,7 @@ const columns: CrudTableColumn<Path>[] = [
 ];
 
 onMounted(() => {
+  if (props.port) return;
   const query = route.params.project_id
     ? { project: route.params.project_id }
     : {};

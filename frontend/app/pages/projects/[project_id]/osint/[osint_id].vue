@@ -9,6 +9,8 @@
     fix-verb="Discard"
     @update="fetch()"
   >
+  <!-- TODO: Move the icon to the FindingsSingle, and keep the type field simple -->
+  <!-- TODO: Add create target button to the page actions -->
     <template #metadata>
       <div v-if="osint.data_type" class="flex items-center gap-2">
         <span class="text-muted">Data type:</span>

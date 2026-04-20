@@ -87,7 +87,7 @@ export default function () {
     return findingCell(
       host,
       "hosts",
-      host?.ip || host?.domain,
+      host?.domain || host?.ip,
       project,
       config?.icon || "i-lucide-server",
       config?.color || "neutral",

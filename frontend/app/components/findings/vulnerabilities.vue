@@ -8,8 +8,7 @@
     :filters="filters"
     :ordering="[
       'id',
-      'technology',
-      'port',
+      ...(port ? [] : ['technology', 'port']),
       'name',
       'severity',
       { id: 'cve', label: 'CVE' },
@@ -19,6 +18,8 @@
       description: false,
     }"
     :extra-dropdown-actions="dropdownActions"
+    :custom-default-filters="port ? { port: port } : undefined"
+    :header-hide-title="Boolean(port)"
     is-triageable
   />
 </template>
@@ -30,6 +31,10 @@ import type { CrudTableColumn } from "~/types/crud";
 import { severities } from "~/constants";
 import type { Vulnerability } from "~/types/models";
 
+const props = defineProps<{
+  port?: number;
+}>();
+
 const toast = useToast();
 const route = useRoute();
 const table = useTable();
@@ -38,27 +43,31 @@ const hostOptions = ref();
 const portOptions = ref();
 const technologyOptions = ref();
 const filters = computed(() => [
-  {
-    key: "host",
-    label: "Host",
-    icon: "i-lucide-server",
-    type: "select" as const,
-    options: hostOptions,
-  },
-  {
-    key: "port",
-    label: "Port",
-    icon: "i-lucide-ethernet-port",
-    type: "select" as const,
-    options: portOptions,
-  },
-  {
-    key: "technology",
-    label: "Technology",
-    icon: "i-lucide-layers",
-    type: "select" as const,
-    options: technologyOptions,
-  },
+  ...(props.port
+    ? []
+    : [
+        {
+          key: "host",
+          label: "Host",
+          icon: "i-lucide-server",
+          type: "select" as const,
+          options: hostOptions,
+        },
+        {
+          key: "port",
+          label: "Port",
+          icon: "i-lucide-ethernet-port",
+          type: "select" as const,
+          options: portOptions,
+        },
+        {
+          key: "technology",
+          label: "Technology",
+          icon: "i-lucide-layers",
+          type: "select" as const,
+          options: technologyOptions,
+        },
+      ]),
   {
     key: "severity",
     label: "Severity",
@@ -75,33 +84,37 @@ const filters = computed(() => [
   },
 ]);
 const columns: CrudTableColumn<Vulnerability>[] = [
-  {
-    accessorKey: "host",
-    header: "Host",
-    icon: "i-lucide-server",
-    cell: ({ row }) =>
-      table.hostCell(
-        row.original.port?.host || row.original.technology?.port?.host,
-        row.original.project,
-      ),
-  },
-  {
-    accessorKey: "port",
-    header: "Port",
-    icon: "i-lucide-ethernet-port",
-    cell: ({ row }) =>
-      table.portCell(
-        row.original.port || row.original.technology?.port,
-        row.original.project,
-      ),
-  },
-  {
-    accessorKey: "technology",
-    header: "Technology",
-    icon: "i-lucide-layers",
-    cell: ({ row }) =>
-      table.technologyCell(row.original.technology, row.original.project),
-  },
+  ...(props.port
+    ? []
+    : [
+        {
+          accessorKey: "host",
+          header: "Host",
+          icon: "i-lucide-server",
+          cell: ({ row }) =>
+            table.hostCell(
+              row.original.port?.host || row.original.technology?.port?.host,
+              row.original.project,
+            ),
+        },
+        {
+          accessorKey: "port",
+          header: "Port",
+          icon: "i-lucide-ethernet-port",
+          cell: ({ row }) =>
+            table.portCell(
+              row.original.port || row.original.technology?.port,
+              row.original.project,
+            ),
+        },
+        {
+          accessorKey: "technology",
+          header: "Technology",
+          icon: "i-lucide-layers",
+          cell: ({ row }) =>
+            table.technologyCell(row.original.technology, row.original.project),
+        },
+      ]),
   {
     accessorKey: "name",
     header: "Name",
@@ -225,6 +238,7 @@ function dropdownActions(item: Vulnerability) {
 }
 
 onMounted(() => {
+  if (props.port) return;
   const query = route.params.project_id
     ? { project: route.params.project_id }
     : {};

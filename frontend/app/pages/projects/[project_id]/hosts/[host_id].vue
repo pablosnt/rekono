@@ -11,6 +11,7 @@
     fix-verb="Discard"
     @update="fetch()"
   >
+    <!-- TODO: Move this to the FindingsSingle by default and allow disabling it? -->
     <template #post-title>
       <UButton
         icon="i-lucide-copy"
@@ -128,12 +129,7 @@
           <FindingsHostsMetricsLocations :hosts="[host]" />
         </UPageCard>
       </div>
-      <UPageCard
-        v-if="host && host.port.length > 0"
-        title="Ports"
-        description="Ports and services identified during enumeration"
-        variant="outline"
-      >
+      <UPageCard v-if="host.port.length > 0" title="Ports" variant="outline">
         <FindingsPorts :host="host.id" />
       </UPageCard>
     </template>
