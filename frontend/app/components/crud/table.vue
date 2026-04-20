@@ -25,7 +25,6 @@ const UIcon = resolveComponent("UIcon");
 const props = defineProps<{ config: CrudConfig; state: CrudState }>();
 const emit = defineEmits<{ edit: [item: object]; delete: [item: object] }>();
 const slots = useSlots();
-const toast = useToast();
 const url = useRequestURL();
 
 const columns = computed(() => {
@@ -76,24 +75,17 @@ const columns = computed(() => {
           actions.push({
             label: "Copy ID",
             icon: "i-lucide-copy",
-            onSelect: () => {
-              navigator.clipboard.writeText(String(item.id));
-              toast.add({ title: "ID copied to clipboard", color: "success" });
-            },
+            onSelect: () => copyText(String(item.id), "ID copied to clipboard"),
           });
         } else if (props.config.itemLink) {
           actions.push({
             label: "Copy link",
             icon: "i-lucide-copy",
-            onSelect: () => {
-              navigator.clipboard.writeText(
+            onSelect: () =>
+              copyText(
                 `${url.origin}${String(props.config.itemLink(item))}`,
-              );
-              toast.add({
-                title: "Link copied to clipboard",
-                color: "success",
-              });
-            },
+                "Link copied to clipboard",
+              ),
           });
         }
       }

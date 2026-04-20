@@ -13,7 +13,7 @@
         color="neutral"
         variant="ghost"
         size="lg"
-        @click="copyToken()"
+        @click="copyText(newToken.key, 'Token copied to clipboard')"
       />
     </template>
   </UAlert>
@@ -49,14 +49,8 @@ const emit = defineEmits<{
   "new-loading": [newLoading: boolean];
   error: [error: object];
 }>();
-const toast = useToast();
 const form = ref();
 const newToken = ref();
-
-function copyToken() {
-  navigator.clipboard.writeText(newToken.value.key);
-  toast.add({ title: "Token copied to clipboard", color: "success" });
-}
 
 function submit() {
   if (!newToken.value) {

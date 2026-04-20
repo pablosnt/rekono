@@ -98,13 +98,8 @@ function getUserActions(item: User, onEdit: () => void, onDelete: () => void) {
       {
         label: "Copy email",
         icon: "i-lucide-copy",
-        onSelect: () => {
-          navigator.clipboard.writeText(String(item.email));
-          toast.add({
-            title: "User email copied to clipboard",
-            color: "success",
-          });
-        },
+        onSelect: () =>
+          copyText(String(item.email), "User email copied to clipboard"),
       },
       {
         label: "Edit",

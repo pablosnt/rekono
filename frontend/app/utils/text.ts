@@ -44,3 +44,12 @@ export function copyLink() {
   navigator.clipboard.writeText(`${url.origin}${url.pathname}`);
   toast.add({ title: "Link copied to clipboard", color: "success" });
 }
+
+export function copyText(text: string, message?: string) {
+  const toast = useToast();
+  navigator.clipboard.writeText(text);
+  toast.add({
+    title: message || `${text} copied to clipboard`,
+    color: "success",
+  });
+}
