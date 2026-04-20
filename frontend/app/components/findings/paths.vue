@@ -90,8 +90,8 @@ const columns: CrudTableColumn<Path>[] = [
       ),
   },
   {
-    accessorKey: "httpStatus",
-    header: "HTTP Status",
+    accessorKey: "code",
+    header: "Status Code",
     icon: "i-lucide-hash",
     cell: ({ row }) => {
       const status = row.getValue("status") as number | null;

@@ -64,7 +64,7 @@ export default function () {
     icon: string | undefined = undefined,
     color: string = "neutral",
   ) {
-    return entity
+    return entity && value
       ? h(
           "a",
           {
@@ -108,7 +108,11 @@ export default function () {
     return findingCell(
       technology,
       "technologies",
-      technology ? `${technology.name} - ${technology.version}` : undefined,
+      technology
+        ? technology.name && technology.version
+          ? `${technology.name} - ${technology.version}`
+          : technology.name
+        : undefined,
       project,
     );
   }
