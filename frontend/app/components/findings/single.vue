@@ -2,75 +2,91 @@
   <div class="space-y-5">
     <UPageCard variant="subtle" :ui="{ header: 'w-full' }">
       <template #header>
-        <div class="flex flex-wrap justify-between w-full mb-4">
-          <div class="flex items-center gap-2">
-            <UIcon
-              v-if="icon"
-              :name="icon"
-              :class="`text-${iconColor || 'neutral'} text-xl`"
-            />
-            <span class="text-base font-semibold text-xl text-highlighted">{{
-              title
-            }}</span>
-            <slot name="post-title" />
-          </div>
-          <div class="flex items-center gap-2">
-            <FindingsUtilsStatus
-              :finding="finding"
-              :is-triageable="isTriageable"
-              :fix-verb="fixVerb"
-            />
-            <!-- todo: DefectDojo link -->
-            <!-- TODO: Add a badge with the number of existing notes to the Notes button everywhere. Only if greater than 0 -->
-            <FindingsUtilsNotes :finding="finding" :entity-name="entityName" />
-            <UDropdownMenu
-              v-if="
-                (hacktricks && hacktricks.enabled && finding.hacktricks_link) ||
-                finding.reference ||
-                finding.defectdojo_id
-              "
-              :items="
-                [
-                  finding.hacktricks_link && hacktricks.enabled
-                    ? {
-                        label: 'HackTricks',
-                        avatar: { src: hacktricks.icon },
-                        to: finding.hacktricks_link,
-                        target: '_blank',
-                      }
-                    : {},
-                  finding.reference
-                    ? {
-                        label: 'Reference',
-                        icon: 'i-lucide-external-link',
-                        to: finding.reference,
-                        target: '_blank',
-                      }
-                    : {},
-                ].filter((i) => Object.keys(i).length > 0)
-              "
-              :content="{ align: 'end' }"
-            >
-              <UButton icon="i-lucide-link" color="neutral" variant="ghost" />
-            </UDropdownMenu>
-            <UDropdownMenu
-              v-if="userStore.is_auditor && dropdownActions.length > 0"
-              :items="dropdownActions"
-              :content="{ align: 'end' }"
-            >
+        <div class="mb-4">
+          <div class="flex flex-wrap justify-between w-full">
+            <div class="flex items-center gap-2">
+              <UIcon
+                v-if="icon"
+                :name="icon"
+                :class="`text-${iconColor || 'neutral'} text-xl`"
+              />
+              <span class="text-base font-semibold text-xl text-highlighted">{{
+                title
+              }}</span>
               <UButton
-                icon="i-lucide-ellipsis"
+                v-if="!disableTitleCopy"
+                icon="i-lucide-copy"
                 color="neutral"
                 variant="ghost"
+                size="xs"
+                @click="copyText(title)"
               />
-            </UDropdownMenu>
+            </div>
+            <div class="flex items-center gap-2">
+              <FindingsUtilsStatus
+                :finding="finding"
+                :is-triageable="isTriageable"
+                :fix-verb="fixVerb"
+              />
+              <!-- todo: DefectDojo link -->
+              <!-- TODO: Add a badge with the number of existing notes to the Notes button everywhere. Only if greater than 0 -->
+              <FindingsUtilsNotes
+                :finding="finding"
+                :entity-name="entityName"
+              />
+              <UDropdownMenu
+                v-if="
+                  (hacktricks &&
+                    hacktricks.enabled &&
+                    finding.hacktricks_link) ||
+                  finding.reference ||
+                  finding.defectdojo_id
+                "
+                :items="
+                  [
+                    finding.hacktricks_link && hacktricks.enabled
+                      ? {
+                          label: 'HackTricks',
+                          avatar: { src: hacktricks.icon },
+                          to: finding.hacktricks_link,
+                          target: '_blank',
+                        }
+                      : {},
+                    finding.reference
+                      ? {
+                          label: 'Reference',
+                          icon: 'i-lucide-external-link',
+                          to: finding.reference,
+                          target: '_blank',
+                        }
+                      : {},
+                  ].filter((i) => Object.keys(i).length > 0)
+                "
+                :content="{ align: 'end' }"
+              >
+                <UButton icon="i-lucide-link" color="neutral" variant="ghost" />
+              </UDropdownMenu>
+              <UDropdownMenu
+                v-if="userStore.is_auditor && dropdownActions.length > 0"
+                :items="dropdownActions"
+                :content="{ align: 'end' }"
+              >
+                <UButton
+                  icon="i-lucide-ellipsis"
+                  color="neutral"
+                  variant="ghost"
+                />
+              </UDropdownMenu>
+            </div>
           </div>
+          <slot name="description" />
         </div>
       </template>
-      <div class="flex items-center justify-around">
+      <div class="flex items-center justify-around flex-wrap">
+        <!-- TODO: This is not responsive! -->
         <slot name="metadata" />
       </div>
-      <slot name="top-custom" />
+      <slot name="post-metadata" />
     </UPageCard>
     <slot name="custom" />
     <UPageCard
@@ -114,6 +130,7 @@
 
 <script setup lang="ts">
 import { useUserStore } from "~/store/user";
+import type { DropdownAction } from "~/types/crud";
 import type { Execution, Finding } from "~/types/models";
 
 const props = defineProps<{
@@ -126,6 +143,8 @@ const props = defineProps<{
   isTriageable?: boolean;
   isAsset?: boolean;
   fixVerb: string;
+  disableTitleCopy?: boolean;
+  customDropdownActions?: DropdownAction[];
 }>();
 defineEmits<{ update: [] }>();
 
@@ -138,8 +157,8 @@ const fixModalOpen = ref(false);
 const executions = ref();
 const refresh = ref();
 const hacktricks = ref();
-const dropdownActions = computed(() =>
-  getFindingDropdownActions(
+const dropdownActions = computed(() => [
+  ...getFindingDropdownActions(
     props.finding,
     props.fixVerb,
     unfixVerb.value,
@@ -148,7 +167,8 @@ const dropdownActions = computed(() =>
     () => (fixModalOpen.value = true),
     () => (triageModalOpen.value = true),
   ),
-);
+  ...(props.customDropdownActions || []),
+]);
 
 function processExecutions(items: Execution[]) {
   if (items.filter((e) => ["Running", "Requested"].includes(e.status))) {
