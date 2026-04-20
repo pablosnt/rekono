@@ -123,7 +123,7 @@
           >
             <UButton icon="i-lucide-link" variant="subtle" color="neutral" />
           </UDropdownMenu>
-          <!-- TODO: Links (or custom finding's view) to OSINT, credentials, assets and vulnerabilities, at task and execution level -->
+          <!-- todo: Links (or custom finding's view) to OSINT, credentials, assets and vulnerabilities, at task and execution level -->
         </div>
       </div>
       <USeparator />

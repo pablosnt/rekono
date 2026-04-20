@@ -1,6 +1,5 @@
 <template>
   <div>
-    <!-- TODO: Duration, at least in executions page is calculated wrong in a cancelled execution -->
     <CrudPage
       ref="page"
       :config="config"
@@ -179,7 +178,7 @@ const config: CrudConfig<Execution> = reactive({
         table.valueCell(
           row.original.start && row.original.end
             ? duration(row.original.start, row.original.end)
-            : row.original.start
+            : row.original.status === "Running" && row.original.start
               ? duration(row.original.start, new Date().toISOString())
               : undefined,
         ),

@@ -181,7 +181,9 @@ const config: CrudConfig<Task> = reactive({
         table.valueCell(
           row.original.start && row.original.end
             ? duration(row.original.start, row.original.end)
-            : undefined,
+            : row.original.status === "Running" && row.original.start
+              ? duration(row.original.start, new Date().toISOString())
+              : undefined,
         ),
     },
     {
