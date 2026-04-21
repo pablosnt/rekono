@@ -32,7 +32,7 @@
       </template>
       <UNavigationMenu
         :collapsed="!open"
-        :items="navigationItems"
+        :items="items"
         orientation="vertical"
         tooltip
         popover
@@ -120,7 +120,30 @@ const props = defineProps<{
   navigationItems: Array<Record<string, unknown>>;
 }>();
 
+const route = useRoute();
 const userStore = useUserStore();
 const open = useLocalStorage(props.storageKey, true);
 const profileOpen = ref(false);
+const items = computed(() =>
+  props.navigationItems.map((item) => setActiveState(item)),
+);
+
+function setActiveState(
+  item: Record<string, unknown>,
+): Array<Record<string, unknown>> {
+  const newItem = { ...item };
+  if (item.to) {
+    const path = item.to.toString();
+    newItem.active =
+      route.path === path ||
+      (path !== "/" &&
+        route.params.project_id &&
+        path !== `/projects/${route.params.project_id}` &&
+        (route.path.startsWith(path) || route.path.startsWith(path + "/")));
+  }
+  if (item.children) {
+    newItem.children = item.children.map((child) => setActiveState(child));
+  }
+  return newItem;
+}
 </script>
