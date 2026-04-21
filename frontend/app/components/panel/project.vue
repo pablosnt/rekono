@@ -1,13 +1,8 @@
 <template>
-  <Panel :navigation-items="items" storage-key="project-panel">
-    <template
-      #panel-header="{ sidebarCollapsed, largeScreen, switchCollapsed }"
-    >
+  <Panel :navigation-items="items" storage-key="panel">
+    <template #panel-header="{ open }">
       <div class="relative flex items-center w-full justify-between">
-        <div
-          v-if="!sidebarCollapsed"
-          class="flex items-center justify-center gap-2"
-        >
+        <div v-if="open" class="flex items-center justify-center gap-2">
           <UAvatar
             :text="projectEntity.name.charAt(0).toUpperCase()"
             class="bg-primary-500"
@@ -22,21 +17,6 @@
           width="30"
           class="bg-primary-500 opacity-100 group-hover:opacity-0 transition-opacity duration-200"
           :ui="{ fallback: 'text-white' }"
-        />
-        <UButton
-          v-if="largeScreen"
-          :icon="
-            sidebarCollapsed
-              ? 'i-lucide-chevrons-right'
-              : 'i-lucide-chevrons-left'
-          "
-          color="neutral"
-          variant="ghost"
-          :class="
-            'ml-auto opacity-0 group-hover:opacity-100 transition-opacity duration-200' +
-            (sidebarCollapsed ? ' absolute' : '')
-          "
-          @click="switchCollapsed()"
         />
       </div>
     </template>

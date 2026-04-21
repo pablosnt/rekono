@@ -14,18 +14,18 @@
     "typecheck": "nuxt typecheck"
   },
   "dependencies": {
-    "@iconify-json/lucide": "^1.2.101",
-    "@iconify-json/simple-icons": "^1.2.76",
-    "@nuxt/ui": "^4.6.0",
+    "@iconify-json/lucide": "^1.2.102",
+    "@iconify-json/simple-icons": "^1.2.79",
+    "@nuxt/ui": "^4.6.1",
     "@pinia/nuxt": "0.11.3",
-    "@tiptap/core": "^3.22.1",
-    "@tiptap/extension-emoji": "^3.22.1",
-    "@tiptap/extension-table": "^3.22.1",
-    "@tiptap/extension-text-align": "^3.22.1",
-    "@tiptap/pm": "^3.22.1",
-    "@tiptap/starter-kit": "^3.22.1",
-    "@tiptap/vue-3": "^3.22.1",
-    "@tiptap/y-tiptap": "^3.0.2",
+    "@tiptap/core": "^3.22.4",
+    "@tiptap/extension-emoji": "^3.22.4",
+    "@tiptap/extension-table": "^3.22.4",
+    "@tiptap/extension-text-align": "^3.22.4",
+    "@tiptap/pm": "^3.22.4",
+    "@tiptap/starter-kit": "^3.22.4",
+    "@tiptap/vue-3": "^3.22.4",
+    "@tiptap/y-tiptap": "^3.0.3",
     "@unovis/ts": "^1.6.4",
     "@unovis/vue": "^1.6.4",
     "jwt-decode": "^4.0.0",
@@ -38,12 +38,12 @@
   },
   "devDependencies": {
     "@nuxt/eslint": "^1.15.2",
-    "@types/node": "^25.5.2",
-    "eslint": "^10.1.0",
+    "@types/node": "^25.6.0",
+    "eslint": "^10.2.1",
     "eslint-config-prettier": "^10.1.8",
-    "prettier": "^3.8.1",
-    "typescript": "^5.6.3",
-    "vue-tsc": "^3.2.6"
+    "prettier": "^3.8.3",
+    "typescript": "^6.0.3",
+    "vue-tsc": "^3.2.7"
   },
   "packageManager": "pnpm@10.33.0"
 }

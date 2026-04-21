@@ -1,5 +1,5 @@
 <template>
-  <Panel :navigation-items="items" storage-key="main-panel">
+  <Panel :navigation-items="items" storage-key="panel">
     <slot />
   </Panel>
 </template>

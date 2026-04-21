@@ -1,32 +1,18 @@
 <template>
-  <UDashboardGroup persistent storage="local" :storage-key="storageKey">
-    <UDashboardSidebar
-      v-if="mounted"
-      v-model:collapsed="sidebarCollapsed"
-      class="group"
-      style="display: flex"
-      :resizable="largeScreen"
-      collapsible
-      @update:collapsed="
-        (value) => {
-          if (largeScreen) {
-            sidebarCollapsed = value;
-          }
-        }
-      "
+  <div class="flex flex-1 bg-neutral-200 dark:bg-neutral-950">
+    <USidebar
+      v-model:open="open"
+      collapsible="icon"
+      variant="inset"
+      rail
+      :ui="{
+        container: 'h-full',
+      }"
     >
       <template #header>
-        <slot
-          name="panel-header"
-          :sidebar-collapsed="sidebarCollapsed"
-          :large-screen="largeScreen"
-          :switch-collapsed="() => (sidebarCollapsed = !sidebarCollapsed)"
-        >
+        <slot name="panel-header" :open="open">
           <div class="relative flex items-center w-full justify-between">
-            <div
-              v-if="!sidebarCollapsed"
-              class="flex items-center justify-center gap-2"
-            >
+            <div v-if="open" class="flex items-center justify-center gap-2">
               <UColorModeImage
                 light="/favicon-light.ico"
                 dark="/favicon-dark.ico"
@@ -41,35 +27,24 @@
               class="opacity-100 group-hover:opacity-0 transition-opacity duration-200"
               width="30"
             />
-            <UButton
-              v-if="largeScreen"
-              :icon="
-                sidebarCollapsed
-                  ? 'i-lucide-chevrons-right'
-                  : 'i-lucide-chevrons-left'
-              "
-              color="neutral"
-              variant="ghost"
-              :class="
-                'ml-auto opacity-0 group-hover:opacity-100 transition-opacity duration-200' +
-                (sidebarCollapsed ? ' absolute' : '')
-              "
-              @click="sidebarCollapsed = !sidebarCollapsed"
-            />
           </div>
         </slot>
       </template>
       <UNavigationMenu
-        :collapsed="sidebarCollapsed"
+        :collapsed="!open"
         :items="navigationItems"
         orientation="vertical"
         tooltip
         popover
+        :ui="{ link: 'p-1.5 overflow-hidden' }"
       />
       <template #footer>
         <UModal
           v-model:open="profileOpen"
-          :ui="{ content: 'sm:max-w-6xl sm:max-h-2xl' }"
+          :ui="{
+            content: 'sm:max-w-6xl h-[min(45rem,75dvh)] flex flex-col',
+            body: 'flex-1 min-h-0 p-0',
+          }"
         >
           <UButton
             :avatar="{
@@ -80,11 +55,11 @@
               ui: { fallback: 'text-white' },
               size: 'sm',
             }"
-            :label="sidebarCollapsed ? undefined : userStore.name || undefined"
+            :label="open ? userStore.name || undefined : undefined"
             color="neutral"
             variant="ghost"
             class="w-full"
-            :block="sidebarCollapsed"
+            :block="!open"
             @click="profileOpen = true"
           />
           <template #header>
@@ -113,51 +88,39 @@
           </template>
         </UModal>
       </template>
-    </UDashboardSidebar>
-    <UDashboardPanel>
-      <template #header>
+    </USidebar>
+    <div class="flex-1 flex flex-col overflow-hidden lg:m-4 lg:mt-8 lg:ms-0">
+      <div
+        class="flex-1 overflow-hidden bg-default lg:rounded-xl lg:shadow-sm lg:ring lg:ring-default"
+      >
+        <div class="flex items-center gap-2 p-3 lg:hidden">
+          <UButton
+            icon="i-lucide-panel-left-open"
+            variant="ghost"
+            color="neutral"
+            @click="open = true"
+          />
+        </div>
         <slot name="content-header" />
-      </template>
-      <template #body>
-        <div class="mx-10">
+        <div class="p-10 mx-10">
           <slot />
         </div>
-      </template>
-      <template #footer>
-        <Footer />
-      </template>
-    </UDashboardPanel>
-  </UDashboardGroup>
+      </div>
+      <Footer />
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
+import { useLocalStorage } from "@vueuse/core";
 import { useUserStore } from "~/store/user";
 
-defineProps<{
+const props = defineProps<{
   storageKey: string;
-  navigationItems: Array<string, unknown>;
+  navigationItems: Array<Record<string, unknown>>;
 }>();
+
 const userStore = useUserStore();
+const open = useLocalStorage(props.storageKey, true);
 const profileOpen = ref(false);
-const sidebarCollapsed = ref(false);
-const mounted = ref(false);
-const windowWidth = ref(0);
-const largeScreen = computed(() => windowWidth.value >= 1024);
-
-const handleResize = () => {
-  windowWidth.value = window.innerWidth;
-  if (!largeScreen.value) {
-    sidebarCollapsed.value = true;
-  }
-};
-
-onUnmounted(() => {
-  window.removeEventListener("resize", handleResize);
-});
-
-onMounted(() => {
-  mounted.value = true;
-  handleResize();
-  window.addEventListener("resize", handleResize);
-});
 </script>
