@@ -3,7 +3,9 @@
     <UPageCard variant="subtle" :ui="{ header: 'w-full' }">
       <template #header>
         <div class="mb-4">
-          <div class="flex flex-wrap justify-between w-full">
+          <div
+            class="flex flex-col gap-3 sm:flex-row sm:justify-between w-full"
+          >
             <div class="flex items-center gap-2">
               <UIcon
                 v-if="icon"
@@ -23,16 +25,16 @@
               />
             </div>
             <div class="flex items-center gap-2">
-              <FindingsUtilsStatus
+              <FindingsStatus
                 :finding="finding"
                 :is-triageable="isTriageable"
                 :fix-verb="fixVerb"
               />
               <!-- todo: DefectDojo link -->
-              <!-- TODO: Add a badge with the number of existing notes to the Notes button everywhere. Only if greater than 0 -->
-              <FindingsUtilsNotes
-                :finding="finding"
+              <NotesDropdown
+                :related-entity="finding"
                 :entity-name="entityName"
+                :project="finding.project"
               />
               <UDropdownMenu
                 v-if="
@@ -84,8 +86,9 @@
           <slot name="description" />
         </div>
       </template>
-      <div class="flex items-center justify-around flex-wrap">
-        <!-- TODO: This is not responsive! -->
+      <div
+        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-4 mx-10"
+      >
         <slot name="metadata" />
       </div>
       <slot name="post-metadata" />
@@ -97,6 +100,7 @@
       title="Exposure Window"
       description="Executions detecting the finding"
       variant="outline"
+      :ui="{ root: 'overflow-x-auto' }"
     >
       <FindingsMetricsExposure class="mb-3" :finding="finding" />
       <Executions

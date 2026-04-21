@@ -1,5 +1,5 @@
 <template>
-  <div v-if="port" class="flex items-center gap-2">
+  <div v-if="port" class="flex items-center gap-2 flex-wrap">
     <span class="text-muted">Port:</span>
     <a
       class="flex items-center gap-2 hover:text-primary hover:underline"

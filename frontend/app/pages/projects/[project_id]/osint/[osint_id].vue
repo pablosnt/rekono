@@ -16,11 +16,11 @@
     @update="fetch()"
   >
     <template #metadata>
-      <div v-if="osint.data_type" class="flex items-center gap-2">
+      <div v-if="osint.data_type" class="flex items-center gap-2 flex-wrap">
         <span class="text-muted">Data type:</span>
         <span class="text-base">{{ osint.data_type }}</span>
       </div>
-      <div v-if="osint.source" class="flex items-center gap-2">
+      <div v-if="osint.source" class="flex items-center gap-2 flex-wrap">
         <span class="text-muted">Source:</span>
         <span class="text-base">{{ osint.source }}</span>
       </div>

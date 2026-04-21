@@ -15,7 +15,7 @@
       <FindingsMetadataTechnology :technology="credential.technology" />
       <div
         v-if="credential.email && credential.username"
-        class="flex items-center gap-2"
+        class="flex items-center gap-2 flex-wrap"
       >
         <span class="text-muted">Email:</span>
         <span class="text-base">{{ credential.email }}</span>
@@ -29,7 +29,7 @@
       </div>
       <div
         v-if="(credential.email || credential.username) && credential.secret"
-        class="flex items-center gap-2"
+        class="flex items-center gap-2 flex-wrap"
       >
         <span class="text-muted">Secret:</span>
         <span class="text-base">{{ credential.secret }}</span>
@@ -41,7 +41,7 @@
           @click="copyText(credential.email, 'Secret copied to clipboard')"
         />
       </div>
-      <div v-if="credential.context" class="flex items-center gap-2">
+      <div v-if="credential.context" class="flex items-center gap-2 flex-wrap">
         <span class="text-muted">Context:</span>
         <span class="text-base">{{ credential.context }}</span>
       </div>

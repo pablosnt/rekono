@@ -1,5 +1,11 @@
 <template>
-  <UButton v-if="show !== false" icon="i-lucide-plus" @click="createNote" />
+  <UButton
+    v-if="show !== false"
+    :icon="icon || 'i-lucide-plus'"
+    :color="color"
+    :variant="variant"
+    @click="createNote"
+  />
 </template>
 
 <script setup lang="ts">
@@ -16,6 +22,9 @@ const props = defineProps<{
   technology?: number;
   vulnerability?: number;
   exploit?: number;
+  icon?: string;
+  color?: string;
+  variant?: string;
 }>();
 const api = useApi("/api/notes/");
 const route = useRoute();

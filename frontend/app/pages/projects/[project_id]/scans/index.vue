@@ -1,9 +1,21 @@
 <template>
-  <CrudPage ref="page" :config="config" @fetched="onFetched">
-    <template #create-button>
-      <TasksButton :project="{ id: parseInt(route.params.project_id) }" />
-    </template>
-  </CrudPage>
+  <div>
+    <CrudPage ref="page" :config="config" @fetched="onFetched">
+      <template #create-button>
+        <TasksButton :project="{ id: parseInt(route.params.project_id) }" />
+      </template>
+    </CrudPage>
+    <ReportsButton
+      v-model:open="showReportModal"
+      :task-id="selectedTask?.id"
+      only-modal
+    />
+    <NotesButton
+      v-if="selectedTask"
+      ref="notesButton"
+      :task="selectedTask?.id"
+    />
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -25,6 +37,9 @@ const options = useOptions();
 const api = useApi("/api/tasks/");
 const table = useTable();
 const page = ref();
+const notesButton = ref();
+const showReportModal = ref(false);
+const selectedTask = ref();
 const refresh = ref<ReturnType<typeof setTimeout> | null>(null);
 const targetOptions = ref<FilterOption[]>([]);
 const executorOptions = ref<FilterOption[]>([]);
@@ -286,24 +301,44 @@ const config: CrudConfig<Task> = reactive({
   tableCopyId: true,
   customDropdownActions: (task: Task) => {
     if (!userStore.is_auditor) return [];
-    const actions = [];
-    if (task.progress === 100) {
-      actions.push({
-        label: "Repeat",
-        icon: "i-lucide-play",
-        color: "success",
+    return [
+      ...(task.progress === 100
+        ? [
+            {
+              label: "Repeat",
+              icon: "i-lucide-play",
+              color: "success",
+              onSelect: () => {
+                api
+                  .create(`${task.id}/repeat/`, {}, {}, "Scan")
+                  .then((response) =>
+                    navigateTo(
+                      `/projects/${route.params.project_id}/scans/${response.id}`,
+                    ),
+                  );
+              },
+            },
+            {
+              label: "Generate a report",
+              icon: "i-lucide-file-text",
+              color: "neutral",
+              onSelect: (task: Task) => {
+                selectedTask.value = task;
+                showReportModal.value = true;
+              },
+            },
+          ]
+        : []),
+      {
+        label: "Take note",
+        icon: "i-lucide-notebook",
+        color: "neutral",
         onSelect: () => {
-          api
-            .create(`${task.id}/repeat/`, {}, {}, "Scan")
-            .then((response) =>
-              navigateTo(
-                `/projects/${route.params.project_id}/scans/${response.id}`,
-              ),
-            );
+          selectedTask.value = task;
+          notesButton.value.createNote();
         },
-      });
-    }
-    return actions;
+      },
+    ];
   },
   deleteMessage: (task: Task) =>
     buildDeleteMessage(

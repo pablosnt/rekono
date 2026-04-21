@@ -15,7 +15,7 @@
     <template #metadata>
       <FindingsMetadataHost :host="technology.port?.host" />
       <FindingsMetadataPort :port="technology.port" />
-      <div v-if="technology.version" class="flex items-center gap-2">
+      <div v-if="technology.version" class="flex items-center gap-2 flex-wrap">
         <span class="text-muted">Version:</span>
         <span class="text-base">{{ technology.version }}</span>
         <UButton
@@ -32,14 +32,15 @@
         v-if="technology.credential.length > 0"
         title="Credentials"
         variant="outline"
+        :ui="{ root: 'overflow-x-auto' }"
       >
         <FindingsCredentials :technology="technology.id" />
       </UPageCard>
-      <!-- TODO: Tables exceed page size when the window is small. Vulnerabilities is a good example -->
       <UPageCard
         v-if="technology.vulnerability.length > 0"
         title="Vulnerabilities"
         variant="outline"
+        :ui="{ root: 'overflow-x-auto' }"
       >
         <FindingsVulnerabilities :technology="technology.id" />
       </UPageCard>

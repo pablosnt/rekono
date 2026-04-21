@@ -3,7 +3,11 @@
     <slot name="stats" />
     <CrudPage ref="page" :config="config">
       <template #actions="{ item }">
-        <FindingsUtilsNotes :finding="item" :entity-name="entityName" />
+        <NotesDropdown
+          :related-entity="item"
+          :entity-name="entityName"
+          :project="item.project"
+        />
         <slot name="extra-actions" :item="item" />
       </template>
     </CrudPage>
@@ -132,7 +136,7 @@ const config: CrudConfig<Finding> = reactive({
         header: "Status",
         icon: "i-lucide-activity",
         cell: ({ row }) =>
-          h(resolveComponent("FindingsUtilsStatus"), {
+          h(resolveComponent("FindingsStatus"), {
             finding: row.original,
             isTriageable: props.isTriageable,
             fixVerb: fixVerb.value,

@@ -12,7 +12,10 @@
     @update="fetch()"
   >
     <template #metadata>
-      <div v-if="host.domain && host.ip" class="flex items-center gap-2">
+      <div
+        v-if="host.domain && host.ip"
+        class="flex items-center gap-2 flex-wrap"
+      >
         <span class="text-muted">IP:</span>
         <span class="text-base">{{ host.ip }}</span>
         <UButton
@@ -23,13 +26,13 @@
           @click="copyText(host.ip)"
         />
       </div>
-      <div v-if="host.os" class="flex items-center gap-2">
+      <div v-if="host.os" class="flex items-center gap-2 flex-wrap">
         <span class="text-muted">OS:</span>
         <span class="text-base">{{ host.os }}</span>
       </div>
       <div
         v-if="host.country && !(host.latitude && host.longitude)"
-        class="flex items-center gap-2"
+        class="flex items-center gap-2 flex-wrap"
       >
         <span class="text-muted">Country:</span>
         <div class="flex items-center gap-2">
@@ -43,7 +46,7 @@
       </div>
       <div
         v-if="host.city && !(host.latitude && host.longitude)"
-        class="flex items-center gap-2"
+        class="flex items-center gap-2 flex-wrap"
       >
         <span class="text-muted">City:</span>
         <span class="text-base">{{ host.city }}</span>
@@ -58,7 +61,7 @@
         title="Malware Analysis"
         variant="outline"
       >
-        <div class="flex items-center gap-8 flex-wrap w-full">
+        <div class="flex flex-wrap items-center gap-8 flex-wrap w-full">
           <UCard
             v-if="host.total_analysis > 0 || host.reputation !== 0"
             :class="
@@ -96,6 +99,7 @@
           title="WHOIS"
           variant="outline"
           class="flex-1 min-w-150"
+          :ui="{ root: 'overflow-x-auto' }"
         >
           <span class="whitespace-pre-wrap font-mono">{{ host.whois }}</span>
         </UPageCard>
@@ -105,6 +109,7 @@
           :description="host.city ? host.city : host.country"
           variant="outline"
           class="flex-1 min-w-150"
+          :ui="{ root: 'overflow-x-auto' }"
         >
           <template v-if="host.country && host.city" #description>
             <div class="flex items-center gap-2">
@@ -119,7 +124,12 @@
           <FindingsHostsMetricsLocations :hosts="[host]" />
         </UPageCard>
       </div>
-      <UPageCard v-if="host.port.length > 0" title="Ports" variant="outline">
+      <UPageCard
+        v-if="host.port.length > 0"
+        title="Ports"
+        variant="outline"
+        :ui="{ root: 'overflow-x-auto' }"
+      >
         <FindingsPorts :host="host.id" />
       </UPageCard>
     </template>

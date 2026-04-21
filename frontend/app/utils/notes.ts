@@ -1,3 +1,4 @@
+import { hostOS } from "~/constants";
 import type { Note } from "~/types/models";
 
 export function getNoteRelatedEntity(
@@ -42,13 +43,15 @@ export function getNoteRelatedEntity(
     {
       entity: note.port,
       to: `${baseTo}ports/${note.port?.id}`,
-      icon: "i-lucide-keethernet-porty",
+      icon: getPortIcon(note.port?.port, note.port?.service),
       label: `${note.port?.host?.ip}:${note.port?.port}`,
     },
     {
       entity: note.host,
       to: `${baseTo}hosts/${note.host?.id}`,
-      icon: "i-lucide-server",
+      icon:
+        hostOS.find((o) => o.value === note.host?.os_type)?.icon ||
+        "i-lucide-server",
       label: note.host?.ip,
     },
     {

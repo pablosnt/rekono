@@ -13,11 +13,11 @@
     <template #metadata>
       <FindingsMetadataHost :host="path.port?.host" />
       <FindingsMetadataPort :port="path.port" />
-      <div v-if="path.type" class="flex items-center gap-2">
+      <div v-if="path.type" class="flex items-center gap-2 flex-wrap">
         <span class="text-muted">Type:</span>
         <span class="text-base">{{ path.type }}</span>
       </div>
-      <div v-if="path.status" class="flex items-center gap-2">
+      <div v-if="path.status" class="flex items-center gap-2 flex-wrap">
         <span class="text-muted">Status:</span>
         <span class="text-base">{{ path.status }}</span>
       </div>
