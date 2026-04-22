@@ -1,15 +1,17 @@
 <template>
   <FindingsSingle
-    v-if="osint"
+    :loading="loading"
     :icon="typeConfig?.icon"
     :api="api"
-    :title="osint.data"
+    :title="osint?.data || ''"
     :finding="osint"
     entity-name="OSINT"
     is-triageable
     fix-verb="Discard"
     :custom-dropdown-actions="
-      userStore.is_auditor && ['IP', 'Domain'].includes(osint.data_type)
+      userStore.is_auditor &&
+      osint &&
+      ['IP', 'Domain'].includes(osint.data_type)
         ? [getOSINTDropdownActions(osint, api)]
         : []
     "
@@ -39,14 +41,21 @@ const route = useRoute();
 const userStore = useUserStore();
 const osint = ref();
 const typeConfig = ref();
+const loading = ref(true);
 
 function fetch() {
-  api.get(`${route.params.osint_id}/`).then((response) => {
-    osint.value = response;
-    typeConfig.value = osintDataTypes.find(
-      (t) => t.value === osint.value.data_type,
-    );
-  });
+  loading.value = true;
+  api
+    .get(`${route.params.osint_id}/`)
+    .then((response) => {
+      osint.value = response;
+      typeConfig.value = osintDataTypes.find(
+        (t) => t.value === osint.value.data_type,
+      );
+    })
+    .finally(() => {
+      loading.value = false;
+    });
 }
 
 onMounted(fetch);

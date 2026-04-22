@@ -1,8 +1,8 @@
 <template>
   <FindingsSingle
-    v-if="technology"
+    :loading="loading"
     :api="api"
-    :title="technology.name"
+    :title="technology?.name || ''"
     :finding="technology"
     entity-name="Technology"
     is-asset
@@ -57,11 +57,16 @@ definePageMeta({ layout: "project" });
 const api = useApi("/api/technologies/");
 const route = useRoute();
 const technology = ref();
+const loading = ref(true);
 
 function fetch() {
+  loading.value = true;
   api
     .get(`${route.params.technology_id}/`)
-    .then((response) => (technology.value = response));
+    .then((response) => (technology.value = response))
+    .finally(() => {
+      loading.value = false;
+    });
 }
 
 onMounted(fetch);

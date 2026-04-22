@@ -1,8 +1,10 @@
 <template>
   <FindingsSingle
-    v-if="credential"
+    :loading="loading"
     :api="api"
-    :title="credential.username || credential.email || credential.secret"
+    :title="
+      credential?.username || credential?.email || credential?.secret || ''
+    "
     :finding="credential"
     entity-name="Credential"
     is-triageable
@@ -55,11 +57,16 @@ definePageMeta({ layout: "project" });
 const api = useApi("/api/credentials/");
 const route = useRoute();
 const credential = ref();
+const loading = ref(true);
 
 function fetch() {
+  loading.value = true;
   api
     .get(`${route.params.credential_id}/`)
-    .then((response) => (credential.value = response));
+    .then((response) => (credential.value = response))
+    .finally(() => {
+      loading.value = false;
+    });
 }
 
 onMounted(fetch);

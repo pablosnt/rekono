@@ -1,10 +1,10 @@
 <template>
   <FindingsSingle
-    v-if="host"
+    :loading="loading"
     :icon="osConfig?.icon || 'i-lucide-server'"
     :icon-color="osConfig?.color"
     :api="api"
-    :title="host.domain || host.ip"
+    :title="host?.domain || host?.ip || ''"
     :finding="host"
     entity-name="Host"
     is-asset
@@ -146,12 +146,19 @@ const route = useRoute();
 const host = ref();
 const osConfig = ref();
 const virusTotal = ref();
+const loading = ref(true);
 
 function fetch() {
-  api.get(`${route.params.host_id}/`).then((response) => {
-    host.value = response;
-    osConfig.value = hostOS.find((h) => h.value === host.value.os_type);
-  });
+  loading.value = true;
+  api
+    .get(`${route.params.host_id}/`)
+    .then((response) => {
+      host.value = response;
+      osConfig.value = hostOS.find((h) => h.value === host.value.os_type);
+    })
+    .finally(() => {
+      loading.value = false;
+    });
   useApi("/api/integrations/")
     .get("5/")
     .then((response) => {

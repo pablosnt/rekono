@@ -1,9 +1,9 @@
 <template>
   <FindingsSingle
-    v-if="path"
-    :icon="pathType.icon"
+    :loading="loading"
+    :icon="pathType?.icon"
     :api="api"
-    :title="path.path"
+    :title="path?.path || ''"
     :finding="path"
     entity-name="Path"
     is-asset
@@ -34,12 +34,19 @@ const api = useApi("/api/paths/");
 const route = useRoute();
 const path = ref();
 const pathType = ref();
+const loading = ref(true);
 
 function fetch() {
-  api.get(`${route.params.path_id}/`).then((response) => {
-    path.value = response;
-    pathType.value = pathTypes.find((t) => t.value === response.type);
-  });
+  loading.value = true;
+  api
+    .get(`${route.params.path_id}/`)
+    .then((response) => {
+      path.value = response;
+      pathType.value = pathTypes.find((t) => t.value === response.type);
+    })
+    .finally(() => {
+      loading.value = false;
+    });
 }
 
 onMounted(fetch);

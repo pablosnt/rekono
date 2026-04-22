@@ -1,9 +1,9 @@
 <template>
   <FindingsSingle
-    v-if="port"
-    :icon="getPortIcon(port.port, port.service)"
+    :loading="loading"
+    :icon="port ? getPortIcon(port.port, port.service) : undefined"
     :api="api"
-    :title="port.port.toString()"
+    :title="port?.port?.toString() || ''"
     :finding="port"
     entity-name="Port"
     is-asset
@@ -66,12 +66,19 @@ const api = useApi("/api/ports/");
 const route = useRoute();
 const port = ref();
 const portStatus = ref();
+const loading = ref(true);
 
 function fetch() {
-  api.get(`${route.params.port_id}/`).then((response) => {
-    port.value = response;
-    portStatus.value = portStatuses.find((s) => s.value === response.status);
-  });
+  loading.value = true;
+  api
+    .get(`${route.params.port_id}/`)
+    .then((response) => {
+      port.value = response;
+      portStatus.value = portStatuses.find((s) => s.value === response.status);
+    })
+    .finally(() => {
+      loading.value = false;
+    });
 }
 
 onMounted(fetch);
