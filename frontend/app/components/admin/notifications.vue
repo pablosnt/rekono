@@ -104,10 +104,15 @@
         :title="selectedTitle"
         @open="(open) => (openModal = open)"
         @submit="
-          (data) =>
-            selectedTitle === 'SMTP'
-              ? (smtpSettings = data)
-              : (telegramSettings = data)
+          (data) => {
+            if (selectedTitle === 'SMTP') {
+              smtpSettings = data;
+              integrations.updateSmtpSettings(data);
+            } else {
+              telegramSettings = data;
+              integrations.updateTelegramSettings(data);
+            }
+          }
         "
       >
         <template #before-close="{ loading }">
@@ -124,15 +129,17 @@
 <script setup lang="ts">
 import * as z from "zod";
 import { useUserStore } from "~/store/user";
+import { useIntegrationsStore } from "~/store/integrations";
 
 const smtpApi = useApi("/api/smtp/");
 const telegramApi = useApi("/api/telegram/settings/");
 const validation = useValidation();
 const userStore = useUserStore();
+const integrations = useIntegrationsStore();
 const loadingSmtp = ref(false);
 const loadingTelegram = ref(false);
 const openModal = ref(false);
-const smtpSettings = ref();
+const smtpSettings = ref(integrations.smtp);
 const smtpConfig = ref({
   entityName: "SMTP",
   editFormFields: [
@@ -183,7 +190,7 @@ const smtpConfig = ref({
   modalIcon: "i-lucide-mail",
   modalIconClass: "text-xl text-neutral",
 });
-const telegramSettings = ref();
+const telegramSettings = ref(integrations.telegram);
 const telegramConfig = ref({
   entityName: "Telegram",
   editFormFields: [

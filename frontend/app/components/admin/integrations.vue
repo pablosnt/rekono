@@ -63,12 +63,14 @@
 
 <script setup lang="ts">
 import type { CrudConfig } from "~/types/crud";
-import type { Integration } from "~/types/models";
+import type { DefectDojoSettings, Integration, VirusTotalSettings } from "~/types/models";
 import { useUserStore } from "~/store/user";
+import { useIntegrationsStore } from "~/store/integrations";
 import * as z from "zod";
 
 const toast = useToast();
 const userStore = useUserStore();
+const integrations = useIntegrationsStore();
 const validation = useValidation();
 const api = useApi("/api/integrations/");
 const openModal = ref(false);
@@ -235,6 +237,8 @@ function fetch() {
 
 function updateSettings(integrationId: number, data: Record<string, unknown>) {
   integrationsSettings.value[integrationId].item = data;
+  if (integrationId === 1) integrations.updateDefectDojoSettings(data as DefectDojoSettings);
+  else if (integrationId === 5) integrations.updateVirusTotalSettings(data as VirusTotalSettings);
   if (
     enableIfAvailable !== undefined &&
     enableIfAvailable.id === integrationId &&
@@ -265,6 +269,7 @@ function toggleIntegration(integration: Integration, enabled: boolean) {
   } else {
     api.update(`${integration.id}/`, { enabled: enabled }, {}).then(() => {
       integration.enabled = enabled;
+      integrations.updateIntegration(integration.id, { enabled: enabled });
       toast.add({
         title: integration.name,
         description: `${integration.name} integration has been ${enabled ? "enabled" : "disabled"}`,

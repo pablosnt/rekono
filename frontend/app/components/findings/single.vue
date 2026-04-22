@@ -41,18 +41,18 @@
                 />
                 <UDropdownMenu
                   v-if="
-                    (hacktricks &&
-                      hacktricks.enabled &&
+                    (integrations.hacktricks?.enabled &&
                       finding.hacktricks_link) ||
                     finding.reference ||
                     finding.defectdojo_id
                   "
                   :items="[
-                    ...(finding.hacktricks_link && hacktricks.enabled
+                    ...(finding.hacktricks_link &&
+                    integrations.hacktricks?.enabled
                       ? [
                           {
                             label: 'HackTricks',
-                            avatar: { src: hacktricks.icon },
+                            avatar: { src: integrations.hacktricks?.icon },
                             to: finding.hacktricks_link,
                             target: '_blank',
                           },
@@ -144,6 +144,7 @@
 
 <script setup lang="ts">
 import { useUserStore } from "~/store/user";
+import { useIntegrationsStore } from "~/store/integrations";
 import type { DropdownAction } from "~/types/crud";
 import type { Execution, Finding } from "~/types/models";
 
@@ -164,6 +165,7 @@ const props = defineProps<{
 defineEmits<{ update: [] }>();
 
 const userStore = useUserStore();
+const integrations = useIntegrationsStore();
 const unfixVerb = computed(() =>
   props.fixVerb === "Fix" ? "Reopen" : "Restore",
 );
@@ -171,7 +173,6 @@ const triageModalOpen = ref(false);
 const fixModalOpen = ref(false);
 const executions = ref();
 const refresh = ref();
-const hacktricks = ref();
 const dropdownActions = computed(() =>
   props.finding
     ? [
@@ -195,11 +196,7 @@ function processExecutions(items: Execution[]) {
   }
 }
 
-onMounted(() => {
-  useApi("/api/integrations/")
-    .get("3/")
-    .then((response) => (hacktricks.value = response));
-});
+onMounted(integrations.fetchHackTricks);
 
 onUnmounted(() => {
   if (refresh.value) clearTimeout(refresh.value);

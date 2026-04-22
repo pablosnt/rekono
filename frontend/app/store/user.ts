@@ -25,19 +25,13 @@ export const useUserStore = defineStore("user", {
       this.is_auditor = this.is_admin || this.isRole("auditor");
       this.fetchProfile();
     },
-    logout() {
-      this.user = null;
-      this.role = null;
-      this.is_admin = false;
-      this.is_auditor = false;
-    },
     check() {
       const tokens = useTokens();
       const jwt = tokens.get().access;
       if (jwt !== null && typeof jwt === "string" && this.user === null) {
         this.login(jwt);
       } else if (jwt === null && this.user !== null) {
-        this.logout();
+        this.$reset();
       }
     },
     refresh() {

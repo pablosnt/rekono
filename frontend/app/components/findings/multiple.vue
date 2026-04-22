@@ -53,6 +53,7 @@
 import { h } from "vue";
 import type { CrudConfig, DropdownAction } from "~/types/crud";
 import { useUserStore } from "~/store/user";
+import { useIntegrationsStore } from "~/store/integrations";
 import type { Finding } from "~/types/models";
 import { triageStatuses } from "~/constants";
 
@@ -76,6 +77,7 @@ const props = defineProps<{
 }>();
 
 const userStore = useUserStore();
+const integrations = useIntegrationsStore();
 const options = useOptions();
 const route = useRoute();
 const api = useApi(props.endpoint);
@@ -95,7 +97,6 @@ const unfixVerb = computed(() =>
 const targetOptions = ref();
 const taskOptions = ref();
 const toolOptions = ref();
-const hacktricks = ref();
 
 onMounted(() => {
   options.targets(
@@ -107,9 +108,7 @@ onMounted(() => {
     route.params.project_id ? { project: route.params.project_id } : undefined,
   );
   options.tools(toolOptions);
-  useApi("/api/integrations/")
-    .get("3/")
-    .then((response) => (hacktricks.value = response));
+  integrations.fetchHackTricks();
 });
 
 // todo: DefectDojo link (if integration enabled and available. Get defectdojo server from settings)
@@ -251,17 +250,17 @@ const config: CrudConfig<Finding> = reactive({
           }
         },
       },
-      ...(hacktricks.value?.enabled
+      ...(integrations.hacktricks?.enabled
         ? [
             {
               accessorKey: "hacktricks",
               header: "HackTricks",
-              avatar: { src: hacktricks.value.icon },
+              avatar: { src: integrations.hacktricks.icon },
               cell: ({ row }) =>
                 table.externalLinkCell(
                   row.original.hacktricks_link,
                   undefined,
-                  hacktricks.value.icon,
+                  integrations.hacktricks?.icon,
                 ),
             },
           ]

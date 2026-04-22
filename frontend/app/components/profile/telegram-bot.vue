@@ -16,7 +16,7 @@
         variant="ghost"
         color="neutral"
         size="xl"
-        :to="`https://t.me/${settings.bot}`"
+        :to="`https://t.me/${integrations.telegram.bot}`"
         target="_blank"
         external
       />
@@ -26,9 +26,9 @@
         <div class="flex flex-wrap justify-around">
           <UButton
             class="mt-2"
-            :label="`Go to @${settings.bot}`"
+            :label="`Go to @${integrations.telegram.bot}`"
             icon="i-simple-icons-telegram"
-            :to="`https://t.me/${settings.bot}`"
+            :to="`https://t.me/${integrations.telegram.bot}`"
             target="_blank"
             color="info"
             size="xl"
@@ -58,7 +58,7 @@
         <UAlert
           class="mb-10"
           color="info"
-          :description="`Go to @${settings.bot} and send the /start command`"
+          :description="`Go to @${integrations.telegram.bot} and send the /start command`"
         >
           <template #description>
             <p>
@@ -66,9 +66,9 @@
               <ULink
                 class="font-bold"
                 raw
-                :to="`https://t.me/${settings.bot}`"
+                :to="`https://t.me/${integrations.telegram.bot}`"
                 target="_blank"
-                >@{{ settings.bot }}</ULink
+                >@{{ integrations.telegram.bot }}</ULink
               >, send the
               <UBadge variant="subtle" color="neutral">/start</UBadge> command
               and paste here the token returned by the bot
@@ -87,7 +87,7 @@
           :disabled="!valid"
           :loading="loading"
           color="info"
-          :label="`Log in @${settings.bot}`"
+          :label="`Log in @${integrations.telegram.bot}`"
           block
           class="w-full mt-5"
           size="lg"
@@ -105,12 +105,10 @@
 <script setup lang="ts">
 import { useUserStore } from "~/store/user";
 import * as z from "zod";
-
-const props = defineProps<{
-  settings: Record<string, unknown>;
-}>();
+import { useIntegrationsStore } from "~/store/integrations";
 
 const api = useApi("/api/telegram/link/");
+const integrations = useIntegrationsStore();
 const validation = useValidation();
 const userStore = useUserStore();
 const loading = ref(false);
@@ -123,8 +121,8 @@ const config = ref({
       key: "otp",
       label: "Telegram token",
       type: "password",
-      placeholder: `Paste the token provided by @${props.settings.bot}`,
-      hint: `@${props.settings.bot}`,
+      placeholder: `Paste the token provided by @${integrations.telegram.bot}`,
+      hint: `@${integrations.telegram.bot}`,
       size: "xl",
       required: true,
       icon: "i-lucide-key",

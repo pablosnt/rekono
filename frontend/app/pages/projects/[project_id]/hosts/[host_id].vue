@@ -56,7 +56,7 @@
       <UPageCard
         v-if="
           (host.total_analysis > 0 || host.reputation !== 0) &&
-          virusTotal?.enabled
+          integrations.virustotal.integration?.enabled
         "
         title="Malware Analysis"
         variant="outline"
@@ -138,14 +138,15 @@
 
 <script setup lang="ts">
 import { hostOS } from "~/constants";
+import { useIntegrationsStore } from "~/store/integrations";
 
 definePageMeta({ layout: "project" });
 
 const api = useApi("/api/hosts/");
 const route = useRoute();
+const integrations = useIntegrationsStore();
 const host = ref();
 const osConfig = ref();
-const virusTotal = ref();
 const loading = ref(true);
 
 function fetch() {
@@ -159,12 +160,10 @@ function fetch() {
     .finally(() => {
       loading.value = false;
     });
-  useApi("/api/integrations/")
-    .get("5/")
-    .then((response) => {
-      virusTotal.value = response;
-    });
 }
 
-onMounted(fetch);
+onMounted(() => {
+  fetch();
+  integrations.fetchVirusTotal();
+});
 </script>

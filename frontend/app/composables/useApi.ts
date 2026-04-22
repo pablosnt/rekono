@@ -1,3 +1,4 @@
+import { useIntegrationsStore } from "~/store/integrations";
 import { useUserStore } from "~/store/user";
 
 export default function (
@@ -41,12 +42,9 @@ export default function (
 
   function forwardToLogin(): Promise {
     const tokens = useTokens();
-    const user = useUserStore();
     tokens.remove();
-    user.logout();
-    if (user.refreshing) {
-      user.refresh();
-    }
+    useUserStore().$reset();
+    useIntegrationsStore().$reset();
     return navigateTo("/login");
   }
 

@@ -29,7 +29,7 @@
           <ProfileApiTokens />
         </template>
         <template v-else-if="active === 'telegram-bot'">
-          <ProfileTelegramBot :settings="telegramSettings" />
+          <ProfileTelegramBot />
         </template>
         <template v-else-if="active === 'http-headers'">
           <HttpHeaders
@@ -47,11 +47,11 @@
 
 <script setup lang="ts">
 import { useUserStore } from "~/store/user";
+import { useIntegrationsStore } from "~/store/integrations";
 
 const userStore = useUserStore();
+const integrations = useIntegrationsStore();
 const api = useApi("/api/security/logout/", false);
-const telegramSettingsApi = useApi("/api/telegram/settings/");
-const telegramSettings = ref();
 const tokens = useTokens();
 const active = ref("profile");
 
@@ -70,7 +70,7 @@ const items = computed(() =>
   baseItems
     .filter(
       (item) =>
-        item.value !== "telegram-bot" || telegramSettings.value?.is_available,
+        item.value !== "telegram-bot" || integrations.telegram?.is_available,
     )
     .map((item) => ({
       ...item,
@@ -87,9 +87,5 @@ function logout() {
   return api.forwardToLogin();
 }
 
-onMounted(() => {
-  telegramSettingsApi.get("1/").then((response) => {
-    telegramSettings.value = response;
-  });
-});
+onMounted(integrations.fetchTelegram);
 </script>
