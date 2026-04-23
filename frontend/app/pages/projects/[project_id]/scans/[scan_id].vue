@@ -125,7 +125,6 @@
           >
             <UButton icon="i-lucide-link" variant="subtle" color="neutral" />
           </UDropdownMenu>
-          <!-- todo: Links (or custom finding's view) to OSINT, credentials, assets and vulnerabilities, at task and execution level -->
         </div>
       </div>
       <USeparator />
@@ -206,6 +205,14 @@
       </div>
     </UPageCard>
 
+    <FindingsCounters
+      v-if="task"
+      ref="findings"
+      :task-id="route.params.scan_id"
+      :project-id="route.params.project_id"
+      class="mb-8"
+    />
+
     <Executions ref="executions" :task="route.params.scan_id" />
 
     <CrudDeleteModal
@@ -254,6 +261,7 @@ const cancelOpen = ref(false);
 const reportOpen = ref(false);
 const task = ref<Task | null>();
 const executions = ref();
+const findings = ref();
 const notesButton = ref();
 const refresh = ref<ReturnType<typeof setTimeout> | null>(null);
 const toolOptions = ref<FilterOption[]>([]);
@@ -278,6 +286,7 @@ function processTask(data?: Task) {
     refresh.value = setTimeout(() => {
       fetchTask();
       executions.value?.page?.fetch();
+      findings.value?.fetch();
     }, 10000);
   }
 }

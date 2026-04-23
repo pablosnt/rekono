@@ -63,7 +63,11 @@
 
 <script setup lang="ts">
 import type { CrudConfig } from "~/types/crud";
-import type { DefectDojoSettings, Integration, VirusTotalSettings } from "~/types/models";
+import type {
+  DefectDojoSettings,
+  Integration,
+  VirusTotalSettings,
+} from "~/types/models";
 import { useUserStore } from "~/store/user";
 import { useIntegrationsStore } from "~/store/integrations";
 import * as z from "zod";
@@ -237,8 +241,10 @@ function fetch() {
 
 function updateSettings(integrationId: number, data: Record<string, unknown>) {
   integrationsSettings.value[integrationId].item = data;
-  if (integrationId === 1) integrations.updateDefectDojoSettings(data as DefectDojoSettings);
-  else if (integrationId === 5) integrations.updateVirusTotalSettings(data as VirusTotalSettings);
+  if (integrationId === 1)
+    integrations.updateDefectDojoSettings(data as DefectDojoSettings);
+  else if (integrationId === 5)
+    integrations.updateVirusTotalSettings(data as VirusTotalSettings);
   if (
     enableIfAvailable !== undefined &&
     enableIfAvailable.id === integrationId &&

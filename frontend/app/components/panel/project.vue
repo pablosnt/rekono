@@ -21,7 +21,7 @@
       </div>
     </template>
     <template #content-header>
-      <UBreadcrumb class="m-5" :items="breadcrumb">
+      <UBreadcrumb class="mt-5 ml-5" :items="breadcrumb">
         <template #dropdown="{ item }">
           <UDropdownMenu :items="item.children">
             <UButton

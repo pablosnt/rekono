@@ -12,5 +12,3 @@ export type * from "./targets";
 export type * from "./tools";
 export type * from "./users";
 export type * from "./wordlists";
-
-// todo: Improve model types accuracy

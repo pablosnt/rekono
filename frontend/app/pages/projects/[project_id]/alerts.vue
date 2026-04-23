@@ -13,7 +13,10 @@
         <template #leading>
           <UIcon
             :name="alertItems.find((alert) => alert.item === item.item)?.icon"
-            :class="`text-2xl ${item.enabled ? 'text-success' : 'text-primary'}`"
+            :class="[
+              'text-2xl',
+              item.enabled ? 'text-success' : 'text-primary',
+            ]"
           />
         </template>
         <UTooltip

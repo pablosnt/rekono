@@ -1,5 +1,4 @@
 <template>
-  <!-- todo: the addition of telegram section is moving everything, not only the menu items, but also the logout button in the bottom -->
   <div class="flex flex-1 h-full">
     <USidebar collapsible="none">
       <UNavigationMenu

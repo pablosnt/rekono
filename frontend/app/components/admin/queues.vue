@@ -25,7 +25,7 @@
           spotlight
         >
           <template #leading>
-            <UIcon :name="queue.icon" :class="`${queue.icon_class} text-xl`" />
+            <UIcon :name="queue.icon" :class="['text-xl', queue.icon_class]" />
           </template>
           <div class="absolute top-4 right-4">
             <UButton

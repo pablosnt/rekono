@@ -9,7 +9,7 @@
     class="mx-auto"
     @submit="save()"
   >
-    <div :class="`grid gap-4 ${gridCols}`">
+    <div :class="['grid gap-4', gridCols]">
       <template v-for="field in formFields" :key="field.key">
         <UFormField
           :name="field.key"

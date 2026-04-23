@@ -11,7 +11,10 @@
         />
         <h1
           v-if="!config.headerHideTitle"
-          :class="`${titleSizeClass ? titleSizeClass : 'text-2xl'} font-bold text-default truncate max-w-[300px] sm:max-w-none`"
+          :class="[
+            'font-bold text-default truncate max-w-[300px] sm:max-w-none',
+            titleSizeClass ? titleSizeClass : 'text-2xl',
+          ]"
         >
           {{ config.entityNamePlural }}
         </h1>
