@@ -1,5 +1,3 @@
-from datetime import date, timedelta
-
 from django.test import TestCase
 
 from findings.enums import HostOS, Severity
@@ -8,20 +6,6 @@ from tests.framework.cases import ApiTestCase
 from tests.framework.data import SetupProject
 
 # pytype: disable=wrong-arg-types
-
-
-class LatestHostsTest(ApiTest, TestCase):
-    endpoint = "/api/stats/latest-hosts/"
-    data = [SetupProject(2, 6)]
-    cases = [
-        ApiTestCase(["members"], expected=[{"id": value} for value in range(1, 6)]),
-        ApiTestCase(["not_members"]),
-        ApiTestCase(["members"], expected=[{"id": value} for value in range(1, 6)], endpoint="{endpoint}?project=1"),
-        ApiTestCase(["not_members"], endpoint="{endpoint}?project=1"),
-        ApiTestCase(["members"], expected=[{"id": value} for value in range(1, 6)], endpoint="{endpoint}?target=1"),
-        ApiTestCase(["members"], expected=[{"id": value} for value in range(7, 12)], endpoint="{endpoint}?target=2"),
-        ApiTestCase(["not_members"], endpoint="{endpoint}?target=2"),
-    ]
 
 
 class HostOSStatsTest(ApiTest, TestCase):
@@ -135,54 +119,6 @@ class HostVulnerabilitiesStatsTest(ApiTest, TestCase):
         ApiTestCase(
             ["members"],
             expected=[{"id": 2, "open": 24, "fixed": 17, "critical": 1, "high": 3, "medium": 8, "low": 12, "info": 0}],
-            endpoint="{endpoint}?target=2",
-        ),
-        ApiTestCase(["not_members"], endpoint="{endpoint}?target=1"),
-    ]
-
-
-class HostEvolutionStatsTest(ApiTest, TestCase):
-    endpoint = "/api/stats/host-evolution/"
-    data = [SetupProject(3, 3), SetupProject(2, 2), SetupProject()]
-    cases = [
-        ApiTestCase(
-            ["members"],
-            expected=[
-                {"date": str(date.today() - timedelta(days=11)), "count": 3},
-                {"date": str(date.today() - timedelta(days=12)), "count": 3},
-                {"date": str(date.today() - timedelta(days=13)), "count": 3},
-                {"date": str(date.today() - timedelta(days=21)), "count": 2},
-                {"date": str(date.today() - timedelta(days=22)), "count": 2},
-                {"date": str(date.today() - timedelta(days=31)), "count": 1},
-            ],
-        ),
-        ApiTestCase(["not_members"]),
-        ApiTestCase(
-            ["members"],
-            expected=[
-                {"date": str(date.today() - timedelta(days=11)), "count": 3},
-                {"date": str(date.today() - timedelta(days=12)), "count": 3},
-                {"date": str(date.today() - timedelta(days=13)), "count": 3},
-            ],
-            endpoint="{endpoint}?project=1",
-        ),
-        ApiTestCase(
-            ["members"],
-            expected=[
-                {"date": str(date.today() - timedelta(days=21)), "count": 2},
-                {"date": str(date.today() - timedelta(days=22)), "count": 2},
-            ],
-            endpoint="{endpoint}?project=2",
-        ),
-        ApiTestCase(["not_members"], endpoint="{endpoint}?project=1"),
-        ApiTestCase(
-            ["members"],
-            expected=[{"date": str(date.today() - timedelta(days=11)), "count": 3}],
-            endpoint="{endpoint}?target=1",
-        ),
-        ApiTestCase(
-            ["members"],
-            expected=[{"date": str(date.today() - timedelta(days=12)), "count": 3}],
             endpoint="{endpoint}?target=2",
         ),
         ApiTestCase(["not_members"], endpoint="{endpoint}?target=1"),

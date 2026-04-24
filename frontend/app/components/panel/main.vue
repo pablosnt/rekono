@@ -7,7 +7,7 @@
 <script setup lang="ts">
 import { useUserStore } from "~/store/user";
 
-const api = useApi();
+const api = useApi("/api/");
 const userStore = useUserStore();
 
 const items = ref([
@@ -133,7 +133,7 @@ onMounted(() => {
       ],
     });
   }
-  api.get("stats/top-projects/").then((response: object) => {
+  api.get("projects/top/").then((response: object) => {
     const children: NavigationItem[] = [];
     for (let i = 0; i < response.length; i++) {
       children.push({

@@ -5,11 +5,10 @@ analytics, host metrics, queue monitoring, trending data, and evolution analysis
 Supports filtering, pagination, and aggregation for comprehensive security reporting.
 """
 
-from django.db.models import Count, F, Func, Max, OuterRef, Q, Subquery
-from django.db.models.functions import TruncDate
+from django.db.models import Count, Exists, F, Func, Max, Min, OuterRef, Q, Subquery
+from django.db.models.functions import TruncMonth
 from django_rq.utils import get_statistics
 from drf_spectacular.utils import extend_schema
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK
@@ -21,34 +20,28 @@ from findings.filters import (
     ExploitFilter,
     HostFilter,
     OSINTFilter,
+    PathFilter,
     PortFilter,
     TechnologyFilter,
     VulnerabilityFilter,
 )
+from findings.framework.models import TriageFinding
 from findings.models import OSINT, Credential, Exploit, Host, Port, Technology, Vulnerability
-from findings.serializers import HostSerializer, VulnerabilitySerializer
-from framework.views import BaseViewSet
-from projects.filters import ProjectFilter
-from projects.models import Project
-from projects.serializers import ProjectSerializer
+from framework.views import StatsViewSet
 from security.authorization.permissions import IsAdmin
 from stats.serializers import (
-    EvolutionPerSeverityStatsSerializer,
-    EvolutionStatsSerializer,
+    ExploitCoverageStatsSerializer,
+    FindingsEvolutionStatsSerializer,
     HostStatsSerializer,
     HostVulnerabilitiesStatsSerializer,
     PortStatsSerializer,
     RQStatsSerializer,
     TechnologyStatsSerializer,
     TriagingStatsSerializer,
-    VulnerabilityCountPerIsFixedSerializer,
     VulnerabilityCVEStatsSerializer,
     VulnerabilityCWEStatsSerializer,
     VulnerabilitySeverityStatsSerializer,
 )
-from tasks.filters import TaskFilter
-from tasks.models import Task
-from tasks.serializers import TaskSerializer
 
 
 class RQStatsView(APIView):
@@ -100,150 +93,6 @@ class RQStatsView(APIView):
             ).data,
             status=HTTP_200_OK,
         )
-
-
-class StatsViewSet(BaseViewSet):
-    """Base viewset for statistics endpoints.
-
-    Provides common configuration for all statistics views including
-    authentication requirements and HTTP method restrictions.
-
-    Attributes:
-        ordering_fields: No custom ordering fields defined
-        http_method_names: Restricted to GET requests only
-        permission_classes: Requires authenticated users
-    """
-
-    ordering = []
-    http_method_names = ["get"]
-    permission_classes = [IsAuthenticated]
-
-
-class LatestViewSet(StatsViewSet):
-    """Base viewset for retrieving latest items statistics.
-
-    Extends StatsViewSet to provide functionality for fetching the most
-    recent items with a configurable limit and no pagination.
-
-    Attributes:
-        top_items: Maximum number of items to return (default: 5)
-        pagination_class: Pagination disabled for latest views
-    """
-
-    top_items = 5
-    pagination_class = None
-
-    def filter_queryset(self, queryset):
-        """Apply filtering and limit results to top items.
-
-        Args:
-            queryset: Base queryset to filter
-
-        Returns:
-            Filtered queryset limited to top_items count
-        """
-        queryset = super().filter_queryset(queryset)
-        return queryset[: self.top_items]
-
-
-class LatestTasksViewSet(LatestViewSet):
-    """ViewSet for retrieving latest task execution statistics.
-
-    Provides the most recently started tasks, excluding those without
-    a start time. Ordered by start time in descending order.
-
-    Attributes:
-        queryset: Tasks with non-null start times
-        ordering: Most recent tasks first
-        serializer_class: Task serialization
-        filterset_class: Task filtering capabilities
-    """
-
-    queryset = Task.objects.exclude(start=None)
-    ordering = ["-start"]
-    serializer_class = TaskSerializer
-    filterset_class = TaskFilter
-
-
-class LatestHostsViewSet(LatestViewSet):
-    """ViewSet for retrieving latest discovered host statistics.
-
-    Provides the most recently discovered hosts that are not fixed,
-    annotated with their latest execution timestamp.
-
-    Attributes:
-        queryset: Unfixed hosts with latest execution annotations
-        ordering: Most recently discovered hosts first
-        serializer_class: Host serialization
-        filterset_class: Host filtering capabilities
-    """
-
-    queryset = Host.objects.filter(is_fixed=False).annotate(latest=Max("executions__start"))
-    ordering = ["-latest"]
-    serializer_class = HostSerializer
-    filterset_class = HostFilter
-
-
-class LatestVulnerabilitiesViewSet(LatestViewSet):
-    """ViewSet for retrieving latest vulnerability statistics.
-
-    Provides the most recently discovered vulnerabilities that are unfixed,
-    not marked as false positives, and not created from user input, with
-    latest execution timestamps.
-
-    Attributes:
-        queryset: Active vulnerabilities with latest execution annotations
-        ordering: Most recently discovered vulnerabilities first
-        serializer_class: Vulnerability serialization
-        filterset_class: Vulnerability filtering capabilities
-    """
-
-    queryset = (
-        Vulnerability.objects.filter(is_fixed=False, created_from_user_input=False)
-        .exclude(triage_status=TriageStatus.FALSE_POSITIVE)
-        .annotate(latest=Max("executions__start"))
-    )
-    ordering = ["-latest"]
-    serializer_class = VulnerabilitySerializer
-    filterset_class = VulnerabilityFilter
-
-
-class TopProjectsViewSet(LatestViewSet):
-    """ViewSet for retrieving top project statistics by activity.
-
-    Provides projects ranked by security findings and activity metrics,
-    annotated with counts of targets, tasks, hosts, and vulnerabilities.
-
-    Attributes:
-        queryset: Projects with comprehensive activity annotations
-        ordering: Prioritizes projects with most vulnerabilities and activity
-        serializer_class: Project serialization
-        filterset_class: Project filtering capabilities
-    """
-
-    queryset = (
-        Project.objects.annotate(targets_count=Count("targets", distinct=True))
-        .annotate(tasks_count=Count("targets__tasks", distinct=True))
-        .annotate(
-            hosts_count=Count(
-                "targets__tasks__executions__host",
-                distinct=True,
-                filter=Q(targets__tasks__executions__host__is_fixed=False),
-            )
-        )
-        .annotate(
-            vulnerabilities_count=Count(
-                "targets__tasks__executions__vulnerability",
-                distinct=True,
-                filter=~Q(targets__tasks__executions__vulnerability__triage_status=TriageStatus.FALSE_POSITIVE)
-                & Q(targets__tasks__executions__vulnerability__is_fixed=False)
-                & Q(targets__tasks__executions__vulnerability__created_from_user_input=False),
-            )
-        )
-    )
-    ordering = ["-vulnerabilities_count", "-hosts_count", "-tasks_count", "-targets_count"]
-    serializer_class = ProjectSerializer
-    filterset_class = ProjectFilter
 
 
 class HostStatsViewSet(StatsViewSet):
@@ -321,30 +170,6 @@ class HostVulnerabilitiesStatsViewSet(StatsViewSet):
     filterset_class = HostFilter
 
 
-class HostEvolutionStatsViewSet(StatsViewSet):
-    """ViewSet for host discovery evolution statistics over time.
-
-    Provides time-series data showing host discovery trends by date
-    for tracking reconnaissance and asset discovery progress.
-
-    Attributes:
-        queryset: Hosts grouped by discovery date with counts
-        ordering: Most recent discoveries first
-        serializer_class: Evolution statistics serialization
-        filterset_class: Host filtering capabilities
-    """
-
-    queryset = (
-        Host.objects.prefetch_related("executions")
-        .annotate(date=TruncDate("executions__start"))
-        .values("date")
-        .annotate(count=Count("date"))
-    )
-    ordering = ["-date"]
-    serializer_class = EvolutionStatsSerializer
-    filterset_class = HostFilter
-
-
 class PortStatsViewSet(StatsViewSet):
     """ViewSet for network port and service statistics.
 
@@ -389,35 +214,6 @@ class TechnologyStatsViewSet(StatsViewSet):
     filterset_class = TechnologyFilter
 
 
-class VulnerabilityTrendingStatsViewSet(StatsViewSet):
-    """ViewSet for trending vulnerability statistics by CVE.
-
-    Provides statistics for vulnerabilities marked as trending, grouped by
-    CVE identifier with severity information and reference links.
-
-    Attributes:
-        queryset: Active trending vulnerabilities with CVE annotations
-        ordering: Most critical open vulnerabilities first
-        serializer_class: CVE vulnerability statistics serialization
-        filterset_class: Vulnerability filtering capabilities
-    """
-
-    queryset = (
-        Vulnerability.objects.filter(trending=True, created_from_user_input=False)
-        .exclude(triage_status=TriageStatus.FALSE_POSITIVE)
-        .exclude(triage_status=TriageStatus.WONT_FIX)
-        .exclude(cve=None)
-        .annotate(link=Max("reference"))
-        .annotate(severity_value=Max("severity"))
-        .values("cve", "severity_value", "link")
-        .annotate(open=Count("cve", filter=Q(is_fixed=False)))
-        .annotate(fixed=Count("cve", filter=Q(is_fixed=True)))
-    )
-    ordering = ["-open", "-severity_value", "cve"]
-    serializer_class = VulnerabilityCVEStatsSerializer
-    filterset_class = VulnerabilityFilter
-
-
 class VulnerabilityCVEStatsViewSet(StatsViewSet):
     """ViewSet for vulnerability statistics grouped by CVE identifier.
 
@@ -434,7 +230,6 @@ class VulnerabilityCVEStatsViewSet(StatsViewSet):
     queryset = (
         Vulnerability.objects.filter(created_from_user_input=False)
         .exclude(triage_status=TriageStatus.FALSE_POSITIVE)
-        .exclude(triage_status=TriageStatus.WONT_FIX)
         .exclude(cve=None)
         .annotate(link=Max("reference"))
         .annotate(severity_value=Max("severity"))
@@ -463,7 +258,6 @@ class VulnerabilityCWEStatsViewSet(StatsViewSet):
     queryset = (
         Vulnerability.objects.filter(created_from_user_input=False)
         .exclude(triage_status=TriageStatus.FALSE_POSITIVE)
-        .exclude(triage_status=TriageStatus.WONT_FIX)
         .exclude(cwe=None)
         .values("cwe")
         .annotate(open=Count("cwe", filter=Q(is_fixed=False)))
@@ -474,88 +268,7 @@ class VulnerabilityCWEStatsViewSet(StatsViewSet):
     filterset_class = VulnerabilityFilter
 
 
-class VulnerabilitySeverityStatsViewSet(StatsViewSet):
-    """ViewSet for vulnerability statistics grouped by severity level.
-
-    Provides vulnerability counts categorized by severity rating for
-    security prioritization and risk assessment analysis.
-
-    Attributes:
-        queryset: Active vulnerabilities grouped by severity with counts
-        ordering: Most severe vulnerabilities first
-        serializer_class: Severity vulnerability statistics serialization
-        filterset_class: Vulnerability filtering capabilities
-        pagination_class: Pagination disabled for complete severity breakdown
-    """
-
-    queryset = (
-        Vulnerability.objects.filter(created_from_user_input=False)
-        .exclude(triage_status=TriageStatus.FALSE_POSITIVE)
-        .exclude(triage_status=TriageStatus.WONT_FIX)
-        .values("severity")
-        .annotate(open=Count("severity", filter=Q(is_fixed=False)))
-        .annotate(fixed=Count("severity", filter=Q(is_fixed=True)))
-    )
-    ordering = ["-severity"]
-    serializer_class = VulnerabilitySeverityStatsSerializer
-    filterset_class = VulnerabilityFilter
-    pagination_class = None
-
-
-class VulnerabilityEvolutionStatsViewSet(StatsViewSet):
-    """ViewSet for vulnerability discovery evolution statistics over time.
-
-    Provides time-series data showing vulnerability discovery trends by date
-    and severity level for tracking security posture changes over time.
-
-    Attributes:
-        queryset: Vulnerabilities grouped by discovery date and severity with counts
-        ordering: Most recent and severe vulnerabilities first
-        serializer_class: Evolution per severity statistics serialization
-        filterset_class: Vulnerability filtering capabilities
-    """
-
-    queryset = (
-        Vulnerability.objects.filter(created_from_user_input=False)
-        .exclude(triage_status=TriageStatus.FALSE_POSITIVE)
-        .prefetch_related("executions")
-        .annotate(date=TruncDate("executions__start"))
-        .values("date", "severity")
-        .annotate(count=Count("date"))
-    )
-    ordering = ["-date", "-severity"]
-    serializer_class = EvolutionPerSeverityStatsSerializer
-    filterset_class = VulnerabilityFilter
-
-
 class VulnerabilityStatusStatsViewSet(StatsViewSet):
-    """ViewSet for vulnerability statistics grouped by fix status.
-
-    Provides high-level counts of vulnerabilities categorized by their
-    remediation status for overall security posture assessment.
-
-    Attributes:
-        queryset: Active vulnerabilities grouped by fix status with counts
-        ordering: Fixed status ordering (false first, then true)
-        serializer_class: Fix status statistics serialization
-        filterset_class: Vulnerability filtering capabilities
-        pagination_class: Pagination disabled for complete status overview
-    """
-
-    queryset = (
-        Vulnerability.objects.filter(created_from_user_input=False)
-        .exclude(triage_status=TriageStatus.FALSE_POSITIVE)
-        .exclude(triage_status=TriageStatus.WONT_FIX)
-        .values("is_fixed")
-        .annotate(count=Count("id", distinct=True))
-    )
-    ordering = ["is_fixed"]
-    serializer_class = VulnerabilityCountPerIsFixedSerializer
-    filterset_class = VulnerabilityFilter
-    pagination_class = None
-
-
-class VulnerabilityStatusPerServerityStatsViewSet(StatsViewSet):
     """ViewSet for vulnerability fix status statistics grouped by severity.
 
     Provides detailed breakdown of vulnerability remediation progress
@@ -581,6 +294,33 @@ class VulnerabilityStatusPerServerityStatsViewSet(StatsViewSet):
     serializer_class = VulnerabilitySeverityStatsSerializer
     filterset_class = VulnerabilityFilter
     pagination_class = None
+
+
+class VulnerabilityExploitCoverageStatsViewSet(StatsViewSet):
+    """ViewSet for vulnerability exploit coverage statistics.
+
+    Provides counts of open vulnerabilities grouped by whether public exploit
+    code is available, enabling prioritization of exploitable vulnerabilities.
+
+    Attributes:
+        queryset: Open vulnerabilities annotated with exploit availability
+        serializer_class: Exploit coverage statistics serialization
+        filterset_class: Vulnerability filtering capabilities
+        pagination_class: Pagination disabled for complete coverage overview
+        ordering: False (no exploits) first, then True (has exploits)
+    """
+
+    queryset = (
+        Vulnerability.objects.filter(is_fixed=False, created_from_user_input=False)
+        .exclude(triage_status=TriageStatus.FALSE_POSITIVE)
+        .annotate(has_exploits=Exists(Exploit.objects.filter(vulnerability=OuterRef("pk"))))
+        .values("has_exploits")
+        .annotate(count=Count("id", distinct=True))
+    )
+    serializer_class = ExploitCoverageStatsSerializer
+    filterset_class = VulnerabilityFilter
+    pagination_class = None
+    ordering = ["has_exploits"]
 
 
 class TriagingStatsViewSet(StatsViewSet):
@@ -643,3 +383,125 @@ class TriagingStatsViewSet(StatsViewSet):
                     count_per_status[item["triage_status"]] = item
         self.filterset_class = OSINTFilter
         return list(dict(sorted(count_per_status.items())).values())
+
+
+class MonthlyEvolutionViewSet(StatsViewSet):
+    """Generic base ViewSet for monthly finding discovery and fix evolution.
+
+    Provides per-month statistics on finding discoveries, fixes, and the
+    running total of active findings. Subclasses configure the finding model
+    via filterset_class. False positives are excluded automatically for
+    TriageFinding models.
+
+    Attributes:
+        serializer_class: Monthly evolution statistics serialization
+        pagination_class: Pagination disabled for complete time-series data
+        queryset: Set dynamically in get_queryset from filterset_class.Meta.model
+    """
+
+    serializer_class = FindingsEvolutionStatsSerializer
+    pagination_class = None
+    queryset = None
+
+    def get_queryset(self):
+        """Build model-specific queryset with appropriate triage filtering.
+
+        Derives the model from filterset_class.Meta.model and sets self.queryset
+        before calling super() so BaseViewSet can apply project membership filtering.
+        False positives are excluded when the model extends TriageFinding.
+
+        Returns:
+            QuerySet: Project-membership-filtered queryset for the finding model
+        """
+        model = self.filterset_class.Meta.model
+        self.queryset = model.objects.filter(created_from_user_input=False)
+        if issubclass(model, TriageFinding):
+            self.queryset = self.queryset.exclude(triage_status=TriageStatus.FALSE_POSITIVE)
+        return super().get_queryset()
+
+    def filter_queryset(self, queryset):
+        """Apply filters and compute monthly evolution statistics.
+
+        Runs two aggregation queries (discoveries by first execution month,
+        fixes by fixed_date month) then computes a running active total.
+
+        Args:
+            queryset: Project-membership-filtered queryset from get_queryset
+
+        Returns:
+            List of monthly data points with discovered, fixed, and active counts
+        """
+        queryset = super().filter_queryset(queryset)
+        discovered_by_month = {
+            item["month"]: item["discovered"]
+            for item in queryset.annotate(month=TruncMonth(Min("executions__start")))
+            .values("month")
+            .annotate(discovered=Count("id", distinct=True))
+            .order_by("month")
+            if item["month"]
+        }
+        fixed_by_month = {
+            item["month"]: item["fixed"]
+            for item in queryset.filter(is_fixed=True, fixed_date__isnull=False)
+            .annotate(month=TruncMonth("fixed_date"))
+            .values("month")
+            .annotate(fixed=Count("id", distinct=True))
+            .order_by("month")
+            if item["month"]
+        }
+        active = 0
+        result = []
+        for month in sorted(set(discovered_by_month) | set(fixed_by_month)):
+            discovered = discovered_by_month.get(month, 0)
+            fixed = fixed_by_month.get(month, 0)
+            active = max(0, active + discovered - fixed)
+            result.append({"month": month.date(), "discovered": discovered, "fixed": fixed, "active": active})
+        return result
+
+
+class OSINTEvolutionViewSet(MonthlyEvolutionViewSet):
+    """ViewSet for OSINT finding monthly evolution statistics."""
+
+    filterset_class = OSINTFilter
+
+
+class HostEvolutionViewSet(MonthlyEvolutionViewSet):
+    """ViewSet for host finding monthly evolution statistics."""
+
+    filterset_class = HostFilter
+
+
+class PortEvolutionViewSet(MonthlyEvolutionViewSet):
+    """ViewSet for port finding monthly evolution statistics."""
+
+    filterset_class = PortFilter
+
+
+class PathEvolutionViewSet(MonthlyEvolutionViewSet):
+    """ViewSet for path finding monthly evolution statistics."""
+
+    filterset_class = PathFilter
+
+
+class TechnologyEvolutionViewSet(MonthlyEvolutionViewSet):
+    """ViewSet for technology finding monthly evolution statistics."""
+
+    filterset_class = TechnologyFilter
+
+
+class CredentialEvolutionViewSet(MonthlyEvolutionViewSet):
+    """ViewSet for credential finding monthly evolution statistics."""
+
+    filterset_class = CredentialFilter
+
+
+class VulnerabilityEvolutionViewSet(MonthlyEvolutionViewSet):
+    """ViewSet for vulnerability finding monthly evolution statistics."""
+
+    filterset_class = VulnerabilityFilter
+
+
+class ExploitEvolutionViewSet(MonthlyEvolutionViewSet):
+    """ViewSet for exploit finding monthly evolution statistics."""
+
+    filterset_class = ExploitFilter

@@ -19,7 +19,7 @@ from rq.exceptions import NoSuchJobError
 
 from executions.enums import Status
 from executions.queues import ExecutionsQueue
-from framework.views import BaseViewSet
+from framework.views import BaseViewSet, LatestViewSet
 from rekono.settings import CONFIG
 from security.authorization.permissions import ProjectMemberPermission, RekonoModelPermission
 from tasks.filters import TaskFilter
@@ -153,3 +153,22 @@ class TaskViewSet(BaseViewSet):
         new_task.input_vulnerabilities.set(task.input_vulnerabilities.all())
         self.tasks_queue.enqueue(new_task)
         return Response(self.get_serializer(instance=new_task).data, status=status.HTTP_201_CREATED)
+
+
+class LatestTasksViewSet(LatestViewSet):
+    """ViewSet for retrieving latest task execution statistics.
+
+    Provides the most recently started tasks, excluding those without
+    a start time. Ordered by start time in descending order.
+
+    Attributes:
+        queryset: Tasks with non-null start times
+        ordering: Most recent tasks first
+        serializer_class: Task serialization
+        filterset_class: Task filtering capabilities
+    """
+
+    queryset = Task.objects.exclude(start=None)
+    ordering = ["-start"]
+    serializer_class = TaskSerializer
+    filterset_class = TaskFilter

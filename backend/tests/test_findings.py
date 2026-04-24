@@ -213,3 +213,50 @@ class ExploitTest(FindingTest, TestCase):
         "references": "https://www.exploit-db.com/exploits/1",
     }
     expected_string = f"10.10.10.10 - 80 - {TransportProtocol.TCP.value} - WordPress - 1.0.10 - Vulnerability 10 - CVE-2025-3010 - 1 - https://www.exploit-db.com/exploits/1"
+
+
+class LatestHostsTest(ApiTest, TestCase):
+    endpoint = "/api/hosts/latest/"
+    data = [SetupProject(2, 6)]
+    cases = [
+        ApiTestCase(["members"], expected=[{"id": value} for value in range(1, 6)]),
+        ApiTestCase(["not_members"]),
+        ApiTestCase(["members"], expected=[{"id": value} for value in range(1, 6)], endpoint="{endpoint}?project=1"),
+        ApiTestCase(["not_members"], endpoint="{endpoint}?project=1"),
+        ApiTestCase(["members"], expected=[{"id": value} for value in range(1, 6)], endpoint="{endpoint}?target=1"),
+        ApiTestCase(["members"], expected=[{"id": value} for value in range(7, 12)], endpoint="{endpoint}?target=2"),
+        ApiTestCase(["not_members"], endpoint="{endpoint}?target=2"),
+    ]
+
+
+class LatestVulnerabilitiesTest(ApiTest, TestCase):
+    endpoint = "/api/vulnerabilities/latest/"
+    data = [
+        SetupProject(1, 6),
+        SetupProject(vulnerabilities_fields=[{"is_fixed": True}, {"triage_status": TriageStatus.FALSE_POSITIVE}]),
+    ]
+    cases = [
+        ApiTestCase(
+            ["members"],
+            expected=[
+                {"id": value, "is_fixed": False, "triage_status": TriageStatus.UNTRIAGED.value} for value in range(1, 6)
+            ],
+        ),
+        ApiTestCase(["not_members"]),
+        ApiTestCase(
+            ["members"],
+            expected=[
+                {"id": value, "is_fixed": False, "triage_status": TriageStatus.UNTRIAGED.value} for value in range(1, 6)
+            ],
+            endpoint="{endpoint}?project=1",
+        ),
+        ApiTestCase(["members", "not_members"], endpoint="{endpoint}?project=2"),
+        ApiTestCase(
+            ["members"],
+            expected=[
+                {"id": value, "is_fixed": False, "triage_status": TriageStatus.UNTRIAGED.value} for value in range(1, 6)
+            ],
+            endpoint="{endpoint}?target=1",
+        ),
+        ApiTestCase(["members", "not_members"], endpoint="{endpoint}?target=2"),
+    ]

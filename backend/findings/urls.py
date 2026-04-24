@@ -10,6 +10,8 @@ from findings.views import (
     CredentialViewSet,
     ExploitViewSet,
     HostViewSet,
+    LatestHostsViewSet,
+    LatestVulnerabilitiesViewSet,
     OSINTViewSet,
     PathViewSet,
     PortViewSet,
@@ -18,6 +20,8 @@ from findings.views import (
 )
 
 router = SimpleRouter()
+router.register("hosts/latest", LatestHostsViewSet, basename="latest-hosts")
+router.register("vulnerabilities/latest", LatestVulnerabilitiesViewSet, basename="latest-vulnerabilities")
 router.register("osint", OSINTViewSet)
 router.register("hosts", HostViewSet)
 router.register("ports", PortViewSet)
