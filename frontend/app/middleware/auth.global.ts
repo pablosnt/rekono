@@ -4,8 +4,6 @@ import { useIntegrationsStore } from "~/store/integrations";
 export default defineNuxtRouteMiddleware((to, _) => {
   if (import.meta.server) return;
 
-  const publicRoutes = ["login", "signup", "reset-password", "mfa"];
-
   const userStore = useUserStore();
   userStore.check();
   const isAuthenticated = !!userStore.user;
@@ -17,10 +15,10 @@ export default defineNuxtRouteMiddleware((to, _) => {
     }
   }
 
-  const isPublicRoute = publicRoutes.includes(to.name as string);
-  if (!isPublicRoute && !isAuthenticated) {
+  const isPublic = isPublicRoute(to.name as string);
+  if (!isPublic && !isAuthenticated) {
     return navigateTo("/login");
-  } else if (isPublicRoute && isAuthenticated) {
+  } else if (isPublic && isAuthenticated) {
     return navigateTo("/");
   }
 });

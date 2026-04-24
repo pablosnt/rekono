@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-1 bg-neutral-200 dark:bg-neutral-950">
+  <div class="flex h-dvh bg-neutral-200 dark:bg-neutral-950">
     <USidebar
       v-model:open="open"
       collapsible="icon"
@@ -89,9 +89,9 @@
         </UModal>
       </template>
     </USidebar>
-    <div class="flex-1 flex flex-col overflow-hidden lg:m-4 lg:mt-8 lg:ms-0">
+    <div class="flex-1 flex flex-col min-h-0 lg:m-4 lg:mb-0 lg:ms-0">
       <div
-        class="flex-1 overflow-hidden bg-default lg:rounded-xl lg:shadow-sm lg:ring lg:ring-default"
+        class="flex-1 min-h-0 overflow-y-auto bg-default lg:rounded-xl lg:shadow-sm lg:ring lg:ring-default"
       >
         <div class="flex items-center gap-2 p-3 lg:hidden">
           <UButton
@@ -105,8 +105,9 @@
         <div class="p-10 mx-10">
           <slot />
         </div>
+        <Footer class="lg:hidden" />
       </div>
-      <Footer />
+      <Footer class="hidden lg:block" />
     </div>
   </div>
 </template>

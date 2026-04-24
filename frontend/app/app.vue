@@ -1,6 +1,7 @@
 <script setup lang="ts">
 const route = useRoute();
 const layout = computed(() => (route.meta.layout as string) ?? "default");
+const isPublic = computed(() => isPublicRoute(route.name as string));
 
 useHead({
   meta: [{ name: "viewport", content: "width=device-width, initial-scale=1" }],
@@ -29,7 +30,7 @@ useSeoMeta({
 <template>
   <UApp :toaster="{ position: 'bottom-right', expand: false }">
     <NuxtLayout :name="layout">
-      <UMain>
+      <UMain :class="{ '!min-h-0': !isPublic }">
         <NuxtPage />
       </UMain>
     </NuxtLayout>
