@@ -205,7 +205,7 @@
       </div>
     </UPageCard>
 
-    <FindingsCounters
+    <FindingsCounterAll
       v-if="task"
       ref="findings"
       :task-id="route.params.scan_id"
