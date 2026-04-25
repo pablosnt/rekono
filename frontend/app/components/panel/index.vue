@@ -1,5 +1,5 @@
 <template>
-  <div class="flex h-dvh bg-neutral-200 dark:bg-neutral-950">
+  <div class="flex h-dvh overflow-hidden bg-neutral-200 dark:bg-neutral-950">
     <USidebar
       v-model:open="open"
       collapsible="icon"
@@ -89,7 +89,7 @@
         </UModal>
       </template>
     </USidebar>
-    <div class="flex-1 flex flex-col min-h-0 lg:m-4 lg:mb-0 lg:ms-0">
+    <div class="flex-1 min-w-0 flex flex-col min-h-0 lg:m-4 lg:mb-0 lg:ms-0">
       <div
         class="flex-1 min-h-0 overflow-y-auto bg-default lg:rounded-xl lg:shadow-sm lg:ring lg:ring-default"
       >
