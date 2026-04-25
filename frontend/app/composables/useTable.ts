@@ -163,7 +163,7 @@ export default function () {
   function counterCell(count: number, link: string, internal: boolean = true) {
     return count === 0
       ? valueCell("0", "text-muted-foreground")
-      : linkCell(link, undefined, count.toString(), internal);
+      : linkCell(link, undefined, undefined, count.toString(), internal);
   }
 
   function linkCell(

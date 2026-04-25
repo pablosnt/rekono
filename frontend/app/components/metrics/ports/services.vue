@@ -35,7 +35,7 @@ const tooltipTriggers = {
   [Treemap.selectors.tile]: (node) => {
     const d = node.data?.datum;
     if (!d) return null;
-    return `<b>${d.count} ${d.service}</b> ${d.count === 1 ? "service" : "service"} found running on port <b>${d.port}/${d.protocol}</b>`;
+    return `${d.count} ${d.service} ${d.count === 1 ? "service" : "service"} running on port ${d.port}/${d.protocol}`;
   },
 };
 

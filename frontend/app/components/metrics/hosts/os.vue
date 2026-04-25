@@ -1,26 +1,32 @@
 <template>
   <UPageCard title="Hosts per OS" class="w-200" variant="outline">
     <div v-if="loading" class="flex items-center justify-center">
-      <UButton variant="ghost" loading  size="xl" />
+      <UButton variant="ghost" loading size="xl" />
     </div>
-    <VisSingleContainer
-      v-else-if="data.length"
-      :data="data"
-      :height="200"
-      class="flex-none"
-    >
-      <VisDonut
-        :value="(d) => d.count"
-        :color="(d) => d.color"
-        :arc-width="25"
+    <template v-else-if="data.length">
+      <VisBulletLegend
+        :items="legendItems"
+        :on-legend-item-click="onLegendItemClick"
       />
-      <VisTooltip :triggers="tooltipTriggers" />
-    </VisSingleContainer>
+      <VisSingleContainer :data="activeData" :height="200" class="flex-none">
+        <VisDonut
+          :value="(d) => d.count"
+          :color="(d) => d.color"
+          :arc-width="25"
+        />
+        <VisTooltip :triggers="tooltipTriggers" />
+      </VisSingleContainer>
+    </template>
   </UPageCard>
 </template>
 
 <script setup lang="ts">
-import { VisSingleContainer, VisDonut, VisTooltip } from "@unovis/vue";
+import {
+  VisSingleContainer,
+  VisDonut,
+  VisTooltip,
+  VisBulletLegend,
+} from "@unovis/vue";
 import { Donut } from "@unovis/ts";
 import { hostOS } from "~/constants";
 
@@ -30,6 +36,23 @@ const api = useApi("/api/stats/");
 const loading = ref(true);
 const data = ref([]);
 const total = ref(0);
+const inactive = ref<boolean[]>([]);
+
+const legendItems = computed(() =>
+  data.value.map((d, i) => ({
+    name: d.os_type,
+    color: d.color,
+    inactive: inactive.value[i],
+  })),
+);
+
+const onLegendItemClick = (_: unknown, i: number) => {
+  inactive.value = inactive.value.map((v, j) => (j === i ? !v : v));
+};
+
+const activeData = computed(() =>
+  data.value.filter((_, i) => !inactive.value[i]),
+);
 
 const tooltipTriggers = {
   [Donut.selectors.segment]: (d) =>
@@ -51,6 +74,7 @@ function fetch() {
         };
       });
       total.value = response.reduce((sum, d) => sum + d.count, 0);
+      inactive.value = data.value.map(() => false);
     })
     .finally(() => (loading.value = false));
 }
