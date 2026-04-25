@@ -41,7 +41,7 @@ function fetch() {
   counters.value.forEach((counter, index) => {
     api
       .list(
-        `${counter.label.toLowerCase()}/`,
+        `${counter.plural.toLowerCase()}/`,
         props.taskId
           ? { task: props.taskId }
           : props.projectId

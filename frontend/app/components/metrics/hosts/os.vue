@@ -1,21 +1,21 @@
 <template>
   <UPageCard title="Hosts per OS" class="w-200" variant="outline">
-    <!-- TODO: Loading status -->
-    <div
-      v-if="data.length"
-      class="flex flex-wrap justify-around items-center gap-6"
-    >
-      <VisSingleContainer :data="data" :height="200" class="flex-none">
-        <VisDonut
-          :value="(d) => d.count"
-          :color="(d) => d.color"
-          :arc-width="25"
-          :central-label="String(formatCount(total))"
-          :central-sub-label="total === 1 ? 'Host' : 'Hosts'"
-        />
-        <VisTooltip :triggers="tooltipTriggers" />
-      </VisSingleContainer>
+    <div v-if="loading" class="flex items-center justify-center">
+      <UButton variant="ghost" loading  size="xl" />
     </div>
+    <VisSingleContainer
+      v-else-if="data.length"
+      :data="data"
+      :height="200"
+      class="flex-none"
+    >
+      <VisDonut
+        :value="(d) => d.count"
+        :color="(d) => d.color"
+        :arc-width="25"
+      />
+      <VisTooltip :triggers="tooltipTriggers" />
+    </VisSingleContainer>
   </UPageCard>
 </template>
 
@@ -29,7 +29,7 @@ const props = defineProps<{ project?: string | number }>();
 const api = useApi("/api/stats/");
 const loading = ref(true);
 const data = ref([]);
-const total = ref(0)
+const total = ref(0);
 
 const tooltipTriggers = {
   [Donut.selectors.segment]: (d) =>
@@ -50,7 +50,7 @@ function fetch() {
           color: `var(--color-${os?.color ?? "neutral"}-500)`,
         };
       });
-      total.value = response.reduce((sum, d) => sum + d.count, 0)
+      total.value = response.reduce((sum, d) => sum + d.count, 0);
     })
     .finally(() => (loading.value = false));
 }

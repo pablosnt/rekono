@@ -8,9 +8,9 @@
       :on-legend-item-click="onLegendItemClick"
     />
   </div>
-  <!-- TODO: Loading status -->
-  <div class="overflow-x-auto">
-    <VisXYContainer v-if="data.length" :data="data" :height="500">
+  <div class="overflow-x-auto" :class="{ 'min-h-[500px]': loading }">
+    <UProgress v-if="loading" />
+    <VisXYContainer v-else-if="data.length" :data="data" :height="500">
       <VisLine :x="x" :y="activeY" :color="colors" />
       <VisAxis type="x" :tick-format="formatMonth" :tick-values="tickValues" />
       <VisAxis

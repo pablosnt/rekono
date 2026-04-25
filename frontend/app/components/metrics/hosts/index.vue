@@ -1,16 +1,14 @@
 <template>
-  <div class="pt-6 space-y-8">
-    <div class="flex flex-wrap items-start gap-6 w-full justify-around">
-      <div class="flex-1">
-        <FindingsCounterSingle
+  <div class="flex flex-col flex-wrap mt-6 space-y-6">
+    <div class="flex flex-row flex-wra items-start justify-around w-full">
+      <FindingsCounterSingle
+        class="w-60 h-40"
         :project-id="project"
         finding-name-plural="Hosts"
       />
-      </div>
-      <div class="flex-1">
-        <MetricsHostsOs :project="project" />
-      </div>
+      <MetricsHostsOs :project="project" />
     </div>
+    <MetricsHostsVulnerabilities :project="project" />
   </div>
 </template>
 

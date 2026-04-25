@@ -19,7 +19,7 @@ const tabs = [
   { label: "Others", slot: "others", icon: "i-lucide-scan" },
   { label: "Triage", slot: "triage", icon: "i-lucide-shield-check" },
 ];
-// TODO: Is it possible to get the number of findings from the parent panel? They already have the values for showing them in the panel
+// TODO: Is it possible to get the number of findings from the parent panel? They already have the values for showing them in the panel. Each tab is getting the number again to show the value
 // TODO: If no findings, empty message
 // TODO: Filter the tabs if no items from a given finding type
 </script>
