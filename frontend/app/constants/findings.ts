@@ -1,12 +1,12 @@
 export const findingTypes = [
-  { value: "OSINT", icon: "i-lucide-rss" },
-  { value: "Host", icon: "i-lucide-server" },
-  { value: "Port", icon: "i-lucide-ethernet-port" },
-  { value: "Path", icon: "i-lucide-slash" },
-  { value: "Technology", icon: "i-lucide-layers" },
-  { value: "Credential", icon: "i-lucide-key" },
-  { value: "Vulnerability", icon: "i-lucide-bug" },
-  { value: "Exploit", icon: "i-lucide-flame" },
+  { value: "OSINT", plural: "OSINT", icon: "i-lucide-rss", color: "primary" },
+  { value: "Host", plural: "Hosts", icon: "i-lucide-server", color: "slate" },
+  { value: "Port", plural: "Ports", icon: "i-lucide-ethernet-port", color: "cyan" },
+  { value: "Path", plural: "Paths", icon: "i-lucide-slash", color: "teal"},
+  { value: "Technology", plural: "Technologies", icon: "i-lucide-layers", color: "amber" },
+  { value: "Credential", plural: "Credentials", icon: "i-lucide-key", color: "orange" },
+  { value: "Vulnerability", plural: "Vulnerabilities", icon: "i-lucide-bug", color: "error" },
+  { value: "Exploit", plural: "Exploits", icon: "i-lucide-flame", color: "rose" },
 ];
 
 export const triageStatuses = [

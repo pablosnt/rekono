@@ -1,5 +1,10 @@
 <template>
-  <UFooter :ui="{ container: 'py-2 lg:py-2 lg:flex lg:items-center lg:justify-between lg:gap-x-3' }">
+  <UFooter
+    :ui="{
+      container:
+        'py-2 lg:py-2 lg:flex lg:items-center lg:justify-between lg:gap-x-3',
+    }"
+  >
     <template #left>
       <UNavigationMenu
         :items="[

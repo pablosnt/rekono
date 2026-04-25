@@ -1,6 +1,5 @@
 <template>
   <div>
-    <slot name="stats" />
     <CrudPage ref="page" :config="config">
       <template #actions="{ item }">
         <NotesDropdown
@@ -40,7 +39,7 @@
       :ui="{ content: 'sm:max-w-3xl sm:max-h-xl' }"
     >
       <template #body>
-        <FindingsMetricsExposure
+        <FindingsExposure
           :finding="selectedItem"
           :dates="selectedItemExposureWindow"
         />

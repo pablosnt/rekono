@@ -45,6 +45,8 @@
 </template>
 
 <script setup lang="ts">
+import { findingTypes } from '~/constants';
+
 const props = defineProps<{
   taskId?: string | number;
   projectId?: string | number;
@@ -53,80 +55,19 @@ const props = defineProps<{
 const api = useApi("/api/");
 const total = ref(0);
 const loading = ref(false);
-const counters = ref([
-  {
-    label: "OSINT",
-    icon: "i-lucide-rss",
-    iconClass: "text-primary",
-    iconBgClass: "bg-primary/10",
-    accentClass: "bg-primary",
+const counters = ref(findingTypes.map((ft) => {
+  const color = ['primary', 'error'].includes(ft.color) ? ft.color : `${ft.color}-${ft.color === 'rose' ? '600' : '500'}`
+  const iconClass = ft.color === 'slate' ? "text-slate-500 dark:text-slate-400" : `text-${color}`
+  return {
+    label: ft.plural,
+    icon: ft.icon,
+    iconClass: iconClass,
+    iconBgClass: `bg-${color}/10`,
+    accentClass: `bg-${color}`,
     count: 0,
-    loading: false,
-  },
-  {
-    label: "Hosts",
-    icon: "i-lucide-server",
-    iconClass: "text-slate-500 dark:text-slate-400",
-    iconBgClass: "bg-slate-500/10",
-    accentClass: "bg-slate-500",
-    count: 0,
-    loading: false,
-  },
-  {
-    label: "Ports",
-    icon: "i-lucide-ethernet-port",
-    iconClass: "text-cyan-500",
-    iconBgClass: "bg-cyan-500/10",
-    accentClass: "bg-cyan-500",
-    count: 0,
-    loading: false,
-  },
-  {
-    label: "Paths",
-    icon: "i-lucide-slash",
-    iconClass: "text-teal-500",
-    iconBgClass: "bg-teal-500/10",
-    accentClass: "bg-teal-500",
-    count: 0,
-    loading: false,
-  },
-  {
-    label: "Technologies",
-    icon: "i-lucide-layers",
-    iconClass: "text-amber-500",
-    iconBgClass: "bg-amber-500/10",
-    accentClass: "bg-amber-500",
-    count: 0,
-    loading: false,
-  },
-  {
-    label: "Credentials",
-    icon: "i-lucide-key",
-    iconClass: "text-orange-500",
-    iconBgClass: "bg-orange-500/10",
-    accentClass: "bg-orange-500",
-    count: 0,
-    loading: false,
-  },
-  {
-    label: "Vulnerabilities",
-    icon: "i-lucide-bug",
-    iconClass: "text-error",
-    iconBgClass: "bg-error/10",
-    accentClass: "bg-error",
-    count: 0,
-    loading: false,
-  },
-  {
-    label: "Exploits",
-    icon: "i-lucide-flame",
-    iconClass: "text-rose-600",
-    iconBgClass: "bg-rose-600/10",
-    accentClass: "bg-rose-600",
-    count: 0,
-    loading: false,
-  },
-]);
+    loading: false
+  }
+}))
 
 function fetch() {
   total.value = 0;

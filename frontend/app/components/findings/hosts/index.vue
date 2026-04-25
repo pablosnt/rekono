@@ -43,7 +43,7 @@
         </div>
       </template>
       <template #body>
-        <FindingsHostsMetricsLocations :hosts="[selectedHost]" />
+        <FindingsHostsLocations :hosts="[selectedHost]" />
       </template>
     </UModal>
     <UModal
@@ -53,7 +53,7 @@
       :ui="{ content: 'sm:max-w-3xl sm:max-h-xl' }"
     >
       <template #body>
-        <FindingsHostsMetricsMalware :host="selectedHost" />
+        <FindingsHostsMalware :host="selectedHost" />
       </template>
     </UModal>
   </div>

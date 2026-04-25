@@ -109,7 +109,7 @@
         variant="outline"
         :ui="{ root: 'overflow-x-auto' }"
       >
-        <FindingsMetricsExposure class="mb-3" :finding="finding" />
+        <FindingsExposure class="mb-3" :finding="finding" />
         <Executions
           ref="executions"
           :finding="finding"

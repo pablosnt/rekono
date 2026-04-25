@@ -87,7 +87,7 @@
             </p>
             <p class="text-muted mt-2">Reputation Score</p>
           </UCard>
-          <FindingsHostsMetricsMalware :host="host" />
+          <FindingsHostsMalware :host="host" />
         </div>
       </UPageCard>
       <div
@@ -121,7 +121,7 @@
               <span class="text-base">{{ host.city }}</span>
             </div>
           </template>
-          <FindingsHostsMetricsLocations :hosts="[host]" />
+          <FindingsHostsLocations :hosts="[host]" />
         </UPageCard>
       </div>
       <UPageCard
