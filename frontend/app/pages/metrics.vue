@@ -1,3 +1,3 @@
 <template>
-  <div />
+  <Metrics />
 </template>
