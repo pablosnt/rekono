@@ -1,6 +1,10 @@
 <template>
   <NuxtLink
-    :to="`/projects/${projectId}/${counter.plural.toLowerCase()}${taskId ? `?task=${taskId}` : ''}`"
+    :to="
+      projectId
+        ? `/projects/${projectId}/${counter.plural.toLowerCase()}${taskId ? `?task=${taskId}` : ''}`
+        : `/${counter.plural.toLowerCase()}`
+    "
     color="primary"
     class="group relative flex flex-col items-center gap-1.5 p-3 rounded-xl border border-default bg-elevated hover:bg-muted/50 hover:border-default/80 transition-all duration-200 text-center overflow-hidden"
   >

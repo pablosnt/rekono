@@ -3,6 +3,7 @@
 
 :root {
   --ui-orange: var(--color-orange-500);
+  --ui-amber: var(--color-amber-500);
 }
 
 @theme static {

@@ -1,8 +1,14 @@
 <template>
-  <VisBulletLegend
-    :items="legendItems"
-    :on-legend-item-click="onLegendItemClick"
-  />
+  <div
+    class="flex flex-col flex-wrap sm:flex-row sm:items-center sm:justify-between gap-2 mb-5"
+  >
+    <span class="text-2xl font-bold text-default">Findings Evolution</span>
+    <VisBulletLegend
+      :items="legendItems"
+      :on-legend-item-click="onLegendItemClick"
+    />
+  </div>
+  <!-- TODO: Loading status -->
   <div class="overflow-x-auto">
     <VisXYContainer v-if="data.length" :data="data" :height="500">
       <VisLine :x="x" :y="activeY" :color="colors" />

@@ -1,26 +1,25 @@
 <template>
   <div class="space-y-8">
-    <!-- TODO: Page title Metrics -->
-    <!-- TODO: Add Findings Evolution as title -->
     <MetricsEvolution :project="$route.params.project_id" />
-    <UTabs v-model="tab" :items="tabs" class="w-full">
-      <template #content="{ item }">{{ item.label }}<br />{{ tab }}</template>
+    <UTabs :items="tabs" class="w-full">
+      <template #hosts>
+        <MetricsHosts :project="$route.params.project_id" />
+      </template>
     </UTabs>
   </div>
 </template>
 
 <script setup lang="ts">
-const tab = ref("0");
 const tabs = [
-  { label: "Hosts", icon: "i-lucide-server" },
-  { label: "Ports", icon: "i-lucide-ethernet-port" },
-  { label: "Technologies", icon: "i-lucide-layers" },
-  { label: "Vulnerabilities", icon: "i-lucide-bug" },
-  { label: "Exploits", icon: "i-lucide-flame" },
-  { label: "Others", icon: "i-lucide-scan" },
-  { label: "Triage", icon: "i-lucide-shield-check" },
+  { label: "Hosts", slot: "hosts", icon: "i-lucide-server" },
+  { label: "Ports", slot: "ports", icon: "i-lucide-ethernet-port" },
+  { label: "Technologies", slot: "technologies", icon: "i-lucide-layers" },
+  { label: "Vulnerabilities", slot: "vulnerabilities", icon: "i-lucide-bug" },
+  { label: "Exploits", slot: "exploits", icon: "i-lucide-flame" },
+  { label: "Others", slot: "others", icon: "i-lucide-scan" },
+  { label: "Triage", slot: "triage", icon: "i-lucide-shield-check" },
 ];
-// TODO: When a metrics tab is selected, the line corresponding to that finding type must be bigger
+// TODO: Is it possible to get the number of findings from the parent panel? They already have the values for showing them in the panel
 // TODO: If no findings, empty message
-// TODO: Add links from the counters of each section to each finding page
+// TODO: Filter the tabs if no items from a given finding type
 </script>
