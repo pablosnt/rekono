@@ -184,7 +184,9 @@ class PortStatsViewSet(StatsViewSet):
     """
 
     queryset = (
-        Port.objects.filter(is_fixed=False).values("service", "protocol", "port").annotate(count=Count("service"))
+        Port.objects.filter(is_fixed=False)
+        .values("service", "protocol", "port")
+        .annotate(count=Count("id", distinct=True))
     )
     ordering = ["-count", "service", "port", "protocol"]
     serializer_class = PortStatsSerializer
