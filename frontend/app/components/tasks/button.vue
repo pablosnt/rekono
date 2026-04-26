@@ -3,7 +3,9 @@
     icon="i-lucide-play"
     color="success"
     variant="solid"
-    class="font-bold rounded-full"
+    :class="['font-bold', notRounded ? undefined : 'rounded-full']"
+    :label="label"
+    :size="size"
     @click="openModal = !openModal"
   />
   <CrudFormModal
@@ -53,6 +55,9 @@ const props = defineProps<{
   tool?: Tool;
   process?: Process;
   configuration?: Configuration;
+  label?: string;
+  notRounded?: boolean;
+  size?: string;
 }>();
 
 const api = useApi("/api/tasks/");
