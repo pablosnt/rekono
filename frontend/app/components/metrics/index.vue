@@ -12,6 +12,9 @@
         <template #technologies>
           <MetricsTechnologies :project="$route.params.project_id" />
         </template>
+        <template #others>
+          <MetricsOthers :project="$route.params.project_id" />
+        </template>
       </UTabs>
     </template>
     <div v-else class="flex justify-center items-center mt-10">
