@@ -1,6 +1,6 @@
 <template>
   <div class="flex flex-col flex-wrap mt-6 space-y-6">
-    <div class="flex flex-row flex-wra items-start justify-around w-full">
+    <div class="flex flex-row flex-wra items-start justify-between w-full">
       <FindingsCounterSingle
         class="w-60 h-40"
         :project-id="project"

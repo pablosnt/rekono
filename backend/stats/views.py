@@ -109,7 +109,7 @@ class HostStatsViewSet(StatsViewSet):
         pagination_class: Pagination disabled for complete statistics
     """
 
-    queryset = Host.objects.filter(is_fixed=False).values("os_type").annotate(count=Count("os_type"))
+    queryset = Host.objects.filter(is_fixed=False).values("os_type").annotate(count=Count("os_type", distinct=True))
     ordering = ["-count", "os_type"]
     serializer_class = HostStatsSerializer
     filterset_class = HostFilter
@@ -209,7 +209,7 @@ class TechnologyStatsViewSet(StatsViewSet):
     queryset = (
         Technology.objects.filter(is_fixed=False, created_from_user_input=False)
         .values("name")
-        .annotate(count=Count("name"))
+        .annotate(count=Count("name", distinct=True))
     )
     ordering = ["-count", "name"]
     serializer_class = TechnologyStatsSerializer
@@ -236,8 +236,8 @@ class VulnerabilityCVEStatsViewSet(StatsViewSet):
         .annotate(link=Max("reference"))
         .annotate(severity_value=Max("severity"))
         .values("cve", "severity_value", "link")
-        .annotate(open=Count("cve", filter=Q(is_fixed=False)))
-        .annotate(fixed=Count("cve", filter=Q(is_fixed=True)))
+        .annotate(open=Count("cve", distinct=True, filter=Q(is_fixed=False)))
+        .annotate(fixed=Count("cve", distinct=True, filter=Q(is_fixed=True)))
     )
     ordering = ["-open", "-severity_value", "cve"]
     serializer_class = VulnerabilityCVEStatsSerializer
@@ -262,8 +262,8 @@ class VulnerabilityCWEStatsViewSet(StatsViewSet):
         .exclude(triage_status=TriageStatus.FALSE_POSITIVE)
         .exclude(cwe=None)
         .values("cwe")
-        .annotate(open=Count("cwe", filter=Q(is_fixed=False)))
-        .annotate(fixed=Count("cwe", filter=Q(is_fixed=True)))
+        .annotate(open=Count("cwe", distinct=True, filter=Q(is_fixed=False)))
+        .annotate(fixed=Count("cwe", distinct=True, filter=Q(is_fixed=True)))
     )
     ordering = ["-open", "cwe"]
     serializer_class = VulnerabilityCWEStatsSerializer

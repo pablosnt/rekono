@@ -1,5 +1,5 @@
 <template>
-  <UPageCard title="Hosts per OS" class="w-200" variant="outline">
+  <UPageCard title="Hosts per OS" class="w-250" variant="outline">
     <div v-if="loading" class="flex items-center justify-center">
       <UButton variant="ghost" loading size="xl" />
     </div>
