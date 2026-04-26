@@ -70,7 +70,7 @@ const y = [
 ];
 const colors = [
   ...reversedSeverities.map((s) => {
-    let color =
+    const color =
       s.color === "neutral"
         ? "neutral-400"
         : s.color === "info"

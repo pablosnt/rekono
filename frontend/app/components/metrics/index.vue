@@ -8,6 +8,9 @@
       <template #ports>
         <MetricsPorts :project="$route.params.project_id" />
       </template>
+      <template #technologies>
+        <MetricsTechnologies :project="$route.params.project_id" />
+      </template>
     </UTabs>
   </div>
 </template>
