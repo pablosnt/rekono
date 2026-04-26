@@ -53,12 +53,31 @@ const items = ref([]);
 const projectEntity = ref({ name: "Rekono" });
 const mounting = ref(false);
 const allProjects = ref<Project[]>([]);
+const counts = reactive({
+  hosts: 0,
+  ports: 0,
+  technologies: 0,
+  paths: 0,
+  osint: 0,
+  credentials: 0,
+  vulnerabilities: 0,
+  exploits: 0,
+});
+provide("projectCounts", readonly(counts));
 
 function onProjectChange() {
   if (!route.params.project_id) {
     projectEntity.value = { name: "Rekono" };
     return;
   }
+  counts.hosts = 0;
+  counts.ports = 0;
+  counts.technologies = 0;
+  counts.paths = 0;
+  counts.osint = 0;
+  counts.credentials = 0;
+  counts.vulnerabilities = 0;
+  counts.exploits = 0;
   breadcrumb.value = [
     {
       label: "Home",
@@ -187,6 +206,7 @@ function onProjectChange() {
       if (items.value[3]?.children?.[0]) {
         items.value[3].children[0].badge = response.total.toString();
       }
+      counts.hosts = response.total;
     });
   api
     .list("ports/", { project: route.params.project_id }, false, 1, 1)
@@ -194,6 +214,7 @@ function onProjectChange() {
       if (items.value[3]?.children?.[1]) {
         items.value[3].children[1].badge = response.total.toString();
       }
+      counts.ports = response.total;
     });
   api
     .list("technologies/", { project: route.params.project_id }, false, 1, 1)
@@ -201,6 +222,7 @@ function onProjectChange() {
       if (items.value[3]?.children?.[2]) {
         items.value[3].children[2].badge = response.total.toString();
       }
+      counts.technologies = response.total;
     });
   api
     .list("paths/", { project: route.params.project_id }, false, 1, 1)
@@ -208,6 +230,7 @@ function onProjectChange() {
       if (items.value[3]?.children?.[3]) {
         items.value[3].children[3].badge = response.total.toString();
       }
+      counts.paths = response.total;
     });
   api
     .list("osint/", { project: route.params.project_id }, false, 1, 1)
@@ -215,6 +238,7 @@ function onProjectChange() {
       if (items.value[4]?.children?.[0]) {
         items.value[4].children[0].badge = response.total.toString();
       }
+      counts.osint = response.total;
     });
   api
     .list("credentials/", { project: route.params.project_id }, false, 1, 1)
@@ -222,6 +246,7 @@ function onProjectChange() {
       if (items.value[4]?.children?.[1]) {
         items.value[4].children[1].badge = response.total.toString();
       }
+      counts.credentials = response.total;
     });
   api
     .list("vulnerabilities/", { project: route.params.project_id }, false, 1, 1)
@@ -229,6 +254,7 @@ function onProjectChange() {
       if (items.value[4]?.children?.[2]) {
         items.value[4].children[2].badge = response.total.toString();
       }
+      counts.vulnerabilities = response.total;
     });
   api
     .list("exploits/", { project: route.params.project_id }, false, 1, 1)
@@ -236,6 +262,7 @@ function onProjectChange() {
       if (items.value[4]?.children?.[3]) {
         items.value[4].children[3].badge = response.total.toString();
       }
+      counts.exploits = response.total;
     });
 }
 

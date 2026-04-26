@@ -9,6 +9,17 @@ import { useUserStore } from "~/store/user";
 
 const api = useApi("/api/");
 const userStore = useUserStore();
+const counts = reactive({
+  hosts: 0,
+  ports: 0,
+  technologies: 0,
+  paths: 0,
+  osint: 0,
+  credentials: 0,
+  vulnerabilities: 0,
+  exploits: 0,
+});
+provide("projectCounts", readonly(counts));
 
 const items = ref([
   {
@@ -165,41 +176,49 @@ onMounted(() => {
     if (items.value[2]?.children?.[0]) {
       items.value[2].children[0].badge = response.total.toString();
     }
+    counts.hosts = response.total;
   });
   api.list("ports/", {}, false, 1, 1).then((response: object) => {
     if (items.value[2]?.children?.[1]) {
       items.value[2].children[1].badge = response.total.toString();
     }
+    counts.ports = response.total;
   });
   api.list("technologies/", {}, false, 1, 1).then((response: object) => {
     if (items.value[2]?.children?.[2]) {
       items.value[2].children[2].badge = response.total.toString();
     }
+    counts.technologies = response.total;
   });
   api.list("paths/", {}, false, 1, 1).then((response: object) => {
     if (items.value[2]?.children?.[3]) {
       items.value[2].children[3].badge = response.total.toString();
     }
+    counts.paths = response.total;
   });
   api.list("osint/", {}, false, 1, 1).then((response: object) => {
     if (items.value[3]?.children?.[0]) {
       items.value[3].children[0].badge = response.total.toString();
     }
+    counts.osint = response.total;
   });
   api.list("credentials/", {}, false, 1, 1).then((response: object) => {
     if (items.value[3]?.children?.[1]) {
       items.value[3].children[1].badge = response.total.toString();
     }
+    counts.credentials = response.total;
   });
   api.list("vulnerabilities/", {}, false, 1, 1).then((response: object) => {
     if (items.value[3]?.children?.[2]) {
       items.value[3].children[2].badge = response.total.toString();
     }
+    counts.vulnerabilities = response.total;
   });
   api.list("exploits/", {}, false, 1, 1).then((response: object) => {
     if (items.value[3]?.children?.[3]) {
       items.value[3].children[3].badge = response.total.toString();
     }
+    counts.exploits = response.total;
   });
 });
 </script>
