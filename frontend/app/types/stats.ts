@@ -4,3 +4,9 @@ export interface FindingsEvolution {
   fixed: number;
   active: number;
 }
+
+export interface BarSeries {
+  label: string;
+  color: string;
+  y: (d: unknown) => number;
+}
