@@ -33,7 +33,13 @@
       />
       <UButton
         :icon="
-          finding.is_fixed ? 'i-lucide-rotate-ccw' : 'i-lucide-check-circle'
+          fixVerb === 'Fix'
+            ? finding.is_fixed
+              ? 'i-lucide-rotate-ccw'
+              : 'i-lucide-check-circle'
+            : finding.is_fixed
+              ? 'i-lucide-eye'
+              : 'i-lucide-eye-off'
         "
         :color="
           fixVerb === 'Fix'

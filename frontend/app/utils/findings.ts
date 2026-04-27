@@ -14,8 +14,7 @@ export function getFindingDropdownActions(
   if (!finding.is_fixed) {
     actions.push({
       label: fixVerb,
-      icon:
-        fixVerb.value === "Fix" ? "i-lucide-check-circle" : "i-lucide-eye-off",
+      icon: fixVerb === "Fix" ? "i-lucide-check-circle" : "i-lucide-eye-off",
       color: fixVerb === "Fix" ? "success" : "neutral",
       onSelect: () => onFix(finding),
     });
