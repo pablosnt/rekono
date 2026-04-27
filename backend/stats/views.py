@@ -339,12 +339,7 @@ class TriagingStatsViewSet(StatsViewSet):
         pagination_class: Pagination disabled for complete triage overview
     """
 
-    queryset = (
-        OSINT.objects.filter(created_from_user_input=False)
-        .values("triage_status")
-        .annotate(open=Count("id", distinct=True, filter=Q(is_fixed=False)))
-        .annotate(fixed=Count("id", distinct=True, filter=Q(is_fixed=True)))
-    )
+    queryset = OSINT.objects.all()
     serializer_class = TriagingStatsSerializer
     filterset_class = OSINTFilter
     pagination_class = None
@@ -361,11 +356,11 @@ class TriagingStatsViewSet(StatsViewSet):
         Returns:
             List of aggregated triage status statistics across all finding types
         """
-        queryset = super().filter_queryset(queryset)
         # This is needed because it's not possible to union multiple querysets
         # and then get counts grouped by triage_status
-        count_per_status = {item["triage_status"]: item for item in queryset}
+        count_per_status = {}
         for filterset_class, model in [
+            (OSINTFilter, OSINT),
             (CredentialFilter, Credential),
             (VulnerabilityFilter, Vulnerability),
             (ExploitFilter, Exploit),
@@ -383,7 +378,6 @@ class TriagingStatsViewSet(StatsViewSet):
                         count_per_status[item["triage_status"]][field] += item[field]
                 else:
                     count_per_status[item["triage_status"]] = item
-        self.filterset_class = OSINTFilter
         return list(dict(sorted(count_per_status.items())).values())
 
 

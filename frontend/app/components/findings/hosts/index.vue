@@ -138,7 +138,7 @@ const columns = computed(() => [
         : table.valueCell(row.original.city);
     },
   },
-  ...(integrations.virusTotalEnabled
+  ...(integrations.virustotal.integration?.enabled
     ? [
         {
           accessorKey: "analysis",
