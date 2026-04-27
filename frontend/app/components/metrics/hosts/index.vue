@@ -6,7 +6,7 @@
         :project-id="project"
         finding-name-plural="Hosts"
       />
-      <MetricsHostsOs :project="project" />
+      <MetricsHostsOs :project="project" class="flex-1 ml-6" />
     </div>
     <MetricsHostsVulnerabilities :project="project" />
   </div>

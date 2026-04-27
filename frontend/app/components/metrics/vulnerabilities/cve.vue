@@ -1,30 +1,38 @@
 <template>
   <MetricsChartsBar
-    title="Hosts per Vulnerabilities"
+    title="CVEs"
     :loading="loading"
     :data="data"
     :series="series"
-    :y-label="(item) => item.domain || item.ip"
+    :y-label="(item) => item.cve"
     :tooltip="tooltip"
-    class="w-full"
+    :on-bar-click="
+      (d) =>
+        d.link
+          ? navigateTo(d.link, { external: true, open: { target: '_blank' } })
+          : null
+    "
+    class="w-48/100"
   />
 </template>
 
 <script setup lang="ts">
 import { severities } from "~/constants";
+import type { BarSeries } from "~/types/stats";
 
 const props = defineProps<{ project?: string | number }>();
 
 const api = useApi("/api/stats/");
 const loading = ref(true);
 const data = ref([]);
-const reversedSeverities = [...severities].reverse();
-const series = [
-  ...reversedSeverities.map((s) => ({
-    label: s.value,
-    color: `var(--color-${s.color === "info" ? "cyan-500" : `${s.color}-500`})`,
-    y: (d) => d[s.value.toLowerCase()] || 0,
-  })),
+const series: BarSeries[] = [
+  {
+    label: "Open",
+    color: (d) =>
+      `var(--color-${severities.find((s) => s.value === d.severity_value)?.color || "primary"}-500)`,
+    legendColor: "var(--color-primary-500)",
+    y: (d) => d.open,
+  },
   {
     label: "Fixed",
     color: "var(--color-success-500)",
@@ -33,15 +41,14 @@ const series = [
 ];
 const tooltip = (d) => {
   const count = Math.round(d.stacked[1] - d.stacked[0]);
-  const label = series[d.stackIndex]?.label.toLowerCase();
-  return `${count} ${label === "fixed" ? label : `open ${label}`} ${count === 1 ? "vulnerability" : "vulnerabilities"}`;
+  return `${count} ${series[d.stackIndex]?.label.toLowerCase()} ${count === 1 ? "vulnerability" : "vulnerabilities"}`;
 };
 
 function fetch() {
   loading.value = true;
   api
     .list(
-      "host-vulnerabilities/",
+      "vulnerability-cve/",
       props.project ? { project: props.project } : {},
       false,
       1,

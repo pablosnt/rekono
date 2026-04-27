@@ -1,5 +1,5 @@
 <template>
-  <UPageCard title="Hosts per OS" class="w-250" variant="outline">
+  <UPageCard title="Hosts per OS" class="w-full" variant="outline">
     <div v-if="loading" class="flex items-center justify-center">
       <UButton variant="ghost" loading size="xl" />
     </div>
@@ -65,12 +65,10 @@ function fetch() {
     .get(`host-os/${props.project ? `?project=${props.project}` : ""}`)
     .then((response) => {
       data.value = response.map((item) => {
-        const os = hostOS.find((o) => o.value === item.os_type);
         return {
           os_type: item.os_type,
           count: item.count,
-          icon: os?.icon ?? "i-lucide-server",
-          color: `var(--color-${os?.color ?? "neutral"}-500)`,
+          color: `var(--color-${hostOS.find((o) => o.value === item.os_type)?.color ?? "neutral"}-500)`,
         };
       });
       total.value = response.reduce((sum, d) => sum + d.count, 0);

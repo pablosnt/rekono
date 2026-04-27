@@ -12,6 +12,9 @@
         <template #technologies>
           <MetricsTechnologies :project="$route.params.project_id" />
         </template>
+        <template #vulnerabilities>
+          <MetricsVulnerabilities :project="$route.params.project_id" />
+        </template>
         <template #others>
           <MetricsOthers :project="$route.params.project_id" />
         </template>

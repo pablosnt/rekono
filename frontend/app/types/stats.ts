@@ -7,6 +7,7 @@ export interface FindingsEvolution {
 
 export interface BarSeries {
   label: string;
-  color: string;
+  color: string | ((d: unknown) => string);
+  legendColor?: string;
   y: (d: unknown) => number;
 }
