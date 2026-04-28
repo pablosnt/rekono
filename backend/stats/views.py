@@ -393,11 +393,13 @@ class MonthlyEvolutionViewSet(StatsViewSet):
         serializer_class: Monthly evolution statistics serialization
         pagination_class: Pagination disabled for complete time-series data
         queryset: Set dynamically in get_queryset from filterset_class.Meta.model
+        max_months: Maximum number of months returned, capped at 10 years
     """
 
     serializer_class = FindingsEvolutionStatsSerializer
     pagination_class = None
     queryset = None
+    max_months = 120  # 10 years
 
     def get_queryset(self):
         """Build model-specific queryset with appropriate triage filtering.
@@ -425,7 +427,8 @@ class MonthlyEvolutionViewSet(StatsViewSet):
             queryset: Project-membership-filtered queryset from get_queryset
 
         Returns:
-            List of monthly data points with discovered, fixed, and active counts
+            List of the most recent monthly data points (up to max_months) with
+            discovered, fixed, and active counts
         """
         queryset = super().filter_queryset(queryset)
         discovered_by_month = {
@@ -452,7 +455,7 @@ class MonthlyEvolutionViewSet(StatsViewSet):
             fixed = fixed_by_month.get(month, 0)
             active = max(0, active + discovered - fixed)
             result.append({"month": month.date(), "discovered": discovered, "fixed": fixed, "active": active})
-        return result
+        return result[-self.max_months :]
 
 
 class OSINTEvolutionViewSet(MonthlyEvolutionViewSet):
