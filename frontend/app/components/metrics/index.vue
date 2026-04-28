@@ -58,33 +58,49 @@
 <script setup lang="ts">
 import { useUserStore } from "~/store/user";
 
+const api = useApi();
+const route = useRoute();
 const userStore = useUserStore();
-const counts = inject(
-  "projectCounts",
-  reactive({
-    hosts: 0,
-    ports: 0,
-    technologies: 0,
-    paths: 0,
-    osint: 0,
-    credentials: 0,
-    vulnerabilities: 0,
-    exploits: 0,
-  }),
+const counts = reactive({
+  hosts: { value: 0, loading: true },
+  ports: { value: 0, loading: true },
+  technologies: { value: 0, loading: true },
+  paths: { value: 0, loading: true },
+  osint: { value: 0, loading: true },
+  credentials: { value: 0, loading: true },
+  vulnerabilities: { value: 0, loading: true },
+  exploits: { value: 0, loading: true },
+});
+const hasFindings = computed(() =>
+  Object.values(counts).some((v) => v.value > 0 || v.loading),
 );
-const hasFindings = computed(() => Object.values(counts).some((v) => v > 0));
 const tabCountMap: Record<string, () => number> = {
-  hosts: () => counts.hosts,
-  ports: () => counts.ports,
-  technologies: () => counts.technologies,
-  vulnerabilities: () => counts.vulnerabilities,
-  exploits: () => counts.exploits,
-  others: () => counts.osint + counts.paths + counts.credentials,
+  hosts: () => counts.hosts.value,
+  ports: () => counts.ports.value,
+  technologies: () => counts.technologies.value,
+  vulnerabilities: () => counts.vulnerabilities.value,
+  exploits: () => counts.exploits.value,
+  others: () =>
+    counts.osint.value + counts.paths.value + counts.credentials.value,
   triage: () =>
-    counts.osint +
-    counts.credentials +
-    counts.vulnerabilities +
-    counts.exploits,
+    counts.osint.value +
+    counts.credentials.value +
+    counts.vulnerabilities.value +
+    counts.exploits.value,
+};
+const tabLoadingMap = {
+  hosts: () => counts.hosts.loading,
+  ports: () => counts.ports.loading,
+  technologies: () => counts.technologies.loading,
+  vulnerabilities: () => counts.vulnerabilities.loading,
+  exploits: () => counts.exploits.loading,
+  others: () =>
+    counts.osint.loading && counts.paths.loading && counts.credentials.loading,
+  triage: () =>
+    counts.osint.loading &&
+    counts.credentials.loading &&
+    counts.vulnerabilities.loading &&
+    counts.exploits.loading,
 };
 const allTabs = [
   { label: "Hosts", slot: "hosts", icon: "i-lucide-server" },
@@ -96,6 +112,62 @@ const allTabs = [
   { label: "Triage", slot: "triage", icon: "i-lucide-shield-check" },
 ];
 const tabs = computed(() =>
-  allTabs.filter((tab) => tabCountMap[tab.slot]() > 0),
+  allTabs.filter(
+    (tab) => tabCountMap[tab.slot]() > 0 || tabLoadingMap[tab.slot](),
+  ),
 );
+
+onMounted(() => {
+  const params = route.params.project_id
+    ? { project: route.params.project_id }
+    : {};
+  api
+    .list("hosts/", params, false, 1, 1)
+    .then((r) => {
+      counts.hosts.value = r.total;
+    })
+    .finally(() => (counts.hosts.loading = false));
+  api
+    .list("ports/", params, false, 1, 1)
+    .then((r) => {
+      counts.ports.value = r.total;
+    })
+    .finally(() => (counts.ports.loading = false));
+  api
+    .list("technologies/", params, false, 1, 1)
+    .then((r) => {
+      counts.technologies.value = r.total;
+    })
+    .finally(() => (counts.technologies.loading = false));
+  api
+    .list("paths/", params, false, 1, 1)
+    .then((r) => {
+      counts.paths.value = r.total;
+    })
+    .finally(() => (counts.paths.loading = false));
+  api
+    .list("osint/", params, false, 1, 1)
+    .then((r) => {
+      counts.osint.value = r.total;
+    })
+    .finally(() => (counts.osint.loading = false));
+  api
+    .list("credentials/", params, false, 1, 1)
+    .then((r) => {
+      counts.credentials.value = r.total;
+    })
+    .finally(() => (counts.credentials.loading = false));
+  api
+    .list("vulnerabilities/", params, false, 1, 1)
+    .then((r) => {
+      counts.vulnerabilities.value = r.total;
+    })
+    .finally(() => (counts.vulnerabilities.loading = false));
+  api
+    .list("exploits/", params, false, 1, 1)
+    .then((r) => {
+      counts.exploits.value = r.total;
+    })
+    .finally(() => (counts.exploits.loading = false));
+});
 </script>

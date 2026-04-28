@@ -9,18 +9,6 @@ import { useUserStore } from "~/store/user";
 
 const api = useApi("/api/");
 const userStore = useUserStore();
-const counts = reactive({
-  hosts: 0,
-  ports: 0,
-  technologies: 0,
-  paths: 0,
-  osint: 0,
-  credentials: 0,
-  vulnerabilities: 0,
-  exploits: 0,
-});
-provide("projectCounts", readonly(counts));
-
 const items = ref([
   {
     label: "Home",
@@ -156,7 +144,7 @@ onMounted(() => {
     if (children.length > 0) {
       api.list("projects/", {}, false, 1, 1).then((response: object) => {
         if (items.value[1]) {
-          items.value[1].badge = response.total.toString();
+          items.value[1].badge = formatCount(response.total);
           if (response.total > children.length) {
             children.push({
               label: "Show all",
@@ -172,53 +160,58 @@ onMounted(() => {
       }
     }
   });
-  api.list("hosts/", {}, false, 1, 1).then((response: object) => {
+  const openFindings = { is_fixed: false };
+  const activeFindings = {
+    triage_status__in: "True Positive,Untriaged",
+    is_fixed: false,
+  };
+  api.list("hosts/", openFindings, false, 1, 1).then((response: object) => {
     if (items.value[2]?.children?.[0]) {
-      items.value[2].children[0].badge = response.total.toString();
+      items.value[2].children[0].badge = formatCount(response.total);
     }
-    counts.hosts = response.total;
   });
-  api.list("ports/", {}, false, 1, 1).then((response: object) => {
+  api.list("ports/", openFindings, false, 1, 1).then((response: object) => {
     if (items.value[2]?.children?.[1]) {
-      items.value[2].children[1].badge = response.total.toString();
+      items.value[2].children[1].badge = formatCount(response.total);
     }
-    counts.ports = response.total;
   });
-  api.list("technologies/", {}, false, 1, 1).then((response: object) => {
-    if (items.value[2]?.children?.[2]) {
-      items.value[2].children[2].badge = response.total.toString();
-    }
-    counts.technologies = response.total;
-  });
-  api.list("paths/", {}, false, 1, 1).then((response: object) => {
+  api
+    .list("technologies/", openFindings, false, 1, 1)
+    .then((response: object) => {
+      if (items.value[2]?.children?.[2]) {
+        items.value[2].children[2].badge = formatCount(response.total);
+      }
+    });
+  api.list("paths/", openFindings, false, 1, 1).then((response: object) => {
     if (items.value[2]?.children?.[3]) {
-      items.value[2].children[3].badge = response.total.toString();
+      items.value[2].children[3].badge = formatCount(response.total);
     }
-    counts.paths = response.total;
   });
-  api.list("osint/", {}, false, 1, 1).then((response: object) => {
+  api.list("osint/", activeFindings, false, 1, 1).then((response: object) => {
     if (items.value[3]?.children?.[0]) {
-      items.value[3].children[0].badge = response.total.toString();
+      items.value[3].children[0].badge = formatCount(response.total);
     }
-    counts.osint = response.total;
   });
-  api.list("credentials/", {}, false, 1, 1).then((response: object) => {
-    if (items.value[3]?.children?.[1]) {
-      items.value[3].children[1].badge = response.total.toString();
-    }
-    counts.credentials = response.total;
-  });
-  api.list("vulnerabilities/", {}, false, 1, 1).then((response: object) => {
-    if (items.value[3]?.children?.[2]) {
-      items.value[3].children[2].badge = response.total.toString();
-    }
-    counts.vulnerabilities = response.total;
-  });
-  api.list("exploits/", {}, false, 1, 1).then((response: object) => {
-    if (items.value[3]?.children?.[3]) {
-      items.value[3].children[3].badge = response.total.toString();
-    }
-    counts.exploits = response.total;
-  });
+  api
+    .list("credentials/", activeFindings, false, 1, 1)
+    .then((response: object) => {
+      if (items.value[3]?.children?.[1]) {
+        items.value[3].children[1].badge = formatCount(response.total);
+      }
+    });
+  api
+    .list("vulnerabilities/", activeFindings, false, 1, 1)
+    .then((response: object) => {
+      if (items.value[3]?.children?.[2]) {
+        items.value[3].children[2].badge = formatCount(response.total);
+      }
+    });
+  api
+    .list("exploits/", activeFindings, false, 1, 1)
+    .then((response: object) => {
+      if (items.value[3]?.children?.[3]) {
+        items.value[3].children[3].badge = formatCount(response.total);
+      }
+    });
 });
 </script>
