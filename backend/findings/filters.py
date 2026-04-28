@@ -75,6 +75,8 @@ class HostFilter(FindingFilter):
             "os_type": ["exact"],
             "country": ["exact", "icontains"],
             "city": ["exact", "icontains"],
+            "latitude": ["isnull"],
+            "longitude": ["isnull"],
         }
 
 

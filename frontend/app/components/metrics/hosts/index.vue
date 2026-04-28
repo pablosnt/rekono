@@ -8,6 +8,7 @@
       />
       <MetricsHostsOs :project="project" class="flex-1 ml-6" />
     </div>
+    <MetricsHostsLocations :project="project" />
     <MetricsHostsVulnerabilities :project="project" />
   </div>
 </template>
