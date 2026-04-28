@@ -21,6 +21,9 @@
         <template #others>
           <MetricsOthers :project="$route.params.project_id" />
         </template>
+        <template #triage>
+          <MetricsTriage :project="$route.params.project_id" />
+        </template>
       </UTabs>
     </template>
     <div v-else class="flex justify-center items-center mt-10">
