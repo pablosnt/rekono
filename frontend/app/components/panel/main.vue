@@ -116,7 +116,7 @@ function loadBadges() {
   const openFindings = { is_fixed: false };
   const activeFindings = {
     triage_status__in: "True Positive,Untriaged",
-    is_fixed: false,
+    ...openFindings,
   };
   api.list("hosts/", openFindings, false, 1, 1).then((response: object) => {
     if (items.value[2]?.children?.[0]) {

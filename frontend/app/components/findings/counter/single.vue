@@ -12,6 +12,8 @@ import { findingTypes } from "~/constants";
 const props = defineProps<{
   taskId?: string | number;
   projectId?: string | number;
+  onlyActive?: boolean;
+  isTriageable?: boolean;
   findingNamePlural: string;
 }>();
 
@@ -21,6 +23,16 @@ const loading = ref(false);
 const findingType = ref(
   findingTypes.find((ft) => ft.plural === props.findingNamePlural) ?? {},
 );
+const openFindings = { is_fixed: false };
+const activeFindings = {
+  triage_status__in: "True Positive,Untriaged",
+  ...openFindings,
+};
+const defaultFilters = props.onlyActive
+  ? props.isTriageable
+    ? activeFindings
+    : openFindings
+  : {};
 
 function fetch() {
   total.value = 0;
@@ -29,10 +41,10 @@ function fetch() {
     .list(
       props.findingNamePlural.toLowerCase(),
       props.taskId
-        ? { task: props.taskId }
+        ? { task: props.taskId, ...defaultFilters }
         : props.projectId
-          ? { project: props.projectId }
-          : {},
+          ? { project: props.projectId, ...defaultFilters }
+          : defaultFilters,
       false,
       1,
       1,

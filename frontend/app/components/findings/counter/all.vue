@@ -19,6 +19,8 @@ import { findingTypes } from "~/constants";
 const props = defineProps<{
   taskId?: string | number;
   projectId?: string | number;
+  onlyActive?: boolean;
+  isTriageable?: boolean;
 }>();
 
 const api = useApi("/api/");
@@ -31,6 +33,16 @@ const counters = ref(
     loading: false,
   })),
 );
+const openFindings = { is_fixed: false };
+const activeFindings = {
+  triage_status__in: "True Positive,Untriaged",
+  ...openFindings,
+};
+const defaultFilters = props.onlyActive
+  ? props.isTriageable
+    ? activeFindings
+    : openFindings
+  : {};
 
 function fetch() {
   total.value = 0;
@@ -43,10 +55,10 @@ function fetch() {
       .list(
         `${counter.plural.toLowerCase()}/`,
         props.taskId
-          ? { task: props.taskId }
+          ? { task: props.taskId, ...defaultFilters }
           : props.projectId
-            ? { project: props.projectId }
-            : {},
+            ? { project: props.projectId, ...defaultFilters }
+            : defaultFilters,
         false,
         1,
         1,

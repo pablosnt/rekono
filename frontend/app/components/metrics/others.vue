@@ -4,16 +4,21 @@
       class="w-60 h-40"
       :project-id="project"
       finding-name-plural="OSINT"
+      only-active
+      is-triageable
     />
     <FindingsCounterSingle
       class="w-60 h-40"
       :project-id="project"
       finding-name-plural="Paths"
+      only-active
     />
     <FindingsCounterSingle
       class="w-60 h-40"
       :project-id="project"
       finding-name-plural="Credentials"
+      only-active
+      is-triageable
     />
   </div>
 </template>

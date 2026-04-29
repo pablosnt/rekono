@@ -5,6 +5,8 @@
         class="w-60 h-40"
         :project-id="project"
         finding-name-plural="Vulnerabilities"
+        only-active
+        is-triageable
       />
       <MetricsVulnerabilitiesSeverity :project="project" class="flex-1 ml-6" />
     </div>
