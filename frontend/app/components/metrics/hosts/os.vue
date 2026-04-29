@@ -1,5 +1,5 @@
 <template>
-  <UPageCard title="Hosts per OS" class="w-full" variant="outline">
+  <UPageCard title="Operative Systems" class="w-full" variant="outline">
     <div v-if="loading" class="flex items-center justify-center">
       <UButton variant="ghost" loading size="xl" />
     </div>
@@ -56,7 +56,12 @@ const activeData = computed(() =>
 
 const tooltipTriggers = {
   [Donut.selectors.segment]: (d) =>
-    `<b>${d.data.os_type}</b>: ${d.value} ${d.value === 1 ? "host" : "hosts"}`,
+    metricsTooltip(
+      {
+        Hosts: `${formatCount(d.value)}${metricsPercentage(d.value, total.value)}`,
+      },
+      d.data.os_type,
+    ),
 };
 
 function fetch() {

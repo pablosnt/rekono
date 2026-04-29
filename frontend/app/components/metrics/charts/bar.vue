@@ -9,13 +9,13 @@
         :items="legendItems"
         :on-legend-item-click="onLegendItemClick"
       />
-      <div
-        :class="isVertical ? 'overflow-x-auto' : 'overflow-y-auto max-h-500'"
-      >
+      <div :class="isVertical ? 'overflow-x-auto' : 'overflow-y-auto'">
         <VisXYContainer
           :data="data"
           :height="
-            isVertical ? barHeight : Math.max(100, data.length * barHeight)
+            isVertical
+              ? barHeight
+              : Math.min(500, Math.max(200, data.length * barHeight))
           "
         >
           <VisStackedBar

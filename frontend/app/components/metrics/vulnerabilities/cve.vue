@@ -1,6 +1,6 @@
 <template>
   <MetricsChartsBar
-    title="CVEs"
+    title="Top CVEs"
     :loading="loading"
     :data="data"
     :series="series"
@@ -41,7 +41,14 @@ const series: BarSeries[] = [
 ];
 const tooltip = (d) => {
   const count = Math.round(d.stacked[1] - d.stacked[0]);
-  return `${count} ${series[d.stackIndex]?.label.toLowerCase()} ${count === 1 ? "vulnerability" : "vulnerabilities"}`;
+  return metricsTooltip(
+    {
+      Severity: d.datum.severity_value,
+      Status: series[d.stackIndex]?.label,
+      Vulnerabilities: `${formatCount(count)}${metricsPercentage(count, (d.datum.open || 0) + (d.datum.fixed || 0))}`,
+    },
+    d.datum.cve,
+  );
 };
 
 function fetch() {

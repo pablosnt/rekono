@@ -32,9 +32,8 @@
         <VisTooltip :triggers="treemapTooltip" />
       </VisSingleContainer>
     </UPageCard>
-
     <UPageCard
-      title="False Positive Rate"
+      title="False Positives Rate"
       description="Include all triaged findings, including fixed ones"
       class="flex-1"
       variant="outline"
@@ -46,10 +45,7 @@
         :height="400"
         :radius="250"
         :arc-width="50"
-        :tooltip="
-          (d) =>
-            `${d.value} ${d.value === 1 ? d.data.label : `${d.data.label}s`} (${(d.data.label === 'false positive' ? fpRate : 100 - fpRate).toPrecision(3)}%)`
-        "
+        :tooltip="donutTooltip"
       />
     </UPageCard>
   </div>
@@ -78,11 +74,19 @@ const treemapData = computed(() =>
       color: `var(--color-${triageStatuses.find((s) => s.value === d.triage_status)?.color ?? "neutral"}-500)`,
     })),
 );
+const totalOpen = computed(() =>
+  treemapData.value.reduce((sum, d) => sum + d.open, 0),
+);
 const treemapTooltip = {
   [Treemap.selectors.tile]: (node) => {
     const d = node.data?.datum;
     if (!d) return null;
-    return `<b>${d.triage_status}</b>: ${d.open} open ${d.open === 1 ? "finding" : "findings"}`;
+    return metricsTooltip(
+      {
+        Findings: `${formatCount(d.open)}${metricsPercentage(d.open, totalOpen.value)}`,
+      },
+      d.triage_status,
+    );
   },
 };
 
@@ -98,6 +102,16 @@ const fps = computed(() => {
 const fpRate = computed(() =>
   triaged.value > 0 ? (fps.value * 100) / triaged.value : 0,
 );
+const donutTooltip = (d) =>
+  metricsTooltip(
+    {
+      Findings: `${formatCount(d.value)} (${(d.data.label === "false positive"
+        ? fpRate.value
+        : 100 - fpRate.value
+      ).toPrecision(3)}%)`,
+    },
+    d.data.label === "false positive" ? "False Positives" : "Real Findings",
+  );
 const donutData = computed(() => [
   {
     label: "false positive",

@@ -1,5 +1,5 @@
 <template>
-  <UPageCard title="Ports per Service" class="w-full">
+  <UPageCard title="Top Ports & Services" class="w-full">
     <div v-if="loading" class="flex items-center justify-center">
       <UButton variant="ghost" loading size="xl" />
     </div>
@@ -30,12 +30,20 @@ const api = useApi("/api/stats/");
 const loading = ref(true);
 const data = ref([]);
 const layers = [(d) => d.protocol, (d) => d.service, (d) => d.port];
+const total = computed(() =>
+  data.value.reduce((sum, d) => sum + (d.count || 0), 0),
+);
 
 const tooltipTriggers = {
   [Treemap.selectors.tile]: (node) => {
     const d = node.data?.datum;
     if (!d) return null;
-    return `${d.count} ${d.service} ${d.count === 1 ? "service" : "service"} running on port ${d.port}/${d.protocol}`;
+    return metricsTooltip({
+      Service: d.service,
+      Port: d.port,
+      Protocol: d.protocol.toUpperCase(),
+      Instances: `${formatCount(d.count)}${metricsPercentage(d.count, total.value)}`,
+    });
   },
 };
 

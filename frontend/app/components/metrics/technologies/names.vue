@@ -1,6 +1,6 @@
 <template>
   <MetricsChartsBar
-    title="Technologies"
+    title="Top Technologies"
     :loading="loading"
     :data="data"
     :series="series"
@@ -23,8 +23,16 @@ const series = [
     y: (d) => d.count || 0,
   },
 ];
+const total = computed(() =>
+  data.value.reduce((sum, d) => sum + (d.count || 0), 0),
+);
 const tooltip = (d) =>
-  `${d.datum.count} ${d.datum.count === 1 ? "instance" : "instances"}`;
+  metricsTooltip(
+    {
+      Instances: `${formatCount(d.datum.count)}${metricsPercentage(d.datum.count, total.value)}`,
+    },
+    d.datum.name,
+  );
 
 function fetch() {
   loading.value = true;

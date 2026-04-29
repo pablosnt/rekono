@@ -36,7 +36,13 @@ const series: BarSeries[] = [
 ];
 const tooltip = (d) => {
   const count = Math.round(d.stacked[1] - d.stacked[0]);
-  return `${count} ${series[d.stackIndex]?.label.toLowerCase()} ${count === 1 ? "vulnerability" : "vulnerabilities"}`;
+  return metricsTooltip(
+    {
+      Status: series[d.stackIndex]?.label,
+      Vulnerabilities: `${formatCount(count)}${metricsPercentage(count, (d.datum.open || 0) + (d.datum.fixed || 0))}`,
+    },
+    d.datum.severity,
+  );
 };
 
 function fetch() {

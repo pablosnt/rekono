@@ -1,6 +1,6 @@
 <template>
   <MetricsChartsBar
-    title="Hosts per Vulnerabilities"
+    title="Most Vulnerable Hosts"
     :loading="loading"
     :data="data"
     :series="series"
@@ -33,8 +33,23 @@ const series = [
 ];
 const tooltip = (d) => {
   const count = Math.round(d.stacked[1] - d.stacked[0]);
-  const label = series[d.stackIndex]?.label.toLowerCase();
-  return `${count} ${label === "fixed" ? label : `open ${label}`} ${count === 1 ? "vulnerability" : "vulnerabilities"}`;
+  const label = series[d.stackIndex]?.label;
+  const host = d.datum.domain || d.datum.ip;
+  return label === "Fixed"
+    ? metricsTooltip(
+        {
+          "Fixed Vulnerabilities": `${formatCount(count)}${metricsPercentage(count, d.datum.totalOpen + (d.datum.fixed || 0))}`,
+          "Open Vulnerabilities": d.datum.totalOpen,
+        },
+        host,
+      )
+    : metricsTooltip(
+        {
+          [`${label} Vulnerabilities`]: `${formatCount(count)}${metricsPercentage(count, d.datum.totalOpen)}`,
+          "Open Vulnerabilities": d.datum.totalOpen,
+        },
+        host,
+      );
 };
 
 function fetch() {
@@ -47,7 +62,15 @@ function fetch() {
       1,
       100,
     )
-    .then((response) => (data.value = response.items))
+    .then((response) => {
+      data.value = response.items.map((item) => ({
+        ...item,
+        totalOpen: reversedSeverities.reduce(
+          (sum, s) => sum + (item[s.value.toLowerCase()] || 0),
+          0,
+        ),
+      }));
+    })
     .finally(() => (loading.value = false));
 }
 
