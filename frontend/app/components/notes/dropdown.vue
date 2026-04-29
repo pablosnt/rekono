@@ -23,7 +23,7 @@
         :content="{ align: 'end' }"
       >
         <UChip
-          :text="relatedEntity.notes.length.toString()"
+          :text="formatCount(relatedEntity.notes.length)"
           size="3xl"
           color="neutral"
           position="top-right"

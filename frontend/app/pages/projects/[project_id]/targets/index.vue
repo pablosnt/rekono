@@ -72,7 +72,7 @@ const config: CrudConfig<Target> = reactive({
       header: "Target Ports",
       icon: "i-lucide-server",
       cell: ({ row }) =>
-        table.valueCell((row.getValue("target_ports").length || 0).toString()),
+        table.valueCell(formatCount(row.getValue("target_ports").length || 0)),
     },
     {
       accessorKey: "tasks",
@@ -103,7 +103,7 @@ const config: CrudConfig<Target> = reactive({
           `/projects/${route.params.project_id}/reports?target=${row.original.id}`,
           undefined,
           undefined,
-          (row.getValue("reports").length || 0).toString(),
+          formatCount(row.getValue("reports").length || 0),
         ),
     },
   ] as CrudTableColumn<Target>[],

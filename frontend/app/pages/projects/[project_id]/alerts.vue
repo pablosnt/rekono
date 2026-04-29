@@ -33,7 +33,7 @@
               :name="item.subscribed ? 'i-lucide-bell-ring' : 'i-lucide-bell'"
               :class="item.subscribed ? 'fill-current' : ''"
             />
-            <span>{{ item.subscribers.length }}</span>
+            <span>{{ formatCount(item.subscribers.length) }}</span>
           </UButton>
         </UTooltip>
         <UDropdownMenu

@@ -191,9 +191,11 @@ const config: CrudConfig<Finding> = reactive({
               h(
                 resolveComponent("UChip"),
                 {
-                  text: row.original.executions
-                    .filter((e) => e.configuration?.tool.name === s.name)
-                    .length.toString(),
+                  text: formatCount(
+                    row.original.executions.filter(
+                      (e) => e.configuration?.tool.name === s.name,
+                    ).length,
+                  ),
                   size: "3xl",
                   color: "neutral",
                   variant: "ghost",

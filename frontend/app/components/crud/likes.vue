@@ -7,7 +7,7 @@
     @click.stop="toggleLike()"
   >
     <UIcon name="i-lucide-heart" :class="liked ? 'fill-current' : ''" />
-    <span>{{ count }}</span>
+    <span>{{ formatCount(count) }}</span>
   </UButton>
 </template>
 

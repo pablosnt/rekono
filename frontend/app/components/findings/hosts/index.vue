@@ -180,7 +180,7 @@ const columns = computed(() => [
           cell: ({ row }) => {
             const rep = row.original.reputation || 0;
             return table.iconAndValueCell(
-              rep.toString(),
+              formatCount(rep),
               rep > 0
                 ? "i-lucide-badge-check"
                 : rep < 0

@@ -92,7 +92,7 @@ const config: CrudConfig<Process> = reactive({
       header: "Steps",
       icon: "i-lucide-list",
       cell: ({ row }) =>
-        table.valueCell((row.original.steps?.length || 0).toString()),
+        table.valueCell(formatCount(row.original.steps?.length || 0)),
     },
     {
       accessorKey: "owner",
