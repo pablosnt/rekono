@@ -36,6 +36,7 @@ const route = useRoute();
 const options = useOptions();
 const api = useApi("/api/tasks/");
 const table = useTable();
+const { refreshPanelCounts } = usePanel();
 const page = ref();
 const notesButton = ref();
 const showReportModal = ref(false);
@@ -58,8 +59,10 @@ function onFetched(items: Task[]) {
   ) {
     refresh.value = setTimeout(() => {
       page.value?.fetch();
+      refreshPanelCounts();
     }, 10000);
   } else if (refresh.value) {
+    refreshPanelCounts();
     clearTimeout(refresh.value);
     refresh.value = null;
   }
@@ -75,9 +78,7 @@ onMounted(() => {
 });
 
 onUnmounted(() => {
-  if (refresh.value) {
-    clearInterval(refresh.value);
-  }
+  if (refresh.value) clearInterval(refresh.value);
 });
 
 const config: CrudConfig<Task> = reactive({

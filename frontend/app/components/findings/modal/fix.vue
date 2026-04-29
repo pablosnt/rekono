@@ -76,6 +76,7 @@ const emit = defineEmits<{
 }>();
 
 const toast = useToast();
+const { refreshPanelCounts } = usePanel();
 const loading = ref(false);
 const verb = computed(() =>
   props.finding.is_fixed ? props.unfixVerb : props.fixVerb,
@@ -92,6 +93,7 @@ function switchFix() {
         title: `${firstUpper(smartLowerCase(props.entityName))} ${props.isAsset ? "asset" : "finding"} ${verb.value.toLowerCase()}ed`,
         color: props.finding.is_fixed ? "warning" : "success",
       });
+      refreshPanelCounts();
     })
     .finally(() => {
       loading.value = false;

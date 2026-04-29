@@ -48,6 +48,7 @@ import { targetTypes } from "~/constants";
 const api = useApi();
 const route = useRoute();
 const userStore = useUserStore();
+const { panelRefresh } = usePanel();
 const breadcrumb = ref([]);
 const items = ref([]);
 const projectEntity = ref({ name: "Rekono" });
@@ -181,6 +182,11 @@ function onProjectChange() {
       to: `/projects/${route.params.project_id}/members`,
     });
   }
+  loadProjectBadges();
+}
+
+function loadProjectBadges() {
+  if (!route.params.project_id) return;
   const openFindings = { project: route.params.project_id, is_fixed: false };
   const activeFindings = {
     project: route.params.project_id,
@@ -401,6 +407,7 @@ function onExploitChange() {
   });
 }
 
+watch(panelRefresh, loadProjectBadges);
 watch(() => route.params.project_id, onProjectChange);
 watch(() => route.params.target_id, onTargetChange);
 watch(() => route.params.scan_id, onScanChange);

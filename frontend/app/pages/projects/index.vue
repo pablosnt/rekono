@@ -1,5 +1,5 @@
 <template>
-  <CrudPage :config="config" />
+  <CrudPage :config="config" @deleted="refreshPanelCounts()" />
 </template>
 
 <script setup lang="ts">
@@ -13,6 +13,7 @@ const userStore = useUserStore();
 const validation = useValidation();
 const options = useOptions();
 const table = useTable();
+const { refreshPanelCounts } = usePanel();
 const userOptions = ref<FilterOption[]>([]);
 
 onMounted(() => {

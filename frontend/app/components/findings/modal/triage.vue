@@ -22,6 +22,7 @@
           () => {
             $emit('triaged');
             $emit('open', false);
+            refreshPanelCounts();
           }
         "
         @new-loading="(newLoading) => (loading = newLoading)"
@@ -67,6 +68,7 @@ defineEmits<{
 }>();
 
 const validation = useValidation();
+const { refreshPanelCounts } = usePanel();
 const loading = ref(false);
 const valid = ref(false);
 const form = ref();

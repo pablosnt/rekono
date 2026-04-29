@@ -28,6 +28,7 @@
                 (data) => {
                   project = data;
                   stepper = 1;
+                  refreshPanelCounts();
                   $emit('new-title', data.name);
                   $emit('new-submit-label', 'Continue');
                   $emit('new-loading', false);
@@ -72,6 +73,7 @@ defineEmits<{
 }>();
 
 const targetApi = useApi("/api/targets/");
+const { refreshPanelCounts } = usePanel();
 const projectFormRef = ref();
 const targetFormRef = ref();
 const stepper = ref(0);

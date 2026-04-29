@@ -135,7 +135,12 @@
           :config="config"
           :item="selectedItem"
           @open="(open: boolean) => (openDeleteModal = open)"
-          @deleted="fetch()"
+          @deleted="
+            () => {
+              fetch();
+              $emit('deleted');
+            }
+          "
         />
 
         <CrudPagination
@@ -176,7 +181,7 @@
 import type { CrudConfig, CrudState } from "~/types/crud";
 
 const props = defineProps<{ config: CrudConfig }>();
-const emit = defineEmits<{ fetched: [items: unknown[]] }>();
+const emit = defineEmits<{ fetched: [items: unknown[]]; deleted: [] }>();
 const api = useApi(props.config.endpoint);
 const tableRef = ref();
 const openCreateModal = ref(false);

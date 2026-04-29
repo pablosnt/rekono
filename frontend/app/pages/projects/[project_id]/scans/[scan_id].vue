@@ -257,6 +257,7 @@ const route = useRoute();
 const tasksApi = useApi("/api/tasks/");
 const userStore = useUserStore();
 const options = useOptions();
+const { refreshPanelCounts } = usePanel();
 const cancelOpen = ref(false);
 const reportOpen = ref(false);
 const task = ref<Task | null>();
@@ -287,7 +288,11 @@ function processTask(data?: Task) {
       fetchTask();
       executions.value?.page?.fetch();
       findings.value?.fetch();
+      refreshPanelCounts();
     }, 10000);
+  } else if (refresh.value) {
+    refreshPanelCounts();
+    clearTimeout(refresh.value);
   }
 }
 
