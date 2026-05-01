@@ -20,7 +20,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from framework.views import BaseViewSet
 from platforms.mail.notifications import SMTP
-from security.authorization.permissions import IsAdmin, IsNotAuthenticated, RekonoModelPermission
+from security.authorization.permissions import IsNotAuthenticated, RekonoModelPermission
 from users.filters import UserFilter
 from users.models import User
 from users.serializers import (
@@ -58,8 +58,7 @@ class UserViewSet(BaseViewSet):
     serializer_class = UserSerializer
     queryset = User.objects.all()
     filterset_class = UserFilter
-    # Required to include the IsAdmin to the base authorization classes and remove unneeded permissions
-    permission_classes = [IsAuthenticated, RekonoModelPermission, IsAdmin]
+    permission_classes = [IsAuthenticated, RekonoModelPermission]
     search_fields = ["username", "first_name", "last_name", "email"]
     ordering_fields = ["id", "username", "first_name", "last_name", "email", "date_joined", "last_login"]
     http_method_names = ["get", "post", "put", "delete"]
