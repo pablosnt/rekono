@@ -47,6 +47,7 @@ class ToolFilter(LikeFilter):
             "is_installed": ["exact"],
             "version": ["exact", "icontains"],
             "configurations": ["exact"],
+            "icon": ["isnull"]
         }
 
 

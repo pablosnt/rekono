@@ -6,11 +6,10 @@
 import { h } from "vue";
 import type { CrudConfig, CrudTableColumn, FilterOption } from "~/types/crud";
 import { useUserStore } from "~/store/user";
-import * as z from "zod";
 import type { Project } from "~/types/models";
 
 const userStore = useUserStore();
-const validation = useValidation();
+const { formFields, formSchema } = useProjectsConfig();
 const options = useOptions();
 const table = useTable();
 const { refreshPanelCounts } = usePanel();
@@ -93,35 +92,8 @@ const config: CrudConfig<Project> = reactive({
   defaultOrdering: "-id",
   pageSize: 25,
   pageSizeOptions: [25, 50, 100],
-  formFields: [
-    {
-      key: "name",
-      label: "Name",
-      type: "text",
-      required: true,
-      placeholder: "Enter project name",
-    },
-    {
-      key: "description",
-      label: "Description",
-      type: "textarea",
-      required: true,
-      placeholder: "Enter project description",
-    },
-    {
-      key: "tags",
-      label: "Tags",
-      type: "tags",
-      required: false,
-      placeholder: "Add project tags",
-      icon: "i-lucide-tag",
-    },
-  ],
-  formSchema: z.object({
-    name: validation.name(),
-    description: validation.text("description"),
-    tags: z.array(validation.name("tag", true, 100)).optional(),
-  }),
+  formFields,
+  formSchema,
   createForm: resolveComponent("ProjectsForm"),
   updateOnCreateModalOpen: true,
   onCreation: (data: Record<string, unknown>) =>

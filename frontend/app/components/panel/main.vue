@@ -5,11 +5,13 @@
 </template>
 
 <script setup lang="ts">
+import type { Project } from "~/types/models";
 import { useUserStore } from "~/store/user";
 
 const api = useApi("/api/");
 const userStore = useUserStore();
 const { panelRefresh } = usePanel();
+const topProjects = useState<Project[]>("top-projects", () => []);
 const items = ref([
   {
     label: "Home",
@@ -85,7 +87,8 @@ const items = ref([
 ]);
 
 function loadBadges() {
-  api.get("projects/top/").then((response: object) => {
+  api.get("projects/top/").then((response: Project[]) => {
+    topProjects.value = response;
     const children: NavigationItem[] = [];
     for (let i = 0; i < response.length; i++) {
       children.push({

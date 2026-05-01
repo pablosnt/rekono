@@ -105,7 +105,7 @@
         v-if="!finding.created_from_user_input"
         class="mt-5"
         title="Exposure Window"
-        description="Executions detecting the finding"
+        description="Executions where the finding was detected"
         variant="outline"
         :ui="{ root: 'overflow-x-auto' }"
       >

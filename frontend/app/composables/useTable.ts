@@ -17,15 +17,20 @@ export default function () {
     );
   }
 
+  function iconAndValueHeader(value: string, icon: string) {
+    return iconAndValueCell(value, icon, "gray-500 dark:text-gray-400", true);
+  }
+
   function iconAndValueCell(
     value: string | number | undefined = undefined,
     icon: string,
     color: string = "neutral",
+    isHeader?: boolean,
   ) {
     return value
       ? h("div", { class: "flex items-center gap-2" }, [
           h(UIcon, { name: icon, class: `w-4 h-4 text-${color}` }),
-          valueCell(value),
+          isHeader ? h("span", value) : valueCell(value),
         ])
       : noDataCell;
   }
@@ -217,6 +222,7 @@ export default function () {
   return {
     noDataCell,
     valueCell,
+    iconAndValueHeader,
     iconAndValueCell,
     badgeCell,
     hostCell,

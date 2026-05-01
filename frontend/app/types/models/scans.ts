@@ -4,6 +4,7 @@ export interface Task {
   id: number;
   target: {
     id: number;
+    project: number;
     target: string;
     type: string;
   };
