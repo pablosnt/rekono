@@ -4,6 +4,7 @@ Defines REST API routes for all finding types using Django REST Framework
 router with ViewSet registration for comprehensive findings management.
 """
 
+from django.urls import include, path
 from rest_framework.routers import SimpleRouter
 
 from findings.views import (
@@ -20,8 +21,6 @@ from findings.views import (
 )
 
 router = SimpleRouter()
-router.register("hosts/latest", LatestHostsViewSet, basename="latest-hosts")
-router.register("vulnerabilities/latest", LatestVulnerabilitiesViewSet, basename="latest-vulnerabilities")
 router.register("osint", OSINTViewSet)
 router.register("hosts", HostViewSet)
 router.register("ports", PortViewSet)
@@ -31,4 +30,12 @@ router.register("vulnerabilities", VulnerabilityViewSet)
 router.register("credentials", CredentialViewSet)
 router.register("exploits", ExploitViewSet)
 
-urlpatterns = router.urls
+urlpatterns = [
+    path("hosts/latest", LatestHostsViewSet.as_view({"get": "retrieve"}), name="latest-hosts"),
+    path(
+        "vulnerabilities/latest",
+        LatestVulnerabilitiesViewSet.as_view({"get": "retrieve"}),
+        name="latest-vulnerabilities",
+    ),
+    path("", include(router.urls)),
+]
