@@ -9,7 +9,7 @@ import { useUserStore } from "~/store/user";
 import type { Project } from "~/types/models";
 
 const userStore = useUserStore();
-const { formFields, formSchema } = useProjectsConfig();
+const { formFields, formSchema, deleteMessage } = useProjectsConfig();
 const options = useOptions();
 const table = useTable();
 const { refreshPanelCounts } = usePanel();
@@ -102,13 +102,7 @@ const config: CrudConfig<Project> = reactive({
         ? `/projects/${data.id}`
         : `/projects/${data.id}/targets`,
     ),
-  deleteMessage: (project: Project) =>
-    buildDeleteMessage(
-      "project",
-      project.name,
-      "Permanent deletion",
-      "All associated data including assets, findings, and scans will be permanently deleted. This action cannot be undone.",
-    ),
+  deleteMessage: deleteMessage,
   canRead: true,
   canCreate: userStore.is_admin,
   canEdit: (_project: Project) => userStore.is_admin,
