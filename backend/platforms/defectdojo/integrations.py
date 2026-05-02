@@ -268,20 +268,18 @@ class DefectDojo(BaseIntegration):
         if len(findings) == 0:
             return
         created_engagement = False
-        target_sync = DefectDojoTargetSync.objects.filter(target=execution.task.target)
-        if target_sync.exists():
-            sync = target_sync.first()
-            engagement_id = sync.engagement_id
-            product_id = sync.defectdojo_sync.product_id
-            project_sync = sync.defectdojo_sync
+        target_sync = DefectDojoTargetSync.objects.filter(target=execution.task.target).first()
+        if target_sync:
+            engagement_id = target_sync.engagement_id
+            product_id = target_sync.defectdojo_sync.product_id
+            project_sync = target_sync.defectdojo_sync
         else:
             project_sync = DefectDojoSync.objects.filter(project=execution.task.target.project).first()
             if not project_sync:
                 return
-            sync = project_sync
-            product_id = sync.product_id
-            if sync.engagement_id:
-                engagement_id = sync.engagement_id
+            product_id = project_sync.product_id
+            if project_sync.engagement_id:
+                engagement_id = project_sync.engagement_id
             else:
                 created_engagement = True
                 new_engagement = self.create_engagement(
@@ -291,7 +289,7 @@ class DefectDojo(BaseIntegration):
                     [self.settings.tag] if self.settings.tag else [],
                 )
                 new_sync = DefectDojoTargetSync.objects.create(
-                    defectdojo_sync=sync, target=execution.task.target, engagement_id=new_engagement.get("id")
+                    defectdojo_sync=project_sync, target=execution.task.target, engagement_id=new_engagement.get("id")
                 )
                 engagement_id = new_sync.engagement_id
         test_id = None
