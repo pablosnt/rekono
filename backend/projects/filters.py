@@ -19,14 +19,12 @@ class ProjectFilter(FilterSet):
 
     Custom Filters:
         tag: Filter projects by tag names
-        defectdojo_product_type: Filter by DefectDojo product type ID
         defectdojo_product: Filter by DefectDojo product ID
         defectdojo_engagement: Filter by DefectDojo engagement ID
         owner_username: Filter by owner username
     """
 
     tag = CharFilter(field_name="tags__name")
-    defectdojo_product_type = NumberFilter(field_name="defectdojo_sync__product_type_id")
     defectdojo_product = NumberFilter(field_name="defectdojo_sync__product_id")
     defectdojo_engagement = NumberFilter(field_name="defectdojo_sync__engagement_id")
     owner_username = CharFilter(field_name="owner__username", lookup_expr="icontains")

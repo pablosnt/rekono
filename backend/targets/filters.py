@@ -19,12 +19,10 @@ class TargetFilter(FilterSet):
     with specialized filters for DefectDojo integration fields.
 
     Attributes:
-        defectdojo_product_type (NumberFilter): Filter by DefectDojo product type ID
         defectdojo_product (NumberFilter): Filter by DefectDojo product ID
         defectdojo_engagement (NumberFilter): Filter by DefectDojo engagement ID
     """
 
-    defectdojo_product_type = NumberFilter(field_name="defectdojo_sync__defectdojo_sync__product_type_id")
     defectdojo_product = NumberFilter(field_name="defectdojo_sync__defectdojo_sync__product_id")
     defectdojo_engagement = NumberFilter(field_name="defectdojo_sync__engagement_id")
 
