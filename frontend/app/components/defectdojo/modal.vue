@@ -29,8 +29,8 @@
         <div class="flex items-center gap-2">
           <DefectdojoLink
             v-if="sync"
-            entity="product"
             :id="sync.product_id"
+            entity="product"
             icon="i-lucide-external-link"
           />
           <UButton
