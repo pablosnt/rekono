@@ -110,8 +110,6 @@ onMounted(() => {
   integrations.fetchHackTricks();
 });
 
-// todo: DefectDojo link (if integration enabled and available. Get defectdojo server from settings)
-
 const config: CrudConfig<Finding> = reactive({
   endpoint: props.endpoint,
   entityName: props.entityName,

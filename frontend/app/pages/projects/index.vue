@@ -7,8 +7,10 @@ import { h } from "vue";
 import type { CrudConfig, CrudTableColumn, FilterOption } from "~/types/crud";
 import { useUserStore } from "~/store/user";
 import type { Project } from "~/types/models";
+import { useIntegrationsStore } from "~/store/integrations";
 
 const userStore = useUserStore();
+const integrations = useIntegrationsStore();
 const { formFields, formSchema, deleteMessage } = useProjectsConfig();
 const options = useOptions();
 const table = useTable();
@@ -17,9 +19,9 @@ const userOptions = ref<FilterOption[]>([]);
 
 onMounted(() => {
   options.users(userOptions, { role: "Admin", is_active: true });
+  integrations.fetchDefectDojo();
 });
 
-// todo: add link to DefectDojo if sync is enabled
 const config: CrudConfig<Project> = reactive({
   endpoint: "/api/projects/",
   entityName: "Project",
@@ -63,11 +65,29 @@ const config: CrudConfig<Project> = reactive({
       icon: "i-lucide-user",
       cell: ({ row }) => table.usernameCell(row.getValue("owner")),
     },
+    ...(integrations.defectdojo?.settings?.is_available
+      ? [
+          {
+            accessorKey: "defectdojo",
+            header: "DefectDojo",
+            avatar: { src: integrations.defectdojo?.integration.icon },
+            cell: ({ row }) =>
+              row.original.defectdojo_sync?.product_id
+                ? h(resolveComponent("DefectdojoLink"), {
+                    entity: "product",
+                    id: row.original.defectdojo_sync?.product_id,
+                    size: "sm",
+                  })
+                : table.noDataCell,
+          },
+        ]
+      : []),
   ] as CrudTableColumn<Project>[],
   tableColumnsVisibility: {
     id: false,
     description: false,
     owner: false,
+    defectdojo: integrations.defectdojo.integration?.enabled,
   },
   itemLink: (project: Project) => `/projects/${project.id}`,
   searchable: true,

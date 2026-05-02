@@ -43,6 +43,7 @@ class ExecutionSerializer(ModelSerializer):
             "status",
             "start",
             "end",
+            "defectdojo_test_id",
             "osint",
             "host",
             "port",
@@ -86,4 +87,4 @@ class SimpleExecutionSerializer(ModelSerializer):
         """
 
         model = Execution
-        fields = ("id", "task", "configuration", "status", "start", "end")
+        fields = ("id", "task", "configuration", "status", "start", "end", "defectdojo_test_id")

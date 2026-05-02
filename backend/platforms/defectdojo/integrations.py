@@ -1,62 +1,44 @@
 """DefectDojo integration client for vulnerability management synchronization.
 
-Provides comprehensive integration with OWASP DefectDojo vulnerability management
-platform, enabling automated security finding synchronization, entity creation,
-and bidirectional data flow for streamlined vulnerability tracking and reporting.
+Provides integration with OWASP DefectDojo vulnerability management platform,
+enabling automated security finding synchronization through native scan import
+and reimport endpoints for centralized vulnerability tracking.
 """
 
+import json
+import uuid
 from datetime import timedelta
 from functools import cached_property
 from pathlib import Path as PathFile
 from typing import Any, Callable
+from xmlrpc.client import boolean
 
 import requests
 from django.utils import timezone
 
 from executions.models import Execution
-from findings.enums import PathType, Severity
 from findings.framework.models import Finding
 from findings.models import Path
 from framework.platforms import BaseIntegration
 from platforms.defectdojo.models import DefectDojoSettings, DefectDojoSync, DefectDojoTargetSync
-from targets.models import Target
+from rekono.settings import CONFIG
 
 
 class DefectDojo(BaseIntegration):
     """DefectDojo integration client for vulnerability management synchronization.
 
-    Provides comprehensive integration with OWASP DefectDojo vulnerability management
-    platform through REST API interactions. Supports automated finding synchronization,
-    hierarchical entity management, and bidirectional data flow for centralized
-    vulnerability tracking and reporting workflows.
-
-    Integration Features:
-        - Automated vulnerability finding synchronization after tool execution
-        - Support for both scan file imports and generic finding creation
-        - Hierarchical entity management (Product Types → Products → Engagements → Tests)
-        - Real-time availability checking and connection validation
-        - Severity mapping between Rekono and DefectDojo severity scales
-        - Project-level and target-level engagement organization
-
-    Data Synchronization:
-        - Security findings mapped to DefectDojo finding format
-        - Web endpoints synchronized for application security testing
-        - Execution results linked to DefectDojo tests for audit trails
-        - Tag-based organization and filtering capabilities
+    Integrates with OWASP DefectDojo through REST API interactions, synchronizing
+    security findings after each tool execution. Supports both native scan file
+    imports (for tools with a registered DefectDojo scan type) and generic JSON
+    finding imports, with optional reimport to update existing tests.
 
     Attributes:
-        run_per_execution (bool): Execute integration after each tool execution
-        severity_mapping (dict): Mapping between Rekono and DefectDojo severity levels
+        run_per_execution (bool): Execute integration after each tool execution.
+        generic_import (str): DefectDojo scan type name for generic finding imports.
     """
 
     run_per_execution = True
-    severity_mapping = {
-        Severity.INFO: "S0",
-        Severity.LOW: "S1",
-        Severity.MEDIUM: "S3",
-        Severity.HIGH: "S4",
-        Severity.CRITICAL: "S5",
-    }
+    generic_import = "Generic Findings Import"
 
     @property
     def settings(self) -> DefectDojoSettings:
@@ -152,46 +134,6 @@ class DefectDojo(BaseIntegration):
         except Exception:
             return False
 
-    def create_product_type(self, name: str, description: str) -> dict[str, Any]:  # pragma: no cover
-        """Create a new product type in DefectDojo.
-
-        Creates a top-level organizational entity in DefectDojo's hierarchy.
-        Product types serve as the highest level of organization for grouping
-        related products and security assessments.
-
-        Args:
-            name (str): Product type name
-            description (str): Product type description
-
-        Returns:
-            dict[str, Any]: DefectDojo API response containing created product type data
-        """
-        return self._request(self.session.post, "/product_types/", data={"name": name, "description": description})
-
-    def create_product(
-        self, product_type: int, name: str, description: str, tags: list[str]
-    ) -> dict[str, Any]:  # pragma: no cover
-        """Create a new product in DefectDojo under a specific product type.
-
-        Creates a product entity representing a specific application or system
-        being tested. Products are associated with product types and can have
-        multiple engagements for different security assessments.
-
-        Args:
-            product_type (int): DefectDojo product type ID
-            name (str): Product name
-            description (str): Product description
-            tags (list[str]): List of tags for product organization
-
-        Returns:
-            dict[str, Any]: DefectDojo API response containing created product data
-        """
-        return self._request(
-            self.session.post,
-            "/products/",
-            data={"tags": tags, "name": name, "description": description, "prod_type": product_type},
-        )
-
     def create_engagement(
         self, product: int, name: str, description: str, tags: list[str]
     ) -> dict[str, Any]:  # pragma: no cover
@@ -227,165 +169,119 @@ class DefectDojo(BaseIntegration):
             },
         )
 
-    def _create_test_type(self, name: str, tags: list[str]) -> dict[str, Any]:  # pragma: no cover
-        """Create a new test type in DefectDojo for categorizing tests.
-
-        Creates a test type definition that can be reused across multiple tests.
-        Test types help categorize and organize different kinds of security
-        assessments within DefectDojo.
+    def _get_test_type(self, name: str) -> dict[str, Any] | None:
+        """Look up a DefectDojo test type by name.
 
         Args:
-            name (str): Test type name
-            tags (list[str]): List of tags for test type organization
+            name (str): Test type name to search for.
 
         Returns:
-            dict[str, Any]: DefectDojo API response containing created test type data
+            dict[str, Any] | None: First matching test type record, or None if not found.
         """
-        return self._request(self.session.post, "/test_types/", data={"name": name, "tags": tags, "dynamic_tool": True})
+        response = self._request(self.session.get, "/test_types/", params={"name": name})
+        return response.get("results", [])[0] if response.get("count", 0) > 0 else None
 
-    def _create_test(
-        self, test_type: int, engagement: int, title: str, description: str
-    ) -> dict[str, Any]:  # pragma: no cover
-        """Create a new test in DefectDojo under a specific engagement.
-
-        Creates a test entity representing a specific security testing activity.
-        Tests contain individual findings and serve as containers for organizing
-        security vulnerabilities discovered during assessments.
+    def _get_test(self, engagement: int, test_type: int, scan_type: str) -> dict[str, Any] | None:
+        """Look up an existing DefectDojo test by engagement, test type, and scan type.
 
         Args:
-            test_type (int): DefectDojo test type ID
-            engagement (int): DefectDojo engagement ID
-            title (str): Test title
-            description (str): Test description
+            engagement (int): DefectDojo engagement ID.
+            test_type (int): DefectDojo test type ID.
+            scan_type (str): Scan type name matching the tool's DefectDojo scan type.
 
         Returns:
-            dict[str, Any]: DefectDojo API response containing created test data
+            dict[str, Any] | None: First matching test record, or None if not found.
         """
-        datetime = timezone.now().strftime(self.settings.datetime_format)
-        return self._request(
-            self.session.post,
+        response = self._request(
+            self.session.get,
             "/tests/",
-            data={
-                "engagement": engagement,
-                "test_type": test_type,
-                "title": title,
-                "description": description,
-                "target_start": datetime,
-                "target_end": datetime,
-            },
+            params={"engagement": engagement, "scan_type": scan_type, "test_type": test_type},
         )
+        return response.get("results", [])[0] if response.get("count", 0) > 0 else None
 
-    def _create_endpoint(
-        self, product: int, endpoint: Path, target: Target
-    ) -> dict[str, Any] | None:  # pragma: no cover
-        """Create a new endpoint in DefectDojo for web application testing.
-
-        Creates an endpoint entity representing a specific web service or API
-        endpoint discovered during security testing. Endpoints are associated
-        with products and help track web application attack surface.
-
-        Args:
-            product (int): DefectDojo product ID
-            endpoint (Path): Path finding containing endpoint information
-            target (Target): Target being assessed
-
-        Returns:
-            dict[str, Any] | None: DefectDojo API response with endpoint data or None on error
-        """
-        # TOTEST: What happen if the endpoint already exists?
-        return self._request(
-            self.session.post, "/endpoints/", data={**endpoint.defectdojo_endpoint(target), "product": product}
-        )
-
-    def _create_finding(self, test: int, finding: Finding) -> dict[str, Any]:  # pragma: no cover
-        """Create a new finding in DefectDojo under a specific test.
-
-        Creates a security finding representing a discovered vulnerability or
-        security issue. Findings are the core entities in DefectDojo containing
-        detailed vulnerability information, severity, and remediation guidance.
-
-        Args:
-            test (int): DefectDojo test ID
-            finding (Finding): Rekono finding to be synchronized
-
-        Returns:
-            dict[str, Any]: DefectDojo API response containing created finding data
-        """
-        data = finding.defectdojo_finding()
-        return self._request(
-            self.session.post,
-            "/findings/",
-            data={
-                **data,
-                "test": test,
-                "numerical_severity": self.severity_mapping[data.get("severity")],
-                "active": True,
-            },
-        )
-
-    def _import_scan(
-        self, engagement: int, execution: Execution, tags: list[str]
+    def _import_or_reimport_scan(
+        self,
+        scan_type: str,
+        report: PathFile,
+        service: str,
+        engagement: int,
+        test: int | None,
+        tags: list[str],
+        close_old_findings: boolean,
     ) -> dict[str, Any]:  # pragma: no cover
-        """Import scan results file directly into DefectDojo.
+        """Import or reimport a scan report into DefectDojo.
 
-        Imports security tool output files directly into DefectDojo using the
-        native scan import functionality. This preserves original tool output
-        format and leverages DefectDojo's built-in parsers for comprehensive
-        finding extraction and analysis.
+        Uses `import-scan` when no existing test is provided, creating a new test
+        under the given engagement. Uses `reimport-scan` when a test ID is provided,
+        updating an existing test and closing findings absent from the new report
+        when `close_old_findings` is enabled.
 
         Args:
-            engagement (int): DefectDojo engagement ID
-            execution (Execution): Rekono execution containing scan results
-            tags (list[str]): List of tags for imported findings
+            scan_type (str): DefectDojo scan type identifier for the report format.
+            report (PathFile): Path to the report file to upload.
+            engagement (int): DefectDojo engagement ID.
+            test (int | None): Existing DefectDojo test ID for reimport, or None for import.
+            tags (list[str]): Tags applied to the created test, findings, and endpoints.
+            close_old_findings (bool): Close findings from previous imports not present in this one.
 
         Returns:
-            dict[str, Any]: DefectDojo API response containing import results
+            dict[str, Any]: DefectDojo API response containing the test ID and import summary.
         """
-        with open(execution.output_file, "r") as report:
+        context = {"engagement": engagement}
+        endpoint = "import-scan"
+        if test:
+            context = {"test": test}
+            endpoint = "reimport-scan"
+        with report.open("r") as _report:
             return self._request(
                 self.session.post,
-                "/import-scan/",
+                f"/{endpoint}/",
                 data={
-                    "scan_type": execution.configuration.tool.defectdojo_scan_type,
-                    "engagement": engagement,
+                    "scan_type": scan_type,
+                    **context,
+                    "service": service,
                     "tags": tags,
+                    "apply_tags_to_findings": True,
+                    "apply_tags_to_endpoints": True,
+                    "close_old_findings": close_old_findings,
                 },
-                files={"file": report},
+                files={"file": _report},
             )
 
     def process_findings(self, execution: Execution, findings: list[Finding]) -> None:
-        """Process and synchronize security findings to DefectDojo after execution completion.
+        """Synchronize security findings to DefectDojo after execution completion.
 
-        Main integration method that handles the complete synchronization workflow
-        for security findings discovered during tool execution. Manages the hierarchical
-        organization of findings within DefectDojo's structure and supports both
-        scan file imports and generic finding creation.
-
-        Synchronization Workflow:
-            1. Determine target or project-level synchronization configuration
-            2. Create engagement if needed for new targets
-            3. Import scan results if tool supports native DefectDojo format
-            4. Create generic findings and endpoints for structured data
-            5. Update DefectDojo entity IDs for future reference
+        Resolves the engagement to use (from an existing target sync, the project sync,
+        or a newly created one), then imports all non-Path findings as a scan report.
+        For tools with a registered DefectDojo scan type the raw output file is sent;
+        otherwise a Generic Findings Import JSON is generated from the finding data.
+        When the project sync has reimport enabled, an existing test is located and
+        updated rather than creating a new one.
 
         Args:
-            execution (Execution): Completed security tool execution
-            findings (list[Finding]): List of security findings to synchronize
+            execution (Execution): Completed security tool execution.
+            findings (list[Finding]): Security findings to synchronize.
         """
-        target_sync = DefectDojoTargetSync.objects.filter(target=execution.task.target)
-        if target_sync.exists():
-            sync = target_sync.first()
-            engagement_id = sync.engagement_id
-            product_id = sync.defectdojo_sync.product_id
+        findings = [
+            finding for finding in findings if not isinstance(finding, Path) and not finding.created_from_user_input
+        ]
+        if len(findings) == 0:
+            return
+        created_engagement = False
+        target_sync = DefectDojoTargetSync.objects.filter(target=execution.task.target).first()
+        if target_sync:
+            engagement_id = target_sync.engagement_id
+            product_id = target_sync.defectdojo_sync.product_id
+            project_sync = target_sync.defectdojo_sync
         else:
-            project_sync = DefectDojoSync.objects.filter(project=execution.task.target.project)
-            if not project_sync.exists():
+            project_sync = DefectDojoSync.objects.filter(project=execution.task.target.project).first()
+            if not project_sync:
                 return
-            sync = project_sync.first()
-            product_id = sync.product_id
-            if sync.engagement_id:
-                engagement_id = sync.engagement_id
+            product_id = project_sync.product_id
+            if project_sync.engagement_id:
+                engagement_id = project_sync.engagement_id
             else:
+                created_engagement = True
                 new_engagement = self.create_engagement(
                     product_id,
                     execution.task.target.target,
@@ -393,40 +289,47 @@ class DefectDojo(BaseIntegration):
                     [self.settings.tag] if self.settings.tag else [],
                 )
                 new_sync = DefectDojoTargetSync.objects.create(
-                    defectdojo_sync=sync, target=execution.task.target, engagement_id=new_engagement.get("id")
+                    defectdojo_sync=project_sync, target=execution.task.target, engagement_id=new_engagement.get("id")
                 )
                 engagement_id = new_sync.engagement_id
-        if (
-            execution.configuration.tool.defectdojo_scan_type
-            and execution.output_file is not None
-            and PathFile(execution.output_file).is_file()
-        ):
-            new_import = self._import_scan(engagement_id, execution, [self.settings.tag])
-            execution.defectdojo_test_id = new_import.get("test_id")
-            execution.save(update_fields=["defectdojo_test_id"])
+        test_id = None
+        if execution.configuration.tool.defectdojo_scan_type:
+            if execution.output_file is None or not PathFile(execution.output_file).is_file():
+                return
+            scan_type = execution.configuration.tool.defectdojo_scan_type
+            test_type_name = scan_type
+            report = PathFile(execution.output_file)
         else:
-            test_id = None
-            for finding in findings:
-                if finding.created_from_user_input:
-                    continue
-                if isinstance(finding, Path) and finding.type == PathType.ENDPOINT:
-                    if finding.defectdojo_id is None:
-                        new_endpoint = self._create_endpoint(product_id, finding, execution.task.target)
-                        if new_endpoint is not None:
-                            finding.defectdojo_id = new_endpoint.get("id")
-                else:
-                    if not test_id:
-                        if not self.settings.test_type_id:
-                            new_test_type = self._create_test_type(
-                                self.settings.test_type, [self.settings.tag] if self.settings.tag else []
-                            )
-                            self.settings.test_type_id = new_test_type.get("id")
-                            self.settings.save(update_fields=["test_type_id"])
-                        new_test = self._create_test(
-                            self.settings.test_type_id, engagement_id, self.settings.test, self.settings.test
-                        )
-                        test_id = new_test.get("id")
-                    if test_id:
-                        new_finding = self._create_finding(test_id, finding)
-                        finding.defectdojo_id = new_finding.get("id")
-                finding.save(update_fields=["defectdojo_id"])
+            scan_type = self.generic_import
+            report = CONFIG.reports / f"temp-{str(uuid.uuid4())}.json"
+            with report.open("w") as temp:
+                json.dump(
+                    {
+                        "name": execution.configuration.tool.name,
+                        "type": execution.configuration.tool.name,
+                        "findings": [finding.defectdojo_finding() for finding in findings],
+                    },
+                    temp,
+                    ensure_ascii=True,
+                    indent=4,
+                )
+            test_type_name = f"{execution.configuration.tool.name} ({scan_type})"
+        if project_sync.reimport and not created_engagement:
+            test_type = self._get_test_type(test_type_name)
+            if test_type:
+                test = self._get_test(engagement_id, test_type.get("id"), scan_type)
+                test_id = test.get("id") if test else None
+        execution.defectdojo_test_id = self._import_or_reimport_scan(
+            scan_type,
+            report,
+            f"{execution.task.target.target}:{execution.task.target_port.port}"
+            if execution.task.target_port
+            else execution.task.target.target,
+            engagement_id,
+            test_id,
+            [self.settings.tag],
+            project_sync.close_old_findings,
+        ).get("test_id")
+        execution.save(update_fields=["defectdojo_test_id"])
+        if not execution.output_file and report and report.is_file():
+            report.unlink()

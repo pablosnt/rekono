@@ -20,15 +20,14 @@ class FindingFilter(MultipleFieldFilterSet):
     """Base filter for all finding types with execution context.
 
     Provides standardized filtering capabilities for finding data including
-    tool, task, target, project, and executor relationships with fixing
-    status and DefectDojo integration filtering.
+    tool, task, target, project, and executor relationships with fixing status.
 
     Attributes:
-        tool (ModelMultipleChoiceFilter): Filter by tools used in executions
-        task (ModelMultipleChoiceFilter): Filter by tasks that produced findings
-        target (ModelMultipleChoiceFilter): Filter by targets in execution context
-        project (ModelMultipleChoiceFilter): Filter by projects containing findings
-        executor (ModelMultipleChoiceFilter): Filter by users who executed tasks
+        tool (ModelMultipleChoiceFilter): Filter by tools used in executions.
+        task (ModelMultipleChoiceFilter): Filter by tasks that produced findings.
+        target (ModelMultipleChoiceFilter): Filter by targets in execution context.
+        project (ModelMultipleChoiceFilter): Filter by projects containing findings.
+        executor (ModelMultipleChoiceFilter): Filter by users who executed tasks.
     """
 
     tool = ModelMultipleChoiceFilter(queryset=Tool.objects.all(), field_name="executions__configuration__tool")
@@ -44,8 +43,8 @@ class FindingFilter(MultipleFieldFilterSet):
         Uses OSINT as the default model reference which is overridden by subclasses.
 
         Attributes:
-            model (type): Default model class (overridden by subclasses)
-            fields (dict): Field names mapped to available lookup types
+            model (type): Default model class (overridden by subclasses).
+            fields (dict): Field names mapped to available lookup types.
         """
 
         model = OSINT  # It's needed to define a non-abstract model as default. It will be overwritten
@@ -55,7 +54,6 @@ class FindingFilter(MultipleFieldFilterSet):
             "auto_fixed": ["exact"],
             "fixed_date": ["gte", "lte", "exact"],
             "fixed_by": ["exact"],
-            "defectdojo_id": ["exact"],
             "created_from_user_input": ["exact"],
         }
 

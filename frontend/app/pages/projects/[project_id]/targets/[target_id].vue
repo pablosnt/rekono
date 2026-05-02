@@ -56,6 +56,17 @@
                   },
                 ]
               : []),
+            ...(integrations.defectdojo.settings?.is_available &&
+            target?.defectdojo_sync?.engagement_id
+              ? [
+                  {
+                    label: 'DefectDojo',
+                    avatar: { src: integrations.defectdojo.integration?.icon },
+                    to: `${integrations.defectdojo.settings.server}/engagement/${target.defectdojo_sync?.engagement_id}`,
+                    target: '_blank',
+                  },
+                ]
+              : []),
             ...(target?.reports.length > 0
               ? [
                   {
@@ -138,9 +149,11 @@
 <script setup lang="ts">
 import { useUserStore } from "~/store/user";
 import { targetTypes } from "~/constants";
+import { useIntegrationsStore } from "~/store/integrations";
 
 definePageMeta({ layout: "project" });
 const userStore = useUserStore();
+const integrations = useIntegrationsStore();
 const route = useRoute();
 const api = useApi("/api/targets/");
 const target = ref();
@@ -156,5 +169,6 @@ onMounted(() => {
   api.get(`${route.params.target_id}/`).then((response) => {
     target.value = response;
   });
+  integrations.fetchDefectDojo();
 });
 </script>

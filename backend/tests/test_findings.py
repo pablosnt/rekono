@@ -91,9 +91,9 @@ class OSINTTest(FindingTest, TestCase):
     model = OSINT
     endpoint = "/api/osint/"
     expected_defectdojo = {
-        "title": f"{OSINTDataType.USER.value} found using OSINT techniques",
+        "title": f"{OSINTDataType.USER.value} found on public sources",
         "description": "Data: admin10\nSource: Google",
-        "severity": Severity.MEDIUM,
+        "severity": Severity.LOW,
     }
     expected_string = f"admin10 - {OSINTDataType.USER.value}"
 
@@ -146,17 +146,12 @@ class PortTest(FindingTest, TestCase):
 class PathTest(FindingTest, TestCase):
     model = Path
     endpoint = "/api/paths/"
-    expected_defectdojo = {
-        "title": "Path discovered",
-        "description": "Host: 10.10.10.10\nPort: 80\nPath: /index.html\nType: Endpoint\nStatus: 200",
-        "severity": Severity.INFO,
-    }
+    expected_defectdojo = None
     expected_string = f"10.10.10.10 - 80 - {TransportProtocol.TCP.value} - /index.html"
 
     def test_defectdojo(self):
-        super().test_defectdojo()
         defectdojo_endpoint = {"protocol": "http", "host": "10.10.10.10", "port": 80, "path": "/index.html"}
-        parsed = self.path.defectdojo_endpoint(self.target)
+        parsed = self.path.defectdojo_endpoint()
         for key, value in defectdojo_endpoint.items():
             self.assertEqual(value, parsed[key])
 

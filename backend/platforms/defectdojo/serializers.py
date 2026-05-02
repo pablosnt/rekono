@@ -5,19 +5,10 @@ and entity management with secure handling of sensitive data, validation, and
 integration with DefectDojo API client for entity existence verification.
 """
 
-from typing import Any, cast
+from typing import Any
 
 from django.core.exceptions import ValidationError
-from django.core.validators import MaxValueValidator, MinValueValidator
-from django.shortcuts import get_object_or_404
-from rest_framework.serializers import (
-    CharField,
-    IntegerField,
-    ModelSerializer,
-    PrimaryKeyRelatedField,
-    Serializer,
-    SerializerMethodField,
-)
+from rest_framework.serializers import ModelSerializer, SerializerMethodField
 
 from framework.fields import ProtectedSecretField
 from platforms.defectdojo.integrations import DefectDojo
@@ -26,8 +17,6 @@ from platforms.defectdojo.models import (
     DefectDojoSync,
     DefectDojoTargetSync,
 )
-from projects.models import Project
-from security.validators.input_validator import Regex, Validator
 
 
 class DefectDojoClientMixin:
@@ -70,7 +59,7 @@ class DefectDojoSettingsSerializer(DefectDojoClientMixin, ModelSerializer):
         """
 
         model = DefectDojoSettings
-        fields = ("id", "server", "api_token", "tls_validation", "tag", "test_type", "test", "is_available")
+        fields = ("id", "server", "api_token", "tls_validation", "tag", "is_available")
 
     def get_is_available(self, instance: DefectDojoSettings) -> bool:
         """Check if DefectDojo service is currently available and functional.
@@ -107,42 +96,7 @@ class DefectDojoSettingsSerializer(DefectDojoClientMixin, ModelSerializer):
         return attrs
 
 
-class BaseDefectDojoSerializer(DefectDojoClientMixin, Serializer):
-    """Base serializer for DefectDojo entity operations with validation.
-
-    Provides common validation logic for DefectDojo entity serializers including
-    integration availability checking and entity existence verification.
-    Ensures all operations are performed against properly configured DefectDojo instances.
-    """
-
-    def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
-        """Validate DefectDojo integration availability and entity references.
-
-        Performs comprehensive validation including DefectDojo service availability
-        and existence verification for referenced entities (product types, products,
-        engagements) to prevent creation of orphaned or invalid relationships.
-
-        Args:
-            attrs (dict[str, Any]): Serializer attribute dictionary
-
-        Returns:
-            dict[str, Any]: Validated attributes
-
-        Raises:
-            ValidationError: If DefectDojo is unavailable or referenced entities don't exist
-        """
-        if not self.client.is_available():
-            raise ValidationError("DefectDojo integration is not configured", code="defectdojo")
-        attrs = super().validate(attrs)
-        for entity in ["product_type", "product", "engagement"]:
-            value = attrs.get(f"{entity}_id") or attrs.get(entity)
-            if value:
-                if not self.client.exists(f"{entity}s", value):
-                    raise ValidationError(f"{entity.capitalize().replace('_', '')} {value} doesn't exist", code=entity)
-        return attrs
-
-
-class DefectDojoSyncSerializer(BaseDefectDojoSerializer, ModelSerializer):
+class DefectDojoSyncSerializer(DefectDojoClientMixin, ModelSerializer):
     """Serializer for DefectDojo project synchronization mappings.
 
     Provides serialization for project-level synchronization configurations
@@ -162,7 +116,33 @@ class DefectDojoSyncSerializer(BaseDefectDojoSerializer, ModelSerializer):
         """
 
         model = DefectDojoSync
-        fields = ("id", "project", "product_type_id", "product_id", "engagement_id")
+        fields = ("id", "project", "product_id", "engagement_id", "reimport", "close_old_findings")
+
+    def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
+        """Validate DefectDojo integration availability and entity references.
+
+        Performs comprehensive validation including DefectDojo service availability
+        and existence verification for referenced entities (products, engagements)
+        to prevent creation of orphaned or invalid relationships.
+
+        Args:
+            attrs (dict[str, Any]): Serializer attribute dictionary
+
+        Returns:
+            dict[str, Any]: Validated attributes
+
+        Raises:
+            ValidationError: If DefectDojo is unavailable or referenced entities don't exist
+        """
+        if not self.client.is_available():
+            raise ValidationError("DefectDojo integration is not configured", code="defectdojo")
+        attrs = super().validate(attrs)
+        for entity in ["product", "engagement"]:
+            value = attrs.get(f"{entity}_id") or attrs.get(entity)
+            if value:
+                if not self.client.exists(f"{entity}s", value):
+                    raise ValidationError(f"{entity.capitalize().replace('_', '')} {value} doesn't exist", code=entity)
+        return attrs
 
 
 class DefectDojoTargetSyncSerializer(ModelSerializer):
@@ -186,190 +166,3 @@ class DefectDojoTargetSyncSerializer(ModelSerializer):
 
         model = DefectDojoTargetSync
         fields = ("id", "defectdojo_sync", "target", "engagement_id")
-
-
-class DefectDojoProductTypeSerializer(BaseDefectDojoSerializer):
-    """Serializer for creating DefectDojo product types.
-
-    Provides serialization and validation for creating product type entities
-    in DefectDojo through direct API integration. Product types serve as the
-    top-level organizational structure in DefectDojo's hierarchy.
-
-    Attributes:
-        id (IntegerField): Created product type ID (read-only)
-        name (CharField): Product type name (write-only, max 100 chars)
-        description (CharField): Product type description (write-only, max 500 chars)
-        client (DefectDojo): DefectDojo integration client instance inherited from mixin
-    """
-
-    id = IntegerField(read_only=True)
-    name = CharField(
-        required=True,
-        allow_blank=False,
-        max_length=100,
-        validators=[Validator(Regex.NAME, code="name")],
-        write_only=True,
-    )
-    description = CharField(
-        required=True,
-        allow_blank=False,
-        max_length=500,
-        validators=[Validator(Regex.TEXT, code="description")],
-        write_only=True,
-    )
-
-    def create(self, validated_data: dict[str, Any]) -> dict[str, Any]:
-        """Create a new product type in DefectDojo.
-
-        Creates a product type entity through DefectDojo API integration
-        using validated name and description data.
-
-        Args:
-            validated_data (dict[str, Any]): Validated serializer data
-
-        Returns:
-            dict[str, Any]: Created product type data from DefectDojo API
-        """
-        return self.client.create_product_type(validated_data["name"], validated_data["description"])
-
-
-class DefectDojoProductSerializer(BaseDefectDojoSerializer):
-    """Serializer for creating DefectDojo products.
-
-    Provides serialization and validation for creating product entities in DefectDojo
-    through direct API integration. Products represent specific applications or
-    systems being tested and are associated with product types.
-
-    Attributes:
-        id (IntegerField): Created product ID (read-only)
-        product_type (IntegerField): DefectDojo product type ID (write-only, 1-999999999)
-        name (CharField): Product name (write-only, max 100 chars)
-        description (CharField): Product description (write-only, max 500 chars)
-        project_id (PrimaryKeyRelatedField): Rekono project ID for tag integration (write-only)
-        client (DefectDojo): DefectDojo integration client instance inherited from mixin
-    """
-
-    id = IntegerField(read_only=True)
-    product_type = IntegerField(
-        required=True,
-        validators=[MinValueValidator(1), MaxValueValidator(999999999)],
-        write_only=True,
-    )
-    name = CharField(
-        required=True,
-        allow_blank=False,
-        max_length=100,
-        validators=[Validator(Regex.NAME, code="name")],
-        write_only=True,
-    )
-    description = CharField(
-        required=True,
-        allow_blank=False,
-        max_length=500,
-        validators=[Validator(Regex.TEXT, code="description")],
-        write_only=True,
-    )
-    # Needed to add project tags to DefectDojo product
-    project_id = PrimaryKeyRelatedField(
-        required=True,
-        queryset=Project.objects.all(),
-        write_only=True,
-    )
-
-    def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
-        """Validate product creation data and verify project access permissions.
-
-        Validates DefectDojo integration and entity references, then verifies
-        that the requesting user has access to the specified project for
-        tag integration purposes.
-
-        Args:
-            attrs (dict[str, Any]): Serializer attribute dictionary
-
-        Returns:
-            dict[str, Any]: Validated attributes with project instance
-        """
-        attrs = super().validate(attrs)
-        attrs["project"] = get_object_or_404(
-            Project, id=cast(Project, attrs.get("project_id")).id, members=self.context.get("request").user.id
-        )
-        return attrs
-
-    def create(self, validated_data: dict[str, Any]) -> dict[str, Any]:
-        """Create a new product in DefectDojo with project tag integration.
-
-        Creates a product entity through DefectDojo API integration using
-        validated data and includes project tags for organizational consistency.
-
-        Args:
-            validated_data (dict[str, Any]): Validated serializer data
-
-        Returns:
-            dict[str, Any]: Created product data from DefectDojo API
-        """
-        return self.client.create_product(
-            validated_data["product_type"],
-            validated_data["name"],
-            validated_data["description"],
-            (
-                [self.client.settings.tag]
-                if self.client.settings.tag
-                else [] + list(validated_data["project"].tags.all().values_list("slug", flat=True))
-            ),
-        )
-
-
-class DefectDojoEngagementSerializer(BaseDefectDojoSerializer):
-    """Serializer for creating DefectDojo engagements.
-
-    Provides serialization and validation for creating engagement entities in
-    DefectDojo through direct API integration. Engagements represent specific
-    security assessments or testing periods within a product.
-
-    Attributes:
-        id (IntegerField): Created engagement ID (read-only)
-        product (IntegerField): DefectDojo product ID (write-only, 1-999999999)
-        name (CharField): Engagement name (write-only, max 100 chars)
-        description (CharField): Engagement description (write-only, max 500 chars)
-        client (DefectDojo): DefectDojo integration client instance inherited from mixin
-    """
-
-    id = IntegerField(read_only=True)
-    product = IntegerField(
-        required=True,
-        validators=[MinValueValidator(1), MaxValueValidator(999999999)],
-        write_only=True,
-    )
-    name = CharField(
-        required=True,
-        allow_blank=False,
-        max_length=100,
-        validators=[Validator(Regex.NAME, code="name")],
-        write_only=True,
-    )
-    description = CharField(
-        required=True,
-        allow_blank=False,
-        max_length=500,
-        validators=[Validator(Regex.TEXT, code="description")],
-        write_only=True,
-    )
-
-    def create(self, validated_data: dict[str, Any]) -> dict[str, Any]:
-        """Create a new engagement in DefectDojo with tag integration.
-
-        Creates an engagement entity through DefectDojo API integration using
-        validated data and includes configured tags for organizational consistency.
-
-        Args:
-            validated_data (dict[str, Any]): Validated serializer data
-
-        Returns:
-            dict[str, Any]: Created engagement data from DefectDojo API
-        """
-        return self.client.create_engagement(
-            validated_data["product"],
-            validated_data["name"],
-            validated_data["description"],
-            [self.client.settings.tag] if self.client.settings.tag else [],
-        )

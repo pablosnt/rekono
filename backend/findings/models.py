@@ -61,11 +61,11 @@ class OSINT(TriageFinding):
         InputKeyword.URL: lambda instance, target: instance.get_url(target, instance.data),
     }
     _defectdojo_finding_mapping = {
-        "title": lambda instance: f"{instance.data_type} found using OSINT techniques",
+        "title": lambda instance: f"{instance.data_type} found on public sources",
         "description": lambda instance: "\n".join(
             [f"{k}: {v}" for k, v in [("Data", instance.data), ("Source", instance.source)] if v]
         ),
-        "severity": Severity.MEDIUM,
+        "severity": Severity.LOW,
     }
 
     def parse(self, target: Any, accumulated: dict[str, Any] = {}) -> dict[str, Any]:
@@ -140,21 +140,28 @@ class Host(Finding):
     }
     _defectdojo_finding_mapping = {
         "title": "Host discovered",
-        "description": lambda instance: "\n".join(
-            [
-                f"{k}: {v}"
-                for k, v in [
-                    ("IP", instance.ip),
-                    ("Domain", instance.domain),
-                    ("OS type", instance.os_type),
-                    ("OS", instance.os),
-                    ("Country", instance.country),
-                    ("City", instance.city),
-                    ("Latitude", instance.latitude),
-                    ("Longitude", instance.longitude),
+        "description": lambda instance: (
+            "\n".join(
+                [
+                    f"{k}: {v}"
+                    for k, v in [
+                        ("IP", instance.ip),
+                        ("Domain", instance.domain),
+                        ("OS type", instance.os_type),
+                        ("OS", instance.os),
+                        ("Country", instance.country),
+                        ("City", instance.city),
+                        ("Latitude", instance.latitude),
+                        ("Longitude", instance.longitude),
+                        ("Reputation", instance.reputation),
+                        ("Malicious Analysis", instance.malicious_analysis),
+                        ("Suspicious Analysis", instance.suspicious_analysis),
+                        ("Total Analysis", instance.total_analysis),
+                    ]
+                    if v
                 ]
-                if v
-            ]
+            )
+            + (f"\nWHOIS:\n{instance.whois}" if instance.whois else "")
         ),
         "severity": Severity.INFO,
     }
@@ -215,6 +222,7 @@ class Port(Finding):
             ]
         ),
         "severity": Severity.INFO,
+        "endpoints": lambda instance: [path.defectdojo_endpoint() for path in instance.path.all()],
     }
     _filters = [
         Finding.Filter(int, "port"),
@@ -301,30 +309,10 @@ class Path(Finding):
         ),
     }
     _parse_dependencies = ["port"]
-    _defectdojo_finding_mapping = {
-        "title": "Path discovered",
-        "description": lambda instance: "\n".join(
-            [
-                f"{k}: {v}"
-                for k, v in [
-                    ("Host", instance.port.host.ip if instance.port and instance.port.host else None),
-                    ("Port", instance.port.port if instance.port else None),
-                    ("Path", instance.path),
-                    ("Type", instance.type),
-                    ("Status", instance.status),
-                    ("Info", instance.extra_info),
-                ]
-                if v
-            ]
-        ),
-        "severity": Severity.INFO,
-    }
     _defectdojo_endpoint_mapping = {
-        "protocol": lambda instance, target: instance.port.service if instance.port else None,
-        "host": lambda instance, target: (
-            instance.port.host.ip if instance.port and instance.port.host else target.target
-        ),
-        "port": lambda instance, target: instance.port.port if instance.port else None,
+        "protocol": lambda instance: instance.port.service if instance.port else None,
+        "host": lambda instance: instance.port.host.ip if instance.port and instance.port.host else None,
+        "port": lambda instance: instance.port.port if instance.port else None,
         "path": "path",
     }
 
@@ -572,6 +560,19 @@ class Vulnerability(TriageFinding):
         "severity": "severity",
         "cve": "cve",
         "cwe": lambda instance: int(instance.cwe.split("-", 1)[1]) if instance.cwe else None,
+        "cvss3": lambda instance: (
+            instance.cvss_vector if instance.cvss_version and instance.cvss_version.startswith("3") else None
+        ),
+        "cvss3_score": lambda instance: (
+            instance.cvss_base_score if instance.cvss_version and instance.cvss_version.startswith("3") else None
+        ),
+        "cvss4": lambda instance: (
+            instance.cvss_vector if instance.cvss_version and instance.cvss_version.startswith("4") else None
+        ),
+        "cvss4_score": lambda instance: (
+            instance.cvss_base_score if instance.cvss_version and instance.cvss_version.startswith("4") else None
+        ),
+        "mitigation": "remediation",
         "references": "reference",
     }
 

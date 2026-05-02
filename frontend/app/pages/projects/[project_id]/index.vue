@@ -24,7 +24,10 @@
           />
         </UFormField>
         <div class="flex flex-wrap items-center gap-3">
-          <!-- TODO: DefectDojo modal -->
+          <DefectdojoModal
+            :sync="currentProject.defectdojo_sync"
+            @update="fetch()"
+          />
           <UDropdownMenu
             v-if="userStore.is_admin"
             :items="[
@@ -101,6 +104,12 @@ const deleteConfig = {
   entityName: "Project",
   deleteMessage: config.deleteMessage,
 };
+
+function fetch() {
+  api.get(`${route.params.project_id}/`).then((response) => {
+    setCurrentProject(response);
+  });
+}
 
 function update() {
   if (!schema.safeParse(state.value).success) return;

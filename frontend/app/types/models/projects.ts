@@ -1,3 +1,5 @@
+import type { DefectDojoSync } from "./integrations";
+
 export interface Project {
   id: number;
   name: string;
@@ -9,4 +11,5 @@ export interface Project {
   targets: Array<number>;
   members: Array<number>;
   tags: Array<string>;
+  defectdojo_sync?: DefectDojoSync;
 }
