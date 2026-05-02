@@ -105,6 +105,7 @@
             />
           </UPageCard>
         </div>
+        <!-- TODO: The only-active is not applied well for triageable findings -->
         <FindingsCounterAll only-active />
         <div
           v-if="hosts.length > 0 || vulnerabilities.length > 0"
@@ -166,7 +167,6 @@
             />
           </UMarquee>
         </UPageSection>
-        <!-- TODO: Improve descriptions. Ask Claude -->
         <UPageSection
           title="Core Features"
           :features="[
@@ -180,13 +180,14 @@
             {
               title: 'Reports',
               description:
-                'Generate reports with the findings detected in PDF, JSON or XML formats',
+                'Export polished reports in multiple formats, ready for clients, stakeholders, or automated pipelines',
               icon: 'i-lucide-file-text',
               ui: { leadingIcon: 'text-neutral' },
             },
             {
               title: 'Metrics',
-              description: 'Analyze the results of your scans and operations',
+              description:
+                'Track vulnerability trends, measure coverage, and visualize how your attack surface evolves',
               icon: 'i-lucide-chart-bar',
               to: '/metrics',
               ui: { leadingIcon: 'text-success' },
@@ -201,7 +202,7 @@
             {
               title: 'Notes',
               description:
-                'Take time to write down your thoughts and plan your next steps',
+                'Capture hypotheses, annotate findings, and plan your recon strategy where the work happens',
               icon: 'i-lucide-notebook',
               ui: { leadingIcon: 'text-purple-500' },
             },
@@ -230,7 +231,6 @@
             />
           </UMarquee>
         </UPageSection>
-        <!-- TODO: Text center? As the features are short, they are aligned to the start -->
         <UPageSection
           title="Join the Community"
           :features="[
@@ -240,7 +240,8 @@
               icon: 'i-simple-icons-github',
               to: 'https://github.com/pablosnt/rekono',
               target: '_blank',
-              ui: { leadingIcon: 'text-neutral' },
+              orientation: 'vertical',
+              ui: { root: 'text-center', leadingIcon: 'text-neutral' },
             },
             {
               title: 'Twitter',
@@ -248,7 +249,8 @@
               icon: 'i-simple-icons-x',
               to: 'https://x.com/rekonosec',
               target: '_blank',
-              ui: { leadingIcon: 'text-neutral' },
+              orientation: 'vertical',
+              ui: { root: 'text-center', leadingIcon: 'text-neutral' },
             },
             {
               title: 'Discord',
@@ -256,7 +258,8 @@
               icon: 'i-simple-icons-discord',
               to: 'https://discord.gg/Zyduu5C7M3',
               target: '_blank',
-              ui: { leadingIcon: 'text-indigo-500' },
+              orientation: 'vertical',
+              ui: { root: 'text-center', leadingIcon: 'text-indigo-500' },
             },
             {
               title: 'Ko-fi',
@@ -264,15 +267,17 @@
               icon: 'i-simple-icons-kofi',
               to: 'https://ko-fi.com/pablosnt',
               target: '_blank',
-              ui: { leadingIcon: 'text-primary' },
+              orientation: 'vertical',
+              ui: { root: 'text-center', leadingIcon: 'text-primary' },
             },
             {
-              title: 'Buy Me a Coffe',
+              title: 'Buy Me a Coffee',
               description: 'Support us',
               icon: 'i-simple-icons-buymeacoffee',
               to: 'https://buymeacoffee.com/pablosnt',
               target: '_blank',
-              ui: { leadingIcon: 'text-warning' },
+              orientation: 'vertical',
+              ui: { root: 'text-center', leadingIcon: 'text-warning' },
             },
             {
               title: 'Docs',
@@ -280,7 +285,8 @@
               icon: 'i-simple-icons-readthedocs',
               to: 'https://github.com/pablosnt/rekono/wiki',
               target: '_blank',
-              ui: { leadingIcon: 'text-neutral' },
+              orientation: 'vertical',
+              ui: { root: 'text-center', leadingIcon: 'text-neutral' },
             },
           ]"
         />
@@ -323,19 +329,19 @@ const description = computed(() => {
   if (loading.value) return "Welcome to Rekono";
   if (!hasProjects.value && !hasScans.value) {
     if (userStore.is_admin) {
-      return "Rekono is your automated recon-to-report platform — mapping attack surfaces, uncovering vulnerabilities, and chaining findings across your entire scope. Create your first project to define your targets and kick off the operation.";
+      return "Rekono is your automated recon-to-report platform. It maps attack surfaces, uncovers vulnerabilities, and chains findings across your entire scope.Create your first project to define your targets and kick off the operation.";
     }
     if (userStore.is_auditor) {
-      return "Rekono is your automated recon-to-report platform — mapping attack surfaces, uncovering vulnerabilities, and chaining findings across your entire scope. Ask your admin to assign you to a project to launch your first scan.";
+      return "Rekono is your automated recon-to-report platform. It maps attack surfaces, uncovers vulnerabilities, and chains findings across your entire scope.Ask your admin to assign you to a project to launch your first scan.";
     }
     return "Rekono is your automated recon-to-report platform — mapping attack surfaces, uncovering vulnerabilities, and chaining findings across your entire scope. Your admin will add you to a project once one is ready to explore.";
   } else if (!hasScans.value) {
     if (userStore.is_auditor) {
-      return "Targets are locked in — now it's time to go loud. Run your first scan and let Rekono probe every host, port, and service while you plan the next move.";
+      return "Targets are locked in. Run your first scan and let Rekono probe every host, port, and service while you plan the next move.";
     }
     return "Projects are scoped and targets are set, but no scans have run yet. Explore your projects to get familiar with the attack surface before the recon begins.";
   } else if (userStore.is_auditor) {
-    return "Recon is live and findings are surfacing. Every scan peels back another layer — keep the momentum and push deeper into the attack surface.";
+    return "Recon is live and findings are surfacing. Every scan peels back another layer, so keep the momentum and push deeper into the attack surface.";
   }
   return "Your team's recon is active. Dive into the latest findings, track open vulnerabilities, and explore the full picture of the attack surface.";
 });
