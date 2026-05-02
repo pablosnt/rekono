@@ -5,6 +5,8 @@ analytics, host metrics, queue monitoring, trending data, and evolution analysis
 Supports filtering, pagination, and aggregation for comprehensive security reporting.
 """
 
+import datetime
+
 from django.db.models import Count, Exists, F, Func, Max, Min, OuterRef, Q, Subquery
 from django.db.models.functions import TruncMonth
 from django_rq.utils import get_statistics
@@ -448,13 +450,20 @@ class MonthlyEvolutionViewSet(StatsViewSet):
             .order_by("month")
             if item["month"]
         }
+        event_months = sorted(set(discovered_by_month) | set(fixed_by_month))
+        if not event_months:
+            return []
+        now = datetime.datetime.now(tz=event_months[0].tzinfo)
+        current_month = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
         active = 0
         result = []
-        for month in sorted(set(discovered_by_month) | set(fixed_by_month)):
+        month = event_months[0]
+        while month <= current_month:
             discovered = discovered_by_month.get(month, 0)
             fixed = fixed_by_month.get(month, 0)
             active = max(0, active + discovered - fixed)
             result.append({"month": month.date(), "discovered": discovered, "fixed": fixed, "active": active})
+            month = (month + datetime.timedelta(days=32)).replace(day=1, hour=0, minute=0, second=0, microsecond=0)
         return result[-self.max_months :]
 
 
