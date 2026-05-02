@@ -81,7 +81,7 @@ class FindingManager(Manager):
             findings.fixed_by = fixed_by
             findings.save(update_fields=["is_fixed", "auto_fixed", "fixed_date", "fixed_by"])
         else:
-            findings = findings.update(
+            findings.update(
                 is_fixed=True,
                 auto_fixed=fixed_by is None,
                 fixed_date=timezone.now(),

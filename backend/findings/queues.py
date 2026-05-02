@@ -121,7 +121,10 @@ class FindingsQueue(BaseQueue):
                 Exploit,
             ]:
                 finding_type.objects.fix(
-                    finding_type.objects.exclude(executions__id=execution.id)
-                    .filter(hash=execution.hash, status=Status.COMPLETED)
-                    .all()
+                    finding_type.objects.filter(
+                        executions__hash=execution.hash,
+                        executions__status=Status.COMPLETED,
+                    )
+                    .exclude(executions__id=execution.id)
+                    .distinct()
                 )
