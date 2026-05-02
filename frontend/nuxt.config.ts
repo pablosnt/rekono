@@ -16,9 +16,10 @@ export default defineNuxtConfig({
         "info",
         "success",
         "warning",
+        "neutral",
         "error",
         "orange",
-        "amber"
+        "amber",
       ],
     },
   },
