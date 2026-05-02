@@ -126,12 +126,13 @@
           </USelectMenu>
           <UCheckbox
             v-else-if="field.type === 'checkbox'"
-            v-model="formData[field.key] as any"
+            v-model="formData[field.key]"
             :label="field.label"
+            :disabled="field.disabled === true"
           />
           <CrudTagsForm
             v-else-if="field.type === 'tags'"
-            v-model="formData[field.key] as string[]"
+            v-model="formData[field.key]"
             :placeholder="field.placeholder"
             :icon="field.icon"
             :size="field.size"
