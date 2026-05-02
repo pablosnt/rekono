@@ -7,6 +7,7 @@ export const findingTypes = [
     iconClass: "text-primary",
     iconBgClass: "bg-primary/10",
     accentClass: "bg-primary",
+    isTriageable: true,
   },
   {
     value: "Host",
@@ -16,6 +17,7 @@ export const findingTypes = [
     iconClass: "text-slate-500 dark:text-slate-400",
     iconBgClass: "bg-slate-500/10",
     accentClass: "bg-slate-500",
+    isTriageable: false,
   },
   {
     value: "Port",
@@ -25,6 +27,7 @@ export const findingTypes = [
     iconClass: "text-cyan-500",
     iconBgClass: "bg-cyan-500/10",
     accentClass: "bg-cyan-500",
+    isTriageable: false,
   },
   {
     value: "Path",
@@ -34,6 +37,7 @@ export const findingTypes = [
     iconClass: "text-teal-500",
     iconBgClass: "bg-teal-500/10",
     accentClass: "bg-teal-500",
+    isTriageable: false,
   },
   {
     value: "Technology",
@@ -43,6 +47,7 @@ export const findingTypes = [
     iconClass: "text-amber-500",
     iconBgClass: "bg-amber-500/10",
     accentClass: "bg-amber-500",
+    isTriageable: false,
   },
   {
     value: "Credential",
@@ -52,6 +57,7 @@ export const findingTypes = [
     iconClass: "text-orange-500",
     iconBgClass: "bg-orange-500/10",
     accentClass: "bg-orange-500",
+    isTriageable: true,
   },
   {
     value: "Vulnerability",
@@ -61,6 +67,7 @@ export const findingTypes = [
     iconClass: "text-error",
     iconBgClass: "bg-error/10",
     accentClass: "bg-error",
+    isTriageable: true,
   },
   {
     value: "Exploit",
@@ -70,6 +77,7 @@ export const findingTypes = [
     iconClass: "text-rose-600",
     iconBgClass: "bg-rose-600/10",
     accentClass: "bg-rose-600",
+    isTriageable: true,
   },
 ];
 

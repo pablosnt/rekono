@@ -20,7 +20,6 @@ const props = defineProps<{
   taskId?: string | number;
   projectId?: string | number;
   onlyActive?: boolean;
-  isTriageable?: boolean;
 }>();
 
 const api = useApi("/api/");
@@ -33,16 +32,19 @@ const counters = ref(
     loading: false,
   })),
 );
-const openFindings = { is_fixed: false };
-const activeFindings = {
-  triage_status__in: "True Positive,Untriaged",
-  ...openFindings,
-};
-const defaultFilters = props.onlyActive
-  ? props.isTriageable
-    ? activeFindings
-    : openFindings
-  : {};
+
+function getFilters(isTriageable: boolean) {
+  const defaultFilters = props.onlyActive
+    ? isTriageable
+      ? { triage_status__in: "True Positive,Untriaged", is_fixed: false }
+      : { is_fixed: false }
+    : {};
+  return props.taskId
+    ? { task: props.taskId, ...defaultFilters }
+    : props.projectId
+      ? { project: props.projectId, ...defaultFilters }
+      : defaultFilters;
+}
 
 function fetch() {
   total.value = 0;
@@ -54,11 +56,7 @@ function fetch() {
     api
       .list(
         `${counter.plural.toLowerCase()}/`,
-        props.taskId
-          ? { task: props.taskId, ...defaultFilters }
-          : props.projectId
-            ? { project: props.projectId, ...defaultFilters }
-            : defaultFilters,
+        getFilters(counter.isTriageable),
         false,
         1,
         1,

@@ -75,7 +75,6 @@
     </UForm>
     <div v-if="project.targets.length > 0">
       <USeparator class="mb-8 mt-8" />
-      <!-- TODO: The only-active is not applied well for triageable findings -->
       <FindingsCounterAll :project-id="route.params.project_id" only-active />
     </div>
   </div>

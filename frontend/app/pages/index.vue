@@ -105,7 +105,6 @@
             />
           </UPageCard>
         </div>
-        <!-- TODO: The only-active is not applied well for triageable findings -->
         <FindingsCounterAll only-active />
         <div
           v-if="hosts.length > 0 || vulnerabilities.length > 0"
