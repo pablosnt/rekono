@@ -317,7 +317,7 @@ class DefectDojo(BaseIntegration):
         if project_sync.reimport and not created_engagement:
             test_type = self._get_test_type(test_type_name)
             if test_type:
-                test = self._get_test(engagement_id, test_type, scan_type)
+                test = self._get_test(engagement_id, test_type.get("id"), scan_type)
                 test_id = test.get("id") if test else None
         execution.defectdojo_test_id = self._import_or_reimport_scan(
             scan_type,
