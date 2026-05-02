@@ -13,6 +13,6 @@ router = SimpleRouter()
 router.register("tasks", TaskViewSet)
 
 urlpatterns = [
-    path("tasks/latest", LatestTasksViewSet.as_view({"get": "retrieve"}), name="latest-tasks"),
+    path("tasks/latest/", LatestTasksViewSet.as_view({"get": "list"}), name="latest-tasks"),
     path("", include(router.urls)),
 ]

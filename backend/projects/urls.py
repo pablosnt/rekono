@@ -13,6 +13,6 @@ router = SimpleRouter()
 router.register("projects", ProjectViewSet)
 
 urlpatterns = [
-    path("projects/top", TopProjectsViewSet.as_view({"get": "retrieve"}), name="top-projects"),
+    path("projects/top/", TopProjectsViewSet.as_view({"get": "list"}), name="top-projects"),
     path("", include(router.urls)),
 ]

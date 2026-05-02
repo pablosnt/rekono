@@ -31,11 +31,9 @@ router.register("credentials", CredentialViewSet)
 router.register("exploits", ExploitViewSet)
 
 urlpatterns = [
-    path("hosts/latest", LatestHostsViewSet.as_view({"get": "retrieve"}), name="latest-hosts"),
+    path("hosts/latest/", LatestHostsViewSet.as_view({"get": "list"}), name="latest-hosts"),
     path(
-        "vulnerabilities/latest",
-        LatestVulnerabilitiesViewSet.as_view({"get": "retrieve"}),
-        name="latest-vulnerabilities",
+        "vulnerabilities/latest/", LatestVulnerabilitiesViewSet.as_view({"get": "list"}), name="latest-vulnerabilities"
     ),
     path("", include(router.urls)),
 ]
