@@ -19,8 +19,6 @@ export interface DefectDojoSettings {
   api_token: string;
   tls_validation: boolean;
   tag: string;
-  test_type: string;
-  test: string;
   is_available: boolean;
 }
 

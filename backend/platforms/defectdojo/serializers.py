@@ -59,7 +59,7 @@ class DefectDojoSettingsSerializer(DefectDojoClientMixin, ModelSerializer):
         """
 
         model = DefectDojoSettings
-        fields = ("id", "server", "api_token", "tls_validation", "tag", "test_type", "test", "is_available")
+        fields = ("id", "server", "api_token", "tls_validation", "tag", "is_available")
 
     def get_is_available(self, instance: DefectDojoSettings) -> bool:
         """Check if DefectDojo service is currently available and functional.
