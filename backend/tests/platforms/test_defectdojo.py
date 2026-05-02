@@ -4,12 +4,14 @@ from unittest import mock
 
 from django.test import TestCase
 
+from findings.models import Path
 from platforms.defectdojo.integrations import DefectDojo
 from platforms.defectdojo.models import DefectDojoSettings, DefectDojoSync, DefectDojoTargetSync
 from security.authorization.roles import Role
 from tests.framework import ApiTest, ApiTestNoData, BaseTest
 from tests.framework.cases import ApiTestCase, DeleteApiTestCase, PostApiTestCase, PutApiTestCase
 from tests.framework.data import SetupProject
+from tools.models import Configuration
 
 # pytype: disable=wrong-arg-types
 
@@ -32,6 +34,14 @@ def create_engagement(*args: Any) -> dict[str, Any]:
 
 def import_scan(*args: Any) -> dict[str, Any]:
     return {"test_id": 1, "engagement_id": 1, "product_id": 1, "product_type_id": 1, "active": True}
+
+
+def return_test_type(*args: Any, **kwargs: Any) -> dict[str, Any]:
+    return {"id": 1, "name": "Nmap Scan"}
+
+
+def return_test(*args: Any, **kwargs: Any) -> dict[str, Any]:
+    return {"id": 5}
 
 
 def exception(*args: Any, **kwargs: Any) -> Any:
@@ -72,6 +82,28 @@ class DefectDojoIntegrationTest(BaseTest, TestCase):
         self.assertTrue(DefectDojoTargetSync.objects.filter(target=self.target).exists())
         integration.process_findings(self.execution, self.findings)
         self.assertEqual(1, DefectDojoTargetSync.objects.filter(target=self.target).count())
+
+    def test_process_findings_empty(self) -> None:
+        DefectDojoSync.objects.create(project=self.project, product_id=1, engagement_id=1)
+        path_only = [f for f in self.findings if isinstance(f, Path)]
+        DefectDojo().process_findings(self.execution, path_only)
+        self.assertIsNone(self.execution.defectdojo_test_id)
+
+    @mock.patch("platforms.defectdojo.integrations.DefectDojo._import_or_reimport_scan", import_scan)
+    def test_import(self) -> None:
+        DefectDojoSync.objects.create(project=self.project, product_id=1, engagement_id=1)
+        self.execution.configuration = Configuration.objects.get(pk=15)
+        DefectDojo().process_findings(self.execution, self.findings)
+        self.assertEqual(1, self.execution.defectdojo_test_id)
+
+    @mock.patch("platforms.defectdojo.integrations.DefectDojo._get_test_type", return_test_type)
+    @mock.patch("platforms.defectdojo.integrations.DefectDojo._get_test", return_test)
+    @mock.patch("platforms.defectdojo.integrations.DefectDojo._import_or_reimport_scan", import_scan)
+    def test_reimport(self) -> None:
+        DefectDojoSync.objects.create(project=self.project, product_id=1, engagement_id=1, reimport=True)
+        self.execution.output_file = self.data_dir / "reports" / "nmap" / "enumeration-vulners.xml"
+        DefectDojo().process_findings(self.execution, self.findings)
+        self.assertEqual(1, self.execution.defectdojo_test_id)
 
     def _test_is_available_and_exists(self, expected: bool) -> None:
         settings = DefectDojoSettings.objects.first()
