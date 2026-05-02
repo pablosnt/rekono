@@ -2,18 +2,21 @@
   <Panel :navigation-items="items" storage-key="panel">
     <template #panel-header="{ open }">
       <div class="relative flex items-center w-full justify-between">
-        <div v-if="open" class="flex items-center justify-center gap-2">
+        <div
+          v-if="open && currentProject"
+          class="flex items-center justify-center gap-2"
+        >
           <UAvatar
-            :text="projectEntity.name.charAt(0).toUpperCase()"
+            :text="currentProject.name.charAt(0).toUpperCase()"
             class="bg-primary-500"
             :ui="{ fallback: 'text-white' }"
             width="30"
           />
-          <h1>{{ projectEntity.name }}</h1>
+          <h1>{{ currentProject.name }}</h1>
         </div>
         <UAvatar
-          v-else
-          :text="projectEntity.name.charAt(0).toUpperCase()"
+          v-else-if="currentProject"
+          :text="currentProject.name.charAt(0).toUpperCase()"
           width="30"
           class="bg-primary-500 opacity-100 group-hover:opacity-0 transition-opacity duration-200"
           :ui="{ fallback: 'text-white' }"
@@ -49,15 +52,15 @@ const api = useApi();
 const route = useRoute();
 const userStore = useUserStore();
 const { panelRefresh } = usePanel();
+const { currentProject, setCurrentProject } = useCurrentProject();
 const breadcrumb = ref([]);
 const items = ref([]);
-const projectEntity = ref({ name: "Rekono" });
 const mounting = ref(false);
 const allProjects = ref<Project[]>([]);
 
 function onProjectChange() {
   if (!route.params.project_id) {
-    projectEntity.value = { name: "Rekono" };
+    setCurrentProject(null);
     return;
   }
   breadcrumb.value = [
@@ -72,15 +75,15 @@ function onProjectChange() {
       to: "/projects/",
     },
   ];
-  api.get(`/api/projects/${route.params.project_id}/`).then((project) => {
-    projectEntity.value = project;
+  api.get(`/api/projects/${route.params.project_id}/`).then((data) => {
+    setCurrentProject(data);
     if (allProjects.value.length === 0) {
       api.list("/api/projects/", {}, true).then((response) => {
         allProjects.value = response.items;
-        getProjectBreadcrum(project);
+        getProjectBreadcrum(data);
       });
     } else {
-      getProjectBreadcrum(project);
+      getProjectBreadcrum(data);
     }
   });
   items.value = [
@@ -409,6 +412,19 @@ function onExploitChange() {
 
 watch(panelRefresh, loadProjectBadges);
 watch(() => route.params.project_id, onProjectChange);
+watch(
+  () => currentProject.value?.name,
+  (name) => {
+    if (!name || breadcrumb.value.length < 3) return;
+    const item = breadcrumb.value[2];
+    item.label = name;
+    item.avatar = { text: name.charAt(0).toUpperCase() };
+    const cached = allProjects.value.find(
+      (p) => p.id === currentProject.value?.id,
+    );
+    if (cached) cached.name = name;
+  },
+);
 watch(() => route.params.target_id, onTargetChange);
 watch(() => route.params.scan_id, onScanChange);
 watch(() => route.params.note_id, onNoteChange);

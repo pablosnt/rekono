@@ -1,5 +1,5 @@
 <template>
-  <div v-if="project">
+  <div v-if="currentProject">
     <UForm
       class="space-y-4 p-3"
       :schema="schema"
@@ -49,7 +49,7 @@
           </UDropdownMenu>
           <CrudDeleteModal
             :open="deleteOpen"
-            :item="project"
+            :item="currentProject"
             :config="deleteConfig"
             :api="api"
             @open="(open) => (deleteOpen = open)"
@@ -60,7 +60,10 @@
       <UFormField v-if="userStore.is_admin" class="mt-5" name="tags">
         <CrudTagsForm v-model="state.tags" @update:model-value="update()" />
       </UFormField>
-      <CrudTags v-else-if="project.tags?.length" :tags="project.tags" />
+      <CrudTags
+        v-else-if="currentProject.tags.length"
+        :tags="currentProject.tags"
+      />
       <UFormField class="mt-8" name="description">
         <UTextarea
           v-model="state.description"
@@ -73,7 +76,7 @@
         />
       </UFormField>
     </UForm>
-    <div v-if="project.targets.length > 0">
+    <div v-if="currentProject.targets.length > 0">
       <USeparator class="mb-8 mt-8" />
       <FindingsCounterAll :project-id="route.params.project_id" only-active />
     </div>
@@ -89,9 +92,10 @@ const api = useApi("/api/projects/");
 const route = useRoute();
 const userStore = useUserStore();
 const config = useProjectsConfig();
-const project = ref();
+const { currentProject, setCurrentProject } = useCurrentProject();
 const schema = config.formSchema;
 const state = ref({});
+const initializedProjectId = ref(null);
 const deleteOpen = ref(false);
 const deleteConfig = {
   entityName: "Project",
@@ -100,20 +104,22 @@ const deleteConfig = {
 
 function update() {
   if (!schema.safeParse(state.value).success) return;
-  api.update(`${route.params.project_id}/`, state.value);
-  // TODO: On update, update the panel's breadcrum item name
-}
-
-function fetch() {
-  api.get(`${route.params.project_id}/`).then((response) => {
-    project.value = response;
-    state.value = {
-      name: response.name,
-      description: response.description,
-      tags: response.tags,
-    };
+  api.update(`${route.params.project_id}/`, state.value).then((response) => {
+    setCurrentProject(response);
   });
 }
 
-onMounted(fetch);
+watch(
+  currentProject,
+  (data) => {
+    if (!data || data.id === initializedProjectId.value) return;
+    state.value = {
+      name: data.name,
+      description: data.description,
+      tags: data.tags ?? [],
+    };
+    initializedProjectId.value = data.id;
+  },
+  { immediate: true, flush: "sync" },
+);
 </script>
