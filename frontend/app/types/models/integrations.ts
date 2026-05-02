@@ -1,8 +1,12 @@
 export interface DefectDojoSync {
   id: number;
-  defectdojo_sync: number;
-  target: number;
+  project?: number;
+  product_id?: number;
+  defectdojo_sync?: number;
+  target?: number;
   engagement_id: number;
+  reimport?: boolean;
+  close_old_findings?: boolean;
 }
 
 export interface Integration {

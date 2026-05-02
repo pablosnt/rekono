@@ -26,16 +26,17 @@ import type { CrudConfig, CrudTableColumn } from "~/types/crud";
 import { useUserStore } from "~/store/user";
 import type { Target } from "~/types/models";
 import { targetTypes } from "~/constants";
+import { useIntegrationsStore } from "~/store/integrations";
 
 definePageMeta({ layout: "project" });
 const userStore = useUserStore();
 const route = useRoute();
 const table = useTable();
+const integrations = useIntegrationsStore();
 const selectedTarget = ref<Target | null>(null);
 const showReportModal = ref(false);
 const notesButton = ref();
 
-// todo: add link to DefectDojo if sync is enabled
 const config: CrudConfig<Target> = reactive({
   endpoint: "/api/targets/",
   entityName: "Target",
@@ -106,11 +107,29 @@ const config: CrudConfig<Target> = reactive({
           formatCount(row.getValue("reports").length || 0),
         ),
     },
+    ...(integrations.defectdojo?.settings?.is_available
+      ? [
+          {
+            accessorKey: "defectdojo",
+            header: "DefectDojo",
+            avatar: { src: integrations.defectdojo?.integration?.icon },
+            cell: ({ row }) =>
+              row.original.defectdojo_sync?.engagement_id
+                ? h(resolveComponent("DefectdojoLink"), {
+                    entity: "engagement",
+                    id: row.original.defectdojo_sync?.engagement_id,
+                    size: "sm",
+                  })
+                : table.noDataCell,
+          },
+        ]
+      : []),
   ] as CrudTableColumn<Target>[],
   tableColumnsVisibility: {
     id: false,
     notes: false,
     reports: false,
+    defectdojo: integrations.defectdojo?.integration?.enabled,
   },
   itemLink: (target: Target) =>
     `/projects/${route.params.project_id}/targets/${target.id}`,
@@ -180,4 +199,6 @@ const config: CrudConfig<Target> = reactive({
       : [];
   },
 });
+
+onMounted(integrations.fetchDefectDojo);
 </script>

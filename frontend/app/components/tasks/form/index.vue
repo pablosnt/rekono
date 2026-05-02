@@ -137,6 +137,7 @@
 <script setup lang="ts">
 import type { FormError } from "@nuxt/ui";
 import type { CrudConfig } from "~/types/crud";
+import { intensities } from "~/constants";
 
 const props = defineProps<{
   api: typeof useApi;

@@ -26,12 +26,20 @@
             DefectDojo Synchronization
           </p>
         </div>
-        <UButton
-          icon="i-lucide-x"
-          variant="ghost"
-          color="neutral"
-          @click="close"
-        />
+        <div class="flex items-center gap-2">
+          <DefectdojoLink
+            v-if="sync"
+            entity="product"
+            :id="sync.product_id"
+            icon="i-lucide-external-link"
+          />
+          <UButton
+            icon="i-lucide-x"
+            variant="ghost"
+            color="neutral"
+            @click="close"
+          />
+        </div>
       </div>
     </template>
     <template #body="{ close }">
@@ -168,5 +176,5 @@ const deleteConfig = {
     ),
 };
 
-onMounted(() => integrations.fetchDefectDojo());
+onMounted(integrations.fetchDefectDojo);
 </script>

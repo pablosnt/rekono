@@ -1,11 +1,4 @@
-export interface DefectDojoSync {
-  id: number;
-  project: number;
-  product_id: number;
-  engagement_id: number;
-  reimport: boolean;
-  close_old_findings: boolean;
-}
+import type { DefectDojoSync } from "./integrations";
 
 export interface Project {
   id: number;

@@ -51,6 +51,7 @@ export interface Execution {
   status: string;
   start?: string;
   end?: string;
+  defectdojo_test_id?: number;
   osint: number[];
   host: number[];
   port: number[];

@@ -33,7 +33,6 @@
                   :is-triageable="isTriageable"
                   :fix-verb="fixVerb"
                 />
-                <!-- todo: DefectDojo link -->
                 <NotesDropdown
                   :related-entity="finding"
                   :entity-name="entityName"

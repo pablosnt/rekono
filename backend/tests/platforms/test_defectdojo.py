@@ -139,24 +139,18 @@ settings = {
     "api_token": None,
     "tls_validation": True,
     "tag": "rekono",
-    "test_type": "Rekono Findings Import",
-    "test": "Rekono Execution",
 }
 new_settings = {
     "server": "https://defectdojo.rekono.com/api/v2/",
     "api_token": "any_valid_defectdojo_token",
     "tls_validation": True,
     "tag": "rekono",
-    "test_type": "Rekono",
-    "test": "Rekono",
 }
 invalid_settings = {
     "server": "invalid server",
     "api_token": "invalid;token",
     "tls_validation": True,
     "tag": "rek;ono",
-    "test_type": "Rek;ono",
-    "test": "Rek;ono",
 }
 
 

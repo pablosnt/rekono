@@ -82,6 +82,7 @@
 import { stages, executionStatuses } from "~/constants";
 import type { Execution, Finding } from "~/types/models";
 import type { CrudConfig, FilterOption } from "~/types/crud";
+import { useIntegrationsStore } from "~/store/integrations";
 
 const props = defineProps<{
   task?: number;
@@ -94,6 +95,7 @@ const api = useApi("/api/executions/");
 const table = useTable();
 const route = useRoute();
 const options = useOptions();
+const integrations = useIntegrationsStore();
 const page = ref();
 const selectedExecution = ref();
 const outputOpen = ref(false);
@@ -189,6 +191,23 @@ const config: CrudConfig<Execution> = reactive({
       icon: "i-lucide-skip-forward",
       cell: ({ row }) => table.valueCell(row.original.skipped_reason),
     },
+    ...(integrations.defectdojo?.settings?.is_available
+      ? [
+          {
+            accessorKey: "defectdojo",
+            header: "DefectDojo",
+            avatar: { src: integrations.defectdojo?.integration.icon },
+            cell: ({ row }) =>
+              row.original.defectdojo_test_id
+                ? h(resolveComponent("DefectdojoLink"), {
+                    entity: "test",
+                    id: row.original.defectdojo_test_id,
+                    size: "sm",
+                  })
+                : table.noDataCell,
+          },
+        ]
+      : []),
   ] as CrudTableColumn<Execution>[],
   tableColumnsVisibility: {
     skipped: false,
@@ -240,6 +259,7 @@ const config: CrudConfig<Execution> = reactive({
 
 onMounted(() => {
   options.tools(toolOptions);
+  integrations.fetchDefectDojo();
 });
 
 defineExpose({ page });
