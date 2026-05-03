@@ -90,6 +90,7 @@ const integrationsSettings = ref({
           type: "text",
           placeholder: "https://defectdojo.example.com",
           required: false,
+          inputMode: "url",
         },
         {
           key: "api_token",

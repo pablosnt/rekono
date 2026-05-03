@@ -149,6 +149,7 @@ const smtpConfig = ref({
       type: "text",
       placeholder: "smtp.example.com",
       required: false,
+      inputMode: "url",
     },
     {
       key: "port",

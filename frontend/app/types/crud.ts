@@ -38,6 +38,7 @@ export interface FormField {
   maxValue?: unknown;
   valueKey?: string;
   labelKey?: string;
+  inputMode?: string;
 }
 
 export interface FilterConfig {

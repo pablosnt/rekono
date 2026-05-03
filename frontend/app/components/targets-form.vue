@@ -5,6 +5,7 @@
         v-model="targetInput"
         placeholder="Enter IP addresses, domains, networks, or IP ranges. Separate multiple targets with spaces, commas, or line breaks"
         rows="4"
+        inputmode="url"
         class="w-full"
       />
     </UFormField>

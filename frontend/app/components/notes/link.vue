@@ -18,6 +18,7 @@
         autofocus
         name="url"
         type="url"
+        inputmode="url"
         variant="none"
         placeholder="Paste a link..."
         @keydown="

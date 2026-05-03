@@ -62,6 +62,7 @@ const config = ref({
       type: "text",
       placeholder: "proxy.example.com",
       required: false,
+      inputMode: "url",
     },
     {
       key: "http_proxy",
@@ -69,6 +70,7 @@ const config = ref({
       type: "text",
       placeholder: "http://proxy.example.com",
       required: false,
+      inputMode: "url",
     },
     {
       key: "https_proxy",
@@ -76,6 +78,7 @@ const config = ref({
       type: "text",
       placeholder: "https://proxy.example.com",
       required: false,
+      inputMode: "url",
     },
     {
       key: "ftp_proxy",
@@ -83,6 +86,7 @@ const config = ref({
       type: "text",
       placeholder: "ftp://proxy.example.com",
       required: false,
+      inputMode: "url",
     },
     {
       key: "no_proxy",
@@ -90,6 +94,7 @@ const config = ref({
       type: "text",
       placeholder: ".internal.example.com",
       required: false,
+      inputMode: "url",
     },
 
     {

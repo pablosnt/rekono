@@ -158,6 +158,7 @@ const config: CrudConfig<User> = reactive({
       required: true,
       placeholder: "user@example.com",
       icon: "i-lucide-mail",
+      inputMode: "email",
     },
     {
       key: "role",

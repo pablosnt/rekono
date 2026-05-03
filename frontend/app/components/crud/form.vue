@@ -31,6 +31,7 @@
             "
             :size="field.size || 'lg'"
             :disabled="field.disabled === true"
+            :inputmode="field.inputMode"
           >
             <template v-if="field.type === 'password'" #trailing>
               <UButton

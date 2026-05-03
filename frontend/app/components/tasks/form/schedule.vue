@@ -115,6 +115,7 @@
               v-model="repeatIn"
               type="number"
               min="1"
+              inputmode="numeric"
               class="w-20"
               @update:model-value="$emit('update-repeat-in', repeatIn)"
             />
