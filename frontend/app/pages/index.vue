@@ -1,293 +1,299 @@
 <template>
-  <div v-if="!loading">
-    <UPageCTA
-      :title="`Good ${greeting}, ${userStore.name}`"
-      :description="description"
-      variant="solid"
-    >
-      <template #links>
-        <TasksButton
-          v-if="userStore.is_auditor && hasProjects"
-          size="lg"
-          not-rounded
-          :label="hasScans ? 'Run Scan' : 'Run First Scan'"
-        />
-        <UButton
-          v-if="hasScans && !userStore.is_admin"
-          label="View Metrics"
-          icon="i-lucide-chart-bar"
-          size="lg"
-          to="/metrics"
-        />
-        <UButton
-          v-if="!hasScans && userStore.is_auditor && !userStore.is_admin"
-          label="Design Scan Processes"
-          icon="i-lucide-workflow"
-          size="lg"
-          to="/processes"
-        />
-        <UButton
-          v-if="userStore.is_admin"
-          label="Create Project"
-          icon="i-lucide-plus"
-          size="lg"
-          @click="createProjectOpen = true"
-        />
-        <UButton
-          v-if="!userStore.is_auditor && hasProjects"
-          label="Explore Projects"
-          icon="i-lucide-folder"
-          size="lg"
-          to="/projects"
-        />
-        <!-- todo: update docs link -->
-        <UButton
-          v-if="
-            !hasProjects || (hasProjects && !hasScans && !userStore.is_auditor)
-          "
-          label="Learn More"
-          icon="i-simple-icons-readthedocs"
-          color="neutral"
-          variant="outline"
-          size="lg"
-          to="https://github.com/pablosnt/rekono/wiki"
-          target="_blank"
-        />
-      </template>
-    </UPageCTA>
-    <div v-if="tasks.length > 0" class="mt-10 space-y-10">
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-        <UPageCard variant="outline">
-          <div class="flex items-center justify-between mb-4">
-            <span class="text-base font-semibold text-highlighted"
-              >Top Projects</span
-            >
-            <div class="flex items-center gap-2">
-              <template v-if="userStore.is_admin">
-                <UButton
-                  icon="i-lucide-plus"
-                  @click="createProjectOpen = true"
-                />
-              </template>
-              <UButton
-                icon="i-lucide-external-link"
-                color="neutral"
-                variant="outline"
-                to="/projects"
-              />
-            </div>
-          </div>
-          <UTable
-            :data="projects"
-            :columns="projectColumns"
-            :ui="{ tbody: '[&>tr]:cursor-pointer' }"
-            @select="(_, row) => navigateTo(`/projects/${row.original.id}`)"
-          />
-        </UPageCard>
-        <UPageCard variant="outline">
-          <div class="flex items-center justify-between mb-4">
-            <span class="text-base font-semibold text-highlighted"
-              >Latest Scans</span
-            >
-            <TasksButton v-if="userStore.is_auditor" not-rounded />
-          </div>
-          <UTable
-            :data="tasks"
-            :columns="scanColumns"
-            :ui="{ tbody: '[&>tr]:cursor-pointer' }"
-            @select="
-              (_, row) =>
-                navigateTo(
-                  `/projects/${row.original.target.project}/scans/${row.original.id}`,
-                )
-            "
-          />
-        </UPageCard>
-      </div>
-      <FindingsCounterAll only-active />
-      <div
-        v-if="hosts.length > 0 || vulnerabilities.length > 0"
-        class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start"
-      >
-        <UPageCard variant="outline">
-          <div class="flex items-center justify-between mb-4">
-            <span class="text-base font-semibold text-highlighted"
-              >Latest Hosts</span
-            >
-          </div>
-          <UTable
-            :data="hosts"
-            :columns="hostColumns"
-            :ui="{ tbody: '[&>tr]:cursor-pointer' }"
-            @select="
-              (_, row) =>
-                navigateTo(
-                  `/projects/${row.original.project}/hosts/${row.original.id}`,
-                )
-            "
-          />
-        </UPageCard>
-        <UPageCard variant="outline">
-          <div class="flex items-center justify-between mb-4">
-            <span class="text-base font-semibold text-highlighted"
-              >Latest Vulnerabilities</span
-            >
-          </div>
-          <UTable
-            :data="vulnerabilities"
-            :columns="vulnerabilityColumns"
-            :ui="{ tbody: '[&>tr]:cursor-pointer' }"
-            @select="
-              (_, row) =>
-                navigateTo(
-                  `/projects/${row.original.project}/vulnerabilities/${row.original.id}`,
-                )
-            "
-          />
-        </UPageCard>
-      </div>
-      <CrudFormModal
-        v-if="userStore.is_admin"
-        :open="createProjectOpen"
-        :api="projectsApi"
-        :config="projectsConfig"
-        @open="createProjectOpen = $event"
-      />
+  <div>
+    <div v-if="loading" class="flex items-center justify-center">
+      <UButton variant="ghost" loading size="xl" />
     </div>
     <div v-else>
-      <UPageSection title="Supported Tools">
-        <UMarquee>
-          <UAvatar
-            v-for="tool in tools"
-            :key="tool.id"
-            :src="tool.icon"
-            size="xl"
+      <UPageCTA
+        :title="`Good ${greeting}, ${userStore.name}`"
+        :description="description"
+        variant="solid"
+      >
+        <template #links>
+          <TasksButton
+            v-if="userStore.is_auditor && hasProjects"
+            size="lg"
+            not-rounded
+            :label="hasScans ? 'Run Scan' : 'Run First Scan'"
           />
-        </UMarquee>
-      </UPageSection>
-      <UPageSection
-        title="Core Features"
-        :features="[
-          {
-            title: 'Processes',
-            description:
-              'Design your scanning workflows to combine multiple hacking tools',
-            icon: 'i-lucide-workflow',
-            to: '/processes',
-          },
-          {
-            title: 'Reports',
-            description:
-              'Export polished reports in multiple formats, ready for clients, stakeholders, or automated pipelines',
-            icon: 'i-lucide-file-text',
-            ui: { leadingIcon: 'text-neutral' },
-          },
-          {
-            title: 'Metrics',
-            description:
-              'Track vulnerability trends, measure coverage, and visualize how your attack surface evolves',
-            icon: 'i-lucide-chart-bar',
-            to: '/metrics',
-            ui: { leadingIcon: 'text-success' },
-          },
-          {
-            title: 'Alerts',
-            description:
-              'Receive notifications when the finding that you are looking for is detected',
-            icon: 'i-lucide-triangle-alert',
-            ui: { leadingIcon: 'text-warning' },
-          },
-          {
-            title: 'Notes',
-            description:
-              'Capture hypotheses, annotate findings, and plan your recon strategy where the work happens',
-            icon: 'i-lucide-notebook',
-            ui: { leadingIcon: 'text-purple-500' },
-          },
-          {
-            title: 'Telegram Bot',
-            description:
-              'Away From Keyboard? Keep triggering scans from our Telegram Bot',
-            icon: 'i-simple-icons-telegram',
-            to: integrationsStore.telegram?.is_available
-              ? `https://t.me/${integrationsStore.telegram?.bot}`
-              : undefined,
-            target: integrationsStore.telegram?.is_available
-              ? '_blank'
-              : undefined,
-            ui: { leadingIcon: 'text-info' },
-          },
-        ]"
-      />
-      <UPageSection title="Integrations">
-        <UMarquee>
-          <UAvatar
-            v-for="integration in integrations"
-            :key="integration.id"
-            :src="integration.icon"
-            size="xl"
+          <UButton
+            v-if="hasScans && !userStore.is_admin"
+            label="View Metrics"
+            icon="i-lucide-chart-bar"
+            size="lg"
+            to="/metrics"
           />
-        </UMarquee>
-      </UPageSection>
-      <UPageSection
-        title="Join the Community"
-        :features="[
-          {
-            title: 'GitHub',
-            description: 'Star us',
-            icon: 'i-simple-icons-github',
-            to: 'https://github.com/pablosnt/rekono',
-            target: '_blank',
-            orientation: 'vertical',
-            ui: { root: 'text-center', leadingIcon: 'text-neutral' },
-          },
-          {
-            title: 'Twitter',
-            description: 'Follow us',
-            icon: 'i-simple-icons-x',
-            to: 'https://x.com/rekonosec',
-            target: '_blank',
-            orientation: 'vertical',
-            ui: { root: 'text-center', leadingIcon: 'text-neutral' },
-          },
-          {
-            title: 'Discord',
-            description: 'Join us',
-            icon: 'i-simple-icons-discord',
-            to: 'https://discord.gg/Zyduu5C7M3',
-            target: '_blank',
-            orientation: 'vertical',
-            ui: { root: 'text-center', leadingIcon: 'text-indigo-500' },
-          },
-          {
-            title: 'Ko-fi',
-            description: 'Support us',
-            icon: 'i-simple-icons-kofi',
-            to: 'https://ko-fi.com/pablosnt',
-            target: '_blank',
-            orientation: 'vertical',
-            ui: { root: 'text-center', leadingIcon: 'text-primary' },
-          },
-          {
-            title: 'Buy Me a Coffee',
-            description: 'Support us',
-            icon: 'i-simple-icons-buymeacoffee',
-            to: 'https://buymeacoffee.com/pablosnt',
-            target: '_blank',
-            orientation: 'vertical',
-            ui: { root: 'text-center', leadingIcon: 'text-warning' },
-          },
-          {
-            title: 'Docs',
-            description: 'Read us',
-            icon: 'i-simple-icons-readthedocs',
-            to: 'https://github.com/pablosnt/rekono/wiki',
-            target: '_blank',
-            orientation: 'vertical',
-            ui: { root: 'text-center', leadingIcon: 'text-neutral' },
-          },
-        ]"
-      />
+          <UButton
+            v-if="!hasScans && userStore.is_auditor && !userStore.is_admin"
+            label="Design Scan Processes"
+            icon="i-lucide-workflow"
+            size="lg"
+            to="/processes"
+          />
+          <UButton
+            v-if="userStore.is_admin"
+            label="Create Project"
+            icon="i-lucide-plus"
+            size="lg"
+            @click="createProjectOpen = true"
+          />
+          <UButton
+            v-if="!userStore.is_auditor && hasProjects"
+            label="Explore Projects"
+            icon="i-lucide-folder"
+            size="lg"
+            to="/projects"
+          />
+          <!-- todo: update docs link -->
+          <UButton
+            v-if="
+              !hasProjects ||
+              (hasProjects && !hasScans && !userStore.is_auditor)
+            "
+            label="Learn More"
+            icon="i-simple-icons-readthedocs"
+            color="neutral"
+            variant="outline"
+            size="lg"
+            to="https://github.com/pablosnt/rekono/wiki"
+            target="_blank"
+          />
+        </template>
+      </UPageCTA>
+      <div v-if="tasks.length > 0" class="mt-10 space-y-10">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+          <UPageCard variant="outline">
+            <div class="flex items-center justify-between mb-4">
+              <span class="text-base font-semibold text-highlighted"
+                >Top Projects</span
+              >
+              <div class="flex items-center gap-2">
+                <template v-if="userStore.is_admin">
+                  <UButton
+                    icon="i-lucide-plus"
+                    @click="createProjectOpen = true"
+                  />
+                </template>
+                <UButton
+                  icon="i-lucide-external-link"
+                  color="neutral"
+                  variant="outline"
+                  to="/projects"
+                />
+              </div>
+            </div>
+            <UTable
+              :data="projects"
+              :columns="projectColumns"
+              :ui="{ tbody: '[&>tr]:cursor-pointer' }"
+              @select="(_, row) => navigateTo(`/projects/${row.original.id}`)"
+            />
+          </UPageCard>
+          <UPageCard variant="outline">
+            <div class="flex items-center justify-between mb-4">
+              <span class="text-base font-semibold text-highlighted"
+                >Latest Scans</span
+              >
+              <TasksButton v-if="userStore.is_auditor" not-rounded />
+            </div>
+            <UTable
+              :data="tasks"
+              :columns="scanColumns"
+              :ui="{ tbody: '[&>tr]:cursor-pointer' }"
+              @select="
+                (_, row) =>
+                  navigateTo(
+                    `/projects/${row.original.target.project}/scans/${row.original.id}`,
+                  )
+              "
+            />
+          </UPageCard>
+        </div>
+        <FindingsCounterAll only-active />
+        <div
+          v-if="hosts.length > 0 || vulnerabilities.length > 0"
+          class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start"
+        >
+          <UPageCard variant="outline">
+            <div class="flex items-center justify-between mb-4">
+              <span class="text-base font-semibold text-highlighted"
+                >Latest Hosts</span
+              >
+            </div>
+            <UTable
+              :data="hosts"
+              :columns="hostColumns"
+              :ui="{ tbody: '[&>tr]:cursor-pointer' }"
+              @select="
+                (_, row) =>
+                  navigateTo(
+                    `/projects/${row.original.project}/hosts/${row.original.id}`,
+                  )
+              "
+            />
+          </UPageCard>
+          <UPageCard variant="outline">
+            <div class="flex items-center justify-between mb-4">
+              <span class="text-base font-semibold text-highlighted"
+                >Latest Vulnerabilities</span
+              >
+            </div>
+            <UTable
+              :data="vulnerabilities"
+              :columns="vulnerabilityColumns"
+              :ui="{ tbody: '[&>tr]:cursor-pointer' }"
+              @select="
+                (_, row) =>
+                  navigateTo(
+                    `/projects/${row.original.project}/vulnerabilities/${row.original.id}`,
+                  )
+              "
+            />
+          </UPageCard>
+        </div>
+        <CrudFormModal
+          v-if="userStore.is_admin"
+          :open="createProjectOpen"
+          :api="projectsApi"
+          :config="projectsConfig"
+          @open="createProjectOpen = $event"
+        />
+      </div>
+      <div v-else>
+        <UPageSection title="Supported Tools">
+          <UMarquee>
+            <UAvatar
+              v-for="tool in tools"
+              :key="tool.id"
+              :src="tool.icon"
+              size="xl"
+            />
+          </UMarquee>
+        </UPageSection>
+        <UPageSection
+          title="Core Features"
+          :features="[
+            {
+              title: 'Processes',
+              description:
+                'Design your scanning workflows to combine multiple hacking tools',
+              icon: 'i-lucide-workflow',
+              to: '/processes',
+            },
+            {
+              title: 'Reports',
+              description:
+                'Export polished reports in multiple formats, ready for clients, stakeholders, or automated pipelines',
+              icon: 'i-lucide-file-text',
+              ui: { leadingIcon: 'text-neutral' },
+            },
+            {
+              title: 'Metrics',
+              description:
+                'Track vulnerability trends, measure coverage, and visualize how your attack surface evolves',
+              icon: 'i-lucide-chart-bar',
+              to: '/metrics',
+              ui: { leadingIcon: 'text-success' },
+            },
+            {
+              title: 'Alerts',
+              description:
+                'Receive notifications when the finding that you are looking for is detected',
+              icon: 'i-lucide-triangle-alert',
+              ui: { leadingIcon: 'text-warning' },
+            },
+            {
+              title: 'Notes',
+              description:
+                'Capture hypotheses, annotate findings, and plan your recon strategy where the work happens',
+              icon: 'i-lucide-notebook',
+              ui: { leadingIcon: 'text-purple-500' },
+            },
+            {
+              title: 'Telegram Bot',
+              description:
+                'Away From Keyboard? Keep triggering scans from our Telegram Bot',
+              icon: 'i-simple-icons-telegram',
+              to: integrationsStore.telegram?.is_available
+                ? `https://t.me/${integrationsStore.telegram?.bot}`
+                : undefined,
+              target: integrationsStore.telegram?.is_available
+                ? '_blank'
+                : undefined,
+              ui: { leadingIcon: 'text-info' },
+            },
+          ]"
+        />
+        <UPageSection title="Integrations">
+          <UMarquee>
+            <UAvatar
+              v-for="integration in integrations"
+              :key="integration.id"
+              :src="integration.icon"
+              size="xl"
+            />
+          </UMarquee>
+        </UPageSection>
+        <UPageSection
+          title="Join the Community"
+          :features="[
+            {
+              title: 'GitHub',
+              description: 'Star us',
+              icon: 'i-simple-icons-github',
+              to: 'https://github.com/pablosnt/rekono',
+              target: '_blank',
+              orientation: 'vertical',
+              ui: { root: 'text-center', leadingIcon: 'text-neutral' },
+            },
+            {
+              title: 'Twitter',
+              description: 'Follow us',
+              icon: 'i-simple-icons-x',
+              to: 'https://x.com/rekonosec',
+              target: '_blank',
+              orientation: 'vertical',
+              ui: { root: 'text-center', leadingIcon: 'text-neutral' },
+            },
+            {
+              title: 'Discord',
+              description: 'Join us',
+              icon: 'i-simple-icons-discord',
+              to: 'https://discord.gg/Zyduu5C7M3',
+              target: '_blank',
+              orientation: 'vertical',
+              ui: { root: 'text-center', leadingIcon: 'text-indigo-500' },
+            },
+            {
+              title: 'Ko-fi',
+              description: 'Support us',
+              icon: 'i-simple-icons-kofi',
+              to: 'https://ko-fi.com/pablosnt',
+              target: '_blank',
+              orientation: 'vertical',
+              ui: { root: 'text-center', leadingIcon: 'text-primary' },
+            },
+            {
+              title: 'Buy Me a Coffee',
+              description: 'Support us',
+              icon: 'i-simple-icons-buymeacoffee',
+              to: 'https://buymeacoffee.com/pablosnt',
+              target: '_blank',
+              orientation: 'vertical',
+              ui: { root: 'text-center', leadingIcon: 'text-warning' },
+            },
+            {
+              title: 'Docs',
+              description: 'Read us',
+              icon: 'i-simple-icons-readthedocs',
+              to: 'https://github.com/pablosnt/rekono/wiki',
+              target: '_blank',
+              orientation: 'vertical',
+              ui: { root: 'text-center', leadingIcon: 'text-neutral' },
+            },
+          ]"
+        />
+      </div>
     </div>
   </div>
 </template>
