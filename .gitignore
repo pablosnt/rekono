@@ -56,9 +56,9 @@ rekono-kbx
 Result/
 
 # AI
+.agent/
 .agents/
 .claude/
 
 # TODO Temporal ignore
 migrations/
-frontend-old/
