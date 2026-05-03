@@ -37,10 +37,28 @@ export function duration(
   return parts.join(" ");
 }
 
+const ACRONYMS = new Set([
+  "API",
+  "HTTP",
+  "URL",
+  "JSON",
+  "XML",
+  "HTML",
+  "CSS",
+  "JS",
+  "TS",
+  "OSINT",
+  "CVE",
+  "IP",
+  "ID",
+  "EDB",
+]);
+
 export function smartLowerCase(text: string): string {
-  return text.replace(
-    /\b(?!API|HTTP|URL|JSON|XML|HTML|CSS|JS|TS|OSINT|CVE|IP|EDB)\w+/g,
-    (match) => match.toLowerCase(),
+  return text.replace(/\b\w+\b/g, (match) =>
+    ACRONYMS.has(match.toUpperCase())
+      ? match.toUpperCase()
+      : match.toLowerCase(),
   );
 }
 

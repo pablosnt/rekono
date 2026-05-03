@@ -229,7 +229,7 @@
       @open="(open) => (cancelOpen = open)"
       @deleted="
         fetchTask();
-        executionsPage.fetch();
+        executions.page.fetch();
       "
     />
 

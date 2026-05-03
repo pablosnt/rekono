@@ -113,7 +113,7 @@
                 ?.getAllColumns()
                 .filter((column) => column.getCanHide())
                 .map((column) => ({
-                  label: firstUpper(smartLowerCase(column.id)),
+                  label: columnLabel(column.id),
                   type: 'checkbox' as const,
                   checked: column.getIsVisible(),
                   onUpdateChecked(checked: boolean) {
@@ -171,7 +171,7 @@
 <script setup lang="ts">
 import type { CrudConfig, CrudState } from "~/types/crud";
 
-defineProps<{
+const props = defineProps<{
   api: typeof useApi;
   config: CrudConfig;
   state: CrudState;
@@ -179,6 +179,15 @@ defineProps<{
   openCreateModal: boolean;
   titleSizeClass?: string;
 }>();
+
+function columnLabel(columnId: string): string {
+  const colDef = props.config.tableColumns?.find(
+    (c) => (c as { accessorKey?: string }).accessorKey === columnId,
+  );
+  return typeof colDef?.header === "string"
+    ? colDef.header
+    : firstUpper(smartLowerCase(columnId));
+}
 const emit = defineEmits<{
   search: [search: string];
   filters: [filters: Record<string, unknown>];
