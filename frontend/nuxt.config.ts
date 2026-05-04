@@ -6,6 +6,18 @@ export default defineNuxtConfig({
     enabled: process.env.NODE_ENV === "development",
   },
 
+  app: {
+    head: {
+      script: [
+        {
+          defer: true,
+          src: "https://cloud.umami.is/script.js",
+          "data-website-id": "f765ec70-c85e-499b-a75f-93744bdcabef",
+        },
+      ],
+    },
+  },
+
   css: ["~/assets/css/main.css"],
 
   ui: {
