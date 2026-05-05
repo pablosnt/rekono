@@ -13,7 +13,7 @@
   >
     <template #metadata>
       <div
-        v-if="host.domain && host.ip"
+        v-if="host?.domain && host?.ip"
         class="flex items-center gap-2 flex-wrap"
       >
         <span class="text-muted">IP:</span>
@@ -26,12 +26,12 @@
           @click="copyText(host.ip)"
         />
       </div>
-      <div v-if="host.os" class="flex items-center gap-2 flex-wrap">
+      <div v-if="host?.os" class="flex items-center gap-2 flex-wrap">
         <span class="text-muted">OS:</span>
         <span class="text-base">{{ host.os }}</span>
       </div>
       <div
-        v-if="host.country && !(host.latitude && host.longitude)"
+        v-if="host?.country && !(host?.latitude && host?.longitude)"
         class="flex items-center gap-2 flex-wrap"
       >
         <span class="text-muted">Country:</span>
@@ -45,7 +45,7 @@
         </div>
       </div>
       <div
-        v-if="host.city && !(host.latitude && host.longitude)"
+        v-if="host?.city && !(host?.latitude && host?.longitude)"
         class="flex items-center gap-2 flex-wrap"
       >
         <span class="text-muted">City:</span>
@@ -55,7 +55,7 @@
     <template #custom>
       <UPageCard
         v-if="
-          (host.total_analysis > 0 || host.reputation !== 0) &&
+          (host?.total_analysis > 0 || host?.reputation !== 0) &&
           integrations.virustotal.integration?.enabled
         "
         title="Malware Analysis"
@@ -63,7 +63,7 @@
       >
         <div class="flex flex-wrap items-center gap-8 flex-wrap w-full">
           <UCard
-            v-if="host.total_analysis > 0 || host.reputation !== 0"
+            v-if="host?.total_analysis > 0 || host?.reputation !== 0"
             :class="
               host.reputation > 0
                 ? 'bg-success/10 ring-success/30'
@@ -91,11 +91,11 @@
         </div>
       </UPageCard>
       <div
-        v-if="host.whois || (host.latitude && host.longitude)"
+        v-if="host?.whois || (host?.latitude && host?.longitude)"
         class="flex items-stretch gap-4 flex-wrap w-full"
       >
         <UPageCard
-          v-if="host.whois"
+          v-if="host?.whois"
           title="WHOIS"
           variant="outline"
           class="flex-1 min-w-150"
@@ -104,18 +104,18 @@
           <span class="whitespace-pre-wrap font-mono">{{ host.whois }}</span>
         </UPageCard>
         <UPageCard
-          v-if="host.latitude && host.longitude"
+          v-if="host?.latitude && host?.longitude"
           title="Geolocation"
-          :description="host.city ? host.city : host.country"
+          :description="host?.city ? host?.city : host?.country"
           variant="outline"
           class="flex-1 min-w-150"
           :ui="{ root: 'overflow-x-auto' }"
         >
-          <template v-if="host.country && host.city" #description>
+          <template v-if="host?.country && host?.city" #description>
             <div class="flex items-center gap-2">
               <UIcon
                 :name="
-                  host.country ? `cif:${host.country.toLowerCase()}` : undefined
+                  host?.country ? `cif:${host.country.toLowerCase()}` : undefined
                 "
               />
               <span class="text-base">{{ host.city }}</span>
@@ -125,7 +125,7 @@
         </UPageCard>
       </div>
       <UPageCard
-        v-if="host.port.length > 0"
+        v-if="host?.port.length > 0"
         title="Ports"
         variant="outline"
         :ui="{ root: 'overflow-x-auto' }"

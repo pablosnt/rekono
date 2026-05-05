@@ -12,11 +12,11 @@
     @update="fetch()"
   >
     <template #metadata>
-      <FindingsMetadataHost :host="credential.technology?.port?.host" />
-      <FindingsMetadataPort :port="credential.technology?.port" />
-      <FindingsMetadataTechnology :technology="credential.technology" />
+      <FindingsMetadataHost :host="credential?.technology?.port?.host" />
+      <FindingsMetadataPort :port="credential?.technology?.port" />
+      <FindingsMetadataTechnology :technology="credential?.technology" />
       <div
-        v-if="credential.email && credential.username"
+        v-if="credential?.email && credential?.username"
         class="flex items-center gap-2 flex-wrap"
       >
         <span class="text-muted">Email:</span>
@@ -30,7 +30,7 @@
         />
       </div>
       <div
-        v-if="(credential.email || credential.username) && credential.secret"
+        v-if="(credential?.email || credential?.username) && credential?.secret"
         class="flex items-center gap-2 flex-wrap"
       >
         <span class="text-muted">Secret:</span>
@@ -43,7 +43,7 @@
           @click="copyText(credential.email, 'Secret copied to clipboard')"
         />
       </div>
-      <div v-if="credential.context" class="flex items-center gap-2 flex-wrap">
+      <div v-if="credential?.context" class="flex items-center gap-2 flex-wrap">
         <span class="text-muted">Context:</span>
         <span class="text-base">{{ credential.context }}</span>
       </div>

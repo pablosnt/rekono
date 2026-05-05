@@ -9,13 +9,13 @@
     fix-verb="Discard"
     @update="fetch()"
   >
-    <template v-if="technology.description" #description>
+    <template v-if="technology?.description" #description>
       <span class="text-muted">{{ technology.description }}</span>
     </template>
     <template #metadata>
-      <FindingsMetadataHost :host="technology.port?.host" />
-      <FindingsMetadataPort :port="technology.port" />
-      <div v-if="technology.version" class="flex items-center gap-2 flex-wrap">
+      <FindingsMetadataHost :host="technology?.port?.host" />
+      <FindingsMetadataPort :port="technology?.port" />
+      <div v-if="technology?.version" class="flex items-center gap-2 flex-wrap">
         <span class="text-muted">Version:</span>
         <span class="text-base">{{ technology.version }}</span>
         <UButton
@@ -29,23 +29,32 @@
     </template>
     <template #custom>
       <UPageCard
-        v-if="technology.credential.length > 0"
+        v-if="technology?.credential.length > 0"
         title="Credentials"
         variant="outline"
         :ui="{ root: 'overflow-x-auto' }"
       >
-        <FindingsCredentials :technology="technology.id" />
+        <FindingsCredentials
+          :technology="technology.id"
+          :disable-url-sync="true"
+        />
       </UPageCard>
       <UPageCard
-        v-if="technology.vulnerability.length > 0"
+        v-if="technology?.vulnerability.length > 0"
         title="Vulnerabilities"
         variant="outline"
         :ui="{ root: 'overflow-x-auto' }"
       >
-        <FindingsVulnerabilities :technology="technology.id" />
+        <FindingsVulnerabilities
+          :technology="technology.id"
+          :disable-url-sync="true"
+        />
       </UPageCard>
       <UPageCard title="Exploits" variant="outline">
-        <FindingsExploits :technology="technology.id" />
+        <FindingsExploits
+          :technology="technology.id"
+          :disable-url-sync="true"
+        />
       </UPageCard>
     </template>
   </FindingsSingle>

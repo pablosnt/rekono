@@ -11,18 +11,18 @@
     :custom-dropdown-actions="
       userStore.is_auditor &&
       osint &&
-      ['IP', 'Domain'].includes(osint.data_type)
+      ['IP', 'Domain'].includes(osint?.data_type)
         ? [getOSINTDropdownActions(osint, api)]
         : []
     "
     @update="fetch()"
   >
     <template #metadata>
-      <div v-if="osint.data_type" class="flex items-center gap-2 flex-wrap">
+      <div v-if="osint?.data_type" class="flex items-center gap-2 flex-wrap">
         <span class="text-muted">Data type:</span>
         <span class="text-base">{{ osint.data_type }}</span>
       </div>
-      <div v-if="osint.source" class="flex items-center gap-2 flex-wrap">
+      <div v-if="osint?.source" class="flex items-center gap-2 flex-wrap">
         <span class="text-muted">Source:</span>
         <span class="text-base">{{ osint.source }}</span>
       </div>
