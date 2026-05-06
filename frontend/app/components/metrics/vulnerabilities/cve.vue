@@ -12,7 +12,7 @@
           ? navigateTo(d.link, { external: true, open: { target: '_blank' } })
           : null
     "
-    class="w-48/100"
+    class="w-full"
   />
 </template>
 

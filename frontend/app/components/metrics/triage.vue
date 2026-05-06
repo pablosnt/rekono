@@ -1,13 +1,12 @@
 <template>
-  <div
-    class="flex flex-row flex-wrap mt-6 items-start justify-between w-full gap-6"
-  >
+  <div class="flex flex-col sm:flex-row gap-6 mt-6">
     <UPageCard
       v-if="loading || hasOpenFindings"
       title="Findings per Triage Status"
       description="Only open findings"
-      class="flex-1"
+      class="sm:flex-1 min-w-0"
       variant="outline"
+      :ui="{ container: 'min-w-0' }"
     >
       <div v-if="loading" class="flex items-center justify-center">
         <UButton variant="ghost" loading size="xl" />
@@ -35,8 +34,9 @@
     <UPageCard
       title="False Positives Rate"
       description="Include all triaged findings, including fixed ones"
-      class="flex-1"
+      class="sm:flex-1 min-w-0"
       variant="outline"
+      :ui="{ container: 'min-w-0' }"
     >
       <MetricsChartsHalfDonut
         :data="donutData"
@@ -44,7 +44,6 @@
         :central-label="`${fpRate.toPrecision(3)}%`"
         :height="400"
         :radius="250"
-        :arc-width="50"
         :tooltip="donutTooltip"
       />
     </UPageCard>

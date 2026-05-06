@@ -4,6 +4,7 @@
     title="Geolocation"
     class="w-full"
     variant="outline"
+    :ui="{ container: 'min-w-0' }"
   >
     <div v-if="loading" class="flex items-center justify-center">
       <UButton variant="ghost" loading size="xl" />

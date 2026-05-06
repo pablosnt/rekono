@@ -62,10 +62,7 @@
       </UPageCTA>
       <div v-if="tasks.length > 0" class="mt-10 space-y-10">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-          <UPageCard
-            variant="outline"
-            :ui="{ container: 'min-w-0' }"
-          >
+          <UPageCard variant="outline" :ui="{ container: 'min-w-0' }">
             <div class="flex items-center justify-between mb-4">
               <span class="text-base font-semibold text-highlighted"
                 >Top Projects</span
@@ -92,10 +89,7 @@
               @select="(_, row) => navigateTo(`/projects/${row.original.id}`)"
             />
           </UPageCard>
-          <UPageCard
-            variant="outline"
-            :ui="{ container: 'min-w-0' }"
-          >
+          <UPageCard variant="outline" :ui="{ container: 'min-w-0' }">
             <div class="flex items-center justify-between mb-4">
               <span class="text-base font-semibold text-highlighted"
                 >Latest Scans</span
@@ -120,10 +114,7 @@
           v-if="hosts.length > 0 || vulnerabilities.length > 0"
           class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start"
         >
-          <UPageCard
-            variant="outline"
-            :ui="{ container: 'min-w-0' }"
-          >
+          <UPageCard variant="outline" :ui="{ container: 'min-w-0' }">
             <div class="flex items-center justify-between mb-4">
               <span class="text-base font-semibold text-highlighted"
                 >Latest Hosts</span
@@ -141,10 +132,7 @@
               "
             />
           </UPageCard>
-          <UPageCard
-            variant="outline"
-            :ui="{ container: 'min-w-0' }"
-          >
+          <UPageCard variant="outline" :ui="{ container: 'min-w-0' }">
             <div class="flex items-center justify-between mb-4">
               <span class="text-base font-semibold text-highlighted"
                 >Latest Vulnerabilities</span

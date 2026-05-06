@@ -1,5 +1,9 @@
 <template>
-  <UPageCard title="Top Ports & Services" class="w-full">
+  <UPageCard
+    title="Top Ports & Services"
+    class="w-full"
+    :ui="{ container: 'min-w-0' }"
+  >
     <div v-if="loading" class="flex items-center justify-center">
       <UButton variant="ghost" loading size="xl" />
     </div>
