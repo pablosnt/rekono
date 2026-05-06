@@ -60,7 +60,7 @@ const validation = useValidation();
 const route = useRoute();
 const loading = ref(false);
 const otp = ref(route.query.otp ? route.query.otp : null);
-if (!otp.value) {
+if (!import.meta.server && !otp.value) {
   navigateTo("/login");
 }
 const schema = z

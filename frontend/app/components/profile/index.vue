@@ -53,7 +53,7 @@ const integrations = useIntegrationsStore();
 const api = useApi("/api/security/logout/", false);
 const tokens = useTokens();
 const active = ref("profile");
-
+const isTelegramAvailable = integrations.telegram?.is_available;
 const baseItems = [
   { label: "Profile", icon: "i-lucide-user", value: "profile" },
   {
@@ -64,13 +64,9 @@ const baseItems = [
   { label: "Security", icon: "i-lucide-lock", value: "security" },
   { label: "HTTP Headers", icon: "i-lucide-globe", value: "http-headers" },
 ];
-
 const items = computed(() =>
   baseItems
-    .filter(
-      (item) =>
-        item.value !== "telegram-bot" || integrations.telegram?.is_available,
-    )
+    .filter((item) => item.value !== "telegram-bot" || isTelegramAvailable)
     .map((item) => ({
       ...item,
       active: active.value === item.value,

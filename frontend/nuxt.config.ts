@@ -44,7 +44,11 @@ export default defineNuxtConfig({
   },
 
   routeRules: {
-    "/": { prerender: true },
+    "/login": { prerender: true },
+    "/signup": { prerender: true },
+    "/mfa": { prerender: true },
+    "/reset-password": { prerender: true },
+    "/**": { ssr: false },
   },
 
   compatibilityDate: "2025-01-15",

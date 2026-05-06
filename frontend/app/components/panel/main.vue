@@ -84,6 +84,58 @@ const items = ref([
     icon: "i-lucide-chart-bar",
     to: "/metrics",
   },
+  ...(userStore.is_auditor
+    ? [
+        {
+          label: "Toolkit",
+          icon: "i-lucide-toolbox",
+          defaultOpen: false,
+          children: [
+            {
+              label: "Tools",
+              icon: "i-lucide-square-terminal",
+              to: "/tools",
+            },
+            {
+              label: "Processes",
+              icon: "i-lucide-workflow",
+              to: "/processes",
+            },
+            {
+              label: "Wordlists",
+              icon: "i-mdi-file-word",
+              to: "/wordlists",
+            },
+          ],
+        },
+      ]
+    : []),
+  ...(userStore.is_admin
+    ? [
+        {
+          label: "Administration",
+          icon: "i-lucide-settings",
+          defaultOpen: false,
+          children: [
+            {
+              label: "System",
+              icon: "i-lucide-settings",
+              to: "/admin/system",
+            },
+            {
+              label: "Integrations",
+              icon: "i-lucide-plug",
+              to: "/admin/integrations",
+            },
+            {
+              label: "Users",
+              icon: "i-lucide-users",
+              to: "/admin/users",
+            },
+          ],
+        },
+      ]
+    : []),
 ]);
 
 function loadBadges() {
@@ -171,57 +223,7 @@ function loadBadges() {
     });
 }
 
-onMounted(() => {
-  if (userStore.is_auditor) {
-    items.value.push({
-      label: "Toolkit",
-      icon: "i-lucide-toolbox",
-      defaultOpen: false,
-      children: [
-        {
-          label: "Tools",
-          icon: "i-lucide-square-terminal",
-          to: "/tools",
-        },
-        {
-          label: "Processes",
-          icon: "i-lucide-workflow",
-          to: "/processes",
-        },
-        {
-          label: "Wordlists",
-          icon: "i-mdi-file-word",
-          to: "/wordlists",
-        },
-      ],
-    });
-  }
-  if (userStore.is_admin) {
-    items.value.push({
-      label: "Administration",
-      icon: "i-lucide-settings",
-      defaultOpen: false,
-      children: [
-        {
-          label: "System",
-          icon: "i-lucide-settings",
-          to: "/admin/system",
-        },
-        {
-          label: "Integrations",
-          icon: "i-lucide-plug",
-          to: "/admin/integrations",
-        },
-        {
-          label: "Users",
-          icon: "i-lucide-users",
-          to: "/admin/users",
-        },
-      ],
-    });
-  }
-  loadBadges();
-});
+onMounted(loadBadges);
 
 watch(panelRefresh, loadBadges);
 </script>

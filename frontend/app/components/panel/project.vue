@@ -54,9 +54,128 @@ const userStore = useUserStore();
 const { panelRefresh } = usePanel();
 const { currentProject, setCurrentProject } = useCurrentProject();
 const breadcrumb = ref([]);
-const items = ref([]);
 const mounting = ref(false);
 const allProjects = ref<Project[]>([]);
+
+const projectBadges = reactive({
+  hosts: "",
+  ports: "",
+  technologies: "",
+  paths: "",
+  osint: "",
+  credentials: "",
+  vulnerabilities: "",
+  exploits: "",
+});
+
+const items = computed(() => [
+  {
+    label: "Details",
+    icon: "i-lucide-folder",
+    to: `/projects/${route.params.project_id}`,
+  },
+  {
+    label: "Targets",
+    icon: "i-lucide-locate-fixed",
+    to: `/projects/${route.params.project_id}/targets`,
+  },
+  {
+    label: "Scans",
+    icon: "i-lucide-play",
+    to: `/projects/${route.params.project_id}/scans`,
+  },
+  {
+    label: "Assets",
+    icon: "i-lucide-server",
+    defaultOpen: true,
+    children: [
+      {
+        label: "Hosts",
+        icon: "i-lucide-server",
+        to: `/projects/${route.params.project_id}/hosts`,
+        badge: projectBadges.hosts || undefined,
+      },
+      {
+        label: "Ports",
+        icon: "i-lucide-ethernet-port",
+        to: `/projects/${route.params.project_id}/ports`,
+        badge: projectBadges.ports || undefined,
+      },
+      {
+        label: "Technologies",
+        icon: "i-lucide-layers",
+        to: `/projects/${route.params.project_id}/technologies`,
+        badge: projectBadges.technologies || undefined,
+      },
+      {
+        label: "Paths",
+        icon: "i-lucide-slash",
+        to: `/projects/${route.params.project_id}/paths`,
+        badge: projectBadges.paths || undefined,
+      },
+    ],
+  },
+  {
+    label: "Findings",
+    icon: "i-lucide-scan",
+    defaultOpen: true,
+    children: [
+      {
+        label: "OSINT",
+        icon: "i-lucide-rss",
+        to: `/projects/${route.params.project_id}/osint`,
+        badge: projectBadges.osint || undefined,
+      },
+      {
+        label: "Credentials",
+        icon: "i-lucide-key",
+        to: `/projects/${route.params.project_id}/credentials`,
+        badge: projectBadges.credentials || undefined,
+      },
+      {
+        label: "Vulnerabilities",
+        icon: "i-lucide-bug",
+        to: `/projects/${route.params.project_id}/vulnerabilities`,
+        badge: projectBadges.vulnerabilities || undefined,
+      },
+      {
+        label: "Exploits",
+        icon: "i-lucide-flame",
+        to: `/projects/${route.params.project_id}/exploits`,
+        badge: projectBadges.exploits || undefined,
+      },
+    ],
+  },
+  {
+    label: "Metrics",
+    icon: "i-lucide-chart-bar",
+    to: `/projects/${route.params.project_id}/metrics`,
+  },
+  {
+    label: "Reports",
+    icon: "i-lucide-file-text",
+    to: `/projects/${route.params.project_id}/reports`,
+  },
+  {
+    label: "Notes",
+    icon: "i-lucide-notebook",
+    to: `/projects/${route.params.project_id}/notes`,
+  },
+  {
+    label: "Alerts",
+    icon: "i-lucide-triangle-alert",
+    to: `/projects/${route.params.project_id}/alerts`,
+  },
+  ...(userStore.is_admin
+    ? [
+        {
+          label: "Members",
+          icon: "i-lucide-users",
+          to: `/projects/${route.params.project_id}/members`,
+        },
+      ]
+    : []),
+]);
 
 function onProjectChange() {
   if (!route.params.project_id) {
@@ -75,6 +194,7 @@ function onProjectChange() {
       to: "/projects/",
     },
   ];
+  Object.keys(projectBadges).forEach((key) => (projectBadges[key] = ""));
   api.get(`/api/projects/${route.params.project_id}/`).then((data) => {
     setCurrentProject(data);
     if (allProjects.value.length === 0) {
@@ -86,105 +206,6 @@ function onProjectChange() {
       getProjectBreadcrum(data);
     }
   });
-  items.value = [
-    {
-      label: "Details",
-      icon: "i-lucide-folder",
-      to: `/projects/${route.params.project_id}`,
-    },
-    {
-      label: "Targets",
-      icon: "i-lucide-locate-fixed",
-      to: `/projects/${route.params.project_id}/targets`,
-    },
-    {
-      label: "Scans",
-      icon: "i-lucide-play",
-      to: `/projects/${route.params.project_id}/scans`,
-    },
-    {
-      label: "Assets",
-      icon: "i-lucide-server",
-      defaultOpen: true,
-      children: [
-        {
-          label: "Hosts",
-          icon: "i-lucide-server",
-          to: `/projects/${route.params.project_id}/hosts`,
-        },
-        {
-          label: "Ports",
-          icon: "i-lucide-ethernet-port",
-          to: `/projects/${route.params.project_id}/ports`,
-        },
-        {
-          label: "Technologies",
-          icon: "i-lucide-layers",
-          to: `/projects/${route.params.project_id}/technologies`,
-        },
-        {
-          label: "Paths",
-          icon: "i-lucide-slash",
-          to: `/projects/${route.params.project_id}/paths`,
-        },
-      ],
-    },
-    {
-      label: "Findings",
-      icon: "i-lucide-scan",
-      defaultOpen: true,
-      children: [
-        {
-          label: "OSINT",
-          icon: "i-lucide-rss",
-          to: `/projects/${route.params.project_id}/osint`,
-        },
-        {
-          label: "Credentials",
-          icon: "i-lucide-key",
-          to: `/projects/${route.params.project_id}/credentials`,
-        },
-        {
-          label: "Vulnerabilities",
-          icon: "i-lucide-bug",
-          to: `/projects/${route.params.project_id}/vulnerabilities`,
-        },
-        {
-          label: "Exploits",
-          icon: "i-lucide-flame",
-          to: `/projects/${route.params.project_id}/exploits`,
-        },
-      ],
-    },
-    {
-      label: "Metrics",
-      icon: "i-lucide-chart-bar",
-      to: `/projects/${route.params.project_id}/metrics`,
-    },
-    {
-      label: "Reports",
-      icon: "i-lucide-file-text",
-      to: `/projects/${route.params.project_id}/reports`,
-    },
-
-    {
-      label: "Notes",
-      icon: "i-lucide-notebook",
-      to: `/projects/${route.params.project_id}/notes`,
-    },
-    {
-      label: "Alerts",
-      icon: "i-lucide-triangle-alert",
-      to: `/projects/${route.params.project_id}/alerts`,
-    },
-  ];
-  if (userStore.is_admin) {
-    items.value.push({
-      label: "Members",
-      icon: "i-lucide-users",
-      to: `/projects/${route.params.project_id}/members`,
-    });
-  }
   loadProjectBadges();
 }
 
@@ -196,54 +217,50 @@ function loadProjectBadges() {
     triage_status__in: "True Positive,Untriaged",
     is_fixed: false,
   };
-  api.list("hosts/", openFindings, false, 1, 1).then((response: object) => {
-    if (items.value[3]?.children?.[0]) {
-      items.value[3].children[0].badge = formatCount(response.total);
-    }
-  });
-  api.list("ports/", openFindings, false, 1, 1).then((response: object) => {
-    if (items.value[3]?.children?.[1]) {
-      items.value[3].children[1].badge = formatCount(response.total);
-    }
-  });
+  api
+    .list("hosts/", openFindings, false, 1, 1)
+    .then(
+      (response: object) => (projectBadges.hosts = formatCount(response.total)),
+    );
+  api
+    .list("ports/", openFindings, false, 1, 1)
+    .then(
+      (response: object) => (projectBadges.ports = formatCount(response.total)),
+    );
   api
     .list("technologies/", openFindings, false, 1, 1)
-    .then((response: object) => {
-      if (items.value[3]?.children?.[2]) {
-        items.value[3].children[2].badge = formatCount(response.total);
-      }
-    });
-  api.list("paths/", openFindings, false, 1, 1).then((response: object) => {
-    if (items.value[3]?.children?.[3]) {
-      items.value[3].children[3].badge = formatCount(response.total);
-    }
-  });
-  api.list("osint/", activeFindings, false, 1, 1).then((response: object) => {
-    if (items.value[4]?.children?.[0]) {
-      items.value[4].children[0].badge = formatCount(response.total);
-    }
-  });
+    .then(
+      (response: object) =>
+        (projectBadges.technologies = formatCount(response.total)),
+    );
+  api
+    .list("paths/", openFindings, false, 1, 1)
+    .then(
+      (response: object) => (projectBadges.paths = formatCount(response.total)),
+    );
+  api
+    .list("osint/", activeFindings, false, 1, 1)
+    .then(
+      (response: object) => (projectBadges.osint = formatCount(response.total)),
+    );
   api
     .list("credentials/", activeFindings, false, 1, 1)
-    .then((response: object) => {
-      if (items.value[4]?.children?.[1]) {
-        items.value[4].children[1].badge = formatCount(response.total);
-      }
-    });
+    .then(
+      (response: object) =>
+        (projectBadges.credentials = formatCount(response.total)),
+    );
   api
     .list("vulnerabilities/", activeFindings, false, 1, 1)
-    .then((response: object) => {
-      if (items.value[4]?.children?.[2]) {
-        items.value[4].children[2].badge = formatCount(response.total);
-      }
-    });
+    .then(
+      (response: object) =>
+        (projectBadges.vulnerabilities = formatCount(response.total)),
+    );
   api
     .list("exploits/", activeFindings, false, 1, 1)
-    .then((response: object) => {
-      if (items.value[4]?.children?.[3]) {
-        items.value[4].children[3].badge = formatCount(response.total);
-      }
-    });
+    .then(
+      (response: object) =>
+        (projectBadges.exploits = formatCount(response.total)),
+    );
 }
 
 function getProjectBreadcrum(project: Project) {
