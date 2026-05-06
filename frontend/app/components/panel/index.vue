@@ -91,7 +91,7 @@
     </USidebar>
     <div class="flex-1 min-w-0 flex flex-col min-h-0 lg:m-4 lg:mb-0 lg:ms-0">
       <div
-        class="flex-1 min-h-0 overflow-y-auto bg-default lg:rounded-xl lg:shadow-sm lg:ring lg:ring-default"
+        class="flex-1 min-h-0 overflow-y-auto bg-default lg:rounded-xl lg:shadow-sm lg:ring lg:ring-default flex flex-col"
       >
         <div class="flex items-center gap-2 p-3 lg:hidden">
           <UButton
@@ -102,7 +102,7 @@
           />
         </div>
         <slot name="content-header" />
-        <div class="p-4 lg:p-10 lg:mx-10">
+        <div class="p-4 lg:p-10 lg:mx-10 flex-1">
           <slot />
         </div>
         <Footer class="lg:hidden" />
