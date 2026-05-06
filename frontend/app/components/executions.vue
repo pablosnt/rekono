@@ -3,6 +3,7 @@
     <CrudPage
       ref="page"
       :config="config"
+      :disable-url-sync="disableUrlSync"
       @fetched="(items) => $emit('fetched', items)"
     >
       <template #actions="{ item }">
@@ -88,6 +89,7 @@ const props = defineProps<{
   task?: number;
   finding?: Finding;
   findingType?: string;
+  disableUrlSync?: boolean;
 }>();
 defineEmits<{ fetched: [items: Execution[]] }>();
 

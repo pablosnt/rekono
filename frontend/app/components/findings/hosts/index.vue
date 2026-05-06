@@ -26,6 +26,7 @@
       ]"
       :visibility="{ whois: false, ports: false }"
       is-asset
+      :disable-url-sync="disableUrlSync"
     />
     <UModal
       v-if="selectedHost"
@@ -64,6 +65,7 @@ import { h } from "vue";
 import { hostOS } from "~/constants";
 import { useIntegrationsStore } from "~/store/integrations";
 
+defineProps<{ disableUrlSync?: boolean }>();
 const route = useRoute();
 const table = useTable();
 const integrations = useIntegrationsStore();

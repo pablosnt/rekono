@@ -1,6 +1,6 @@
 <template>
   <div>
-    <CrudPage :config="integrationsConfig">
+    <CrudPage disable-url-sync :config="integrationsConfig">
       <template #item="{ item }">
         <UPageCard
           :title="item.name"

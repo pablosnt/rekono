@@ -27,7 +27,7 @@ export default function () {
           optionsRef.value = [
             {
               label: "Current user",
-              value: userStore.user,
+              value: parseInt(userStore.user),
             },
           ];
         }

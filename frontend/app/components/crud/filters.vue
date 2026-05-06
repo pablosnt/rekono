@@ -1,9 +1,13 @@
 <template>
-  <div class="border-b border-default bg-muted/30 p-4 space-y-4">
+  <div
+    v-if="config.filters"
+    class="border-b border-default bg-muted/30 p-4 space-y-4"
+  >
     <div class="flex flex-wrap gap-4 justify-around">
       <template v-for="filter in config.filters" :key="filter.key">
         <USelectMenu
           v-if="filter.type === 'select'"
+          :key="`${filter.key}-${Boolean(_filters[filter.key]) && Array.isArray(filter.options) && filter.options.length > 0}`"
           :model-value="_filters[filter.key]"
           :placeholder="filter.placeholder || filter.label"
           :items="Array.isArray(filter.options) ? filter.options : []"
@@ -116,16 +120,19 @@ import type { CrudConfig, CrudState, FilterConfig } from "~/types/crud";
 const props = defineProps<{
   config: CrudConfig;
   state: CrudState;
+  disableUrlSync?: boolean;
 }>();
 const emit = defineEmits<{
   filters: [filters: Record<string, unknown>];
 }>();
+const router = useRouter();
+const route = useRoute();
 const _filters = ref(props.state.filters);
 const updating = [];
 let delayTimeout: NodeJS.Timeout | null = null;
 
 function getSelectConfig(filter: FilterConfig) {
-  return _filters.value[filter.key]
+  return _filters.value[filter.key] && filter.options
     ? filter.options.find(
         (option: FilterOption) =>
           (filter.valueKey ? option[filter.valueKey] : option.value) ===
@@ -141,10 +148,26 @@ function updateFilter(
 ) {
   if (props.config.defaultFilters && key in props.config.defaultFilters) return;
   updating.push(key);
-  if (value !== null && value !== undefined && value !== "") {
+  if (
+    value !== null &&
+    value !== undefined &&
+    value !== "" &&
+    value !== false
+  ) {
     _filters.value[key] = value;
+    if (!props.disableUrlSync)
+      router.replace({ query: { ...route.query, ...{ [key]: value } } });
   } else {
     delete _filters.value[key];
+    if (!props.disableUrlSync)
+      router.replace({
+        query: Object.assign(
+          {},
+          ...Object.entries(route.query)
+            .filter(([k, _]) => k !== key)
+            .map(([k, v]) => ({ [k]: v })),
+        ),
+      });
   }
   updating.splice(updating.indexOf(key));
   if (delay) {

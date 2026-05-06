@@ -1,5 +1,5 @@
 <template>
-  <CrudPage :config="apiTokensConfig" />
+  <CrudPage disable-url-sync :config="apiTokensConfig" />
 </template>
 
 <script setup lang="ts">

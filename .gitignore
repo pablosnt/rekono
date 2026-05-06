@@ -59,6 +59,7 @@ Result/
 .agent/
 .agents/
 .claude/
+docs/superpowers/
 
 # TODO Temporal ignore
 migrations/

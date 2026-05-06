@@ -17,6 +17,7 @@
       technology ? { technology: technology } : undefined
     "
     :header-hide-title="Boolean(technology)"
+    :disable-url-sync="disableUrlSync"
     is-triageable
   />
 </template>
@@ -27,6 +28,7 @@ import type { Credential } from "~/types/models";
 
 const props = defineProps<{
   technology?: number;
+  disableUrlSync?: boolean;
 }>();
 
 const route = useRoute();

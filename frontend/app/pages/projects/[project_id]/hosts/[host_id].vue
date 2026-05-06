@@ -115,7 +115,9 @@
             <div class="flex items-center gap-2">
               <UIcon
                 :name="
-                  host?.country ? `cif:${host.country.toLowerCase()}` : undefined
+                  host?.country
+                    ? `cif:${host.country.toLowerCase()}`
+                    : undefined
                 "
               />
               <span class="text-base">{{ host.city }}</span>

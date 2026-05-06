@@ -28,9 +28,14 @@
             :placeholder="config.searchPlaceholder"
             icon="i-lucide-search"
             class="w-full min-w-48 sm:w-64"
-            @update:model-value="$emit('search', search)"
+            @update:model-value="
+              () => {
+                $emit('search', search);
+                if (search && !disableUrlSync)
+                  router.replace({ query: { ...route.query, ...{ search } } });
+              }
+            "
           />
-
           <UButton
             v-if="config.filters?.length"
             :icon="openFilters ? 'i-lucide-filter-x' : 'i-lucide-filter'"
@@ -79,7 +84,7 @@
                     <UButton
                       size="xs"
                       :color="
-                        state.ordering === item.id ? 'primary' : 'neutral'
+                        state?.ordering === item.id ? 'primary' : 'neutral'
                       "
                       variant="soft"
                       icon="i-lucide-arrow-up-narrow-wide"
@@ -90,7 +95,9 @@
                     <UButton
                       size="xs"
                       :color="
-                        state.ordering === `-${item.id}` ? 'primary' : 'neutral'
+                        state?.ordering === `-${item.id}`
+                          ? 'primary'
+                          : 'neutral'
                       "
                       variant="soft"
                       icon="i-lucide-arrow-down-wide-narrow"
@@ -174,11 +181,25 @@ import type { CrudConfig, CrudState } from "~/types/crud";
 const props = defineProps<{
   api: typeof useApi;
   config: CrudConfig;
-  state: CrudState;
-  table: unknown;
-  openCreateModal: boolean;
+  state?: CrudState;
+  table?: unknown;
+  openCreateModal?: boolean;
   titleSizeClass?: string;
+  filtersOpen?: boolean;
+  disableUrlSync?: boolean;
 }>();
+const emit = defineEmits<{
+  search: [search: string];
+  filters: [filters: Record<string, unknown>];
+  ordering: [sortering: string];
+  create: [];
+  openCreate: [open: boolean];
+}>();
+
+const route = useRoute();
+const router = useRouter();
+const search = ref(props.state?.searchQuery ?? "");
+const openFilters = ref(props.filtersOpen ?? false);
 
 function columnLabel(columnId: string): string {
   const colDef = props.config.tableColumns?.find(
@@ -188,13 +209,4 @@ function columnLabel(columnId: string): string {
     ? colDef.header
     : firstUpper(smartLowerCase(columnId));
 }
-const emit = defineEmits<{
-  search: [search: string];
-  filters: [filters: Record<string, unknown>];
-  ordering: [sortering: string];
-  create: [];
-  openCreate: [open: boolean];
-}>();
-const search = ref("");
-const openFilters = ref(false);
 </script>

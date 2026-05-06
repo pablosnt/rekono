@@ -1,6 +1,6 @@
 <template>
   <div>
-    <CrudPage ref="page" :config="config">
+    <CrudPage ref="page" disable-url-sync :config="config">
       <template v-if="userStore.is_auditor" #actions="{ item }">
         <TasksButton
           :project="{ id: parseInt(route.params.project_id) }"

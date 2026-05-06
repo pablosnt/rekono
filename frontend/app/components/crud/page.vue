@@ -7,6 +7,8 @@
         :config="config"
         :state="state"
         :table="tableRef"
+        :filters-open="Object.keys(initialFiltersFromUrl).length > 0"
+        :disable-url-sync="disableUrlSync"
         @search="
           (search: string) => {
             state.loading = true;
@@ -18,6 +20,12 @@
           (filters: Record<string, any>) => {
             state.loading = true;
             state.filters = filters;
+            if (
+              Object.keys(filters).length ===
+                Object.keys(config.defaultFilters || {}).length &&
+              !disableUrlSync
+            )
+              router.replace({ query: {} });
             fetchFirstPage();
           }
         "
@@ -180,15 +188,50 @@
 <script setup lang="ts">
 import type { CrudConfig, CrudState } from "~/types/crud";
 
-const props = defineProps<{ config: CrudConfig }>();
+const props = defineProps<{ config: CrudConfig; disableUrlSync?: boolean }>();
 const emit = defineEmits<{ fetched: [items: unknown[]]; deleted: [] }>();
+
 const api = useApi(props.config.endpoint);
+const route = useRoute();
+const router = useRouter();
 const tableRef = ref();
 const openCreateModal = ref(false);
 const openEditModal = ref(false);
 const openDeleteModal = ref(false);
 const selectedItem = ref(null);
 const mounted = ref(false);
+const urlFilterKeys = computed(() => {
+  const keys = new Set<string>();
+  for (const f of props.config.filters ?? []) {
+    if (f.type === "range" && f.multiple) {
+      keys.add(`${f.key}__gte`);
+      keys.add(`${f.key}__lte`);
+    } else {
+      keys.add(f.key);
+    }
+  }
+  return keys;
+});
+const initialFiltersFromUrl = !props.disableUrlSync
+  ? Object.fromEntries(
+      Object.entries(route.query)
+        .filter(
+          ([key, value]) =>
+            ![undefined, null, "false"].includes(value) &&
+            typeof value === "string" &&
+            urlFilterKeys.value.has(key) &&
+            (!props.config.defaultFilters ||
+              !Object.keys(props.config.defaultFilters).includes(key)),
+        )
+        .map(([key, value]) => {
+          const num = Number(value as string);
+          return [
+            key,
+            value === "true" ? true : value !== "" && !isNaN(num) ? num : value,
+          ];
+        }),
+    )
+  : {};
 
 const state = reactive<CrudState>({
   items: [],
@@ -196,9 +239,16 @@ const state = reactive<CrudState>({
   loading: true,
   page: 1,
   pageSize: props.config.pageSize || 24,
-  filters: props.config.defaultFilters
-    ? JSON.parse(JSON.stringify(props.config.defaultFilters))
-    : {},
+  filters: {
+    ...(props.config.defaultFilters
+      ? JSON.parse(JSON.stringify(props.config.defaultFilters))
+      : {}),
+    ...initialFiltersFromUrl,
+  },
+  searchQuery:
+    props.config.searchable && !props.disableUrlSync && route.query.search
+      ? route.query.search
+      : undefined,
   ordering: props.config.defaultOrdering,
 });
 

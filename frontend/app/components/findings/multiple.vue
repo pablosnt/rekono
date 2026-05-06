@@ -1,6 +1,6 @@
 <template>
   <div>
-    <CrudPage ref="page" :config="config">
+    <CrudPage ref="page" :config="config" :disable-url-sync="disableUrlSync">
       <template #actions="{ item }">
         <NotesDropdown
           :related-entity="item"
@@ -73,6 +73,7 @@ const props = defineProps<{
   ) => DropdownAction<Record<string, unknown>>[];
   customDefaultFilters?: Rercord<string, unknown>;
   headerHideTitle?: boolean;
+  disableUrlSync?: boolean;
 }>();
 
 const userStore = useUserStore();

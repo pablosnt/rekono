@@ -27,6 +27,7 @@
     "
     :header-hide-title="Boolean(port) || Boolean(technology)"
     is-triageable
+    :disable-url-sync="disableUrlSync"
   />
 </template>
 
@@ -40,6 +41,7 @@ import type { Vulnerability } from "~/types/models";
 const props = defineProps<{
   port?: number;
   technology?: number;
+  disableUrlSync?: boolean;
 }>();
 
 const route = useRoute();

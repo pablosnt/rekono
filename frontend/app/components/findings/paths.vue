@@ -16,6 +16,7 @@
     :custom-default-filters="port ? { port: port } : undefined"
     :header-hide-title="Boolean(port)"
     is-asset
+    :disable-url-sync="disableUrlSync"
   />
 </template>
 
@@ -26,6 +27,7 @@ import type { Path } from "~/types/models";
 
 const props = defineProps<{
   port?: number;
+  disableUrlSync?: boolean;
 }>();
 
 const route = useRoute();

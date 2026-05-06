@@ -1,5 +1,6 @@
 <template>
   <CrudPage
+    disable-url-sync
     :config="{
       entityNamePlural: 'Notifications',
       entityName: 'Notification',

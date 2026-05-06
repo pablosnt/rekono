@@ -20,6 +20,7 @@
     :custom-default-filters="host ? { host: host } : undefined"
     :header-hide-title="Boolean(host)"
     is-asset
+    :disable-url-sync="disableUrlSync"
   />
 </template>
 
@@ -30,6 +31,7 @@ import type { Port } from "~/types/models";
 
 const props = defineProps<{
   host?: number;
+  disableUrlSync?: boolean;
 }>();
 
 const route = useRoute();

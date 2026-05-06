@@ -34,10 +34,7 @@
         variant="outline"
         :ui="{ root: 'overflow-x-auto' }"
       >
-        <FindingsCredentials
-          :technology="technology.id"
-          :disable-url-sync="true"
-        />
+        <FindingsCredentials :technology="technology.id" disable-url-sync />
       </UPageCard>
       <UPageCard
         v-if="technology?.vulnerability.length > 0"
@@ -45,16 +42,10 @@
         variant="outline"
         :ui="{ root: 'overflow-x-auto' }"
       >
-        <FindingsVulnerabilities
-          :technology="technology.id"
-          :disable-url-sync="true"
-        />
+        <FindingsVulnerabilities :technology="technology.id" disable-url-sync />
       </UPageCard>
       <UPageCard title="Exploits" variant="outline">
-        <FindingsExploits
-          :technology="technology.id"
-          :disable-url-sync="true"
-        />
+        <FindingsExploits :technology="technology.id" disable-url-sync />
       </UPageCard>
     </template>
   </FindingsSingle>

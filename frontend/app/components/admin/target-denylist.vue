@@ -1,5 +1,5 @@
 <template>
-  <CrudPage :config="config" />
+  <CrudPage disable-url-sync :config="config" />
 </template>
 
 <script setup lang="ts">

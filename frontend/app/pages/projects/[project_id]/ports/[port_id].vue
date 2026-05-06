@@ -36,7 +36,7 @@
         variant="outline"
         :ui="{ root: 'overflow-x-auto' }"
       >
-        <FindingsPaths :port="port.id" :disable-url-sync="true" />
+        <FindingsPaths :port="port.id" disable-url-sync />
       </UPageCard>
       <UPageCard
         v-if="port?.technology.length > 0"
@@ -44,14 +44,14 @@
         variant="outline"
         :ui="{ root: 'overflow-x-auto' }"
       >
-        <FindingsTechnologies :port="port.id" :disable-url-sync="true" />
+        <FindingsTechnologies :port="port.id" disable-url-sync />
       </UPageCard>
       <UPageCard
         title="Vulnerabilities"
         variant="outline"
         :ui="{ root: 'overflow-x-auto' }"
       >
-        <FindingsVulnerabilities :port="port.id" :disable-url-sync="true" />
+        <FindingsVulnerabilities :port="port.id" disable-url-sync />
       </UPageCard>
     </template>
   </FindingsSingle>

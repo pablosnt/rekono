@@ -113,6 +113,7 @@
           ref="executions"
           :finding="finding"
           :finding-type="entityName"
+          disable-url-sync
           @fetched="(items) => processExecutions(items)"
         />
       </UPageCard>

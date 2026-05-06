@@ -9,6 +9,7 @@
           : undefined,
       }"
       title-size-class="text-3xl"
+      disable-url-sync
     >
       <template #header-actions>
         <TasksButton

@@ -1,5 +1,5 @@
 <template>
-  <CrudPage :config="config">
+  <CrudPage disable-url-sync :config="config">
     <template #before>
       <UAlert
         v-if="!target"
