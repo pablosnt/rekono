@@ -4,5 +4,7 @@ export default defineNuxtRouteMiddleware(() => {
   if (import.meta.server) return;
 
   const userStore = useUserStore();
-  userStore.check();
+  if (userStore.user) {
+    return navigateTo("/");
+  }
 });

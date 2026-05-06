@@ -1,4 +1,7 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+import type { NuxtPage } from "nuxt/schema";
+import { isPublicRoute } from "./app/utils/routes";
+
 export default defineNuxtConfig({
   modules: ["@nuxt/eslint", "@nuxt/ui", "@pinia/nuxt", "nuxt-qrcode"],
 
@@ -83,6 +86,23 @@ export default defineNuxtConfig({
         "@nuxt/ui > prosemirror-view",
         "@nuxt/ui > prosemirror-gapcursor",
       ],
+    },
+  },
+
+  hooks: {
+    "pages:extend"(pages) {
+      function setMiddleware(pages: NuxtPage[]) {
+        for (const page of pages) {
+          page.meta ||= {};
+          page.meta.middleware = [
+            isPublicRoute(page.name) ? "public" : "private",
+          ];
+          if (page.children) {
+            setMiddleware(page.children);
+          }
+        }
+      }
+      setMiddleware(pages);
     },
   },
 
