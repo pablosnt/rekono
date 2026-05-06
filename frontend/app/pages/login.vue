@@ -11,6 +11,7 @@
         required: true,
         size: 'xl',
         autofocus: true,
+        autocomplete: 'username',
       },
       {
         name: 'password',
@@ -19,6 +20,7 @@
         placeholder: 'Enter your password',
         required: true,
         size: 'xl',
+        autocomplete: 'current-password',
       },
     ]"
     :submit="{ label: 'Sign in', autoFocus: true, size: 'xl' }"
@@ -26,10 +28,7 @@
     @submit="submit"
   >
     <template #password-hint>
-      <ULink
-        :to="{ path: '/reset-password' }"
-        class="text-primary font-medium"
-        tabindex="-1"
+      <ULink :to="{ path: '/reset-password' }" class="text-primary font-medium"
         >Forgot password?</ULink
       >
     </template>

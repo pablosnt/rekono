@@ -22,8 +22,12 @@
           dark="/favicon-dark.ico"
           :width="100"
           :height="100"
+          alt="Rekono logo"
         />
       </div>
+    </template>
+    <template #title>
+      <h1>{{ title }}</h1>
     </template>
     <template #password-hint>
       <slot name="password-hint" />
