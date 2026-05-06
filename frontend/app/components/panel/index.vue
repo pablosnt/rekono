@@ -102,7 +102,7 @@
           />
         </div>
         <slot name="content-header" />
-        <div class="p-10 mx-10">
+        <div class="p-4 lg:p-10 lg:mx-10">
           <slot />
         </div>
         <Footer class="lg:hidden" />
