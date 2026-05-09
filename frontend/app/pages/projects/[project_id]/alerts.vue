@@ -119,12 +119,12 @@ function canEdit(alert: Alert): boolean {
   return (
     field &&
     field !== "trending" &&
-    (userStore.is_admin || alert.owner?.id === parseInt(userStore.user))
+    (userStore.is_admin || alert.owner?.id === userStore.user)
   );
 }
 
 function canDelete(alert: Alert): boolean {
-  return userStore.is_admin || alert.owner?.id === parseInt(userStore.user);
+  return userStore.is_admin || alert.owner?.id === userStore.user;
 }
 
 function getActions(item: Alert, onEdit: () => void, onDelete: () => void) {

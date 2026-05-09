@@ -27,22 +27,8 @@ export default function (
     return endpoint;
   }
 
-  function headers(extra?: object = {}): object {
-    const headers = defaultHeaders;
-    if (authentication) {
-      const tokens = useTokens();
-      const jwt = tokens.get().access;
-      if (!jwt) {
-        forwardToLogin();
-      }
-      headers.Authorization = `Bearer ${jwt}`;
-    }
-    return Object.assign({}, headers, extra);
-  }
-
   function forwardToLogin(): Promise {
-    const tokens = useTokens();
-    tokens.remove();
+    localStorage.removeItem("authenticated");
     useUserStore().$reset();
     useIntegrationsStore().$reset();
     return navigateTo("/login");
@@ -72,7 +58,9 @@ export default function (
       toastOnError = [400, 401, 403, 404, 429, 500];
     }
     const requestUrl = url(endpoint);
-    options.headers = headers(extraHeaders);
+    options.headers = Object.assign({}, defaultHeaders, extraHeaders);
+    // todo: verify if same-origin works from desktop app. Otherwise use  include
+    if (authentication) options.credentials = "same-origin";
     return (
       raw ? $fetch.raw(requestUrl, options) : $fetch(requestUrl, options)
     ).catch((error) => {
@@ -102,7 +90,7 @@ export default function (
                     if (user.refreshing) {
                       return wait();
                     }
-                    request(endpoint, options, headers, raw, toastOnError)
+                    request(endpoint, options, extraHeaders, raw, toastOnError)
                       .then((response) => resolve(response))
                       .catch((error) => reject(error));
                   }, 500);
@@ -111,7 +99,13 @@ export default function (
               return wait();
             } else {
               return refresh().then(() => {
-                return request(endpoint, options, headers, raw, toastOnError);
+                return request(
+                  endpoint,
+                  options,
+                  extraHeaders,
+                  raw,
+                  toastOnError,
+                );
               });
             }
           } else {
@@ -150,29 +144,21 @@ export default function (
   }
 
   function refresh(): Promise {
-    const tokens = useTokens();
     const user = useUserStore();
     user.refresh();
-    const refresh = tokens.get().refresh;
-    if (!refresh) {
-      forwardToLogin();
-      return Promise.reject();
-    } else {
-      return request("/api/security/refresh/", {
-        method: "POST",
-        body: { refresh: refresh },
+    return request("/api/security/refresh/", {
+      method: "POST",
+      body: { refresh: refresh },
+      credentials: true,
+    })
+      .then(() => {
+        user.refresh();
+        return Promise.resolve();
       })
-        .then((response) => {
-          tokens.remove();
-          tokens.login(response);
-          user.refresh();
-          return Promise.resolve();
-        })
-        .catch(() => {
-          forwardToLogin();
-          return Promise.reject();
-        });
-    }
+      .catch(() => {
+        forwardToLogin();
+        return Promise.reject();
+      });
   }
 
   function list(

@@ -6,11 +6,8 @@
         :description="user.role"
         :avatar="{
           text: getUserDisplayName(user).charAt(0).toUpperCase(),
-          class: user.id.toString() === userStore.user ? 'bg-primary-500' : '',
-          ui:
-            user.id.toString() === userStore.user
-              ? { fallback: 'text-white' }
-              : {},
+          class: user.id === userStore.user ? 'bg-primary-500' : '',
+          ui: user.id === userStore.user ? { fallback: 'text-white' } : {},
         }"
         size="xl"
       />

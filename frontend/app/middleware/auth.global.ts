@@ -3,6 +3,5 @@ import { useUserStore } from "~/store/user";
 export default defineNuxtRouteMiddleware(() => {
   if (import.meta.server) return;
 
-  const userStore = useUserStore();
-  userStore.check();
+  useUserStore().check();
 });
