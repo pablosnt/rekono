@@ -63,6 +63,14 @@
             @click="profileOpen = true"
           />
           <template #header>
+            <UButton
+              icon="i-lucide-menu"
+              size="xl"
+              variant="ghost"
+              color="neutral"
+              class="lg:hidden"
+              @click="profileSidebarOpen = true"
+            />
             <UUser
               :avatar="{
                 text: userStore.name
@@ -84,7 +92,7 @@
             />
           </template>
           <template #body>
-            <Profile />
+            <Profile v-model:sidebar-open="profileSidebarOpen" />
           </template>
         </UModal>
       </template>
@@ -125,6 +133,10 @@ const route = useRoute();
 const userStore = useUserStore();
 const open = useLocalStorage(props.storageKey, true);
 const profileOpen = ref(false);
+const profileSidebarOpen = ref(true);
+// watch(profileOpen, (isOpen) => {
+//   if (!isOpen) profileSidebarOpen.value = true;
+// });
 const items = computed(() =>
   props.navigationItems.map((item) => setActiveState(item)),
 );

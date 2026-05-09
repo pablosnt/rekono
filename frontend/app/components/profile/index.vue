@@ -1,18 +1,31 @@
 <template>
-  <div class="flex flex-1 h-full">
-    <USidebar collapsible="none">
+  <div class="flex flex-1 h-full overflow-hidden [contain:layout]">
+    <USidebar
+      v-model:open="open"
+      variant="floating"
+      collapsible="icon"
+      mode="drawer"
+      :ui="{
+        container: 'h-full [contain:layout]',
+      }"
+      :style="{ '--sidebar-width': '14rem' }"
+      rail
+    >
       <UNavigationMenu
         :items="items"
+        :collapsed="collapsed"
         orientation="vertical"
+        tooltip
         :ui="{ link: 'p-1.5 overflow-hidden' }"
       />
       <template #footer>
         <UButton
           icon="i-lucide-log-out"
-          label="Logout"
+          :label="collapsed ? undefined : 'Logout'"
           color="neutral"
           variant="ghost"
           size="lg"
+          block
           @click="logout()"
         />
       </template>
@@ -45,12 +58,19 @@
 </template>
 
 <script setup lang="ts">
+import { useBreakpoints, breakpointsTailwind } from "@vueuse/core";
 import { useUserStore } from "~/store/user";
 import { useIntegrationsStore } from "~/store/integrations";
+
+const open = defineModel<boolean>("sidebarOpen", { default: true });
 
 const userStore = useUserStore();
 const integrations = useIntegrationsStore();
 const api = useApi("/api/security/logout/");
+const breakpoints = useBreakpoints(breakpointsTailwind);
+const collapsed = computed(
+  () => breakpoints.smaller("sm").value && !open.value,
+);
 const active = ref("profile");
 const isTelegramAvailable = integrations.telegram?.is_available;
 const baseItems = [
@@ -69,7 +89,10 @@ const items = computed(() =>
     .map((item) => ({
       ...item,
       active: active.value === item.value,
-      onSelect: () => (active.value = item.value),
+      onSelect: () => {
+        active.value = item.value;
+        if (breakpoints.smaller("sm").value) open.value = false;
+      },
     })),
 );
 
