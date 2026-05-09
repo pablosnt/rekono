@@ -161,6 +161,12 @@ SIMPLE_JWT = {
     "ISSUER": "Rekono",
 }
 
+# Cookies
+JWT_ACCESS_COOKIE = "rekono_access"
+JWT_REFRESH_COOKIE = "rekono_refresh"
+JWT_MFA_COOKIE = "rekono_mfa"
+COOKIES_CONFIG = {"httponly": True, "samesite": "Strict", "secure": CONFIG.secure_cookies}
+
 LOGGING: dict[str, Any] = {
     "version": 1,
     # Disable default Django logging system to avoid noise
@@ -216,7 +222,7 @@ REST_FRAMEWORK: dict[str, Any] = {
     "DEFAULT_PAGINATION_CLASS": "framework.pagination.Pagination",
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "security.authentication.api.ApiAuthentication",
-        "rest_framework_simplejwt.authentication.JWTAuthentication",
+        "security.authentication.jwt.CookieJWTAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",

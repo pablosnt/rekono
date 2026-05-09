@@ -9,6 +9,7 @@ from django.test import TestCase
 from django.utils import timezone
 from rest_framework.test import APIClient
 
+from rekono.settings import JWT_ACCESS_COOKIE, JWT_MFA_COOKIE, JWT_REFRESH_COOKIE
 from security.validators.enums import Regex
 from security.validators.input_validator import Validator
 from security.validators.target_validator import TargetValidator
@@ -129,6 +130,9 @@ class SecurityTest(ApiTest, TestCase):
         self.assertEqual(200, response.status_code)
         content = json.loads((response.content or "{}".encode()).decode())
         self.assertIsNotNone(content.get("mfa"))
+        self.assertIn(JWT_MFA_COOKIE, response.cookies)
+        self.assertNotIn(JWT_ACCESS_COOKIE, response.cookies)
+        self.assertNotIn(JWT_REFRESH_COOKIE, response.cookies)
         # Partial authenticated token is not valid to access API
         mfa_client = APIClient(HTTP_AUTHORIZATION=f"Bearer {content.get('mfa')}")
         self.assertEqual(401, mfa_client.get(self.profile).status_code)
@@ -145,8 +149,26 @@ class SecurityTest(ApiTest, TestCase):
         self.assertEqual(200, response.status_code)
         content = json.loads((response.content or "{}".encode()).decode())
         self.assertIsNotNone(content.get("access"))
+        self.assertIn(JWT_ACCESS_COOKIE, response.cookies)
+        self.assertIn(JWT_REFRESH_COOKIE, response.cookies)
         client = APIClient(HTTP_AUTHORIZATION=f"Bearer {content.get('access')}")
         self.assertEqual(200, client.get(self.profile).status_code)
+
+        # Login with MFA via cookies
+        response = APIClient().post(
+            self.login, data={"username": self.admin1.username, "password": self.admin1.username}
+        )
+        self.assertEqual(200, response.status_code)
+        self.assertIn(JWT_MFA_COOKIE, response.cookies)
+        # TODO: Test invalid access, refresh, and mfa tokens via cookies
+        mfa_client = APIClient()
+        mfa_client.cookies[JWT_MFA_COOKIE] = response.cookies[JWT_MFA_COOKIE].value
+        response = mfa_client.post(self.mfa_login, data={"mfa": mfa_otp.now()})
+        self.assertEqual(200, response.status_code)
+        self.assertIn("access", json.loads(response.content.decode()))
+        self.assertIn(JWT_ACCESS_COOKIE, response.cookies)
+        self.assertIn(JWT_REFRESH_COOKIE, response.cookies)
+        self.assertEqual("", response.cookies[JWT_MFA_COOKIE].value)
 
         # Login with email MFA
         response = APIClient().post(
@@ -209,6 +231,59 @@ class SecurityTest(ApiTest, TestCase):
         response = APIClient(HTTP_AUTHORIZATION=f"Bearer {content.get('access')}").get(self.profile)
         self.assertEqual(200, response.status_code)
         self.assertFalse(json.loads((response.content or "{}".encode()).decode()).get("mfa"))
+
+    def test_access_token_via_cookie(self) -> None:
+        # Login as admin1
+        response = APIClient().post(
+            self.login, data={"username": self.admin1.username, "password": self.admin1.username}
+        )
+        self.assertEqual(200, response.status_code)
+        # Check cookies are set
+        self.assertIn(JWT_ACCESS_COOKIE, response.cookies)
+        self.assertIn(JWT_REFRESH_COOKIE, response.cookies)
+        data = json.loads((response.content or "{}".encode()).decode())
+        cookie_client = APIClient()
+        # Authentication via cookie
+        cookie_client.cookies[JWT_ACCESS_COOKIE] = data["access"]
+        self.assertEqual(200, cookie_client.get(self.profile).status_code)
+
+    def test_refresh_token_via_cookie(self) -> None:
+        # Login as admin1
+        response = APIClient().post(
+            self.login, data={"username": self.admin1.username, "password": self.admin1.username}
+        )
+        data = json.loads((response.content or "{}".encode()).decode())
+        cookie_client = APIClient()
+        # Authentication and refresh via cookie
+        cookie_client.cookies[JWT_ACCESS_COOKIE] = data["access"]
+        cookie_client.cookies[JWT_REFRESH_COOKIE] = data["refresh"]
+        # Refresh tokens
+        response = cookie_client.post(self.refresh)
+        self.assertEqual(200, response.status_code)
+        # New tokens are generated
+        new_tokens = json.loads((response.content or "{}".encode()).decode())
+        self.assertIn("access", new_tokens)
+        self.assertIn("refresh", new_tokens)
+        self.assertIn(JWT_ACCESS_COOKIE, response.cookies)
+        self.assertIn(JWT_REFRESH_COOKIE, response.cookies)
+
+    def test_logout_via_cookie(self) -> None:
+        # Login as admin1
+        login_response = APIClient().post(
+            self.login, data={"username": self.admin1.username, "password": self.admin1.username}
+        )
+        data = json.loads(login_response.content.decode())
+        client = APIClient()
+        # Authentication and refresh via cookie
+        client.cookies[JWT_ACCESS_COOKIE] = data["access"]
+        client.cookies[JWT_REFRESH_COOKIE] = data["refresh"]
+        response = client.post(self.logout)
+        self.assertEqual(200, response.status_code)
+        # The refresh token is no longer valid
+        self.assertEqual(401, client.post(self.refresh, data={"refresh": data["refresh"]}).status_code)
+        # No cookies available
+        self.assertEqual("", response.cookies[JWT_ACCESS_COOKIE].value)
+        self.assertEqual("", response.cookies[JWT_REFRESH_COOKIE].value)
 
     def test_input_validation_with_no_value(self) -> None:
         for validator in [Validator(Regex.CVE), TargetValidator(Regex.TARGET)]:

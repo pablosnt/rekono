@@ -185,6 +185,7 @@ class RekonoConfig:
     _frotend_url = Property("RKN_FRONTEND_URL", "frontend.url", "https://127.0.0.1")
     _root_path = Property("RKN_ROOT_PATH", "rootpath", None)
     _secret_key = Property("RKN_SECRET_KEY", "security.secret-key", Crypto.random(3000))
+    _secure_cookies = Property("RKN_COOKIES_SECURE", "security.cookies.secure", False)
     _allowed_hosts = Property("RKN_ALLOWED_HOSTS", "security.allowed-hosts", ["localhost", "127.0.0.1", "::1"])
     _trusted_proxy = Property("RKN_TRUSTED_PROXY", None, False)
     _otp_expiration_hours = Property(None, None, 24)
@@ -368,6 +369,15 @@ class RekonoConfig:
             str: Secret key for Django cryptographic operations.
         """
         return self._secret_key.read(self.config_from_file)
+
+    @property
+    def secure_cookies(self) -> bool:
+        """Get whether auth cookies should be sent over HTTPS only.
+
+        Returns:
+            bool: True if the ``Secure`` cookie flag should be set.
+        """
+        return self._secure_cookies.read(self.config_from_file)
 
     @property
     def allowed_hosts(self) -> list[str]:
