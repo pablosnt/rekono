@@ -2,7 +2,10 @@
   <div class="space-y-5">
     <UProgress :class="[loading ? 'visible' : 'invisible', 'mb-1']" />
     <template v-if="finding">
-      <UPageCard variant="subtle" :ui="{ header: 'w-full', container: 'overflow-hidden' }">
+      <UPageCard
+        variant="subtle"
+        :ui="{ header: 'w-full', container: 'overflow-hidden' }"
+      >
         <template #header>
           <div class="mb-4">
             <div
