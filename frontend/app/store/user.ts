@@ -1,10 +1,6 @@
-import { jwtDecode, type JwtPayload } from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 import type { User } from "~/types/models";
-
-interface UserPayload extends JwtPayload {
-  user_id: number;
-  role: string;
-}
+import { useIntegrationsStore } from "./integrations";
 
 export const useUserStore = defineStore("user", {
   state: () => ({
@@ -12,29 +8,54 @@ export const useUserStore = defineStore("user", {
     name: null as string | null,
     role: null as string | null,
     refreshing: false,
+    refreshTimeout: null as NodeJS.Timeout | null,
+    is_partial_authenticated: false,
+    is_authenticated: false,
     is_admin: false,
     is_auditor: false,
     profile: null as User | null,
   }),
   actions: {
-    login(token: string) {
-      const payload = jwtDecode<UserPayload>(token);
-      this.user = payload.user_id;
-      this.role = payload.role;
-      this.is_admin = this.isRole("admin");
-      this.is_auditor = this.is_admin || this.isRole("auditor");
-      this.fetchProfile();
-    },
-    check() {
-      const tokens = useTokens();
-      const jwt = tokens.get().access;
-      if (jwt !== null && typeof jwt === "string" && this.user === null) {
-        this.login(jwt);
-      } else if (jwt === null && this.user !== null) {
-        this.$reset();
+    login(response: Record<string, string>) {
+      this.is_partial_authenticated = Boolean(response.mfa) && !response.access;
+      this.is_authenticated = Boolean(response.access) && !response.mfa;
+      if (this.is_authenticated) {
+        localStorage.setItem("authenticated", true);
+        this.fetchProfile();
+        this.scheduleSilentRefreshing(response.access);
       }
     },
+    scheduleSilentRefreshing(access: string) {
+      this.refreshTimeout = setTimeout(
+        this.refresh,
+        new Date(jwtDecode(access).exp * 1000).getTime() -
+          Date.now() -
+          60 * 1000,
+      );
+    },
     refresh() {
+      useApi("")
+        .refresh()
+        .then((response) => this.scheduleSilentRefreshing(response.access));
+    },
+    logout() {
+      if (this.refreshTimeout) clearTimeout(this.refreshTimeout);
+      localStorage.removeItem("authenticated");
+      this.$reset();
+      useIntegrationsStore().$reset();
+      navigateTo("/login");
+    },
+    check() {
+      if (
+        localStorage.getItem("authenticated") === "true" &&
+        !this.is_authenticated
+      ) {
+        this.is_partial_authenticated = false;
+        this.is_authenticated = true;
+        this.fetchProfile();
+      }
+    },
+    switchRefreshing() {
       this.refreshing = !this.refreshing;
     },
     fetchProfile() {
@@ -46,7 +67,11 @@ export const useUserStore = defineStore("user", {
     },
     updateProfile(profile: User) {
       this.profile = profile;
+      this.user = profile.id;
       this.name = getUserDisplayName(profile);
+      this.role = profile.role;
+      this.is_admin = this.isRole("admin");
+      this.is_auditor = this.is_admin || this.isRole("auditor");
     },
     isRole(role: string): boolean {
       return (this.role?.toLowerCase() ?? "") === role.toLowerCase();
@@ -56,7 +81,7 @@ export const useUserStore = defineStore("user", {
         entity[field] !== null &&
         entity[field] !== undefined &&
         ((entity[field] as Record<string, number | unknown>).id as number) ===
-          parseInt(this.user)
+          this.user
       );
     },
   },

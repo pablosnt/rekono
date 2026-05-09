@@ -50,8 +50,7 @@ import { useIntegrationsStore } from "~/store/integrations";
 
 const userStore = useUserStore();
 const integrations = useIntegrationsStore();
-const api = useApi("/api/security/logout/", false);
-const tokens = useTokens();
+const api = useApi("/api/security/logout/");
 const active = ref("profile");
 const isTelegramAvailable = integrations.telegram?.is_available;
 const baseItems = [
@@ -75,11 +74,10 @@ const items = computed(() =>
 );
 
 function logout() {
-  const refresh = tokens.get().refresh;
-  if (refresh) {
-    api.create("", { refresh: refresh });
+  if (userStore.is_authenticated) {
+    api.create("");
   }
-  return api.forwardToLogin();
+  return userStore.logout();
 }
 
 onMounted(integrations.fetchTelegram);

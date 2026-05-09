@@ -2,10 +2,7 @@
   <CrudPage :config="config">
     <template #item="{ item, onDelete }">
       <User :user="item">
-        <div
-          v-if="item.id.toString() !== userStore.user"
-          class="flex justify-end"
-        >
+        <div v-if="item.id !== userStore.user" class="flex justify-end">
           <UTooltip
             text="Delete member"
             :content="{ side: 'left', sideOffset: 8, collisionPadding: 8 }"

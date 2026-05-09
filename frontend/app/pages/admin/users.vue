@@ -28,7 +28,7 @@
           </div>
           <div class="flex1">
             <UDropdownMenu
-              v-if="item.id.toString() !== userStore.user"
+              v-if="item.id !== userStore.user"
               :items="getUserActions(item, onEdit, onDelete)"
             >
               <UButton

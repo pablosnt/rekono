@@ -37,10 +37,11 @@
 
 <script setup lang="ts">
 import * as z from "zod";
+import { useUserStore } from "~/store/user";
 
 definePageMeta({ layout: "public" });
 const api = useApi("/api/security/login/", false);
-const tokens = useTokens();
+const userStore = useUserStore();
 const loading = ref(false);
 const schema = z.object({
   username: z.string("Username is required"),
@@ -55,9 +56,10 @@ function submit(event: object) {
       password: event.data.password,
     })
     .then((response) => {
-      if (tokens.login(response)) {
+      userStore.login(response);
+      if (userStore.is_authenticated) {
         navigateTo("/");
-      } else {
+      } else if (userStore.is_partial_authenticated) {
         navigateTo("/mfa");
       }
     })

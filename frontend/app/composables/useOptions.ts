@@ -27,14 +27,14 @@ export default function () {
           optionsRef.value = [
             {
               label: "Current user",
-              value: parseInt(userStore.user),
+              value: userStore.user,
             },
           ];
         }
         optionsRef.value = [
           ...optionsRef.value,
           ...(response.items as User[])
-            .filter((user) => user.id.toString() !== userStore.user)
+            .filter((user) => user.id !== userStore.user)
             .map((user) => ({
               label: user.username,
               value: user.id,

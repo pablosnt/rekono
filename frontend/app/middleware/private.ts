@@ -4,8 +4,7 @@ import { useIntegrationsStore } from "~/store/integrations";
 export default defineNuxtRouteMiddleware(() => {
   if (import.meta.server) return;
 
-  const userStore = useUserStore();
-  if (userStore.user) {
+  if (useUserStore().is_authenticated) {
     const integrationsStore = useIntegrationsStore();
     if (integrationsStore.isEmpty) {
       integrationsStore.fetch();

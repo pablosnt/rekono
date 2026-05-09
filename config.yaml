@@ -17,6 +17,8 @@ security:
   - ::1
   encryption-key: null
   secret-key: null
+  cookies:
+    secure: false
 tools:
   cmseek:
     directory: /usr/share/cmseek

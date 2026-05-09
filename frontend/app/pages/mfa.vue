@@ -26,11 +26,12 @@
 
 <script setup lang="ts">
 import * as z from "zod";
+import { useUserStore } from "~/store/user";
 
 definePageMeta({ layout: "public" });
-const tokens = useTokens();
+const userStore = useUserStore();
 const validation = useValidation();
-const api = useApi("/api/security/mfa/", false);
+const api = useApi("/api/security/mfa/");
 const loading = ref(false);
 const fields = ref([]);
 let schema = z.object({});
@@ -40,7 +41,7 @@ handleMethodSwitch();
 async function handleMethodSwitch() {
   method.value = method.value === "app" ? "email" : "app";
   if (method.value === "email") {
-    api.create("email/", { token: tokens.get().mfa });
+    api.create("email/");
     fields.value = [
       {
         name: "mfaEmail",
@@ -80,12 +81,10 @@ function submit(event: object) {
         mfa: event.data.mfaEmail
           ? event.data.mfaEmail
           : event.data.mfaApp.join(""),
-        token: tokens.get().mfa,
       })
       .then((response) => {
-        if (tokens.login(response)) {
-          navigateTo("/", { replace: true });
-        }
+        userStore.login(response);
+        navigateTo("/");
       });
   } finally {
     loading.value = false;
@@ -93,7 +92,7 @@ function submit(event: object) {
 }
 
 onMounted(() => {
-  if (!tokens.get().mfa && !loading.value) {
+  if (!userStore.is_partial_authenticated) {
     return navigateTo("/login");
   }
 });
