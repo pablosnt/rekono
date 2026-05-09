@@ -1,4 +1,3 @@
-import { useIntegrationsStore } from "~/store/integrations";
 import { useUserStore } from "~/store/user";
 
 export default function (

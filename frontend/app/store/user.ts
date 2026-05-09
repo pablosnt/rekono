@@ -34,11 +34,9 @@ export const useUserStore = defineStore("user", {
       );
     },
     refresh() {
-      console.log("SILENT REFRESHING", Date.now());
       useApi("")
         .refresh()
-        .then((response) => this.scheduleSilentRefreshing(response.access))
-        .finally(() => console.log("DONE"));
+        .then((response) => this.scheduleSilentRefreshing(response.access));
     },
     logout() {
       if (this.refreshTimeout) clearTimeout(this.refreshTimeout);
