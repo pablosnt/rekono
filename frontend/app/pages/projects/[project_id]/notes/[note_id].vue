@@ -7,7 +7,7 @@
     :validate-on="['input', 'change']"
   >
     <div
-      class="flex flex-row flex-wrap items-center justify-between w-full gap-2"
+      class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between w-full"
     >
       <UFormField name="title" class="flex-1 min-w-0">
         <UInput
