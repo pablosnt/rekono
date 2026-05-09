@@ -61,7 +61,7 @@
         title="Malware Analysis"
         variant="outline"
       >
-        <div class="flex flex-wrap items-center gap-8 flex-wrap w-full">
+        <div class="flex flex-wrap items-center gap-8 w-full">
           <UCard
             v-if="host?.total_analysis > 0 || host?.reputation !== 0"
             :class="
@@ -92,13 +92,13 @@
       </UPageCard>
       <div
         v-if="host?.whois || (host?.latitude && host?.longitude)"
-        class="flex items-stretch gap-4 flex-wrap w-full"
+        class="flex flex-wrap items-start gap-8 w-full"
       >
         <UPageCard
           v-if="host?.whois"
           title="WHOIS"
           variant="outline"
-          class="flex-1 min-w-150"
+          class="w-full sm:flex-1"
           :ui="{ root: 'overflow-x-auto' }"
         >
           <span class="whitespace-pre-wrap font-mono">{{ host.whois }}</span>
@@ -108,8 +108,7 @@
           title="Geolocation"
           :description="host?.city ? host?.city : host?.country"
           variant="outline"
-          class="flex-1 min-w-150"
-          :ui="{ root: 'overflow-x-auto' }"
+          class="w-full sm:flex-1"
         >
           <template v-if="host?.country && host?.city" #description>
             <div class="flex items-center gap-2">
