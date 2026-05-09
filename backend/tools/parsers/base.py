@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import Any
 
 import defusedxml.ElementTree as parser
+from findings.models import OSINT, Host
 from django.db.models.fields.related_descriptors import ReverseManyToOneDescriptor
 from django.db.models.query_utils import DeferredAttribute
 
@@ -117,111 +118,114 @@ class BaseParser:
         Returns:
             Finding | None: The created or updated finding instance, or None if creation fails
         """
-        # PHASE 1: Attempt to link with findings already discovered in this execution
-        # This creates hierarchical relationships like Host > Port > Technology > Vulnerability > Exploit
-        if not linked_finding:
-            # Iterate through all findings that have been used as inputs in this execution
-            for finding_model, related_finding in self.executor.findings_used_in_execution.items():
-                # Convert the finding model class name to lowercase to match field names
-                # Example: "Host" becomes "host" to match the foreign key field name
-                field = finding_model.__name__.lower()
-                # Check if this finding type can be linked to the current finding type
-                # Avoid self-references and ensure the field exists as a valid relationship
-                if finding_model != finding_type and self.is_finding_link_field(finding_type, field):
-                    fields[field] = related_finding
-                    linked_finding = True
-                    # Stop after first successful link to avoid multiple relationships
-                    break
-        # PHASE 2: If no existing findings to link with, try to create relationships from user inputs
-        if not linked_finding:
-            port_for_input_parameter = None
-            # Check if we're dealing with input parameters that require port associations
-            # Technologies and vulnerabilities often need to be associated with specific ports
-            is_port_for_input_parameter = (
-                InputVulnerability in self.executor.targets_used_in_execution
-                or InputTechnology in self.executor.targets_used_in_execution
-            )
-            # Try to establish relationships with target-related inputs in priority order
-            for related_target in [
-                # 1. First try explicit target port from execution context
-                self.executor.targets_used_in_execution.get(TargetPort),
-                # 2. Create target port from scanned port if available
-                TargetPort(target=self.executor.execution.task.target, port=self.executor.scanned_port)
-                if self.executor.scanned_port is not None
-                else None,
-                # 3. Use task's target port if specified
-                self.executor.execution.task.target_port,
-                # 4. Finally, try the base target
-                self.executor.targets_used_in_execution.get(Target),
-            ]:
-                # Skip if no target is available at this level
-                if not related_target:
-                    continue
-                # Determine the field name for this relationship type
-                # Example: Target -> "host", TargetPort -> "port"
-                field = related_target.input_type.model_class.__name__.lower()
-                add_findings_to_field = self.is_finding_link_field(finding_type, field)
-                # Check if we should create this relationship
-                if not fields.get(field) and (
-                    # For regular findings, create if it's a valid link field
-                    (not is_port_for_input_parameter and add_findings_to_field)
-                    # For input parameters, specifically look for port relationships
-                    or (is_port_for_input_parameter and field == "port")
-                ):
-                    # Create a finding from the user input
-                    related_finding = related_target.create_finding_from_user_input(self.executor.execution)
-                    if not related_finding:
-                        continue
-                    # We avoid including the new user-input findings in the findings list
-                    # to make parser unit tests easier and more intuitive
-                    if not CONFIG.testing:  # pragma: no cover
-                        self.findings.append(related_finding)
-                    # Establish the relationship if it's a valid link field
-                    if add_findings_to_field:
+        has_parent_findings = finding_type not in [OSINT, Host]
+        if has_parent_findings:
+            # PHASE 1: Attempt to link with findings already discovered in this execution
+            # This creates hierarchical relationships like Host > Port > Technology > Vulnerability > Exploit
+            if not linked_finding:
+                # Iterate through all findings that have been used as inputs in this execution
+                for finding_model, related_finding in self.executor.findings_used_in_execution.items():
+                    # Convert the finding model class name to lowercase to match field names
+                    # Example: "Host" becomes "host" to match the foreign key field name
+                    field = finding_model.__name__.lower()
+                    # Check if this finding type can be linked to the current finding type
+                    # Avoid self-references and ensure the field exists as a valid relationship
+                    if finding_model != finding_type and self.is_finding_link_field(finding_type, field):
                         fields[field] = related_finding
                         linked_finding = True
-                    # Store port finding for potential use with input parameters
-                    if is_port_for_input_parameter:
-                        port_for_input_parameter = related_finding
-                    # Stop after first successful relationship
-                    break
-            # PHASE 3: Handle special case for input parameters (Technologies/Vulnerabilities)
-            # These need to be associated with ports when creating findings
-            if is_port_for_input_parameter and port_for_input_parameter and not linked_finding:
-                # Process technology and vulnerability input parameters
-                for input_parameter_class in [InputVulnerability, InputTechnology]:
-                    related_parameter = self.executor.targets_used_in_execution.get(input_parameter_class)
-                    if not related_parameter:
+                        # Stop after first successful link to avoid multiple relationships
+                        break
+            # PHASE 2: If no existing findings to link with, try to create relationships from user inputs
+            if not linked_finding:
+                port_for_input_parameter = None
+                # Check if we're dealing with input parameters that require port associations
+                # Technologies and vulnerabilities often need to be associated with specific ports
+                is_port_for_input_parameter = (
+                    InputVulnerability in self.executor.targets_used_in_execution
+                    or InputTechnology in self.executor.targets_used_in_execution
+                )
+                # Try to establish relationships with target-related inputs in priority order
+                for related_target in [
+                    # 1. First try explicit target port from execution context
+                    self.executor.targets_used_in_execution.get(TargetPort),
+                    # 2. Create target port from scanned port if available
+                    TargetPort(target=self.executor.execution.task.target, port=self.executor.scanned_port)
+                    if self.executor.scanned_port is not None
+                    else None,
+                    # 3. Use task's target port if specified
+                    self.executor.execution.task.target_port,
+                    # 4. Finally, try the base target
+                    self.executor.targets_used_in_execution.get(Target),
+                ]:
+                    # Skip if no target is available at this level
+                    if not related_target:
                         continue
-                    # Determine field name for the parameter type
-                    # Example: InputTechnology -> "technology", InputVulnerability -> "vulnerability"
-                    field = related_parameter.input_type.model_class.__name__.lower()
-                    # Create finding from input parameter if it's a valid relationship
-                    if self.is_finding_link_field(finding_type, field):
-                        #  Create the parameter finding and associate it with the port
-                        related_finding = related_parameter.create_finding_from_user_input(
-                            self.executor.execution, port=port_for_input_parameter
-                        )
+                    # Determine the field name for this relationship type
+                    # Example: Target -> "host", TargetPort -> "port"
+                    field = related_target.input_type.model_class.__name__.lower()
+                    add_findings_to_field = self.is_finding_link_field(finding_type, field)
+                    # Check if we should create this relationship
+                    if not fields.get(field) and (
+                        # For regular findings, create if it's a valid link field
+                        (not is_port_for_input_parameter and add_findings_to_field)
+                        # For input parameters, specifically look for port relationships
+                        or (is_port_for_input_parameter and field == "port")
+                    ):
+                        # Create a finding from the user input
+                        related_finding = related_target.create_finding_from_user_input(self.executor.execution)
                         if not related_finding:
                             continue
                         # We avoid including the new user-input findings in the findings list
                         # to make parser unit tests easier and more intuitive
                         if not CONFIG.testing:  # pragma: no cover
                             self.findings.append(related_finding)
-                        fields[field] = related_finding
-                        linked_finding = True
-                        # Stop after first successful parameter association
+                        # Establish the relationship if it's a valid link field
+                        if add_findings_to_field:
+                            fields[field] = related_finding
+                            linked_finding = True
+                        # Store port finding for potential use with input parameters
+                        if is_port_for_input_parameter:
+                            port_for_input_parameter = related_finding
+                        # Stop after first successful relationship
                         break
+                # PHASE 3: Handle special case for input parameters (Technologies/Vulnerabilities)
+                # These need to be associated with ports when creating findings
+                if is_port_for_input_parameter and port_for_input_parameter and not linked_finding:
+                    # Process technology and vulnerability input parameters
+                    for input_parameter_class in [InputVulnerability, InputTechnology]:
+                        related_parameter = self.executor.targets_used_in_execution.get(input_parameter_class)
+                        if not related_parameter:
+                            continue
+                        # Determine field name for the parameter type
+                        # Example: InputTechnology -> "technology", InputVulnerability -> "vulnerability"
+                        field = related_parameter.input_type.model_class.__name__.lower()
+                        # Create finding from input parameter if it's a valid relationship
+                        if self.is_finding_link_field(finding_type, field):
+                            #  Create the parameter finding and associate it with the port
+                            related_finding = related_parameter.create_finding_from_user_input(
+                                self.executor.execution, port=port_for_input_parameter
+                            )
+                            if not related_finding:
+                                continue
+                            # We avoid including the new user-input findings in the findings list
+                            # to make parser unit tests easier and more intuitive
+                            if not CONFIG.testing:  # pragma: no cover
+                                self.findings.append(related_finding)
+                            fields[field] = related_finding
+                            linked_finding = True
+                            # Stop after first successful parameter association
+                            break
+            if not linked_finding and not CONFIG.testing:
+                return
         # PHASE 4: Create the finding if relationships were established or
         # we're in testing mode, as we need to test parsers completely
-        if linked_finding or CONFIG.testing:
-            # Mark as tool-generated (not from user input) since this is from parser output
-            fields["created_from_user_input"] = False
-            # Use the manager's create_finding method for proper duplicate handling
-            finding = finding_type.objects.create_finding(finding_type, self.executor.execution, **fields)
-            # Add to the parser's findings list for tracking
-            self.findings.append(finding)
-            return finding
+        # Mark as tool-generated (not from user input) since this is from parser output
+        fields["created_from_user_input"] = False
+        # Use the manager's create_finding method for proper duplicate handling
+        finding = finding_type.objects.create_finding(finding_type, self.executor.execution, **fields)
+        # Add to the parser's findings list for tracking
+        self.findings.append(finding)
+        return finding
 
     def load_json_report(self) -> dict[str, Any] | list[dict[str, Any]] | None:
         """Load and parse JSON report file.
