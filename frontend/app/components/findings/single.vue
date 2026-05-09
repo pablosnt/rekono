@@ -12,11 +12,13 @@
               class="flex flex-col gap-3 sm:flex-row sm:justify-between w-full"
             >
               <div class="flex items-center gap-2">
-                <UIcon
-                  v-if="icon"
-                  :name="icon"
-                  :class="`text-${iconColor || 'neutral'} text-xl`"
-                />
+                <slot name="icon">
+                  <UIcon
+                    v-if="icon"
+                    :name="icon"
+                    :class="`text-${iconColor || 'neutral'} text-xl`"
+                  />
+                </slot>
                 <span
                   class="text-base font-semibold text-xl text-highlighted"
                   >{{ title }}</span

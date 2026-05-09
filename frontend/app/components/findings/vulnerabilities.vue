@@ -33,7 +33,7 @@
 
 <script setup lang="ts">
 import { h } from "vue";
-import { UTooltip, UIcon } from "#components";
+import { UTooltip, UButton, UIcon } from "#components";
 import type { CrudTableColumn } from "~/types/crud";
 import { severities } from "~/constants";
 import type { Vulnerability } from "~/types/models";
@@ -171,10 +171,21 @@ const columns: CrudTableColumn<Vulnerability>[] = [
                 },
                 {
                   default: () =>
-                    h(UIcon, {
-                      name: "i-lucide-trending-up",
-                      class: "text-warning text-lg shrink-0",
-                    }),
+                    h(
+                      UButton,
+                      {
+                        target: "_blank",
+                        to: "https://cvecrowd.com/",
+                        color: "neutral",
+                        variant: "ghost",
+                      },
+                      [
+                        h(UIcon, {
+                          name: "i-lucide-flame",
+                          class: "text-orange text-lg shrink-0",
+                        }),
+                      ],
+                    ),
                 },
               ),
               table.valueCell(cve),
