@@ -50,20 +50,21 @@ export const useUserStore = defineStore("user", {
         localStorage.getItem("authenticated") === "true" &&
         !this.is_authenticated
       ) {
-        this.is_partial_authenticated = false;
-        this.is_authenticated = true;
-        this.fetchProfile();
+        return this.fetchProfile();
       }
     },
     switchRefreshing() {
       this.refreshing = !this.refreshing;
     },
     fetchProfile() {
-      useApi()
+      return useApi()
         .get("profile/")
         .then((response: User) => {
+          this.is_partial_authenticated = false;
+          this.is_authenticated = true;
           this.updateProfile(response);
-        });
+        })
+        .catch(() => this.logout());
     },
     updateProfile(profile: User) {
       this.profile = profile;

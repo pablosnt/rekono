@@ -1,7 +1,7 @@
 import { useUserStore } from "~/store/user";
 
-export default defineNuxtRouteMiddleware(() => {
+export default defineNuxtRouteMiddleware(async () => {
   if (import.meta.server) return;
 
-  useUserStore().check();
+  await useUserStore().check();
 });

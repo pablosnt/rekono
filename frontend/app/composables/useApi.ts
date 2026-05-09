@@ -59,6 +59,11 @@ export default function (
       let message = "Unexpected error";
       switch (error.statusCode) {
         case 400: {
+          if (
+            requestUrl.includes("/api/security/refresh/") ||
+            requestUrl.includes("/api/security/logout/")
+          )
+            return Promise.reject(error);
           message = parseErrorMessage(error);
           break;
         }
@@ -82,6 +87,7 @@ export default function (
                     if (user.refreshing) {
                       return wait();
                     }
+                    if (!user.is_authenticated) return reject();
                     request(endpoint, options, extraHeaders, raw, toastOnError)
                       .then((response) => resolve(response))
                       .catch((error) => reject(error));
