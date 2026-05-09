@@ -14,7 +14,6 @@
 import * as z from "zod";
 import type FormField from "@nuxt/ui";
 
-definePageMeta({ layout: "public" });
 const api = useApi("/api/users/reset-password/", false);
 const validation = useValidation();
 const route = useRoute();

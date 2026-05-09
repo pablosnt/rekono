@@ -39,7 +39,6 @@
 import * as z from "zod";
 import { useUserStore } from "~/store/user";
 
-definePageMeta({ layout: "public" });
 const api = useApi("/api/security/login/", false);
 const userStore = useUserStore();
 const loading = ref(false);

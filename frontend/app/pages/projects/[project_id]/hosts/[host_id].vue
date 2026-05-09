@@ -141,8 +141,6 @@
 import { hostOS } from "~/constants";
 import { useIntegrationsStore } from "~/store/integrations";
 
-definePageMeta({ layout: "project" });
-
 const api = useApi("/api/hosts/");
 const route = useRoute();
 const integrations = useIntegrationsStore();

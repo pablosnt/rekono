@@ -28,8 +28,6 @@
 <script setup lang="ts">
 import { pathTypes } from "~/constants";
 
-definePageMeta({ layout: "project" });
-
 const api = useApi("/api/paths/");
 const route = useRoute();
 const path = ref();

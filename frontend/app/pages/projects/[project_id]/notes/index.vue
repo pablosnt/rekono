@@ -133,8 +133,6 @@ import { useUserStore } from "~/store/user";
 import type { Note } from "~/types/models";
 import { useTimeAgo } from "@vueuse/core";
 
-definePageMeta({ layout: "project" });
-
 const userStore = useUserStore();
 const options = useOptions();
 const route = useRoute();

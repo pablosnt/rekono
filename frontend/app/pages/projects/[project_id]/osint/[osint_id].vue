@@ -34,8 +34,6 @@
 import { osintDataTypes } from "~/constants";
 import { useUserStore } from "~/store/user";
 
-definePageMeta({ layout: "project" });
-
 const api = useApi("/api/osint/");
 const route = useRoute();
 const userStore = useUserStore();

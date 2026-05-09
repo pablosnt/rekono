@@ -28,7 +28,6 @@ import type { Target } from "~/types/models";
 import { targetTypes } from "~/constants";
 import { useIntegrationsStore } from "~/store/integrations";
 
-definePageMeta({ layout: "project" });
 const userStore = useUserStore();
 const route = useRoute();
 const table = useTable();

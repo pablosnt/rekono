@@ -56,8 +56,6 @@
 </template>
 
 <script setup lang="ts">
-definePageMeta({ layout: "project" });
-
 const api = useApi("/api/technologies/");
 const route = useRoute();
 const technology = ref();

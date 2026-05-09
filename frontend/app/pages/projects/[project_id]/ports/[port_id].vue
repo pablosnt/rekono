@@ -60,8 +60,6 @@
 <script setup lang="ts">
 import { portStatuses } from "~/constants";
 
-definePageMeta({ layout: "project" });
-
 const api = useApi("/api/ports/");
 const route = useRoute();
 const port = ref();

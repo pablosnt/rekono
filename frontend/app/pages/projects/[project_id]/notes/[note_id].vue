@@ -167,7 +167,6 @@
 import { useUserStore } from "~/store/user";
 import * as z from "zod";
 
-definePageMeta({ layout: "project" });
 const route = useRoute();
 const userStore = useUserStore();
 const toast = useToast();

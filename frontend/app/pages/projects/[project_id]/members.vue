@@ -26,7 +26,6 @@ import type { User } from "~/types/models";
 import { useUserStore } from "~/store/user";
 import { roles } from "~/constants";
 
-definePageMeta({ layout: "project" });
 const userStore = useUserStore();
 const route = useRoute();
 

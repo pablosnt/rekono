@@ -30,7 +30,6 @@ import {
   executionStatuses,
 } from "~/constants";
 
-definePageMeta({ layout: "project" });
 const userStore = useUserStore();
 const route = useRoute();
 const options = useOptions();

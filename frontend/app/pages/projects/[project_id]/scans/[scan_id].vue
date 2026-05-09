@@ -251,8 +251,6 @@ import type { FilterOption } from "~/types/crud";
 import type { Task } from "~/types/models";
 import { intensities, targetTypes, executionStatuses } from "~/constants";
 
-definePageMeta({ layout: "project" });
-
 const route = useRoute();
 const tasksApi = useApi("/api/tasks/");
 const userStore = useUserStore();

@@ -58,7 +58,6 @@ import type { Alert } from "~/types/models";
 import { useUserStore } from "~/store/user";
 import { alertItems } from "~/constants";
 
-definePageMeta({ layout: "project" });
 const userStore = useUserStore();
 const api = useApi("/api/alerts/");
 const options = useOptions();

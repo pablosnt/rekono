@@ -28,7 +28,6 @@
 import * as z from "zod";
 import { useUserStore } from "~/store/user";
 
-definePageMeta({ layout: "public" });
 const userStore = useUserStore();
 const validation = useValidation();
 const api = useApi("/api/security/mfa/");

@@ -152,7 +152,6 @@ import { useUserStore } from "~/store/user";
 import { targetTypes } from "~/constants";
 import { useIntegrationsStore } from "~/store/integrations";
 
-definePageMeta({ layout: "project" });
 const userStore = useUserStore();
 const integrations = useIntegrationsStore();
 const route = useRoute();

@@ -54,7 +54,6 @@
 <script setup lang="ts">
 import * as z from "zod";
 
-definePageMeta({ layout: "public" });
 const api = useApi("/api/security/signup/", false);
 const validation = useValidation();
 const route = useRoute();

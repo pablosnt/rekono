@@ -18,7 +18,6 @@ import type { CrudConfig, CrudTableColumn, FilterOption } from "~/types/crud";
 import type { Report } from "~/types/models";
 import { reportFormats, reportStatuses } from "~/constants";
 
-definePageMeta({ layout: "project" });
 const options = useOptions();
 const api = useApi();
 const route = useRoute();

@@ -52,8 +52,6 @@
 </template>
 
 <script setup lang="ts">
-definePageMeta({ layout: "project" });
-
 const api = useApi("/api/credentials/");
 const route = useRoute();
 const credential = ref();

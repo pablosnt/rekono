@@ -1,15 +1,4 @@
 <script setup lang="ts">
-const route = useRoute();
-const layout = computed(() => (route.meta.layout as string) ?? "default");
-const isPublic = computed(() => isPublicRoute(route.name as string));
-const contentVisible = ref(true);
-
-watch(layout, async () => {
-  contentVisible.value = false;
-  await nextTick();
-  contentVisible.value = true;
-});
-
 useHead({
   meta: [{ name: "viewport", content: "width=device-width, initial-scale=1" }],
   link: [{ rel: "icon", href: "/favicon-light.ico" }],
@@ -36,10 +25,11 @@ useSeoMeta({
 
 <template>
   <UApp :toaster="{ position: 'bottom-right', expand: false }">
-    <NuxtLayout :name="layout">
-      <UMain v-show="contentVisible" :class="{ '!min-h-0': !isPublic }">
-        <NuxtPage />
-      </UMain>
+    <NuxtLayout
+      name="default"
+      :class="{ '!min-h-0': !isPublicRoute($route.name) }"
+    >
+      <NuxtPage />
     </NuxtLayout>
   </UApp>
 </template>
