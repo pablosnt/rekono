@@ -24,7 +24,7 @@
       </div>
     </template>
     <template #content-header>
-      <UBreadcrumb class="mt-5 ml-5" :items="breadcrumb">
+      <UBreadcrumb class="mt-5 ml-5" :items="responsiveBreadcrum">
         <template #dropdown="{ item }">
           <UDropdownMenu :items="item.children">
             <UButton
@@ -44,6 +44,7 @@
 </template>
 
 <script setup lang="ts">
+import { useBreakpoints, breakpointsTailwind } from "@vueuse/core";
 import { useUserStore } from "~/store/user";
 import type { Project } from "~/types/models";
 import { targetTypes } from "~/constants";
@@ -53,7 +54,21 @@ const route = useRoute();
 const userStore = useUserStore();
 const { panelRefresh } = usePanel();
 const { currentProject, setCurrentProject } = useCurrentProject();
+const breakpoints = useBreakpoints(breakpointsTailwind);
 const breadcrumb = ref([]);
+const responsiveBreadcrum = computed(() =>
+  breakpoints.smaller("sm").value && breadcrumb.value.length > 3
+    ? [
+        breadcrumb.value[0],
+        {
+          slot: "dropdown" as const,
+          icon: "i-lucide-ellipsis",
+          children: breadcrumb.value.slice(1, -1),
+        },
+        breadcrumb.value[breadcrumb.value.length - 1],
+      ]
+    : breadcrumb.value,
+);
 const mounting = ref(false);
 const allProjects = ref<Project[]>([]);
 
