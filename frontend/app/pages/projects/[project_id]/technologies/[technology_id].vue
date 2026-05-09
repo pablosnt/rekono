@@ -44,7 +44,11 @@
       >
         <FindingsVulnerabilities :technology="technology.id" disable-url-sync />
       </UPageCard>
-      <UPageCard title="Exploits" variant="outline">
+      <UPageCard
+        title="Exploits"
+        variant="outline"
+        :ui="{ root: 'overflow-x-auto' }"
+      >
         <FindingsExploits :technology="technology.id" disable-url-sync />
       </UPageCard>
     </template>
