@@ -111,7 +111,7 @@
         title="Exposure Window"
         description="Executions where the finding was detected"
         variant="outline"
-        :ui="{ root: 'overflow-x-auto' }"
+        :ui="{ header: 'w-full', container: 'min-w-0' }"
       >
         <FindingsExposure class="mb-3" :finding="finding" />
         <Executions

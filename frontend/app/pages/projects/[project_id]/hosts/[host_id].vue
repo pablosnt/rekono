@@ -129,7 +129,7 @@
         v-if="host?.port.length > 0"
         title="Ports"
         variant="outline"
-        :ui="{ root: 'overflow-x-auto' }"
+        :ui="{ header: 'w-full', container: 'min-w-0' }"
       >
         <FindingsPorts :host="host.id" />
       </UPageCard>

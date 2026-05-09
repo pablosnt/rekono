@@ -32,7 +32,7 @@
         v-if="technology?.credential.length > 0"
         title="Credentials"
         variant="outline"
-        :ui="{ root: 'overflow-x-auto' }"
+        :ui="{ header: 'w-full', container: 'min-w-0' }"
       >
         <FindingsCredentials :technology="technology.id" disable-url-sync />
       </UPageCard>
@@ -40,14 +40,14 @@
         v-if="technology?.vulnerability.length > 0"
         title="Vulnerabilities"
         variant="outline"
-        :ui="{ root: 'overflow-x-auto' }"
+        :ui="{ header: 'w-full', container: 'min-w-0' }"
       >
         <FindingsVulnerabilities :technology="technology.id" disable-url-sync />
       </UPageCard>
       <UPageCard
         title="Exploits"
         variant="outline"
-        :ui="{ root: 'overflow-x-auto' }"
+        :ui="{ header: 'w-full', container: 'min-w-0' }"
       >
         <FindingsExploits :technology="technology.id" disable-url-sync />
       </UPageCard>

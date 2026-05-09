@@ -34,7 +34,7 @@
         v-if="port?.path.length > 0"
         title="Paths"
         variant="outline"
-        :ui="{ root: 'overflow-x-auto' }"
+        :ui="{ header: 'w-full', container: 'min-w-0' }"
       >
         <FindingsPaths :port="port.id" disable-url-sync />
       </UPageCard>
@@ -42,14 +42,14 @@
         v-if="port?.technology.length > 0"
         title="Technologies"
         variant="outline"
-        :ui="{ root: 'overflow-x-auto' }"
+        :ui="{ header: 'w-full', container: 'min-w-0' }"
       >
         <FindingsTechnologies :port="port.id" disable-url-sync />
       </UPageCard>
       <UPageCard
         title="Vulnerabilities"
         variant="outline"
-        :ui="{ root: 'overflow-x-auto' }"
+        :ui="{ header: 'w-full', container: 'min-w-0' }"
       >
         <FindingsVulnerabilities :port="port.id" disable-url-sync />
       </UPageCard>
