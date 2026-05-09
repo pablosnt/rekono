@@ -160,8 +160,10 @@ class SecurityTest(ApiTest, TestCase):
         )
         self.assertEqual(200, response.status_code)
         self.assertIn(JWT_MFA_COOKIE, response.cookies)
-        # TODO: Test invalid access, refresh, and mfa tokens via cookies
         mfa_client = APIClient()
+        # Invalid token via cookie
+        mfa_client.cookies[JWT_MFA_COOKIE] = "invalid JWT"
+        self.assertEqual(401, mfa_client.post(self.mfa_login, data={"mfa": mfa_otp.now()}).status_code)
         mfa_client.cookies[JWT_MFA_COOKIE] = response.cookies[JWT_MFA_COOKIE].value
         response = mfa_client.post(self.mfa_login, data={"mfa": mfa_otp.now()})
         self.assertEqual(200, response.status_code)
@@ -242,7 +244,12 @@ class SecurityTest(ApiTest, TestCase):
         self.assertIn(JWT_ACCESS_COOKIE, response.cookies)
         self.assertIn(JWT_REFRESH_COOKIE, response.cookies)
         data = json.loads((response.content or "{}".encode()).decode())
+
         cookie_client = APIClient()
+        # Invalid token via cookie
+        cookie_client.cookies[JWT_ACCESS_COOKIE] = "invalid JWT"
+        self.assertEqual(401, cookie_client.get(self.profile).status_code)
+
         # Authentication via cookie
         cookie_client.cookies[JWT_ACCESS_COOKIE] = data["access"]
         self.assertEqual(200, cookie_client.get(self.profile).status_code)
@@ -253,11 +260,17 @@ class SecurityTest(ApiTest, TestCase):
             self.login, data={"username": self.admin1.username, "password": self.admin1.username}
         )
         data = json.loads((response.content or "{}".encode()).decode())
-        cookie_client = APIClient()
+
         # Authentication and refresh via cookie
+        cookie_client = APIClient()
         cookie_client.cookies[JWT_ACCESS_COOKIE] = data["access"]
-        cookie_client.cookies[JWT_REFRESH_COOKIE] = data["refresh"]
+
+        # Invalid token via cookie
+        cookie_client.cookies[JWT_REFRESH_COOKIE] = "invalid JWT"
+        self.assertEqual(401, cookie_client.post(self.refresh).status_code)
+
         # Refresh tokens
+        cookie_client.cookies[JWT_REFRESH_COOKIE] = data["refresh"]
         response = cookie_client.post(self.refresh)
         self.assertEqual(200, response.status_code)
         # New tokens are generated
@@ -273,14 +286,21 @@ class SecurityTest(ApiTest, TestCase):
             self.login, data={"username": self.admin1.username, "password": self.admin1.username}
         )
         data = json.loads(login_response.content.decode())
-        client = APIClient()
+        cookie_client = APIClient()
+        cookie_client.cookies[JWT_ACCESS_COOKIE] = data["access"]
+
+        # Invalid token via cookie
+        cookie_client.cookies[JWT_REFRESH_COOKIE] = "invalid JWT"
+        self.assertEqual(401, cookie_client.post(self.logout).status_code)
+
         # Authentication and refresh via cookie
-        client.cookies[JWT_ACCESS_COOKIE] = data["access"]
-        client.cookies[JWT_REFRESH_COOKIE] = data["refresh"]
-        response = client.post(self.logout)
+        cookie_client.cookies[JWT_REFRESH_COOKIE] = data["refresh"]
+        response = cookie_client.post(self.logout)
         self.assertEqual(200, response.status_code)
+
         # The refresh token is no longer valid
-        self.assertEqual(401, client.post(self.refresh, data={"refresh": data["refresh"]}).status_code)
+        self.assertEqual(401, cookie_client.post(self.refresh, data={"refresh": data["refresh"]}).status_code)
+
         # No cookies available
         self.assertEqual("", response.cookies[JWT_ACCESS_COOKIE].value)
         self.assertEqual("", response.cookies[JWT_REFRESH_COOKIE].value)
