@@ -248,7 +248,7 @@ if not CONFIG.testing:
                 "anon": "100/min",
                 # 4 request by second by user
                 # It is enough for legitimate usage, but attacks will be blocked
-                "user": "300/min",
+                "user": "1000/min",
                 # Prevent brute force attacks in login and refresh token features
                 # Login is not authenticated, we can receive many requests from different users with same public IP address
                 "login": "30/min",
