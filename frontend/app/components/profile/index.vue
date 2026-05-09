@@ -77,7 +77,7 @@ function logout() {
   if (userStore.is_authenticated) {
     api.create("");
   }
-  return api.forwardToLogin();
+  return userStore.logout();
 }
 
 onMounted(integrations.fetchTelegram);

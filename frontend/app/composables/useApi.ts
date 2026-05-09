@@ -27,13 +27,6 @@ export default function (
     return endpoint;
   }
 
-  function forwardToLogin(): Promise {
-    localStorage.removeItem("authenticated");
-    useUserStore().$reset();
-    useIntegrationsStore().$reset();
-    return navigateTo("/login");
-  }
-
   function parseErrorMessage(
     error: object,
     include_field: boolean = true,
@@ -145,18 +138,18 @@ export default function (
 
   function refresh(): Promise {
     const user = useUserStore();
-    user.refresh();
+    user.switchRefreshing();
     return request("/api/security/refresh/", {
       method: "POST",
       body: { refresh: refresh },
       credentials: true,
     })
-      .then(() => {
-        user.refresh();
-        return Promise.resolve();
+      .then((response) => {
+        user.switchRefreshing();
+        return Promise.resolve(response);
       })
       .catch(() => {
-        forwardToLogin();
+        user.logout();
         return Promise.reject();
       });
   }
@@ -312,5 +305,5 @@ export default function (
     });
   }
 
-  return { get, list, download, create, update, remove, forwardToLogin };
+  return { get, list, download, create, update, remove, refresh };
 }

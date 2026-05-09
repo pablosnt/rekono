@@ -1,10 +1,6 @@
-import { jwtDecode, type JwtPayload } from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 import type { User } from "~/types/models";
-
-interface UserPayload extends JwtPayload {
-  user_id: number;
-  role: string;
-}
+import { useIntegrationsStore } from "./integrations";
 
 export const useUserStore = defineStore("user", {
   state: () => ({
@@ -12,25 +8,44 @@ export const useUserStore = defineStore("user", {
     name: null as string | null,
     role: null as string | null,
     refreshing: false,
+    refreshTimeout: null as NodeJS.Timeout | null,
     is_partial_authenticated: false,
     is_authenticated: false,
-    expiration: null as number | null,
     is_admin: false,
     is_auditor: false,
     profile: null as User | null,
   }),
   actions: {
     login(response: Record<string, string>) {
-      this.is_partial_authenticated =
-        Boolean(response.mfa) && !response.access;
-      this.is_authenticated =
-        Boolean(response.access) && !response.mfa;
+      this.is_partial_authenticated = Boolean(response.mfa) && !response.access;
+      this.is_authenticated = Boolean(response.access) && !response.mfa;
       if (this.is_authenticated) {
         localStorage.setItem("authenticated", true);
         this.fetchProfile();
-        const payload = jwtDecode<UserPayload>(response.access);
-        this.expiration = payload.exp;
+        this.scheduleSilentRefreshing(response.access);
       }
+    },
+    scheduleSilentRefreshing(access: string) {
+      this.refreshTimeout = setTimeout(
+        this.refresh,
+        new Date(jwtDecode(access).exp * 1000).getTime() -
+          Date.now() -
+          60 * 1000,
+      );
+    },
+    refresh() {
+      console.log("SILENT REFRESHING", Date.now());
+      useApi("")
+        .refresh()
+        .then((response) => this.scheduleSilentRefreshing(response.access))
+        .finally(() => console.log("DONE"));
+    },
+    logout() {
+      if (this.refreshTimeout) clearTimeout(this.refreshTimeout);
+      localStorage.removeItem("authenticated");
+      this.$reset();
+      useIntegrationsStore().$reset();
+      navigateTo("/login");
     },
     check() {
       if (
@@ -42,7 +57,7 @@ export const useUserStore = defineStore("user", {
         this.fetchProfile();
       }
     },
-    refresh() {
+    switchRefreshing() {
       this.refreshing = !this.refreshing;
     },
     fetchProfile() {
