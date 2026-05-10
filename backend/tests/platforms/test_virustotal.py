@@ -82,6 +82,9 @@ class VirusTotalTest(BaseTest, TestCase):
         self.settings.save(update_fields=["_api_token"])
         self.assertFalse(self.virustotal.live_is_available())
 
+    def test_cached_is_available(self) -> None:
+        self.assertFalse(self.virustotal.is_available())
+
 
 new_settings = {"api_token": "cve-crowd-token"}
 invalid_settings = {"api_token": "x" * 70}
