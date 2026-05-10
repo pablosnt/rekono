@@ -222,7 +222,9 @@ class SecurityMiddleware(LoggingEntity):
         request.META["REMOTE_ADDR"] = self._get_source_ip_address(request)
         RequestContext.set(request)
         try:
-            response = self.get_response(request) if request.method != "OPTIONS" else self._get_options_response(request)
+            response = (
+                self.get_response(request) if request.method != "OPTIONS" else self._get_options_response(request)
+            )
             response = self._add_security_headers(request, response)
             self._log_request_and_response(request, response)
             return response
