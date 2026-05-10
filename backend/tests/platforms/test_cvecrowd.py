@@ -55,7 +55,7 @@ class CveCrowdTest(BaseTest, TestCase):
         self.assertTrue(Vulnerability.objects.get(pk=self.trending.id).trending)
         self.assertFalse(Vulnerability.objects.get(pk=self.not_trending.id).trending)
         # Rerun to force cache usage
-        self.cvecrowd.process_findings(self.execution, [self.trending, self.not_trending])
+        CveCrowd().process_findings(self.execution, [self.trending, self.not_trending])
 
     @mock.patch("platforms.cvecrowd.integrations.CveCrowd._request", not_found)
     def test_process_findings_not_found(self) -> None:
