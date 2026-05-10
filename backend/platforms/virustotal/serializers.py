@@ -27,18 +27,23 @@ class VirusTotalSettingsSerializer(ModelSerializer):
     api_token = ProtectedSecretField(required=False, allow_null=True, source="secret")
 
     class Meta:
-        """Serializer metadata configuration.
-
-        Defines the model and fields for VirusTotal settings serialization.
-        Includes platform configuration ID, encrypted API token, and real-time
-        availability status for comprehensive platform management.
-        """
-
         model = VirusTotalSettings
         fields = ("id", "api_token", "is_available")
         read_only_fields = ("is_available",)
 
     def update(self, instance, validated_data):
+        """Update VirusTotal settings and refresh the platform availability status.
+
+        Delegates to the parent update method, then performs a live API check to
+        update the is_available field in the database.
+
+        Args:
+            instance (VirusTotalSettings): The settings instance to update.
+            validated_data (dict): Validated data from the request.
+
+        Returns:
+            VirusTotalSettings: The updated settings instance.
+        """
         instance = super().update(instance, validated_data)
         instance.is_available = VirusTotal().live_is_available()
         instance.save(update_fields=["is_available"])

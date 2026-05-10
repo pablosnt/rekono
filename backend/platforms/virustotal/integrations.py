@@ -50,6 +50,14 @@ class VirusTotal(BaseIntegration):
         return VirusTotalSettings.objects.first()
 
     def is_available(self) -> bool:
+        """Check if the VirusTotal platform is available and accessible.
+
+        Returns the availability status stored in the database, which is updated
+        each time the platform settings are saved.
+
+        Returns:
+            bool: True if the platform is available and accessible, False otherwise.
+        """
         return self.settings.is_available
 
     def live_is_available(self) -> bool:

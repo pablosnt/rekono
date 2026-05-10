@@ -21,7 +21,8 @@ class VirusTotalSettings(BaseEncrypted):
 
     Attributes:
         _api_token (TextField): Encrypted VirusTotal API token for authentication.
-                               Validated using SECRET regex pattern for security.
+            Validated using SECRET regex pattern for security.
+        is_available (BooleanField): Cached platform availability status (default False).
 
     Example:
         Configure VirusTotal API credentials:

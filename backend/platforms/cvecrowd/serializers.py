@@ -31,7 +31,19 @@ class CveCrowdSettingsSerializer(ModelSerializer):
         read_only_fields = ("is_available",)
 
     def update(self, instance, validated_data):
+        """Update CVE Crowd settings and refresh the platform availability status.
+
+        Delegates to the parent update method, then performs a live API check to
+        update the is_available field in the database.
+
+        Args:
+            instance (CveCrowdSettings): The settings instance to update.
+            validated_data (dict): Validated data from the request.
+
+        Returns:
+            CveCrowdSettings: The updated settings instance.
+        """
         instance = super().update(instance, validated_data)
-        instance.is_available = len(CveCrowd().get_trending_cves(False)) > 0
+        instance.is_available = CveCrowd().live_is_available()
         instance.save(update_fields=["is_available"])
         return instance
