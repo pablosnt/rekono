@@ -48,6 +48,17 @@ class CveCrowd(BaseIntegration):
         """
         return CveCrowdSettings.objects.first()
 
+    def is_available(self) -> bool:
+        """Check if the CVE Crowd platform is available and accessible.
+
+        Validates platform connectivity by checking for valid API credentials
+        and successful trending CVE data retrieval.
+
+        Returns:
+            bool: True if the platform is available and has trending data, False otherwise.
+        """
+        return self.settings.is_available
+
     @cached_property
     def trending_cves(self) -> list[str]:
         return self.get_trending_cves(True)
@@ -78,17 +89,6 @@ class CveCrowd(BaseIntegration):
             except Exception:
                 pass
         return []
-
-    def is_available(self) -> bool:
-        """Check if the CVE Crowd platform is available and accessible.
-
-        Validates platform connectivity by checking for valid API credentials
-        and successful trending CVE data retrieval.
-
-        Returns:
-            bool: True if the platform is available and has trending data, False otherwise.
-        """
-        return self.settings.is_available
 
     def _process_finding(self, execution: Execution, finding: Vulnerability) -> None:
         """Process a vulnerability finding by marking it as trending.
