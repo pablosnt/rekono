@@ -12,11 +12,11 @@ from pathlib import Path
 from typing import Any
 
 import defusedxml.ElementTree as parser
-from findings.models import OSINT, Host
 from django.db.models.fields.related_descriptors import ReverseManyToOneDescriptor
 from django.db.models.query_utils import DeferredAttribute
 
 from findings.framework.models import Finding
+from findings.models import OSINT, Host
 from parameters.models import InputTechnology, InputVulnerability
 from rekono.settings import CONFIG
 from target_ports.models import TargetPort

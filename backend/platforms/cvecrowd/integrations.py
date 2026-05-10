@@ -6,7 +6,10 @@ automated alerting for security teams. The integration supports both per-executi
 processing and bulk monitoring capabilities for comprehensive threat intelligence.
 """
 
+from datetime import timedelta
 from functools import cached_property
+
+from django.utils import timezone
 
 from alerts.enums import AlertItem
 from alerts.models import Alert
@@ -15,7 +18,7 @@ from findings.enums import TriageStatus
 from findings.framework.models import Finding
 from findings.models import Vulnerability
 from framework.platforms import BaseIntegration
-from platforms.cvecrowd.models import CveCrowdSettings
+from platforms.cvecrowd.models import CveCrowdCache, CveCrowdSettings
 from platforms.mail.notifications import SMTP
 from platforms.telegram_app.notifications import Telegram
 
@@ -34,7 +37,7 @@ class CveCrowd(BaseIntegration):
     """
 
     finding_types = [Vulnerability]
-    url = "https://api.cvecrowd.com/api/v1/cves"
+    url = "https://api.cvecrowd.com/api/v2/cves"
 
     @property
     def settings(self) -> CveCrowdSettings:
@@ -45,18 +48,79 @@ class CveCrowd(BaseIntegration):
         """
         return CveCrowdSettings.objects.first()
 
-    @cached_property
-    def trending_cves(self) -> list[str]:
-        """Retrieve and cache trending CVE data from the CVE Crowd API.
+    def is_available(self) -> bool:
+        """Check if the CVE Crowd platform is available and accessible.
 
-        Fetches current trending vulnerability data using the configured API
-        credentials and trending analysis timeframe. Results are cached for
-        efficient access during vulnerability processing operations.
+        Returns the availability status stored in the database, which is updated
+        each time the platform settings are saved.
 
         Returns:
-            list[str]: List of trending CVE identifiers, empty list if unavailable.
+            bool: True if the platform is available and has trending data, False otherwise.
         """
-        if self.integration.enabled and self.settings.secret:
+        return self.settings.is_available
+
+    def live_is_available(self) -> bool:
+        """Check if the CVE Crowd platform is available by performing a live API request.
+
+        Validates platform connectivity by fetching trending CVE data directly from
+        the API, bypassing the database cache. Returns True if at least one trending
+        CVE is returned.
+
+        Returns:
+            bool: True if the platform is reachable and returns trending data, False otherwise.
+        """
+        return len(self.get_trending_cves(False)) > 0
+
+    @cached_property
+    def trending_cves(self) -> list[str]:
+        """Trending CVEs from CVE Crowd, cached for the lifetime of the instance.
+
+        Uses the database cache to avoid redundant API requests. Delegates to
+        get_trending_cves with cache enabled.
+
+        Returns:
+            list[str]: List of CVE identifiers currently trending on CVE Crowd.
+        """
+        return self.get_trending_cves(True)
+
+    def get_trending_cves(self, use_cache: bool) -> list[str]:
+        """Retrieve the list of trending CVEs from CVE Crowd, optionally using the database cache.
+
+        When cache is enabled, returns stored CVE data if it was collected within the last day.
+        If the cache is expired or empty, fetches fresh data from the API, stores it in the
+        database, and returns the result.
+
+        Args:
+            use_cache (bool): Whether to use the database cache to avoid redundant API requests.
+
+        Returns:
+            list[str]: List of CVE identifiers currently trending on CVE Crowd.
+        """
+        if use_cache:
+            cache = CveCrowdCache.objects.order_by("date")
+            if cache.exists():
+                first = cache.first()
+                if first.date > (timezone.now() - timedelta(days=1)):
+                    return cache.values_list("cve", flat=True)
+        CveCrowdCache.objects.all().delete()
+        cves = self.download_trending_cves()
+        if len(cves) > 0:
+            CveCrowdCache.objects.bulk_create([CveCrowdCache(cve=cve, date=timezone.now()) for cve in cves])
+        return cves
+
+    def download_trending_cves(self) -> list[str]:
+        """Download the list of trending CVEs directly from the CVE Crowd API.
+
+        Makes an authenticated request to the CVE Crowd API endpoint, passing the
+        configured trending span in days. Returns an empty list if no API token is
+        configured or if the request fails.
+
+        Returns:
+            list[str]: List of CVE identifiers currently trending on CVE Crowd,
+                or an empty list on failure.
+        """
+        if self.settings.secret:
+            # TOTEST: We don't have API access
             try:
                 return self._request(
                     self.session.get,
@@ -67,19 +131,6 @@ class CveCrowd(BaseIntegration):
             except Exception:
                 pass
         return []
-
-    def is_available(self) -> bool:
-        """Check if the CVE Crowd platform is available and accessible.
-
-        Validates platform connectivity by checking for valid API credentials
-        and successful trending CVE data retrieval.
-
-        Returns:
-            bool: True if the platform is available and has trending data, False otherwise.
-        """
-        if self.settings.secret:
-            return len(self.trending_cves) > 0
-        return False
 
     def _process_finding(self, execution: Execution, finding: Vulnerability) -> None:
         """Process a vulnerability finding by marking it as trending.

@@ -54,6 +54,8 @@ class CveCrowdTest(BaseTest, TestCase):
         self.cvecrowd.process_findings(self.execution, [self.trending, self.not_trending])
         self.assertTrue(Vulnerability.objects.get(pk=self.trending.id).trending)
         self.assertFalse(Vulnerability.objects.get(pk=self.not_trending.id).trending)
+        # Rerun to force cache usage
+        CveCrowd().process_findings(self.execution, [self.trending, self.not_trending])
 
     @mock.patch("platforms.cvecrowd.integrations.CveCrowd._request", not_found)
     def test_process_findings_not_found(self) -> None:
@@ -84,19 +86,22 @@ class CveCrowdTest(BaseTest, TestCase):
 
     @mock.patch("platforms.cvecrowd.integrations.CveCrowd._request", success)
     def test_is_available(self) -> None:
-        self.assertTrue(self.cvecrowd.is_available())
+        self.assertTrue(self.cvecrowd.live_is_available())
 
     @mock.patch("platforms.cvecrowd.integrations.CveCrowd._request", not_found)
     def test_is_not_available_1(self) -> None:
-        self.assertFalse(self.cvecrowd.is_available())
+        self.assertFalse(self.cvecrowd.live_is_available())
 
     @mock.patch("platforms.cvecrowd.integrations.CveCrowd._request", exception)
     def test_is_not_available_2(self) -> None:
+        self.assertFalse(self.cvecrowd.live_is_available())
+
+    def test_cached_is_available(self) -> None:
         self.assertFalse(self.cvecrowd.is_available())
 
 
 new_settings = {"api_token": "cve-crowd-token", "trending_span_days": 3, "execute_per_execution": False}
-invalid_settings = {**new_settings, "trending_span_days": 10}
+invalid_settings = {**new_settings, "trending_span_days": 50}
 
 
 class CveCrowdSettingsTest(ApiTestNoData, TestCase):

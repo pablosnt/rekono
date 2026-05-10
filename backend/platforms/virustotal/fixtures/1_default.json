@@ -3,7 +3,8 @@
         "model": "virustotal.virustotalsettings",
         "pk": 1,
         "fields": {
-            "_api_token": null
+            "_api_token": null,
+            "is_available": false
         }
     }
 ]

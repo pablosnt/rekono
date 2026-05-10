@@ -1,21 +1,23 @@
 """Django models for CVE Crowd platform integration settings.
 
-This module provides the core data model for CVE Crowd platform configuration,
-enabling secure storage of API credentials and monitoring settings. The model
-supports encrypted credential storage and configurable trending analysis parameters
+This module provides the data models for CVE Crowd platform configuration,
+enabling secure storage of API credentials, monitoring settings, and a
+database-backed cache for trending CVE data. The settings model supports
+encrypted credential storage and configurable trending analysis parameters
 for comprehensive vulnerability threat intelligence integration.
 
 Architecture:
     The settings model extends BaseEncrypted to provide automatic encryption for
     sensitive API credentials while maintaining flexible configuration options
     for trending analysis timeframes and execution patterns within the security
-    assessment workflow.
+    assessment workflow. The cache model stores trending CVE identifiers to
+    avoid redundant API requests across multiple executions.
 """
 
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
-from framework.models import BaseEncrypted
+from framework.models import BaseEncrypted, BaseModel
 from security.validators.input_validator import Regex, Validator
 
 
@@ -28,9 +30,10 @@ class CveCrowdSettings(BaseEncrypted):
     monitoring and prioritization.
 
     Attributes:
-        _api_token (TextField): Encrypted CVE Crowd API bearer token (max 50 chars)
-        trending_span_days (IntegerField): Days for trending analysis (1-7, default 7)
-        execute_per_execution (BooleanField): Enable per-execution processing (default True)
+        _api_token (TextField): Encrypted CVE Crowd API bearer token (max 50 chars).
+        trending_span_days (IntegerField): Days for trending analysis (1-30, default 7).
+        execute_per_execution (BooleanField): Enable per-execution processing (default True).
+        is_available (BooleanField): Cached platform availability status (default False).
 
     Example:
         Configure CVE Crowd integration with 3-day trending window:
@@ -52,8 +55,9 @@ class CveCrowdSettings(BaseEncrypted):
         blank=True,
         db_column="api_token",
     )
-    trending_span_days = models.IntegerField(default=7, validators=[MinValueValidator(1), MaxValueValidator(7)])
+    trending_span_days = models.IntegerField(default=7, validators=[MinValueValidator(1), MaxValueValidator(30)])
     execute_per_execution = models.BooleanField(default=True)
+    is_available = models.BooleanField(default=False)
 
     _encrypted_field = "_api_token"
 
@@ -64,3 +68,19 @@ class CveCrowdSettings(BaseEncrypted):
             str: Platform name "CVE Crowd".
         """
         return "CVE Crowd"
+
+
+class CveCrowdCache(BaseModel):
+    """Cache model for trending CVE identifiers retrieved from the CVE Crowd API.
+
+    Stores CVE identifiers with their retrieval timestamp to avoid redundant API
+    requests. The cache is considered valid for one day; all entries are replaced
+    atomically when the cache is expired or a forced refresh is triggered.
+
+    Attributes:
+        cve (TextField): CVE identifier (e.g., CVE-2024-12345), max 20 chars.
+        date (DateTimeField): Timestamp when this entry was stored in the cache.
+    """
+
+    cve = models.TextField(max_length=20)
+    date = models.DateTimeField()

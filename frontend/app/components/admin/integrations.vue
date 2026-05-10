@@ -155,10 +155,10 @@ const integrationsSettings = ref({
           key: "trending_span_days",
           label: "Trending Span Days",
           type: "number",
-          placeholder: "Enter number of days (1-7)",
+          placeholder: "Enter number of days (1-30)",
           required: true,
           min: 1,
-          max: 7,
+          max: 30,
         },
         {
           key: "execute_per_execution",
@@ -172,7 +172,7 @@ const integrationsSettings = ref({
         trending_span_days: z
           .number()
           .min(1, "Must be at least 1")
-          .max(7, "Must be at most 7"),
+          .max(30, "Must be at most 30"),
         execute_per_execution: z.boolean(),
       }),
     },
