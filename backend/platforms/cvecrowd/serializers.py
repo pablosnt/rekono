@@ -5,7 +5,7 @@ for API operations. Includes secure credential handling, validation logic,
 and platform availability detection for threat intelligence integration.
 """
 
-from rest_framework.serializers import ModelSerializer, SerializerMethodField
+from rest_framework.serializers import ModelSerializer
 
 from framework.fields import ProtectedSecretField
 from platforms.cvecrowd.integrations import CveCrowd
@@ -21,27 +21,17 @@ class CveCrowdSettingsSerializer(ModelSerializer):
 
     Attributes:
         api_token (ProtectedSecretField): Protected API token field with validation
-        is_available (SerializerMethodField): Platform availability status
     """
 
     api_token = ProtectedSecretField(required=False, allow_null=True, source="secret")
-    is_available = SerializerMethodField(read_only=True)
-    client = CveCrowd()
 
     class Meta:
         model = CveCrowdSettings
         fields = ("id", "trending_span_days", "execute_per_execution", "api_token", "is_available")
+        read_only_fields = ("is_available",)
 
-    def get_is_available(self, instance: CveCrowdSettings) -> bool:
-        """Check if the CVE Crowd platform is available and accessible.
-
-        Validates platform connectivity and API accessibility using the
-        configured credentials and settings.
-
-        Args:
-            instance (CveCrowdSettings): The settings instance being serialized.
-
-        Returns:
-            bool: True if the platform is available and accessible, False otherwise.
-        """
-        return self.client.is_available()
+    def update(self, instance, validated_data):
+        instance = super().update(instance, validated_data)
+        instance.is_available = len(CveCrowd().trending_cves) > 0
+        instance.save(update_fields=["is_available"])
+        return instance

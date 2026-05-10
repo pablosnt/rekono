@@ -34,7 +34,7 @@ class CveCrowd(BaseIntegration):
     """
 
     finding_types = [Vulnerability]
-    url = "https://api.cvecrowd.com/api/v1/cves"
+    url = "https://api.cvecrowd.com/api/v2/cves"
 
     @property
     def settings(self) -> CveCrowdSettings:
@@ -47,6 +47,9 @@ class CveCrowd(BaseIntegration):
 
     @cached_property
     def trending_cves(self) -> list[str]:
+        return self.get_trending_cves()
+
+    def get_trending_cves(self) -> list[str]:
         """Retrieve and cache trending CVE data from the CVE Crowd API.
 
         Fetches current trending vulnerability data using the configured API
@@ -77,9 +80,7 @@ class CveCrowd(BaseIntegration):
         Returns:
             bool: True if the platform is available and has trending data, False otherwise.
         """
-        if self.settings.secret:
-            return len(self.trending_cves) > 0
-        return False
+        return self.settings.is_available
 
     def _process_finding(self, execution: Execution, finding: Vulnerability) -> None:
         """Process a vulnerability finding by marking it as trending.
