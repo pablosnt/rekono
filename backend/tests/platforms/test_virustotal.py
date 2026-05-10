@@ -72,15 +72,15 @@ class VirusTotalTest(BaseTest, TestCase):
 
     @mock.patch("platforms.virustotal.integrations.VirusTotal._request", success)
     def test_is_available(self) -> None:
-        self.assertTrue(self.virustotal.is_available())
+        self.assertTrue(self.virustotal.live_is_available())
 
     @mock.patch("platforms.virustotal.integrations.VirusTotal._request", exception)
     def test_is_not_available(self) -> None:
-        self.assertFalse(self.virustotal.is_available())
+        self.assertFalse(self.virustotal.live_is_available())
 
         self.settings.secret = None
         self.settings.save(update_fields=["_api_token"])
-        self.assertFalse(self.virustotal.is_available())
+        self.assertFalse(self.virustotal.live_is_available())
 
 
 new_settings = {"api_token": "cve-crowd-token"}
