@@ -12,7 +12,19 @@ const api = useApi("/api/");
 const userStore = useUserStore();
 const { panelRefresh } = usePanel();
 const topProjects = useState<Project[]>("top-projects", () => []);
-const items = ref([
+const badges = reactive({
+  projects: "",
+  hosts: "",
+  ports: "",
+  technologies: "",
+  paths: "",
+  osint: "",
+  credentials: "",
+  vulnerabilities: "",
+  exploits: "",
+});
+const topProjectChildren = ref([]);
+const items = computed(() => [
   {
     label: "Home",
     icon: "i-lucide-house",
@@ -24,6 +36,10 @@ const items = ref([
     type: "link",
     defaultOpen: true,
     to: "/projects",
+    badge: badges.projects || undefined,
+    children: topProjectChildren.value.length
+      ? topProjectChildren.value
+      : undefined,
   },
   {
     label: "Assets",
@@ -34,21 +50,25 @@ const items = ref([
         label: "Hosts",
         icon: "i-lucide-server",
         to: "/hosts",
+        badge: badges.hosts || undefined,
       },
       {
         label: "Ports",
         icon: "i-lucide-ethernet-port",
         to: "/ports",
+        badge: badges.ports || undefined,
       },
       {
         label: "Technologies",
         icon: "i-lucide-layers",
         to: "/technologies",
+        badge: badges.technologies || undefined,
       },
       {
         label: "Paths",
         icon: "i-lucide-slash",
         to: "/paths",
+        badge: badges.paths || undefined,
       },
     ],
   },
@@ -61,21 +81,25 @@ const items = ref([
         label: "OSINT",
         icon: "i-lucide-rss",
         to: "/osint",
+        badge: badges.osint || undefined,
       },
       {
         label: "Credentials",
         icon: "i-lucide-key",
         to: "/credentials",
+        badge: badges.credentials || undefined,
       },
       {
         label: "Vulnerabilities",
         icon: "i-lucide-bug",
         to: "/vulnerabilities",
+        badge: badges.vulnerabilities || undefined,
       },
       {
         label: "Exploits",
         icon: "i-lucide-flame",
         to: "/exploits",
+        badge: badges.exploits || undefined,
       },
     ],
   },
@@ -141,7 +165,7 @@ const items = ref([
 function loadBadges() {
   api.get("projects/top/").then((response: Project[]) => {
     topProjects.value = response;
-    const children: NavigationItem[] = [];
+    const children = [];
     for (let i = 0; i < response.length; i++) {
       children.push({
         label: response[i].name,
@@ -151,21 +175,18 @@ function loadBadges() {
     }
     if (children.length > 0) {
       api.list("projects/", {}, false, 1, 1).then((response: object) => {
-        if (items.value[1]) {
-          items.value[1].badge = formatCount(response.total);
-          if (response.total > children.length) {
-            children.push({
-              label: "Show all",
-              to: "/projects",
-            });
-          }
-          items.value[1].children = children;
+        badges.projects = formatCount(response.total);
+        if (response.total > children.length) {
+          children.push({
+            label: "Show all",
+            to: "/projects",
+          });
         }
+        topProjectChildren.value = children;
       });
     } else {
-      if (items.value[1]) {
-        items.value[1].badge = "0";
-      }
+      badges.projects = "0";
+      topProjectChildren.value = [];
     }
   });
   const openFindings = { is_fixed: false };
@@ -173,54 +194,39 @@ function loadBadges() {
     triage_status__in: "True Positive,Untriaged",
     ...openFindings,
   };
-  api.list("hosts/", openFindings, false, 1, 1).then((response: object) => {
-    if (items.value[2]?.children?.[0]) {
-      items.value[2].children[0].badge = formatCount(response.total);
-    }
-  });
-  api.list("ports/", openFindings, false, 1, 1).then((response: object) => {
-    if (items.value[2]?.children?.[1]) {
-      items.value[2].children[1].badge = formatCount(response.total);
-    }
-  });
+  api
+    .list("hosts/", openFindings, false, 1, 1)
+    .then((response: object) => (badges.hosts = formatCount(response.total)));
+  api
+    .list("ports/", openFindings, false, 1, 1)
+    .then((response: object) => (badges.ports = formatCount(response.total)));
   api
     .list("technologies/", openFindings, false, 1, 1)
-    .then((response: object) => {
-      if (items.value[2]?.children?.[2]) {
-        items.value[2].children[2].badge = formatCount(response.total);
-      }
-    });
-  api.list("paths/", openFindings, false, 1, 1).then((response: object) => {
-    if (items.value[2]?.children?.[3]) {
-      items.value[2].children[3].badge = formatCount(response.total);
-    }
-  });
-  api.list("osint/", activeFindings, false, 1, 1).then((response: object) => {
-    if (items.value[3]?.children?.[0]) {
-      items.value[3].children[0].badge = formatCount(response.total);
-    }
-  });
+    .then(
+      (response: object) => (badges.technologies = formatCount(response.total)),
+    );
+  api
+    .list("paths/", openFindings, false, 1, 1)
+    .then((response: object) => (badges.paths = formatCount(response.total)));
+  api
+    .list("osint/", activeFindings, false, 1, 1)
+    .then((response: object) => (badges.osint = formatCount(response.total)));
   api
     .list("credentials/", activeFindings, false, 1, 1)
-    .then((response: object) => {
-      if (items.value[3]?.children?.[1]) {
-        items.value[3].children[1].badge = formatCount(response.total);
-      }
-    });
+    .then(
+      (response: object) => (badges.credentials = formatCount(response.total)),
+    );
   api
     .list("vulnerabilities/", activeFindings, false, 1, 1)
-    .then((response: object) => {
-      if (items.value[3]?.children?.[2]) {
-        items.value[3].children[2].badge = formatCount(response.total);
-      }
-    });
+    .then(
+      (response: object) =>
+        (badges.vulnerabilities = formatCount(response.total)),
+    );
   api
     .list("exploits/", activeFindings, false, 1, 1)
-    .then((response: object) => {
-      if (items.value[3]?.children?.[3]) {
-        items.value[3].children[3].badge = formatCount(response.total);
-      }
-    });
+    .then(
+      (response: object) => (badges.exploits = formatCount(response.total)),
+    );
 }
 
 onMounted(loadBadges);
