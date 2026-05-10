@@ -32,6 +32,6 @@ class CveCrowdSettingsSerializer(ModelSerializer):
 
     def update(self, instance, validated_data):
         instance = super().update(instance, validated_data)
-        instance.is_available = len(CveCrowd().trending_cves) > 0
+        instance.is_available = len(CveCrowd().get_trending_cves(False)) > 0
         instance.save(update_fields=["is_available"])
         return instance

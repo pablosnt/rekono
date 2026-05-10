@@ -6,7 +6,10 @@ automated alerting for security teams. The integration supports both per-executi
 processing and bulk monitoring capabilities for comprehensive threat intelligence.
 """
 
+from datetime import timedelta
 from functools import cached_property
+
+from django.utils import timezone
 
 from alerts.enums import AlertItem
 from alerts.models import Alert
@@ -15,7 +18,7 @@ from findings.enums import TriageStatus
 from findings.framework.models import Finding
 from findings.models import Vulnerability
 from framework.platforms import BaseIntegration
-from platforms.cvecrowd.models import CveCrowdSettings
+from platforms.cvecrowd.models import CveCrowdCache, CveCrowdSettings
 from platforms.mail.notifications import SMTP
 from platforms.telegram_app.notifications import Telegram
 
@@ -47,19 +50,24 @@ class CveCrowd(BaseIntegration):
 
     @cached_property
     def trending_cves(self) -> list[str]:
-        return self.get_trending_cves()
+        return self.get_trending_cves(True)
 
-    def get_trending_cves(self) -> list[str]:
-        """Retrieve and cache trending CVE data from the CVE Crowd API.
+    def get_trending_cves(self, use_cache: bool) -> list[str]:
+        if use_cache:
+            cache = CveCrowdCache.objects.order_by("date")
+            if cache.exists():
+                first = cache.first()
+                if first.date > (timezone.now() - timedelta(days=1)):
+                    return cache.values_list("cve", flat=True)
+        CveCrowdCache.objects.all().delete()
+        cves = self.download_trending_cves()
+        if len(cves) > 0:
+            CveCrowdCache.objects.bulk_create([CveCrowdCache(cve=cve, date=timezone.now()) for cve in cves])
+        return cves
 
-        Fetches current trending vulnerability data using the configured API
-        credentials and trending analysis timeframe. Results are cached for
-        efficient access during vulnerability processing operations.
-
-        Returns:
-            list[str]: List of trending CVE identifiers, empty list if unavailable.
-        """
-        if self.integration.enabled and self.settings.secret:
+    def download_trending_cves(self) -> list[str]:
+        if self.settings.secret:
+            # TOTEST: We don't have API access
             try:
                 return self._request(
                     self.session.get,

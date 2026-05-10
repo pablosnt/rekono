@@ -15,7 +15,7 @@ Architecture:
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
-from framework.models import BaseEncrypted
+from framework.models import BaseEncrypted, BaseModel
 from security.validators.input_validator import Regex, Validator
 
 
@@ -65,3 +65,8 @@ class CveCrowdSettings(BaseEncrypted):
             str: Platform name "CVE Crowd".
         """
         return "CVE Crowd"
+
+
+class CveCrowdCache(BaseModel):
+    cve = models.TextField(max_length=20)
+    date = models.DateTimeField()
