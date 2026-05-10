@@ -44,6 +44,7 @@ class VirusTotalSettings(BaseEncrypted):
         blank=True,
         db_column="api_token",
     )
+    is_available = models.BooleanField(default=False)
 
     _encrypted_field = "_api_token"
 

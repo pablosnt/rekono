@@ -50,6 +50,9 @@ class VirusTotal(BaseIntegration):
         return VirusTotalSettings.objects.first()
 
     def is_available(self) -> bool:
+        return self.settings.is_available
+
+    def live_is_available(self) -> bool:
         """Check if the VirusTotal platform is available and accessible.
 
         Validates platform connectivity by checking for valid API credentials

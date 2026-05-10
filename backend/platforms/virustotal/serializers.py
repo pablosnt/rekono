@@ -5,7 +5,7 @@ and configuration management through REST API endpoints. Supports secure
 handling of API credentials and real-time platform availability checking.
 """
 
-from rest_framework.serializers import ModelSerializer, SerializerMethodField
+from rest_framework.serializers import ModelSerializer
 
 from framework.fields import ProtectedSecretField
 from platforms.virustotal.integrations import VirusTotal
@@ -22,14 +22,9 @@ class VirusTotalSettingsSerializer(ModelSerializer):
     Attributes:
         api_token (ProtectedSecretField): Secure API token field with
                                           encryption
-        is_available (SerializerMethodField): Real-time platform availability
-                                              status
-        client (VirusTotal): Integration client for availability checking
     """
 
     api_token = ProtectedSecretField(required=False, allow_null=True, source="secret")
-    is_available = SerializerMethodField(read_only=True)
-    client = VirusTotal()
 
     class Meta:
         """Serializer metadata configuration.
@@ -41,20 +36,10 @@ class VirusTotalSettingsSerializer(ModelSerializer):
 
         model = VirusTotalSettings
         fields = ("id", "api_token", "is_available")
+        read_only_fields = ("is_available",)
 
-    def get_is_available(self, instance: VirusTotalSettings) -> bool:
-        """Get real-time availability status of the VirusTotal platform.
-
-        Checks if the VirusTotal platform is currently accessible and
-        responsive
-        by performing a test API request with the configured credentials.
-
-        Args:
-            instance (VirusTotalSettings): The settings instance being
-                                          serialized
-
-        Returns:
-            bool: True if VirusTotal is available and accessible, False
-                  otherwise
-        """
-        return self.client.is_available()
+    def update(self, instance, validated_data):
+        instance = super().update(instance, validated_data)
+        instance.is_available = VirusTotal().live_is_available()
+        instance.save(update_fields=["is_available"])
+        return instance
