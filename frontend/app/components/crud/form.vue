@@ -121,6 +121,7 @@
                 variant="ghost"
                 color="neutral"
                 size="sm"
+                :aria-label="`Clear ${field.label}`"
                 @click="formData[field.key] = null"
               />
             </template>

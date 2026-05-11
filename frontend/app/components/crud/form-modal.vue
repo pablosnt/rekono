@@ -22,9 +22,9 @@
             :name="modalIcon"
             :class="config.modalIconClass || 'text-xl text-primary'"
           />
-          <p class="text-gray-900 dark:text-white font-bold text-lg">
+          <h2 class="text-gray-900 dark:text-white font-bold text-lg">
             {{ modalTitle }}
-          </p>
+          </h2>
         </div>
         <div class="flex items-center gap-2">
           <slot name="before-close" :loading="loading" />
@@ -32,6 +32,7 @@
             icon="i-lucide-x"
             variant="ghost"
             color="neutral"
+            aria-label="Close"
             @click="close"
           />
         </div>

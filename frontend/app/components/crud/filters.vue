@@ -38,6 +38,7 @@
               variant="ghost"
               color="neutral"
               size="sm"
+              :aria-label="`Clear ${filter.label} filter`"
               @click="updateFilter(filter.key, null)"
             />
           </template>
@@ -46,6 +47,7 @@
           v-else-if="filter.type === 'text'"
           :model-value="_filters[filter.key] as string"
           :placeholder="filter.placeholder || filter.label"
+          :aria-label="`Filter by ${filter.label}`"
           :icon="filter.icon"
           class="w-64"
           @update:model-value="(value) => updateFilter(filter.key, value)"
