@@ -3,11 +3,21 @@
     :color="liked ? 'primary' : 'neutral'"
     :variant="variant || 'subtle'"
     :size="size || 'md'"
+    :aria-label="
+      liked
+        ? `Unlike (${formatCount(count)} likes)`
+        : `Like (${formatCount(count)} likes)`
+    "
+    :aria-pressed="liked"
     class="gap-2"
     @click.stop="toggleLike()"
   >
-    <UIcon name="i-lucide-heart" :class="liked ? 'fill-current' : ''" />
-    <span>{{ formatCount(count) }}</span>
+    <UIcon
+      name="i-lucide-heart"
+      :class="liked ? 'fill-current' : ''"
+      aria-hidden="true"
+    />
+    <span aria-hidden="true">{{ formatCount(count) }}</span>
   </UButton>
 </template>
 

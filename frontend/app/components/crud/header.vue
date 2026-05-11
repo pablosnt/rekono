@@ -26,6 +26,7 @@
             v-if="config.searchable"
             v-model="search"
             :placeholder="config.searchPlaceholder"
+            :aria-label="config.searchPlaceholder || 'Search'"
             icon="i-lucide-search"
             class="w-full min-w-48 sm:w-64"
             @update:model-value="
@@ -39,6 +40,7 @@
           <UButton
             v-if="config.filters?.length"
             :icon="openFilters ? 'i-lucide-filter-x' : 'i-lucide-filter'"
+            :aria-label="openFilters ? 'Close filters' : 'Open filters'"
             :color="openFilters ? 'primary' : 'neutral'"
             variant="outline"
             @click="
@@ -75,6 +77,7 @@
               icon="i-lucide-arrow-up-down"
               color="neutral"
               variant="outline"
+              aria-label="Sort results"
             />
             <template #item="{ item }">
               <div class="flex items-center justify-between flex-1 gap-2">
@@ -88,6 +91,7 @@
                       "
                       variant="soft"
                       icon="i-lucide-arrow-up-narrow-wide"
+                      :aria-label="`Sort by ${item.label} ascending`"
                       @click.stop="emit('ordering', item.id)"
                     />
                   </UTooltip>
@@ -101,6 +105,7 @@
                       "
                       variant="soft"
                       icon="i-lucide-arrow-down-wide-narrow"
+                      :aria-label="`Sort by ${item.label} descending`"
                       @click.stop="emit('ordering', `-${item.id}`)"
                     />
                   </UTooltip>
@@ -139,6 +144,7 @@
               icon="i-lucide-settings-2"
               color="neutral"
               variant="outline"
+              aria-label="Show or hide columns"
             />
           </UDropdownMenu>
 
@@ -158,7 +164,11 @@
               "
               @submit="emit('create')"
             />
-            <UButton icon="i-lucide-plus" @click="$emit('openCreate', true)" />
+            <UButton
+              icon="i-lucide-plus"
+              :aria-label="`Create ${config.entityName}`"
+              @click="$emit('openCreate', true)"
+            />
           </slot>
         </slot>
       </div>

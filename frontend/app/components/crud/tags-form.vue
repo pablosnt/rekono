@@ -6,6 +6,7 @@
       :icon="icon"
       :size="size"
       :disabled="disabled"
+      aria-label="Add tag, press Enter to confirm"
       @keydown.enter.prevent="addTag"
     />
     <div v-if="modelValue.length" class="flex flex-wrap gap-2 mt-2">
@@ -22,6 +23,7 @@
           color="neutral"
           variant="ghost"
           class="ml-1 -mr-1"
+          :aria-label="`Remove tag ${tag}`"
           @click="removeTag(index)"
         />
       </UBadge>

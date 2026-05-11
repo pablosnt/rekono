@@ -47,6 +47,7 @@ const columns = computed(() => {
                 : h(resolveComponent("UAvatar"), {
                     ...column.avatar,
                     size: "3xs",
+                    alt: column.header as string,
                   }),
               h("span", column.header as string),
             ]),
@@ -56,6 +57,7 @@ const columns = computed(() => {
   cols.push({
     id: "actions",
     enableHiding: false,
+    header: () => h("span", { class: "sr-only" }, "Actions"),
     cell: ({ row }: unknown) => {
       const actions = [];
       const item = row.original;
@@ -135,6 +137,7 @@ const columns = computed(() => {
                 icon: "i-lucide-ellipsis",
                 color: "neutral",
                 variant: "ghost",
+                "aria-label": "Row actions",
               }),
           ),
         );
