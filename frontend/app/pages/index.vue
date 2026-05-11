@@ -64,13 +64,14 @@
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
           <UPageCard variant="outline" :ui="{ container: 'min-w-0' }">
             <div class="flex items-center justify-between mb-4">
-              <span class="text-base font-semibold text-highlighted"
-                >Top Projects</span
-              >
+              <h2 class="text-base font-semibold text-highlighted">
+                Top Projects
+              </h2>
               <div class="flex items-center gap-2">
                 <template v-if="userStore.is_admin">
                   <UButton
                     icon="i-lucide-plus"
+                    aria-label="Create project"
                     @click="createProjectOpen = true"
                   />
                 </template>
@@ -78,6 +79,7 @@
                   icon="i-lucide-external-link"
                   color="neutral"
                   variant="outline"
+                  aria-label="View all projects"
                   to="/projects"
                 />
               </div>
@@ -91,9 +93,9 @@
           </UPageCard>
           <UPageCard variant="outline" :ui="{ container: 'min-w-0' }">
             <div class="flex items-center justify-between mb-4">
-              <span class="text-base font-semibold text-highlighted"
-                >Latest Scans</span
-              >
+              <h2 class="text-base font-semibold text-highlighted">
+                Latest Scans
+              </h2>
               <TasksButton v-if="userStore.is_auditor" not-rounded />
             </div>
             <UTable
@@ -116,9 +118,9 @@
         >
           <UPageCard variant="outline" :ui="{ container: 'min-w-0' }">
             <div class="flex items-center justify-between mb-4">
-              <span class="text-base font-semibold text-highlighted"
-                >Latest Hosts</span
-              >
+              <h2 class="text-base font-semibold text-highlighted">
+                Latest Hosts
+              </h2>
             </div>
             <UTable
               :data="hosts"
@@ -134,9 +136,9 @@
           </UPageCard>
           <UPageCard variant="outline" :ui="{ container: 'min-w-0' }">
             <div class="flex items-center justify-between mb-4">
-              <span class="text-base font-semibold text-highlighted"
-                >Latest Vulnerabilities</span
-              >
+              <h2 class="text-base font-semibold text-highlighted">
+                Latest Vulnerabilities
+              </h2>
             </div>
             <UTable
               :data="vulnerabilities"
@@ -166,6 +168,7 @@
               v-for="tool in tools"
               :key="tool.id"
               :src="tool.icon"
+              :alt="tool.name"
               size="xl"
             />
           </UMarquee>
@@ -230,6 +233,7 @@
               v-for="integration in integrations"
               :key="integration.id"
               :src="integration.icon"
+              :alt="integration.name"
               size="xl"
             />
           </UMarquee>
