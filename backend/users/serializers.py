@@ -15,6 +15,7 @@ from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.fields import SerializerMethodField
 from rest_framework.serializers import CharField, ChoiceField, EmailField, ModelSerializer, Serializer, URLField
 
+from framework.logging import LoggingEntity
 from platforms.mail.notifications import SMTP
 from platforms.telegram_app.notifications import Telegram
 from security.authentication.serializers import MfaSerializer
@@ -399,7 +400,7 @@ class ResetPasswordSerializer(PasswordSerializer, OTPSerializer):
         return User.objects.reset_password(self.validated_data.get("user"), self.validated_data.get("password"))
 
 
-class RequestPasswordResetSerializer(Serializer):
+class RequestPasswordResetSerializer(Serializer, LoggingEntity):
     """Serializer for password reset requests.
 
     Handles password reset email sending with user enumeration protection.
