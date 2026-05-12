@@ -214,7 +214,9 @@ const config: CrudConfig<Finding> = reactive({
                       {
                         default: () =>
                           h(resolveComponent("UButton"), {
-                            avatar: s.icon ? { src: s.icon } : undefined,
+                            avatar: s.icon
+                              ? { src: s.icon, alt: s.name }
+                              : undefined,
                             icon: s.icon
                               ? undefined
                               : "i-lucide-square-terminal",
@@ -262,6 +264,8 @@ const config: CrudConfig<Finding> = reactive({
                   row.original.hacktricks_link,
                   undefined,
                   integrations.hacktricks?.icon,
+                  undefined,
+                  "HackTricks",
                 ),
             },
           ]

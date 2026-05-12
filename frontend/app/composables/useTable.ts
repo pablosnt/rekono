@@ -178,6 +178,7 @@ export default function () {
     avatar: string | undefined = undefined,
     text: string | undefined = undefined,
     internal: boolean = true,
+    ariaLabel: string | undefined = undefined,
   ) {
     if (!link) return noDataCell;
     const iconItem = icon
@@ -191,6 +192,7 @@ export default function () {
       href: link,
       class: `hover:text-primary hover:underline ${iconItem && textItem ? "flex items-center gap-2" : ""}`,
       onClick: (e: Event) => e.stopPropagation(),
+      ...(ariaLabel ? { "aria-label": ariaLabel } : {}),
     };
     if (!internal) {
       linkConfig["target"] = "_blank";
@@ -201,7 +203,9 @@ export default function () {
       linkConfig,
       [
         iconItem,
-        avatar ? h(UAvatar, { src: avatar, alt: text || "" }) : undefined,
+        avatar
+          ? h(UAvatar, { src: avatar, alt: text || ariaLabel || "" })
+          : undefined,
         textItem,
       ].filter((i) => i !== undefined),
     );
@@ -212,8 +216,9 @@ export default function () {
     icon: string | undefined = undefined,
     avatar: string | undefined = undefined,
     text: string | undefined = undefined,
+    ariaLabel: string | undefined = undefined,
   ) {
-    return linkCell(link, icon, avatar, text, false);
+    return linkCell(link, icon, avatar, text, false, ariaLabel);
   }
 
   function usernameCell(user: User) {
