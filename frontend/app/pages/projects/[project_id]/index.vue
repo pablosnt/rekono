@@ -18,6 +18,7 @@
             type="text"
             variant="ghost"
             size="xl"
+            aria-label="Name"
             :disabled="!userStore.is_admin"
             :ui="{ base: 'text-4xl font-bold' }"
             @update:model-value="update()"
@@ -76,6 +77,7 @@
           placeholder="Project description..."
           autoresize
           color="neutral"
+          aria-label="Description"
           :disabled="!userStore.is_admin"
         />
       </UFormField>

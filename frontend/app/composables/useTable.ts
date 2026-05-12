@@ -1,7 +1,7 @@
 import type { Configuration, Finding, Tool, User } from "~/types/models";
 import { hostOS } from "~/constants";
 import { h } from "vue";
-import { UAvatar, UBadge, UIcon } from "#components";
+import { UAvatar, UBadge, UIcon, UButton } from "#components";
 
 export default function () {
   const noDataCell = valueCell();
@@ -180,35 +180,21 @@ export default function () {
     internal: boolean = true,
     ariaLabel: string | undefined = undefined,
   ) {
-    if (!link) return noDataCell;
-    const iconItem = icon
-      ? h(UIcon, {
-          name: icon,
-          class: "text-lg",
+    return link
+      ? h(UButton, {
+          to: link,
+          class: `hover:text-primary hover:underline`,
+          icon,
+          avatar: avatar
+            ? { src: avatar, alt: text || ariaLabel || "" }
+            : undefined,
+          target: internal ? undefined : "_blank",
+          label: text,
+          variant: "ghost",
+          color: "neutral",
+          "aria-label": ariaLabel || text || "",
         })
-      : undefined;
-    const textItem = text ? valueCell(text) : undefined;
-    const linkConfig = {
-      href: link,
-      class: `hover:text-primary hover:underline ${iconItem && textItem ? "flex items-center gap-2" : ""}`,
-      onClick: (e: Event) => e.stopPropagation(),
-      ...(ariaLabel ? { "aria-label": ariaLabel } : {}),
-    };
-    if (!internal) {
-      linkConfig["target"] = "_blank";
-      linkConfig["rel"] = "noopener noreferrer";
-    }
-    return h(
-      "a",
-      linkConfig,
-      [
-        iconItem,
-        avatar
-          ? h(UAvatar, { src: avatar, alt: text || ariaLabel || "" })
-          : undefined,
-        textItem,
-      ].filter((i) => i !== undefined),
-    );
+      : noDataCell;
   }
 
   function externalLinkCell(

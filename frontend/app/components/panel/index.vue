@@ -44,6 +44,7 @@
       <template #footer>
         <UModal
           v-model:open="profileOpen"
+          title="Profile"
           :ui="{
             content: 'sm:max-w-6xl h-[min(45rem,75dvh)] flex flex-col',
             body: 'flex-1 min-h-0 p-0',

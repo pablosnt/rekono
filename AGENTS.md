@@ -18,7 +18,6 @@ Offensive security platform that automates attack surface discovery and vulnerab
 - `/backend/`: Rekono backend
 - `/docker/`: Rekono Docker images
 - `/frontend/`: Rekono UI
-- `/frontend-old/`: Previous version of the frontend that was finally discarded, but it contains code that we might need to finish the frontend
 
 ## Code Style
 

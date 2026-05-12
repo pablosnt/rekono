@@ -18,6 +18,7 @@
           type="text"
           variant="ghost"
           size="xl"
+          aria-label="Title"
           :disabled="!canEdit"
           :ui="{ base: 'text-4xl font-bold' }"
           @update:model-value="updateNote()"

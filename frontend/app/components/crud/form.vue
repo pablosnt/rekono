@@ -14,6 +14,7 @@
         <UFormField
           :name="field.key"
           :label="field.type !== 'checkbox' ? field.label : undefined"
+          :aria-label="field.label"
           :required="field.required"
           :hint="field.hint"
         >
@@ -45,7 +46,6 @@
                   showPassword[field.key] ? 'Hide password' : 'Show password'
                 "
                 :aria-pressed="showPassword[field.key]"
-                aria-controls="password"
                 @click="
                   showPassword[field.key] =
                     showPassword[field.key] !== undefined
@@ -105,6 +105,7 @@
             :size="field.size || 'lg'"
             leading
             :disabled="field.disabled === true"
+            :aria-label="field.label"
           >
             <template v-if="field.clearable" #trailing>
               <UIcon
@@ -130,6 +131,7 @@
             v-else-if="field.type === 'checkbox'"
             v-model="formData[field.key]"
             :label="field.label"
+            :aria-label="field.label"
             :disabled="field.disabled === true"
           />
           <CrudTagsForm

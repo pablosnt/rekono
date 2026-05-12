@@ -104,6 +104,8 @@ const config: CrudConfig<Target> = reactive({
           undefined,
           undefined,
           formatCount(row.getValue("reports").length || 0),
+          true,
+          "Related reports",
         ),
     },
     ...(integrations.defectdojo?.settings?.is_available

@@ -11,11 +11,11 @@
     :extensions="extensions"
     :handlers="customHandlers"
     :starter-kit="{ link: { openOnClick: true } }"
-    @update:model-value="$emit('update:modelValue', modelValue)"
   >
     <UEditorDragHandle
       v-slot="{ ui, onClick }"
       :editor="editor"
+      aria-hidden="true"
       @node-change="selectedNode = $event"
     >
       <UButton
@@ -169,7 +169,6 @@ import { TableKit } from "@tiptap/extension-table";
 import { CellSelection } from "@tiptap/pm/tables";
 
 defineProps<{ entityId: string | number; canEdit: boolean }>();
-defineEmits<{ "update:modelValue": [value: string[]] }>();
 const modelValue = defineModel<string>();
 
 const selectedNode = ref<{ node: JSONContent; pos: number }>();

@@ -156,13 +156,19 @@ const config: CrudConfig<Execution> = reactive({
           },
           {
             default: () =>
-              h(resolveComponent("UButton"), {
-                icon: isRunning ? "i-lucide-loader" : status?.icon,
-                loading: isRunning,
-                color: status?.color,
-                class: "text-lg",
-                variant: "ghost",
-              }),
+              isRunning
+                ? h(resolveComponent("UButton"), {
+                    icon: "i-lucide-loader",
+                    loading: true,
+                    color: status?.color,
+                    class: "text-lg",
+                    variant: "ghost",
+                  })
+                : h(resolveComponent("UIcon"), {
+                    name: status?.icon,
+                    class: `text-lg text-${status?.color}`,
+                    variant: "ghost",
+                  }),
           },
         );
       },

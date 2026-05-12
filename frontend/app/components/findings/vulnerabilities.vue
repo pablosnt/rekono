@@ -205,7 +205,13 @@ const columns: CrudTableColumn<Vulnerability>[] = [
     header: "Reference",
     icon: "i-lucide-link",
     cell: ({ row }) =>
-      table.externalLinkCell(row.original.reference, "i-lucide-external-link"),
+      table.externalLinkCell(
+        row.original.reference,
+        "i-lucide-external-link",
+        undefined,
+        undefined,
+        "Reference",
+      ),
   },
   {
     accessorKey: "exploit",

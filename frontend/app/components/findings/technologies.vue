@@ -101,7 +101,13 @@ const columns: CrudTableColumn<Technology>[] = [
     header: "Reference",
     icon: "i-lucide-link",
     cell: ({ row }) =>
-      table.externalLinkCell(row.original.reference, "i-lucide-external-link"),
+      table.externalLinkCell(
+        row.original.reference,
+        "i-lucide-external-link",
+        undefined,
+        undefined,
+        "Reference",
+      ),
   },
   {
     accessorKey: "credential",
