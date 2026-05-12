@@ -213,15 +213,18 @@ const config: CrudConfig<Finding> = reactive({
                       },
                       {
                         default: () =>
-                          h(resolveComponent("UButton"), {
-                            avatar: s.icon
-                              ? { src: s.icon, alt: s.name }
-                              : undefined,
-                            icon: s.icon
-                              ? undefined
-                              : "i-lucide-square-terminal",
-                            "aria-label": s.name,
-                          }),
+                          s.icon
+                            ? h(resolveComponent("UAvatar"), {
+                                src: s.icon,
+                                size: "sm",
+                                alt: s.name,
+                                "aria-label": s.name,
+                              })
+                            : h(resolveComponent("UIcon"), {
+                                name: "i-lucide-square-terminal",
+                                "aria-label": s.name,
+                                class: "text-xl text-primary",
+                              }),
                       },
                     ),
                 },

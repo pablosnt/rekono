@@ -4,23 +4,26 @@
     :text="
       finding.auto_fixed
         ? `Auto-${fixVerb}ed`
-        : `${fixVerb}ed by ${finding.fixed_by.username} ${useTimeAgo(new Date(finding.fixed_date))}`
+        : `${fixVerb}ed by ${finding.fixed_by.username} ${useTimeAgo(new Date(finding.fixed_date)).value}`
     "
     :content="{ side: 'left', sideOffset: 8, collisionPadding: 8 }"
   >
-    <UButton
-      :icon="
-        finding.auto_fixed
-          ? 'i-lucide-bot'
-          : fixVerb === 'Fix'
-            ? 'i-lucide-badge-check'
-            : 'i-lucide-eye-off'
-      "
-      :color="fixVerb === 'Fix' ? 'success' : 'neutral'"
+    <UBadge
       variant="subtle"
-      :label="`${fixVerb}ed`"
-      size="sm"
-    />
+      :color="fixVerb === 'Fix' ? 'success' : 'neutral'"
+      size="lg"
+    >
+      <UIcon
+        :name="
+          finding.auto_fixed
+            ? 'i-lucide-bot'
+            : fixVerb === 'Fix'
+              ? 'i-lucide-badge-check'
+              : 'i-lucide-eye-off'
+        "
+      />
+      {{ fixVerb }}ed
+    </UBadge>
   </UTooltip>
   <UTooltip
     v-else-if="isTriageable"
@@ -31,13 +34,10 @@
     "
     :content="{ side: 'left', sideOffset: 8, collisionPadding: 8 }"
   >
-    <UButton
-      :icon="triageConfig?.icon"
-      :color="triageConfig?.color"
-      variant="subtle"
-      :label="triageConfig?.value"
-      size="sm"
-    />
+    <UBadge variant="subtle" :color="triageConfig?.color" size="lg">
+      <UIcon :name="triageConfig?.icon" />
+      {{ triageConfig?.value }}
+    </UBadge>
   </UTooltip>
   <UBadge
     v-else

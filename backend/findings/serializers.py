@@ -392,6 +392,7 @@ class VulnerabilitySerializer(TriageFindingSerializer, SimpleVulnerabilitySerial
             exploits_triage_comment = (
                 "Automatically triaged after triaging the related vulnerability as a false positive"
             )
+            exploits_queryset = None
             if instance.triage_status == TriageStatus.FALSE_POSITIVE:
                 exploits_triage_status = TriageStatus.FALSE_POSITIVE
                 exploits_queryset = instance.exploit.all()
@@ -401,14 +402,15 @@ class VulnerabilitySerializer(TriageFindingSerializer, SimpleVulnerabilitySerial
                     triage_status=TriageStatus.FALSE_POSITIVE, triage_comment=exploits_triage_comment
                 )
                 exploits_triage_comment = (
-                    "Automatically untriaged after a triage status change on the related vulnerability"
+                    f"Automatically untriaged after changing the triage status for the related vulnerability to {instance.triage_status}"
                 )
-            exploits_queryset.update(
-                triage_status=exploits_triage_status,
-                triage_comment=exploits_triage_comment,
-                triage_by=instance.triage_by,
-                triage_date=instance.triage_date,
-            )
+            if exploits_queryset is not None:
+                exploits_queryset.update(
+                    triage_status=exploits_triage_status,
+                    triage_comment=exploits_triage_comment,
+                    triage_by=instance.triage_by,
+                    triage_date=instance.triage_date,
+                )
         return instance
 
 

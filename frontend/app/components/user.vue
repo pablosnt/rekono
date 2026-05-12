@@ -24,11 +24,11 @@
           <div>
             <p v-if="user.last_login">
               Last login
-              {{ useTimeAgo(new Date(user.last_login)) }}
+              {{ useTimeAgo(new Date(user.last_login)).value }}
             </p>
             <p v-if="user.date_joined">
               Joined
-              {{ useTimeAgo(new Date(user.date_joined)) }}
+              {{ useTimeAgo(new Date(user.date_joined)).value }}
             </p>
           </div>
         </template>
