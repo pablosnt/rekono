@@ -37,6 +37,7 @@
         variant="ghost"
         color="neutral"
         size="sm"
+        aria-label="Clear tool filter"
         @click="
           toolFilter = undefined;
           fetch();
@@ -58,7 +59,7 @@
     type="multiple"
   >
     <template #default="{ item: stage }">
-      <p class="text-xl">{{ stage.label }}</p>
+      <h3 class="text-xl">{{ stage.label }}</h3>
     </template>
     <template #body="{ item: stageBody }">
       <UTree
@@ -70,7 +71,11 @@
       >
         <template #item-leading="{ item: toolNode }">
           <template v-if="Object.hasOwn(toolNode, 'avatar')">
-            <UAvatar v-if="toolNode.avatar" :src="toolNode.avatar" />
+            <UAvatar
+              v-if="toolNode.avatar"
+              :src="toolNode.avatar"
+              :alt="toolNode.label"
+            />
             <UIcon
               v-else
               name="i-lucide-square-terminal"
@@ -82,6 +87,7 @@
           <USwitch
             v-if="Object.hasOwn(configNode, 'id')"
             :model-value="configurations.includes(configNode.id)"
+            :aria-label="`${configurations.includes(configNode.id) ? 'Disable' : 'Enable'} ${configNode.label}`"
             @update:model-value="
               (value) =>
                 value ? addStep(configNode.id) : removeStep(configNode.id)

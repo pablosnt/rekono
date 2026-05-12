@@ -23,6 +23,7 @@
         color="neutral"
         variant="ghost"
         size="sm"
+        aria-label="Add block"
         :class="ui.handle()"
         @click="
           (e) => {
@@ -47,6 +48,7 @@
           color="neutral"
           active-variant="soft"
           size="sm"
+          aria-label="Drag to reorder block"
           :active="open"
           :class="ui.handle()"
         />

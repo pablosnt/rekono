@@ -9,6 +9,7 @@
         : { src: integrations.defectdojo.integration?.icon, size: size || 'xl' }
     "
     :icon="icon"
+    :aria-label="`Open ${entity} in DefectDojo`"
     variant="ghost"
     color="neutral"
   />

@@ -5,6 +5,7 @@
     variant="solid"
     :class="['font-bold', notRounded ? undefined : 'rounded-full']"
     :label="label"
+    aria-label="Run scan"
     :size="size"
     @click="openModal = !openModal"
   />

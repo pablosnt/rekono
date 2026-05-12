@@ -8,6 +8,7 @@
       variant="ghost"
       :loading="loading"
       :icon="ok ? 'i-lucide-check' : 'i-lucide-unplug'"
+      :aria-label="ok ? 'Available' : 'Not available'"
     />
   </UTooltip>
 </template>

@@ -23,6 +23,7 @@
           color="neutral"
           variant="ghost"
           size="xs"
+          aria-label="Copy IP address"
           @click="copyText(host.ip)"
         />
       </div>

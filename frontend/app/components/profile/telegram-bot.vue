@@ -19,6 +19,7 @@
         :to="`https://t.me/${integrations.telegram.bot}`"
         target="_blank"
         external
+        aria-label="Open Telegram bot"
       />
     </template>
     <template #content>

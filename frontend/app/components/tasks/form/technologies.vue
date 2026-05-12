@@ -39,6 +39,7 @@
             variant="ghost"
             color="neutral"
             size="sm"
+            aria-label="Clear technologies"
             @click="technologies = []"
           />
         </template>

@@ -6,6 +6,7 @@
           icon="i-lucide-download"
           variant="ghost"
           size="xl"
+          aria-label="Download report"
           @click="api.download(`/api/reports/${item.id}/download/`)"
         />
       </UTooltip>

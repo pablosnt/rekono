@@ -2,7 +2,7 @@
   <div
     class="flex flex-col flex-wrap sm:flex-row sm:items-center sm:justify-between gap-2 mb-5"
   >
-    <span class="text-2xl font-bold text-default">Findings Evolution</span>
+    <h2 class="text-2xl font-bold text-default">Findings Evolution</h2>
     <VisBulletLegend
       :items="legendItems"
       :on-legend-item-click="onLegendItemClick"

@@ -17,12 +17,13 @@
           "
         >
           <template #leading>
-            <UAvatar :src="item.icon" />
+            <UAvatar :src="item.icon" :alt="item.name" />
           </template>
           <div class="absolute top-4 right-4">
             <div class="flex items-center gap-3">
               <USwitch
                 :model-value="getIntegrationState(item)"
+                :aria-label="`${getIntegrationState(item) ? 'Disable' : 'Enable'} ${item.name} integration`"
                 @update:model-value="toggleIntegration(item, $event)"
                 @click.stop
               />
@@ -32,6 +33,7 @@
                 variant="ghost"
                 color="neutral"
                 size="xl"
+                :aria-label="`Open ${item.name} documentation`"
                 :to="item.reference"
                 target="_blank"
                 external
@@ -217,6 +219,7 @@ function fetch() {
     integrationsSettings.value[key]["api"] = api;
     integrationsSettings.value[key]["config"]["modalAvatar"] = () => ({
       src: selectedIntegration.value.icon,
+      alt: selectedIntegration.value.name,
     });
     api.get("1/").then((response) => {
       integrationsSettings.value[key]["item"] = response;

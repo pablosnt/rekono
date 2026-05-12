@@ -35,6 +35,7 @@
                 icon="i-lucide-more-horizontal"
                 variant="ghost"
                 color="neutral"
+                aria-label="User actions"
               />
             </UDropdownMenu>
           </div>

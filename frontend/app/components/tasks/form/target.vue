@@ -25,6 +25,7 @@
             variant="ghost"
             color="neutral"
             size="sm"
+            aria-label="Clear project"
             @click="onProject(undefined)"
           />
         </template>
@@ -55,6 +56,7 @@
             variant="ghost"
             color="neutral"
             size="sm"
+            aria-label="Clear target"
             @click="onTarget(undefined)"
           />
         </template>
@@ -93,6 +95,7 @@
             variant="ghost"
             color="neutral"
             size="sm"
+            aria-label="Clear target port"
             @click="onTargetPort(undefined)"
           />
         </template>

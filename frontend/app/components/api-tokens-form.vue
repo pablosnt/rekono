@@ -13,6 +13,7 @@
         color="neutral"
         variant="ghost"
         size="lg"
+        aria-label="Copy API token"
         @click="copyText(newToken.key, 'Token copied to clipboard')"
       />
     </template>

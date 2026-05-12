@@ -12,6 +12,7 @@
             icon="i-lucide-download"
             variant="ghost"
             size="xl"
+            aria-label="Download execution report"
             @click="api.download(`${item.id}/report/`)"
           />
         </UTooltip>
@@ -31,6 +32,7 @@
             <UAvatar
               v-if="selectedExecution.configuration?.tool.icon"
               :src="selectedExecution.configuration.tool.icon"
+              :alt="selectedExecution.configuration.tool.name"
             />
             <UIcon
               v-else
@@ -57,6 +59,7 @@
                 icon="i-lucide-download"
                 variant="ghost"
                 size="xl"
+                aria-label="Download report"
                 @click="api.download(`${selectedExecution.id}/report/`)"
               />
             </UTooltip>
@@ -64,6 +67,7 @@
               icon="i-lucide-x"
               variant="ghost"
               color="neutral"
+              aria-label="Close"
               @click="close"
             />
           </div>

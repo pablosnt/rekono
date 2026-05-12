@@ -36,6 +36,7 @@
             variant="ghost"
             color="neutral"
             size="sm"
+            aria-label="Clear vulnerabilities"
             @click="vulnerabilities = []"
           />
         </template>

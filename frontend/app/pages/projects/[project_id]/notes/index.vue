@@ -34,6 +34,7 @@
               color="neutral"
               size="xl"
               variant="ghost"
+              :aria-label="item.public ? 'Public note' : 'Private note'"
             />
           </UTooltip>
           <UButton
@@ -93,6 +94,7 @@
                 icon="i-lucide-more-horizontal"
                 variant="ghost"
                 color="neutral"
+                aria-label="Note actions"
                 @click.stop
               />
             </UDropdownMenu>

@@ -34,6 +34,7 @@
               variant="ghost"
               color="neutral"
               size="sm"
+              :aria-label="`Discard target ${target}`"
               @click="removeTarget(index)"
             />
           </template>

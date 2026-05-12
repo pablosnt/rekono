@@ -10,7 +10,7 @@
         @click="onCardClick($event.target, item.reference)"
       >
         <template #leading>
-          <UAvatar v-if="item.icon" :src="item.icon" />
+          <UAvatar v-if="item.icon" :src="item.icon" :alt="item.name" />
           <UIcon
             v-else
             name="i-lucide-square-terminal"

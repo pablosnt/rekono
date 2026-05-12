@@ -14,6 +14,7 @@
         <USwitch
           :model-value="userStore.profile.mfa"
           :loading="loading"
+          :aria-label="userStore.profile.mfa ? 'Disable MFA' : 'Enable MFA'"
           @change="(value) => handleSwitch(value)"
         />
       </template>
@@ -55,6 +56,7 @@
             variant="outline"
             size="xl"
             color="neutral"
+            aria-label="One-Time Password via app"
             @complete="
               (value) => {
                 userStore.profile.mfa
@@ -72,6 +74,7 @@
           icon="i-lucide-key-square"
           size="xl"
           :maxlength="128"
+          aria-label="One-Time Password via email"
           @update:model-value="
             () => {
               if (mailOtp?.length === 128) {

@@ -8,15 +8,16 @@
     <UModal v-model:open="processModalOpen" fullscreen>
       <template #header>
         <div class="flex items-center justify-between w-full">
-          <p class="text-gray-900 dark:text-white font-bold text-lg">
-            {{ selectedProcess ? selectedProcess.name : "" }}
-          </p>
+          <h2 class="text-gray-900 dark:text-white font-bold text-lg">
+            {{ selectedProcess?.name }}
+          </h2>
           <div class="flex items-center gap-2">
             <TasksButton :process="selectedProcess" />
             <UButton
               icon="i-lucide-x"
               variant="ghost"
               color="neutral"
+              aria-label="Close"
               @click="processModalOpen = false"
             />
           </div>

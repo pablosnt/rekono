@@ -100,6 +100,7 @@
             icon="i-lucide-more-horizontal"
             variant="subtle"
             color="neutral"
+            aria-label="Note actions"
           />
         </UDropdownMenu>
         <CrudDeleteModal

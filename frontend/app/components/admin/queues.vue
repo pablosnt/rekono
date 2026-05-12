@@ -91,6 +91,7 @@
                     size="sm"
                     variant="ghost"
                     color="neutral"
+                    :aria-label="`Last monitor was ${useTimeAgo(new Date(monitor.last_monitor)).value}`"
                   />
                 </UTooltip>
               </template>

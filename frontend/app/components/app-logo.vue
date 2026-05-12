@@ -1,5 +1,7 @@
 <template>
   <svg
+    role="img"
+    aria-label="Rekono"
     width="1020"
     height="200"
     viewBox="0 0 1020 200"

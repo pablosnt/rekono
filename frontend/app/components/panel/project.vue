@@ -2,6 +2,7 @@
   <Panel :navigation-items="items" storage-key="panel">
     <template #panel-header="{ open }">
       <div class="relative flex items-center w-full justify-between">
+        <!-- TODO: As we don't have collapse button on the header, can't we reuse the same avatar -->
         <div
           v-if="open && currentProject"
           class="flex items-center justify-center gap-2"
@@ -10,6 +11,7 @@
             :text="currentProject.name.charAt(0).toUpperCase()"
             class="bg-primary-500"
             :ui="{ fallback: 'text-white' }"
+            :alt="currentProject.name"
             width="30"
           />
           <h1>{{ currentProject.name }}</h1>
@@ -17,6 +19,7 @@
         <UAvatar
           v-else-if="currentProject"
           :text="currentProject.name.charAt(0).toUpperCase()"
+          :alt="currentProject.name"
           width="30"
           class="bg-primary-500 opacity-100 group-hover:opacity-0 transition-opacity duration-200"
           :ui="{ fallback: 'text-white' }"

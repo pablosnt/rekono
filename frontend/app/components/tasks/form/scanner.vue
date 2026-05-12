@@ -59,6 +59,7 @@
             variant="ghost"
             color="neutral"
             size="sm"
+            aria-label="Clear scanner"
             @click="
               onTool(undefined);
               onProcess(undefined);

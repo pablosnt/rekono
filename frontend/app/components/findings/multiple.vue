@@ -218,6 +218,7 @@ const config: CrudConfig<Finding> = reactive({
                             icon: s.icon
                               ? undefined
                               : "i-lucide-square-terminal",
+                            ariaLabel: s.name,
                           }),
                       },
                     ),

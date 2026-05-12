@@ -120,12 +120,14 @@
         <UButton
           color="neutral"
           leading-icon="i-lucide-chevron-left"
+          aria-label="Previous step"
           :disabled="!stepper?.hasPrev"
           @click="stepper?.prev()"
         />
         <UButton
           color="neutral"
           trailing-icon="i-lucide-chevron-right"
+          aria-label="Next step"
           :disabled="!stepper?.hasNext"
           @click="stepper?.next()"
         />

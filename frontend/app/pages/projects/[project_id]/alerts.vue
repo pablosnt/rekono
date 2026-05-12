@@ -27,6 +27,9 @@
           <UButton
             variant="subtle"
             :color="item.subscribed ? 'primary' : 'neutral'"
+            :aria-label="
+              item.subscribed ? 'Unsubscribe from alert' : 'Subscribe to alert'
+            "
             @click="toggleSubscription(item)"
           >
             <UIcon
@@ -45,6 +48,7 @@
             icon="i-lucide-more-horizontal"
             variant="ghost"
             color="neutral"
+            aria-label="Alert actions"
           />
         </UDropdownMenu>
       </UPageCard>

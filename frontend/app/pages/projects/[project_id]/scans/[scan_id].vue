@@ -9,6 +9,7 @@
             <UAvatar
               v-if="task.configuration?.tool.icon"
               :src="task.configuration.tool.icon"
+              :alt="task.configuration.tool.name"
             />
             <UIcon
               v-else
@@ -63,6 +64,7 @@
                 icon="i-lucide-x"
                 color="error"
                 variant="subtle"
+                aria-label="Cancel scan"
                 @click="cancelOpen = true"
               />
             </UTooltip>
@@ -71,6 +73,7 @@
                 icon="i-lucide-play"
                 color="success"
                 variant="subtle"
+                aria-label="Repeat scan"
                 @click="repeatScan"
               />
             </UTooltip>
@@ -96,7 +99,12 @@
               },
             ]"
           >
-            <UButton icon="i-lucide-plus" variant="subtle" color="neutral" />
+            <UButton
+              icon="i-lucide-plus"
+              variant="subtle"
+              color="neutral"
+              aria-label="Scan actions"
+            />
           </UDropdownMenu>
           <UDropdownMenu
             v-if="task.notes.length + task.reports.length > 0"
@@ -123,7 +131,12 @@
                 : []),
             ]"
           >
-            <UButton icon="i-lucide-link" variant="subtle" color="neutral" />
+            <UButton
+              icon="i-lucide-link"
+              variant="subtle"
+              color="neutral"
+              aria-label="View scan resources"
+            />
           </UDropdownMenu>
         </div>
       </div>

@@ -14,7 +14,12 @@
     </template>
     <div class="absolute top-4 right-4">
       <UTooltip v-if="user.is_active && (user.last_login || user.date_joined)">
-        <UButton icon="i-lucide-clock" color="neutral" variant="ghost" />
+        <UButton
+          icon="i-lucide-clock"
+          color="neutral"
+          variant="ghost"
+          aria-label="User activity"
+        />
         <template #content>
           <div>
             <p v-if="user.last_login">

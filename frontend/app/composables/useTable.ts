@@ -153,6 +153,7 @@ export default function () {
           ? h(UAvatar, {
               src: tool.icon,
               size: "2xs",
+              alt: tool.name,
             })
           : h(UIcon, {
               name: "i-lucide-square-terminal",
@@ -200,7 +201,7 @@ export default function () {
       linkConfig,
       [
         iconItem,
-        avatar ? h(UAvatar, { src: avatar }) : undefined,
+        avatar ? h(UAvatar, { src: avatar, alt: text || "" }) : undefined,
         textItem,
       ].filter((i) => i !== undefined),
     );

@@ -79,6 +79,7 @@
                 :to="`https://t.me/${telegramSettings.bot}`"
                 target="_blank"
                 external
+                aria-label="Open Telegram bot"
               />
             </div>
           </div>

@@ -36,7 +36,12 @@
             },
           ]"
         >
-          <UButton icon="i-lucide-plus" variant="subtle" color="neutral" />
+          <UButton
+            icon="i-lucide-plus"
+            variant="subtle"
+            color="neutral"
+            aria-label="Target actions"
+          />
         </UDropdownMenu>
         <UDropdownMenu
           v-if="
@@ -90,7 +95,12 @@
               : []),
           ]"
         >
-          <UButton icon="i-lucide-link" variant="subtle" color="neutral" />
+          <UButton
+            icon="i-lucide-link"
+            variant="subtle"
+            color="neutral"
+            aria-label="View target resources"
+          />
         </UDropdownMenu>
         <ReportsButton
           v-model:open="showReportModal"
@@ -121,6 +131,7 @@
             icon="i-lucide-more-horizontal"
             variant="subtle"
             color="neutral"
+            aria-label="Target options"
           />
         </UDropdownMenu>
         <CrudDeleteModal

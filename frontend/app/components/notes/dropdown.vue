@@ -28,7 +28,12 @@
           color="neutral"
           position="top-right"
         >
-          <UButton icon="i-lucide-notebook" variant="ghost" color="neutral" />
+          <UButton
+            icon="i-lucide-notebook"
+            variant="ghost"
+            color="neutral"
+            aria-label="Related notes"
+          />
         </UChip>
       </UDropdownMenu>
     </template>

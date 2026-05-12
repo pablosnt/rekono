@@ -4,6 +4,7 @@
     icon="i-lucide-file-text"
     color="info"
     variant="subtle"
+    aria-label="Generate report"
     @click="openModal = !openModal"
   />
   <CrudFormModal

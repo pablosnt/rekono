@@ -98,6 +98,7 @@
         <template #leading>
           <USwitch
             v-model="monitor"
+            aria-label="Enable monitor mode"
             @update:model-value="
               (value) => {
                 repeatIn = value ? 1 : undefined;
@@ -117,12 +118,14 @@
               min="1"
               inputmode="numeric"
               class="w-20"
+              aria-label="Repeat interval"
               @update:model-value="$emit('update-repeat-in', repeatIn)"
             />
             <USelect
               v-model="repeatTimeUnit"
               :items="timeUnits"
               class="w-32"
+              aria-label="Repeat time unit"
               @update:model-value="
                 $emit('update-repeat-time-unit', repeatTimeUnit)
               "

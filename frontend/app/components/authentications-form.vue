@@ -31,6 +31,7 @@
               variant="ghost"
               color="neutral"
               size="sm"
+              aria-label="Remove authentication"
               @click="formData.type = 'None'"
             />
           </template>

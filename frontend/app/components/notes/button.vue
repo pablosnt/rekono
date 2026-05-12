@@ -4,6 +4,7 @@
     :icon="icon || 'i-lucide-plus'"
     :color="color"
     :variant="variant"
+    aria-label="Create note"
     @click="createNote"
   />
 </template>

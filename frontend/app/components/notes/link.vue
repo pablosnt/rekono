@@ -10,6 +10,7 @@
         size="sm"
         :active="active"
         :disabled="disabled"
+        aria-label="Add or edit link"
       />
     </UTooltip>
     <template #content>
@@ -36,7 +37,7 @@
             variant="ghost"
             size="sm"
             :disabled="!url && !active"
-            title="Apply link"
+            aria-label="Apply link"
             @click="setLink"
           />
           <USeparator orientation="vertical" class="h-6 mx-1" />
@@ -46,7 +47,7 @@
             variant="ghost"
             size="sm"
             :disabled="!url && !active"
-            title="Open in new window"
+            aria-label="Open link in new window"
             @click="openLink"
           />
           <UButton
@@ -55,7 +56,7 @@
             variant="ghost"
             size="sm"
             :disabled="!url && !active"
-            title="Remove link"
+            aria-label="Remove link"
             @click="
               () => {
                 editor

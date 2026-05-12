@@ -5,6 +5,7 @@
         ? `/projects/${projectId}/${counter.plural.toLowerCase()}${taskId ? `?task=${taskId}` : ''}`
         : `/${counter.plural.toLowerCase()}`
     "
+    :aria-label="`${formatCount(counter.count as number)} ${counter.plural}`"
     color="primary"
     class="group relative flex flex-col items-center justify-center gap-1.5 p-3 rounded-xl border border-default bg-elevated hover:bg-muted/50 hover:border-default/80 transition-all duration-200 text-center overflow-hidden"
   >

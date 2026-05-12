@@ -16,15 +16,20 @@
           size: 'lg',
         }"
         variant="ghost"
+        aria-label="Configure DefectDojo sync"
       />
     </UTooltip>
     <template #header="{ close }">
       <div class="flex items-center justify-between w-full">
         <div class="flex items-center gap-2">
-          <UAvatar :src="integrations.defectdojo.integration.icon" size="xl" />
-          <p class="text-gray-900 dark:text-white font-bold text-lg">
+          <UAvatar
+            :src="integrations.defectdojo.integration.icon"
+            size="xl"
+            :alt="integrations.defectdojo.integration.name"
+          />
+          <h2 class="text-gray-900 dark:text-white font-bold text-lg">
             DefectDojo Synchronization
-          </p>
+          </h2>
         </div>
         <div class="flex items-center gap-2">
           <DefectdojoLink
@@ -37,6 +42,7 @@
             icon="i-lucide-x"
             variant="ghost"
             color="neutral"
+            aria-label="Close"
             @click="close"
           />
         </div>

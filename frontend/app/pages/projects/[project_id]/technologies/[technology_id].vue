@@ -23,6 +23,7 @@
           color="neutral"
           variant="ghost"
           size="xs"
+          aria-label="Copy version"
           @click="copyText(technology.version)"
         />
       </div>

@@ -22,6 +22,7 @@
         <UButton
           icon="i-lucide-log-out"
           :label="collapsed ? undefined : 'Logout'"
+          aria-label="Logout"
           color="neutral"
           variant="ghost"
           size="lg"

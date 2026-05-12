@@ -26,6 +26,7 @@
           color="neutral"
           variant="ghost"
           size="xs"
+          aria-label="Copy email"
           @click="copyText(credential.email)"
         />
       </div>
@@ -40,6 +41,7 @@
           color="neutral"
           variant="ghost"
           size="xs"
+          aria-label="Copy secret"
           @click="copyText(credential.email, 'Secret copied to clipboard')"
         />
       </div>

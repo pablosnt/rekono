@@ -19,16 +19,16 @@
                     :class="`text-${iconColor || 'neutral'} text-xl`"
                   />
                 </slot>
-                <span
-                  class="text-base font-semibold text-xl text-highlighted"
-                  >{{ title }}</span
-                >
+                <h1 class="text-base font-semibold text-xl text-highlighted">
+                  {{ title }}
+                </h1>
                 <UButton
                   v-if="!disableTitleCopy"
                   icon="i-lucide-copy"
                   color="neutral"
                   variant="ghost"
                   size="xs"
+                  aria-label="Copy title"
                   @click="copyText(title)"
                 />
               </div>
@@ -79,6 +79,7 @@
                     icon="i-lucide-link"
                     color="neutral"
                     variant="ghost"
+                    aria-label="View references and links"
                   />
                 </UDropdownMenu>
                 <UDropdownMenu
@@ -90,6 +91,7 @@
                     icon="i-lucide-ellipsis"
                     color="neutral"
                     variant="ghost"
+                    aria-label="More finding actions"
                   />
                 </UDropdownMenu>
               </div>

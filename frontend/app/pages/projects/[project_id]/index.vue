@@ -48,6 +48,7 @@
               icon="i-lucide-more-horizontal"
               variant="subtle"
               color="neutral"
+              aria-label="Project actions"
             />
           </UDropdownMenu>
           <CrudDeleteModal

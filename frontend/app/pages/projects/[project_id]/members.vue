@@ -11,6 +11,7 @@
               icon="i-lucide-x"
               variant="subtle"
               class="justify-end"
+              aria-label="Delete member"
               @click="onDelete"
             />
           </UTooltip>

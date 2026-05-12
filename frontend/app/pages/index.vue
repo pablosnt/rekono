@@ -336,10 +336,10 @@ const description = computed(() => {
   if (loading.value) return "Welcome to Rekono";
   if (!hasProjects.value && !hasScans.value) {
     if (userStore.is_admin) {
-      return "Rekono is your automated recon-to-report platform. It maps attack surfaces, uncovers vulnerabilities, and chains findings across your entire scope.Create your first project to define your targets and kick off the operation.";
+      return "Rekono is your automated recon-to-report platform. It maps attack surfaces, uncovers vulnerabilities, and chains findings across your entire scope. Create your first project to define your targets and kick off the operation.";
     }
     if (userStore.is_auditor) {
-      return "Rekono is your automated recon-to-report platform. It maps attack surfaces, uncovers vulnerabilities, and chains findings across your entire scope.Ask your admin to assign you to a project to launch your first scan.";
+      return "Rekono is your automated recon-to-report platform. It maps attack surfaces, uncovers vulnerabilities, and chains findings across your entire scope. Ask your admin to assign you to a project to launch your first scan.";
     }
     return "Rekono is your automated recon-to-report platform — mapping attack surfaces, uncovering vulnerabilities, and chaining findings across your entire scope. Your admin will add you to a project once one is ready to explore.";
   } else if (!hasScans.value) {

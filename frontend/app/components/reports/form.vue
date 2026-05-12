@@ -38,6 +38,7 @@
             variant="ghost"
             color="neutral"
             size="sm"
+            aria-label="Clear target"
             @click="onTargetChange(undefined)"
           />
         </template>
@@ -73,6 +74,7 @@
             variant="ghost"
             color="neutral"
             size="sm"
+            aria-label="Clear scan"
             @click="formData.task = undefined"
           />
         </template>
