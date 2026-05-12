@@ -8,6 +8,7 @@
         <UIcon
           :name="config.headerIcon"
           :class="titleSizeClass ? titleSizeClass : 'text-2xl'"
+          :aria-label="config.entityNamePlural"
         />
         <h1
           v-if="!config.headerHideTitle"

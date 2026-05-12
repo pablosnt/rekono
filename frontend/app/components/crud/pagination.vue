@@ -1,9 +1,9 @@
 <template>
   <div
     v-if="state.total > state.items.length"
-    class="flex flex-wrap justify-center lg:justify-between items-center mt-5"
+    class="flex flex-wrap md:flex-row flex-col justify-between items-center mt-5"
   >
-    <div class="flex1 text-sm text-gray-500 mt-3">
+    <div class="text-sm text-gray-500 mt-3">
       Showing
       <span class="font-medium">{{
         (state.page - 1) * state.pageSize + 1
@@ -27,12 +27,13 @@
       size="lg"
       @update:model-value="(value: number) => $emit('page', value)"
     />
-    <div class="flex1 flex items-center gap-2 text-sm text-gray-500 mt-3">
+    <div class="flex items-center gap-2 text-sm text-gray-500 mt-3">
       <span>Items per page</span>
       <USelect
         :model-value="state.pageSize"
         :items="config.pageSizeOptions?.filter((i) => i <= state.total)"
         size="sm"
+        aria-label="Items per page"
         @update:model-value="(value: number) => $emit('pageSize', value)"
       />
     </div>

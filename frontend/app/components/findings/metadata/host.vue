@@ -8,6 +8,7 @@
       <UIcon
         :name="osConfig?.icon || 'i-lucide-server'"
         :class="`text-${osConfig?.color || 'neutral'}`"
+        :aria-label="host.domain || host.ip"
       />
       <span class="text-base">{{ host.domain || host.ip }}</span>
     </a>

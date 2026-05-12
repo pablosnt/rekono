@@ -3,42 +3,38 @@
     <template #item="{ item, onEdit, onDelete }">
       <User :user="item">
         <div class="flex items-center justify-between">
-          <div class="flex1">
-            <UBadge
-              v-if="item.is_active === true"
-              icon="i-lucide-check-circle"
-              label="Active"
-              color="success"
-              variant="subtle"
+          <UBadge
+            v-if="item.is_active === true"
+            icon="i-lucide-check-circle"
+            label="Active"
+            color="success"
+            variant="subtle"
+          />
+          <UBadge
+            v-else-if="item.is_active === false"
+            icon="i-lucide-x-circle"
+            label="Disabled"
+            color="error"
+            variant="subtle"
+          />
+          <UBadge
+            v-else
+            icon="i-lucide-clock"
+            label="Pending"
+            color="warning"
+            variant="subtle"
+          />
+          <UDropdownMenu
+            v-if="item.id !== userStore.user"
+            :items="getUserActions(item, onEdit, onDelete)"
+          >
+            <UButton
+              icon="i-lucide-more-horizontal"
+              variant="ghost"
+              color="neutral"
+              aria-label="User actions"
             />
-            <UBadge
-              v-else-if="item.is_active === false"
-              icon="i-lucide-x-circle"
-              label="Disabled"
-              color="error"
-              variant="subtle"
-            />
-            <UBadge
-              v-else
-              icon="i-lucide-clock"
-              label="Pending"
-              color="warning"
-              variant="subtle"
-            />
-          </div>
-          <div class="flex1">
-            <UDropdownMenu
-              v-if="item.id !== userStore.user"
-              :items="getUserActions(item, onEdit, onDelete)"
-            >
-              <UButton
-                icon="i-lucide-more-horizontal"
-                variant="ghost"
-                color="neutral"
-                aria-label="User actions"
-              />
-            </UDropdownMenu>
-          </div>
+          </UDropdownMenu>
         </div>
       </User>
     </template>

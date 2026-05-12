@@ -178,11 +178,13 @@ const columns: CrudTableColumn<Vulnerability>[] = [
                         to: "https://cvecrowd.com/",
                         color: "neutral",
                         variant: "ghost",
+                        "aria-label": "Trending on CVECrowd",
                       },
                       [
                         h(UIcon, {
                           name: "i-lucide-flame",
                           class: "text-orange text-lg shrink-0",
+                          "aria-hidden": "true",
                         }),
                       ],
                     ),

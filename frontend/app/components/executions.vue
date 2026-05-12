@@ -163,11 +163,12 @@ const config: CrudConfig<Execution> = reactive({
                     color: status?.color,
                     class: "text-lg",
                     variant: "ghost",
+                    "aria-label": row.original.status,
                   })
                 : h(resolveComponent("UIcon"), {
                     name: status?.icon,
                     class: `text-lg text-${status?.color}`,
-                    variant: "ghost",
+                    "aria-label": row.original.status,
                   }),
           },
         );

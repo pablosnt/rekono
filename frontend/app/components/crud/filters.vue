@@ -10,6 +10,7 @@
           :key="`${filter.key}-${Boolean(_filters[filter.key]) && Array.isArray(filter.options) && filter.options.length > 0}`"
           :model-value="_filters[filter.key]"
           :placeholder="filter.placeholder || filter.label"
+          :aria-label="`Filter by ${filter.label}`"
           :items="Array.isArray(filter.options) ? filter.options : []"
           :value-key="filter.valueKey || 'value'"
           :label-key="filter.labelKey || 'label'"

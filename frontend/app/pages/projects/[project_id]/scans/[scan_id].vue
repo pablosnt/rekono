@@ -52,6 +52,7 @@
                 executionStatuses.find((s) => s.value === task.status).icon
               "
               class="text-lg"
+              :aria-label="task.status"
             />
             <span>{{ task.status }}</span>
           </UBadge>

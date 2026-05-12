@@ -5,7 +5,11 @@
       class="flex items-center gap-2 hover:text-primary hover:underline"
       :href="`/projects/${$route.params.project_id}/ports/${port.id}`"
     >
-      <UIcon :name="getPortIcon(port.port, port.service)" class="text-xl" />
+      <UIcon
+        :name="getPortIcon(port.port, port.service)"
+        class="text-xl"
+        :aria-label="port.service || port.port"
+      />
       <span class="text-base">{{ port.port }}</span>
     </a>
   </div>
