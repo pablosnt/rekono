@@ -138,7 +138,11 @@
 </template>
 
 <script setup lang="ts">
-import { useLocalStorage } from "@vueuse/core";
+import {
+  useLocalStorage,
+  useBreakpoints,
+  breakpointsTailwind
+} from "@vueuse/core";
 import { useUserStore } from "~/store/user";
 
 const props = defineProps<{
@@ -151,11 +155,18 @@ const userStore = useUserStore();
 const open = useLocalStorage(props.storageKey, true);
 const profileOpen = ref(false);
 const profileSidebarOpen = ref(true);
-// watch(profileOpen, (isOpen) => {
-//   if (!isOpen) profileSidebarOpen.value = true;
-// });
+const breakpoints = useBreakpoints(breakpointsTailwind);
+const isMobile = breakpoints.smaller("lg");
+
 const items = computed(() =>
   props.navigationItems.map((item) => setActiveState(item)),
+);
+
+watch(
+  () => route.path,
+  () => {
+    if (isMobile.value) open.value = false
+  }
 );
 
 function setActiveState(
