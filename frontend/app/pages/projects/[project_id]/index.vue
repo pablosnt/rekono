@@ -78,6 +78,7 @@
           v-model="state.description"
           class="w-full"
           :rows="10"
+          :maxrows="20"
           placeholder="Project description..."
           autoresize
           color="neutral"
