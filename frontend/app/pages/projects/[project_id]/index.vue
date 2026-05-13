@@ -89,6 +89,7 @@
     </UForm>
     <div v-if="currentProject.targets.length > 0">
       <USeparator class="mb-8 mt-8" />
+      <h2 class="text-2xl font-bold text-default m-5">Findings</h2>
       <FindingsCounterAll :project-id="route.params.project_id" only-active />
     </div>
   </div>
