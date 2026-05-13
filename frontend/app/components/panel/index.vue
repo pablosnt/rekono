@@ -112,13 +112,19 @@
         class="flex-1 min-h-0 overflow-y-auto bg-default lg:rounded-xl lg:shadow-sm lg:ring lg:ring-default flex flex-col"
       >
         <div class="flex items-center gap-2 p-3 lg:hidden">
-          <UButton
-            icon="i-lucide-panel-left-open"
-            variant="ghost"
-            color="neutral"
-            aria-label="Open navigation"
-            @click="open = true"
-          />
+          <UTooltip text="Open panel" :content="{
+                    side: 'right',
+                    sideOffset: 8,
+                    collisionPadding: 8,
+                  }">
+            <UButton
+              icon="i-lucide-panel-left-open"
+              variant="ghost"
+              color="neutral"
+              aria-label="Open navigation"
+              @click="open = true"
+            />
+          </UTooltip>
         </div>
         <slot name="content-header" />
         <div class="p-4 lg:p-10 lg:mx-10 flex-1">
