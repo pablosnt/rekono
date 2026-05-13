@@ -25,6 +25,10 @@
           />
         </UFormField>
         <div class="flex flex-wrap items-center gap-3">
+          <TasksButton
+            v-if="userStore.is_auditor && currentProject.targets.length > 0"
+            :project="currentProject"
+          />
           <DefectdojoModal
             :sync="currentProject.defectdojo_sync"
             @update="fetch()"
