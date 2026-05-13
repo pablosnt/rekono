@@ -115,11 +115,14 @@
         class="flex-1 min-h-0 overflow-y-auto bg-default lg:rounded-xl lg:shadow-sm lg:ring lg:ring-default flex flex-col"
       >
         <div class="flex items-center gap-2 p-3 lg:hidden">
-          <UTooltip text="Open panel" :content="{
-                    side: 'right',
-                    sideOffset: 8,
-                    collisionPadding: 8,
-                  }">
+          <UTooltip
+            text="Open panel"
+            :content="{
+              side: 'right',
+              sideOffset: 8,
+              collisionPadding: 8,
+            }"
+          >
             <UButton
               icon="i-lucide-panel-left-open"
               variant="ghost"
@@ -144,7 +147,7 @@
 import {
   useLocalStorage,
   useBreakpoints,
-  breakpointsTailwind
+  breakpointsTailwind,
 } from "@vueuse/core";
 import { useUserStore } from "~/store/user";
 
@@ -168,8 +171,10 @@ const items = computed(() =>
 watch(
   () => route.path,
   () => {
-    if (isMobile.value) open.value = false
-  }
+    if (isMobile.value) {
+      open.value = false;
+    }
+  },
 );
 
 function setActiveState(
