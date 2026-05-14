@@ -37,7 +37,7 @@ class CveCrowd(BaseIntegration):
     """
 
     finding_types = [Vulnerability]
-    url = "https://api.cvecrowd.com/api/v2/cves"
+    url = "https://api.cvecrowd.com/v2/cves"
 
     @property
     def settings(self) -> CveCrowdSettings:
@@ -108,29 +108,38 @@ class CveCrowd(BaseIntegration):
             CveCrowdCache.objects.bulk_create([CveCrowdCache(cve=cve, date=timezone.now()) for cve in cves])
         return cves
 
-    def download_trending_cves(self) -> list[str]:
+    def download_trending_cves(self, accumulated: list[str] = []) -> list[str]:
         """Download the list of trending CVEs directly from the CVE Crowd API.
 
         Makes an authenticated request to the CVE Crowd API endpoint, passing the
         configured trending span in days. Returns an empty list if no API token is
         configured or if the request fails.
 
+        Args:
+            accumulated (list[str]): Already retrieved CVEs from previous pages.
+
         Returns:
             list[str]: List of CVE identifiers currently trending on CVE Crowd,
                 or an empty list on failure.
         """
         if self.settings.secret:
-            # TOTEST: We don't have API access
+            params = {"days": self.settings.trending_span_days, "limit": 50}
+            if len(accumulated) > 0:
+                params["offset"] = len(accumulated)
             try:
-                return self._request(
+                response = self._request(
                     self.session.get,
                     self.url,
                     headers={"Authorization": f"Bearer {self.settings.secret}"},
-                    params={"days": self.settings.trending_span_days},
+                    params=params,
                 )
+                if len(response) == params["limit"]:
+                    return self.download_trending_cves(accumulated + response)
+                else:
+                    return accumulated + response
             except Exception:
-                pass
-        return []
+                return accumulated
+        return accumulated
 
     def _process_finding(self, execution: Execution, finding: Vulnerability) -> None:
         """Process a vulnerability finding by marking it as trending.

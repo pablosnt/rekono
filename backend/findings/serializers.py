@@ -401,9 +401,7 @@ class VulnerabilitySerializer(TriageFindingSerializer, SimpleVulnerabilitySerial
                 exploits_queryset = instance.exploit.filter(
                     triage_status=TriageStatus.FALSE_POSITIVE, triage_comment=exploits_triage_comment
                 )
-                exploits_triage_comment = (
-                    f"Automatically untriaged after changing the triage status for the related vulnerability to {instance.triage_status}"
-                )
+                exploits_triage_comment = f"Automatically untriaged after changing the triage status for the related vulnerability to {instance.triage_status}"
             if exploits_queryset is not None:
                 exploits_queryset.update(
                     triage_status=exploits_triage_status,
