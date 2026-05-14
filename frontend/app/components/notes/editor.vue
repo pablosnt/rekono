@@ -519,6 +519,7 @@ function dragHandleItems(editor: Editor) {
         pos: selectedNode.value?.pos,
         label: "Delete",
         icon: "i-lucide-trash",
+        color: "error",
       },
     ],
   ] as DropdownMenuItem[][]);
