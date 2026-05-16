@@ -32,7 +32,6 @@
     <template #custom>
       <UPageCard
         v-if="port?.path.length > 0"
-        title="Paths"
         variant="outline"
         :ui="{ header: 'w-full', container: 'min-w-0' }"
       >
@@ -40,14 +39,12 @@
       </UPageCard>
       <UPageCard
         v-if="port?.technology.length > 0"
-        title="Technologies"
         variant="outline"
         :ui="{ header: 'w-full', container: 'min-w-0' }"
       >
         <FindingsTechnologies :port="port.id" disable-url-sync />
       </UPageCard>
       <UPageCard
-        title="Vulnerabilities"
         variant="outline"
         :ui="{ header: 'w-full', container: 'min-w-0' }"
       >

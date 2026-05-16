@@ -16,7 +16,6 @@
     :custom-default-filters="
       technology ? { technology: technology } : undefined
     "
-    :header-hide-title="Boolean(technology)"
     :disable-url-sync="disableUrlSync"
     is-triageable
   />

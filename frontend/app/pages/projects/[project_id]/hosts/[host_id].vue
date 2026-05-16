@@ -128,7 +128,6 @@
       </div>
       <UPageCard
         v-if="host?.port.length > 0"
-        title="Ports"
         variant="outline"
         :ui="{ header: 'w-full', container: 'min-w-0' }"
       >

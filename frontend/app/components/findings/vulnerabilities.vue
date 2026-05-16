@@ -25,7 +25,6 @@
           ? { technology: technology }
           : undefined
     "
-    :header-hide-title="Boolean(port) || Boolean(technology)"
     is-triageable
     :disable-url-sync="disableUrlSync"
   />

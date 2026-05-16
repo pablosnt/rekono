@@ -1,5 +1,6 @@
 <template>
   <div class="space-y-5">
+    {{}}
     <UProgress :class="[loading ? 'visible' : 'invisible', 'mb-1']" />
     <template v-if="finding">
       <UPageCard
@@ -19,7 +20,9 @@
                     :class="`text-${iconColor || 'neutral'} text-xl`"
                   />
                 </slot>
-                <h1 class="text-base font-semibold text-xl text-highlighted">
+                <h1
+                  class="font-bold text-default truncate max-w-[300px] sm:max-w-none text-2xl"
+                >
                   {{ title }}
                 </h1>
                 <UButton
@@ -108,11 +111,21 @@
       <UPageCard
         v-if="!finding.created_from_user_input"
         class="mt-5"
-        title="Exposure Window"
-        description="Executions where the finding was detected"
+        :description="
+          finding.executions.length > 0
+            ? `First detected ${useTimeAgo(finding.executions.map((e) => new Date(e.start)).sort((a, b) => a - b)[0]).value} across ${finding.executions.length} executions${finding.is_fixed ? `. ${firstUpper(fixVerb)}ed ${useTimeAgo(new Date(finding.fixed_date)).value}` : ''}`
+            : 'Executions where the finding was detected'
+        "
         variant="outline"
         :ui="{ header: 'w-full', container: 'min-w-0' }"
       >
+        <template #title>
+          <h2
+            class="font-bold text-default truncate max-w-[300px] sm:max-w-none text-2xl"
+          >
+            Exposure Window
+          </h2>
+        </template>
         <FindingsExposure class="mb-3" :finding="finding" />
         <Executions
           ref="executions"
@@ -152,6 +165,7 @@ import { useUserStore } from "~/store/user";
 import { useIntegrationsStore } from "~/store/integrations";
 import type { DropdownAction } from "~/types/crud";
 import type { Execution, Finding } from "~/types/models";
+import { useTimeAgo } from "@vueuse/core";
 
 const props = defineProps<{
   api: typeof useApi;

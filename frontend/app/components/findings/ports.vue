@@ -18,7 +18,6 @@
     "
     :visibility="{ paths: false, technologies: false, vulnerabilities: false }"
     :custom-default-filters="host ? { host: host } : undefined"
-    :header-hide-title="Boolean(host)"
     is-asset
     :disable-url-sync="disableUrlSync"
   />

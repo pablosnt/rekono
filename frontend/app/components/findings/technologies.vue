@@ -19,7 +19,6 @@
       exploit: false,
     }"
     :custom-default-filters="port ? { port: port } : undefined"
-    :header-hide-title="Boolean(port)"
     is-asset
     :disable-url-sync="disableUrlSync"
   />
