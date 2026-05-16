@@ -28,52 +28,57 @@
             <UIcon :name="queue.icon" :class="['text-xl', queue.icon_class]" />
           </template>
           <div class="absolute top-4 right-4">
-            <UButton
-              v-if="queue.started_jobs > 0"
-              :label="queue.started_jobs"
-              variant="ghost"
-              color="warning"
-              size="xl"
-              loading
-            />
+            <UTooltip
+              :text="`${queue.started_jobs} jobs running`"
+              :content="{
+                side: 'left',
+                sideOffset: 8,
+                collisionPadding: 8,
+              }"
+            >
+              <UButton
+                v-if="queue.started_jobs > 0"
+                :label="queue.started_jobs"
+                variant="ghost"
+                color="warning"
+                size="xl"
+                loading
+              />
+            </UTooltip>
           </div>
           <div class="flex flex-wrap justify-between">
-            <UButton
+            <UBadge
               v-if="queue.scheduled_jobs > 0"
               icon="i-lucide-calendar-check"
-              :label="`Scheduled: ${queue.scheduled_jobs} jobs`"
               variant="ghost"
-              color="neutral"
-              size="sm"
               class="flex-1 min-w-fit"
-            />
-            <UButton
+            >
+              {{ queue.scheduled_jobs }} scheduled jobs
+            </UBadge>
+            <UBadge
               v-if="queue.deferred_jobs + queue.jobs > 0"
               icon="i-lucide-pause"
-              :label="`Waiting: ${queue.deferred_jobs + queue.jobs} jobs`"
               variant="ghost"
-              color="neutral"
-              size="sm"
               class="flex-1 min-w-fit"
-            />
-            <UButton
+            >
+              {{ queue.deferred_jobs + queue.jobs }} jobs on hold
+            </UBadge>
+            <UBadge
               v-if="queue.finished_jobs > 0"
               icon="i-lucide-check"
-              :label="`Succeed: ${queue.finished_jobs} jobs`"
               variant="ghost"
-              color="success"
-              size="sm"
-              class="flex-1 min-w-fit"
-            />
-            <UButton
+              class="flex-1 min-w-fit text-success"
+            >
+              {{ queue.finished_jobs }} successful jobs
+            </UBadge>
+            <UBadge
               v-if="queue.failed_jobs > 0"
               icon="i-lucide-x"
-              :label="`Failed: ${queue.failed_jobs} jobs`"
               variant="ghost"
-              color="error"
-              size="sm"
-              class="flex-1 min-w-fit"
-            />
+              class="flex-1 min-w-fit text-error"
+            >
+              {{ queue.failed_jobs }} failed jobs
+            </UBadge>
           </div>
           <div v-if="queue.name === 'monitor' && monitor">
             <UFormField label="Monitor regularity in hours">
