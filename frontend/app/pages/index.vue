@@ -164,13 +164,14 @@
       <div v-else>
         <UPageSection title="Supported Tools">
           <UMarquee>
-            <UAvatar
+            <div
               v-for="tool in tools"
               :key="tool.id"
-              :src="tool.icon"
-              :alt="tool.name"
-              size="xl"
-            />
+              class="flex flex-col items-center gap-2"
+            >
+              <UAvatar :src="tool.icon" :alt="tool.name" size="xl" />
+              <span>{{ tool.name }}</span>
+            </div>
           </UMarquee>
         </UPageSection>
         <UPageSection
@@ -229,13 +230,18 @@
         />
         <UPageSection title="Integrations">
           <UMarquee>
-            <UAvatar
+            <div
               v-for="integration in integrations"
               :key="integration.id"
-              :src="integration.icon"
-              :alt="integration.name"
-              size="xl"
-            />
+              class="flex flex-col items-center gap-2"
+            >
+              <UAvatar
+                :src="integration.icon"
+                :alt="integration.name"
+                size="xl"
+              />
+              <span>{{ integration.name }}</span>
+            </div>
           </UMarquee>
         </UPageSection>
         <UPageSection
@@ -466,11 +472,16 @@ const vulnerabilityColumns = [
   {
     id: "host",
     header: table.iconAndValueHeader("Host", "i-lucide-server"),
-    cell: ({ row }: { row: { original: Vulnerability } }) =>
-      table.hostCell(
-        row.original.port?.host || row.original.technology?.port?.host,
-        row.original.project,
-      ),
+    cell: ({ row }: { row: { original: Vulnerability } }) => {
+      const host =
+        row.original.port?.host || row.original.technology?.port?.host;
+      const config = hostOS.find((c) => c.value === host.os_type);
+      return table.iconAndValueCell(
+        host.domain || host.ip,
+        config?.icon || "i-lucide-server",
+        config?.color || "neutral",
+      );
+    },
   },
   {
     accessorKey: "name",
