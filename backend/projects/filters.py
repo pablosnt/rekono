@@ -4,12 +4,14 @@ Provides filter classes for advanced project querying with support for
 tag-based filtering and DefectDojo integration parameters.
 """
 
-from django_filters.filters import CharFilter, NumberFilter
+from django_filters.filters import CharFilter, ModelChoiceFilter, NumberFilter
 from django_filters.rest_framework import FilterSet
 
 from projects.models import Project
+from targets.models import Target
 
 
+# TODO: Fix filters defining custom filters instead of Attributes in the docstrings!
 class ProjectFilter(FilterSet):
     """Filter class for Project model queries.
 
@@ -28,6 +30,7 @@ class ProjectFilter(FilterSet):
     defectdojo_product = NumberFilter(field_name="defectdojo_sync__product_id")
     defectdojo_engagement = NumberFilter(field_name="defectdojo_sync__engagement_id")
     owner_username = CharFilter(field_name="owner__username", lookup_expr="icontains")
+    target = ModelChoiceFilter(queryset=Target.objects.all(), field_name="targets")
 
     class Meta:
         """Meta configuration for the ProjectFilter.

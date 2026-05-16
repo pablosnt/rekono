@@ -16,9 +16,11 @@ const options = useOptions();
 const table = useTable();
 const { refreshPanelCounts } = usePanel();
 const userOptions = ref<FilterOption[]>([]);
+const targetOptions = ref<FilterOption[]>([]);
 
 onMounted(() => {
   options.users(userOptions, { role: "Admin", is_active: true });
+  options.targets(targetOptions);
   integrations.fetchDefectDojo();
 });
 
@@ -93,6 +95,13 @@ const config: CrudConfig<Project> = reactive({
   searchable: true,
   searchPlaceholder: "Search projects...",
   filters: [
+    {
+      key: "target",
+      label: "Target",
+      icon: "i-lucide-locate-fixed",
+      type: "select" as const,
+      options: targetOptions,
+    },
     {
       key: "tag",
       label: "Tag",
