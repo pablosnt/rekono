@@ -4,6 +4,11 @@
     v-model="stepperStep"
     :items="stepperItems"
     :linear="false"
+    :ui="{
+      header: 'overflow-x-auto',
+      root: 'w-full',
+      item: 'min-w-32',
+    }"
   >
     <template #content="{ item }">
       <UForm

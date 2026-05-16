@@ -48,6 +48,7 @@ import type {
   Target,
   TargetPort,
 } from "~/types/models";
+import { useBreakpoints, breakpointsTailwind } from "@vueuse/core";
 
 const props = defineProps<{
   project?: Project;
@@ -62,7 +63,8 @@ const props = defineProps<{
 }>();
 
 const api = useApi("/api/tasks/");
-const config = {
+const breakpoints = useBreakpoints(breakpointsTailwind);
+const config = reactive({
   entityName: "Scan",
   editForm: resolveComponent("TasksForm"),
   onCreation: (data: Record<string, unknown>) =>
@@ -71,6 +73,7 @@ const config = {
     props.tool && props.tool.icon ? { src: props.tool.icon } : undefined,
   modalIcon: () =>
     props.tool && !props.tool.icon ? "i-lucide-square-terminal" : undefined,
-};
+  formFullscreen: breakpoints.smaller("lg"),
+});
 const openModal = ref(false);
 </script>
