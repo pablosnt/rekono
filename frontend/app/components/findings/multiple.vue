@@ -35,7 +35,11 @@
       v-if="selectedItemExposureWindow"
       v-model:open="exposureModalOpen"
       title="Exposure Window"
-      description="Dates when the finding has been detected"
+      :description="
+        selectedItem.executions.length > 0
+          ? `First detected ${useTimeAgo(new Date(selectedItemExposureWindow[0].date)).value} across ${selectedItem.executions.length} executions${selectedItem.is_fixed ? `. ${firstUpper(fixVerb)}ed ${useTimeAgo(new Date(selectedItem.fixed_date)).value}` : ''}`
+          : 'Dates when the finding has been detected'
+      "
       :ui="{ content: 'sm:max-w-3xl sm:max-h-xl' }"
     >
       <template #body>
@@ -55,6 +59,7 @@ import { useUserStore } from "~/store/user";
 import { useIntegrationsStore } from "~/store/integrations";
 import type { Finding } from "~/types/models";
 import { triageStatuses } from "~/constants";
+import { useTimeAgo } from "@vueuse/core";
 
 const props = defineProps<{
   endpoint: string;
