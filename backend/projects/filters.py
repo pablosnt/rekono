@@ -11,7 +11,6 @@ from projects.models import Project
 from targets.models import Target
 
 
-# TODO: Fix filters defining custom filters instead of Attributes in the docstrings!
 class ProjectFilter(FilterSet):
     """Filter class for Project model queries.
 
@@ -19,11 +18,12 @@ class ProjectFilter(FilterSet):
     tag-based filtering and DefectDojo integration parameters for enhanced
     project search and organization features.
 
-    Custom Filters:
-        tag: Filter projects by tag names
-        defectdojo_product: Filter by DefectDojo product ID
-        defectdojo_engagement: Filter by DefectDojo engagement ID
-        owner_username: Filter by owner username
+    Attributes:
+        tag (CharFilter): Filter projects by tag names
+        defectdojo_product (NumberFilter): Filter by DefectDojo product ID
+        defectdojo_engagement (NumberFilter): Filter by DefectDojo engagement ID
+        owner_username (CharFilter): Filter by owner username
+        target (ModelChoiceFilter): Filter by target
     """
 
     tag = CharFilter(field_name="tags__name")

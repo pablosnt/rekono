@@ -46,7 +46,7 @@ class ProjectViewSet(BaseViewSet):
     serializer_class = ProjectSerializer
     filterset_class = ProjectFilter
     permission_classes = [IsAuthenticated, RekonoModelPermission, ProjectMemberPermission]
-    search_fields = ["name", "description"]
+    search_fields = ["name", "description", "targets__target"]
     ordering_fields = ["id", "name"]
 
     @action(detail=True, methods=["POST", "DELETE"], url_path="members/(?P<member_id>[0-9])")
