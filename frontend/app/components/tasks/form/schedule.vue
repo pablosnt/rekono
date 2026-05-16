@@ -9,7 +9,7 @@
       <UInputDate
         ref="inputDate"
         v-model="scheduledAt"
-        class="w-80"
+        class="max-w-120 w-full"
         :min-value="now(getLocalTimeZone())"
         size="xl"
         variant="outline"
