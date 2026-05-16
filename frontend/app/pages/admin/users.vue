@@ -62,6 +62,7 @@ function getUserActions(item: User, onEdit: () => void, onDelete: () => void) {
     actions.push({
       label: "Enable",
       icon: "i-lucide-check-circle",
+      color: "success",
       onSelect: () => {
         api.create(`${item.id}/enable/`, {}).then(() => {
           toast.add({
@@ -73,43 +74,42 @@ function getUserActions(item: User, onEdit: () => void, onDelete: () => void) {
         });
       },
     });
-  }
-  if (item.is_active === null || item.is_active === undefined) {
-    actions.push({
-      label: "Resend invitation",
-      icon: "i-lucide-mail",
-      onSelect: () => {
-        api.create(`${item.id}/resend/`, {}).then(() => {
-          toast.add({
-            title: "Invitation sent",
-            description: `Invitation has been resent to ${getUserDisplayName(item)}`,
-            color: "success",
+  } else {
+    if (item.is_active === null || item.is_active === undefined) {
+      actions.push({
+        label: "Resend invitation",
+        icon: "i-lucide-mail",
+        onSelect: () => {
+          api.create(`${item.id}/resend/`, {}).then(() => {
+            toast.add({
+              title: "Invitation sent",
+              description: `Invitation has been resent to ${getUserDisplayName(item)}`,
+              color: "success",
+            });
           });
-        });
-      },
+        },
+      });
+    }
+    actions.push({
+      label: "Disable",
+      icon: "i-lucide-x-circle",
+      color: "error",
+      onSelect: onDelete,
     });
   }
   return [
+    {
+      label: "Copy email",
+      icon: "i-lucide-copy",
+      onSelect: () =>
+        copyText(String(item.email), "User email copied to clipboard"),
+    },
+    {
+      label: "Edit",
+      icon: "i-lucide-edit",
+      onSelect: onEdit,
+    },
     ...actions,
-    ...[
-      {
-        label: "Copy email",
-        icon: "i-lucide-copy",
-        onSelect: () =>
-          copyText(String(item.email), "User email copied to clipboard"),
-      },
-      {
-        label: "Edit",
-        icon: "i-lucide-edit",
-        onSelect: onEdit,
-      },
-      {
-        label: "Disable",
-        icon: "i-lucide-x-circle",
-        color: "error",
-        onSelect: onDelete,
-      },
-    ],
   ];
 }
 
