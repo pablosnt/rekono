@@ -98,7 +98,7 @@ const config: CrudConfig<Wordlist> = reactive({
       header: "Likes",
       icon: "i-lucide-thumbs-up",
       cell: ({ row }) =>
-        h(resolveComponent("CrudLikes"), {
+        h(resolveComponent("Likes"), {
           itemId: row.original.id,
           endpoint: "/api/wordlists/",
           liked: row.original.liked,

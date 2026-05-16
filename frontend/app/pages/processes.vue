@@ -86,7 +86,7 @@ const config: CrudConfig<Process> = reactive({
       header: "Tags",
       icon: "i-lucide-tag",
       cell: ({ row }) =>
-        h(resolveComponent("CrudTags"), { tags: row.getValue("tags") }),
+        h(resolveComponent("Tags"), { tags: row.getValue("tags") }),
     },
     {
       accessorKey: "steps",
@@ -106,7 +106,7 @@ const config: CrudConfig<Process> = reactive({
       header: "Likes",
       icon: "i-lucide-thumbs-up",
       cell: ({ row }) =>
-        h(resolveComponent("CrudLikes"), {
+        h(resolveComponent("Likes"), {
           itemId: row.original.id,
           endpoint: "/api/processes/",
           liked: row.original.liked,

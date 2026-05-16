@@ -68,7 +68,7 @@
             })
           "
         />
-        <CrudLikes
+        <Likes
           size="lg"
           :item-id="note.id"
           endpoint="/api/notes/"
@@ -150,10 +150,10 @@
         <UIcon name="i-lucide-file-text" class="size-3 shrink-0" />
         {{ note.body?.match(/[a-zA-Z0-9\u00C0-\u024F]+/g)?.length ?? 0 }} words
       </span>
-      <CrudTags v-if="!canEdit && note.tags?.length" :tags="note.tags" />
+      <Tags v-if="!canEdit && note.tags?.length" :tags="note.tags" />
     </div>
     <UFormField v-if="canEdit" class="mt-5" name="tags">
-      <CrudTagsForm v-model="note.tags" @update:model-value="updateNote()" />
+      <TagsForm v-model="note.tags" @update:model-value="updateNote()" />
     </UFormField>
     <USeparator class="mb-6 mt-6" />
     <NotesEditor

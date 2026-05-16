@@ -134,7 +134,7 @@
             :aria-label="field.label"
             :disabled="field.disabled === true"
           />
-          <CrudTagsForm
+          <TagsForm
             v-else-if="field.type === 'tags'"
             v-model="formData[field.key]"
             :placeholder="field.placeholder"

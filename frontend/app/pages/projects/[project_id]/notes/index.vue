@@ -47,9 +47,9 @@
             @click.stop
           />
         </template>
-        <CrudTags :tags="item.tags" />
+        <Tags :tags="item.tags" />
         <div class="flex items-center justify-between mt-4" @click.stop>
-          <CrudLikes
+          <Likes
             size="lg"
             :item-id="item.id"
             endpoint="/api/notes/"

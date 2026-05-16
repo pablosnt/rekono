@@ -67,9 +67,9 @@
         </div>
       </div>
       <UFormField v-if="userStore.is_admin" class="mt-5" name="tags">
-        <CrudTagsForm v-model="state.tags" @update:model-value="update()" />
+        <TagsForm v-model="state.tags" @update:model-value="update()" />
       </UFormField>
-      <CrudTags
+      <Tags
         v-else-if="currentProject.tags.length"
         :tags="currentProject.tags"
       />

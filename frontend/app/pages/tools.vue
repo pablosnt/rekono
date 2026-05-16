@@ -26,7 +26,7 @@
         />
         <div class="flex items-center justify-between mt-4">
           <TasksButton :tool="item" />
-          <CrudLikes
+          <Likes
             size="lg"
             :item-id="item.id"
             endpoint="/api/tools/"

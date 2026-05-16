@@ -377,7 +377,7 @@ const projectColumns = [
     accessorKey: "tags",
     header: table.iconAndValueHeader("Tags", "i-lucide-tag"),
     cell: ({ row }: { row: { getValue: (key: string) => unknown } }) =>
-      h(resolveComponent("CrudTags"), { tags: row.getValue("tags") }),
+      h(resolveComponent("Tags"), { tags: row.getValue("tags") }),
   },
   {
     accessorKey: "targets",
