@@ -166,7 +166,7 @@ const columns: CrudTableColumn<Vulnerability>[] = [
               h(
                 UTooltip,
                 {
-                  text: "Trending",
+                  text: "Trending on CVECrowd",
                   content: { side: "left", sideOffset: 8, collisionPadding: 8 },
                 },
                 {
@@ -182,8 +182,8 @@ const columns: CrudTableColumn<Vulnerability>[] = [
                       },
                       [
                         h(UIcon, {
-                          name: "i-lucide-flame",
-                          class: "text-orange text-lg shrink-0",
+                          name: "i-lucide-trending-up",
+                          class: "text-orange text-xl shrink-0",
                           "aria-hidden": "true",
                         }),
                       ],

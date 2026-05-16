@@ -99,9 +99,7 @@
             <slot name="description" />
           </div>
         </template>
-        <div
-          class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-4 mx-10"
-        >
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4 mx-10">
           <slot name="metadata" />
         </div>
         <slot name="post-metadata" />
