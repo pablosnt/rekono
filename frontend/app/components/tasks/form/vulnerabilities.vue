@@ -7,7 +7,7 @@
     >
       <USelectMenu
         :model-value="vulnerabilities"
-        create-item="always"
+        create-item
         multiple
         class="w-full"
         icon="i-lucide-bug"

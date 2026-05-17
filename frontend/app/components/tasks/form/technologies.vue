@@ -3,7 +3,7 @@
     <UFormField :required="required" label="Technologies" name="technologies">
       <USelectMenu
         :model-value="technologies"
-        create-item="always"
+        create-item
         multiple
         class="w-full"
         icon="i-lucide-code"
