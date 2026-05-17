@@ -35,7 +35,7 @@ venv.bak/
 /reports/
 /wordlists/
 /logs/
-home/
+/backend/tests/home/
 
 # Vue.js and Nuxt
 node_modules/

@@ -7,10 +7,10 @@
       name="scanner"
     >
       <USelectMenu
+        v-model="scanner"
         class="w-full"
         :icon="scannerIcon"
         :avatar="scannerAvatar"
-        v-model="scanner"
         :items="
           toolOptions
             .map((tool) => ({
