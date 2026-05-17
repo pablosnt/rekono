@@ -1,8 +1,16 @@
 <template>
   <div class="space-y-8">
-    <template v-if="hasFindings">
+    <UProgress v-if="loading && !hasFindings" />
+    <template v-else-if="hasFindings">
       <MetricsEvolution :project="$route.params.project_id" />
-      <UTabs :items="tabs" class="w-full">
+      <UTabs
+        :items="tabs"
+        class="w-full"
+        :ui="{
+          list: 'overflow-x-auto',
+          trigger: 'min-w-38',
+        }"
+      >
         <template #hosts>
           <MetricsHosts :project="$route.params.project_id" />
         </template>
@@ -72,8 +80,9 @@ const counts = reactive({
   exploits: { value: 0, loading: true },
 });
 const hasFindings = computed(() =>
-  Object.values(counts).some((v) => v.value > 0 || v.loading),
+  Object.values(counts).some((v) => v.value > 0),
 );
+const loading = computed(() => Object.values(counts).some((v) => v.loading));
 const tabCountMap: Record<string, () => number> = {
   hosts: () => counts.hosts.value,
   ports: () => counts.ports.value,
