@@ -43,8 +43,11 @@
               size="lg"
               to="/metrics"
             />
-            <HomeActionsExploreProjects v-if="hasProjects" :color="hasFindings ? 'neutral' : 'primary'"
-              :variant="hasFindings ? 'outline' : 'solid'" />
+            <HomeActionsExploreProjects
+              v-if="hasProjects"
+              :color="hasFindings ? 'neutral' : 'primary'"
+              :variant="hasFindings ? 'outline' : 'solid'"
+            />
             <HomeActionsDocs v-if="!hasFindings" />
           </template>
         </template>
