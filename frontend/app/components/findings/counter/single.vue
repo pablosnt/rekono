@@ -39,7 +39,7 @@ function fetch() {
   loading.value = true;
   api
     .list(
-      props.findingNamePlural.toLowerCase(),
+      `${props.findingNamePlural.toLowerCase()}/`,
       props.taskId
         ? { task: props.taskId, ...defaultFilters }
         : props.projectId
