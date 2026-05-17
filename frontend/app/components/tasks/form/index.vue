@@ -11,24 +11,29 @@
     }"
   >
     <template #content="{ item }">
-      <UForm
-        :validate-on="['input', 'change']"
-        :validate="validate"
-        :loading="loading"
-      >
+      <UForm :loading="loading">
         <TasksFormTarget
           v-show="item.title === 'Target'"
           :api="genericApi"
           :default-project="entity.project"
           :default-target="entity.target"
           @update-project="
-            (newProject: number | undefined) => (project = newProject)
+            (newProject: number | undefined) => {
+              project = newProject;
+              validate();
+            }
           "
           @update-target="
-            (newTarget: number | undefined) => (target = newTarget)
+            (newTarget: number | undefined) => {
+              target = newTarget;
+              validate();
+            }
           "
           @update-target-port="
-            (newTargetPort: number | undefined) => (targetPort = newTargetPort)
+            (newTargetPort: number | undefined) => {
+              targetPort = newTargetPort;
+              validate();
+            }
           "
           @update-target-port-options="
             (hasOptions: boolean) => (hasTargetPortOptions = hasOptions)
@@ -40,11 +45,24 @@
           :default-tool="entity.tool"
           :default-configuration="entity.configuration"
           :default-process="entity.process"
-          @update-tool="(newTool) => (tool = newTool)"
-          @update-configuration="
-            (newConfiguration) => (configuration = newConfiguration)
+          @update-tool="
+            (newTool) => {
+              tool = newTool;
+              validate();
+            }
           "
-          @update-process="(newProcess) => (process = newProcess)"
+          @update-configuration="
+            (newConfiguration) => {
+              configuration = newConfiguration;
+              validate();
+            }
+          "
+          @update-process="
+            (newProcess) => {
+              process = newProcess;
+              validate();
+            }
+          "
           @update-wordlist="
             (supported, required) => {
               supportedWordlist = supported;
@@ -52,6 +70,7 @@
               if (!supported) {
                 wordlists = [];
               }
+              validate();
             }
           "
           @update-input-technology="
@@ -60,6 +79,7 @@
               if (!required) {
                 inputTechnologies = [];
               }
+              validate();
             }
           "
           @update-input-vulnerability="
@@ -68,6 +88,7 @@
               if (!required) {
                 inputVulnerabilities = [];
               }
+              validate();
             }
           "
           @update-intensity="
@@ -77,6 +98,7 @@
               if (minIntensity === maxIntensity) {
                 intensity = minIntensity;
               }
+              validate();
             }
           "
         />
@@ -85,21 +107,34 @@
           :is-process-selected="process !== null && process !== undefined"
           :min-intensity="minIntensity"
           :max-intensity="maxIntensity"
-          @update-intensity="(newIntensity) => (intensity = newIntensity)"
+          @update-intensity="
+            (newIntensity) => {
+              intensity = newIntensity;
+              validate();
+            }
+          "
         />
         <TasksFormWordlists
           v-show="item.title === 'Wordlists'"
           :api="genericApi"
           :supported-wordlist="supportedWordlist"
           :required-wordlist="requiredWordlist"
-          @update-wordlists="(newWordlists) => (wordlists = newWordlists)"
+          @update-wordlists="
+            (newWordlists) => {
+              wordlists = newWordlists;
+              validate();
+            }
+          "
         />
         <TasksFormTechnologies
           v-show="item.title === 'Technologies'"
           :api="genericApi"
           :required="requiredInputTechnology"
           @update-technologies="
-            (newTechnologies) => (inputTechnologies = newTechnologies)
+            (newTechnologies) => {
+              inputTechnologies = newTechnologies;
+              validate();
+            }
           "
         />
         <TasksFormVulnerabilities
@@ -107,7 +142,10 @@
           :api="genericApi"
           :required="requiredInputVulnerability"
           @update-vulnerabilities="
-            (newVulnerabilities) => (inputVulnerabilities = newVulnerabilities)
+            (newVulnerabilities) => {
+              inputVulnerabilities = newVulnerabilities;
+              validate();
+            }
           "
         />
         <TasksFormSchedule

@@ -10,6 +10,7 @@
         class="w-full"
         :icon="scannerIcon"
         :avatar="scannerAvatar"
+        v-model="scanner"
         :items="
           toolOptions
             .map((tool) => ({
@@ -37,6 +38,7 @@
                 onProcess(value.value);
               }
             } else {
+              scanner = undefined;
               onTool(undefined);
               onProcess(undefined);
               onConfiguration(undefined);
@@ -61,6 +63,7 @@
             size="sm"
             aria-label="Clear scanner"
             @click="
+              scanner = undefined;
               onTool(undefined);
               onProcess(undefined);
               onConfiguration(undefined);
@@ -106,6 +109,7 @@ const emit = defineEmits<{
   "update-intensity": [newMaxIntensity: number, newMinIntensity: number];
 }>();
 
+const scanner = ref();
 const scannerIcon = ref("i-lucide-terminal");
 const scannerAvatar = ref(undefined);
 const process = ref(props.defaultProcess);
