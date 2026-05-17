@@ -173,7 +173,7 @@ class TaskSerializer(RelatedNotesSerializer):
                 * 100
             )
             if total > 0
-            else 0
+            else (100 if instance.end else 0)
         )
 
     def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
