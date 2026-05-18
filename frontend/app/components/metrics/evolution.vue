@@ -8,9 +8,18 @@
       :on-legend-item-click="onLegendItemClick"
     />
   </div>
-  <div class="overflow-x-auto" :class="{ 'min-h-[500px]': loading }">
+  <div
+    ref="container"
+    class="overflow-x-auto"
+    :class="{ 'min-h-[500px]': loading }"
+  >
     <UProgress v-if="loading" />
-    <VisXYContainer v-else-if="data.length" :data="data" :height="500">
+    <VisXYContainer
+      v-else-if="data.length"
+      :data="data"
+      :height="500"
+      :width="data.length > 12 ? data.length * 80 : undefined"
+    >
       <VisLine :x="x" :y="activeY" :color="colors" />
       <VisAxis type="x" :tick-format="formatMonth" :tick-values="tickValues" />
       <VisAxis
@@ -40,6 +49,7 @@ import type { FindingsEvolution } from "~/types/stats";
 const props = defineProps<{ project?: number }>();
 const api = useApi("/api/stats/");
 const loading = ref(true);
+const container = ref<HTMLElement>();
 const stats = ref<Record<string, FindingsEvolution[]>>({});
 const data = computed(() => processStats());
 const x = (d) => new Date(d.month).getTime();
@@ -137,15 +147,22 @@ function tooltip(d) {
 
 function fetch() {
   loading.value = true;
-  findingTypes.map((ft) => {
-    api
-      .get(
-        `${ft.value.toLowerCase()}-evolution/${props.project ? `?project=${props.project}` : ""}`,
-      )
-      .then((response) => (stats.value[ft.plural.toLowerCase()] = response))
-      .finally(() => (loading.value = false));
-  });
+  return Promise.all(
+    findingTypes.map((ft) =>
+      api
+        .get(
+          `${ft.value.toLowerCase()}-evolution/${props.project ? `?project=${props.project}` : ""}`,
+        )
+        .then((response) => (stats.value[ft.plural.toLowerCase()] = response)),
+    ),
+  ).finally(() => (loading.value = false));
 }
 
-onMounted(fetch);
+onMounted(async () => {
+  await fetch();
+  await nextTick();
+  if (container.value) {
+    container.value.scrollLeft = container.value.scrollWidth;
+  }
+});
 </script>
