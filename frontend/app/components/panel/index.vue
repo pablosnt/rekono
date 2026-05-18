@@ -11,25 +11,14 @@
     >
       <template #header>
         <slot name="panel-header" :open="open">
-          <div class="relative flex items-center w-full justify-between">
-            <!-- TODO: Given that we don't have the collapse button in the header anymore, we can deifne the icon only once -->
-            <div v-if="open" class="flex items-center justify-center gap-2">
-              <UColorModeImage
-                light="/favicon-light.ico"
-                dark="/favicon-dark.ico"
-                alt="Rekono"
-                width="30"
-              />
-              <AppLogo class="h-7 w-auto shrink-0" />
-            </div>
+          <div class="relative flex items-center w-full justify-start gap-2">
             <UColorModeImage
-              v-else
               light="/favicon-light.ico"
               dark="/favicon-dark.ico"
               alt="Rekono"
-              class="opacity-100 group-hover:opacity-0 transition-opacity duration-200"
               width="30"
             />
+            <AppLogo v-if="open" class="h-7 w-auto shrink-0" />
           </div>
         </slot>
       </template>
@@ -73,7 +62,6 @@
             @click="profileOpen = true"
           />
           <template #header>
-            <!-- TODO: Don't we have two profile navigation buttons? -->
             <UButton
               icon="i-lucide-menu"
               size="xl"

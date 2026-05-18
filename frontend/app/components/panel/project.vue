@@ -1,29 +1,20 @@
 <template>
   <Panel :navigation-items="items" storage-key="panel">
     <template #panel-header="{ open }">
-      <div class="relative flex items-center w-full justify-between">
-        <!-- TODO: As we don't have collapse button on the header, can't we reuse the same avatar -->
-        <div
-          v-if="open && currentProject"
-          class="flex items-center justify-center gap-2"
-        >
-          <UAvatar
-            :text="currentProject.name.charAt(0).toUpperCase()"
-            class="bg-primary-500"
-            :ui="{ fallback: 'text-white' }"
-            :alt="currentProject.name"
-            width="30"
-          />
-          <h1>{{ currentProject.name }}</h1>
-        </div>
+      <div
+        v-if="currentProject"
+        class="flex items-center w-full justify-start gap-2"
+      >
         <UAvatar
-          v-else-if="currentProject"
           :text="currentProject.name.charAt(0).toUpperCase()"
+          class="bg-primary-500"
+          :ui="{ fallback: 'text-white' }"
           :alt="currentProject.name"
           width="30"
-          class="bg-primary-500 opacity-100 group-hover:opacity-0 transition-opacity duration-200"
-          :ui="{ fallback: 'text-white' }"
         />
+        <h1 v-if="open" class="text-2xl font-bold font-mono">
+          {{ currentProject.name }}
+        </h1>
       </div>
     </template>
     <template #content-header>
@@ -55,7 +46,7 @@ import { targetTypes } from "~/constants";
 const api = useApi();
 const route = useRoute();
 const userStore = useUserStore();
-const { panelRefresh } = usePanel();
+const { panelRefresh, projectHasActiveFindings } = usePanel();
 const { currentProject, setCurrentProject } = useCurrentProject();
 const breakpoints = useBreakpoints(breakpointsTailwind);
 const breadcrumb = ref([]);
@@ -74,7 +65,6 @@ const responsiveBreadcrum = computed(() =>
 );
 const mounting = ref(false);
 const allProjects = ref<Project[]>([]);
-
 const projectBadges = reactive({
   hosts: "",
   ports: "",
@@ -85,7 +75,6 @@ const projectBadges = reactive({
   vulnerabilities: "",
   exploits: "",
 });
-
 const items = computed(() => [
   {
     label: "Details",
@@ -213,6 +202,7 @@ function onProjectChange() {
     },
   ];
   Object.keys(projectBadges).forEach((key) => (projectBadges[key] = ""));
+  projectHasActiveFindings.value = false;
   api.get(`/api/projects/${route.params.project_id}/`).then((data) => {
     setCurrentProject(data);
     if (allProjects.value.length === 0) {
@@ -235,50 +225,61 @@ function loadProjectBadges() {
     triage_status__in: "True Positive,Untriaged",
     is_fixed: false,
   };
-  api
-    .list("hosts/", openFindings, false, 1, 1)
-    .then(
-      (response: object) => (projectBadges.hosts = formatCount(response.total)),
-    );
-  api
-    .list("ports/", openFindings, false, 1, 1)
-    .then(
-      (response: object) => (projectBadges.ports = formatCount(response.total)),
-    );
-  api
-    .list("technologies/", openFindings, false, 1, 1)
-    .then(
-      (response: object) =>
-        (projectBadges.technologies = formatCount(response.total)),
-    );
-  api
-    .list("paths/", openFindings, false, 1, 1)
-    .then(
-      (response: object) => (projectBadges.paths = formatCount(response.total)),
-    );
-  api
-    .list("osint/", activeFindings, false, 1, 1)
-    .then(
-      (response: object) => (projectBadges.osint = formatCount(response.total)),
-    );
-  api
-    .list("credentials/", activeFindings, false, 1, 1)
-    .then(
-      (response: object) =>
-        (projectBadges.credentials = formatCount(response.total)),
-    );
-  api
-    .list("vulnerabilities/", activeFindings, false, 1, 1)
-    .then(
-      (response: object) =>
-        (projectBadges.vulnerabilities = formatCount(response.total)),
-    );
-  api
-    .list("exploits/", activeFindings, false, 1, 1)
-    .then(
-      (response: object) =>
-        (projectBadges.exploits = formatCount(response.total)),
-    );
+  Promise.all([
+    api
+      .list("hosts/", openFindings, false, 1, 1)
+      .then(
+        (response: object) =>
+          (projectBadges.hosts = formatCount(response.total)),
+      ),
+    api
+      .list("ports/", openFindings, false, 1, 1)
+      .then(
+        (response: object) =>
+          (projectBadges.ports = formatCount(response.total)),
+      ),
+    api
+      .list("technologies/", openFindings, false, 1, 1)
+      .then(
+        (response: object) =>
+          (projectBadges.technologies = formatCount(response.total)),
+      ),
+    api
+      .list("paths/", openFindings, false, 1, 1)
+      .then(
+        (response: object) =>
+          (projectBadges.paths = formatCount(response.total)),
+      ),
+    api
+      .list("osint/", activeFindings, false, 1, 1)
+      .then(
+        (response: object) =>
+          (projectBadges.osint = formatCount(response.total)),
+      ),
+    api
+      .list("credentials/", activeFindings, false, 1, 1)
+      .then(
+        (response: object) =>
+          (projectBadges.credentials = formatCount(response.total)),
+      ),
+    api
+      .list("vulnerabilities/", activeFindings, false, 1, 1)
+      .then(
+        (response: object) =>
+          (projectBadges.vulnerabilities = formatCount(response.total)),
+      ),
+    api
+      .list("exploits/", activeFindings, false, 1, 1)
+      .then(
+        (response: object) =>
+          (projectBadges.exploits = formatCount(response.total)),
+      ),
+  ]).finally(
+    () =>
+      (projectHasActiveFindings.value = Object.values(projectBadges).some(
+        (value) => !["", "0"].includes(value),
+      )),
+  );
 }
 
 function getProjectBreadcrum(project: Project) {

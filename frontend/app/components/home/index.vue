@@ -11,7 +11,10 @@
       >
         <template #links>
           <template v-if="userStore.is_admin">
-            <HomeActionsScan v-if="targets > 0" :has-scans="hasScans" />
+            <HomeActionsScan
+              v-if="targets > 0 || hasScans"
+              :has-scans="hasScans"
+            />
             <UButton
               label="Create Project"
               icon="i-lucide-plus"
@@ -20,10 +23,13 @@
               :variant="targets > 0 ? 'outline' : 'solid'"
               @click="createProjectOpen = true"
             />
-            <HomeActionsDocs v-if="targets === 0" />
+            <HomeActionsDocs v-if="targets === 0 && !hasScans" />
           </template>
           <template v-else-if="userStore.is_auditor">
-            <HomeActionsScan v-if="targets > 0" :has-scans="hasScans" />
+            <HomeActionsScan
+              v-if="targets > 0 || hasScans"
+              :has-scans="hasScans"
+            />
             <HomeActionsExploreProjects v-else-if="hasProjects" />
             <UButton
               label="Design Scans"
@@ -59,7 +65,7 @@
         :config="projectsConfig"
         @open="createProjectOpen = $event"
       />
-      <div v-if="tasks.length > 0" class="mt-10 space-y-10">
+      <div v-if="hasScans" class="mt-10 space-y-10">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
           <HomeTopProjects @create="createProjectOpen = true" />
           <HomeLatestScans :tasks="tasks" />
@@ -152,52 +158,55 @@ const projectsConfig = reactive({
     ),
 });
 
-function fetch() {
+async function fetch() {
   loading.value = true;
   api
     .get("tasks/latest/")
-    .then((response) => {
+    .then(async (response) => {
       tasks.value = response;
-      // TODO: Await all the requests, so the loading becomes false when everything is loaded
       if (response.length > 0) {
-        api.get("hosts/latest/").then((response) => (hosts.value = response));
-        api
-          .get("vulnerabilities/latest/")
-          .then((response) => (vulnerabilities.value = response));
-        api.list("hosts/", {}, false, 1, 1).then((r) => {
-          findings.hosts = r.total;
-        });
-        api.list("ports/", {}, false, 1, 1).then((r) => {
-          findings.ports = r.total;
-        });
-        api.list("technologies/", {}, false, 1, 1).then((r) => {
-          findings.technologies = r.total;
-        });
-        api.list("paths/", {}, false, 1, 1).then((r) => {
-          findings.paths = r.total;
-        });
-        api.list("osint/", {}, false, 1, 1).then((r) => {
-          findings.osint = r.total;
-        });
-        api.list("credentials/", {}, false, 1, 1).then((r) => {
-          findings.credentials = r.total;
-        });
-        api.list("vulnerabilities/", {}, false, 1, 1).then((r) => {
-          findings.vulnerabilities = r.total;
-        });
-        api.list("exploits/", {}, false, 1, 1).then((r) => {
-          findings.exploits = r.total;
-        });
+        await Promise.all([
+          api.get("hosts/latest/").then((r) => (hosts.value = r)),
+          api
+            .get("vulnerabilities/latest/")
+            .then((r) => (vulnerabilities.value = r)),
+          api
+            .list("hosts/", {}, false, 1, 1)
+            .then((r) => (findings.hosts = r.total)),
+          api
+            .list("ports/", {}, false, 1, 1)
+            .then((r) => (findings.ports = r.total)),
+          api
+            .list("technologies/", {}, false, 1, 1)
+            .then((r) => (findings.technologies = r.total)),
+          api
+            .list("paths/", {}, false, 1, 1)
+            .then((r) => (findings.paths = r.total)),
+          api
+            .list("osint/", {}, false, 1, 1)
+            .then((r) => (findings.osint = r.total)),
+          api
+            .list("credentials/", {}, false, 1, 1)
+            .then((r) => (findings.credentials = r.total)),
+          api
+            .list("vulnerabilities/", {}, false, 1, 1)
+            .then((r) => (findings.vulnerabilities = r.total)),
+          api
+            .list("exploits/", {}, false, 1, 1)
+            .then((r) => (findings.exploits = r.total)),
+        ]);
       } else {
-        api
-          .list("tools/", { icon__isnull: false }, true)
-          .then((response) => (tools.value = response.items));
-        api
-          .list("integrations/", {}, true)
-          .then((response) => (integrations.value = response.items));
-        api
-          .list("targets/", {}, false, 1, 1)
-          .then((response) => (targets.value = response.total));
+        await Promise.all([
+          api
+            .list("tools/", { icon__isnull: false }, true)
+            .then((r) => (tools.value = r.items)),
+          api
+            .list("integrations/", {}, true)
+            .then((r) => (integrations.value = r.items)),
+          api
+            .list("targets/", {}, false, 1, 1)
+            .then((r) => (targets.value = r.total)),
+        ]);
       }
     })
     .finally(() => (loading.value = false));
