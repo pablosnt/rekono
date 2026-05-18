@@ -81,6 +81,7 @@ const validation = useValidation();
 const api = useApi("/api/integrations/");
 const openModal = ref(false);
 const selectedIntegration = ref();
+const cveCrowdDaysSpan = [1, 7, 30];
 const integrationsSettings = ref({
   1: {
     config: {
@@ -155,12 +156,13 @@ const integrationsSettings = ref({
         },
         {
           key: "trending_span_days",
-          label: "Trending Span Days",
-          type: "number",
-          placeholder: "Enter number of days (1-30)",
+          label: "Trending Span",
+          type: "select",
           required: true,
-          min: 1,
-          max: 30,
+          options: cveCrowdDaysSpan.map((v) => ({
+            value: v,
+            label: `${v} day${v > 0 ? "s" : ""}`,
+          })),
         },
         {
           key: "execute_per_execution",
@@ -171,10 +173,7 @@ const integrationsSettings = ref({
       ],
       editFormSchema: z.object({
         api_token: validation.secret("api_token", false, 50).or(z.literal("")),
-        trending_span_days: z
-          .number()
-          .min(1, "Must be at least 1")
-          .max(30, "Must be at most 30"),
+        trending_span_days: z.union(cveCrowdDaysSpan.map((v) => z.literal(v))),
         execute_per_execution: z.boolean(),
       }),
     },

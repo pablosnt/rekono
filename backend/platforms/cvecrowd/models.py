@@ -14,7 +14,6 @@ Architecture:
     avoid redundant API requests across multiple executions.
 """
 
-from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
 from framework.models import BaseEncrypted, BaseModel
@@ -31,16 +30,16 @@ class CveCrowdSettings(BaseEncrypted):
 
     Attributes:
         _api_token (TextField): Encrypted CVE Crowd API bearer token (max 50 chars).
-        trending_span_days (IntegerField): Days for trending analysis (1-30, default 7).
+        trending_span_days (IntegerField): Days for trending analysis (1, 7, or 30, default 1).
         execute_per_execution (BooleanField): Enable per-execution processing (default True).
         is_available (BooleanField): Cached platform availability status (default False).
 
     Example:
-        Configure CVE Crowd integration with 3-day trending window:
+        Configure CVE Crowd integration with 7-day trending window:
 
         ```python
         settings = CveCrowdSettings.objects.create(
-            trending_span_days=3,
+            trending_span_days=7,
             execute_per_execution=True
         )
         settings.secret = "your_api_token_here"
@@ -55,7 +54,7 @@ class CveCrowdSettings(BaseEncrypted):
         blank=True,
         db_column="api_token",
     )
-    trending_span_days = models.IntegerField(default=7, validators=[MinValueValidator(1), MaxValueValidator(30)])
+    trending_span_days = models.IntegerField(choices=[(1, "1 day"), (7, "7 days"), (30, "30 days")], default=1)
     execute_per_execution = models.BooleanField(default=True)
     is_available = models.BooleanField(default=False)
 
