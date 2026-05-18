@@ -87,7 +87,7 @@
         />
       </UFormField>
     </UForm>
-    <div v-if="currentProject.targets.length > 0">
+    <div v-if="projectHasActiveFindings">
       <USeparator class="mb-8 mt-8" />
       <h2 class="text-2xl font-bold text-default m-5">Findings</h2>
       <FindingsCounterAll :project-id="route.params.project_id" only-active />
@@ -101,6 +101,7 @@ import { useUserStore } from "~/store/user";
 const api = useApi("/api/projects/");
 const route = useRoute();
 const userStore = useUserStore();
+const { projectHasActiveFindings } = usePanel();
 const config = useProjectsConfig();
 const { currentProject, setCurrentProject } = useCurrentProject();
 const schema = config.formSchema;
