@@ -1,9 +1,9 @@
 <template>
   <div v-if="host" class="flex items-center gap-2 flex-wrap">
     <span class="text-muted">Host:</span>
-    <a
+    <NuxtLink
       class="flex items-center gap-2 hover:text-primary hover:underline"
-      :href="`/projects/${$route.params.project_id}/hosts/${host.id}`"
+      :to="`/projects/${$route.params.project_id}/hosts/${host.id}`"
     >
       <UIcon
         :name="osConfig?.icon || 'i-lucide-server'"
@@ -11,7 +11,7 @@
         :aria-label="host.domain || host.ip"
       />
       <span class="text-base">{{ host.domain || host.ip }}</span>
-    </a>
+    </NuxtLink>
   </div>
 </template>
 

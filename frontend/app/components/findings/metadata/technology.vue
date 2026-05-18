@@ -1,12 +1,12 @@
 <template>
   <div v-if="technology" class="flex items-center gap-2 flex-wrap">
     <span class="text-muted">Technology:</span>
-    <a
+    <NuxtLink
       class="flex items-center gap-2 hover:text-primary hover:underline"
-      :href="`/projects/${$route.params.project_id}/technologies/${technology.id}`"
+      :to="`/projects/${$route.params.project_id}/technologies/${technology.id}`"
     >
       <span class="text-base">{{ technology.name }}</span>
-    </a>
+    </NuxtLink>
   </div>
 </template>
 
