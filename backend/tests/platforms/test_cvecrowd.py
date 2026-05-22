@@ -100,7 +100,7 @@ class CveCrowdTest(BaseTest, TestCase):
         self.assertFalse(self.cvecrowd.is_available())
 
 
-new_settings = {"api_token": "cve-crowd-token", "trending_span_days": 3, "execute_per_execution": False}
+new_settings = {"api_token": "cve-crowd-token", "trending_span_days": 7, "execute_per_execution": False}
 invalid_settings = {**new_settings, "trending_span_days": 50}
 
 
@@ -111,7 +111,7 @@ class CveCrowdSettingsTest(ApiTestNoData, TestCase):
         ApiTestCase([Role.AUDITOR, Role.READER], 403),
         ApiTestCase(
             [Role.ADMIN],
-            expected={"id": 1, "api_token": None, "trending_span_days": 7, "execute_per_execution": True},
+            expected={"id": 1, "api_token": None, "trending_span_days": 1, "execute_per_execution": True},
         ),
         PutApiTestCase([Role.AUDITOR, Role.READER], 403, new_settings),
         PutApiTestCase([Role.ADMIN], 400, invalid_settings),

@@ -270,10 +270,13 @@ SPECTACULAR_SETTINGS = {
     "ENUM_NAME_OVERRIDES": {
         "AuthenticationType": "authentications.enums.AuthenticationType",
         "PathType": "findings.enums.PathType",
+        "PortStatus": "findings.enums.PortStatus",
         "TargetType": "targets.enums.TargetType",
+        "TriageStatus": "findings.enums.TriageStatus",
         "WordlistType": "wordlists.enums.WordlistType",
         "TimeUnit": "tasks.enums.TimeUnit",
         "Status": "executions.enums.Status",
+        "ReportStatus": "reporting.enums.ReportStatus",
     },
 }
 
