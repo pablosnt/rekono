@@ -7,8 +7,8 @@
       <template v-for="filter in config.filters" :key="filter.key">
         <USelectMenu
           v-if="filter.type === 'select'"
-          :key="`${filter.key}-${Boolean(_filters[filter.key]) && Array.isArray(filter.options) && filter.options.length > 0}`"
-          :model-value="_filters[filter.key]"
+          :key="`${filter.key}-${Boolean(currentFilters[filter.key]) && Array.isArray(filter.options) && filter.options.length > 0}`"
+          :model-value="currentFilters[filter.key]"
           :placeholder="filter.placeholder || filter.label"
           :aria-label="`Filter by ${filter.label}`"
           :items="Array.isArray(filter.options) ? filter.options : []"
@@ -27,8 +27,8 @@
           <template #trailing>
             <UIcon
               v-if="
-                _filters[filter.key] === null ||
-                _filters[filter.key] === undefined
+                currentFilters[filter.key] === null ||
+                currentFilters[filter.key] === undefined
               "
               class="group-data-[state=open]:rotate-180 transition-transform duration-200"
               name="i-lucide-chevron-down"
@@ -46,7 +46,7 @@
         </USelectMenu>
         <UInput
           v-else-if="filter.type === 'text'"
-          :model-value="_filters[filter.key] as string"
+          :model-value="currentFilters[filter.key] as string"
           :placeholder="filter.placeholder || filter.label"
           :aria-label="`Filter by ${filter.label}`"
           :icon="filter.icon"
@@ -57,8 +57,8 @@
           v-else-if="filter.type === 'checkbox'"
           :model-value="
             (filter.value
-              ? _filters[filter.key] === filter.value
-              : _filters[filter.key]) as boolean
+              ? currentFilters[filter.key] === filter.value
+              : currentFilters[filter.key]) as boolean
           "
           :label="filter.label"
           :icon="filter.icon"
@@ -80,10 +80,10 @@
             :model-value="
               filter.multiple
                 ? [
-                    _filters[`${filter.key}__gte`] || filter.min || 0,
-                    _filters[`${filter.key}__lte`] || filter.max || 100,
+                    currentFilters[`${filter.key}__gte`] || filter.min || 0,
+                    currentFilters[`${filter.key}__lte`] || filter.max || 100,
                   ]
-                : _filters[filter.key]
+                : currentFilters[filter.key]
             "
             :min="filter.min || 0"
             :max="filter.max || 100"
@@ -130,25 +130,21 @@ const emit = defineEmits<{
 }>();
 const router = useRouter();
 const route = useRoute();
-const _filters = ref(props.state.filters);
+const currentFilters = ref(props.state.filters);
 const updating = [];
 let delayTimeout: NodeJS.Timeout | null = null;
 
 function getSelectConfig(filter: FilterConfig) {
-  return _filters.value[filter.key] && filter.options
+  return currentFilters.value[filter.key] && filter.options
     ? filter.options.find(
         (option: FilterOption) =>
           (filter.valueKey ? option[filter.valueKey] : option.value) ===
-          _filters.value[filter.key],
+          currentFilters.value[filter.key],
       )
     : filter;
 }
 
-function updateFilter(
-  key: string,
-  value: unknown,
-  delay: number | undefined = undefined,
-) {
+function updateFilter(key: string, value: unknown, delay?: number) {
   if (props.config.defaultFilters && key in props.config.defaultFilters) return;
   updating.push(key);
   if (
@@ -157,11 +153,11 @@ function updateFilter(
     value !== "" &&
     value !== false
   ) {
-    _filters.value[key] = value;
+    currentFilters.value[key] = value;
     if (!props.disableUrlSync)
-      router.replace({ query: { ...route.query, ...{ [key]: value } } });
+      router.replace({ query: { ...route.query, [key]: value } });
   } else {
-    delete _filters.value[key];
+    delete currentFilters.value[key];
     if (!props.disableUrlSync)
       router.replace({
         query: Object.assign(
@@ -179,10 +175,10 @@ function updateFilter(
     }
     delayTimeout = setTimeout(() => {
       if (updating.includes(key)) return;
-      emit("filters", _filters.value);
+      emit("filters", currentFilters.value);
     }, delay);
   } else {
-    emit("filters", _filters.value);
+    emit("filters", currentFilters.value);
   }
 }
 </script>

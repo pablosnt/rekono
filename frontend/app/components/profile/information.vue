@@ -113,7 +113,7 @@ const config = ref({
     username: validation.name("username", true, 100),
     first_name: validation.name("first_name", false, 100).or(z.literal("")),
     last_name: validation.name("last_name", false, 100).or(z.literal("")),
-    email: validation.email(),
+    email: validation.email,
     notification_scope: z.enum(notificationScopes),
     email_notifications: z.boolean(),
     telegram_notifications: z.boolean(),

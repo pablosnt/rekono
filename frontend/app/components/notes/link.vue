@@ -89,8 +89,7 @@ const url = ref("");
 const active = computed(() => props.editor.isActive("link"));
 const disabled = computed(() => {
   if (!props.editor.isEditable) return true;
-  const { selection } = props.editor.state;
-  return selection.empty && !props.editor.isActive("link");
+  return props.editor.state.selection.empty && !props.editor.isActive("link");
 });
 
 watch(
@@ -118,15 +117,13 @@ watch(active, (isActive) => {
 
 function setLink() {
   if (!url.value) return;
-  const { selection } = props.editor.state;
-  const isEmpty = selection.empty;
   const hasCode = props.editor.isActive("code");
   let chain = props.editor.chain().focus();
-  if (hasCode && !isEmpty) {
+  if (hasCode && !props.editor.state.selection.empty) {
     chain = chain.extendMarkRange("code").setLink({ href: url.value });
   } else {
     chain = chain.extendMarkRange("link").setLink({ href: url.value });
-    if (isEmpty) {
+    if (props.editor.state.selection.empty) {
       chain = chain.insertContent({ type: "text", text: url.value });
     }
   }

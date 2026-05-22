@@ -168,7 +168,7 @@ const config: CrudConfig<User> = reactive({
     },
   ],
   createFormSchema: z.object({
-    email: validation.email(),
+    email: validation.email,
     role: z.enum(roles),
   }),
   editFormFields: [

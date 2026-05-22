@@ -35,7 +35,7 @@ const emit = defineEmits<{
   update: [liked: boolean, count: number];
 }>();
 
-async function toggleLike() {
+function toggleLike() {
   const api = useApi(`${props.endpoint}${props.itemId}/like/`);
   const method = props.liked ? api.remove : api.create;
   method("", {}).then(() => {

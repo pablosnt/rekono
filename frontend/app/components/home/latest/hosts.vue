@@ -43,8 +43,8 @@ const columns = [
     cell: ({ row }: { row: { original: Host } }) => {
       const osConfig = hostOS.find((o) => o.value === row.original.os_type);
       return table.iconAndValueCell(
-        row.original.os,
         osConfig?.icon,
+        row.original.os,
         osConfig?.color,
       );
     },

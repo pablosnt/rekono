@@ -322,8 +322,8 @@ const config: CrudConfig<Task> = reactive({
               label: "Generate a report",
               icon: "i-lucide-file-text",
               color: "neutral",
-              onSelect: (task: Task) => {
-                selectedTask.value = task;
+              onSelect: (t: Task) => {
+                selectedTask.value = t;
                 showReportModal.value = true;
               },
             },

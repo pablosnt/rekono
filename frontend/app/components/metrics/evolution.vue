@@ -58,9 +58,9 @@ const y = findingTypes.map(
 );
 const ftColor = (ft) => {
   const cls = ft.iconClass.split(" ")[0].replace("text-", "");
-  return /\d/.test(cls) ? `var(--color-${cls})` : `var(--color-${cls}-500)`;
+  return /\d/u.test(cls) ? `var(--color-${cls})` : `var(--color-${cls}-500)`;
 };
-const colors = findingTypes.map(ftColor);
+const colors = findingTypes.map((ft) => ftColor(ft));
 const inactive = ref<boolean[]>(findingTypes.map(() => false));
 const legendItems = computed(() =>
   findingTypes.map((ft, i) => ({
@@ -104,16 +104,18 @@ function processStats() {
     const key = ft.plural.toLowerCase();
     if (!byMonth[currentMonth][key]) {
       const series = stats.value[key] ?? [];
-      if (series.length) {
+      if (series.length > 0) {
         byMonth[currentMonth][key] = {
-          active: series[series.length - 1].active,
+          active: series.at(-1).active,
           discovered: 0,
           fixed: 0,
         };
       }
     }
   });
-  return Object.values(byMonth).sort((a, b) => a.month.localeCompare(b.month));
+  return Object.values(byMonth).toSorted((a, b) =>
+    a.month.localeCompare(b.month),
+  );
 }
 
 function tooltip(d) {

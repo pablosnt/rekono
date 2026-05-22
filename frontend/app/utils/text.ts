@@ -55,7 +55,7 @@ const ACRONYMS = new Set([
 ]);
 
 export function smartLowerCase(text: string): string {
-  return text.replace(/\b\w+\b/g, (match) =>
+  return text.replaceAll(/\b\w+\b/gu, (match) =>
     ACRONYMS.has(match.toUpperCase())
       ? match.toUpperCase()
       : match.toLowerCase(),

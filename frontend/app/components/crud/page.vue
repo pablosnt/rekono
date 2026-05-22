@@ -212,8 +212,9 @@ const urlFilterKeys = computed(() => {
   }
   return keys;
 });
-const initialFiltersFromUrl = !props.disableUrlSync
-  ? Object.fromEntries(
+const initialFiltersFromUrl = props.disableUrlSync
+  ? {}
+  : Object.fromEntries(
       Object.entries(route.query)
         .filter(
           ([key, value]) =>
@@ -230,8 +231,7 @@ const initialFiltersFromUrl = !props.disableUrlSync
             value === "true" ? true : value !== "" && !isNaN(num) ? num : value,
           ];
         }),
-    )
-  : {};
+    );
 
 const state = reactive<CrudState>({
   items: [],

@@ -133,10 +133,9 @@ function getStageTree(stage: string): Array {
       tree.push({
         label: tool.name,
         avatar: tool.icon,
-        defaultExpanded:
-          configurationsPerStage.filter((configuration) =>
-            configurations.value.includes(configuration.id),
-          ).length > 0,
+        defaultExpanded: configurationsPerStage.some((configuration) =>
+          configurations.value.includes(configuration.id),
+        ),
         children: configurationsPerStage.map((configuration) => {
           return {
             label: configuration.name,

@@ -228,21 +228,21 @@ const isFileUpload = ref(false);
 const formFields = computed(() => {
   if (props.entity && props.config.editFormFields) {
     return props.config.editFormFields;
-  } else if (!props.entity && props.config.createFormFields) {
-    return props.config.createFormFields;
-  } else {
-    return props.config.formFields || [];
   }
+  if (!props.entity && props.config.createFormFields) {
+    return props.config.createFormFields;
+  }
+  return props.config.formFields || [];
 });
 
 const formSchema = computed(() => {
   if (props.entity && props.config.editFormSchema) {
     return props.config.editFormSchema;
-  } else if (!props.entity && props.config.createFormSchema) {
-    return props.config.createFormSchema;
-  } else {
-    return props.config.formSchema;
   }
+  if (!props.entity && props.config.createFormSchema) {
+    return props.config.createFormSchema;
+  }
+  return props.config.formSchema;
 });
 
 const formData = ref<Record<string, unknown>>({});
@@ -287,25 +287,10 @@ function validate(data) {
 }
 
 function body() {
-  if (!isFileUpload.value) {
-    const data = { ...formData.value, ...(props.config.defaultBody || {}) };
-    for (const field of formFields.value) {
-      if (field.type === "date" && data[field.key]) {
-        data[field.key] = data[field.key].toString();
-      } else if (
-        field.type === "password" &&
-        typeof data[field.key] === "string"
-      ) {
-        if (field.key === "confirmpassword" || /^\*+$/.test(data[field.key])) {
-          delete data[field.key];
-        }
-      }
-    }
-    return data;
-  } else {
-    const body = new FormData();
+  if (isFileUpload.value) {
+    const formBody = new FormData();
     for (const field of Object.keys(props.config.defaultBody || {})) {
-      body.append(field, props.config.defaultBody[field]);
+      formBody.append(field, props.config.defaultBody[field]);
     }
     for (const field of formFields.value) {
       if (field.key === "confirmpassword") continue;
@@ -314,18 +299,31 @@ function body() {
           field.type === "password" &&
           typeof formData.value[field.key] === "string"
         ) {
-          if (/^\*+$/.test(formData.value[field.key])) {
+          if (/^\*+$/u.test(formData.value[field.key])) {
             continue;
           }
         } else if (field.type === "date" && data[field.key]) {
-          body.append(field.key, formData.value[field.key].toString());
+          formBody.append(field.key, formData.value[field.key].toString());
         } else {
-          body.append(field.key, formData.value[field.key]);
+          formBody.append(field.key, formData.value[field.key]);
         }
       }
     }
-    return body;
+    return formBody;
   }
+  const data = { ...formData.value, ...props.config.defaultBody };
+  for (const field of formFields.value) {
+    if (field.type === "date" && data[field.key]) {
+      data[field.key] = data[field.key].toString();
+    } else if (
+      field.type === "password" &&
+      typeof data[field.key] === "string" &&
+      (field.key === "confirmpassword" || /^\*+$/u.test(data[field.key]))
+    ) {
+      delete data[field.key];
+    }
+  }
+  return data;
 }
 
 function save() {

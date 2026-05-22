@@ -1,6 +1,14 @@
 import * as z from "zod";
 import type { Project } from "~/types/models";
 
+const deleteMessage = (project: Project) =>
+  buildDeleteMessage(
+    "project",
+    project.name,
+    "Permanent deletion",
+    "All associated data including assets, findings, and scans will be permanently deleted. This action cannot be undone.",
+  );
+
 export function useProjectsConfig() {
   const validation = useValidation();
 
@@ -34,14 +42,6 @@ export function useProjectsConfig() {
     description: validation.text("description"),
     tags: z.array(validation.name("tag", true, 100)).optional(),
   });
-
-  const deleteMessage = (project: Project) =>
-    buildDeleteMessage(
-      "project",
-      project.name,
-      "Permanent deletion",
-      "All associated data including assets, findings, and scans will be permanently deleted. This action cannot be undone.",
-    );
 
   return { formFields, formSchema, deleteMessage };
 }

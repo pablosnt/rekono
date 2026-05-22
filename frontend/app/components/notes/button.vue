@@ -49,9 +49,9 @@ function createNote() {
       tags: [],
       public: false,
     })
-    .then((response) =>
-      navigateTo(`/projects/${response.project}/notes/${response.id}`),
-    );
+    .then((response) => {
+      return navigateTo(`/projects/${response.project}/notes/${response.id}`);
+    });
 }
 
 defineExpose({ createNote });

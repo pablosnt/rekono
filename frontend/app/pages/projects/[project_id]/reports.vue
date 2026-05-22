@@ -65,7 +65,7 @@ const config: CrudConfig<Report> = reactive({
             row.original.target.target,
           );
         }
-        return table.iconAndValueCell("Full project", "i-lucide-folder");
+        return table.iconAndValueCell("i-lucide-folder", "Full project");
       },
     },
     {

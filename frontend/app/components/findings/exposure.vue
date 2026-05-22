@@ -62,10 +62,10 @@ const tooltipTriggers = {
 };
 
 const xDomain = computed<[number, number] | undefined>(() => {
-  if (timeline.value.length < 2) return undefined;
+  if (timeline.value.length < 2) return;
   return [
     timeline.value[0]?.timestamp - dailyMs,
-    timeline.value[timeline.value.length - 1]?.timestamp + dailyMs * 2,
+    timeline.value.at(-1)?.timestamp + dailyMs * 2,
   ];
 });
 </script>

@@ -59,9 +59,6 @@ const validation = useValidation();
 const route = useRoute();
 const loading = ref(false);
 const otp = ref(route.query.otp ? route.query.otp : null);
-if (!import.meta.server && !otp.value) {
-  navigateTo("/login");
-}
 const schema = z
   .object({
     username: validation.name("username", true, 100),
@@ -93,4 +90,10 @@ function submit(event: object) {
       loading.value = false;
     });
 }
+
+onMounted(() => {
+  if (!otp.value) {
+    return navigateTo("/login");
+  }
+});
 </script>

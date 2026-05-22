@@ -125,12 +125,13 @@ const config: CrudConfig<Project> = reactive({
   formSchema,
   createForm: resolveComponent("ProjectsForm"),
   updateOnCreateModalOpen: true,
-  onCreation: (data: Record<string, unknown>) =>
-    navigateTo(
-      data.targets.length == 0
+  onCreation: (data: Record<string, unknown>) => {
+    return navigateTo(
+      data.targets.length === 0
         ? `/projects/${data.id}`
         : `/projects/${data.id}/targets`,
-    ),
+    );
+  },
   deleteMessage: deleteMessage,
   canRead: true,
   canCreate: userStore.is_admin,

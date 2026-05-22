@@ -202,7 +202,7 @@ const currentIntegrationSettings = computed(() => {
     ? integrationsSettings.value[selectedIntegration.value.id]
     : null;
 });
-let enableIfAvailable = undefined;
+let enableIfAvailable;
 
 onMounted(() => {
   fetch();
@@ -210,17 +210,17 @@ onMounted(() => {
 
 function fetch() {
   for (const [key, value] of Object.entries(integrationsSettings.value)) {
-    const api = !value.api
-      ? useApi(
+    const integrationApi = value.api
+      ? value.api
+      : useApi(
           `/api/${value.config.entityName.toLowerCase().replace(" ", "")}/`,
-        )
-      : value.api;
-    integrationsSettings.value[key]["api"] = api;
+        );
+    integrationsSettings.value[key]["api"] = integrationApi;
     integrationsSettings.value[key]["config"]["modalAvatar"] = () => ({
       src: selectedIntegration.value.icon,
       alt: selectedIntegration.value.name,
     });
-    api.get("1/").then((response) => {
+    integrationApi.get("1/").then((response) => {
       integrationsSettings.value[key]["item"] = response;
     });
   }

@@ -245,20 +245,18 @@ const config: CrudConfig<Finding> = reactive({
         cell: ({ row }) => {
           const dates = getExposureWindow(row.original);
           if (dates.length === 0) return table.noDataCell;
-          else if (dates.length === 1)
-            return table.valueCell(dates[0].date.toDateString());
-          else {
-            return h(resolveComponent("UButton"), {
-              label: `${dates[0].date.toDateString()} - ${dates[dates.length - 1].date.toDateString()}`,
-              color: "neutral",
-              variant: "ghost",
-              onClick: () => {
-                selectedItem.value = row.original;
-                selectedItemExposureWindow.value = dates;
-                exposureModalOpen.value = true;
-              },
-            });
-          }
+          return dates.length === 1
+            ? table.valueCell(dates[0].date.toDateString())
+            : h(resolveComponent("UButton"), {
+                label: `${dates[0].date.toDateString()} - ${dates.at(-1).date.toDateString()}`,
+                color: "neutral",
+                variant: "ghost",
+                onClick: () => {
+                  selectedItem.value = row.original;
+                  selectedItemExposureWindow.value = dates;
+                  exposureModalOpen.value = true;
+                },
+              });
         },
       },
       ...(integrations.hacktricks?.enabled
@@ -359,16 +357,16 @@ const config: CrudConfig<Finding> = reactive({
           fixVerb.value,
           unfixVerb.value,
           props.isTriageable,
-          (item) => {
-            selectedItem.value = item;
+          (f) => {
+            selectedItem.value = f;
             fixModalOpen.value = true;
           },
-          (item) => {
-            selectedItem.value = item;
+          (f) => {
+            selectedItem.value = f;
             fixModalOpen.value = true;
           },
-          (item) => {
-            selectedItem.value = item;
+          (f) => {
+            selectedItem.value = f;
             triageModalOpen.value = true;
           },
         )

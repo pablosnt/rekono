@@ -54,10 +54,10 @@ const form = ref();
 const newToken = ref();
 
 function submit() {
-  if (!newToken.value) {
-    form.value.submit();
-  } else {
+  if (newToken.value) {
     emit("submit", newToken.value);
+  } else {
+    form.value.submit();
   }
 }
 

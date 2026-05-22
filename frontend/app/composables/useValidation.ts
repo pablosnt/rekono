@@ -1,55 +1,52 @@
 import * as z from "zod";
 
+function applyRegex(
+  field: string,
+  required: boolean,
+  max: number | undefined,
+  pattern: RegExp,
+) {
+  const fieldName = field.replaceAll("_", " ");
+  let policy = required
+    ? z.string(`${firstUpper(fieldName)} is required`).min(1)
+    : z.string();
+  if (max) {
+    policy = policy.max(max);
+  }
+  policy = policy.refine((value) => pattern.test(value), {
+    message: `Invalid ${fieldName.toLowerCase()}`,
+  });
+  return required ? policy : policy.optional();
+}
+
 export default function () {
   const passwordPolicy = z
     .string("Password is required")
     .min(12, "Must be at least 12 characters")
-    .refine((password) => /[a-z]/.test(password), {
+    .refine((password) => /[a-z]/u.test(password), {
       message: "Must be at least one lowercase letter",
     })
-    .refine((password) => /[A-Z]/.test(password), {
+    .refine((password) => /[A-Z]/u.test(password), {
       message: "Must be at least one uppercase letter",
     })
-    .refine((password) => /[0-9]/.test(password), {
+    .refine((password) => /[0-9]/u.test(password), {
       message: "Must be at least one digit",
     })
-    .refine((password) => /\W/.test(password), {
+    .refine((password) => /\W/u.test(password), {
       message: "Must be at least one symbol",
     });
-
-  function regex(
-    field: string,
-    required: boolean,
-    max: number | undefined,
-    regex: RegExp,
-  ) {
-    const fieldName = field.replaceAll("_", " ");
-    let policy = required
-      ? z.string(`${firstUpper(fieldName)} is required`).min(1)
-      : z.string();
-    if (max) {
-      policy = policy.max(max);
-    }
-    policy = policy.refine((value) => regex.test(value), {
-      message: `Invalid ${fieldName.toLowerCase()}`,
-    });
-    return required ? policy : policy.optional();
-  }
+  const email = z.email("Valid email is required");
 
   function name(
     field: string = "name",
     required: boolean = true,
     max: number = 120,
   ) {
-    return regex(field, required, max, /^[\wÀ-ÿ\s.:\-[\]()@]*$/);
+    return applyRegex(field, required, max, /^[\wÀ-ÿ\s.:\-[\]()@]*$/u);
   }
 
-  function text(
-    field: string,
-    required: boolean = true,
-    max: number | undefined = undefined,
-  ) {
-    return regex(field, required, max, /^[^;<>]*$/);
+  function text(field: string, required: boolean = true, max?: number) {
+    return applyRegex(field, required, max, /^[^;<>]*$/u);
   }
 
   function cve(
@@ -57,7 +54,7 @@ export default function () {
     required: boolean = true,
     max: number = 20,
   ) {
-    return regex(field, required, max, /^CVE-\d{4}-\d{1,7}$/);
+    return applyRegex(field, required, max, /^CVE-\d{4}-\d{1,7}$/u);
   }
 
   function target(
@@ -65,7 +62,7 @@ export default function () {
     required: boolean = true,
     max: number = 100,
   ) {
-    return regex(field, required, max, /^[\w\d.:\-/]{1,100}$/);
+    return applyRegex(field, required, max, /^[\w\d.:\-/]{1,100}$/u);
   }
 
   function target_regex(
@@ -73,7 +70,7 @@ export default function () {
     required: boolean = true,
     max: number = 100,
   ) {
-    return regex(field, required, max, /^[\w\d.,:\-/*?+()\\]{1,300}$/);
+    return applyRegex(field, required, max, /^[\w\d.,:\-/*?+()\\]{1,300}$/u);
   }
 
   function secret(
@@ -81,11 +78,11 @@ export default function () {
     required: boolean = true,
     max: number = 500,
   ) {
-    return regex(
+    return applyRegex(
       field,
       required,
       max,
-      /^[\w\s./\-=+,:<>¿?¡!#&$()@%[\]{}*]{1,500}$/,
+      /^[\w\s./\-=+,:<>¿?¡!#&$()@%[\]{}*]{1,500}$/u,
     );
   }
 
@@ -94,11 +91,7 @@ export default function () {
     required: boolean = true,
     max: number = 500,
   ) {
-    return regex(field, required, max, /^[\w.\-_/\\]{0,500}/);
-  }
-
-  function email() {
-    return z.email("Valid email is required");
+    return applyRegex(field, required, max, /^[\w.\-_/\\]{0,500}/u);
   }
 
   return {

@@ -87,14 +87,15 @@ const baseItems = [
 const items = computed(() =>
   baseItems
     .filter((item) => item.value !== "telegram-bot" || isTelegramAvailable)
-    .map((item) => ({
-      ...item,
-      active: active.value === item.value,
-      onSelect: () => {
-        active.value = item.value;
-        if (breakpoints.smaller("sm").value) open.value = false;
-      },
-    })),
+    .map((item) =>
+      Object.assign({}, item, {
+        active: active.value === item.value,
+        onSelect: () => {
+          active.value = item.value;
+          if (breakpoints.smaller("sm").value) open.value = false;
+        },
+      }),
+    ),
 );
 
 function logout() {

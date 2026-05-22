@@ -150,15 +150,16 @@ const projectsConfig = reactive({
   createForm: resolveComponent("ProjectsForm"),
   formFields,
   formSchema,
-  onCreation: (data: Record<string, unknown>) =>
-    navigateTo(
+  onCreation: (data: Record<string, unknown>) => {
+    return navigateTo(
       (data.targets as number[]).length === 0
         ? `/projects/${data.id}`
         : `/projects/${data.id}/targets`,
-    ),
+    );
+  },
 });
 
-async function fetch() {
+function fetch() {
   loading.value = true;
   api
     .get("tasks/latest/")

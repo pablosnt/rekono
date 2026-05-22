@@ -421,12 +421,12 @@ function imageBubbleItems(editor: Editor) {
           const { state } = editor;
           const { selection } = state;
           const pos = selection.from;
-          const node = state.doc.nodeAt(pos);
-          if (node && node.type.name === "image") {
+          const imageNode = state.doc.nodeAt(pos);
+          if (imageNode && imageNode.type.name === "image") {
             editor
               .chain()
               .focus()
-              .deleteRange({ from: pos, to: pos + node.nodeSize })
+              .deleteRange({ from: pos, to: pos + imageNode.nodeSize })
               .insertContentAt(pos, { type: "imageUpload" })
               .run();
           }
@@ -442,13 +442,13 @@ function imageBubbleItems(editor: Editor) {
           const { selection } = state;
 
           const pos = selection.from;
-          const node = state.doc.nodeAt(pos);
+          const imageNode = state.doc.nodeAt(pos);
 
-          if (node && node.type.name === "image") {
+          if (imageNode && imageNode.type.name === "image") {
             editor
               .chain()
               .focus()
-              .deleteRange({ from: pos, to: pos + node.nodeSize })
+              .deleteRange({ from: pos, to: pos + imageNode.nodeSize })
               .run();
           }
         },
@@ -493,7 +493,7 @@ function dragHandleItems(editor: Editor) {
         ]
       : [],
     [
-      ...(!modificable ? [label] : []),
+      ...(modificable ? [] : [label]),
       {
         kind: "duplicate",
         pos: selectedNode.value?.pos,

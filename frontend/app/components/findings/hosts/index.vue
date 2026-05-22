@@ -93,8 +93,8 @@ const columns = computed(() => [
     cell: ({ row }) => {
       const osConfig = hostOS.find((o) => o.value === row.original.os_type);
       return table.iconAndValueCell(
-        row.original.os,
         osConfig?.icon,
+        row.original.os,
         osConfig?.color,
       );
     },
@@ -117,8 +117,8 @@ const columns = computed(() => [
               },
             })
           : table.iconAndValueCell(
-              row.original.country,
               `cif:${row.original.country.toLowerCase()}`,
+              row.original.country,
             )
         : table.noDataCell,
   },
@@ -182,12 +182,12 @@ const columns = computed(() => [
           cell: ({ row }) => {
             const rep = row.original.reputation || 0;
             return table.iconAndValueCell(
-              formatCount(rep),
               rep > 0
                 ? "i-lucide-badge-check"
                 : rep < 0
                   ? "i-lucide-badge-alert"
                   : "i-lucide-badge-question-mark",
+              formatCount(rep),
               rep > 0 ? "success" : rep < 0 ? "error" : "neutral",
             );
           },

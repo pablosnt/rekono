@@ -37,7 +37,7 @@ let schema = z.object({});
 const method = ref("email");
 handleMethodSwitch();
 
-async function handleMethodSwitch() {
+function handleMethodSwitch() {
   method.value = method.value === "app" ? "email" : "app";
   if (method.value === "email") {
     api.create("email/");

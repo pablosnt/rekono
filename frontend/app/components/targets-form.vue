@@ -55,7 +55,6 @@
 
 <script setup lang="ts">
 import * as z from "zod";
-import type { Target } from "~/types/models";
 
 const props = defineProps<{
   api: typeof useApi;
@@ -92,7 +91,7 @@ function addTargetsFromInput() {
   if (!targetInput.value.trim()) return;
   emit("new-submit-label", "Create");
   for (const target of targetInput.value
-    .split(/[,\s\n]+/)
+    .split(/[,\s\n]+/u)
     .map((t) => t.trim())
     .filter((t) => t.length > 0)) {
     if (targets.value.includes(target)) continue;
@@ -123,55 +122,49 @@ function submit() {
     if (targets.value.length > 0) {
       loading.value = true;
       emit("new-loading", loading.value);
-      const createdTargets: Target[] = [];
       created.value = 0;
-      let errors = 0;
-      for (const target of targets.value) {
-        props.api
-          .create("", { project: project.value.id, target: target })
-          .then((response) => {
-            createdTargets.push(response);
-          })
-          .catch(() => {
-            errors++;
-          })
-          .finally(() => {
-            created.value++;
-            if (created.value === targets.value.length) {
-              if (errors > 0) {
-                if (created.value > errors) {
-                  toast.add({
-                    title: "Targets creation",
-                    description: `${created.value - errors} targets were created successfully and ${errors} failed`,
-                    color: "warning",
-                  });
-                } else {
-                  toast.add({
-                    title: "Targets creation failed",
-                    description: `${errors} targets weren't created`,
-                    color: "error",
-                  });
-                }
-              } else {
-                toast.add({
-                  title: "Targets created successfully",
-                  description: `${targets.value.length} targets were created successfully`,
-                  color: "success",
-                });
-              }
-              loading.value = false;
-              emit("new-loading", loading.value);
-              genericApi
-                .get(`projects/${project.value.id}/`)
-                .then((response) => {
-                  emit("submit", {
-                    project: response,
-                    targets: createdTargets,
-                  });
-                });
-            }
+      const total = targets.value.length;
+      Promise.allSettled(
+        targets.value.map((target) =>
+          props.api
+            .create("", { project: project.value.id, target: target })
+            .finally(() => created.value++),
+        ),
+      ).then((results) => {
+        const createdTargets = results
+          .filter((r) => r.status === "fulfilled")
+          .map((r) => r.value);
+        const errors = results.filter((r) => r.status === "rejected").length;
+        if (errors > 0) {
+          if (total > errors) {
+            toast.add({
+              title: "Targets creation",
+              description: `${total - errors} targets were created successfully and ${errors} failed`,
+              color: "warning",
+            });
+          } else {
+            toast.add({
+              title: "Targets creation failed",
+              description: `${errors} targets weren't created`,
+              color: "error",
+            });
+          }
+        } else {
+          toast.add({
+            title: "Targets created successfully",
+            description: `${total} targets were created successfully`,
+            color: "success",
           });
-      }
+        }
+        loading.value = false;
+        emit("new-loading", loading.value);
+        genericApi.get(`projects/${project.value.id}/`).then((response) => {
+          emit("submit", {
+            project: response,
+            targets: createdTargets,
+          });
+        });
+      });
     } else {
       emit("submit", { project: project.value, targets: [] });
     }

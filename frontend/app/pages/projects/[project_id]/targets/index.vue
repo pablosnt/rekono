@@ -180,8 +180,8 @@ const config: CrudConfig<Target> = reactive({
                   label: "Generate a report",
                   icon: "i-lucide-file-text",
                   color: "neutral",
-                  onSelect: (target: Target) => {
-                    selectedTarget.value = target;
+                  onSelect: (t: Target) => {
+                    selectedTarget.value = t;
                     showReportModal.value = true;
                   },
                 },

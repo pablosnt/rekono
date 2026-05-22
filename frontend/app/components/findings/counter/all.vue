@@ -26,11 +26,7 @@ const api = useApi("/api/");
 const total = ref(0);
 const loading = ref(false);
 const counters = ref(
-  findingTypes.map((ft) => ({
-    ...ft,
-    count: 0,
-    loading: false,
-  })),
+  findingTypes.map((ft) => Object.assign({ count: 0, loading: false }, ft)),
 );
 
 function getFilters(isTriageable: boolean) {

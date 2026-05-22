@@ -117,7 +117,7 @@ onMounted(() => {
 
 function canEdit(alert: Alert): boolean {
   const field = alertItems.find(
-    (definition) => definition.item == alert.item,
+    (definition) => definition.item === alert.item,
   )?.field;
   return (
     field &&

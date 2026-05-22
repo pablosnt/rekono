@@ -56,9 +56,9 @@ const effectiveRadius = computed(() => {
   );
 });
 const effectiveHeight = computed(() =>
-  props.height !== undefined
-    ? Math.min(props.height, effectiveRadius.value + props.arcWidth * 2)
-    : undefined,
+  props.height === undefined
+    ? undefined
+    : Math.min(props.height, effectiveRadius.value + props.arcWidth * 2),
 );
 const hasValues = computed(() => props.data.some((d) => d.value > 0));
 const tooltipTriggers = computed(() => ({

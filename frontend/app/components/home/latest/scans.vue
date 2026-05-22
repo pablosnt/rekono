@@ -53,10 +53,11 @@ const columns = [
               : `/${row.original.target_port.path}`;
         }
       }
-      const icon =
+      return table.iconAndValueCell(
         targetTypes.find((t) => t.value === row.original.target?.type)?.icon ||
-        "i-lucide-locate-fixed";
-      return table.iconAndValueCell(label, icon);
+          "i-lucide-locate-fixed",
+        label,
+      );
     },
   },
   {

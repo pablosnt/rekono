@@ -112,7 +112,7 @@ const config: CrudConfig = reactive({
       .string("Value is required")
       .min(1)
       .max(500)
-      .refine((value) => /^[^;<>]*$/.test(value), {
+      .refine((value) => /^[^;<>]*$/u.test(value), {
         message: "Invalid value",
       }),
   }),

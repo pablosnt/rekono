@@ -30,7 +30,7 @@ const toast = useToast();
 const MAX_MB_SIZE = ref(2);
 const MAX_SIZE = MAX_MB_SIZE.value * 1024 * 1024;
 
-watch(file, async (newFile) => {
+watch(file, (newFile) => {
   if (!newFile) return;
   if (newFile.size > MAX_SIZE) {
     toast.add({
@@ -43,13 +43,15 @@ watch(file, async (newFile) => {
   }
   loading.value = true;
   const reader = new FileReader();
-  reader.onload = async (e) => {
+  reader.addEventListener("load", async (e) => {
     const dataUrl = e.target?.result as string;
     if (!dataUrl) {
       loading.value = false;
       return;
     }
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    await new Promise((resolve) => {
+      setTimeout(resolve, 1000);
+    });
     const pos = props.getPos();
     if (typeof pos !== "number") {
       loading.value = false;
@@ -63,7 +65,7 @@ watch(file, async (newFile) => {
       .run();
 
     loading.value = false;
-  };
+  });
   reader.readAsDataURL(newFile);
 });
 </script>

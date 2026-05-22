@@ -67,8 +67,9 @@ const breakpoints = useBreakpoints(breakpointsTailwind);
 const config = reactive({
   entityName: "Scan",
   editForm: resolveComponent("TasksForm"),
-  onCreation: (data: Record<string, unknown>) =>
-    navigateTo(`/projects/${data.target.project}/scans/${data.id}`),
+  onCreation: (data: Record<string, unknown>) => {
+    return navigateTo(`/projects/${data.target.project}/scans/${data.id}`);
+  },
   modalAvatar: () =>
     props.tool && props.tool.icon ? { src: props.tool.icon } : undefined,
   modalIcon: () =>

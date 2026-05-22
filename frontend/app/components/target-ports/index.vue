@@ -72,7 +72,7 @@ const config: CrudConfig<TargetPort> = reactive({
       icon: "i-lucide-ethernet-port",
       cell: ({ row }) => {
         const port = row.getValue("port") as number;
-        return table.iconAndValueCell(port.toString(), getPortIcon(port));
+        return table.iconAndValueCell(getPortIcon(port), port.toString());
       },
     },
     {

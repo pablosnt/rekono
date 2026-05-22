@@ -18,7 +18,7 @@ export default function () {
 
   function users(
     optionsRef: Ref<FilterOption[]>,
-    queryParams?: Record<string, string> = {},
+    queryParams: Record<string, string> = {},
   ) {
     api
       .list("users/", queryParams, true)
@@ -52,7 +52,7 @@ export default function () {
 
   function tools(
     optionsRef: Ref<FilterOption[]>,
-    queryParams?: Record<string, string> = {},
+    queryParams: Record<string, string> = {},
   ) {
     api.list("tools/", queryParams, true).then((response) => {
       optionsRef.value = (response.items as Tool[]).map((tool) => ({
@@ -66,7 +66,7 @@ export default function () {
 
   function configurations(
     optionsRef: Ref<FilterOption[]>,
-    queryParams?: Record<string, string> = {},
+    queryParams: Record<string, string> = {},
   ) {
     api.list("configurations/", queryParams, true).then((response) => {
       optionsRef.value = (response.items as Configuration[]).map(
@@ -81,7 +81,7 @@ export default function () {
 
   function processes(
     optionsRef: Ref<FilterOption[]>,
-    queryParams?: Record<string, string> = {},
+    queryParams: Record<string, string> = {},
   ) {
     api.list("processes/", queryParams, true).then((response) => {
       optionsRef.value = (response.items as Process[]).map((process) => ({
@@ -93,7 +93,7 @@ export default function () {
 
   function targets(
     optionsRef: Ref<FilterOption[]>,
-    queryParams?: Record<string, string> = {},
+    queryParams: Record<string, string> = {},
   ) {
     api.list("targets/", queryParams, true).then((response) => {
       optionsRef.value = (response.items as Target[]).map((target) => ({
@@ -106,7 +106,7 @@ export default function () {
 
   function tasks(
     optionsRef: Ref<FilterOption[]>,
-    queryParams?: Record<string, string> = {},
+    queryParams: Record<string, string> = {},
   ) {
     api.list("tasks/", queryParams, true).then((response) => {
       optionsRef.value = (response.items as Task[]).map((task) => ({
@@ -120,7 +120,7 @@ export default function () {
     findingType: string,
     parser: (item: Finding) => FilterOption,
     optionsRef: Ref<FilterOption[]>,
-    queryParams?: Record<string, string> = {},
+    queryParams: Record<string, string> = {},
   ) {
     api.list(`${findingType}/`, queryParams, true).then((response) => {
       optionsRef.value = (response.items as Finding[]).map((finding) =>
@@ -131,12 +131,12 @@ export default function () {
 
   function osint(
     optionsRef: Ref<FilterOption[]>,
-    queryParams?: Record<string, string> = {},
+    queryParams: Record<string, string> = {},
   ) {
     findings(
       "osint",
-      (osint) => {
-        return { label: osint.data, value: osint.id };
+      (item) => {
+        return { label: item.data, value: item.id };
       },
       optionsRef,
       queryParams,
@@ -145,7 +145,7 @@ export default function () {
 
   function hosts(
     optionsRef: Ref<FilterOption[]>,
-    queryParams?: Record<string, string> = {},
+    queryParams: Record<string, string> = {},
   ) {
     findings(
       "hosts",
@@ -159,7 +159,7 @@ export default function () {
 
   function ports(
     optionsRef: Ref<FilterOption[]>,
-    queryParams?: Record<string, string> = {},
+    queryParams: Record<string, string> = {},
   ) {
     findings(
       "ports",
@@ -179,7 +179,7 @@ export default function () {
 
   function technologies(
     optionsRef: Ref<FilterOption[]>,
-    queryParams?: Record<string, string> = {},
+    queryParams: Record<string, string> = {},
   ) {
     findings(
       "technologies",
@@ -198,7 +198,7 @@ export default function () {
 
   function credentials(
     optionsRef: Ref<FilterOption[]>,
-    queryParams?: Record<string, string> = {},
+    queryParams: Record<string, string> = {},
   ) {
     findings(
       "credentials",
@@ -218,7 +218,7 @@ export default function () {
 
   function vulnerabilities(
     optionsRef: Ref<FilterOption[]>,
-    queryParams?: Record<string, string> = {},
+    queryParams: Record<string, string> = {},
   ) {
     findings(
       "vulnerabilities",
@@ -232,7 +232,7 @@ export default function () {
 
   function exploits(
     optionsRef: Ref<FilterOption[]>,
-    queryParams?: Record<string, string> = {},
+    queryParams: Record<string, string> = {},
   ) {
     findings(
       "exploits",

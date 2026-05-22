@@ -130,7 +130,7 @@ const submitButton = computed(
     props.submitLabel ||
     (props.item ? "Save" : "Create"),
 );
-const formValid = ref(props.item ? true : false);
+const formValid = ref(!!props.item);
 const loading = ref(false);
 
 const handleSubmit = (data: Record<string, unknown>) => {

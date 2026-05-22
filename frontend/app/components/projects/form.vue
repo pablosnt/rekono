@@ -79,7 +79,7 @@ const targetFormRef = ref();
 const stepper = ref(0);
 const project = ref(null);
 
-async function submit() {
+function submit() {
   if (stepper.value === 0) {
     projectFormRef.value.submit();
   } else {

@@ -62,43 +62,38 @@ function submit() {
     emit("new-loading", true);
     loading.value = true;
     created.value = 0;
-    let errors = 0;
-    for (const newMember of newMembers.value) {
-      addApi
-        .create(`${newMember}/`, {})
-        .catch(() => {
-          errors++;
-        })
-        .finally(() => {
-          created.value++;
-          if (created.value === newMembers.value.length) {
-            if (errors > 0) {
-              if (created.value > errors) {
-                toast.add({
-                  title: "Members addition",
-                  description: `${created.value - errors} users were added to the project successfully and ${errors} failed`,
-                  color: "warning",
-                });
-              } else {
-                toast.add({
-                  title: "Members addition",
-                  description: `${errors} users weren't added to the project`,
-                  color: "error",
-                });
-              }
-            } else {
-              toast.add({
-                title: "Members addition",
-                description: `${newMembers.value.length} users were added to the project successfully`,
-                color: "success",
-              });
-            }
-          }
-          loading.value = false;
-          emit("new-loading", false);
-          emit("submit", {});
+    const total = newMembers.value.length;
+    Promise.allSettled(
+      newMembers.value.map((newMember) =>
+        addApi.create(`${newMember}/`, {}).finally(() => created.value++),
+      ),
+    ).then((results) => {
+      const errors = results.filter((r) => r.status === "rejected").length;
+      if (errors > 0) {
+        if (total > errors) {
+          toast.add({
+            title: "Members addition",
+            description: `${total - errors} users were added to the project successfully and ${errors} failed`,
+            color: "warning",
+          });
+        } else {
+          toast.add({
+            title: "Members addition",
+            description: `${errors} users weren't added to the project`,
+            color: "error",
+          });
+        }
+      } else {
+        toast.add({
+          title: "Members addition",
+          description: `${total} users were added to the project successfully`,
+          color: "success",
         });
-    }
+      }
+      loading.value = false;
+      emit("new-loading", false);
+      emit("submit", {});
+    });
   }
 }
 

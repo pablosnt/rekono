@@ -60,18 +60,17 @@ const props = defineProps<{ project?: string | number }>();
 const api = useApi("/api/stats/");
 const loading = ref(true);
 const data = ref([]);
-const hasOpenFindings = computed(
-  () => data.value.filter((d) => d.open > 0).length > 0,
-);
+const hasOpenFindings = computed(() => data.value.some((d) => d.open > 0));
 
 const treemapLayers = [(d) => d.triage_status];
 const treemapData = computed(() =>
   data.value
     .filter((d) => d.open > 0)
-    .map((d) => ({
-      ...d,
-      color: `var(--color-${triageStatuses.find((s) => s.value === d.triage_status)?.color ?? "neutral"}-500)`,
-    })),
+    .map((d) =>
+      Object.assign({}, d, {
+        color: `var(--color-${triageStatuses.find((s) => s.value === d.triage_status)?.color ?? "neutral"}-500)`,
+      }),
+    ),
 );
 const totalOpen = computed(() =>
   treemapData.value.reduce((sum, d) => sum + d.open, 0),

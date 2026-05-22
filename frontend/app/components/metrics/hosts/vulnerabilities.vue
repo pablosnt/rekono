@@ -18,7 +18,7 @@ const props = defineProps<{ project?: string | number }>();
 const api = useApi("/api/stats/");
 const loading = ref(true);
 const data = ref([]);
-const reversedSeverities = [...severities].reverse();
+const reversedSeverities = severities.toReversed();
 const series = [
   ...reversedSeverities.map((s) => ({
     label: s.value,

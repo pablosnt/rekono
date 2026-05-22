@@ -151,18 +151,15 @@ function restoreParameters() {
   emit("update-input-vulnerability", requiredInputVulnerability.value);
 }
 
-function processConfiguration(configuration) {
-  supportedWordlist.value = configuration.wordlists.supported;
-  requiredWordlist.value =
-    configuration.wordlists.supported && configuration.wordlists.required;
+function processConfiguration(conf) {
+  supportedWordlist.value = conf.wordlists.supported;
+  requiredWordlist.value = conf.wordlists.supported && conf.wordlists.required;
   emit("update-wordlist", supportedWordlist.value, requiredWordlist.value);
   requiredInputTechnology.value =
-    configuration.input_technologies.supported &&
-    configuration.input_technologies.required;
+    conf.input_technologies.supported && conf.input_technologies.required;
   emit("update-input-technology", requiredInputTechnology.value);
   requiredInputVulnerability.value =
-    configuration.input_vulnerabilities.supported &&
-    configuration.input_vulnerabilities.required;
+    conf.input_vulnerabilities.supported && conf.input_vulnerabilities.required;
   emit("update-input-vulnerability", requiredInputVulnerability.value);
 }
 
@@ -182,9 +179,7 @@ function onTool(toolId) {
         (option) => option.label === response.intensities[0].value,
       )?.value;
       maxIntensity.value = intensities.find(
-        (option) =>
-          option.label ===
-          response.intensities[response.intensities.length - 1].value,
+        (option) => option.label === response.intensities.at(-1).value,
       )?.value;
       emit("update-intensity", minIntensity.value, maxIntensity.value);
       if (response.icon) {
@@ -200,7 +195,7 @@ function onTool(toolId) {
       .then((response) => {
         configurationOptions.value = response.items;
         defaultConfigurationObject.value = response.items.find(
-          (configuration) => configuration.default,
+          (conf) => conf.default,
         );
         configuration.value = defaultConfigurationObject.value.id;
         emit("update-configuration", configuration.value);

@@ -3,27 +3,24 @@ import { hostOS } from "~/constants";
 import { h } from "vue";
 import { UAvatar, UBadge, UIcon, UButton } from "#components";
 
+function valueCell(value?: string | number, extraClasses?: string) {
+  return h(
+    "span",
+    { class: extraClasses ? `font-medium ${extraClasses}` : "font-medium" },
+    value || "—",
+  );
+}
+
 export default function () {
   const noDataCell = valueCell();
 
-  function valueCell(
-    value: string | number | undefined = undefined,
-    extraClasses: string | undefined = undefined,
-  ) {
-    return h(
-      "span",
-      { class: extraClasses ? `font-medium ${extraClasses}` : "font-medium" },
-      value || "—",
-    );
-  }
-
   function iconAndValueHeader(value: string, icon: string) {
-    return iconAndValueCell(value, icon, "gray-500 dark:text-gray-400", true);
+    return iconAndValueCell(icon, value, "gray-500 dark:text-gray-400", true);
   }
 
   function iconAndValueCell(
-    value: string | number | undefined = undefined,
     icon: string,
+    value?: string | number,
     color: string = "neutral",
     isHeader?: boolean,
   ) {
@@ -37,7 +34,7 @@ export default function () {
 
   function badgeCell(
     value: string | number | undefined,
-    icon: string | undefined = undefined,
+    icon?: string,
     color: string = "neutral",
     variant: string = "subtle",
   ) {
@@ -66,7 +63,7 @@ export default function () {
     subpath: string,
     value: string | undefined,
     project: number,
-    icon: string | undefined = undefined,
+    icon?: string,
     color: string = "neutral",
   ) {
     return entity && value
@@ -137,7 +134,7 @@ export default function () {
   function toolCell(
     tool: Tool,
     configuration: Configuration | undefined,
-    link: string | undefined = undefined,
+    link?: string,
   ) {
     const baseClass = "flex items-center gap-2";
     return h(
@@ -173,12 +170,12 @@ export default function () {
   }
 
   function linkCell(
-    link: string | undefined,
-    icon: string | undefined = undefined,
-    avatar: string | undefined = undefined,
-    text: string | undefined = undefined,
+    link?: string,
+    icon?: string,
+    avatar?: string,
+    text?: string,
     internal: boolean = true,
-    ariaLabel: string | undefined = undefined,
+    ariaLabel?: string,
   ) {
     return link
       ? h(UButton, {
@@ -198,11 +195,11 @@ export default function () {
   }
 
   function externalLinkCell(
-    link: string | undefined,
-    icon: string | undefined = undefined,
-    avatar: string | undefined = undefined,
-    text: string | undefined = undefined,
-    ariaLabel: string | undefined = undefined,
+    link?: string,
+    icon?: string,
+    avatar?: string,
+    text?: string,
+    ariaLabel?: string,
   ) {
     return linkCell(link, icon, avatar, text, false, ariaLabel);
   }

@@ -59,7 +59,7 @@ export function getExposureWindow(finding: Finding) {
     .filter((e) => Boolean(e.end))
     .map((e) => new Date(e.end).toDateString())
     .filter(
-      (value, index, self) => index === self.findIndex((d) => d === value),
+      (value, index, self) => index === self.findIndex((v) => v === value),
     )
     .map((d) => {
       return {
@@ -69,9 +69,9 @@ export function getExposureWindow(finding: Finding) {
           .map((e) => e.configuration?.tool.name)
           .filter(
             (value, index, self) =>
-              index === self.findIndex((d) => d === value),
+              index === self.findIndex((v) => v === value),
           ),
       };
     })
-    .sort((a, b) => a.date.getTime() - b.date.getTime());
+    .toSorted((a, b) => a.date.getTime() - b.date.getTime());
 }

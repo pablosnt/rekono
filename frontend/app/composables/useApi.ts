@@ -1,5 +1,18 @@
 import { useUserStore } from "~/store/user";
 
+function parseErrorMessage(
+  error: object,
+  include_field: boolean = true,
+): string {
+  const field = Object.keys(error.data)[0];
+  let value = Object.values(error.data)[0];
+  value = Array.isArray(value) ? value[0] : value;
+  const message = firstUpper(value);
+  return field !== "non_field_errors" && include_field
+    ? `${field}: ${message}`
+    : message;
+}
+
 export default function (
   base_endpoint: string = "/api/",
   authentication: boolean = true,
@@ -19,31 +32,18 @@ export default function (
       ? config.backendRootPath + endpoint
       : endpoint;
     if (config.backendUrl) {
-      const url = new URL(config.backendUrl);
-      url.pathname = endpoint;
-      return url.href;
+      const backendUrl = new URL(config.backendUrl);
+      backendUrl.pathname = endpoint;
+      return backendUrl.href;
     }
     return endpoint;
-  }
-
-  function parseErrorMessage(
-    error: object,
-    include_field: boolean = true,
-  ): string {
-    const field = Object.keys(error.data)[0];
-    let value = Object.values(error.data)[0];
-    value = Array.isArray(value) ? value[0] : value;
-    const message = firstUpper(value);
-    return field !== "non_field_errors" && include_field
-      ? `${field}: ${message}`
-      : message;
   }
 
   function request(
     endpoint: string,
     options?: object,
     extraHeaders?: object,
-    raw?: boolean = false,
+    raw: boolean = false,
     toastOnError: number[] | null = null,
   ): Promise {
     if (toastOnError === null) {
@@ -63,7 +63,7 @@ export default function (
             requestUrl.includes("/api/security/refresh/") ||
             requestUrl.includes("/api/security/logout/")
           )
-            return Promise.reject(error);
+            throw error;
           message = parseErrorMessage(error);
           break;
         }
@@ -77,11 +77,12 @@ export default function (
                 requestUrl.includes("/api/telegram/link/") ||
                 requestUrl.includes("/api/profile/update-password/")))
           ) {
-            return Promise.reject(error);
-          } else if (authentication) {
+            throw error;
+          }
+          if (authentication) {
             const user = useUserStore();
             if (user.refreshing) {
-              function wait(): Promise {
+              const wait = (): Promise => {
                 return new Promise((resolve, reject) => {
                   setTimeout(() => {
                     if (user.refreshing) {
@@ -89,26 +90,24 @@ export default function (
                     }
                     if (!user.is_authenticated) return reject();
                     request(endpoint, options, extraHeaders, raw, toastOnError)
-                      .then((response) => resolve(response))
-                      .catch((error) => reject(error));
+                      .then((r) => resolve(r))
+                      .catch((e) => reject(e));
                   }, 500);
                 });
-              }
+              };
               return wait();
-            } else {
-              return refresh().then(() => {
-                return request(
-                  endpoint,
-                  options,
-                  extraHeaders,
-                  raw,
-                  toastOnError,
-                );
-              });
             }
-          } else {
-            message = "Invalid credentials";
+            return refresh().then(() => {
+              return request(
+                endpoint,
+                options,
+                extraHeaders,
+                raw,
+                toastOnError,
+              );
+            });
           }
+          message = "Invalid credentials";
           break;
         }
         case 403: {
@@ -137,7 +136,7 @@ export default function (
           color: "error",
         });
       }
-      return Promise.reject(error);
+      throw error;
     });
   }
 
@@ -151,11 +150,11 @@ export default function (
     })
       .then((response) => {
         user.switchRefreshing();
-        return Promise.resolve(response);
+        return response;
       })
-      .catch(() => {
+      .catch((error) => {
         user.logout();
-        return Promise.reject();
+        throw error;
       });
   }
 
@@ -166,7 +165,7 @@ export default function (
     page: number = 1,
     size: number = 24,
     extraHeaders?: object,
-    toastOnError?: number[] | null = null,
+    toastOnError: number[] | null = null,
     items: Array<object> = [],
   ): Promise {
     size = all ? 1000 : size;
@@ -197,14 +196,14 @@ export default function (
       } else {
         items = response.results;
       }
-      return Promise.resolve({ items: items, total: total });
+      return { items: items, total: total };
     });
   }
 
   function get(
     endpoint: string,
     extraHeaders?: object,
-    toastOnError?: number[] | null = null,
+    toastOnError: number[] | null = null,
   ): Promise {
     return request(
       endpoint,
@@ -212,15 +211,13 @@ export default function (
       extraHeaders,
       false,
       toastOnError,
-    ).then((response) => {
-      return Promise.resolve(response);
-    });
+    );
   }
 
   function download(
     endpoint: string,
     extraHeaders?: object,
-    toastOnError?: number[] | null = null,
+    toastOnError: number[] | null = null,
   ): Promise {
     return request(
       endpoint,
@@ -230,7 +227,7 @@ export default function (
       toastOnError,
     ).then((response) => {
       const a = document.createElement("a");
-      a.href = window.URL.createObjectURL(response._data);
+      a.href = window.URL.createObjectURL(response["_data"]);
       a.download = response.headers
         .get("content-disposition")
         .replace('attachment; filename="', "")
@@ -244,7 +241,7 @@ export default function (
     body: object,
     extraHeaders?: object,
     entity?: string,
-    toastOnError?: number[] | null = null,
+    toastOnError: number[] | null = null,
   ): Promise {
     return request(
       endpoint,
@@ -259,7 +256,7 @@ export default function (
           color: "success",
         });
       }
-      return Promise.resolve(response);
+      return response;
     });
   }
 
@@ -268,7 +265,7 @@ export default function (
     body: object,
     extraHeaders?: object,
     entity?: string,
-    toastOnError?: number[] | null = null,
+    toastOnError: number[] | null = null,
   ): Promise {
     return request(
       endpoint,
@@ -283,7 +280,7 @@ export default function (
           color: "success",
         });
       }
-      return Promise.resolve(response);
+      return response;
     });
   }
 
@@ -291,7 +288,7 @@ export default function (
     endpoint: string,
     extraHeaders?: object,
     entity?: string,
-    toastOnError?: number[] | null = null,
+    toastOnError: number[] | null = null,
   ): Promise {
     return request(
       endpoint,
@@ -306,7 +303,6 @@ export default function (
           color: "warning",
         });
       }
-      return Promise.resolve();
     });
   }
 

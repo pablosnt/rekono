@@ -59,7 +59,7 @@ const responsiveBreadcrum = computed(() =>
           icon: "i-lucide-ellipsis",
           children: breadcrumb.value.slice(1, -1),
         },
-        breadcrumb.value[breadcrumb.value.length - 1],
+        breadcrumb.value.at(-1),
       ]
     : breadcrumb.value,
 );
@@ -325,10 +325,9 @@ function cleanSecondaryLinks(
   }
   if (!route.params.project_id || !entityId) {
     return false;
-  } else {
-    breadcrumb.value.push(entitiesLink);
-    return true;
   }
+  breadcrumb.value.push(entitiesLink);
+  return true;
 }
 
 function onTargetChange() {
@@ -344,14 +343,14 @@ function onTargetChange() {
       let currentTarget = null;
       const children: NavigationItem[] = [];
       for (const targetOption of response.items) {
-        if (targetOption.id !== parseInt(route.params.target_id)) {
+        if (targetOption.id === parseInt(route.params.target_id)) {
+          currentTarget = targetOption;
+        } else {
           children.push({
             label: targetOption.target,
             icon: targetTypes.find((t) => t.value === targetOption.type)?.icon,
             to: `/projects/${route.params.project_id}/targets/${targetOption.id}`,
           });
-        } else {
-          currentTarget = targetOption;
         }
       }
       if (currentTarget) {

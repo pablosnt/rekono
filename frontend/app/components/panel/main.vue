@@ -37,9 +37,10 @@ const items = computed(() => [
     defaultOpen: true,
     to: "/projects",
     badge: badges.projects || undefined,
-    children: topProjectChildren.value.length
-      ? topProjectChildren.value
-      : undefined,
+    children:
+      topProjectChildren.value.length > 0
+        ? topProjectChildren.value
+        : undefined,
   },
   {
     label: "Assets",
@@ -174,9 +175,9 @@ function loadBadges() {
       });
     }
     if (children.length > 0) {
-      api.list("projects/", {}, false, 1, 1).then((response: object) => {
-        badges.projects = formatCount(response.total);
-        if (response.total > children.length) {
+      api.list("projects/", {}, false, 1, 1).then((projectsCount: object) => {
+        badges.projects = formatCount(projectsCount.total);
+        if (projectsCount.total > children.length) {
           children.push({
             label: "Show all",
             to: "/projects",

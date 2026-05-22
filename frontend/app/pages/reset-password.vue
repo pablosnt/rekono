@@ -31,7 +31,7 @@ const fields = ref<(typeof FormField)[]>([
     autofocus: true,
   },
 ]);
-const schema = ref<z.ZodObject>(z.object({ email: validation.email() }));
+const schema = ref(z.object({ email: validation.email }));
 const description = ref(
   "Enter your user account's email and we will send you a password reset link",
 );

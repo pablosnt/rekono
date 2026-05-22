@@ -35,8 +35,8 @@ const columns = [
         row.original.port?.host || row.original.technology?.port?.host;
       const config = hostOS.find((c) => c.value === host.os_type);
       return table.iconAndValueCell(
-        host.domain || host.ip,
         config?.icon || "i-lucide-server",
+        host.domain || host.ip,
         config?.color || "neutral",
       );
     },

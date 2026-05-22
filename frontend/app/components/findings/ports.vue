@@ -93,8 +93,8 @@ const columns: CrudTableColumn<Port>[] = [
     icon: "i-lucide-layers",
     cell: ({ row }) =>
       table.iconAndValueCell(
-        row.original.service,
         getPortIcon(row.original.port, row.original.service),
+        row.original.service,
       ),
   },
   {

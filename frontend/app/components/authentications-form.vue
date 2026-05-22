@@ -123,7 +123,9 @@ function validate(data) {
 }
 
 function save() {
-  if (formData.value.type !== "None") {
+  if (formData.value.type === "None") {
+    emit("submit", { type: "None" });
+  } else {
     loading.value = true;
     emit("new-loading", true);
     useApi(props.config.endpoint)
@@ -138,8 +140,6 @@ function save() {
         loading.value = false;
         emit("new-loading", false);
       });
-  } else {
-    emit("submit", { type: "None" });
   }
 }
 

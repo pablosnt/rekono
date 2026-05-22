@@ -282,9 +282,11 @@ const toolOptions = ref<FilterOption[]>([]);
 function repeatScan() {
   tasksApi
     .create(`${route.params.scan_id}/repeat/`, {}, {}, "Scan")
-    .then((response: Task) =>
-      navigateTo(`/projects/${route.params.project_id}/scans/${response.id}`),
-    );
+    .then((response: Task) => {
+      return navigateTo(
+        `/projects/${route.params.project_id}/scans/${response.id}`,
+      );
+    });
 }
 
 function processTask(data?: Task) {
