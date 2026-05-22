@@ -35,9 +35,6 @@ importers:
       '@tiptap/vue-3':
         specifier: ^3.23.4
         version: 3.23.4(@floating-ui/dom@1.7.6)(@tiptap/core@3.23.4(@tiptap/pm@3.23.4))(@tiptap/pm@3.23.4)(vue@3.5.34(typescript@6.0.3))
-      '@tiptap/y-tiptap':
-        specifier: ^3.0.3
-        version: 3.0.3(prosemirror-model@1.25.6)(prosemirror-state@1.4.4)(prosemirror-view@1.41.8)(y-protocols@1.0.7(yjs@13.6.30))(yjs@13.6.30)
       '@unovis/ts':
         specifier: ^1.6.5
         version: 1.6.5

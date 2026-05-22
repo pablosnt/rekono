@@ -1,4 +1,5 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+import { resolve } from "path";
 import type { NuxtPage } from "nuxt/schema";
 import { isPublicRoute } from "./app/utils/routes";
 
@@ -68,6 +69,9 @@ export default defineNuxtConfig({
 
   vite: {
     resolve: {
+      alias: {
+        shiki: resolve(__dirname, "lib/shiki-rekono.ts"),
+      },
       dedupe: [
         "prosemirror-state",
         "prosemirror-tables",
@@ -88,6 +92,7 @@ export default defineNuxtConfig({
           : {},
     },
     optimizeDeps: {
+      exclude: ["tiptap-extension-code-block-shiki"],
       include: [
         "@nuxt/ui > prosemirror-state",
         "@nuxt/ui > prosemirror-tables",

@@ -23,7 +23,6 @@
     "@tiptap/pm": "^3.23.4",
     "@tiptap/starter-kit": "^3.23.4",
     "@tiptap/vue-3": "^3.23.4",
-    "@tiptap/y-tiptap": "^3.0.3",
     "@unovis/ts": "^1.6.5",
     "@unovis/vue": "^1.6.5",
     "jwt-decode": "^4.0.0",
