@@ -10,7 +10,7 @@
         <slot name="extra-actions" :item="item" />
       </template>
     </CrudPage>
-    <FindingsModalTriage
+    <LazyFindingsModalTriage
       v-if="isTriageable && userStore.is_auditor"
       :open="triageModalOpen"
       :api="api"
@@ -19,7 +19,7 @@
       @open="(open) => (triageModalOpen = open)"
       @triaged="page?.fetch()"
     />
-    <FindingsModalFix
+    <LazyFindingsModalFix
       v-if="selectedItem && userStore.is_auditor"
       :api="api"
       :fix-verb="fixVerb"
@@ -31,7 +31,7 @@
       @open="(open) => (fixModalOpen = open)"
       @switched="page?.fetch()"
     />
-    <UModal
+    <LazyUModal
       v-if="selectedItemExposureWindow"
       v-model:open="exposureModalOpen"
       title="Exposure Window"
@@ -48,7 +48,7 @@
           :dates="selectedItemExposureWindow"
         />
       </template>
-    </UModal>
+    </LazyUModal>
   </div>
 </template>
 

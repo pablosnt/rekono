@@ -97,7 +97,7 @@
           </template>
         </UPageCard>
       </UPageGrid>
-      <CrudFormModal
+      <LazyCrudFormModal
         v-if="selectedSettings"
         :open="openModal"
         :item="selectedSettings"
@@ -123,7 +123,7 @@
             :loading="loading"
           />
         </template>
-      </CrudFormModal>
+      </LazyCrudFormModal>
     </template>
   </CrudPage>
 </template>

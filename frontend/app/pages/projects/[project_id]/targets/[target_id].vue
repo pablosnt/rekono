@@ -134,7 +134,7 @@
             aria-label="Target options"
           />
         </UDropdownMenu>
-        <CrudDeleteModal
+        <LazyCrudDeleteModal
           :open="deleteOpen"
           :item="target"
           :config="deleteConfig"

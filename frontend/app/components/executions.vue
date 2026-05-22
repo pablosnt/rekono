@@ -18,7 +18,7 @@
         </UTooltip>
       </template>
     </CrudPage>
-    <USlideover
+    <LazyUSlideover
       v-model:open="outputOpen"
       inset
       portal
@@ -79,7 +79,7 @@
           >{{ selectedExecution?.output_plain }}</pre
         >
       </template>
-    </USlideover>
+    </LazyUSlideover>
   </div>
 </template>
 

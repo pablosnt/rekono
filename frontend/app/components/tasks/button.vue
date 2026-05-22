@@ -9,7 +9,7 @@
     :size="size"
     @click="openModal = !openModal"
   />
-  <CrudFormModal
+  <LazyCrudFormModal
     :open="openModal"
     :api="api"
     :config="config"

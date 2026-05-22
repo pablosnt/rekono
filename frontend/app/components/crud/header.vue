@@ -150,7 +150,7 @@
           </UDropdownMenu>
 
           <slot v-if="config.canCreate" name="create-button">
-            <CrudFormModal
+            <LazyCrudFormModal
               :open="openCreateModal"
               :api="api"
               :config="config"
@@ -176,7 +176,7 @@
     </div>
     <UCollapsible v-model:open="openFilters">
       <template #content>
-        <CrudFilters
+        <LazyCrudFilters
           :config="config"
           :state="state"
           @filters="(filters) => $emit('filters', filters)"

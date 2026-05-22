@@ -124,9 +124,9 @@
         <div class="p-4 lg:p-10 lg:mx-10 flex-1">
           <slot />
         </div>
-        <Footer class="lg:hidden" />
+        <Footer v-once class="lg:hidden" />
       </div>
-      <Footer class="hidden lg:block" />
+      <Footer v-once class="hidden lg:block" />
     </div>
   </div>
 </template>

@@ -39,7 +39,7 @@
             />
           </template>
           <template v-else>
-            <StepsForm
+            <LazyStepsForm
               :process="process"
               @new-loading="(newLoading) => $emit('new-loading', newLoading)"
             />

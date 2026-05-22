@@ -37,15 +37,15 @@
           <ProfileInformation />
         </template>
         <template v-else-if="active === 'security'">
-          <ProfileUpdatePassword />
-          <ProfileMfa />
-          <ProfileApiTokens />
+          <LazyProfileUpdatePassword />
+          <LazyProfileMfa />
+          <LazyProfileApiTokens />
         </template>
         <template v-else-if="active === 'telegram-bot'">
-          <ProfileTelegramBot />
+          <LazyProfileTelegramBot />
         </template>
         <template v-else-if="active === 'http-headers'">
-          <HttpHeaders
+          <LazyHttpHeaders
             :user="userStore.user"
             :can-create="true"
             :can-edit="true"

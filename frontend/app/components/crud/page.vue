@@ -119,7 +119,7 @@
           </UPageGrid>
         </template>
 
-        <CrudFormModal
+        <LazyCrudFormModal
           v-if="config.canEdit"
           :open="openEditModal"
           :api="api"
@@ -136,7 +136,7 @@
           @submit="fetch()"
         />
 
-        <CrudDeleteModal
+        <LazyCrudDeleteModal
           v-if="config.canDelete"
           :open="openDeleteModal"
           :api="api"

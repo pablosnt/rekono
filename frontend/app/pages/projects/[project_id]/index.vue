@@ -29,7 +29,7 @@
             v-if="userStore.is_auditor && currentProject.targets.length > 0"
             :project="currentProject"
           />
-          <DefectdojoModal
+          <LazyDefectdojoModal
             :sync="currentProject.defectdojo_sync"
             @update="fetch()"
           />
@@ -56,7 +56,7 @@
               aria-label="Project actions"
             />
           </UDropdownMenu>
-          <CrudDeleteModal
+          <LazyCrudDeleteModal
             :open="deleteOpen"
             :item="currentProject"
             :config="deleteConfig"
@@ -90,7 +90,10 @@
     <div v-if="projectHasActiveFindings">
       <USeparator class="mb-8 mt-8" />
       <h2 class="text-2xl font-bold text-default m-5">Findings</h2>
-      <FindingsCounterAll :project-id="route.params.project_id" only-active />
+      <LazyFindingsCounterAll
+        :project-id="route.params.project_id"
+        only-active
+      />
     </div>
   </div>
 </template>

@@ -58,7 +58,7 @@
           </template>
         </template>
       </UPageCTA>
-      <CrudFormModal
+      <LazyCrudFormModal
         v-if="userStore.is_admin"
         :open="createProjectOpen"
         :api="projectsApi"
@@ -67,23 +67,23 @@
       />
       <div v-if="hasScans" class="mt-10 space-y-10">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-          <HomeTopProjects @create="createProjectOpen = true" />
-          <HomeLatestScans :tasks="tasks" />
+          <LazyHomeTopProjects @create="createProjectOpen = true" />
+          <LazyHomeLatestScans :tasks="tasks" />
         </div>
-        <FindingsCounterAll only-active />
+        <LazyFindingsCounterAll only-active />
         <div
           v-if="hosts.length > 0 || vulnerabilities.length > 0"
           class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start"
         >
-          <HomeLatestHosts :hosts="hosts" />
-          <HomeLatestVulnerabilities :vulnerabilities="vulnerabilities" />
+          <LazyHomeLatestHosts :hosts="hosts" />
+          <LazyHomeLatestVulnerabilities :vulnerabilities="vulnerabilities" />
         </div>
       </div>
       <div v-else>
-        <HomeTools :tools="tools" />
-        <HomeFeatures />
-        <HomeIntegrations :integrations="integrations" />
-        <HomeCommunity />
+        <LazyHomeTools :tools="tools" />
+        <LazyHomeFeatures />
+        <LazyHomeIntegrations :integrations="integrations" />
+        <LazyHomeCommunity v-once />
       </div>
     </div>
   </div>

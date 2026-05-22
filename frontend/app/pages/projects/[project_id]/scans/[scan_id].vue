@@ -229,7 +229,7 @@
 
     <Executions ref="executions" :task="route.params.scan_id" />
 
-    <CrudDeleteModal
+    <LazyCrudDeleteModal
       :open="cancelOpen"
       :item="task"
       :config="{

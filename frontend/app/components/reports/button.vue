@@ -7,7 +7,7 @@
     aria-label="Generate report"
     @click="openModal = !openModal"
   />
-  <CrudFormModal
+  <LazyCrudFormModal
     :open="open ?? openModal"
     :api="api"
     :config="config"

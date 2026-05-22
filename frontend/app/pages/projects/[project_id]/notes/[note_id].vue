@@ -104,7 +104,7 @@
             aria-label="Note actions"
           />
         </UDropdownMenu>
-        <CrudDeleteModal
+        <LazyCrudDeleteModal
           :open="deleteOpen"
           :item="note"
           :config="deleteConfig"

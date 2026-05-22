@@ -28,7 +28,7 @@
       is-asset
       :disable-url-sync="disableUrlSync"
     />
-    <UModal
+    <LazyUModal
       v-if="selectedHost"
       v-model:open="locationModalOpen"
       title="Geolocation"
@@ -46,8 +46,8 @@
       <template #body>
         <FindingsHostsLocations :hosts="[selectedHost]" />
       </template>
-    </UModal>
-    <UModal
+    </LazyUModal>
+    <LazyUModal
       v-if="selectedHost"
       v-model:open="malwareModalOpen"
       title="Malware Analysis"
@@ -56,7 +56,7 @@
       <template #body>
         <FindingsHostsMalware :host="selectedHost" />
       </template>
-    </UModal>
+    </LazyUModal>
   </div>
 </template>
 

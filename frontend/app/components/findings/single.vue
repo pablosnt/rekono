@@ -135,7 +135,7 @@
           @fetched="(items) => processExecutions(items)"
         />
       </UPageCard>
-      <FindingsModalTriage
+      <LazyFindingsModalTriage
         v-if="isTriageable && userStore.is_auditor"
         :open="triageModalOpen"
         :api="api"
@@ -144,7 +144,7 @@
         @open="(open) => (triageModalOpen = open)"
         @triaged="$emit('update')"
       />
-      <FindingsModalFix
+      <LazyFindingsModalFix
         v-if="userStore.is_auditor"
         :api="api"
         :fix-verb="fixVerb"

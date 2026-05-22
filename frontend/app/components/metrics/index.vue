@@ -15,22 +15,22 @@
           <MetricsHosts :project="$route.params.project_id" />
         </template>
         <template #ports>
-          <MetricsPorts :project="$route.params.project_id" />
+          <LazyMetricsPorts :project="$route.params.project_id" />
         </template>
         <template #technologies>
-          <MetricsTechnologies :project="$route.params.project_id" />
+          <LazyMetricsTechnologies :project="$route.params.project_id" />
         </template>
         <template #vulnerabilities>
-          <MetricsVulnerabilities :project="$route.params.project_id" />
+          <LazyMetricsVulnerabilities :project="$route.params.project_id" />
         </template>
         <template #exploits>
-          <MetricsExploits :project="$route.params.project_id" />
+          <LazyMetricsExploits :project="$route.params.project_id" />
         </template>
         <template #others>
-          <MetricsOthers :project="$route.params.project_id" />
+          <LazyMetricsOthers :project="$route.params.project_id" />
         </template>
         <template #triage>
-          <MetricsTriage :project="$route.params.project_id" />
+          <LazyMetricsTriage :project="$route.params.project_id" />
         </template>
       </UTabs>
     </template>

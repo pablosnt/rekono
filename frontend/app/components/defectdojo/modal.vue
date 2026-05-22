@@ -94,7 +94,7 @@
           form?.submit();
         "
       />
-      <CrudDeleteModal
+      <LazyCrudDeleteModal
         :open="openDelete"
         :item="sync"
         :config="deleteConfig"

@@ -43,7 +43,7 @@
         </UPageCard>
       </template>
     </CrudPage>
-    <CrudFormModal
+    <LazyCrudFormModal
       v-if="currentIntegrationSettings"
       :open="openModal"
       :item="currentIntegrationSettings.item"
@@ -59,7 +59,7 @@
           :loading="loading"
         />
       </template>
-    </CrudFormModal>
+    </LazyCrudFormModal>
   </div>
 </template>
 

@@ -7,7 +7,6 @@
         </UMain>
       </UPageCard>
     </UMain>
-    <Footer />
   </div>
   <PanelProject v-else-if="$route.params.project_id">
     <slot />

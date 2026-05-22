@@ -9,7 +9,7 @@
         />
       </template>
     </CrudPage>
-    <CrudDeleteModal
+    <LazyCrudDeleteModal
       :open="deleteAuthenticationOpen"
       :item="selectedTargetPort?.authentication"
       :config="{
@@ -21,7 +21,7 @@
       @open="(open) => (deleteAuthenticationOpen = open)"
       @deleted="page.fetch()"
     />
-    <CrudFormModal
+    <LazyCrudFormModal
       :open="addAuthenticationOpen"
       :item="selectedTargetPort"
       :config="addAuthenticationConfig"

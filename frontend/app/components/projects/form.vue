@@ -40,7 +40,7 @@
             />
           </template>
           <template v-else>
-            <TargetsForm
+            <LazyTargetsForm
               ref="targetFormRef"
               :api="targetApi"
               :entity="project"
