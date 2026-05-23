@@ -24,7 +24,7 @@
         </div>
       </template>
       <template #body>
-        <StepsForm v-if="selectedProcess" :process="selectedProcess" />
+        <LazyStepsForm v-if="selectedProcess" :process="selectedProcess" />
       </template>
     </UModal>
   </div>

@@ -41,7 +41,7 @@ services:
   initializer:
     restart: 'no'
     image: pablosnt/rekono-worker:unstable
-    command: bash /entrypoints/initilizer.sh
+    command: bash /entrypoints/initializer.sh
     container_name: initializer
     volumes:
       - rekono:/rekono
@@ -174,7 +174,7 @@ services:
     hostname: backend
     container_name: backend
     healthcheck:
-      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://localhost:8000/api/schema/swagger-ui.html"]
+      test: ["CMD", "uv", "run", "python", "-c", "import requests; requests.get('http://localhost:8000/api/schema/swagger-ui/', timeout=5).raise_for_status()"]
       interval: 5s
       timeout: 5s
       retries: 10

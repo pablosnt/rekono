@@ -3,6 +3,7 @@ ARG LABEL_VERSION
 ARG LABEL_REVISION
 ARG LABEL_URL="https://github.com/pablosnt/rekono"
 ARG LABEL_SOURCE="https://github.com/pablosnt/rekono"
+# TODO: Update documentation link
 ARG LABEL_DOCUMENTATION="https://github.com/pablosnt/rekono/wiki"
 ARG LABEL_AUTHORS="Pablo Santiago López"
 ARG LABEL_LICENSES="GPL-3.0"
@@ -15,6 +16,7 @@ FROM ghcr.io/astral-sh/uv:python3.13-bookworm-slim AS build-backend
 ARG BACKEND_DEBIAN_DEPENDENCIES
 
 COPY backend/ /code
+COPY frontend/public /code/static
 COPY config.yaml /rekono/
 WORKDIR /code
 
@@ -66,22 +68,26 @@ COPY --from=build-backend --chown=65532:65532 /code /code
 COPY --from=build-backend /dpkg /
 COPY --from=build-backend /opt/python /opt/python
 COPY --from=build-backend /usr/local/bin/uv /bin/
-# Wget required to healthcheck
-COPY --from=busybox:stable /bin/wget /usr/bin/wget
 
 WORKDIR /code
 EXPOSE 8000
 
 
-FROM node:22.15.1-bookworm-slim AS build-frontend
+FROM node:26.2.0-bookworm-slim AS build-frontend
+
+ENV CI=true
 
 COPY frontend /code
 WORKDIR /code
+
 # Build frontend for production
-RUN npm install && npm run build
+RUN PNPM_VERSION=$(node -p "require('./package.json').packageManager.split('@')[1]") && \
+    npm install -g pnpm@${PNPM_VERSION} && \
+    pnpm install --frozen-lockfile --prod --ignore-scripts && \
+    pnpm run build
 
 
-FROM gcr.io/distroless/nodejs22-debian12:nonroot AS frontend
+FROM gcr.io/distroless/nodejs26-debian13:nonroot AS frontend
 
 ARG LABEL_CREATED
 ARG LABEL_AUTHORS
@@ -104,7 +110,7 @@ LABEL org.opencontainers.image.description="Rekono frontend image based on a dis
 
 COPY --from=build-frontend --chown=65532:65532 /code/.output/ /app
 # Wget required to healthcheck
-COPY --from=busybox:stable /bin/wget /usr/bin/wget
+COPY --from=busybox:musl /bin/wget /usr/bin/wget
 
 WORKDIR /app
 EXPOSE 3000
@@ -168,9 +174,9 @@ RUN apt update && \
     uv pip install -r /opt/spring4shell-scan/requirements.txt && \
     # Initializer script
     mkdir -p /entrypoints && \
-    echo "uv run --no-dev manage.py migrate" > /entrypoints/initilizer.sh && \
-    echo "uv run --no-dev manage.py createsuperuser --no-input" >> /entrypoints/initilizer.sh && \
-    chmod +x /entrypoints/initilizer.sh && \
+    echo "uv run --no-dev manage.py migrate" > /entrypoints/initializer.sh && \
+    echo "uv run --no-dev manage.py createsuperuser --no-input  || true" >> /entrypoints/initializer.sh && \
+    chmod +x /entrypoints/initializer.sh && \
     # Executions worker script
     echo "nuclei -update-templates" > /entrypoints/executions-worker.sh && \
     echo "searchsploit --update || true" >> /entrypoints/executions-worker.sh && \

@@ -343,7 +343,13 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = "static/"
-STATICFILES_DIRS = [CONFIG.base_dir.parent / "frontend" / "public"]
+frontend_public = CONFIG.base_dir.parent / "frontend" / "public"
+if frontend_public.exists():
+    STATICFILES_DIRS = [frontend_public]
+else:
+    custom_static = CONFIG.base_dir / "static"
+    custom_static.mkdir(exist_ok=True)
+    STATICFILES_DIRS = [custom_static]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
