@@ -68,6 +68,30 @@ export default defineNuxtConfig({
   compatibilityDate: "2025-01-15",
 
   vite: {
+    build: {
+      chunkSizeWarningLimit: 1200,
+      rollupOptions: {
+        output: {
+          manualChunks(id) {
+            if (
+              id.includes("/node_modules/@unovis/") ||
+              id.includes("/node_modules/d3/") ||
+              id.includes("/node_modules/d3-")
+            ) {
+              return "vendor-charts";
+            }
+            if (
+              id.includes("/node_modules/@tiptap/") ||
+              id.includes("/node_modules/prosemirror-") ||
+              id.includes("/node_modules/yjs/") ||
+              id.includes("/node_modules/y-protocols/")
+            ) {
+              return "vendor-editor";
+            }
+          },
+        },
+      },
+    },
     resolve: {
       alias: {
         shiki: resolve(__dirname, "lib/shiki-rekono.ts"),
