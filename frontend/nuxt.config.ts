@@ -94,7 +94,7 @@ export default defineNuxtConfig({
     },
     resolve: {
       alias: {
-        shiki: resolve(__dirname, "lib/shiki-rekono.ts"),
+        shiki: resolve(__dirname, "app/lib/shiki-rekono.ts"),
       },
       dedupe: [
         "prosemirror-state",
