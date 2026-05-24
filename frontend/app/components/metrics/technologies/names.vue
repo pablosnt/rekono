@@ -19,7 +19,7 @@ const data = ref([]);
 const series = [
   {
     label: "Count",
-    color: "var(--color-primary-500)",
+    color: "var(--ui-primary)",
     y: (d) => d.count || 0,
   },
 ];

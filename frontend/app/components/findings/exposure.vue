@@ -32,7 +32,7 @@ const timeline = computed(() => {
   ).map((d) => ({
     timestamp: d.date.getTime(),
     length: dailyMs,
-    color: "var(--color-primary-500)",
+    color: "var(--ui-primary)",
     type: "Timeline",
     fixed: false,
     tools: d.tools,

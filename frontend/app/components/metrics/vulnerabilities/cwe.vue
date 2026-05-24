@@ -21,7 +21,7 @@ const data = ref([]);
 const series: BarSeries[] = [
   {
     label: "Open",
-    color: "var(--color-primary-500)",
+    color: "var(--ui-primary)",
     y: (d) => d.open || 0,
   },
   {
