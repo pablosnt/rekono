@@ -1,11 +1,6 @@
 @import "tailwindcss";
 @import "@nuxt/ui";
 
-:root {
-  --ui-orange: var(--color-orange-500);
-  --ui-amber: var(--color-amber-500);
-}
-
 @theme static {
   --font-sans: "Public Sans", sans-serif;
 
@@ -22,8 +17,18 @@
   --color-green-950: #052e16;
 }
 
-.dark .tiptap .shiki,
-.dark .tiptap .shiki span {
-  color: var(--shiki-dark) !important;
-  background-color: var(--shiki-dark-bg) !important;
+:root {
+  --ui-primary: var(--ui-color-primary-600);
+  --ui-orange: var(--color-orange-500);
+  --ui-amber: var(--color-amber-500);
+}
+
+.dark {
+  --ui-primary: var(--ui-color-primary-500);
+
+  .tiptap .shiki,
+  .tiptap .shiki span {
+    color: var(--shiki-dark) !important;
+    background-color: var(--shiki-dark-bg) !important;
+  }
 }
