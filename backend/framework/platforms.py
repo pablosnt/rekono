@@ -266,18 +266,20 @@ class BaseNotification(BasePlatform):
             list[Any]: List of users who should be notified.
         """
         users = set()
-        if execution.task.executor.notification_scope != Notification.DISABLED and getattr(
-            execution.task.executor, self.enable_field
-        ):
-            users.add(execution.task.executor)
-        users.update(
-            execution.task.target.project.members.filter(
-                **{
-                    self.enable_field: True,
-                    "notification_scope": Notification.ALL_EXECUTIONS,
-                }
-            ).exclude(id=execution.task.executor.id)
+        interested_users = execution.task.target.project.members.filter(
+            **{
+                self.enable_field: True,
+                "notification_scope": Notification.ALL_EXECUTIONS,
+            }
         )
+        if execution.task.executor:
+            if execution.task.executor.notification_scope != Notification.DISABLED and getattr(
+                execution.task.executor, self.enable_field
+            ):
+                users.add(execution.task.executor)
+            users.update(interested_users.exclude(id=execution.task.executor.id))
+        else:
+            users.update(interested_users)
         return list(users)
 
     def _notify_execution(self, users: list[Any], execution: Execution, findings: list[Finding]) -> None:

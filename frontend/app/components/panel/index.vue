@@ -11,14 +11,21 @@
     >
       <template #header>
         <slot name="panel-header" :open="open">
-          <div class="relative flex items-center w-full justify-start gap-2">
-            <UColorModeImage
+          <div class="relative flex items-center w-full justify-start">
+            <UColorModeAvatar
+              v-if="!open"
               light="/favicon-light.ico"
               dark="/favicon-dark.ico"
               alt="Rekono"
-              width="30"
+              class="size-8"
             />
-            <AppLogo v-if="open" class="h-7 w-auto shrink-0" />
+            <UColorModeImage
+              v-else
+              dark="/logo-dark.png"
+              light="/logo-light.png"
+              alt="Rekono"
+              class="w-full h-auto"
+            />
           </div>
         </slot>
       </template>

@@ -31,8 +31,8 @@
             "name": "HackTricks",
             "description": "Wiki that includes extensive documentation about hacking techniques and tricks, and whose resources will be linked by Rekono",
             "enabled": true,
-            "reference": "https://book.hacktricks.wiki/",
-            "icon": "https://book.hacktricks.wiki/en/favicon.svg"
+            "reference": "https://hacktricks.wiki/",
+            "icon": "https://hacktricks.wiki/en/favicon.svg"
         }
     },
     {

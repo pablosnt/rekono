@@ -285,7 +285,7 @@ class TasksQueue(BaseScanQueue):
                 process=result.process,
                 configuration=result.configuration,
                 intensity=result.intensity,
-                executor=result.user,
+                executor=result.executor,
                 scheduled_at=result.enqueued_at + timedelta(**{result.repeat_time_unit.lower(): result.repeat_in}),
                 repeat_in=result.repeat_in,
                 repeat_time_unit=result.repeat_time_unit,

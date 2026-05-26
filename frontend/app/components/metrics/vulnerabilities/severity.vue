@@ -25,7 +25,7 @@ const series: BarSeries[] = [
     label: "Open",
     color: (d) =>
       `var(--color-${severities.find((s) => s.value === d.severity)?.color || "primary"}-500)`,
-    legendColor: "var(--color-primary-500)",
+    legendColor: "var(--ui-primary)",
     y: (d) => d.open || 0,
   },
   {
