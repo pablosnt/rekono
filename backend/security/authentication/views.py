@@ -14,7 +14,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenBlacklistView, TokenObtainPairView, TokenRefreshView
 
-from rekono.settings import COOKIES_CONFIG, JWT_ACCESS_COOKIE, JWT_MFA_COOKIE, JWT_REFRESH_COOKIE
+from rekono.settings import CONFIG, COOKIES_CONFIG, JWT_ACCESS_COOKIE, JWT_MFA_COOKIE, JWT_REFRESH_COOKIE
 from security.authentication.serializers import MfaLoginSerializer, SendMfaEmailSerializer
 from security.authorization.permissions import IsNotAuthenticated
 
@@ -58,10 +58,18 @@ class LoginView(TokenObtainPairView):
             if "access" in response.data:
                 response.set_cookie(JWT_ACCESS_COOKIE, response.data["access"], **COOKIES_CONFIG)
                 response.set_cookie(
-                    JWT_REFRESH_COOKIE, response.data["refresh"], path="/api/security/", **COOKIES_CONFIG
+                    JWT_REFRESH_COOKIE,
+                    response.data["refresh"],
+                    path=f"{CONFIG.root_path or ''}/api/security/",
+                    **COOKIES_CONFIG,
                 )
             elif "mfa" in response.data:
-                response.set_cookie(JWT_MFA_COOKIE, response.data["mfa"], path="/api/security/mfa/", **COOKIES_CONFIG)
+                response.set_cookie(
+                    JWT_MFA_COOKIE,
+                    response.data["mfa"],
+                    path=f"{CONFIG.root_path or ''}/api/security/mfa/",
+                    **COOKIES_CONFIG,
+                )
         return response
 
 
@@ -104,7 +112,7 @@ class MfaLoginView(LoginView):
                 request._full_data = {"mfa": request.data.get("mfa"), "token": cookie}
         response = super().post(request, *args, **kwargs)
         if response.status_code == status.HTTP_200_OK:
-            response.delete_cookie(JWT_MFA_COOKIE, "/api/security/mfa/")
+            response.delete_cookie(JWT_MFA_COOKIE, f"{CONFIG.root_path or ''}/api/security/mfa/")
         return response
 
 
@@ -178,7 +186,7 @@ class LogoutView(TokenBlacklistView):
         response = super().post(request, *args, **kwargs)
         if response.status_code == status.HTTP_200_OK:
             response.delete_cookie(JWT_ACCESS_COOKIE)
-            response.delete_cookie(JWT_REFRESH_COOKIE, "/api/security/")
+            response.delete_cookie(JWT_REFRESH_COOKIE, f"{CONFIG.root_path or ''}/api/security/")
         return response
 
 
@@ -222,5 +230,10 @@ class RefreshTokenViewSet(TokenRefreshView):
         response = super().post(request, *args, **kwargs)
         if response.status_code == status.HTTP_200_OK and "access" in response.data:
             response.set_cookie(JWT_ACCESS_COOKIE, response.data["access"], **COOKIES_CONFIG)
-            response.set_cookie(JWT_REFRESH_COOKIE, response.data["refresh"], path="/api/security/", **COOKIES_CONFIG)
+            response.set_cookie(
+                JWT_REFRESH_COOKIE,
+                response.data["refresh"],
+                path=f"{CONFIG.root_path or ''}/api/security/",
+                **COOKIES_CONFIG,
+            )
         return response

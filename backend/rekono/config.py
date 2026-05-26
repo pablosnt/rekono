@@ -359,7 +359,13 @@ class RekonoConfig:
         Returns:
             str: Root path prefix for the application.
         """
-        return self._root_path.read(self.config_from_file)
+        path = self._root_path.read(self.config_from_file)
+        if path:
+            if not path.startswith("/"):
+                path = "/" + path
+            if path.endswith("/"):
+                path = path[:-1]
+        return path
 
     @property
     def secret_key(self) -> str:
