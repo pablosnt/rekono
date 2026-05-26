@@ -40,8 +40,8 @@ class HackTricks(BaseIntegration):
     """
 
     finding_types = [Host, Port, Technology]
-    sitemap_url = "https://www.hacktricks.wiki/sitemap.xml"
-    url = "https://book.hacktricks.wiki/en/"
+    sitemap_url = "https://hacktricks.wiki/en/sitemap.xml"
+    url = "https://hacktricks.wiki/en/"
 
     def __init__(self) -> None:
         """Initialize HackTricks integration with URL mappings and link discovery.
@@ -178,7 +178,14 @@ class HackTricks(BaseIntegration):
                 for link in self.all_links:
                     if self.services_base_url not in link:
                         continue
-                    url_service_path = link.replace(self.services_base_url, "").strip()
+                    url_service_path = (
+                        link.replace(self.services_base_url, "")
+                        .replace("/index.html", "")
+                        .replace("/index.html", "")
+                        .replace(".html", "")
+                        .replace(".htm", "")
+                        .strip()
+                    )
                     url_service_parts = url_service_path.split("-")
                     if "/" not in url_service_path and (
                         service_comparator in url_service_parts
