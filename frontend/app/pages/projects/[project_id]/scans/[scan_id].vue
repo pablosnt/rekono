@@ -224,6 +224,7 @@
       ref="findings"
       :task-id="route.params.scan_id"
       :project-id="route.params.project_id"
+      :show-zero-on-loading="false"
       class="mb-8"
     />
 
