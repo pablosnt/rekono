@@ -159,7 +159,16 @@ const columns: CrudTableColumn<Vulnerability>[] = [
     icon: "i-lucide-gauge",
     cell: ({ row }) => {
       const score = row.original.cvss_base_score as number | undefined;
-      return score ? table.valueCell(score.toPrecision(3)) : table.noDataCell;
+      if (!score) return table.noDataCell;
+      return row.original.cvss_vector && row.original.cvss_version
+        ? table.externalLinkCell(
+            `https://www.first.org/cvss/calculator/${row.original.cvss_version}#${row.original.cvss_vector}`,
+            undefined,
+            undefined,
+            score.toPrecision(3),
+            "Open CVSS Calculator",
+          )
+        : table.valueCell(score.toPrecision(3));
     },
   },
   {
