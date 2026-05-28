@@ -57,8 +57,9 @@ class NvdNist(BaseCveProvider):
             dict[str, Any]: JSON response containing CVE details and metadata
         """
         if self.settings.secret is None:
-            return self._request(self.session.get, self.url.format(cve=cve))
-        return self._request(self.session.get, self.url.format(cve=cve), headers={"apiKey": self.settings.secret})
+            response = self._request(self.session.get, self.url.format(cve=cve))
+        response = self._request(self.session.get, self.url.format(cve=cve), headers={"apiKey": self.settings.secret})
+        return response.get("vulnerabilities", [])[0].get("cve", {}) if len(response.get("vulnerabilities", []) or []) > 0 else response
 
     def _parse_cve(self, cve: str, data: list[dict[str, Any]] | dict[str, Any]) -> BaseCveProvider.CveEnrichment | None:
         """Parse NVD API response into a standardized CVE enrichment object.
@@ -74,23 +75,22 @@ class NvdNist(BaseCveProvider):
         Returns:
             BaseCveProvider.CveEnrichment | None: Parsed enrichment data, or None if not found.
         """
-        if isinstance(data, list) or len(data.get("vulnerabilities", []) or []) == 0:
+        if isinstance(data, list):
             return
-        info = data.get("vulnerabilities", [])[0].get("cve", {})
         enrichment = self.CveEnrichment(
-            name=info.get("cisaVulnerabilityName", cve) or cve,
+            name=data.get("cisaVulnerabilityName", cve) or cve,
             reference=self.reference.format(cve=cve),
-            status=info.get("vulnStatus", ""),
+            status=data.get("vulnStatus", ""),
         )
-        for desc in info.get("descriptions") or []:
+        for desc in data.get("descriptions") or []:
             if desc.get("lang") == "en":
                 enrichment.description = desc.get("value")
                 break
         cwe = 0
-        cvss_info = info.get("metrics", {}) or {}
+        cvss_info = data.get("metrics", {}) or {}
         for category in ["primary", "secondary"]:
             if cwe == 0:
-                for weakness in info.get("weaknesses", []) or []:
+                for weakness in data.get("weaknesses", []) or []:
                     if weakness.get("type").lower() != category:
                         continue
                     for description in weakness.get("description") or []:
@@ -116,7 +116,7 @@ class NvdNist(BaseCveProvider):
                 if enrichment.cvss_base_score and cwe > 0:
                     break
         technologies = []
-        for configuration in info.get("configurations") or []:
+        for configuration in data.get("configurations") or []:
             for node in configuration.get("nodes") or []:
                 for cpe in node.get("cpeMatch") or []:
                     if cpe.get("criteria"):

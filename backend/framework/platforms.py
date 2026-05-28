@@ -247,8 +247,7 @@ class BaseCveProvider(BaseIntegration):
         """
         try:
             # Test connectivity using Log4Shell as a well-known, reliably indexed CVE
-            self._get_cve("CVE-2021-44228")
-            return True
+            return bool(self._get_cve("CVE-2021-44228"))
         except Exception:
             return False
 
