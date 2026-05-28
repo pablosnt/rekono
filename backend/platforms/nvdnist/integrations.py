@@ -59,7 +59,11 @@ class NvdNist(BaseCveProvider):
         if self.settings.secret is None:
             response = self._request(self.session.get, self.url.format(cve=cve))
         response = self._request(self.session.get, self.url.format(cve=cve), headers={"apiKey": self.settings.secret})
-        return response.get("vulnerabilities", [])[0].get("cve", {}) if len(response.get("vulnerabilities", []) or []) > 0 else response
+        return (
+            response.get("vulnerabilities", [])[0].get("cve", {})
+            if len(response.get("vulnerabilities", []) or []) > 0
+            else response
+        )
 
     def _parse_cve(self, cve: str, data: list[dict[str, Any]] | dict[str, Any]) -> BaseCveProvider.CveEnrichment | None:
         """Parse NVD API response into a standardized CVE enrichment object.
