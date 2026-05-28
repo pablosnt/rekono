@@ -5,6 +5,7 @@ from unittest import mock
 from django.test import TestCase
 
 from findings.models import Host
+from integrations.models import Integration
 from platforms.virustotal.integrations import VirusTotal
 from platforms.virustotal.models import VirusTotalSettings
 from security.authorization.roles import Role
@@ -28,6 +29,9 @@ class VirusTotalTest(BaseTest, TestCase):
 
     def setUp(self) -> None:
         super().setUp()
+        integration = Integration.objects.get(key="virustotal")
+        integration.enabled = True
+        integration.save(update_fields=["enabled"])
         self.settings = VirusTotalSettings.objects.first()
         self.settings.secret = "fake-token"
         self.settings.save(update_fields=["_api_token"])
