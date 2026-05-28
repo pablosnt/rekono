@@ -101,6 +101,11 @@ class Host(Finding):
         city (TextField): Geolocation city name (optional, max 100 characters)
         latitude (FloatField): Geographic latitude coordinate (optional)
         longitude (FloatField): Geographic longitude coordinate (optional)
+        reputation (IntegerField): VirusTotal reputation score for the IP address (optional)
+        malicious_analysis (IntegerField): Number of malicious verdicts from VirusTotal analysis (optional)
+        suspicious_analysis (IntegerField): Number of suspicious verdicts from VirusTotal analysis (optional)
+        total_analysis (IntegerField): Total number of VirusTotal analysis engines that processed this host (optional)
+        whois (TextField): Raw WHOIS registration record for the IP address (optional)
 
     Example:
         Create a host finding with geolocation data:
@@ -496,6 +501,8 @@ class Vulnerability(TriageFinding):
         cvss_base_score (FloatField): CVSS base score numerical value (optional)
         cve (TextField): Common Vulnerabilities and Exposures identifier (optional, max 20 characters)
         cwe (TextField): Common Weakness Enumeration classification (optional, max 20 characters)
+        epss_score (FloatField): EPSS probability of exploitation in 30 days (optional, 0.0–1.0)
+        epss_percentile (FloatField): EPSS percentile rank among all scored CVEs (optional, 0.0–1.0)
         remediation (TextField): Recommended remediation steps or mitigation guidance (optional)
         reference (TextField): Security advisory or documentation links (optional, max 250 characters)
         trending (BooleanField): Active exploitation or trending status indicator (default: False)
@@ -542,6 +549,8 @@ class Vulnerability(TriageFinding):
     cvss_base_score = models.FloatField(blank=True, null=True)
     cve = models.TextField(max_length=20, blank=True, null=True)
     cwe = models.TextField(max_length=20, blank=True, null=True)
+    epss_score = models.FloatField(blank=True, null=True)
+    epss_percentile = models.FloatField(blank=True, null=True)
     remediation = models.TextField(blank=True, null=True)
     reference = models.TextField(max_length=250, blank=True, null=True)
     trending = models.BooleanField(default=False)

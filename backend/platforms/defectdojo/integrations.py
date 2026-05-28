@@ -33,11 +33,9 @@ class DefectDojo(BaseIntegration):
     finding imports, with optional reimport to update existing tests.
 
     Attributes:
-        run_per_execution (bool): Execute integration after each tool execution.
         generic_import (str): DefectDojo scan type name for generic finding imports.
     """
 
-    run_per_execution = True
     generic_import = "Generic Findings Import"
 
     @property
