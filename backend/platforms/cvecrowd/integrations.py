@@ -183,6 +183,8 @@ class CveCrowd(BaseIntegration):
         trending status, and triggering automated notifications for newly trending
         vulnerabilities across all configured projects and alert rules.
         """
+        if not self.is_enabled():
+            return
         if not self.trending_cves:
             self.logger.warning("[CVE Crowd] No trending CVEs found")
             return

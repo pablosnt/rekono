@@ -195,6 +195,24 @@ const integrationsSettings = ref({
       }),
     },
   },
+  10: {
+    config: {
+      entityName: "VulnCheck NVD++",
+      editFormFields: [
+        {
+          key: "api_token",
+          label: "API Token",
+          type: "password",
+          placeholder: "Enter your VulnCheck API token",
+          required: false,
+          hint: "A VulnCheck API token is required to use NVD++",
+        },
+      ],
+      editFormSchema: z.object({
+        api_token: validation.secret("api_token", true, 200),
+      }),
+    },
+  },
 });
 const currentIntegrationSettings = computed(() => {
   return selectedIntegration.value &&

@@ -83,6 +83,7 @@ class NvdNist(BaseCveProvider):
             return
         enrichment = self.CveEnrichment(
             name=data.get("cisaVulnerabilityName", cve) or cve,
+            technologies=self._get_technologies(data),
             reference=self.reference.format(cve=cve),
             status=data.get("vulnStatus", ""),
         )
@@ -119,16 +120,30 @@ class NvdNist(BaseCveProvider):
                                 break
                 if enrichment.cvss_base_score and cwe > 0:
                     break
+        if cwe > 0:
+            enrichment.cwe = f"CWE-{cwe}"
+        return enrichment
+
+    def _get_technologies(self, data: dict[str, Any]) -> list[str]:
+        """Extract affected technology CPE identifiers from NVD configuration data.
+
+        Traverses the nested configurations structure to collect all CPE criteria
+        strings, which identify the software products and versions affected by
+        the vulnerability.
+
+        Args:
+            data (dict[str, Any]): NVD API CVE record.
+
+        Returns:
+            list[str]: CPE criteria strings collected from all configuration nodes.
+        """
         technologies = []
         for configuration in data.get("configurations") or []:
             for node in configuration.get("nodes") or []:
                 for cpe in node.get("cpeMatch") or []:
                     if cpe.get("criteria"):
                         technologies.append(cpe.get("criteria"))
-        enrichment.technologies = technologies
-        if cwe > 0:
-            enrichment.cwe = f"CWE-{cwe}"
-        return enrichment
+        return technologies
 
     def cve_quality_score(self, data: BaseCveProvider.CveEnrichment) -> int:
         """Calculate NVD-specific data quality score.

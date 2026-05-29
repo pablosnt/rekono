@@ -26,6 +26,7 @@ from framework.queues import BaseQueue
 from platforms.cvecrowd.integrations import CveCrowd
 from platforms.defectdojo.integrations import DefectDojo
 from platforms.euvd import EUVD
+from platforms.first import First
 from platforms.ghsa import GHSA
 from platforms.hacktricks import HackTricks
 from platforms.hosts_metadata import HostsMetadata
@@ -34,6 +35,7 @@ from platforms.nvdnist.integrations import NvdNist
 from platforms.osv import OSV
 from platforms.telegram_app.notifications import Telegram
 from platforms.virustotal.integrations import VirusTotal
+from platforms.vulncheck.integrations import VulnCheck
 from settings.models import Settings
 
 
@@ -87,8 +89,14 @@ class FindingsQueue(BaseQueue):
         settings = Settings.objects.first()
         if findings:
             # Initialize integration and notification platforms
-            cve_providers: list[BaseCveProvider] = [NvdNist(), GHSA(), EUVD(), OSV()]
-            integrations_per_finding: list[BaseIntegration] = [HackTricks(), CveCrowd(), HostsMetadata(), VirusTotal()]
+            cve_providers: list[BaseCveProvider] = [VulnCheck(), NvdNist(), GHSA(), EUVD(), OSV()]
+            integrations_per_finding: list[BaseIntegration] = [
+                HackTricks(),
+                CveCrowd(),
+                HostsMetadata(),
+                VirusTotal(),
+                First(),
+            ]
             integrations_per_execution: list[BaseIntegration] = [DefectDojo()]
             notifications: list[BaseNotification] = [SMTP(), Telegram()]
             # Process each finding individually

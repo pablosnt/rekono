@@ -37,6 +37,7 @@ urlpatterns = [
     path("api/", include("platforms.nvdnist.urls")),
     path("api/", include("platforms.telegram_app.urls")),
     path("api/", include("platforms.virustotal.urls")),
+    path("api/", include("platforms.vulncheck.urls")),
     path("api/", include("processes.urls")),
     path("api/", include("projects.urls")),
     path("api/", include("reporting.urls")),

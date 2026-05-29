@@ -1,7 +1,7 @@
 """Background job queues for alert monitoring.
 
 Queue classes and job functions for handling background monitoring tasks.
-Includes trending vulnerability monitoring and automated job scheduling.
+Includes trending CVE monitoring, EPSS score updates, and automated job scheduling.
 """
 
 from datetime import timedelta
@@ -14,14 +14,16 @@ from rq.job import Job
 from alerts.models import MonitorSettings
 from framework.queues import BaseQueue
 from platforms.cvecrowd.integrations import CveCrowd
+from platforms.first import First
 
 
 class MonitorQueue(BaseQueue):
     """Queue for managing monitoring background jobs.
 
     Handles scheduling and execution of periodic monitoring tasks that check
-    for trending vulnerabilities and security events. Uses RQ for job management
-    with automatic rescheduling.
+    for trending vulnerabilities, refresh EPSS scores, and process other
+    security intelligence updates. Uses RQ for job management with automatic
+    rescheduling.
 
     Attributes:
         name (str): The name of the monitoring queue
@@ -53,14 +55,14 @@ class MonitorQueue(BaseQueue):
         """Execute the monitoring job.
 
         Runs the monitoring process by updating the last monitor timestamp
-        and checking all configured monitoring platforms for threat intelligence
-        updates.
+        and invoking each configured monitoring platform to refresh their
+        security intelligence data (trending CVEs, EPSS scores, etc.).
         """
         BaseQueue.logger.info("[Monitor] Monitor job has started")
         settings = MonitorSettings.objects.first()
         settings.last_monitor = timezone.now()
         settings.save(update_fields=["last_monitor"])
-        for platform in [CveCrowd()]:
+        for platform in [CveCrowd(), First()]:
             platform.monitor()
 
     @staticmethod

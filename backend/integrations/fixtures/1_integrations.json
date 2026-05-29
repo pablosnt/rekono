@@ -103,8 +103,20 @@
             "name": "FIRST EPSS",
             "description": "FIRST Exploit Prediction Scoring System from where Rekono will get EPSS scores and percentiles for detected CVEs",
             "enabled": true,
-            "reference": "https://api.first.org/",
+            "reference": "https://first.org/epss",
             "icon": "https://www.first.org/favicon.ico"
+        }
+    },
+    {
+        "model": "integrations.integration",
+        "pk": 10,
+        "fields": {
+            "key": "vulncheck",
+            "name": "VulnCheck NVD++",
+            "description": "VulnCheck NVD++ from where Rekono will get enriched CVE information with additional threat intelligence to aggregate findings information",
+            "enabled": false,
+            "reference": "https://www.vulncheck.com/nvd2",
+            "icon": "https://vulncheck.com/favicon.ico"
         }
     }
 ]
