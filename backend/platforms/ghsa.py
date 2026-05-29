@@ -51,22 +51,26 @@ class GHSA(BaseCveProvider):
         if isinstance(data, dict) or len(data or []) == 0:
             return
         info = data[0]
-        cvss_data = {}
-        for key in ["4", "3", "2"]:
-            _cvss = info["cvss_severities"].get(f"cvss_v{key}")
-            if not _cvss or _cvss.get("score", 0) == 0:
+        cvss_base_score = cvss_vector = cvss_version = None
+        for version in ["4", "3", "2"]:
+            _cvss = info["cvss_severities"].get(f"cvss_v{version}")
+            cvss_base_score = _cvss.get("score", 0)
+            if not _cvss or cvss_base_score == 0:
                 continue
-            cvss_data = _cvss
+            cvss_vector = _cvss.get("vector_string")
+            cvss_version = f"{version}.0"
+            if cvss_vector:
+                parsed_version = cvss_vector.replace("CVSS:", "").split("/", 1)[0]
+                if parsed_version and parsed_version.startswith(version):
+                    cvss_version = parsed_version
             break
         return self.CveEnrichment(
             name=info["summary"],
             description=info["description"],
             cwe=info["cwes"][-1]["cwe_id"] if len(info.get("cwes") or []) else None,
-            cvss_base_score=cvss_data.get("score"),
-            cvss_vector=cvss_data.get("vector_string"),
-            cvss_version=cvss_data.get("vector_string", "").replace("CVSS:", "").split("/", 1)[0]
-            if cvss_data.get("vector_string")
-            else None,
+            cvss_base_score=cvss_base_score,
+            cvss_vector=cvss_vector,
+            cvss_version=cvss_version,
             epss_score=info.get("epss", {}).get("percentage"),
             epss_percentile=info.get("epss", {}).get("percentile"),
             technologies=[

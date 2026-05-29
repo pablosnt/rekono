@@ -56,22 +56,25 @@ class OSV(BaseCveProvider):
         """
         if isinstance(data, list) or not data:
             return
-        cvss_data = {}
+        cvss_base_score = cvss_vector = cvss_version = None
         if data.get("severity"):
             for version in ["4", "3", "2"]:
                 for severity in data.get("severity") or []:
                     if severity["type"] == f"CVSS_V{version}":
-                        cvss_data = severity
+                        cvss_vector = severity.get("score")
+                        cvss_version = f"{version}.0"
+                        if cvss_vector:
+                            parsed_version = cvss_vector.replace("CVSS:", "").split("/", 1)[0]
+                            if parsed_version and parsed_version.startswith(version):
+                                cvss_version = parsed_version
+                        if cvss_vector and severity.get("type") in cvss_class_mapping:
+                            try:
+                                cvss_base_score = float(cvss_class_mapping[severity["type"]](cvss_vector).scores()[0])
+                            except CVSSError:
+                                pass
                         break
-                if cvss_data:
+                if cvss_vector:
                     break
-        vector = cvss_data.get("score")
-        cvss_base_score = None
-        if vector and cvss_data.get("type") in cvss_class_mapping:
-            try:
-                cvss_base_score = float(cvss_class_mapping[cvss_data["type"]](vector).scores()[0])
-            except CVSSError:
-                pass
         technologies = []
         for affected in data.get("affected", []):
             package = affected.get("package", {}).get("purl") or affected.get("package", {}).get("name")
@@ -83,8 +86,8 @@ class OSV(BaseCveProvider):
             name=data.get("summary", data["id"]),
             description=data.get("details"),
             cvss_base_score=cvss_base_score,
-            cvss_vector=vector,
-            cvss_version=vector.replace("CVSS:", "").split("/", 1)[0] if vector else None,
+            cvss_vector=cvss_vector,
+            cvss_version=cvss_version,
             technologies=technologies,
             reference=self.reference.format(cve=cve),
         )

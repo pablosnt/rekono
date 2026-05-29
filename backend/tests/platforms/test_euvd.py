@@ -13,7 +13,7 @@ from tests.framework.data import SetupProject
 
 _CVE = "CVE-2021-44228"
 
-_euvd_item = {
+data = {
     "id": "EUVD-2024-46955",
     "aliases": f"{_CVE}\nCVE-2021-45046",
     "description": "Remote code execution in Apache Log4j2 via JNDI lookup",
@@ -34,7 +34,7 @@ _euvd_item_no_match = {
 
 
 def _mock_request_success(*args: Any, **kwargs: Any) -> dict[str, Any]:
-    return {"items": [_euvd_item]}
+    return {"items": [data]}
 
 
 def _mock_request_no_match(*args: Any, **kwargs: Any) -> dict[str, Any]:
@@ -57,20 +57,20 @@ class EuvdTest(BaseTest, TestCase):
         # Retrieval
         enrichment = self.euvd.get_cve(_CVE)
         self.assertIsNotNone(enrichment)
-        self.assertEqual(_euvd_item["id"], enrichment.name)
-        self.assertEqual(_euvd_item["description"], enrichment.description)
-        self.assertEqual(_euvd_item["baseScore"], enrichment.cvss_base_score)
-        self.assertEqual(_euvd_item["baseScoreVector"], enrichment.cvss_vector)
-        self.assertEqual(_euvd_item["baseScoreVersion"], enrichment.cvss_version)
+        self.assertEqual(data["id"], enrichment.name)
+        self.assertEqual(data["description"], enrichment.description)
+        self.assertEqual(data["baseScore"], enrichment.cvss_base_score)
+        self.assertEqual(data["baseScoreVector"], enrichment.cvss_vector)
+        self.assertEqual(data["baseScoreVersion"], enrichment.cvss_version)
         self.assertIsNone(enrichment.cwe)
-        self.assertEqual(_euvd_item["epss"], enrichment.epss_score)
+        self.assertEqual(data["epss"], enrichment.epss_score)
         self.assertIsNone(enrichment.epss_percentile)
-        self.assertEqual([_euvd_item["enisaIdProduct"][0]["id"]], enrichment.technologies)
-        self.assertEqual(self.euvd.reference.format(euvd=_euvd_item["id"]), enrichment.reference)
+        self.assertEqual([data["enisaIdProduct"][0]["id"]], enrichment.technologies)
+        self.assertEqual(self.euvd.reference.format(euvd=data["id"]), enrichment.reference)
         self.assertIsNone(enrichment.status)
 
         # Quality Score
-        self.assertEqual(5, self.euvd.cve_quality_score(enrichment))
+        self.assertEqual(7, self.euvd.cve_quality_score(enrichment))
 
         # Save
         self.euvd.save(self.vulnerability, enrichment)

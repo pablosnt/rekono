@@ -62,7 +62,7 @@ class NvdNist(BaseCveProvider):
         return (
             response.get("vulnerabilities", [])[0].get("cve", {})
             if len(response.get("vulnerabilities", []) or []) > 0
-            else response
+            else response.get("vulnerabilities", [])
         )
 
     def _parse_cve(self, cve: str, data: list[dict[str, Any]] | dict[str, Any]) -> BaseCveProvider.CveEnrichment | None:
@@ -144,7 +144,7 @@ class NvdNist(BaseCveProvider):
             int: Quality score adjusted for NVD analysis status.
         """
         status = data.status.lower()
-        if data.status in ["received", "rejected", "awaiting analysis", "undergoing analysis", "deferred"]:
+        if status in ["received", "rejected", "awaiting analysis", "undergoing analysis", "deferred"]:
             return 0
         score = super().cve_quality_score(data)
-        return score - 2 if status != "modified" else score
+        return score - 4 if status == "modified" else score

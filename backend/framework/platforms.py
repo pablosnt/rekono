@@ -302,13 +302,9 @@ class BaseCveProvider(BaseIntegration):
         score = 10
         if not data.description:
             score -= 8
-        if (
-            not data.cvss_base_score
-            or not data.cvss_version
-            or not data.cvss_vector
-            or not data.cwe
-            or len(list(data.technologies or [])) == 0
-        ):
+        if not data.cwe or len(list(data.technologies or [])) == 0:
+            score -= 3
+        if not data.cvss_base_score or not data.cvss_version or not data.cvss_vector:
             score -= 5
         elif data.cvss_version.startswith("2"):
             score -= 2

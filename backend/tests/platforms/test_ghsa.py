@@ -11,9 +11,7 @@ from tests.framework.data import SetupProject
 
 # pytype: disable=wrong-arg-types
 
-_CVE = "CVE-2021-44228"
-
-_ghsa_item = {
+data = {
     "summary": "Critical RCE in Apache Log4j",
     "description": "Remote code execution vulnerability in Apache Log4j2 via JNDI lookup",
     "cwes": [{"cwe_id": "CWE-400"}, {"cwe_id": "CWE-917"}],
@@ -35,11 +33,11 @@ _ghsa_item = {
 
 
 def _mock_request_success(*args: Any, **kwargs: Any) -> list[dict[str, Any]]:
-    return [_ghsa_item]
+    return [data]
 
 
 def _mock_request_unreviewed(*args: Any, **kwargs: Any) -> list[dict[str, Any]]:
-    return [{**_ghsa_item, "type": "unreviewed"}]
+    return [{**data, "type": "unreviewed"}]
 
 
 def _mock_request_empty(*args: Any, **kwargs: Any) -> list:
@@ -52,7 +50,7 @@ class GhsaTest(BaseTest, TestCase):
     def setUp(self) -> None:
         super().setUp()
         self.vulnerability = Vulnerability.objects.create(
-            name="test", description="test", cve=_CVE, severity=Severity.LOW
+            name="test", description="test", cve="CVE-2021-44228", severity=Severity.LOW
         )
         self.vulnerability.executions.add(self.execution)
         self.ghsa = GHSA()
@@ -60,19 +58,19 @@ class GhsaTest(BaseTest, TestCase):
     @mock.patch("platforms.ghsa.GHSA._request", _mock_request_success)
     def test_enrichement(self) -> None:
         # Retrieval
-        enrichment = self.ghsa.get_cve(_CVE)
+        enrichment = self.ghsa.get_cve(self.vulnerability.cve)
         self.assertIsNotNone(enrichment)
-        self.assertEqual(_ghsa_item["summary"], enrichment.name)
-        self.assertEqual(_ghsa_item["description"], enrichment.description)
-        self.assertEqual(_ghsa_item["cvss_severities"]["cvss_v4"]["score"], enrichment.cvss_base_score)
-        self.assertEqual(_ghsa_item["cvss_severities"]["cvss_v4"]["vector_string"], enrichment.cvss_vector)
+        self.assertEqual(data["summary"], enrichment.name)
+        self.assertEqual(data["description"], enrichment.description)
+        self.assertEqual(data["cvss_severities"]["cvss_v4"]["score"], enrichment.cvss_base_score)
+        self.assertEqual(data["cvss_severities"]["cvss_v4"]["vector_string"], enrichment.cvss_vector)
         self.assertEqual("4.0", enrichment.cvss_version)
         self.assertEqual("CWE-917", enrichment.cwe)
-        self.assertEqual(_ghsa_item["epss"]["percentage"], enrichment.epss_score)
-        self.assertEqual(_ghsa_item["epss"]["percentile"], enrichment.epss_percentile)
-        self.assertEqual([_ghsa_item["vulnerabilities"][0]["package"]["name"]], enrichment.technologies)
-        self.assertEqual(_ghsa_item["html_url"], enrichment.reference)
-        self.assertEqual(_ghsa_item["type"], enrichment.status)
+        self.assertEqual(data["epss"]["percentage"], enrichment.epss_score)
+        self.assertEqual(data["epss"]["percentile"], enrichment.epss_percentile)
+        self.assertEqual([data["vulnerabilities"][0]["package"]["name"]], enrichment.technologies)
+        self.assertEqual(data["html_url"], enrichment.reference)
+        self.assertEqual(data["type"], enrichment.status)
 
         # Quality Score
         self.assertEqual(11, self.ghsa.cve_quality_score(enrichment))
@@ -93,7 +91,7 @@ class GhsaTest(BaseTest, TestCase):
 
     @mock.patch("platforms.ghsa.GHSA._request", _mock_request_unreviewed)
     def test_unreviewed(self) -> None:
-        enrichment = self.ghsa.get_cve(_CVE)
+        enrichment = self.ghsa.get_cve(self.vulnerability.cve)
         self.assertEqual(0, self.ghsa.cve_quality_score(enrichment))
 
     @mock.patch("platforms.ghsa.GHSA._request", _mock_request_success)
@@ -103,3 +101,4 @@ class GhsaTest(BaseTest, TestCase):
     @mock.patch("platforms.ghsa.GHSA._request", _mock_request_empty)
     def test_is_not_available(self) -> None:
         self.assertFalse(self.ghsa.is_available())
+        self.assertIsNone(self.ghsa.get_cve(self.vulnerability.cve))
