@@ -253,22 +253,27 @@ class VulnerabilityCWEStatsViewSet(StatsViewSet):
 
     Provides vulnerability counts categorized by Common Weakness Enumeration
     identifiers for vulnerability pattern analysis and remediation planning.
+    Uses Python-side aggregation because cwes is a JSONField; the primary CWE
+    for grouping is cwes[-1] (the highest-numbered entry, kept sorted on save).
 
     Attributes:
-        queryset: Active vulnerabilities grouped by CWE with counts
-        ordering: Most prevalent open vulnerabilities first
+        queryset: Base filtered vulnerabilities (aggregation done in filter_queryset)
         serializer_class: CWE vulnerability statistics serialization
         filterset_class: Vulnerability filtering capabilities
+        pagination_class: Standard pagination for results
     """
 
     queryset = (
         Vulnerability.objects.filter(created_from_user_input=False)
         .exclude(triage_status=TriageStatus.FALSE_POSITIVE)
-        .exclude(cwe=None)
+        .exclude(cwes=None)
+        .exclude(cwes=[])
+        .annotate(cwe=F("cwes__-1"))
         .values("cwe")
         .annotate(open=Count("id", distinct=True, filter=Q(is_fixed=False)))
         .annotate(fixed=Count("id", distinct=True, filter=Q(is_fixed=True)))
     )
+
     ordering = ["-open", "cwe"]
     serializer_class = VulnerabilityCWEStatsSerializer
     filterset_class = VulnerabilityFilter
