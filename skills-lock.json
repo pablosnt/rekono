@@ -15,7 +15,19 @@
       "source": "nuxt/ui",
       "sourceType": "github",
       "skillPath": "skills/nuxt-ui/SKILL.md",
-      "computedHash": "73c6af534e1efcdfac6f3ac009ad5afe5aa67e12d90c60ee80f686573967ffe6"
+      "computedHash": "2d58c6092b7028db223a819d5a37badc860a4036ca134a3e457ce7b056562f72"
+    },
+    "rekono-docstrings": {
+      "source": "pablosnt/skills",
+      "sourceType": "github",
+      "skillPath": "skills/rekono-docstrings/SKILL.md",
+      "computedHash": "36c0786589bd011b4564cd9d2fba84dbde0d16aae2ee53c5159556e2019882dd"
+    },
+    "rekono-integration": {
+      "source": "pablosnt/skills",
+      "sourceType": "github",
+      "skillPath": "skills/rekono-integration/SKILL.md",
+      "computedHash": "1805e480e1395da548a509d3bbca387d42c3ff9e36d06438d790292cb45e12be"
     },
     "rekono-page": {
       "source": "pablosnt/skills",
