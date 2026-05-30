@@ -7,7 +7,7 @@ configuration, and custom update logic.
 
 from typing import Any
 
-from rest_framework.serializers import ModelSerializer
+from rest_framework.serializers import CharField, ListField, ModelSerializer
 
 from findings.enums import Severity, TriageStatus
 from findings.framework.serializers import FindingSerializer, TriageFindingSerializer
@@ -309,11 +309,13 @@ class SimpleVulnerabilitySerializer(ModelSerializer):
         port (SimplePortSerializer): Nested port relationship (read-only)
         technology (SimpleTechnologySerializer): Nested technology relationship (read-only)
         severity (IntegerChoicesField): Severity level choice field
+        cwes (ListField): Sorted list of CWE identifiers
     """
 
     port = SimplePortSerializer(many=False, read_only=True)
     technology = SimpleTechnologySerializer(many=False, read_only=True)
     severity = IntegerChoicesField(model=Severity, required=False)
+    cwes = ListField(child=CharField(), read_only=True)
 
     class Meta:
         """Meta configuration for SimpleVulnerabilitySerializer.
@@ -338,7 +340,12 @@ class SimpleVulnerabilitySerializer(ModelSerializer):
             "cvss_vector",
             "cvss_base_score",
             "cve",
-            "cwe",
+            "euvd_id",
+            "ghsa_id",
+            "osv_generic_id",
+            "cwes",
+            "epss_score",
+            "epss_percentile",
             "remediation",
             "reference",
             "trending",

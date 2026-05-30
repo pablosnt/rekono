@@ -64,6 +64,7 @@ INSTALLED_APPS = [
     "platforms.nvdnist",
     "platforms.telegram_app",
     "platforms.virustotal",
+    "platforms.vulncheck",
     "parameters",
     "projects",
     "reporting",

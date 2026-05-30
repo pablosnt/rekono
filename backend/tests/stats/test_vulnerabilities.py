@@ -61,15 +61,15 @@ class VulnerabilityCWEStatsTest(ApiTest, TestCase):
     data = [
         SetupProject(
             vulnerabilities_fields=[
-                {"cwe": "CWE-200"},
-                {"cwe": "CWE-79"},
-                {"cwe": "CWE-89"},
-                {"cwe": "CWE-200", "is_fixed": True},
-                {"cwe": "CWE-79"},
-                {"cwe": None},
+                {"cwes": ["CWE-200"]},
+                {"cwes": ["CWE-79"]},
+                {"cwes": ["CWE-89"]},
+                {"cwes": ["CWE-200"], "is_fixed": True},
+                {"cwes": ["CWE-79"]},
+                {"cwes": []},
             ]
         ),
-        SetupProject(vulnerabilities_fields=[{"cwe": "CWE-22"}, {"cwe": "CWE-200"}]),
+        SetupProject(vulnerabilities_fields=[{"cwes": ["CWE-22"]}, {"cwes": ["CWE-200"]}]),
         SetupProject(1, 0),
     ]
     cases = [

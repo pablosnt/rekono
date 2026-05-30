@@ -52,7 +52,7 @@ export default function () {
   function cve(
     field: string = "cve",
     required: boolean = true,
-    max: number = 20,
+    max: number = 30,
   ) {
     return applyRegex(field, required, max, /^CVE-\d{4}-\d{1,7}$/u);
   }

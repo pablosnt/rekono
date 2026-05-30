@@ -178,7 +178,7 @@ class TestingDataMixin:
                                         "name": f"Vulnerability {_vulnerability_index}",
                                         "description": f"Vulnerability {_vulnerability_index}",
                                         "cve": f"CVE-2025-{3000 + _vulnerability_index}",
-                                        "cwe": "CWE-200",
+                                        "cwes": ["CWE-200"],
                                         **vulnerability_fields,
                                         "technology": technology,
                                     }

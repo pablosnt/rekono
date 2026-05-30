@@ -6,7 +6,7 @@
             "key": "defectdojo",
             "name": "DefectDojo",
             "description": "Vulnerability management platform where Rekono will import findings when synchronization is enabled at project level",
-            "enabled": true,
+            "enabled": false,
             "reference": "https://www.defectdojo.com/",
             "icon": "https://defectdojo.com/hubfs/DefectDojo_Symbol_Color-1.png"
         }
@@ -17,7 +17,7 @@
         "fields": {
             "key": "nvdnist",
             "name": "NVD NIST",
-            "description": "National Vulnerability Database from which Rekono will get CVE information to aggregate findings information",
+            "description": "National Vulnerability Database from where Rekono will get CVE information to aggregate findings information",
             "enabled": true,
             "reference": "https://nvd.nist.gov/",
             "icon": "https://nvd.nist.gov/site-media/images/favicons/favicon-32x32.png"
@@ -42,7 +42,7 @@
             "key": "cvecrowd",
             "name": "CVE Crowd",
             "description": "Platform that identifies the most trending CVEs at the moment based on their impact on social networks, and whose data will be used by Rekono to check if the CVEs detected are trending or not",
-            "enabled": true,
+            "enabled": false,
             "reference": "https://cvecrowd.com/",
             "icon": "https://cvecrowd.com/static/img/icon-small-crowd.svg"
         }
@@ -54,9 +54,69 @@
             "key": "virustotal",
             "name": "Virus Total",
             "description": "Malware analysis platform that analyzes files, hosts or URLs, and whose reputation data will be used by Rekono to add context to the hosts identified",
-            "enabled": true,
+            "enabled": false,
             "reference": "https://www.virustotal.com/",
             "icon": "https://www.virustotal.com/gui/images/manifest/icon-192x192.png"
+        }
+    },
+    {
+        "model": "integrations.integration",
+        "pk": 6,
+        "fields": {
+            "key": "ghsa",
+            "name": "GitHub Security Advisories",
+            "description": "GitHub Security Advisories from where Rekono will get CVE information to aggregate findings information",
+            "enabled": true,
+            "reference": "https://github.com/advisories",
+            "icon": "https://github.com/fluidicon.png"
+        }
+    },
+    {
+        "model": "integrations.integration",
+        "pk": 7,
+        "fields": {
+            "key": "euvd",
+            "name": "EU Vulnerability Database",
+            "description": "European Union Vulnerability Database from where Rekono will get CVE information to aggregate findings information",
+            "enabled": true,
+            "reference": "https://euvd.enisa.europa.eu/homepage",
+            "icon": "https://euvd.enisa.europa.eu/favicon.ico"
+        }
+    },
+    {
+        "model": "integrations.integration",
+        "pk": 8,
+        "fields": {
+            "key": "osv",
+            "name": "Open Source Vulnerabilities",
+            "description": "Open Source Vulnerabilities from where Rekono will get CVE information to aggregate findings information",
+            "enabled": true,
+            "reference": "https://osv.dev/",
+            "icon": "https://osv.dev/static/img/favicon-32x32.png"
+        }
+    },
+    {
+        "model": "integrations.integration",
+        "pk": 9,
+        "fields": {
+            "key": "first",
+            "name": "FIRST EPSS",
+            "description": "FIRST Exploit Prediction Scoring System from where Rekono will get EPSS scores and percentiles for detected CVEs",
+            "enabled": true,
+            "reference": "https://first.org/epss",
+            "icon": "https://www.first.org/favicon.ico"
+        }
+    },
+    {
+        "model": "integrations.integration",
+        "pk": 10,
+        "fields": {
+            "key": "vulncheck",
+            "name": "VulnCheck NVD++",
+            "description": "VulnCheck NVD++ from where Rekono will get enriched CVE information with additional threat intelligence to aggregate findings information",
+            "enabled": false,
+            "reference": "https://www.vulncheck.com/nvd2",
+            "icon": "https://vulncheck.com/favicon.ico"
         }
     }
 ]

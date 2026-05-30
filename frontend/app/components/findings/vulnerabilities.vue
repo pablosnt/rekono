@@ -11,11 +11,20 @@
       ...(port || technology ? [] : ['technology', 'port']),
       'name',
       'severity',
+      { id: 'cvss_base_score', label: 'CVSS' },
       { id: 'cve', label: 'CVE' },
-      { id: 'cwe', label: 'CWE' },
+      { id: 'euvd_id', label: 'EUVD' },
+      { id: 'ghsa_id', label: 'GHSA' },
+      { id: 'osv_generic_id', label: 'OSV' },
+      { id: 'cwes', label: 'CWE' },
+      { id: 'epss_score', label: 'EPSS' },
     ]"
     :visibility="{
       description: false,
+      euvd_id: false,
+      ghsa_id: false,
+      osv_generic_id: false,
+      epss_percentile: false,
     }"
     :extra-dropdown-actions="dropdownActions"
     :custom-default-filters="
@@ -31,7 +40,7 @@
 </template>
 
 <script setup lang="ts">
-import { h } from "vue";
+import { h, resolveComponent } from "vue";
 import { UTooltip, UButton, UIcon } from "#components";
 import type { CrudTableColumn } from "~/types/crud";
 import { severities } from "~/constants";
@@ -196,23 +205,58 @@ const columns: CrudTableColumn<Vulnerability>[] = [
     },
   },
   {
-    accessorKey: "cwe",
-    header: "CWE",
-    icon: "i-lucide-tag",
-    cell: ({ row }) => table.valueCell(row.getValue("cwe")),
+    accessorKey: "euvd_id",
+    header: "EUVD ID",
+    icon: "i-lucide-hash",
+    cell: ({ row }) =>
+      row.original.euvd_id
+        ? table.valueCell(row.original.euvd_id)
+        : table.noDataCell,
   },
   {
-    accessorKey: "reference",
-    header: "Reference",
-    icon: "i-lucide-link",
+    accessorKey: "ghsa_id",
+    header: "GHSA ID",
+    icon: "i-lucide-hash",
     cell: ({ row }) =>
-      table.externalLinkCell(
-        row.original.reference,
-        "i-lucide-external-link",
-        undefined,
-        undefined,
-        "Reference",
-      ),
+      row.original.ghsa_id
+        ? table.valueCell(row.original.ghsa_id)
+        : table.noDataCell,
+  },
+  {
+    accessorKey: "osv_generic_id",
+    header: "OSV ID",
+    icon: "i-lucide-hash",
+    cell: ({ row }) =>
+      row.original.osv_generic_id
+        ? table.valueCell(row.original.osv_generic_id)
+        : table.noDataCell,
+  },
+  {
+    accessorKey: "cwes",
+    header: "CWE",
+    icon: "i-lucide-tag",
+    cell: ({ row }) =>
+      row.original.cwes?.length
+        ? h(resolveComponent("Tags"), { tags: row.original.cwes })
+        : table.noDataCell,
+  },
+  {
+    accessorKey: "epss_score",
+    header: "EPSS",
+    icon: "i-lucide-brain-circuit",
+    cell: ({ row }) =>
+      row.original.epss_score
+        ? table.valueCell(`${row.original.epss_score.toPrecision(4)}%`)
+        : table.noDataCell,
+  },
+  {
+    accessorKey: "epss_percentile",
+    header: "EPSS Percentile",
+    icon: "i-lucide-brain-circuit",
+    cell: ({ row }) =>
+      row.original.epss_percentile
+        ? table.valueCell(`${row.original.epss_percentile.toPrecision(4)}%`)
+        : table.noDataCell,
   },
   {
     accessorKey: "exploit",
@@ -228,6 +272,19 @@ const columns: CrudTableColumn<Vulnerability>[] = [
       );
     },
   },
+  {
+    accessorKey: "reference",
+    header: "Reference",
+    icon: "i-lucide-link",
+    cell: ({ row }) =>
+      table.externalLinkCell(
+        row.original.reference,
+        "i-lucide-external-link",
+        undefined,
+        undefined,
+        "Reference",
+      ),
+  },
 ];
 
 function dropdownActions(item: Vulnerability) {
@@ -238,6 +295,45 @@ function dropdownActions(item: Vulnerability) {
             label: "Copy CVE",
             icon: "i-lucide-hash",
             onSelect: () => copyText(item.cve, "CVE copied to clipboard"),
+          },
+        ]
+      : []),
+    ...(item.cve
+      ? [
+          {
+            label: "Copy CVE",
+            icon: "i-lucide-hash",
+            onSelect: () => copyText(item.cve, "CVE copied to clipboard"),
+          },
+        ]
+      : []),
+    ...(item.euvd_id
+      ? [
+          {
+            label: "Copy EUVD ID",
+            icon: "i-lucide-hash",
+            onSelect: () =>
+              copyText(item.euvd_id, "EUVD ID copied to clipboard"),
+          },
+        ]
+      : []),
+    ...(item.ghsa_id
+      ? [
+          {
+            label: "Copy GHSA ID",
+            icon: "i-lucide-hash",
+            onSelect: () =>
+              copyText(item.ghsa_id, "GHSA ID copied to clipboard"),
+          },
+        ]
+      : []),
+    ...(item.osv_generic_id
+      ? [
+          {
+            label: "Copy OSV ID",
+            icon: "i-lucide-hash",
+            onSelect: () =>
+              copyText(item.osv_generic_id, "OSV ID copied to clipboard"),
           },
         ]
       : []),

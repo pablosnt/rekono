@@ -5,7 +5,7 @@ and search operations through the REST API with field-specific filter
 configurations and relationship-based filtering.
 """
 
-from django_filters.filters import ModelChoiceFilter
+from django_filters.filters import CharFilter, ModelChoiceFilter
 
 from findings.framework.filters import FindingFilter, TriageFindingFilter
 from findings.models import (
@@ -225,6 +225,7 @@ class VulnerabilityFilter(TriageFindingFilter):
 
     port = MultipleNumberFilter(fields=["technology__port", "port"])
     host = MultipleNumberFilter(fields=["technology__port__host", "port__host"])
+    cwe = CharFilter(field_name="cwes", lookup_expr="icontains")
 
     class Meta:
         """Meta configuration for VulnerabilityFilter.
@@ -249,8 +250,12 @@ class VulnerabilityFilter(TriageFindingFilter):
             "severity": ["exact"],
             "cvss_version": ["exact"],
             "cvss_base_score": ["gte", "lte", "exact"],
-            "cve": ["exact", "icontains"],
-            "cwe": ["exact", "icontains"],
+            "epss_score": ["gte", "lte"],
+            "epss_percentile": ["gte", "lte"],
+            "cve": ["exact"],
+            "euvd_id": ["exact"],
+            "ghsa_id": ["exact"],
+            "osv_generic_id": ["exact"],
             "trending": ["exact"],
         }
 
@@ -276,6 +281,7 @@ class ExploitFilter(TriageFindingFilter):
     technology = MultipleNumberFilter(fields=["technology", "vulnerability__technology"])
     technology__name = MultipleCharFilter(fields=["technology__name", "vulnerability__technology__name"])
     technology__version = MultipleCharFilter(fields=["technology__version", "vulnerability__technology__version"])
+    vulnerability__cwe = CharFilter(field_name="vulnerability__cwes", lookup_expr="icontains")
 
     class Meta:
         """Meta configuration for ExploitFilter.
@@ -294,8 +300,10 @@ class ExploitFilter(TriageFindingFilter):
             "vulnerability": ["exact"],
             "vulnerability__name": ["exact", "icontains"],
             "vulnerability__severity": ["exact"],
-            "vulnerability__cve": ["exact", "icontains"],
-            "vulnerability__cwe": ["exact", "icontains"],
+            "vulnerability__cve": ["exact"],
+            "vulnerability__euvd_id": ["exact"],
+            "vulnerability__ghsa_id": ["exact"],
+            "vulnerability__osv_generic_id": ["exact"],
             "title": ["exact", "icontains"],
             "edb_id": ["exact"],
             "reference": ["exact", "icontains"],

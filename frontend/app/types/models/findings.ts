@@ -101,7 +101,12 @@ export interface Vulnerability extends Finding {
   cvss_vector?: string;
   cvss_base_score?: number;
   cve?: string;
-  cwe?: string;
+  euvd_id?: string;
+  ghsa_id?: string;
+  osv_generic_id?: string;
+  cwes: string[];
+  epss_score?: number;
+  epss_percentile?: number;
   remediation?: string;
   reference?: string;
   trending: boolean;

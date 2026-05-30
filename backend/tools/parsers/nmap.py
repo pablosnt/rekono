@@ -112,7 +112,7 @@ class Nmap(BaseParser):
                         description="Anonymous login is allowed in FTP",
                         severity=Severity.CRITICAL,
                         # CWE-287: Improper Authentication
-                        cwe="CWE-287",
+                        cwes=["CWE-287"],
                         reference="https://book.hacktricks.xyz/pentesting/pentesting-ftp#anonymous-login",
                     )
                 case "ftp-proftpd-backdoor":
@@ -124,7 +124,7 @@ class Nmap(BaseParser):
                         description="FTP ProFTPD 1.3.3c Backdoor",
                         severity=Severity.CRITICAL,
                         # CWE-78: Improper Neutralization of Special Elements used in an OS Command ('OS Command Injection')
-                        cwe="CWE-78",
+                        cwes=["CWE-78"],
                     )
                 case "ftp-vsftpd-backdoor":
                     self.create_finding(
@@ -164,7 +164,7 @@ class Nmap(BaseParser):
                         ),
                         severity=Severity.CRITICAL,
                         # CWE-78: Improper Neutralization of Special Elements used in an OS Command ('OS Command Injection')
-                        cwe="CWE-78",
+                        cwes=["CWE-78"],
                         reference="https://www.tenable.com/plugins/nnm/700059",
                     )
                 case "smb-vuln-webexec":
@@ -235,7 +235,7 @@ class Nmap(BaseParser):
                                     description=f"Anonymous access is allowed to the SMB share {path}",
                                     severity=(Severity.CRITICAL if "WRITE" in anonymous else Severity.HIGH),
                                     # CWE-287: Improper Authentication
-                                    cwe="CWE-287",
+                                    cwes=["CWE-287"],
                                 )
                 case "smb-protocols":
                     if smb_technology:

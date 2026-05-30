@@ -219,4 +219,5 @@ ROLES = {
     "monitorsettings": {"view": [Role.ADMIN], "add": [], "change": [Role.ADMIN], "delete": []},
     "nvdnistsettings": {"view": [Role.ADMIN], "add": [], "change": [Role.ADMIN], "delete": []},
     "virustotalsettings": {"view": [Role.ADMIN], "add": [], "change": [Role.ADMIN], "delete": []},
+    "vulnchecksettings": {"view": [Role.ADMIN], "add": [], "change": [Role.ADMIN], "delete": []},
 }

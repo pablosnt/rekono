@@ -8,6 +8,7 @@ from alerts.enums import AlertItem
 from alerts.models import Alert
 from findings.enums import Severity
 from findings.models import Vulnerability
+from integrations.models import Integration
 from platforms.cvecrowd.integrations import CveCrowd
 from platforms.cvecrowd.models import CveCrowdSettings
 from security.authorization.roles import Role
@@ -43,6 +44,9 @@ class CveCrowdTest(BaseTest, TestCase):
         )
         self.not_trending.executions.add(self.execution)
         self.trending.executions.add(self.execution)
+        integration = Integration.objects.get(key="cvecrowd")
+        integration.enabled = True
+        integration.save(update_fields=["enabled"])
         self.settings = CveCrowdSettings.objects.first()
         self.settings.secret = "fake-token"
         self.settings.save(update_fields=["_api_token"])

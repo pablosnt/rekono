@@ -6,8 +6,8 @@ from django.test import TestCase
 
 from findings.enums import Severity
 from findings.models import Vulnerability
-from platforms.nvdnist.integrations import NvdNist
-from platforms.nvdnist.models import NvdNistSettings
+from platforms.vulncheck.integrations import VulnCheck
+from platforms.vulncheck.models import VulnCheckSettings
 from security.authorization.roles import Role
 from tests.framework import ApiTestNoData, BaseTest
 from tests.framework.cases import ApiTestCase, PutApiTestCase
@@ -16,60 +16,69 @@ from tests.framework.data import SetupProject
 # pytype: disable=wrong-arg-types
 
 data = {
-    "cisaVulnerabilityName": "Log4Shell RCE",
-    "vulnStatus": "Modified",
-    "descriptions": [{"lang": "en", "value": "Remote code execution via JNDI lookup in Log4j2"}],
+    "id": "CVE-2024-21762",
+    "vulnStatus": "Analyzed",
+    "descriptions": [
+        {
+            "lang": "en",
+            "value": "A out-of-bounds write in Fortinet FortiOS allows attacker to execute unauthorized code",
+        }
+    ],
     "weaknesses": [
-        {"type": "Primary", "description": [{"value": "CWE-917", "lang": "en"}]},
+        {"type": "Secondary", "description": [{"value": "CWE-787", "lang": "en"}]},
     ],
     "metrics": {
         "cvssMetricV31": [
             {
+                "source": "nvd@nist.gov",
                 "type": "Primary",
                 "cvssData": {
-                    "baseScore": 10.0,
                     "version": "3.1",
-                    "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H",
+                    "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+                    "baseScore": 9.8,
                 },
             }
         ]
     },
-    "configurations": [{"nodes": [{"cpeMatch": [{"criteria": "cpe:2.3:a:apache:log4j:*:*:*:*:*:*:*:*"}]}]}],
+    "configurations": [{"nodes": [{"cpeMatch": [{"criteria": "cpe:2.3:o:fortinet:fortios:*:*:*:*:*:*:*:*"}]}]}],
+    "vcVulnerableCPEs": [
+        "cpe:2.3:o:fortinet:fortios:6.0.0:*:*:*:*:*:*:*",
+        "cpe:2.3:o:fortinet:fortios:7.4.2:*:*:*:*:*:*:*",
+    ],
 }
 
 
 def _mock_request_success(*args: Any, **kwargs: Any) -> dict[str, Any]:
-    return {"vulnerabilities": [{"cve": data}]}
+    return {"data": [data]}
 
 
-def _mock_request_not_scheduled(*args: Any, **kwargs: Any) -> dict[str, Any]:
-    return {"vulnerabilities": [{"cve": {**data, "vulnStatus": "Deferred"}}]}
+def _mock_request_deferred(*args: Any, **kwargs: Any) -> dict[str, Any]:
+    return {"data": [{**data, "vulnStatus": "Deferred"}]}
 
 
 def _mock_request_empty(*args: Any, **kwargs: Any) -> dict[str, Any]:
-    return {"vulnerabilities": []}
+    return {"data": []}
 
 
-class NvdNistTest(BaseTest, TestCase):
+class VulnCheckTest(BaseTest, TestCase):
     data = [SetupProject()]
 
     def setUp(self) -> None:
         super().setUp()
         self.vulnerability = Vulnerability.objects.create(
-            name="test", description="test", cve="CVE-2021-44228", severity=Severity.LOW
+            name="test", description="test", cve="CVE-2024-21762", severity=Severity.LOW
         )
         self.vulnerability.executions.add(self.execution)
-        self.settings = NvdNistSettings.objects.first()
-        self.settings.secret = "fake-token"
+        self.settings = VulnCheckSettings.objects.first()
+        self.settings.secret = "fake-vulncheck-token"
         self.settings.save(update_fields=["_api_token"])
-        self.nvdnist = NvdNist()
+        self.vulncheck = VulnCheck()
 
-    @mock.patch("platforms.nvdnist.integrations.NvdNist._request", _mock_request_success)
+    @mock.patch("platforms.vulncheck.integrations.VulnCheck._request", _mock_request_success)
     def test_enrichment(self) -> None:
-        # Retrieval
-        enrichment = self.nvdnist.get_cve(self.vulnerability.cve)
+        enrichment = self.vulncheck.get_cve(self.vulnerability.cve)
         self.assertIsNotNone(enrichment)
-        self.assertEqual(data["cisaVulnerabilityName"], enrichment.name)
+        self.assertEqual(data["id"], enrichment.name)
         self.assertEqual(data["descriptions"][0]["value"], enrichment.description)
         self.assertEqual([data["weaknesses"][0]["description"][0]["value"]], enrichment.cwes)
         self.assertEqual(data["metrics"]["cvssMetricV31"][0]["cvssData"]["baseScore"], enrichment.cvss_base_score)
@@ -77,15 +86,15 @@ class NvdNistTest(BaseTest, TestCase):
         self.assertEqual(data["metrics"]["cvssMetricV31"][0]["cvssData"]["vectorString"], enrichment.cvss_vector)
         self.assertIsNone(enrichment.epss_score)
         self.assertIsNone(enrichment.epss_percentile)
-        self.assertEqual([data["configurations"][0]["nodes"][0]["cpeMatch"][0]["criteria"]], enrichment.technologies)
-        self.assertEqual(self.nvdnist.reference.format(cve=self.vulnerability.cve), enrichment.reference)
+        self.assertEqual(data["vcVulnerableCPEs"], enrichment.technologies)
+        self.assertEqual(self.vulncheck.reference.format(cve=self.vulnerability.cve), enrichment.reference)
         self.assertEqual(data["vulnStatus"], enrichment.status)
 
         # Quality Score
-        self.assertEqual(6, self.nvdnist.cve_quality_score(enrichment))
+        self.assertEqual(10, self.vulncheck.cve_quality_score(enrichment))
 
         # Save
-        self.nvdnist.save(self.vulnerability, enrichment)
+        self.vulncheck.save(self.vulnerability, enrichment)
         vuln = Vulnerability.objects.get(pk=self.vulnerability.pk)
         self.assertEqual(Severity.CRITICAL, vuln.severity)
         self.assertEqual(enrichment.name, vuln.name)
@@ -98,29 +107,34 @@ class NvdNistTest(BaseTest, TestCase):
         self.assertIsNone(vuln.epss_percentile)
         self.assertEqual(enrichment.reference, vuln.reference)
 
-    @mock.patch("platforms.nvdnist.integrations.NvdNist._request", _mock_request_not_scheduled)
-    def test_not_scheduled(self) -> None:
-        e = self.nvdnist.get_cve(self.vulnerability.cve)
-        self.assertEqual("Deferred", e.status)
-        self.assertEqual(0, self.nvdnist.cve_quality_score(e))
+    @mock.patch("platforms.vulncheck.integrations.VulnCheck._request", _mock_request_deferred)
+    def test_deferred_quality_score(self) -> None:
+        enrichment = self.vulncheck.get_cve(self.vulnerability.cve)
+        self.assertEqual("Deferred", enrichment.status)
+        self.assertEqual(0, self.vulncheck.cve_quality_score(enrichment))
 
-    @mock.patch("platforms.nvdnist.integrations.NvdNist._request", _mock_request_success)
+    @mock.patch("platforms.vulncheck.integrations.VulnCheck._request", _mock_request_success)
     def test_is_available(self) -> None:
-        self.assertTrue(self.nvdnist.is_available())
+        self.assertTrue(self.vulncheck.is_available())
 
-    @mock.patch("platforms.nvdnist.integrations.NvdNist._request", _mock_request_empty)
-    def test_is_not_available(self) -> None:
-        self.assertFalse(self.nvdnist.is_available())
-        self.assertIsNone(self.nvdnist.get_cve(self.vulnerability.cve))
+    @mock.patch("platforms.vulncheck.integrations.VulnCheck._request", _mock_request_empty)
+    def test_is_not_available_empty_response(self) -> None:
+        self.assertFalse(self.vulncheck.is_available())
+        self.assertIsNone(self.vulncheck.get_cve(self.vulnerability.cve))
+
+    def test_is_not_available_no_token(self) -> None:
+        self.settings.secret = None
+        self.settings.save(update_fields=["_api_token"])
+        self.assertFalse(self.vulncheck.is_available())
 
 
-new_settings = {"api_token": "nvd-nist-token"}
-invalid_settings = {"api_token": "a" * 51}
+new_settings = {"api_token": "vulncheck-api-token"}
+invalid_settings = {"api_token": "a" * 201}
 
 
-class NvdNistSettingsTest(ApiTestNoData, TestCase):
-    endpoint = "/api/nvdnist/1/"
-    expected_string = "NVD NIST"
+class VulnCheckSettingsTest(ApiTestNoData, TestCase):
+    endpoint = "/api/vulncheck/1/"
+    expected_string = "VulnCheck"
     cases = [
         ApiTestCase([Role.AUDITOR, Role.READER], 403),
         ApiTestCase([Role.ADMIN], expected={"id": 1, "api_token": None}),
@@ -138,5 +152,5 @@ class NvdNistSettingsTest(ApiTestNoData, TestCase):
     ]
 
     @cached_property
-    def object(self) -> NvdNistSettings:
-        return NvdNistSettings.objects.first()
+    def object(self) -> VulnCheckSettings:
+        return VulnCheckSettings.objects.first()
