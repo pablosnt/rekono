@@ -331,7 +331,7 @@ class BaseCveProvider(BaseIntegration):
         """
         finding.name = data.name
         finding.description = (
-            BeautifulSoup(markdown(data.description), features="html.parser").get_text()
+            BeautifulSoup(markdown(data.description), features="html.parser").get_text().replace("\n", "\n\n")
             if data.description and data.description.startswith("#")
             else data.description
         )
