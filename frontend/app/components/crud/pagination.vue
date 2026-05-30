@@ -1,6 +1,9 @@
 <template>
   <div
-    v-if="state.total > Math.min(state.items.length, ...config.pageSizeOptions)"
+    v-if="
+      config.pageSizeOptions?.length &&
+      state.total > Math.min(state.items.length, ...config.pageSizeOptions)
+    "
     class="flex flex-wrap md:flex-row flex-col justify-between items-center mt-5"
   >
     <div class="text-sm text-gray-500 mt-3">

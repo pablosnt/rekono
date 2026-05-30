@@ -221,11 +221,6 @@ const currentIntegrationSettings = computed(() => {
     ? integrationsSettings.value[selectedIntegration.value.id]
     : null;
 });
-let enableIfAvailable;
-
-onMounted(() => {
-  fetch();
-});
 
 function fetch() {
   for (const [key, value] of Object.entries(integrationsSettings.value)) {
@@ -251,13 +246,11 @@ function updateSettings(integrationId: number, data: Record<string, unknown>) {
     integrations.updateDefectDojoSettings(data as DefectDojoSettings);
   else if (integrationId === 5)
     integrations.updateVirusTotalSettings(data as VirusTotalSettings);
-  if (
-    enableIfAvailable !== undefined &&
-    enableIfAvailable.id === integrationId &&
-    data.is_available
-  ) {
-    toggleIntegration(enableIfAvailable, true);
-    enableIfAvailable = undefined;
+  const integration = selectedIntegration.value;
+  if (data.is_available && !integration.enabled) {
+    toggleIntegration(selectedIntegration.value, true);
+  } else if (!data.is_available && integration.enabled) {
+    toggleIntegration(selectedIntegration.value, false, true);
   }
 }
 
@@ -269,24 +262,27 @@ function getIntegrationState(item: Integration) {
   return item.enabled;
 }
 
-function toggleIntegration(integration: Integration, enabled: boolean) {
+function toggleIntegration(
+  integration: Integration,
+  enabled: boolean,
+  silent: boolean = false,
+) {
   if (
     integration.id in integrationsSettings.value &&
-    !integrationsSettings.value[integration.id].item.is_available
+    !integrationsSettings.value[integration.id].item?.is_available
   ) {
-    integration.enabled = false;
     openModal.value = true;
     selectedIntegration.value = integration;
-    enableIfAvailable = integration;
   } else {
     api.update(`${integration.id}/`, { enabled: enabled }, {}).then(() => {
       integration.enabled = enabled;
       integrations.updateIntegration(integration.id, { enabled: enabled });
-      toast.add({
-        title: integration.name,
-        description: `${integration.name} integration has been ${enabled ? "enabled" : "disabled"}`,
-        color: enabled ? "success" : "warning",
-      });
+      if (!silent)
+        toast.add({
+          title: integration.name,
+          description: `${integration.name} integration has been ${enabled ? "enabled" : "disabled"}`,
+          color: enabled ? "success" : "warning",
+        });
     });
   }
 }
@@ -305,4 +301,6 @@ const integrationsConfig: CrudConfig<Integration> = reactive({
   canEdit: false,
   canDelete: false,
 });
+
+onMounted(fetch);
 </script>
