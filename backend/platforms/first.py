@@ -84,10 +84,10 @@ class First(BaseIntegration):
         if len(data) == 1 and data[0]["cve"] == finding.cve:
             update_fields = []
             if data[0]["epss"]:
-                finding.epss_score = float(data[0]["epss"])
+                finding.epss_score = float(data[0]["epss"]) * 100
                 update_fields.append("epss_score")
             if data[0]["percentile"]:
-                finding.epss_percentile = float(data[0]["percentile"])
+                finding.epss_percentile = float(data[0]["percentile"]) * 100
                 update_fields.append("epss_percentile")
             if len(update_fields) > 0:
                 finding.save(update_fields=update_fields)

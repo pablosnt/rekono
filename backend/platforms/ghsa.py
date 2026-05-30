@@ -71,8 +71,10 @@ class GHSA(BaseCveProvider):
             cvss_base_score=cvss_base_score,
             cvss_vector=cvss_vector,
             cvss_version=cvss_version,
-            epss_score=info.get("epss", {}).get("percentage"),
-            epss_percentile=info.get("epss", {}).get("percentile"),
+            epss_score=info.get("epss", {}).get("percentage") * 100 if info.get("epss", {}).get("percentage") else None,
+            epss_percentile=info.get("epss", {}).get("percentile") * 100
+            if info.get("epss", {}).get("percentile")
+            else None,
             technologies=[
                 v.get("package", {}).get("name")
                 for v in info.get("vulnerabilities", [])
