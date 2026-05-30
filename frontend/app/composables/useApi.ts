@@ -28,11 +28,11 @@ export default function (
       endpoint === "/api/security/refresh/"
         ? endpoint
         : base_endpoint + endpoint;
-    endpoint = config.backendRootPath
-      ? config.backendRootPath + endpoint
+    endpoint = config.public.backendRootPath
+      ? config.public.backendRootPath + endpoint
       : endpoint;
-    if (config.backendUrl) {
-      const backendUrl = new URL(config.backendUrl);
+    if (config.public.backendUrl) {
+      const backendUrl = new URL(config.public.backendUrl);
       backendUrl.pathname = endpoint;
       return backendUrl.href;
     }
@@ -51,8 +51,8 @@ export default function (
     }
     const requestUrl = url(endpoint);
     options.headers = Object.assign({}, defaultHeaders, extraHeaders);
-    // todo: verify if same-origin works from desktop app. Otherwise use  include
-    if (authentication) options.credentials = "same-origin";
+    if (authentication)
+      options.credentials = config.public.backendUrl ? "include" : "same-origin";
     return (
       raw ? $fetch.raw(requestUrl, options) : $fetch(requestUrl, options)
     ).catch((error) => {
