@@ -1,6 +1,6 @@
 <template>
   <div
-    v-if="state.total > state.items.length"
+    v-if="state.total > Math.min(state.items.length, ...config.pageSizeOptions)"
     class="flex flex-wrap md:flex-row flex-col justify-between items-center mt-5"
   >
     <div class="text-sm text-gray-500 mt-3">
@@ -18,20 +18,20 @@
     </div>
     <UPagination
       class="mt-3"
-      :model-value="state.page"
+      :page="state.page"
       :total="state.total"
       :items-per-page="state.pageSize"
       show-edges
       color="neutral"
       variant="ghost"
       size="lg"
-      @update:model-value="(value: number) => $emit('page', value)"
+      @update:page="(value: number) => $emit('page', value)"
     />
     <div class="flex items-center gap-2 text-sm text-gray-500 mt-3">
       <span>Items per page</span>
       <USelect
         :model-value="state.pageSize"
-        :items="config.pageSizeOptions?.filter((i) => i <= state.total)"
+        :items="config.pageSizeOptions"
         size="sm"
         aria-label="Items per page"
         @update:model-value="(value: number) => $emit('pageSize', value)"

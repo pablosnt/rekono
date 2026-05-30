@@ -157,12 +157,21 @@
           @page="
             (page: number) => {
               state.page = page;
+              if (!disableUrlSync)
+                router.replace({
+                  query: { ...route.query, page: String(page) },
+                });
               fetch();
             }
           "
           @page-size="
             (size: number) => {
               state.pageSize = size;
+              state.page = 1;
+              if (!disableUrlSync)
+                router.replace({
+                  query: { ...route.query, limit: String(size) },
+                });
               fetch();
             }
           "
@@ -233,12 +242,19 @@ const initialFiltersFromUrl = props.disableUrlSync
         }),
     );
 
+const defaultPageSize = props.config.pageSize || 24;
 const state = reactive<CrudState>({
   items: [],
   total: 0,
   loading: true,
-  page: 1,
-  pageSize: props.config.pageSize || 24,
+  page:
+    !props.disableUrlSync && route.query.page
+      ? parseInt(route.query.page as string) || 1
+      : 1,
+  pageSize:
+    !props.disableUrlSync && route.query.limit
+      ? parseInt(route.query.limit) || defaultPageSize
+      : defaultPageSize,
   filters: {
     ...(props.config.defaultFilters
       ? JSON.parse(JSON.stringify(props.config.defaultFilters))
