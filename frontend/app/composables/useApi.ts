@@ -52,7 +52,9 @@ export default function (
     const requestUrl = url(endpoint);
     options.headers = Object.assign({}, defaultHeaders, extraHeaders);
     if (authentication)
-      options.credentials = config.public.backendUrl ? "include" : "same-origin";
+      options.credentials = config.public.backendUrl
+        ? "include"
+        : "same-origin";
     return (
       raw ? $fetch.raw(requestUrl, options) : $fetch(requestUrl, options)
     ).catch((error) => {

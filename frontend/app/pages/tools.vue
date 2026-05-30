@@ -95,7 +95,7 @@ const config: CrudConfig<Tool> = reactive({
       type: "checkbox" as const,
     },
   ],
-  ordering: ["id", "name", "command"],
+  ordering: ["id", "name", "command", { id: "likes_count", label: "Likes" }],
   defaultOrdering: "-id",
   pageSize: 24,
   pageSizeOptions: [24, 50, 100],
