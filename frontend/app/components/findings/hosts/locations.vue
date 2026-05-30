@@ -27,7 +27,7 @@ const data = computed(() => {
           latitude: h.latitude,
           longitude: h.longitude,
           label: h.domain || h.ip || h.city,
-          color: `var(--color-${hostOS.find((o) => o.value === h.os_type)?.color}-500)`,
+          color: `var(--ui-${hostOS.find((o) => o.value === h.os_type)?.color ?? "neutral"})`,
         };
       }),
   };

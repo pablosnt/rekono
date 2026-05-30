@@ -21,10 +21,12 @@
   --ui-primary: var(--ui-color-primary-600);
   --ui-orange: var(--color-orange-500);
   --ui-amber: var(--color-amber-500);
+  --ui-neutral: var(--ui-color-neutral-500);
 }
 
 .dark {
   --ui-primary: var(--ui-color-primary-500);
+  --ui-neutral: var(--ui-color-neutral-400);
 
   .tiptap .shiki,
   .tiptap .shiki span {

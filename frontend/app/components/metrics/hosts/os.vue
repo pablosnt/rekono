@@ -78,7 +78,7 @@ function fetch() {
         return {
           os_type: item.os_type,
           count: item.count,
-          color: `var(--color-${hostOS.find((o) => o.value === item.os_type)?.color ?? "neutral"}-500)`,
+          color: `var(--ui-${hostOS.find((o) => o.value === item.os_type)?.color ?? "neutral"})`,
         };
       });
       total.value = response.reduce((sum, d) => sum + d.count, 0);

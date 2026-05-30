@@ -58,7 +58,7 @@ const y = findingTypes.map(
 );
 const ftColor = (ft) => {
   const cls = ft.iconClass.split(" ")[0].replace("text-", "");
-  return /\d/u.test(cls) ? `var(--color-${cls})` : `var(--color-${cls}-500)`;
+  return /\d/u.test(cls) ? `var(--color-${cls})` : `var(--ui-${cls})`;
 };
 const colors = findingTypes.map((ft) => ftColor(ft));
 const inactive = ref<boolean[]>(findingTypes.map(() => false));

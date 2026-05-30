@@ -68,7 +68,7 @@ const treemapData = computed(() =>
     .filter((d) => d.open > 0)
     .map((d) =>
       Object.assign({}, d, {
-        color: `var(--color-${triageStatuses.find((s) => s.value === d.triage_status)?.color ?? "neutral"}-500)`,
+        color: `var(--ui-${triageStatuses.find((s) => s.value === d.triage_status)?.color ?? "neutral"})`,
       }),
     ),
 );

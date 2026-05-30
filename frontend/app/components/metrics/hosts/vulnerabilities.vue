@@ -22,7 +22,7 @@ const reversedSeverities = severities.toReversed();
 const series = [
   ...reversedSeverities.map((s) => ({
     label: s.value,
-    color: `var(--color-${s.color === "info" ? "cyan-500" : `${s.color}-500`})`,
+    color: `var(--ui-${s.color})`,
     y: (d) => d[s.value.toLowerCase()] || 0,
   })),
   {
