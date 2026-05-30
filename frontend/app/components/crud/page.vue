@@ -52,50 +52,47 @@
       <slot name="before" :state="state" />
 
       <slot name="content">
-        <CrudEmptyState
-          v-if="state.items.length === 0 && !state.loading && config.useGrid"
-          :config="config"
-          :state="state"
-          class="mt-10"
-          @create-click="openCreateModal = true"
-        />
+        <UProgress :class="[state.loading ? 'visible' : 'invisible', 'mb-1']" />
+        <template v-if="config.tableColumns">
+          <CrudTable
+            v-if="!state.loading"
+            ref="tableRef"
+            :config="config"
+            :state="state"
+            @edit="
+              (item) => {
+                selectedItem = item;
+                openEditModal = true;
+              }
+            "
+            @delete="
+              (item) => {
+                selectedItem = item;
+                openDeleteModal = true;
+              }
+            "
+          >
+            <template v-if="$slots.actions" #actions="slotProps">
+              <slot name="actions" v-bind="slotProps" />
+            </template>
+            <template #empty>
+              <CrudEmptyState
+                :config="config"
+                :state="state"
+                container-class="py-12"
+                @create-click="openCreateModal = true"
+              />
+            </template>
+          </CrudTable>
+        </template>
 
-        <CrudTable
-          v-if="config.tableColumns && !config.useGrid"
-          ref="tableRef"
-          :config="config"
-          :state="state"
-          @edit="
-            (item) => {
-              selectedItem = item;
-              openEditModal = true;
-            }
-          "
-          @delete="
-            (item) => {
-              selectedItem = item;
-              openDeleteModal = true;
-            }
-          "
-        >
-          <template v-if="$slots.actions" #actions="slotProps">
-            <slot name="actions" v-bind="slotProps" />
-          </template>
-          <template #empty>
-            <CrudEmptyState
-              v-if="!state.loading"
-              :config="config"
-              :state="state"
-              container-class="py-12"
-              @create-click="openCreateModal = true"
-            />
-            <UButton v-else size="xl" loading variant="ghost" />
-          </template>
-        </CrudTable>
-
-        <template v-if="config.useGrid">
-          <UProgress
-            :class="[state.loading ? 'visible' : 'invisible', 'mb-1']"
+        <template v-else-if="config.useGrid">
+          <CrudEmptyState
+            v-if="state.items.length === 0 && !state.loading"
+            :config="config"
+            :state="state"
+            class="mt-10"
+            @create-click="openCreateModal = true"
           />
           <UPageGrid v-show="state.items.length > 0">
             <slot
