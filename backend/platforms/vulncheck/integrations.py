@@ -66,7 +66,7 @@ class VulnCheck(NvdNist):
             params={"cve": cve},
         )
         data = response.get("data") or []
-        return data[0] if data else []
+        return data[0] if len(data) > 0 else {}
 
     def _get_technologies(self, data: dict[str, Any]) -> list[str]:
         """Extract affected technology CPE identifiers from VulnCheck response data.

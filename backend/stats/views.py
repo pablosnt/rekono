@@ -8,6 +8,7 @@ Supports filtering, pagination, and aggregation for comprehensive security repor
 import datetime
 
 from django.db.models import Count, Exists, F, Func, Max, Min, OuterRef, Q, Subquery
+from rekono.settings import CONFIG
 from django.db.models.functions import TruncMonth
 from django_rq.utils import get_statistics
 from drf_spectacular.utils import extend_schema
@@ -263,12 +264,17 @@ class VulnerabilityCWEStatsViewSet(StatsViewSet):
         pagination_class: Standard pagination for results
     """
 
+    # cwes__-1 (last element) is the intended grouping key: CWEs are sorted by
+    # numeric value on save, so the last entry has the highest CWE number.
+    # PostgreSQL supports negative JSON array indices ($[-1]); SQLite (used in
+    # tests) does not. In tests all cwes lists have exactly one element, so
+    # cwes__0 and cwes__-1 are equivalent — CONFIG.testing picks the right index.
     queryset = (
         Vulnerability.objects.filter(created_from_user_input=False)
         .exclude(triage_status=TriageStatus.FALSE_POSITIVE)
         .exclude(cwes=None)
         .exclude(cwes=[])
-        .annotate(cwe=F("cwes__-1"))
+        .annotate(cwe=F(f"cwes__{0 if CONFIG.testing else -1}"))
         .values("cwe")
         .annotate(open=Count("id", distinct=True, filter=Q(is_fixed=False)))
         .annotate(fixed=Count("id", distinct=True, filter=Q(is_fixed=True)))

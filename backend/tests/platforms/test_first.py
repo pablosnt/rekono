@@ -37,15 +37,15 @@ class FirstTest(BaseTest, TestCase):
     def test_process_finding(self) -> None:
         self.first.process_finding(self.execution, self.vulnerability)
         vuln = Vulnerability.objects.get(pk=self.vulnerability.pk)
-        self.assertAlmostEqual(float(data["epss"]), vuln.epss_score)
-        self.assertAlmostEqual(float(data["percentile"]), vuln.epss_percentile)
+        self.assertAlmostEqual(float(data["epss"]) * 100, vuln.epss_score)
+        self.assertAlmostEqual(float(data["percentile"]) * 100, vuln.epss_percentile)
 
     @mock.patch("platforms.first.First._request", _mock_success)
     def test_monitor(self) -> None:
         self.first.monitor()
         vuln = Vulnerability.objects.get(pk=self.vulnerability.pk)
-        self.assertAlmostEqual(float(data["epss"]), vuln.epss_score)
-        self.assertAlmostEqual(float(data["percentile"]), vuln.epss_percentile)
+        self.assertAlmostEqual(float(data["epss"]) * 100, vuln.epss_score)
+        self.assertAlmostEqual(float(data["percentile"]) * 100, vuln.epss_percentile)
 
     @mock.patch("platforms.first.First._request", _mock_not_found)
     def test_not_found(self) -> None:
