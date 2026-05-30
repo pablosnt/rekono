@@ -33,7 +33,7 @@ class NucleiTest(ParserTest, TestCase):
                     "description": None,
                     "severity": Severity.INFO,
                     "cve": None,
-                    "cwe": None,
+                    "cwes": [],
                     "reference": None,
                 },
                 {
@@ -42,7 +42,7 @@ class NucleiTest(ParserTest, TestCase):
                     "description": "This template searches for missing HTTP security headers. The impact of these missing headers can vary.",
                     "severity": Severity.INFO,
                     "cve": None,
-                    "cwe": None,
+                    "cwes": [],
                     "reference": None,
                 },
                 {
@@ -51,7 +51,7 @@ class NucleiTest(ParserTest, TestCase):
                     "description": "Redis server without any required authentication was discovered.",
                     "severity": Severity.HIGH,
                     "cve": None,
-                    "cwe": None,
+                    "cwes": [],
                     "reference": "https://redis.io/topics/security",
                 },
                 {
@@ -60,7 +60,7 @@ class NucleiTest(ParserTest, TestCase):
                     "description": None,
                     "severity": Severity.INFO,
                     "cve": None,
-                    "cwe": None,
+                    "cwes": [],
                     "reference": "https://twitter.com/pratiky9967/status/1230001391701086208",
                 },
                 {
@@ -76,7 +76,7 @@ class NucleiTest(ParserTest, TestCase):
                     "description": 'A "PHP Info" page was found. The output of the phpinfo() command can reveal detailed PHP environment information.',
                     "severity": Severity.LOW,
                     "cve": None,
-                    "cwe": None,
+                    "cwes": [],
                     "reference": None,
                 },
                 {
@@ -85,7 +85,7 @@ class NucleiTest(ParserTest, TestCase):
                     "description": "Internal documentation file often used in projects which can contain sensitive information.",
                     "severity": Severity.INFO,
                     "cve": None,
-                    "cwe": None,
+                    "cwes": [],
                     "reference": None,
                 },
                 {"model": Credential, "username": "admin", "secret": "password", "context": "DVWA Default Login"},
@@ -107,7 +107,7 @@ class NucleiTest(ParserTest, TestCase):
                     "severity": Severity.INFO,
                     "cvss_vector": "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:N",
                     "cve": None,
-                    "cwe": None,
+                    "cwes": [],
                     "reference": "https://owasp.org/www-community/controls/SecureCookieAttribute",
                 },
                 {
@@ -123,7 +123,7 @@ class NucleiTest(ParserTest, TestCase):
                     "description": "Internal documentation file often used in projects which can contain sensitive information.",
                     "severity": Severity.INFO,
                     "cve": None,
-                    "cwe": None,
+                    "cwes": [],
                     "reference": None,
                 },
                 {
@@ -132,7 +132,7 @@ class NucleiTest(ParserTest, TestCase):
                     "description": None,
                     "severity": Severity.INFO,
                     "cve": None,
-                    "cwe": None,
+                    "cwes": [],
                     "reference": None,
                 },
                 {
@@ -162,7 +162,7 @@ class NucleiTest(ParserTest, TestCase):
                     "description": "This template searches for missing HTTP security headers. The impact of these missing headers can vary.",
                     "severity": Severity.INFO,
                     "cve": None,
-                    "cwe": None,
+                    "cwes": [],
                     "reference": None,
                 },
                 {
@@ -171,7 +171,7 @@ class NucleiTest(ParserTest, TestCase):
                     "description": "This template searches for missing HTTP security headers. The impact of these missing headers can vary.",
                     "severity": Severity.INFO,
                     "cve": None,
-                    "cwe": None,
+                    "cwes": [],
                     "reference": None,
                 },
                 {
@@ -180,7 +180,7 @@ class NucleiTest(ParserTest, TestCase):
                     "description": "This template searches for missing HTTP security headers. The impact of these missing headers can vary.",
                     "severity": Severity.INFO,
                     "cve": None,
-                    "cwe": None,
+                    "cwes": [],
                     "reference": None,
                 },
                 {
@@ -189,7 +189,7 @@ class NucleiTest(ParserTest, TestCase):
                     "description": "This template searches for missing HTTP security headers. The impact of these missing headers can vary.",
                     "severity": Severity.INFO,
                     "cve": None,
-                    "cwe": None,
+                    "cwes": [],
                     "reference": None,
                 },
                 {
@@ -198,7 +198,7 @@ class NucleiTest(ParserTest, TestCase):
                     "description": "This template searches for missing HTTP security headers. The impact of these missing headers can vary.",
                     "severity": Severity.INFO,
                     "cve": None,
-                    "cwe": None,
+                    "cwes": [],
                     "reference": None,
                 },
                 {
@@ -207,7 +207,7 @@ class NucleiTest(ParserTest, TestCase):
                     "description": "This template searches for missing HTTP security headers. The impact of these missing headers can vary.",
                     "severity": Severity.INFO,
                     "cve": None,
-                    "cwe": None,
+                    "cwes": [],
                     "reference": None,
                 },
                 {
@@ -216,7 +216,7 @@ class NucleiTest(ParserTest, TestCase):
                     "description": "This template searches for missing HTTP security headers. The impact of these missing headers can vary.",
                     "severity": Severity.INFO,
                     "cve": None,
-                    "cwe": None,
+                    "cwes": [],
                     "reference": None,
                 },
                 {
@@ -225,7 +225,7 @@ class NucleiTest(ParserTest, TestCase):
                     "description": "This template searches for missing HTTP security headers. The impact of these missing headers can vary.",
                     "severity": Severity.INFO,
                     "cve": None,
-                    "cwe": None,
+                    "cwes": [],
                     "reference": None,
                 },
                 {
@@ -234,7 +234,7 @@ class NucleiTest(ParserTest, TestCase):
                     "description": "This template searches for missing HTTP security headers. The impact of these missing headers can vary.",
                     "severity": Severity.INFO,
                     "cve": None,
-                    "cwe": None,
+                    "cwes": [],
                     "reference": None,
                 },
                 {
@@ -243,7 +243,7 @@ class NucleiTest(ParserTest, TestCase):
                     "description": "This template searches for missing HTTP security headers. The impact of these missing headers can vary.",
                     "severity": Severity.INFO,
                     "cve": None,
-                    "cwe": None,
+                    "cwes": [],
                     "reference": None,
                 },
                 {
@@ -252,7 +252,7 @@ class NucleiTest(ParserTest, TestCase):
                     "description": "This template searches for missing HTTP security headers. The impact of these missing headers can vary.",
                     "severity": Severity.INFO,
                     "cve": None,
-                    "cwe": None,
+                    "cwes": [],
                     "reference": None,
                 },
                 {
@@ -260,8 +260,8 @@ class NucleiTest(ParserTest, TestCase):
                     "name": "CAA Record",
                     "description": "A CAA record was discovered. A CAA record is used to specify which certificate authorities (CAs) are allowed to issue certificates for a domain.",
                     "severity": Severity.INFO,
-                    "cve": None,
-                    "cwe": "CWE-200",
+                    "cve": "CVE-2023-48795",
+                    "cwes": ["CWE-200"],
                     "reference": "https://support.dnsimple.com/articles/caa-record/#whats-a-caa-record",
                 },
                 {"model": Path, "path": "/index.php", "type": PathType.ENDPOINT},

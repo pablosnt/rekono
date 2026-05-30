@@ -82,17 +82,22 @@ class Nuclei(BaseParser):
                 cve = classification.get("cve-id")
                 cwe = classification.get("cwe-id", [])
                 remediation = info.get("remediation")
-                self.create_finding(
-                    Vulnerability,
-                    name=(f"{name}: {matcher}" if matcher else name).strip(),
-                    description=description.strip() if description else None,
-                    severity=(cast(dict[str, str], Severity)[severity.upper()] if severity else Severity.INFO),
-                    cvss_vector=classification.get("cvss-metrics"),
-                    cve=cve.upper() if cve else None,
-                    cwe=cwe[0].upper() if cwe else None,
-                    remediation=remediation.strip() if remediation else None,
-                    reference=reference[0] if reference else None,
-                )
+                attributes = {
+                    "name": (f"{name}: {matcher}" if matcher else name).strip(),
+                    "description": description.strip() if description else None,
+                    "severity": (cast(dict[str, str], Severity)[severity.upper()] if severity else Severity.INFO),
+                    "cvss_vector": classification.get("cvss-metrics"),
+                    "cwes": [c.upper() for c in cwe] if cwe else [],
+                    "remediation": remediation.strip() if remediation else None,
+                    "reference": reference[0] if reference else None,
+                }
+                if cve and isinstance(cve, list):
+                    for cve_value in cve:
+                        attributes["cve"] = cve_value.upper()
+                        self.create_finding(Vulnerability, **attributes)
+                else:
+                    attributes["cve"] = cve.upper() if cve else None
+                    self.create_finding(Vulnerability, **attributes)
         # Create identified paths
         for path in paths:
             self.create_finding(Path, path=path, type=PathType.ENDPOINT)
