@@ -106,7 +106,8 @@ export default defineNuxtConfig({
     },
     server: {
       proxy:
-        process.env.NODE_ENV === "development"
+        process.env.NODE_ENV === "development" &&
+        !process.env.NUXT_PUBLIC_BACKEND_URL
           ? {
               "^/api/(?!_nuxt_icon/).*": {
                 target: "http://127.0.0.1:8000",
@@ -118,12 +119,21 @@ export default defineNuxtConfig({
     optimizeDeps: {
       exclude: ["tiptap-extension-code-block-shiki"],
       include: [
+        "@nuxt/ui > prosemirror-gapcursor",
+        "@nuxt/ui > prosemirror-model",
         "@nuxt/ui > prosemirror-state",
         "@nuxt/ui > prosemirror-tables",
         "@nuxt/ui > prosemirror-transform",
-        "@nuxt/ui > prosemirror-model",
         "@nuxt/ui > prosemirror-view",
-        "@nuxt/ui > prosemirror-gapcursor",
+        "@internationalized/date",
+        "@unovis/ts",
+        "@unovis/vue",
+        "@vue/devtools-core",
+        "@vue/devtools-kit",
+        "@vueuse/core",
+        "jwt-decode",
+        "vue-qrcode-reader",
+        "zod",
       ],
     },
   },
