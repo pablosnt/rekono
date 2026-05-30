@@ -17,6 +17,7 @@ data = {
     "details": "Apache Log4j2 does not protect against attacker-controlled LDAP via JNDI lookup",
     "severity": [{"type": "CVSS_V3", "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H"}],
     "affected": [{"package": {"purl": "pkg:maven/org.apache.logging.log4j/log4j-core", "name": "log4j-core"}}],
+    "aliases": ["CVE-2021-45046", "GHSA-jfh8-c2jp-hdp3", "EUVD-2021-44228", "RUSTSEC-2021-0071"],
 }
 
 
@@ -51,9 +52,9 @@ class OsvTest(BaseTest, TestCase):
         self.assertEqual(data["summary"], enrichment.name)
         self.assertEqual(data["details"], enrichment.description)
         self.assertIsNone(enrichment.cwes)
-        self.assertIsNone(enrichment.euvd_id)
-        self.assertIsNone(enrichment.ghsa_id)
-        self.assertIsNone(enrichment.osv_generic_id)
+        self.assertEqual("EUVD-2021-44228", enrichment.euvd_id)
+        self.assertEqual("GHSA-jfh8-c2jp-hdp3", enrichment.ghsa_id)
+        self.assertEqual("RUSTSEC-2021-0071", enrichment.osv_generic_id)
         self.assertEqual(10.0, enrichment.cvss_base_score)
         self.assertEqual(data["severity"][0]["score"], enrichment.cvss_vector)
         self.assertEqual("3.1", enrichment.cvss_version)
@@ -64,7 +65,7 @@ class OsvTest(BaseTest, TestCase):
         self.assertIsNone(enrichment.status)
 
         # Quality Score
-        self.assertEqual(7, self.osv.cve_quality_score(enrichment))
+        self.assertEqual(8, self.osv.cve_quality_score(enrichment))
 
         # Save
         self.osv.save(self.vulnerability, enrichment)
@@ -76,13 +77,16 @@ class OsvTest(BaseTest, TestCase):
         self.assertEqual(enrichment.cvss_vector, vuln.cvss_vector)
         self.assertEqual(enrichment.cvss_version, vuln.cvss_version)
         self.assertEqual([], vuln.cwes)
+        self.assertEqual(enrichment.euvd_id, vuln.euvd_id)
+        self.assertEqual(enrichment.ghsa_id, vuln.ghsa_id)
+        self.assertEqual(enrichment.osv_generic_id, vuln.osv_generic_id)
         self.assertIsNone(vuln.epss_score)
         self.assertIsNone(vuln.epss_percentile)
         self.assertEqual(enrichment.reference, vuln.reference)
 
     @mock.patch("platforms.osv.OSV._request", _mock_request_cvss2)
     def test_get_cve_cvss2(self) -> None:
-        self.assertEqual(5, self.osv.cve_quality_score(self.osv.get_cve(self.vulnerability.cve)))
+        self.assertEqual(6, self.osv.cve_quality_score(self.osv.get_cve(self.vulnerability.cve)))
 
     @mock.patch("platforms.osv.OSV._request", _mock_request_cvss3)
     def test_is_available(self) -> None:

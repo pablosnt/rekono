@@ -82,16 +82,19 @@ class OSV(BaseCveProvider):
                 technologies.append(package)
             elif affected.get("versions"):
                 technologies.extend(affected.get("versions", []))
-        osv_native_id = data["id"]
         euvd_id = ghsa_id = osv_generic_id = None
-        if osv_native_id.upper().startswith("GHSA-"):
-            ghsa_id = osv_native_id
-        elif osv_native_id.upper().startswith("EUVD-"):
-            euvd_id = osv_native_id
-        elif not osv_native_id.upper().startswith("CVE-"):
-            osv_generic_id = osv_native_id
+        for alias in data.get("aliases") or []:
+            alias_upper = alias.upper()
+            if alias_upper.startswith("GHSA-") and ghsa_id is None:
+                ghsa_id = alias
+            elif alias_upper.startswith("EUVD-") and euvd_id is None:
+                euvd_id = alias
+            elif not alias_upper.startswith("CVE-") and not alias_upper.startswith("GHSA-") and not alias_upper.startswith("EUVD-") and osv_generic_id is None:
+                osv_generic_id = alias
+            if euvd_id and ghsa_id and osv_generic_id:
+                break
         return self.CveEnrichment(
-            name=data.get("summary", osv_native_id),
+            name=data.get("summary", data["id"]),
             description=data.get("details"),
             cvss_base_score=cvss_base_score,
             cvss_vector=cvss_vector,
