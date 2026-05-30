@@ -11,7 +11,7 @@
       ...(port || technology ? [] : ['technology', 'port']),
       'name',
       'severity',
-      {id: 'cvss_base_score', label: 'CVSS'},
+      { id: 'cvss_base_score', label: 'CVSS' },
       { id: 'cve', label: 'CVE' },
       { id: 'euvd_id', label: 'EUVD' },
       { id: 'ghsa_id', label: 'GHSA' },
@@ -246,7 +246,7 @@ const columns: CrudTableColumn<Vulnerability>[] = [
     icon: "i-lucide-percent",
     cell: ({ row }) =>
       row.original.epss_score
-        ? table.valueCell(`${row.original.epss_score.toExponential(3)}%`)
+        ? table.valueCell(`${row.original.epss_score.toPrecision(4)}%`)
         : table.noDataCell,
   },
   {
@@ -255,7 +255,7 @@ const columns: CrudTableColumn<Vulnerability>[] = [
     icon: "i-lucide-percent",
     cell: ({ row }) =>
       row.original.epss_percentile
-        ? table.valueCell(`${row.original.epss_percentile.toExponential(3)}%`)
+        ? table.valueCell(`${row.original.epss_percentile.toPrecision(4)}%`)
         : table.noDataCell,
   },
   {
