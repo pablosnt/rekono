@@ -242,8 +242,8 @@ const columns: CrudTableColumn<Vulnerability>[] = [
   },
   {
     accessorKey: "epss_score",
-    header: "EPSS Score",
-    icon: "i-lucide-percent",
+    header: "EPSS",
+    icon: "i-lucide-brain-circuit",
     cell: ({ row }) =>
       row.original.epss_score
         ? table.valueCell(`${row.original.epss_score.toPrecision(4)}%`)
@@ -252,7 +252,7 @@ const columns: CrudTableColumn<Vulnerability>[] = [
   {
     accessorKey: "epss_percentile",
     header: "EPSS Percentile",
-    icon: "i-lucide-percent",
+    icon: "i-lucide-brain-circuit",
     cell: ({ row }) =>
       row.original.epss_percentile
         ? table.valueCell(`${row.original.epss_percentile.toPrecision(4)}%`)
