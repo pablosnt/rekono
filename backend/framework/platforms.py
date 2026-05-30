@@ -213,7 +213,7 @@ class BaseCveProvider(BaseIntegration):
         Attributes:
             name (str | None): Vulnerability name or CISA advisory title.
             description (str | None): Full technical vulnerability description.
-            cwe (str | None): CWE identifier in CWE-NNN format.
+            cwes (list[str] | None): CWE identifiers in CWE-NNN format.
             cvss_base_score (float | None): Numeric CVSS base score.
             cvss_vector (str | None): Full CVSS vector string.
             cvss_version (str | None): CVSS version prefix (e.g. "3.1", "4.0").
@@ -222,11 +222,14 @@ class BaseCveProvider(BaseIntegration):
             technologies (list[str] | None): Affected product or package identifiers.
             reference (str | None): Canonical vulnerability detail page URL.
             status (str | None): Provider-specific advisory status string.
+            euvd_id (str | None): ENISA EUVD identifier.
+            ghsa_id (str | None): GitHub Security Advisory identifier.
+            osv_generic_id (str | None): OSV-native ID for non-CVE/GHSA/EUVD ecosystems.
         """
 
         name: str | None = None
         description: str | None = None
-        cwe: str | None = None
+        cwes: list[str] | None = None
         cvss_base_score: float | None = None
         cvss_vector: str | None = None
         cvss_version: str | None = None
@@ -235,6 +238,9 @@ class BaseCveProvider(BaseIntegration):
         technologies: list[str] | None = None
         reference: str | None = None
         status: str | None = None
+        euvd_id: str | None = None
+        ghsa_id: str | None = None
+        osv_generic_id: str | None = None
 
     def is_available(self) -> bool:
         """Check if the CVE provider API is reachable and functional.
@@ -302,13 +308,13 @@ class BaseCveProvider(BaseIntegration):
         score = 10
         if not data.description:
             score -= 8
-        if not data.cwe or len(list(data.technologies or [])) == 0:
+        if len(data.cwes or []) == 0 or len(list(data.technologies or [])) == 0:
             score -= 3
         if not data.cvss_base_score or not data.cvss_version or not data.cvss_vector:
             score -= 5
         elif data.cvss_version.startswith("2"):
             score -= 2
-        if data.epss_score and data.epss_percentile:
+        if (data.epss_score and data.epss_percentile) or data.euvd_id or data.ghsa_id or data.osv_generic_id:
             score += 1
         return score
 
@@ -329,7 +335,10 @@ class BaseCveProvider(BaseIntegration):
             if data.description and data.description.startswith("#")
             else data.description
         )
-        finding.cwe = data.cwe
+        finding.cwes = sorted(
+            [c for c in (data.cwes or []) if c.upper().startswith("CWE-")],
+            key=lambda c: int(c.split("-", 1)[1]),
+        )
         if data.cvss_base_score:
             finding.severity = next(
                 (
@@ -345,11 +354,14 @@ class BaseCveProvider(BaseIntegration):
         finding.epss_score = data.epss_score
         finding.epss_percentile = data.epss_percentile
         finding.reference = data.reference
+        finding.euvd_id = data.euvd_id
+        finding.ghsa_id = data.ghsa_id
+        finding.osv_generic_id = data.osv_generic_id
         finding.save(
             update_fields=[
                 "name",
                 "description",
-                "cwe",
+                "cwes",
                 "severity",
                 "cvss_base_score",
                 "cvss_vector",
@@ -357,6 +369,9 @@ class BaseCveProvider(BaseIntegration):
                 "epss_score",
                 "epss_percentile",
                 "reference",
+                "euvd_id",
+                "ghsa_id",
+                "osv_generic_id",
             ]
         )
 

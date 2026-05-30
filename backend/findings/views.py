@@ -224,8 +224,22 @@ class VulnerabilityViewSet(TriageFindingViewSet):
     queryset = Vulnerability.objects.all()
     serializer_class = VulnerabilitySerializer
     filterset_class = VulnerabilityFilter
-    search_fields = ["name", "description", "cve", "cwe"]
-    ordering_fields = ["id", "technology", "port", "name", "severity", "cve", "cwe"]
+    search_fields = ["name", "description", "cve", "euvd_id", "ghsa_id", "osv_generic_id", "cwes"]
+    ordering_fields = [
+        "id",
+        "technology",
+        "port",
+        "name",
+        "severity",
+        "cvss_base_score",
+        "cve",
+        "euvd_id",
+        "ghsa_id",
+        "osv_generic_id",
+        "cwes",
+        "epss_score",
+        "epss_percentile",
+    ]
 
 
 class ExploitViewSet(TriageFindingViewSet):

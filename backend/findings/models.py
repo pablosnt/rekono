@@ -500,7 +500,10 @@ class Vulnerability(TriageFinding):
         cvss_vector (TextField): CVSS vector string for detailed scoring (optional, max 200 characters)
         cvss_base_score (FloatField): CVSS base score numerical value (optional)
         cve (TextField): Common Vulnerabilities and Exposures identifier (optional, max 20 characters)
-        cwe (TextField): Common Weakness Enumeration classification (optional, max 20 characters)
+        euvd_id (TextField): ENISA EUVD identifier (optional, max 30 characters)
+        ghsa_id (TextField): GitHub Security Advisory identifier (optional, max 30 characters)
+        osv_generic_id (TextField): OSV-native identifier for non-CVE/GHSA/EUVD ecosystems (optional, max 100 characters)
+        cwes (JSONField): Sorted list of CWE identifiers (e.g. ["CWE-79", "CWE-200"])
         epss_score (FloatField): EPSS probability of exploitation in 30 days (optional, 0.0–1.0)
         epss_percentile (FloatField): EPSS percentile rank among all scored CVEs (optional, 0.0–1.0)
         remediation (TextField): Recommended remediation steps or mitigation guidance (optional)
@@ -547,8 +550,11 @@ class Vulnerability(TriageFinding):
     cvss_version = models.TextField(max_length=3, blank=True, null=True)
     cvss_vector = models.TextField(max_length=200, blank=True, null=True)
     cvss_base_score = models.FloatField(blank=True, null=True)
-    cve = models.TextField(max_length=20, blank=True, null=True)
-    cwe = models.TextField(max_length=20, blank=True, null=True)
+    cve = models.TextField(max_length=30, blank=True, null=True)
+    euvd_id = models.TextField(max_length=30, blank=True, null=True)
+    ghsa_id = models.TextField(max_length=30, blank=True, null=True)
+    osv_generic_id = models.TextField(max_length=100, blank=True, null=True)
+    cwes = models.JSONField(default=list, blank=True)
     epss_score = models.FloatField(blank=True, null=True)
     epss_percentile = models.FloatField(blank=True, null=True)
     remediation = models.TextField(blank=True, null=True)
@@ -559,7 +565,7 @@ class Vulnerability(TriageFinding):
     _filters = [
         Finding.Filter(Severity, "severity"),
         Finding.Filter(str, "cve", contains=True, processor=lambda c: c.lower()),
-        Finding.Filter(str, "cwe", contains=True, processor=lambda c: c.lower()),
+        Finding.Filter(str, "cwes", contains=True, processor=lambda cwes: " ".join(c.lower() for c in (cwes or []))),
     ]
     _parse_mapping = {InputKeyword.CVE: "cve"}
     _parse_dependencies = ["technology", "port"]
@@ -568,7 +574,7 @@ class Vulnerability(TriageFinding):
         "description": "description",
         "severity": "severity",
         "cve": "cve",
-        "cwe": lambda instance: int(instance.cwe.split("-", 1)[1]) if instance.cwe else None,
+        "cwe": lambda instance: int(instance.cwes[-1].split("-", 1)[1]) if instance.cwes else None,
         "cvss3": lambda instance: (
             instance.cvss_vector if instance.cvss_version and instance.cvss_version.startswith("3") else None
         ),
