@@ -6,11 +6,13 @@
     :loading="state.loading"
     loading-color="primary"
     :columns="columns"
-    :ui="
-      config.itemLink || config.onItemClick
+    :ui="{
+      th: 'min-w-42',
+      td: 'min-w-42',
+      ...(config.itemLink || config.onItemClick
         ? { tbody: '[&>tr]:cursor-pointer' }
-        : undefined
-    "
+        : {}),
+    }"
     v-on="
       config.itemLink || config.onItemClick
         ? { select: onTableSelect }
