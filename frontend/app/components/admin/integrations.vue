@@ -212,7 +212,7 @@ const integrationsSettings = ref({
         api_token: validation.secret("api_token", false, 200).or(z.literal("")),
       }),
     },
-    endpoint: "vulncheck"
+    endpoint: "vulncheck",
   },
 });
 const currentIntegrationSettings = computed(() => {
