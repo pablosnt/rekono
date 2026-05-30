@@ -29,7 +29,7 @@ class ZapTest(ParserTest, TestCase):
                         "[GET] http://10.10.10.10/shared/images/Acunetix/\n"
                     ),
                     "severity": Severity.MEDIUM,
-                    "cwe": "CWE-548",
+                    "cwes": ["CWE-548"],
                     "reference": "http://httpd.apache.org/docs/mod/core.html#options",
                 },
                 {
@@ -43,7 +43,7 @@ class ZapTest(ParserTest, TestCase):
                         "[GET] http://10.10.10.10/\n"
                     ),
                     "severity": Severity.MEDIUM,
-                    "cwe": "CWE-1021",
+                    "cwes": ["CWE-1021"],
                     "reference": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options",
                 },
                 {
@@ -71,7 +71,7 @@ class ZapTest(ParserTest, TestCase):
                         "[GET] http://10.10.10.10/\n"
                     ),
                     "severity": Severity.LOW,
-                    "cwe": "CWE-352",
+                    "cwes": ["CWE-352"],
                     "reference": "http://projects.webappsec.org/Cross-Site-Request-Forgery",
                 },
                 {
@@ -86,7 +86,7 @@ class ZapTest(ParserTest, TestCase):
                         "[GET] http://10.10.10.10/\n"
                     ),
                     "severity": Severity.LOW,
-                    "cwe": "CWE-829",
+                    "cwes": ["CWE-829"],
                 },
                 {"model": Path, "path": "/shared/images/Acunetix/acx_Chess-WB.gif", "type": PathType.ENDPOINT},
                 {
@@ -100,7 +100,7 @@ class ZapTest(ParserTest, TestCase):
                         "[GET] http://10.10.10.10/shared/images/Acunetix/acx_Chess-WB.gif\n"
                     ),
                     "severity": Severity.LOW,
-                    "cwe": "CWE-200",
+                    "cwes": ["CWE-200"],
                     "reference": "http://projects.webappsec.org/w/page/13246936/Information%20Leakage",
                 },
                 {"model": Path, "path": "/images/sitelogo.png", "type": PathType.ENDPOINT},
@@ -127,7 +127,7 @@ class ZapTest(ParserTest, TestCase):
                         "[GET] http://10.10.10.10/shared/images/topleftcurve.gif\n"
                     ),
                     "severity": Severity.LOW,
-                    "cwe": "CWE-693",
+                    "cwes": ["CWE-693"],
                     "reference": "http://msdn.microsoft.com/en-us/library/ie/gg622941%28v=vs.85%29.aspx",
                 },
             ],
