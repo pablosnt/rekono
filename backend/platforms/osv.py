@@ -89,7 +89,12 @@ class OSV(BaseCveProvider):
                 ghsa_id = alias
             elif alias_upper.startswith("EUVD-") and euvd_id is None:
                 euvd_id = alias
-            elif not alias_upper.startswith("CVE-") and not alias_upper.startswith("GHSA-") and not alias_upper.startswith("EUVD-") and osv_generic_id is None:
+            elif (
+                not alias_upper.startswith("CVE-")
+                and not alias_upper.startswith("GHSA-")
+                and not alias_upper.startswith("EUVD-")
+                and osv_generic_id is None
+            ):
                 osv_generic_id = alias
             if euvd_id and ghsa_id and osv_generic_id:
                 break

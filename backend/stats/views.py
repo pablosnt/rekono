@@ -8,7 +8,6 @@ Supports filtering, pagination, and aggregation for comprehensive security repor
 import datetime
 
 from django.db.models import Count, Exists, F, Func, Max, Min, OuterRef, Q, Subquery
-from rekono.settings import CONFIG
 from django.db.models.functions import TruncMonth
 from django_rq.utils import get_statistics
 from drf_spectacular.utils import extend_schema
@@ -31,6 +30,7 @@ from findings.filters import (
 from findings.framework.models import TriageFinding
 from findings.models import OSINT, Credential, Exploit, Host, Port, Technology, Vulnerability
 from framework.views import StatsViewSet
+from rekono.settings import CONFIG
 from security.authorization.permissions import IsAdmin
 from stats.serializers import (
     ExploitCoverageStatsSerializer,
