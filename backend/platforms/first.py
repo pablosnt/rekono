@@ -112,8 +112,8 @@ class First(BaseIntegration):
                     data_to_update = {
                         k: v
                         for k, v in {
-                            "epss_score": float(item["epss"]) if item["epss"] else None,
-                            "epss_percentile": float(item["percentile"]) if item["percentile"] else None,
+                            "epss_score": float(item["epss"]) * 100 if item["epss"] else None,
+                            "epss_percentile": float(item["percentile"]) * 100 if item["percentile"] else None,
                         }.items()
                         if v is not None
                     }
