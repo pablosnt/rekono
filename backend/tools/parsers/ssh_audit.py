@@ -50,7 +50,7 @@ class Sshaudit(BaseParser):
                         description="\n".join(notes),
                         severity=Severity.MEDIUM if "fail" in item.get("notes", {}) else Severity.LOW,
                         # CWE-326: Inadequate Encryption Strength
-                        cwe="CWE-326",
+                        cwes=["CWE-326"],
                     )
                 for note in notes:
                     for cve in re.findall(Regex.CVE.value, note):

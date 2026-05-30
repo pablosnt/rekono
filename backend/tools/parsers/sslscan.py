@@ -71,7 +71,7 @@ class Sslscan(BaseParser):
                                 description=f"{technology.name} {technology.version} is supported",
                                 severity=Severity.MEDIUM if technology.name == "TLS" else Severity.HIGH,
                                 # CWE-326: Inadequate Encryption Strength
-                                cwe="CWE-326",
+                                cwes=["CWE-326"],
                             )
                 else:
                     for check, fields in [
@@ -84,7 +84,7 @@ class Sslscan(BaseParser):
                                 "description": "Insecure TLS renegotiation supported",
                                 "severity": Severity.MEDIUM,
                                 # CWE CATEGORY: Permissions, Privileges, and Access Controls
-                                "cwe": "CWE-264",
+                                "cwes": ["CWE-264"],
                             },
                         ),
                         (
@@ -98,7 +98,7 @@ class Sslscan(BaseParser):
                                 "description": f"{item.attrib.get('sslversion')} {item.attrib.get('cipher')} status={item.attrib.get('status')} strength={item.attrib.get('strength')}",
                                 "severity": Severity.LOW,
                                 # CWE-326: Inadequate Encryption Strength
-                                "cwe": "CWE-326",
+                                "cwes": ["CWE-326"],
                             },
                         ),
                     ]:
