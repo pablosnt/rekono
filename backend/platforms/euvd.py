@@ -64,4 +64,5 @@ class EUVD(BaseCveProvider):
             epss_score=data.get("epss"),
             technologies=[p.get("id") for p in data.get("enisaIdProduct", []) if p.get("id")],
             reference=self.reference.format(euvd=data["id"]),
+            euvd_id=data["id"],
         )

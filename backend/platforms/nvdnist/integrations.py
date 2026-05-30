@@ -83,6 +83,7 @@ class NvdNist(BaseCveProvider):
             return
         enrichment = self.CveEnrichment(
             name=data.get("cisaVulnerabilityName", cve) or cve,
+            cwes=[],
             technologies=self._get_technologies(data),
             reference=self.reference.format(cve=cve),
             status=data.get("vulnStatus", ""),
@@ -91,37 +92,30 @@ class NvdNist(BaseCveProvider):
             if desc.get("lang") == "en":
                 enrichment.description = desc.get("value")
                 break
-        cwe = 0
+        for weakness in data.get("weaknesses", []) or []:
+            for description in weakness.get("description") or []:
+                value = description.get("value", "").lower()
+                if value.startswith("cwe-") and value != "cwe-0":
+                    enrichment.cwes.append(value.upper())
+
         cvss_info = data.get("metrics", {}) or {}
         for category in ["primary", "secondary"]:
-            if cwe == 0:
-                for weakness in data.get("weaknesses", []) or []:
-                    if weakness.get("type").lower() != category:
-                        continue
-                    for description in weakness.get("description") or []:
-                        value = description.get("value", "").lower()
-                        if value.startswith("cwe-"):
-                            cwe_value = int(value.split("cwe-")[1])
-                            cwe = cwe_value if cwe_value > cwe else cwe
-            if not enrichment.cvss_base_score:
-                for _version in ["40", "4", "31", "30", "3", "2"]:
-                    cvss_version_field = f"cvssMetricV{_version}"
-                    for cvss in cvss_info.get(cvss_version_field) or sum(
-                        [list(items) for key, items in cvss_info.items() if key.lower().startswith(cvss_version_field)],
-                        [],
-                    ):
-                        if cvss.get("type", "").lower() == category:
-                            cvss_info = cvss.get("cvssData", {})
-                            base_score = cvss_info.get("baseScore")
-                            if base_score:
-                                enrichment.cvss_version = cvss_info.get("version")
-                                enrichment.cvss_vector = cvss_info.get("vectorString")
-                                enrichment.cvss_base_score = base_score
-                                break
-                if enrichment.cvss_base_score and cwe > 0:
-                    break
-        if cwe > 0:
-            enrichment.cwe = f"CWE-{cwe}"
+            if enrichment.cvss_base_score:
+                break
+            for _version in ["40", "4", "31", "30", "3", "2"]:
+                cvss_version_field = f"cvssMetricV{_version}"
+                for cvss in cvss_info.get(cvss_version_field) or sum(
+                    [list(items) for key, items in cvss_info.items() if key.lower().startswith(cvss_version_field)],
+                    [],
+                ):
+                    if cvss.get("type", "").lower() == category:
+                        cvss_info = cvss.get("cvssData", {})
+                        base_score = cvss_info.get("baseScore")
+                        if base_score:
+                            enrichment.cvss_version = cvss_info.get("version")
+                            enrichment.cvss_vector = cvss_info.get("vectorString")
+                            enrichment.cvss_base_score = base_score
+                            break
         return enrichment
 
     def _get_technologies(self, data: dict[str, Any]) -> list[str]:

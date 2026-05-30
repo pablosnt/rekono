@@ -12,6 +12,7 @@ from tests.framework.data import SetupProject
 # pytype: disable=wrong-arg-types
 
 data = {
+    "ghsa_id": "GHSA-jfh8-c2jp-hdp3",
     "summary": "Critical RCE in Apache Log4j",
     "description": "Remote code execution vulnerability in Apache Log4j2 via JNDI lookup",
     "cwes": [{"cwe_id": "CWE-400"}, {"cwe_id": "CWE-917"}],
@@ -65,7 +66,8 @@ class GhsaTest(BaseTest, TestCase):
         self.assertEqual(data["cvss_severities"]["cvss_v4"]["score"], enrichment.cvss_base_score)
         self.assertEqual(data["cvss_severities"]["cvss_v4"]["vector_string"], enrichment.cvss_vector)
         self.assertEqual("4.0", enrichment.cvss_version)
-        self.assertEqual("CWE-917", enrichment.cwe)
+        self.assertEqual(["CWE-400", "CWE-917"], enrichment.cwes)
+        self.assertEqual(data["ghsa_id"], enrichment.ghsa_id)
         self.assertEqual(data["epss"]["percentage"], enrichment.epss_score)
         self.assertEqual(data["epss"]["percentile"], enrichment.epss_percentile)
         self.assertEqual([data["vulnerabilities"][0]["package"]["name"]], enrichment.technologies)
@@ -84,7 +86,8 @@ class GhsaTest(BaseTest, TestCase):
         self.assertEqual(enrichment.cvss_base_score, vuln.cvss_base_score)
         self.assertEqual(enrichment.cvss_vector, vuln.cvss_vector)
         self.assertEqual(enrichment.cvss_version, vuln.cvss_version)
-        self.assertEqual(enrichment.cwe, vuln.cwe)
+        self.assertEqual(enrichment.cwes, vuln.cwes)
+        self.assertEqual(enrichment.ghsa_id, vuln.ghsa_id)
         self.assertEqual(enrichment.epss_score, vuln.epss_score)
         self.assertEqual(enrichment.epss_percentile, vuln.epss_percentile)
         self.assertEqual(enrichment.reference, vuln.reference)

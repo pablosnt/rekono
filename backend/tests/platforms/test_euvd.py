@@ -62,7 +62,8 @@ class EuvdTest(BaseTest, TestCase):
         self.assertEqual(data["baseScore"], enrichment.cvss_base_score)
         self.assertEqual(data["baseScoreVector"], enrichment.cvss_vector)
         self.assertEqual(data["baseScoreVersion"], enrichment.cvss_version)
-        self.assertIsNone(enrichment.cwe)
+        self.assertIsNone(enrichment.cwes)
+        self.assertEqual(data["id"], enrichment.euvd_id)
         self.assertEqual(data["epss"], enrichment.epss_score)
         self.assertIsNone(enrichment.epss_percentile)
         self.assertEqual([data["enisaIdProduct"][0]["id"]], enrichment.technologies)
@@ -70,7 +71,7 @@ class EuvdTest(BaseTest, TestCase):
         self.assertIsNone(enrichment.status)
 
         # Quality Score
-        self.assertEqual(7, self.euvd.cve_quality_score(enrichment))
+        self.assertEqual(8, self.euvd.cve_quality_score(enrichment))
 
         # Save
         self.euvd.save(self.vulnerability, enrichment)
@@ -81,7 +82,8 @@ class EuvdTest(BaseTest, TestCase):
         self.assertEqual(enrichment.cvss_base_score, vuln.cvss_base_score)
         self.assertEqual(enrichment.cvss_vector, vuln.cvss_vector)
         self.assertEqual(enrichment.cvss_version, vuln.cvss_version)
-        self.assertIsNone(vuln.cwe)
+        self.assertEqual([], vuln.cwes)
+        self.assertEqual(data["id"], vuln.euvd_id)
         self.assertEqual(enrichment.epss_score, vuln.epss_score)
         self.assertIsNone(vuln.epss_percentile)
         self.assertEqual(enrichment.reference, vuln.reference)

@@ -67,7 +67,7 @@ class GHSA(BaseCveProvider):
         return self.CveEnrichment(
             name=info["summary"],
             description=info["description"],
-            cwe=info["cwes"][-1]["cwe_id"] if len(info.get("cwes") or []) else None,
+            cwes=[c["cwe_id"] for c in info.get("cwes") or [] if c.get("cwe_id")],
             cvss_base_score=cvss_base_score,
             cvss_vector=cvss_vector,
             cvss_version=cvss_version,
@@ -80,6 +80,7 @@ class GHSA(BaseCveProvider):
             ],
             reference=info["html_url"],
             status=info["type"],
+            ghsa_id=info["ghsa_id"],
         )
 
     def cve_quality_score(self, data: BaseCveProvider.CveEnrichment) -> int:
