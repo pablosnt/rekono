@@ -93,6 +93,13 @@ const filters = computed(() => [
     labelKey: "value",
   },
   {
+    key: "cwe",
+    label: "CWE",
+    icon: "i-lucide-tag",
+    type: "text",
+    placeholder: "Filter by CWE...",
+  },
+  {
     key: "trending",
     label: "Trending",
     icon: "i-lucide-trending-up",
