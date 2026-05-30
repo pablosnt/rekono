@@ -52,17 +52,21 @@ urlpatterns = [
     path("api/", include("users.urls")),
     path("api/", include("wordlists.urls")),
     # OpenAPI specification
-    path("api/schema/", SpectacularAPIView.as_view(permission_classes=[AllowAny]), name="schema"),
+    path(
+        "api/schema/",
+        SpectacularAPIView.as_view(permission_classes=[AllowAny], authentication_classes=[]),
+        name="schema",
+    ),
     # Swagger-UI
     path(
         "api/schema/swagger-ui/",
-        SpectacularSwaggerView.as_view(url_name="schema", permission_classes=[AllowAny]),
+        SpectacularSwaggerView.as_view(url_name="schema", permission_classes=[AllowAny], authentication_classes=[]),
         name="swagger-ui",
     ),
     # Redoc
     path(
         "api/schema/redoc/",
-        SpectacularRedocView.as_view(url_name="schema", permission_classes=[AllowAny]),
+        SpectacularRedocView.as_view(url_name="schema", permission_classes=[AllowAny], authentication_classes=[]),
         name="redoc",
     ),
     path("", lambda request: redirect("swagger-ui")),
