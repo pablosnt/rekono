@@ -41,6 +41,7 @@
         </VisXYContainer>
       </div>
     </template>
+    <MetricsChartsEmpty v-else />
   </UPageCard>
 </template>
 

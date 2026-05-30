@@ -1,6 +1,5 @@
 <template>
   <UPageCard
-    v-if="loading || locationHosts.length"
     title="Geolocation"
     class="w-full"
     variant="outline"
@@ -9,9 +8,7 @@
     <div v-if="loading" class="flex items-center justify-center">
       <UButton variant="ghost" loading size="xl" />
     </div>
-    <template v-else-if="locationHosts.length">
-      <FindingsHostsLocations :height="400" :hosts="locationHosts" />
-    </template>
+    <FindingsHostsLocations v-else :height="400" :hosts="locationHosts" />
   </UPageCard>
 </template>
 

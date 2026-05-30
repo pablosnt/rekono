@@ -1,7 +1,6 @@
 <template>
   <div class="flex flex-col sm:flex-row gap-6 mt-6">
     <UPageCard
-      v-if="loading || hasOpenFindings"
       title="Findings per Triage Status"
       description="Only open findings"
       class="sm:flex-1 min-w-0"
@@ -30,6 +29,7 @@
         />
         <VisTooltip :triggers="treemapTooltip" />
       </VisSingleContainer>
+      <MetricsChartsEmpty v-else />
     </UPageCard>
     <UPageCard
       title="False Positives Rate"
@@ -39,6 +39,7 @@
       :ui="{ container: 'min-w-0' }"
     >
       <MetricsChartsHalfDonut
+        v-if="loading || triaged > 0"
         :data="donutData"
         :loading="loading"
         :central-label="`${fpRate.toPrecision(3)}%`"
@@ -46,6 +47,7 @@
         :radius="250"
         :tooltip="donutTooltip"
       />
+      <MetricsChartsEmpty v-else />
     </UPageCard>
   </div>
 </template>

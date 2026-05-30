@@ -21,6 +21,7 @@
       />
       <VisTooltip :triggers="tooltipTriggers" />
     </VisSingleContainer>
+    <MetricsChartsEmpty v-else />
   </UPageCard>
 </template>
 
