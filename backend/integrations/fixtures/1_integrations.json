@@ -92,7 +92,7 @@
             "description": "Open Source Vulnerabilities from where Rekono will get CVE information to aggregate findings information",
             "enabled": true,
             "reference": "https://osv.dev/",
-            "icon": "https://osv.dev/static/img/logo-dark.png"
+            "icon": "https://osv.dev/static/img/favicon-32x32.png"
         }
     },
     {

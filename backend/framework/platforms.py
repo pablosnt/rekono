@@ -338,7 +338,7 @@ class BaseCveProvider(BaseIntegration):
         cwes = []
         for _cwe in set(data.cwes or []):
             cwe = _cwe.upper()
-            if cwe.starswith("CWE-") and cwe.replace("CWE-", "").isdigit():
+            if cwe.startswith("CWE-") and cwe.replace("CWE-", "").isdigit():
                 finding.cwes.append(cwe)
         finding.cwes = sorted(cwes, key=lambda c: int(c.split("-", 1)[1]))
         if data.cvss_base_score:

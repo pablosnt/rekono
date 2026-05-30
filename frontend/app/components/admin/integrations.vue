@@ -209,9 +209,10 @@ const integrationsSettings = ref({
         },
       ],
       editFormSchema: z.object({
-        api_token: validation.secret("api_token", true, 200),
+        api_token: validation.secret("api_token", false, 200).or(z.literal("")),
       }),
     },
+    endpoint: "vulncheck"
   },
 });
 const currentIntegrationSettings = computed(() => {
@@ -231,7 +232,7 @@ function fetch() {
     const integrationApi = value.api
       ? value.api
       : useApi(
-          `/api/${value.config.entityName.toLowerCase().replace(" ", "")}/`,
+          `/api/${value.endpoint ? value.endpoint : value.config.entityName.toLowerCase().replace(" ", "")}/`,
         );
     integrationsSettings.value[key]["api"] = integrationApi;
     integrationsSettings.value[key]["config"]["modalAvatar"] = () => ({
