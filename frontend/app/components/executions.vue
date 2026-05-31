@@ -152,24 +152,15 @@ const config: CrudConfig<Execution> = reactive({
           resolveComponent("UTooltip"),
           {
             text: row.original.status,
-            content: { side: "left", sideOffset: 8, collisionPadding: 8 },
+            content: { side: "right", sideOffset: 8, collisionPadding: 8 },
           },
           {
             default: () =>
-              isRunning
-                ? h(resolveComponent("UButton"), {
-                    icon: "i-lucide-loader",
-                    loading: true,
-                    color: status?.color,
-                    class: "text-lg",
-                    variant: "ghost",
-                    "aria-label": row.original.status,
-                  })
-                : h(resolveComponent("UIcon"), {
-                    name: status?.icon,
-                    class: `text-lg text-${status?.color}`,
-                    "aria-label": row.original.status,
-                  }),
+              h(resolveComponent("UIcon"), {
+                name: status?.icon,
+                class: `text-lg text-${status?.color}${isRunning ? " animate-spin" : ""}`,
+                "aria-label": row.original.status,
+              }),
           },
         );
       },
