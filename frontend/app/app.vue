@@ -16,8 +16,10 @@ useSeoMeta({
   description,
   ogTitle: title,
   ogDescription: description,
-  ogImage: "https://raw.githubusercontent.com/pablosnt/rekono/refs/heads/main/frontend/public/logo-light.png",
-  twitterImage: "https://raw.githubusercontent.com/pablosnt/rekono/refs/heads/main/frontend/public/logo-light.png",
+  ogImage:
+    "https://raw.githubusercontent.com/pablosnt/rekono/refs/heads/main/frontend/public/logo-light.png",
+  twitterImage:
+    "https://raw.githubusercontent.com/pablosnt/rekono/refs/heads/main/frontend/public/logo-light.png",
   twitterCard: "summary_large_image",
 });
 </script>

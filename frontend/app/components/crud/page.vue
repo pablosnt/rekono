@@ -85,7 +85,14 @@
         </template>
 
         <template v-else-if="config.useGrid">
-          <UProgress :class="[state.loading && (config.useGrid || state.items.length === 0) ? 'visible' : 'invisible', 'mb-1']" />
+          <UProgress
+            :class="[
+              state.loading && (config.useGrid || state.items.length === 0)
+                ? 'visible'
+                : 'invisible',
+              'mb-1',
+            ]"
+          />
           <CrudEmptyState
             v-if="state.items.length === 0 && !state.loading"
             :config="config"
