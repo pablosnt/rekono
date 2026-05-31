@@ -30,7 +30,7 @@ const description = computed(() => {
   }
   const base =
     props.config.emptyMessage ||
-    `It looks like there are no ${smartLowerCase(props.config.entityNamePlural)} yet`;
+    `There are no ${smartLowerCase(props.config.entityNamePlural)} yet`;
   return props.config.canCreate ? `${base}. You can create one below` : base;
 });
 const actions = computed(() => {

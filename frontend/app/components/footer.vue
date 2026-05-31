@@ -34,7 +34,7 @@
             target: '_blank',
           },
           {
-            'aria-label': 'Wiki',
+            'aria-label': 'Documentation',
             icon: 'i-simple-icons-readthedocs',
             to: 'https://github.com/pablosnt/rekono/wiki',
             target: '_blank',
