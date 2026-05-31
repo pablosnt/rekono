@@ -51,7 +51,7 @@
         "model": "target_denylist.targetdenylist",
         "pk": 7,
         "fields": {
-            "target": "redis",
+            "target": "valkey",
             "default": true
         }
     },
