@@ -18,11 +18,11 @@ jobs:
         with:
           fetch-depth: 0
       
-      - name: Install and start Redis server
+      - name: Install and start Valkey server
         run: |
           sudo apt update -y
-          sudo apt install redis-server -y
-          sudo systemctl start redis-server
+          sudo apt install valkey-server -y
+          sudo systemctl start valkey-server
 
       - name: Install UV
         uses: astral-sh/setup-uv@cb84d12dc6a0d495b82fcae14fa4559b90698660
