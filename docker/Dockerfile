@@ -3,7 +3,6 @@ ARG LABEL_VERSION
 ARG LABEL_REVISION
 ARG LABEL_URL="https://github.com/pablosnt/rekono"
 ARG LABEL_SOURCE="https://github.com/pablosnt/rekono"
-# TODO: Update documentation link
 ARG LABEL_DOCUMENTATION="https://github.com/pablosnt/rekono/wiki"
 ARG LABEL_AUTHORS="Pablo Santiago López"
 ARG LABEL_LICENSES="GPL-3.0"
@@ -151,7 +150,7 @@ WORKDIR /code
 # Install hacking tools supported via apt
 RUN apt update && \
     TOOLS="nmap theharvester nikto sslscan sslyze cmseek zaproxy exploitdb metasploit-framework emailharvester joomscan gitleaks smbmap nuclei gobuster seclists dirb" && \
-    apt install --yes --no-install-recommends $TOOLS $BACKEND_DEBIAN_DEPENDENCIES libcap2-bin git ca-certificates && \
+    apt install --yes --no-install-recommends $TOOLS $BACKEND_DEBIAN_DEPENDENCIES libcap2-bin git ca-certificates sudo && \
     # Grant capabilities required to nmap in order to get it running in a rootless environment
     setcap cap_net_raw,cap_net_admin,cap_net_bind_service+eip $(which nmap) && \
     # Clean apt resources
@@ -177,9 +176,12 @@ RUN apt update && \
     echo "uv run --no-dev manage.py migrate" > /entrypoints/initializer.sh && \
     echo "uv run --no-dev manage.py createsuperuser --no-input  || true" >> /entrypoints/initializer.sh && \
     chmod +x /entrypoints/initializer.sh && \
+    # Tooling update script
+    echo "nuclei -update-templates" > /entrypoints/update-tooling.sh && \
+    echo "searchsploit --update || true" >> /entrypoints/update-tooling.sh && \
+    chmod +x /entrypoints/update-tooling.sh && \
     # Executions worker script
-    echo "nuclei -update-templates" > /entrypoints/executions-worker.sh && \
-    echo "searchsploit --update || true" >> /entrypoints/executions-worker.sh && \
+    echo "sudo /entrypoints/update-tooling.sh &" > /entrypoints/executions-worker.sh && \
     echo "uv run --no-dev manage.py rqworker executions" >> /entrypoints/executions-worker.sh && \
     chmod +x /entrypoints/executions-worker.sh && \
     # Rootless user
@@ -187,6 +189,10 @@ RUN apt update && \
     chown -R rekono:rekono /opt && \
     chown -R rekono:rekono /code && \
     chown -R rekono:rekono /entrypoints && \
+    chown root:root /entrypoints/update-tooling.sh && \
+    chmod 700 /entrypoints/update-tooling.sh && \
+    echo "rekono ALL=(root) NOPASSWD: /entrypoints/update-tooling.sh" > /etc/sudoers.d/rekono-update-tooling && \
+    chmod 440 /etc/sudoers.d/rekono-update-tooling && \
     chown -R rekono:rekono /usr/share/cmseek && \
     chown -R rekono:rekono /usr/share/seclists && \
     chown -R rekono:rekono /usr/share/dirb/wordlists
