@@ -304,7 +304,7 @@ function processTask(data?: Task) {
       executions.value?.page?.fetch();
       findings.value?.fetch();
       refreshPanelCounts();
-    }, 10000);
+    }, 5000);
   } else if (refresh.value) {
     refreshPanelCounts();
     clearTimeout(refresh.value);

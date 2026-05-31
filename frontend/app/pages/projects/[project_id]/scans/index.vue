@@ -59,7 +59,7 @@ function onFetched(items: Task[]) {
     refresh.value = setTimeout(() => {
       page.value?.fetch();
       refreshPanelCounts();
-    }, 10000);
+    }, 5000);
   } else if (refresh.value) {
     refreshPanelCounts();
     clearTimeout(refresh.value);

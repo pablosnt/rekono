@@ -211,7 +211,7 @@ const dropdownActions = computed(() =>
 
 function processExecutions(items: Execution[]) {
   if (items.filter((e) => ["Running", "Requested"].includes(e.status))) {
-    refresh.value = setTimeout(executions.value?.page?.fetch, 10000);
+    refresh.value = setTimeout(executions.value?.page?.fetch, 5000);
   }
 }
 
