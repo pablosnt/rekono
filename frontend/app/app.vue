@@ -16,9 +16,8 @@ useSeoMeta({
   description,
   ogTitle: title,
   ogDescription: description,
-  // todo: Update:
-  ogImage: "https://ui.nuxt.com/assets/templates/nuxt/starter-light.png",
-  twitterImage: "https://ui.nuxt.com/assets/templates/nuxt/starter-light.png",
+  ogImage: "https://raw.githubusercontent.com/pablosnt/rekono/refs/heads/main/frontend/public/logo-light.png",
+  twitterImage: "https://raw.githubusercontent.com/pablosnt/rekono/refs/heads/main/frontend/public/logo-light.png",
   twitterCard: "summary_large_image",
 });
 </script>

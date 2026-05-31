@@ -1,5 +1,4 @@
 <template>
-  <!-- todo: update docs link -->
   <UButton
     label="Learn More"
     icon="i-simple-icons-readthedocs"
