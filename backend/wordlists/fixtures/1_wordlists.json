@@ -496,28 +496,6 @@
     },
     {
         "model": "wordlists.wordlist",
-        "pk": 50,
-        "fields": {
-            "name": "Confluence Administration",
-            "type": "Endpoint",
-            "path": "/usr/share/seclists/Discovery/Web-Content/Service-Specific/confluence-administration.txt",
-            "checksum": null,
-            "size": null
-        }
-    },
-    {
-        "model": "wordlists.wordlist",
-        "pk": 50,
-        "fields": {
-            "name": "Confluence Administration",
-            "type": "Endpoint",
-            "path": "/usr/share/seclists/Discovery/Web-Content/Service-Specific/confluence-administration.txt",
-            "checksum": null,
-            "size": null
-        }
-    },
-    {
-        "model": "wordlists.wordlist",
         "pk": 49,
         "fields": {
             "name": "SAP Analytics Cloud",
