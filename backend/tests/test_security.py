@@ -18,7 +18,7 @@ from tests.framework import ApiTest, ApiTestNoData
 from tests.framework.cases import ApiTestCase, CustomApiTestCase
 from users.models import User
 
-# pytype: disable=wrong-arg-types
+# pytype: disable=wrong-arg-types,attribute-error
 
 
 class SecurityTest(ApiTest, TestCase):
