@@ -8,9 +8,10 @@
           (item) => (item.related_entity = getNoteRelatedEntity(item)),
         )
     "
+    @create-click="notesButton?.createNote()"
   >
     <template #create-button>
-      <NotesButton show />
+      <NotesButton ref="notesButton" show />
     </template>
     <template #item="{ item, onDelete }">
       <UPageCard
@@ -141,6 +142,7 @@ const route = useRoute();
 const toast = useToast();
 const api = useApi("/api/notes/");
 const page = ref();
+const notesButton = ref();
 const userOptions = ref<FilterOption[]>([]);
 const targetOptions = ref();
 const taskOptions = ref();

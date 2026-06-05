@@ -86,7 +86,7 @@
             :config="config"
             :state="state"
             class="py-12"
-            @create-click="openCreateModal = true"
+            @create-click="onCreateClick"
           />
         </template>
 
@@ -96,7 +96,7 @@
             :config="config"
             :state="state"
             class="mt-10"
-            @create-click="openCreateModal = true"
+            @create-click="onCreateClick"
           />
           <UPageGrid v-show="state.items.length > 0">
             <slot
@@ -199,7 +199,11 @@
 import type { CrudConfig, CrudState } from "~/types/crud";
 
 const props = defineProps<{ config: CrudConfig; disableUrlSync?: boolean }>();
-const emit = defineEmits<{ fetched: [items: unknown[]]; deleted: [] }>();
+const emit = defineEmits<{
+  fetched: [items: unknown[]];
+  deleted: [];
+  createClick: [];
+}>();
 
 const api = useApi(props.config.endpoint);
 const route = useRoute();
@@ -293,6 +297,11 @@ function fetch() {
 function fetchFirstPage() {
   state.page = 1;
   fetch();
+}
+
+function onCreateClick() {
+  openCreateModal.value = true;
+  emit("createClick");
 }
 
 onMounted(() => {
