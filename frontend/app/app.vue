@@ -1,7 +1,7 @@
 <script setup lang="ts">
 useHead({
   meta: [{ name: "viewport", content: "width=device-width, initial-scale=1" }],
-  link: [{ rel: "icon", href: "/favicon-light.ico" }],
+  link: [{ rel: "icon", href: "/favicon-light.png", type: "image/png" }],
   htmlAttrs: {
     lang: "en",
   },

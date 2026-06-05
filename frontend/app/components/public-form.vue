@@ -18,8 +18,8 @@
     <template #leading>
       <div class="flex flex-col items-center justify-center mb-3 mt-3">
         <UColorModeImage
-          light="/favicon-light.ico"
-          dark="/favicon-dark.ico"
+          light="/favicon-light.png"
+          dark="/favicon-dark.png"
           :width="100"
           :height="100"
           alt="Rekono logo"

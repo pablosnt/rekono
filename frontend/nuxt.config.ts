@@ -22,6 +22,7 @@ export default defineNuxtConfig({
 
   app: {
     head: {
+      link: [{ rel: "icon", href: "/favicon-light.png", type: "image/png" }],
       script: [
         {
           defer: true,
@@ -68,6 +69,8 @@ export default defineNuxtConfig({
   compatibilityDate: "2025-01-15",
 
   vite: {
+    clearScreen: false,
+    envPrefix: ['VITE_', 'TAURI_'],
     build: {
       chunkSizeWarningLimit: 1200,
       rollupOptions: {
@@ -105,6 +108,7 @@ export default defineNuxtConfig({
       ],
     },
     server: {
+      strictPort: true,
       proxy:
         process.env.NODE_ENV === "development" &&
         !process.env.NUXT_PUBLIC_BACKEND_URL

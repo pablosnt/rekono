@@ -14,8 +14,8 @@
           <div class="relative flex items-center w-full justify-start">
             <UColorModeAvatar
               v-if="!open"
-              light="/favicon-light.ico"
-              dark="/favicon-dark.ico"
+              light="/favicon-light.png"
+              dark="/favicon-dark.png"
               alt="Rekono"
               class="size-8"
             />

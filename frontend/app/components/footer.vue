@@ -47,8 +47,8 @@
     <template #default>
       <div class="flex items-center justify-center w-full sm:w-auto">
         <UColorModeImage
-          light="/favicon-light.ico"
-          dark="/favicon-dark.ico"
+          light="/favicon-light.png"
+          dark="/favicon-dark.png"
           alt="Rekono logo"
           class="mr-2"
           width="20"
