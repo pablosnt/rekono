@@ -42,6 +42,7 @@ urlpatterns = [
     path("api/", include("projects.urls")),
     path("api/", include("reporting.urls")),
     path("api/", include("security.authentication.urls")),
+    path("api/", include("security.csp.urls")),
     path("api/", include("settings.urls")),
     path("api/", include("stats.urls")),
     path("api/", include("target_denylist.urls")),

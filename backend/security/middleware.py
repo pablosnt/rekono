@@ -52,7 +52,7 @@ CSP = {
             "object-src 'none'",
             "frame-ancestors 'none'",
             "script-src cdn.jsdelivr.net",
-            "style-src cdn.jsdelivr.net fonts.googleapis.com 'unsafe-inline'",
+            "style-src cdn.jsdelivr.net fonts.googleapis.com 'sha256-47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=' 'sha256-QMIg+bpjm3JdElJ388KYke01izlUW0UoNOeKjpMxdgc=' 'sha256-GvZq6XrzMRhFZ2MvEI09Lw7QbE3DnWuVQTMYafGYLcg='",
             "img-src 'self' data: cdn.jsdelivr.net cdn.redoc.ly",
             "font-src fonts.gstatic.com",
             "worker-src blob:",

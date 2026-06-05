@@ -52,9 +52,15 @@
       <slot name="before" :state="state" />
 
       <slot name="content">
+        <UProgress
+          :class="[
+            state.loading && state.items.length === 0 ? 'visible' : 'invisible',
+            'mb-1',
+          ]"
+        />
         <template v-if="config.tableColumns">
           <CrudTable
-            v-if="state.loading || state.items.length > 0"
+            v-if="state.items.length > 0"
             ref="tableRef"
             :config="config"
             :state="state"
@@ -76,7 +82,7 @@
             </template>
           </CrudTable>
           <CrudEmptyState
-            v-else
+            v-else-if="!state.loading"
             :config="config"
             :state="state"
             class="py-12"
@@ -85,14 +91,6 @@
         </template>
 
         <template v-else-if="config.useGrid">
-          <UProgress
-            :class="[
-              state.loading && (config.useGrid || state.items.length === 0)
-                ? 'visible'
-                : 'invisible',
-              'mb-1',
-            ]"
-          />
           <CrudEmptyState
             v-if="state.items.length === 0 && !state.loading"
             :config="config"

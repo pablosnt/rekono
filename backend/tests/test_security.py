@@ -2,6 +2,7 @@ import json
 import time
 from datetime import datetime, timedelta
 from functools import cached_property
+from typing import Any
 
 import pyotp
 from django.core.exceptions import ValidationError
@@ -13,7 +14,7 @@ from rekono.settings import JWT_ACCESS_COOKIE, JWT_MFA_COOKIE, JWT_REFRESH_COOKI
 from security.validators.enums import Regex
 from security.validators.input_validator import Validator
 from security.validators.target_validator import TargetValidator
-from tests.framework import ApiTest
+from tests.framework import ApiTest, ApiTestNoData
 from tests.framework.cases import ApiTestCase, CustomApiTestCase
 from users.models import User
 
@@ -313,3 +314,54 @@ class SecurityTest(ApiTest, TestCase):
             except ValidationError:
                 exception = True
             self.assertTrue(exception)
+
+
+BLOCKED = "https://evil.com/script.js"
+ORIGIN = "https://rekono.com/projects/"
+DIRECTIVE = "script-src"
+
+
+class CspReportTest(ApiTestNoData):
+    endpoint = ""
+    valid = {}
+    no_origin = {}
+    invalid = {}
+    anonymous_access_allowed = None
+
+    def _post(self, payload: dict[str, Any]) -> int:
+        return APIClient().post(self.endpoint, data=payload, content_type="application/json").status_code
+
+    def test_valid(self) -> None:
+        self.assertEqual(204, self._post(self.valid))
+
+    def test_no_origin(self) -> None:
+        self.assertEqual(204, self._post(self.no_origin))
+
+    def test_invalid(self) -> None:
+        self.assertEqual(204, self._post(self.invalid))
+
+
+class CspReportToTest(CspReportTest, TestCase):
+    endpoint = "/api/csp-report-to/"
+    valid = [
+        {
+            "type": "csp-violation",
+            "url": ORIGIN,
+            "body": {"blockedURL": BLOCKED, "documentUrl": ORIGIN, "effectiveDirective": DIRECTIVE},
+        }
+    ]
+    no_origin = [{"type": "csp-violation", "body": {"blockedURL": BLOCKED, "effectiveDirective": DIRECTIVE}}]
+    invalid = [
+        {
+            "type": "csp-violation",
+            "url": ORIGIN,
+            "body": {"documentUrl": ORIGIN, "effectiveDirective": DIRECTIVE},
+        }
+    ]
+
+
+class CspReportUriTest(CspReportTest, TestCase):
+    endpoint = "/api/csp-report-uri/"
+    valid = {"csp-report": {"blocked-uri": BLOCKED, "document-uri": ORIGIN, "effective-directive": DIRECTIVE}}
+    no_origin = {"csp-report": {"blocked-uri": BLOCKED, "effective-directive": DIRECTIVE}}
+    invalid = {"csp-report": {"blocked-uri": BLOCKED, "document-uri": ORIGIN}}

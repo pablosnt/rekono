@@ -44,6 +44,7 @@ services:
     container_name: initializer
     volumes:
       - rekono:/rekono
+      - ./config.yaml:/rekono/config.yaml:ro
     networks:
       - internal
     depends_on:
@@ -64,6 +65,7 @@ services:
     hostname: tasks-worker
     volumes:
       - rekono:/rekono
+      - ./config.yaml:/rekono/config.yaml:ro
     networks:
       - internal
     depends_on:
@@ -84,6 +86,7 @@ services:
     hostname: executions-worker
     volumes:
       - rekono:/rekono
+      - ./config.yaml:/rekono/config.yaml:ro
     networks:
       - internal
       - external
@@ -109,6 +112,7 @@ services:
     hostname: findings-worker
     volumes:
       - rekono:/rekono
+      - ./config.yaml:/rekono/config.yaml:ro
     networks:
       - internal
       - external
@@ -130,6 +134,7 @@ services:
     hostname: monitor-worker
     volumes:
       - rekono:/rekono
+      - ./config.yaml:/rekono/config.yaml:ro
     networks:
       - internal
       - external
@@ -152,6 +157,7 @@ services:
     container_name: telegram-bot
     volumes:
       - rekono:/rekono
+      - ./config.yaml:/rekono/config.yaml:ro
     networks:
       - internal
       - external
@@ -182,6 +188,7 @@ services:
       - 8000
     volumes:
       - rekono:/rekono
+      - ./config.yaml:/rekono/config.yaml:ro
     networks:
       - internal
       - external
@@ -224,6 +231,7 @@ services:
       - 443:443
     volumes:
       - nginx:/etc/nginx/tls/
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
       backend:
         condition: service_healthy

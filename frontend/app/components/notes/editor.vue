@@ -10,7 +10,7 @@
     class="w-full"
     :extensions="extensions"
     :handlers="customHandlers"
-    :starter-kit="{ link: { openOnClick: true } }"
+    :starter-kit="{ link: { openOnClick: true }, codeBlock: false }"
   >
     <UEditorDragHandle
       v-slot="{ ui, onClick }"
