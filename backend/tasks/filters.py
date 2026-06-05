@@ -5,15 +5,15 @@ project, tool, stage, and various time-based filtering operations.
 """
 
 from django_filters.filters import ChoiceFilter, ModelChoiceFilter
-from django_filters.rest_framework import FilterSet
 
+from framework.filters import MultipleFieldFilterSet, MultipleModelFilter
 from projects.models import Project
 from tasks.models import Task
 from tools.enums import Stage
-from tools.models import Tool
+from tools.models import Configuration, Tool
 
 
-class TaskFilter(FilterSet):
+class TaskFilter(MultipleFieldFilterSet):
     """Filter class for Task model queries.
 
     Provides comprehensive filtering options for task queries including
@@ -21,11 +21,19 @@ class TaskFilter(FilterSet):
 
     Attributes:
         project (ModelChoiceFilter): Filter by project through target relationship
+        executed_configuration (MultipleModelFilter): Filter by configuration across direct assignment and process steps
+        executed_tool (MultipleModelFilter): Filter by tool across direct configuration and process steps
         tool (ModelChoiceFilter): Filter by specific tool through configuration
         stage (ChoiceFilter): Filter by tool execution stage
     """
 
     project = ModelChoiceFilter(queryset=Project.objects.all(), field_name="target__project")
+    executed_configuration = MultipleModelFilter(
+        queryset=Configuration.objects.all(), fields=["configuration", "process__steps__configuration"]
+    )
+    executed_tool = MultipleModelFilter(
+        queryset=Tool.objects.all(), fields=["configuration__tool", "process__steps__configuration__tool"]
+    )
     tool = ModelChoiceFilter(queryset=Tool.objects.all(), field_name="configuration__tool")
     stage = ChoiceFilter(field_name="configuration__stage", choices=Stage.choices)
 

@@ -46,7 +46,12 @@ ROLES = {
         "change": [],
         "delete": [Role.ADMIN, Role.AUDITOR, Role.READER],
     },
-    "user": {"view": [Role.ADMIN], "add": [Role.ADMIN], "change": [Role.ADMIN], "delete": [Role.ADMIN]},
+    "user": {
+        "view": [Role.ADMIN, Role.AUDITOR, Role.READER],
+        "add": [Role.ADMIN],
+        "change": [Role.ADMIN],
+        "delete": [Role.ADMIN],
+    },
     "project": {
         "view": [Role.ADMIN, Role.AUDITOR, Role.READER],
         "add": [Role.ADMIN],
@@ -214,4 +219,5 @@ ROLES = {
     "monitorsettings": {"view": [Role.ADMIN], "add": [], "change": [Role.ADMIN], "delete": []},
     "nvdnistsettings": {"view": [Role.ADMIN], "add": [], "change": [Role.ADMIN], "delete": []},
     "virustotalsettings": {"view": [Role.ADMIN], "add": [], "change": [Role.ADMIN], "delete": []},
+    "vulnchecksettings": {"view": [Role.ADMIN], "add": [], "change": [Role.ADMIN], "delete": []},
 }

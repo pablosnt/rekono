@@ -25,9 +25,13 @@ class BaseTelegram(LoggingEntity):
 
     Attributes:
         date_format (str): Standard date format for message timestamps.
+        _app (Application | None): Telegram application client
+        _initialized (bool): Indicates if the Telegram bot has been initialized or not
     """
 
     date_format = "%Y-%m-%d %H:%M:%S"
+    _app = None
+    _initialized = False
 
     @cached_property
     def settings(self) -> TelegramSettings:
@@ -43,13 +47,14 @@ class BaseTelegram(LoggingEntity):
 
         Initializes the bot application if available and handles authentication errors.
         """
-        if self.app and self.app.bot:  # pytype: disable=attribute-error
+        if not self._initialized and self.app and self.app.bot:  # pytype: disable=attribute-error
             try:
                 asyncio.run(self.app.bot.initialize())  # pytype: disable=attribute-error
+                self._initialized = True
             except (InvalidToken, Forbidden):
                 self.handle_invalid_token()
 
-    @cached_property
+    @property
     def app(self) -> Application | None:
         """Get the Telegram Bot application instance.
 
@@ -58,14 +63,14 @@ class BaseTelegram(LoggingEntity):
         Returns:
             Application | None: The configured bot application or None if no token.
         """
-        if self.settings and self.settings.secret:
+        if not self._app and self.settings and self.settings.secret:
             try:
-                return Application.builder().token(self.settings.secret).post_init(self.post_init).build()
+                self._app = Application.builder().token(self.settings.secret).post_init(self.post_init).build()
             except (InvalidToken, Forbidden):
                 self.handle_invalid_token()
-        return None
+        return self._app
 
-    @cached_property
+    @property
     def bot_name(self) -> str | None:
         """Get the Telegram Bot username.
 
@@ -131,6 +136,7 @@ class BaseTelegram(LoggingEntity):
         """
         self.settings.secret = None
         self.settings.save(update_fields=["_token"])
-        del self.app  # Remove cached_property value, so it will be regenerated
+        self._app = None
+        self._initialized = False
         if log_error:
             self.logger.error("[Telegram] Authentication error")

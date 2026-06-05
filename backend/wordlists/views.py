@@ -35,7 +35,7 @@ class WordlistViewSet(LikeViewSet):
     filterset_class = WordlistFilter
     permission_classes = [IsAuthenticated, RekonoModelPermission, OwnerPermission]
     search_fields = ["name"]
-    ordering_fields = ["id", "name", "size", "type", "creator", "likes_count"]
+    ordering_fields = ["id", "name", "size", "type", "owner", "likes_count"]
 
     def get_serializer_class(self) -> Serializer:
         """Get the appropriate serializer class based on the request method.

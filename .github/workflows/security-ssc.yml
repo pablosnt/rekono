@@ -20,13 +20,13 @@ jobs:
           scorecard: yes
           artifact_name: legitify
 
-  chain-bench:
-    name: Chain-Bench
-    runs-on: ubuntu-latest
-    environment: github
-    steps:
-      - name: Chain Bench
-        uses: aquasecurity/chain-bench-action@v1.1.1
-        with:
-          repository-url: ${{ github.server_url }}/${{ github.repository }}
-          github-token: ${{ secrets.ADMIN_PAT }}
+  # chain-bench:
+  #   name: Chain-Bench
+  #   runs-on: ubuntu-latest
+  #   environment: github
+  #   steps:
+  #     - name: Chain Bench
+  #       uses: aquasecurity/chain-bench-action@v1.1.1
+  #       with:
+  #         repository-url: ${{ github.server_url }}/${{ github.repository }}
+  #         github-token: ${{ secrets.ADMIN_PAT }}

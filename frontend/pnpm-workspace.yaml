@@ -1,0 +1,8 @@
+minimumReleaseAge: 2880
+ignoreScripts: true
+ignoredBuiltDependencies:
+  - "@parcel/watcher"
+  - "@tailwindcss/oxide"
+  - esbuild
+  - unrs-resolver
+  - vue-demi

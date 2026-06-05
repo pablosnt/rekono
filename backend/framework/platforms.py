@@ -5,16 +5,21 @@ vulnerability management systems, notification services, and threat
 intelligence platforms.
 """
 
+from dataclasses import dataclass
 from functools import cached_property
 from typing import Any, Callable
 from urllib.parse import urlparse
 
 import requests
+from bs4 import BeautifulSoup
+from markdown import markdown
 from requests.adapters import HTTPAdapter, Retry
 
 from alerts.models import Alert
 from executions.models import Execution
+from findings.enums import Severity
 from findings.framework.models import Finding
+from findings.models import Vulnerability
 from framework.logging import LoggingEntity
 from integrations.models import Integration
 from users.enums import Notification
@@ -25,12 +30,7 @@ class BasePlatform(LoggingEntity):
 
     Provides common interface for all external platform integrations
     including availability checks and findings processing.
-
-    Attributes:
-        run_per_execution (bool): Whether to run once per execution or per finding.
     """
-
-    run_per_execution = False
 
     def is_available(self) -> bool:
         """Check if the platform integration is available.
@@ -185,6 +185,213 @@ class BaseIntegration(BasePlatform):
             self.process_finding(execution, finding)
 
 
+class BaseCveProvider(BaseIntegration):
+    """Base class for CVE enrichment provider integrations.
+
+    Extends BaseIntegration with CVE-specific enrichment logic including
+    data retrieval, parsing, quality scoring, and persistence. Concrete
+    subclasses implement _get_cve and _parse_cve for each provider API.
+
+    Attributes:
+        finding_types (list): Supported finding types (Vulnerability only).
+        cvss_mapping (dict): CVSS base score ranges mapped to Rekono severity levels.
+    """
+
+    finding_types = [Vulnerability]
+    cvss_mapping = {
+        Severity.CRITICAL: (9, 11),
+        Severity.HIGH: (7, 9),
+        Severity.MEDIUM: (4, 7),
+        Severity.LOW: (2, 4),
+        Severity.INFO: (0, 2),
+    }
+
+    @dataclass
+    class CveEnrichment:
+        """Standardized container for CVE enrichment data returned by providers.
+
+        Attributes:
+            name (str | None): Vulnerability name or CISA advisory title.
+            description (str | None): Full technical vulnerability description.
+            cwes (list[str] | None): CWE identifiers in CWE-NNN format.
+            cvss_base_score (float | None): Numeric CVSS base score.
+            cvss_vector (str | None): Full CVSS vector string.
+            cvss_version (str | None): CVSS version prefix (e.g. "3.1", "4.0").
+            epss_score (float | None): EPSS probability of exploitation (0.0–1.0).
+            epss_percentile (float | None): EPSS percentile rank among all CVEs (0.0–1.0).
+            technologies (list[str] | None): Affected product or package identifiers.
+            reference (str | None): Canonical vulnerability detail page URL.
+            status (str | None): Provider-specific advisory status string.
+            euvd_id (str | None): ENISA EUVD identifier.
+            ghsa_id (str | None): GitHub Security Advisory identifier.
+            osv_generic_id (str | None): OSV-native ID for non-CVE/GHSA/EUVD ecosystems.
+        """
+
+        name: str | None = None
+        description: str | None = None
+        cwes: list[str] | None = None
+        cvss_base_score: float | None = None
+        cvss_vector: str | None = None
+        cvss_version: str | None = None
+        epss_score: float | None = None
+        epss_percentile: float | None = None
+        technologies: list[str] | None = None
+        reference: str | None = None
+        status: str | None = None
+        euvd_id: str | None = None
+        ghsa_id: str | None = None
+        osv_generic_id: str | None = None
+
+    def is_available(self) -> bool:
+        """Check if the CVE provider API is reachable and functional.
+
+        Tests connectivity by requesting data for a known CVE (Log4Shell)
+        to validate authentication and API availability.
+
+        Returns:
+            bool: True if the provider API is reachable and returns data, False otherwise.
+        """
+        try:
+            # Test connectivity using Log4Shell as a well-known, reliably indexed CVE
+            return bool(self._get_cve("CVE-2021-44228"))
+        except Exception:
+            return False
+
+    def _get_cve(self, cve: str) -> dict[str, Any]:
+        """Retrieve raw CVE data from the provider API.
+
+        Args:
+            cve (str): CVE identifier to retrieve.
+
+        Returns:
+            dict[str, Any]: Raw API response for the CVE.
+        """
+        return {}  # pragma: no cover
+
+    def _parse_cve(self, cve: str, data: list[dict[str, Any]] | dict[str, Any]) -> CveEnrichment | None:
+        """Parse raw provider API response into a CveEnrichment object.
+
+        Args:
+            cve (str): CVE identifier being parsed.
+            data (list[dict[str, Any]] | dict[str, Any]): Raw API response data.
+
+        Returns:
+            CveEnrichment | None: Parsed enrichment data, or None if unavailable.
+        """
+        return None
+
+    def get_cve(self, cve: str) -> CveEnrichment | None:
+        """Retrieve and parse CVE enrichment data from the provider.
+
+        Args:
+            cve (str): CVE identifier to enrich.
+
+        Returns:
+            CveEnrichment | None: Parsed CVE data, or None if the provider returns nothing.
+        """
+        data = self._get_cve(cve)
+        return self._parse_cve(cve, data) if data else None
+
+    def cve_quality_score(self, data: CveEnrichment) -> int:
+        """Calculate a data quality score for CVE enrichment data.
+
+        Scores start at 10 and are adjusted based on CVSS version (older versions
+        penalised), presence of CWE and affected technology data, and EPSS availability.
+        Subclasses may override to apply provider-specific adjustments.
+
+        Args:
+            data (CveEnrichment): CVE enrichment data to score.
+
+        Returns:
+            int: Quality score used to select the best provider when multiple match.
+        """
+        score = 10
+        if not data.description:
+            score -= 8
+        if len(data.cwes or []) == 0 or len(list(data.technologies or [])) == 0:
+            score -= 3
+        if not data.cvss_base_score or not data.cvss_version or not data.cvss_vector:
+            score -= 5
+        elif data.cvss_version.startswith("2"):
+            score -= 2
+        if (data.epss_score and data.epss_percentile) or data.euvd_id or data.ghsa_id or data.osv_generic_id:
+            score += 1
+        return score
+
+    def save(self, finding: Vulnerability, data: CveEnrichment) -> None:
+        """Persist CVE enrichment data onto a Vulnerability finding.
+
+        Updates the finding's name, description, CWE, CVSS fields, EPSS scores,
+        and reference with data from the enrichment object. Severity is derived
+        from the CVSS base score using the cvss_mapping ranges.
+
+        Args:
+            finding (Vulnerability): The vulnerability finding to update.
+            data (CveEnrichment): CVE enrichment data to apply.
+        """
+        finding.name = data.name
+        finding.description = (
+            BeautifulSoup(markdown(data.description), features="html.parser").get_text().replace("\n", "\n\n")
+            if data.description and data.description.startswith("#")
+            else data.description
+        )
+        cwes = []
+        for _cwe in set(data.cwes or []):
+            cwe = _cwe.upper()
+            if cwe.startswith("CWE-") and cwe.replace("CWE-", "").isdigit():
+                cwes.append(cwe)
+        finding.cwes = sorted(cwes, key=lambda c: int(c.split("-", 1)[1]))
+        if data.cvss_base_score:
+            finding.severity = next(
+                (
+                    k
+                    for k, v in self.cvss_mapping.items()
+                    if data.cvss_base_score >= v[0] and data.cvss_base_score < v[1]
+                ),
+                Severity.MEDIUM,
+            )
+            finding.cvss_base_score = data.cvss_base_score
+        finding.cvss_vector = data.cvss_vector
+        finding.cvss_version = data.cvss_version
+        finding.epss_score = data.epss_score
+        finding.epss_percentile = data.epss_percentile
+        finding.reference = data.reference
+        finding.euvd_id = data.euvd_id
+        finding.ghsa_id = data.ghsa_id
+        finding.osv_generic_id = data.osv_generic_id
+        finding.save(
+            update_fields=[
+                "name",
+                "description",
+                "cwes",
+                "severity",
+                "cvss_base_score",
+                "cvss_vector",
+                "cvss_version",
+                "epss_score",
+                "epss_percentile",
+                "reference",
+                "euvd_id",
+                "ghsa_id",
+                "osv_generic_id",
+            ]
+        )
+
+    def is_finding_processable(self, finding: Finding) -> bool:
+        """Determine if a finding can be processed by this integration.
+
+        Validates that the finding is a processable vulnerability type
+        with a valid CVE identifier for NVD API queries.
+
+        Args:
+            finding (Finding): The finding to evaluate for processing
+
+        Returns:
+            bool: True if finding has CVE and can be processed, False otherwise
+        """
+        return self.is_enabled() and super().is_finding_processable(finding) and finding.cve is not None
+
+
 class BaseNotification(BasePlatform):
     """Base class for notification platform integrations.
 
@@ -199,11 +406,9 @@ class BaseNotification(BasePlatform):
 
     Attributes:
         enable_field (str): User model field name controlling notification enablement.
-        run_per_execution (bool): Whether to run once per execution or per finding.
     """
 
     enable_field = ""
-    run_per_execution = True
 
     def is_enabled(self, user: Any) -> bool:
         """Check if notifications are enabled for a specific user.
@@ -266,18 +471,20 @@ class BaseNotification(BasePlatform):
             list[Any]: List of users who should be notified.
         """
         users = set()
-        if execution.task.executor.notification_scope != Notification.DISABLED and getattr(
-            execution.task.executor, self.enable_field
-        ):
-            users.add(execution.task.executor)
-        users.update(
-            execution.task.target.project.members.filter(
-                **{
-                    self.enable_field: True,
-                    "notification_scope": Notification.ALL_EXECUTIONS,
-                }
-            ).exclude(id=execution.task.executor.id)
+        interested_users = execution.task.target.project.members.filter(
+            **{
+                self.enable_field: True,
+                "notification_scope": Notification.ALL_EXECUTIONS,
+            }
         )
+        if execution.task.executor:
+            if execution.task.executor.notification_scope != Notification.DISABLED and getattr(
+                execution.task.executor, self.enable_field
+            ):
+                users.add(execution.task.executor)
+            users.update(interested_users.exclude(id=execution.task.executor.id))
+        else:
+            users.update(interested_users)
         return list(users)
 
     def _notify_execution(self, users: list[Any], execution: Execution, findings: list[Finding]) -> None:

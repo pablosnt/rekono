@@ -14,6 +14,7 @@ from rest_framework.renderers import JSONRenderer
 from rest_framework.request import HttpRequest
 from rest_framework.response import Response
 
+from framework.context import RequestContext
 from framework.logging import LoggingEntity
 from rekono.settings import CONFIG
 
@@ -51,7 +52,7 @@ CSP = {
             "object-src 'none'",
             "frame-ancestors 'none'",
             "script-src cdn.jsdelivr.net",
-            "style-src cdn.jsdelivr.net fonts.googleapis.com 'unsafe-inline'",
+            "style-src cdn.jsdelivr.net fonts.googleapis.com 'sha256-47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=' 'sha256-QMIg+bpjm3JdElJ388KYke01izlUW0UoNOeKjpMxdgc=' 'sha256-GvZq6XrzMRhFZ2MvEI09Lw7QbE3DnWuVQTMYafGYLcg='",
             "img-src 'self' data: cdn.jsdelivr.net cdn.redoc.ly",
             "font-src fonts.gstatic.com",
             "worker-src blob:",
@@ -69,9 +70,10 @@ SECURITY_HEADERS = {
     "X-Content-Type-Options": "nosniff",
     "X-Frame-Options": "DENY",
     "Permissions-Policy": "camera=(), geolocation=(), microphone=(), midi=(), payment=(), usb=()",
-    "Access-Control-Allow-Origin": "app://.",
+    "Access-Control-Allow-Origin": None,
     "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
     "Access-Control-Allow-Headers": "content-type, authorization",
+    "Access-Control-Allow-Credentials": "true",
 }
 
 
@@ -159,14 +161,18 @@ class SecurityMiddleware(LoggingEntity):
         Returns:
             Response: Response object with security headers applied.
         """
+        origin = request.headers.get("Origin")
+        allowed_origins = ["tauri://localhost", "http://localhost:3000"] if CONFIG.frontend_desktop else []
         for header, value in SECURITY_HEADERS.items():
-            if header == "Referrer-Policy" and request.path.startswith("/admin"):
-                value = "strict-origin"  # pragma: no cover
             if header == "Content-Security-Policy":
                 for path, csp in CSP.items():
                     if request.path.startswith(path):
                         value = csp
                         break
+            elif header == "Access-Control-Allow-Origin":
+                value = origin if origin in allowed_origins else CONFIG.frontend_url
+            elif header == "Referrer-Policy" and request.path.startswith("/admin"):
+                value = "strict-origin"  # pragma: no cover
             response[header] = value
         return response
 
@@ -205,10 +211,12 @@ class SecurityMiddleware(LoggingEntity):
 
         Processing Flow:
             1. Extract and normalize client IP address
-            2. Handle OPTIONS requests
-            3. Process request through Django middleware chain
-            4. Apply comprehensive security headers
-            5. Log request/response for security monitoring
+            2. Store request in context-local storage for downstream components
+            3. Handle OPTIONS requests
+            4. Process request through Django middleware chain
+            5. Apply comprehensive security headers
+            6. Log request/response for security monitoring
+            7. Clear request from context-local storage
 
         Args:
             request (HttpRequest): Incoming Django HTTP request.
@@ -217,7 +225,13 @@ class SecurityMiddleware(LoggingEntity):
             Any: Processed HTTP response with security controls applied.
         """
         request.META["REMOTE_ADDR"] = self._get_source_ip_address(request)
-        response = self.get_response(request) if request.method != "OPTIONS" else self._get_options_response(request)
-        response = self._add_security_headers(request, response)
-        self._log_request_and_response(request, response)
-        return response
+        RequestContext.set(request)
+        try:
+            response = (
+                self.get_response(request) if request.method != "OPTIONS" else self._get_options_response(request)
+            )
+            response = self._add_security_headers(request, response)
+            self._log_request_and_response(request, response)
+            return response
+        finally:
+            RequestContext.clear()

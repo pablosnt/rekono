@@ -26,11 +26,7 @@ class DefectDojoSettings(BaseEncrypted):
         _api_token (TextField): Encrypted DefectDojo API token (max 40 chars)
         tls_validation (BooleanField): Enable TLS certificate validation (default True)
         tag (TextField): Custom tag for DefectDojo entities (optional, max 200 chars)
-        test_type_id (IntegerField): Cached test type ID to avoid duplicates (1-999999999)
-        test_type (TextField): Test type name for DefectDojo tests (max 200 chars)
-        test (TextField): Test name for DefectDojo tests (max 200 chars)
         date_format (TextField): Date format string for DefectDojo API (max 15 chars)
-        datetime_format (TextField): DateTime format string for DefectDojo API (max 15 chars)
 
     Example:
         Configure DefectDojo integration:
@@ -41,10 +37,7 @@ class DefectDojoSettings(BaseEncrypted):
             secret="your_api_token_here",
             tls_validation=True,
             tag="rekono",
-            test_type="Rekono Security Test",
-            test="Rekono Assessment",
-            date_format="%Y-%m-%d",
-            datetime_format="%Y-%m-%d %H:%M:%S"
+            date_format="%Y-%m-%d"
         )
         ```
     """
@@ -59,16 +52,7 @@ class DefectDojoSettings(BaseEncrypted):
     )
     tls_validation = models.BooleanField(default=True)
     tag = models.TextField(max_length=200, validators=[Validator(Regex.NAME, code="tag")], blank=True, null=True)
-    # Stores Test Type ID to avoid duplicated creation
-    test_type_id = models.IntegerField(
-        validators=[MinValueValidator(1), MaxValueValidator(999999999)],
-        blank=True,
-        null=True,
-    )
-    test_type = models.TextField(max_length=200, validators=[Validator(Regex.NAME, code="test_type")])
-    test = models.TextField(max_length=200, validators=[Validator(Regex.NAME, code="test")])
     date_format = models.TextField(max_length=15)
-    datetime_format = models.TextField(max_length=15)
 
     _encrypted_field = "_api_token"
 
@@ -93,9 +77,10 @@ class DefectDojoSync(BaseModel):
 
     Attributes:
         project (OneToOneField): Associated Rekono project (one-to-one relationship)
-        product_type_id (IntegerField): DefectDojo product type ID (1-999999999)
         product_id (IntegerField): DefectDojo product ID (optional, 1-999999999)
         engagement_id (IntegerField): DefectDojo engagement ID (optional, 1-999999999)
+        reimport (BooleanField): Reimport findings instead of creating new tests (default False)
+        close_old_findings (BooleanField): Close old findings not present in new import (default False)
 
     Example:
         Create project synchronization mapping:
@@ -103,17 +88,15 @@ class DefectDojoSync(BaseModel):
         ```python
         sync = DefectDojoSync.objects.create(
             project=rekono_project,
-            product_type_id=5,
             product_id=12,
-            engagement_id=34
+            engagement_id=34,
+            reimport=True,
+            close_old_findings=False
         )
         ```
     """
 
     project = models.OneToOneField(Project, related_name="defectdojo_sync", on_delete=models.CASCADE)
-    product_type_id = models.IntegerField(
-        validators=[MinValueValidator(1), MaxValueValidator(999999999)],
-    )
     product_id = models.IntegerField(
         validators=[MinValueValidator(1), MaxValueValidator(999999999)],
         blank=True,
@@ -124,6 +107,8 @@ class DefectDojoSync(BaseModel):
         blank=True,
         null=True,
     )
+    reimport = models.BooleanField(default=False)
+    close_old_findings = models.BooleanField(default=False)
 
     _project_field = "project"
 
@@ -133,13 +118,7 @@ class DefectDojoSync(BaseModel):
         Returns:
             str: Formatted string with project name and DefectDojo entity IDs
         """
-        return " - ".join(
-            [
-                value.__str__()
-                for value in [self.project, self.product_type_id, self.product_id, self.engagement_id]
-                if value
-            ]
-        )
+        return " - ".join([value.__str__() for value in [self.project, self.product_id, self.engagement_id] if value])
 
 
 class DefectDojoTargetSync(BaseModel):

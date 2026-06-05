@@ -4,6 +4,7 @@ Provides REST API views for project CRUD operations with team member management,
 access control enforcement, and automated alert subscription handling.
 """
 
+from django.db.models import Count, Q
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
@@ -11,7 +12,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from framework.views import BaseViewSet
+from findings.enums import TriageStatus
+from framework.views import BaseViewSet, LatestViewSet
 from projects.filters import ProjectFilter
 from projects.models import Project
 from projects.serializers import ProjectSerializer
@@ -44,7 +46,7 @@ class ProjectViewSet(BaseViewSet):
     serializer_class = ProjectSerializer
     filterset_class = ProjectFilter
     permission_classes = [IsAuthenticated, RekonoModelPermission, ProjectMemberPermission]
-    search_fields = ["name", "description"]
+    search_fields = ["name", "description", "targets__target"]
     ordering_fields = ["id", "name"]
 
     @action(detail=True, methods=["POST", "DELETE"], url_path="members/(?P<member_id>[0-9])")
@@ -84,3 +86,41 @@ class ProjectViewSet(BaseViewSet):
             for alert in project.alerts.filter(subscribers=member).all():
                 alert.subscribers.remove(member)
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class TopProjectsViewSet(LatestViewSet):
+    """ViewSet for retrieving top project statistics by activity.
+
+    Provides projects ranked by security findings and activity metrics,
+    annotated with counts of targets, tasks, hosts, and vulnerabilities.
+
+    Attributes:
+        queryset: Projects with comprehensive activity annotations
+        ordering: Prioritizes projects with most vulnerabilities and activity
+        serializer_class: Project serialization
+        filterset_class: Project filtering capabilities
+    """
+
+    queryset = (
+        Project.objects.annotate(targets_count=Count("targets", distinct=True))
+        .annotate(tasks_count=Count("targets__tasks", distinct=True))
+        .annotate(
+            hosts_count=Count(
+                "targets__tasks__executions__host",
+                distinct=True,
+                filter=Q(targets__tasks__executions__host__is_fixed=False),
+            )
+        )
+        .annotate(
+            vulnerabilities_count=Count(
+                "targets__tasks__executions__vulnerability",
+                distinct=True,
+                filter=~Q(targets__tasks__executions__vulnerability__triage_status=TriageStatus.FALSE_POSITIVE)
+                & Q(targets__tasks__executions__vulnerability__is_fixed=False)
+                & Q(targets__tasks__executions__vulnerability__created_from_user_input=False),
+            )
+        )
+    )
+    ordering = ["-vulnerabilities_count", "-hosts_count", "-tasks_count", "-targets_count"]
+    serializer_class = ProjectSerializer
+    filterset_class = ProjectFilter

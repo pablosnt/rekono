@@ -12,28 +12,38 @@ from tests.framework.cases import ApiTestCase, PutApiTestCase
 
 class IntegrationTest(ApiTestNoData, TestCase):
     endpoint = "/api/integrations/"
-    expected_string = "Defect-Dojo"
+    expected_string = "DefectDojo"
     cases = [
         ApiTestCase(
             [Role.ADMIN, Role.AUDITOR, Role.READER],
             expected=[
-                {"id": 5, "enabled": True},
-                {"id": 4, "enabled": True},
-                {"id": 3, "enabled": True},
-                {"id": 2, "enabled": True},
-                {"id": 1, "enabled": True},
-            ],
-        ),
-        PutApiTestCase([Role.AUDITOR, Role.READER], 403, endpoint="1"),
-        PutApiTestCase([Role.ADMIN], data={"enabled": False}, expected={"id": 1, "enabled": False}, endpoint="1"),
-        ApiTestCase(
-            [Role.ADMIN, Role.AUDITOR, Role.READER],
-            expected=[
-                {"id": 5, "enabled": True},
-                {"id": 4, "enabled": True},
+                {"id": 10, "enabled": False},
+                {"id": 9, "enabled": True},
+                {"id": 8, "enabled": True},
+                {"id": 7, "enabled": True},
+                {"id": 6, "enabled": True},
+                {"id": 5, "enabled": False},
+                {"id": 4, "enabled": False},
                 {"id": 3, "enabled": True},
                 {"id": 2, "enabled": True},
                 {"id": 1, "enabled": False},
+            ],
+        ),
+        PutApiTestCase([Role.AUDITOR, Role.READER], 403, endpoint="1"),
+        PutApiTestCase([Role.ADMIN], data={"enabled": True}, expected={"id": 1, "enabled": True}, endpoint="1"),
+        ApiTestCase(
+            [Role.ADMIN, Role.AUDITOR, Role.READER],
+            expected=[
+                {"id": 10, "enabled": False},
+                {"id": 9, "enabled": True},
+                {"id": 8, "enabled": True},
+                {"id": 7, "enabled": True},
+                {"id": 6, "enabled": True},
+                {"id": 5, "enabled": False},
+                {"id": 4, "enabled": False},
+                {"id": 3, "enabled": True},
+                {"id": 2, "enabled": True},
+                {"id": 1, "enabled": True},
             ],
         ),
     ]

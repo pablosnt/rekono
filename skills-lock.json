@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "skills": {
+    "accessibility": {
+      "source": "addyosmani/web-quality-skills",
+      "sourceType": "github",
+      "computedHash": "6462f04969f59f771150e6410e6a11fa397f2934be0b51e8650f495feed1e28d"
+    },
+    "frontend-design": {
+      "source": "anthropics/skills",
+      "sourceType": "github",
+      "computedHash": "063a0e6448123cd359ad0044cc46b0e490cc7964d45ef4bb9fd842bd2ffbca67"
+    },
+    "nuxt-ui": {
+      "source": "nuxt/ui",
+      "sourceType": "github",
+      "skillPath": "skills/nuxt-ui/SKILL.md",
+      "computedHash": "2d58c6092b7028db223a819d5a37badc860a4036ca134a3e457ce7b056562f72"
+    },
+    "rekono-docstrings": {
+      "source": "pablosnt/skills",
+      "sourceType": "github",
+      "skillPath": "skills/rekono-docstrings/SKILL.md",
+      "computedHash": "36c0786589bd011b4564cd9d2fba84dbde0d16aae2ee53c5159556e2019882dd"
+    },
+    "rekono-integration": {
+      "source": "pablosnt/skills",
+      "sourceType": "github",
+      "skillPath": "skills/rekono-integration/SKILL.md",
+      "computedHash": "1805e480e1395da548a509d3bbca387d42c3ff9e36d06438d790292cb45e12be"
+    },
+    "rekono-page": {
+      "source": "pablosnt/skills",
+      "sourceType": "github",
+      "skillPath": "skills/rekono-page/SKILL.md",
+      "computedHash": "df1a4781467d557663070fff32957d6bcd1e6fe9503f6e237d5b0625efe1737c"
+    },
+    "rekono-unit-test": {
+      "source": "pablosnt/skills",
+      "sourceType": "github",
+      "skillPath": "skills/rekono-unit-test/SKILL.md",
+      "computedHash": "59352230d4c140c572f4c2d3b475372a23cae23f660adbec86c57b2e4822a861"
+    },
+    "skill-creator": {
+      "source": "anthropics/skills",
+      "sourceType": "github",
+      "computedHash": "5ea13a6d9f0d4bb694405d79acd00cadec0d21bb138c4dd10fcf3c500cb835c2"
+    }
+  }
+}

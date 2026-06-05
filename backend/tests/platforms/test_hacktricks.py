@@ -7,15 +7,16 @@ from platforms.hacktricks import HackTricks
 from tests.framework import BaseTest
 from tests.framework.data import SetupProject
 
-base_url = "https://book.hacktricks.wiki/en/"
+base_url = "https://hacktricks.wiki/en/"
 
 
 def links(*args: Any, **kwargs: Any) -> list[str]:
     return [
         f"{base_url}pentesting-web/web-vulnerabilities-methodology.html",
         f"{base_url}network-services-pentesting/wordpress.html",
-        f"{base_url}network-services-pentesting/pentesting-dns",
-        f"{base_url}network-services-pentesting/pentesting-ssh",
+        f"{base_url}network-services-pentesting/pentesting-dns.html",
+        f"{base_url}network-services-pentesting/pentesting-ssh.html",
+        f"{base_url}network-services-pentesting/pentesting-smtp/index.html",
     ]
 
 
@@ -46,12 +47,19 @@ class HackTricksTest(BaseTest, TestCase):
         self.port.port = 53
         self.port.service = "domain"
         self.port.save(update_fields=["port", "service"])
-        self.expected[self.port] = f"{base_url}network-services-pentesting/pentesting-dns"
+        self.expected[self.port] = f"{base_url}network-services-pentesting/pentesting-dns.html"
         self._assert_links()
 
     def test_integration_with_ssh_service(self) -> None:
         self.port.port = 22
         self.port.service = "ssh"
         self.port.save(update_fields=["port", "service"])
-        self.expected[self.port] = f"{base_url}network-services-pentesting/pentesting-ssh"
+        self.expected[self.port] = f"{base_url}network-services-pentesting/pentesting-ssh.html"
+        self._assert_links()
+
+    def test_integration_with_smtp_service(self) -> None:
+        self.port.port = 25
+        self.port.service = "smtp"
+        self.port.save(update_fields=["port", "service"])
+        self.expected[self.port] = f"{base_url}network-services-pentesting/pentesting-smtp/index.html"
         self._assert_links()

@@ -15,6 +15,7 @@ FROM ghcr.io/astral-sh/uv:python3.13-bookworm-slim AS build-backend
 ARG BACKEND_DEBIAN_DEPENDENCIES
 
 COPY backend/ /code
+COPY frontend/public /code/static
 COPY config.yaml /rekono/
 WORKDIR /code
 
@@ -66,22 +67,26 @@ COPY --from=build-backend --chown=65532:65532 /code /code
 COPY --from=build-backend /dpkg /
 COPY --from=build-backend /opt/python /opt/python
 COPY --from=build-backend /usr/local/bin/uv /bin/
-# Wget required to healthcheck
-COPY --from=busybox:stable /bin/wget /usr/bin/wget
 
 WORKDIR /code
 EXPOSE 8000
 
 
-FROM node:22.15.1-bookworm-slim AS build-frontend
+FROM node:26.2.0-bookworm-slim AS build-frontend
+
+ENV CI=true
 
 COPY frontend /code
 WORKDIR /code
+
 # Build frontend for production
-RUN npm install && npm run build
+RUN PNPM_VERSION=$(node -p "require('./package.json').packageManager.split('@')[1]") && \
+    npm install -g pnpm@${PNPM_VERSION} && \
+    pnpm install --frozen-lockfile --prod --ignore-scripts && \
+    pnpm run build
 
 
-FROM gcr.io/distroless/nodejs22-debian12:nonroot AS frontend
+FROM gcr.io/distroless/nodejs26-debian13:nonroot AS frontend
 
 ARG LABEL_CREATED
 ARG LABEL_AUTHORS
@@ -104,7 +109,7 @@ LABEL org.opencontainers.image.description="Rekono frontend image based on a dis
 
 COPY --from=build-frontend --chown=65532:65532 /code/.output/ /app
 # Wget required to healthcheck
-COPY --from=busybox:stable /bin/wget /usr/bin/wget
+COPY --from=busybox:musl /bin/wget /usr/bin/wget
 
 WORKDIR /app
 EXPOSE 3000
@@ -145,7 +150,7 @@ WORKDIR /code
 # Install hacking tools supported via apt
 RUN apt update && \
     TOOLS="nmap theharvester nikto sslscan sslyze cmseek zaproxy exploitdb metasploit-framework emailharvester joomscan gitleaks smbmap nuclei gobuster seclists dirb" && \
-    apt install --yes --no-install-recommends $TOOLS $BACKEND_DEBIAN_DEPENDENCIES libcap2-bin git ca-certificates && \
+    apt install --yes --no-install-recommends $TOOLS $BACKEND_DEBIAN_DEPENDENCIES libcap2-bin git ca-certificates sudo && \
     # Grant capabilities required to nmap in order to get it running in a rootless environment
     setcap cap_net_raw,cap_net_admin,cap_net_bind_service+eip $(which nmap) && \
     # Clean apt resources
@@ -168,12 +173,15 @@ RUN apt update && \
     uv pip install -r /opt/spring4shell-scan/requirements.txt && \
     # Initializer script
     mkdir -p /entrypoints && \
-    echo "uv run --no-dev manage.py migrate" > /entrypoints/initilizer.sh && \
-    echo "uv run --no-dev manage.py createsuperuser --no-input" >> /entrypoints/initilizer.sh && \
-    chmod +x /entrypoints/initilizer.sh && \
+    echo "uv run --no-dev manage.py migrate" > /entrypoints/initializer.sh && \
+    echo "uv run --no-dev manage.py createsuperuser --no-input  || true" >> /entrypoints/initializer.sh && \
+    chmod +x /entrypoints/initializer.sh && \
+    # Tooling update script
+    echo "nuclei -update-templates" > /entrypoints/update-tooling.sh && \
+    echo "searchsploit --update || true" >> /entrypoints/update-tooling.sh && \
+    chmod +x /entrypoints/update-tooling.sh && \
     # Executions worker script
-    echo "nuclei -update-templates" > /entrypoints/executions-worker.sh && \
-    echo "searchsploit --update || true" >> /entrypoints/executions-worker.sh && \
+    echo "sudo /entrypoints/update-tooling.sh &" > /entrypoints/executions-worker.sh && \
     echo "uv run --no-dev manage.py rqworker executions" >> /entrypoints/executions-worker.sh && \
     chmod +x /entrypoints/executions-worker.sh && \
     # Rootless user
@@ -181,6 +189,10 @@ RUN apt update && \
     chown -R rekono:rekono /opt && \
     chown -R rekono:rekono /code && \
     chown -R rekono:rekono /entrypoints && \
+    chown root:root /entrypoints/update-tooling.sh && \
+    chmod 700 /entrypoints/update-tooling.sh && \
+    echo "rekono ALL=(root) NOPASSWD: /entrypoints/update-tooling.sh" > /etc/sudoers.d/rekono-update-tooling && \
+    chmod 440 /etc/sudoers.d/rekono-update-tooling && \
     chown -R rekono:rekono /usr/share/cmseek && \
     chown -R rekono:rekono /usr/share/seclists && \
     chown -R rekono:rekono /usr/share/dirb/wordlists

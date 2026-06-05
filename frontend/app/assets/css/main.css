@@ -1,0 +1,36 @@
+@import "tailwindcss";
+@import "@nuxt/ui";
+
+@theme static {
+  --font-sans: "Public Sans", sans-serif;
+
+  --color-green-50: #effdf5;
+  --color-green-100: #d9fbe8;
+  --color-green-200: #b3f5d1;
+  --color-green-300: #75edae;
+  --color-green-400: #00dc82;
+  --color-green-500: #00c16a;
+  --color-green-600: #00a155;
+  --color-green-700: #007f45;
+  --color-green-800: #016538;
+  --color-green-900: #0a5331;
+  --color-green-950: #052e16;
+}
+
+:root {
+  --ui-primary: var(--ui-color-primary-600);
+  --ui-orange: var(--color-orange-500);
+  --ui-amber: var(--color-amber-500);
+  --ui-neutral: var(--ui-color-neutral-500);
+}
+
+.dark {
+  --ui-primary: var(--ui-color-primary-500);
+  --ui-neutral: var(--ui-color-neutral-400);
+
+  .tiptap .shiki,
+  .tiptap .shiki span {
+    color: var(--shiki-dark) !important;
+    background-color: var(--shiki-dark-bg) !important;
+  }
+}

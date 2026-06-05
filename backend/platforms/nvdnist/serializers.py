@@ -50,4 +50,4 @@ class NvdNistSettingsSerializer(ModelSerializer):
         Returns:
             bool: True if API integration is available and working, False otherwise
         """
-        return self.client.is_api_token_available
+        return self.client.is_available()

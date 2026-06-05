@@ -7,6 +7,8 @@ user identification, and audit trail functionality.
 import logging
 from typing import Any
 
+from framework.context import RequestContext
+
 
 class LoggingFilter(logging.Filter):
     """Custom logging filter for enriching log records with request context.
@@ -21,6 +23,9 @@ class LoggingFilter(logging.Filter):
     def filter(self, record: Any) -> bool:
         """Enrich log records with user and request context information.
 
+        Resolves the active request from the log record's extra data first,
+        falling back to RequestContext for log records emitted by components
+        that do not receive the request directly (models, serializers, etc.).
         Adds source_ip and user attributes to log records for comprehensive
         audit trails and security monitoring.
 
@@ -30,13 +35,14 @@ class LoggingFilter(logging.Filter):
         Returns:
             bool: Always True to allow all records through.
         """
-        if hasattr(record, "request"):
+        request = getattr(record, "request", None) or RequestContext.get()
+        if request:
             # Record with request data
-            record.source_ip = record.request.META.get("REMOTE_ADDR")
-            record.user = "anonymous"  # Anonymous user by default
-            if hasattr(record.request, "user") and record.request.user and record.request.user.id:
+            record.source_ip = request.META.get("REMOTE_ADDR")
+            record.user = "anonymous"
+            if hasattr(request, "user") and request.user and request.user.id:
                 # Authenticated request
-                record.user = record.request.user.id
+                record.user = request.user.id
         else:
             # Record without request data
             record.source_ip = record.source_ip if hasattr(record, "source_ip") else ""

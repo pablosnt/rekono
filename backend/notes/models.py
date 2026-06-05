@@ -8,7 +8,7 @@ and community-driven curation through likes.
 
 Architecture:
     The notes system uses a flexible association model where notes can be attached
-    to any entity type (projects, targets, tasks, executions, findings) through
+    to any entity type (projects, targets, tasks, findings) through
     foreign key relationships. Only one association per note is allowed, ensuring
     clear context. The system supports both individual and collaborative workflows
     with sharing and forking capabilities for knowledge base development.
@@ -17,7 +17,6 @@ Architecture:
 from django.db import models
 from taggit.managers import TaggableManager
 
-from executions.models import Execution
 from findings.models import (
     OSINT,
     Credential,
@@ -54,7 +53,6 @@ class Note(BaseLike):
         project (ForeignKey): The project this note belongs to (required)
         target (ForeignKey): Associated target entity (optional)
         task (ForeignKey): Associated task entity (optional)
-        execution (ForeignKey): Associated execution entity (optional)
         osint (ForeignKey): Associated OSINT finding entity (optional)
         host (ForeignKey): Associated host finding entity (optional)
         port (ForeignKey): Associated port finding entity (optional)
@@ -90,7 +88,6 @@ class Note(BaseLike):
     project = models.ForeignKey(Project, related_name="notes", on_delete=models.CASCADE)
     target = models.ForeignKey(Target, related_name="notes", on_delete=models.CASCADE, null=True, blank=True)
     task = models.ForeignKey(Task, related_name="notes", on_delete=models.CASCADE, null=True, blank=True)
-    execution = models.ForeignKey(Execution, related_name="notes", on_delete=models.CASCADE, null=True, blank=True)
     osint = models.ForeignKey(OSINT, related_name="notes", on_delete=models.CASCADE, null=True, blank=True)
     host = models.ForeignKey(Host, related_name="notes", on_delete=models.CASCADE, null=True, blank=True)
     port = models.ForeignKey(Port, related_name="notes", on_delete=models.CASCADE, null=True, blank=True)
@@ -116,7 +113,7 @@ class Note(BaseLike):
         """Return string representation of the note.
 
         Constructs a string representation by finding the associated entity
-        (target, task, execution, or finding) and combining it with the note title.
+        (target, task, or finding) and combining it with the note title.
         Falls back to project if no specific entity association exists.
 
         Returns:
@@ -129,7 +126,6 @@ class Note(BaseLike):
                     for link in [
                         self.target,
                         self.task,
-                        self.execution,
                         self.osint,
                         self.host,
                         self.port,

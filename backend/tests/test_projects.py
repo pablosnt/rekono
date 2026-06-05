@@ -2,10 +2,12 @@ from functools import cached_property
 
 from django.test import TestCase
 
+from findings.enums import TriageStatus
 from projects.models import Project
 from security.authorization.roles import Role
-from tests.framework import ApiTestNoData
+from tests.framework import ApiTest, ApiTestNoData
 from tests.framework.cases import ApiTestCase, DeleteApiTestCase, PostApiTestCase, PutApiTestCase
+from tests.framework.data import SetupProject
 
 # pytype: disable=wrong-arg-types
 
@@ -53,3 +55,18 @@ class ProjectTest(ApiTestNoData, TestCase):
     @cached_property
     def object(self) -> Project:
         return Project.objects.create(**project1)
+
+
+class TopProjectsTest(ApiTest, TestCase):
+    endpoint = "/api/projects/top/"
+    data = [
+        # Project #1 (self.project) -> 0 vulnerabilities
+        SetupProject(1, 0),
+        # Project #2 -> 1 open vulnerability x 3 executions x 2 tasks = 6 vulnerabilities
+        SetupProject(
+            2, 3, vulnerabilities_fields=[{}, {"is_fixed": True}, {"triage_status": TriageStatus.FALSE_POSITIVE}]
+        ),
+        # Project #3 -> 1 open vulnerability x 1 executions x 1 tasks = 1 vulnerability
+        SetupProject(vulnerabilities_fields=[{}, {"is_fixed": True}, {"triage_status": TriageStatus.FALSE_POSITIVE}]),
+    ]
+    cases = [ApiTestCase(["members"], expected=[{"id": 2}, {"id": 3}, {"id": 1}]), ApiTestCase(["not_members"])]

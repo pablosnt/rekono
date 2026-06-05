@@ -36,11 +36,7 @@ class AuthenticationViewSet(BaseViewSet):
     queryset = Authentication.objects.all()
     serializer_class = AuthenticationSerializer
     filterset_class = AuthenticationFilter
-    permission_classes = [
-        IsAuthenticated,
-        RekonoModelPermission,
-        ProjectMemberPermission,
-    ]
+    permission_classes = [IsAuthenticated, RekonoModelPermission, ProjectMemberPermission]
     search_fields = ["name"]
     ordering_fields = ["id", "name", "type"]
     http_method_names = ["get", "post", "delete"]

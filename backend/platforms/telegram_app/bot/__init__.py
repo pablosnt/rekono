@@ -80,7 +80,8 @@ class TelegramBot(BaseTelegram):
         """
         self.settings = TelegramSettings.objects.first()
         if not self.settings or not self.settings.secret:
-            del self.app  # Remove cached_property value, so it will be regenerated
+            self._app = None
+            self._initialized = False
             self.logger.info("[Telegram Bot] Waiting while Telegram token is not configured")
         while not self.settings or not self.settings.secret:
             time.sleep(sleep_time)

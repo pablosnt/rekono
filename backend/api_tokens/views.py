@@ -7,12 +7,12 @@ access and proper authentication controls.
 from django.db.models import QuerySet
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.serializers import Serializer
-from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from api_tokens.filters import ApiTokenFilter
 from api_tokens.models import ApiToken
 from api_tokens.serializers import ApiTokenSerializer, CreateApiTokenSerializer
 from framework.views import BaseViewSet
+from security.authentication.jwt import CookieJWTAuthentication
 
 # Create your views here.
 
@@ -40,7 +40,7 @@ class ApiTokenViewSet(BaseViewSet):
     filterset_class = ApiTokenFilter
     permission_classes = [IsAuthenticated]
     # Needed to disallow API token management by an user authenticated with an API token
-    authentication_classes = [JWTAuthentication]
+    authentication_classes = [CookieJWTAuthentication]
     http_method_names = ["get", "post", "delete"]
     search_fields = ["name"]
     ordering_fields = ["id", "name", "expiration"]

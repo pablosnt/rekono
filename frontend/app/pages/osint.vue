@@ -1,0 +1,3 @@
+<template>
+  <FindingsOsint />
+</template>

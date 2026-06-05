@@ -2,6 +2,7 @@ import json
 import time
 from datetime import datetime, timedelta
 from functools import cached_property
+from typing import Any
 
 import pyotp
 from django.core.exceptions import ValidationError
@@ -9,14 +10,15 @@ from django.test import TestCase
 from django.utils import timezone
 from rest_framework.test import APIClient
 
+from rekono.settings import JWT_ACCESS_COOKIE, JWT_MFA_COOKIE, JWT_REFRESH_COOKIE
 from security.validators.enums import Regex
 from security.validators.input_validator import Validator
 from security.validators.target_validator import TargetValidator
-from tests.framework import ApiTest
+from tests.framework import ApiTest, ApiTestNoData
 from tests.framework.cases import ApiTestCase, CustomApiTestCase
 from users.models import User
 
-# pytype: disable=wrong-arg-types
+# pytype: disable=wrong-arg-types,attribute-error
 
 
 class SecurityTest(ApiTest, TestCase):
@@ -129,6 +131,9 @@ class SecurityTest(ApiTest, TestCase):
         self.assertEqual(200, response.status_code)
         content = json.loads((response.content or "{}".encode()).decode())
         self.assertIsNotNone(content.get("mfa"))
+        self.assertIn(JWT_MFA_COOKIE, response.cookies)
+        self.assertNotIn(JWT_ACCESS_COOKIE, response.cookies)
+        self.assertNotIn(JWT_REFRESH_COOKIE, response.cookies)
         # Partial authenticated token is not valid to access API
         mfa_client = APIClient(HTTP_AUTHORIZATION=f"Bearer {content.get('mfa')}")
         self.assertEqual(401, mfa_client.get(self.profile).status_code)
@@ -145,8 +150,28 @@ class SecurityTest(ApiTest, TestCase):
         self.assertEqual(200, response.status_code)
         content = json.loads((response.content or "{}".encode()).decode())
         self.assertIsNotNone(content.get("access"))
+        self.assertIn(JWT_ACCESS_COOKIE, response.cookies)
+        self.assertIn(JWT_REFRESH_COOKIE, response.cookies)
         client = APIClient(HTTP_AUTHORIZATION=f"Bearer {content.get('access')}")
         self.assertEqual(200, client.get(self.profile).status_code)
+
+        # Login with MFA via cookies
+        response = APIClient().post(
+            self.login, data={"username": self.admin1.username, "password": self.admin1.username}
+        )
+        self.assertEqual(200, response.status_code)
+        self.assertIn(JWT_MFA_COOKIE, response.cookies)
+        mfa_client = APIClient()
+        # Invalid token via cookie
+        mfa_client.cookies[JWT_MFA_COOKIE] = "invalid JWT"
+        self.assertEqual(401, mfa_client.post(self.mfa_login, data={"mfa": mfa_otp.now()}).status_code)
+        mfa_client.cookies[JWT_MFA_COOKIE] = response.cookies[JWT_MFA_COOKIE].value
+        response = mfa_client.post(self.mfa_login, data={"mfa": mfa_otp.now()})
+        self.assertEqual(200, response.status_code)
+        self.assertIn("access", json.loads(response.content.decode()))
+        self.assertIn(JWT_ACCESS_COOKIE, response.cookies)
+        self.assertIn(JWT_REFRESH_COOKIE, response.cookies)
+        self.assertEqual("", response.cookies[JWT_MFA_COOKIE].value)
 
         # Login with email MFA
         response = APIClient().post(
@@ -210,6 +235,77 @@ class SecurityTest(ApiTest, TestCase):
         self.assertEqual(200, response.status_code)
         self.assertFalse(json.loads((response.content or "{}".encode()).decode()).get("mfa"))
 
+    def test_access_token_via_cookie(self) -> None:
+        # Login as admin1
+        response = APIClient().post(
+            self.login, data={"username": self.admin1.username, "password": self.admin1.username}
+        )
+        self.assertEqual(200, response.status_code)
+        # Check cookies are set
+        self.assertIn(JWT_ACCESS_COOKIE, response.cookies)
+        self.assertIn(JWT_REFRESH_COOKIE, response.cookies)
+        data = json.loads((response.content or "{}".encode()).decode())
+
+        cookie_client = APIClient()
+        # Invalid token via cookie
+        cookie_client.cookies[JWT_ACCESS_COOKIE] = "invalid JWT"
+        self.assertEqual(401, cookie_client.get(self.profile).status_code)
+
+        # Authentication via cookie
+        cookie_client.cookies[JWT_ACCESS_COOKIE] = data["access"]
+        self.assertEqual(200, cookie_client.get(self.profile).status_code)
+
+    def test_refresh_token_via_cookie(self) -> None:
+        # Login as admin1
+        response = APIClient().post(
+            self.login, data={"username": self.admin1.username, "password": self.admin1.username}
+        )
+        data = json.loads((response.content or "{}".encode()).decode())
+
+        # Authentication and refresh via cookie
+        cookie_client = APIClient()
+        cookie_client.cookies[JWT_ACCESS_COOKIE] = data["access"]
+
+        # Invalid token via cookie
+        cookie_client.cookies[JWT_REFRESH_COOKIE] = "invalid JWT"
+        self.assertEqual(401, cookie_client.post(self.refresh).status_code)
+
+        # Refresh tokens
+        cookie_client.cookies[JWT_REFRESH_COOKIE] = data["refresh"]
+        response = cookie_client.post(self.refresh)
+        self.assertEqual(200, response.status_code)
+        # New tokens are generated
+        new_tokens = json.loads((response.content or "{}".encode()).decode())
+        self.assertIn("access", new_tokens)
+        self.assertIn("refresh", new_tokens)
+        self.assertIn(JWT_ACCESS_COOKIE, response.cookies)
+        self.assertIn(JWT_REFRESH_COOKIE, response.cookies)
+
+    def test_logout_via_cookie(self) -> None:
+        # Login as admin1
+        login_response = APIClient().post(
+            self.login, data={"username": self.admin1.username, "password": self.admin1.username}
+        )
+        data = json.loads(login_response.content.decode())
+        cookie_client = APIClient()
+        cookie_client.cookies[JWT_ACCESS_COOKIE] = data["access"]
+
+        # Invalid token via cookie
+        cookie_client.cookies[JWT_REFRESH_COOKIE] = "invalid JWT"
+        self.assertEqual(401, cookie_client.post(self.logout).status_code)
+
+        # Authentication and refresh via cookie
+        cookie_client.cookies[JWT_REFRESH_COOKIE] = data["refresh"]
+        response = cookie_client.post(self.logout)
+        self.assertEqual(200, response.status_code)
+
+        # The refresh token is no longer valid
+        self.assertEqual(401, cookie_client.post(self.refresh, data={"refresh": data["refresh"]}).status_code)
+
+        # No cookies available
+        self.assertEqual("", response.cookies[JWT_ACCESS_COOKIE].value)
+        self.assertEqual("", response.cookies[JWT_REFRESH_COOKIE].value)
+
     def test_input_validation_with_no_value(self) -> None:
         for validator in [Validator(Regex.CVE), TargetValidator(Regex.TARGET)]:
             exception = False
@@ -218,3 +314,54 @@ class SecurityTest(ApiTest, TestCase):
             except ValidationError:
                 exception = True
             self.assertTrue(exception)
+
+
+BLOCKED = "https://evil.com/script.js"
+ORIGIN = "https://rekono.com/projects/"
+DIRECTIVE = "script-src"
+
+
+class CspReportTest(ApiTestNoData):
+    endpoint = ""
+    valid = {}
+    no_origin = {}
+    invalid = {}
+    anonymous_access_allowed = None
+
+    def _post(self, payload: dict[str, Any]) -> int:
+        return APIClient().post(self.endpoint, data=payload, content_type="application/json").status_code
+
+    def test_valid(self) -> None:
+        self.assertEqual(204, self._post(self.valid))
+
+    def test_no_origin(self) -> None:
+        self.assertEqual(204, self._post(self.no_origin))
+
+    def test_invalid(self) -> None:
+        self.assertEqual(204, self._post(self.invalid))
+
+
+class CspReportToTest(CspReportTest, TestCase):
+    endpoint = "/api/csp-report-to/"
+    valid = [
+        {
+            "type": "csp-violation",
+            "url": ORIGIN,
+            "body": {"blockedURL": BLOCKED, "documentUrl": ORIGIN, "effectiveDirective": DIRECTIVE},
+        }
+    ]
+    no_origin = [{"type": "csp-violation", "body": {"blockedURL": BLOCKED, "effectiveDirective": DIRECTIVE}}]
+    invalid = [
+        {
+            "type": "csp-violation",
+            "url": ORIGIN,
+            "body": {"documentUrl": ORIGIN, "effectiveDirective": DIRECTIVE},
+        }
+    ]
+
+
+class CspReportUriTest(CspReportTest, TestCase):
+    endpoint = "/api/csp-report-uri/"
+    valid = {"csp-report": {"blocked-uri": BLOCKED, "document-uri": ORIGIN, "effective-directive": DIRECTIVE}}
+    no_origin = {"csp-report": {"blocked-uri": BLOCKED, "effective-directive": DIRECTIVE}}
+    invalid = {"csp-report": {"blocked-uri": BLOCKED, "document-uri": ORIGIN}}

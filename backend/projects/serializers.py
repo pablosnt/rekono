@@ -9,13 +9,12 @@ from typing import Any
 from django.db import transaction
 from taggit.serializers import TaggitSerializer
 
-from alerts.enums import AlertItem, AlertMode
+from alerts.enums import AlertItem
 from alerts.models import Alert
 from framework.fields import TagField
 from framework.serializers import RelatedNotesSerializer
 from platforms.defectdojo.serializers import DefectDojoSyncSerializer
 from projects.models import Project
-from targets.serializers import SimpleTargetSerializer
 from users.serializers import SimpleUserSerializer
 
 
@@ -27,13 +26,11 @@ class ProjectSerializer(TaggitSerializer, RelatedNotesSerializer):
     including owner membership and default security monitoring alerts.
 
     Attributes:
-        targets (SimpleTargetSerializer): Nested target information for project
         owner (SimpleUserSerializer): Serialized user information for project owner
         tags (TagField): Project organizational tags with tagging support
         defectdojo_sync (DefectDojoSyncSerializer): DefectDojo integration configuration
     """
 
-    targets = SimpleTargetSerializer(read_only=True, many=True)
     owner = SimpleUserSerializer(many=False, read_only=True)
     tags = TagField()  # Tags
     defectdojo_sync = DefectDojoSyncSerializer(many=False, read_only=True)
@@ -57,7 +54,6 @@ class ProjectSerializer(TaggitSerializer, RelatedNotesSerializer):
             "members",
             "tags",
             "defectdojo_sync",
-            "notes",
         )
         read_only_fields = (
             "owner",
@@ -87,8 +83,8 @@ class ProjectSerializer(TaggitSerializer, RelatedNotesSerializer):
         # Create trending CVE monitor alert by default
         alert = Alert.objects.create(
             project=project,
-            item=AlertItem.CVE,
-            mode=AlertMode.MONITOR,
+            item=AlertItem.TRENDING_CVE,
+            value=str(True),
             enabled=True,
             owner=validated_data.get("owner"),
             subscribe_all_members=True,

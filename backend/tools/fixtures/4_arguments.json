@@ -1172,7 +1172,7 @@
             "configuration": 50,
             "name": "cve",
             "argument": "--cve {cve}",
-            "required": false,
+            "required": true,
             "multiple": false
         }
     }

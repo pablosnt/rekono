@@ -4,7 +4,7 @@ Provides filtering capabilities for report queries through REST API endpoints
 with support for exact matches and date range filtering.
 """
 
-from django_filters.rest_framework import FilterSet
+from django_filters.rest_framework import CharFilter, FilterSet
 
 from reporting.models import Report
 
@@ -15,6 +15,8 @@ class ReportFilter(FilterSet):
     Provides filtering capabilities for report queries including exact matches
     on key fields and date range filtering for report creation timestamps.
     """
+
+    report_format = CharFilter(field_name="format", lookup_expr="exact")
 
     class Meta:
         """Meta configuration for the ReportFilter.
@@ -30,7 +32,6 @@ class ReportFilter(FilterSet):
             "target": ["exact"],
             "task": ["exact"],
             "status": ["exact"],
-            "format": ["exact"],
             "user": ["exact"],
             "date": ["gte", "lte", "exact"],
         }

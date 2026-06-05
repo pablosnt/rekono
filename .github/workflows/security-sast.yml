@@ -11,7 +11,7 @@ jobs:
       image: semgrep/semgrep:latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@0c366fd6a839edf440554fa01a7085ccba70ac98
         with:
           fetch-depth: 0
       
@@ -20,7 +20,7 @@ jobs:
       
       - name: Upload report as GitHub artifact
         if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: Semgrep
           path: semgrep.json

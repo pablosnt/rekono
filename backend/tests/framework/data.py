@@ -71,6 +71,7 @@ class TestingDataMixin:
             owner=self.admin1,
         )
         project.members.set(self.members)
+        now = (timezone.now() + timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
         for target_index in range(config.targets_and_tasks):
             _target_index = 10 * project_number + target_index
             target = Target.objects.create(
@@ -85,7 +86,7 @@ class TestingDataMixin:
                 target=target,
                 configuration=self.configuration,
                 executor=self.auditor1,
-                start=timezone.now() - timedelta(days=_target_index + 1),
+                start=now - timedelta(hours=_target_index + 1),
             )
             for executions_index in range(config.executions_per_task):
                 _executions_index = _target_index + executions_index
@@ -177,7 +178,7 @@ class TestingDataMixin:
                                         "name": f"Vulnerability {_vulnerability_index}",
                                         "description": f"Vulnerability {_vulnerability_index}",
                                         "cve": f"CVE-2025-{3000 + _vulnerability_index}",
-                                        "cwe": "CWE-200",
+                                        "cwes": ["CWE-200"],
                                         **vulnerability_fields,
                                         "technology": technology,
                                     }

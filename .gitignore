@@ -35,7 +35,7 @@ venv.bak/
 /reports/
 /wordlists/
 /logs/
-home/
+/backend/tests/home/
 
 # Vue.js and Nuxt
 node_modules/
@@ -45,6 +45,7 @@ yarn-debug.log*
 yarn-error.log*
 .nuxt/
 .output/
+.env
 
 # Debian package
 *.desktop
@@ -54,5 +55,11 @@ rekono-kbx
 # Tools paths
 Result/
 
-# Temporal ignore
+# AI
+.agent/
+.agents/
+.claude/
+docs/
+
+# TODO Temporal ignore
 migrations/

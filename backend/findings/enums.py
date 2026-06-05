@@ -136,8 +136,8 @@ class PathType(models.TextChoices):
         SHARE (str): File shares and directory resources
     """
 
-    ENDPOINT = "ENDPOINT"
-    SHARE = "SHARE"
+    ENDPOINT = "Endpoint"
+    SHARE = "Share"
 
 
 class TriageStatus(models.TextChoices):

@@ -27,12 +27,14 @@ class ProcessFilter(LikeFilter):
         tool (ModelChoiceFilter): Filter by security tool used in process steps
         stage (ChoiceFilter): Filter by security testing stage (reconnaissance, enumeration, etc.)
         tag (CharFilter): Filter by process tags for categorization
+        owner_username: Filter by owner username
     """
 
     configuration = ModelChoiceFilter(queryset=Configuration.objects.all(), field_name="steps__configuration")
     tool = ModelChoiceFilter(queryset=Tool.objects.all(), field_name="steps__configuration__tool")
     stage = ChoiceFilter(field_name="steps__configuration__stage", choices=Stage.choices)
     tag = CharFilter(field_name="tags__name")
+    owner_username = CharFilter(field_name="owner__username", lookup_expr="icontains")
 
     class Meta:
         """Meta configuration for ProcessFilter.
@@ -45,7 +47,11 @@ class ProcessFilter(LikeFilter):
         """
 
         model = Process
-        fields = {"name": ["exact", "icontains"], "description": ["exact", "icontains"], "owner": ["exact"]}
+        fields = {
+            "name": ["exact", "icontains"],
+            "description": ["exact", "icontains"],
+            "owner": ["exact"],
+        }
 
 
 class StepFilter(FilterSet):

@@ -22,17 +22,16 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
   
-  redis:
+  valkey:
     restart: always
-    image: redis:8-bookworm
+    image: valkey/valkey:8-bookworm
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ["CMD", "valkey-cli", "ping"]
       interval: 5s
       timeout: 5s
       retries: 5
-    hostname: redis
-    container_name: redis
-    user: redis
+    hostname: valkey
+    container_name: valkey
     expose:
       - 6379
     networks:
@@ -41,10 +40,11 @@ services:
   initializer:
     restart: 'no'
     image: pablosnt/rekono-worker:unstable
-    command: bash /entrypoints/initilizer.sh
+    command: bash /entrypoints/initializer.sh
     container_name: initializer
     volumes:
       - rekono:/rekono
+      - ./config.yaml:/rekono/config.yaml:ro
     networks:
       - internal
     depends_on:
@@ -65,10 +65,11 @@ services:
     hostname: tasks-worker
     volumes:
       - rekono:/rekono
+      - ./config.yaml:/rekono/config.yaml:ro
     networks:
       - internal
     depends_on:
-      redis:
+      valkey:
         condition: service_healthy
       initializer:
         condition: service_completed_successfully
@@ -76,7 +77,7 @@ services:
       - RKN_DB_HOST=postgres
       - RKN_DB_USER=postgres
       - RKN_DB_PASSWORD=postgres
-      - RKN_RQ_HOST=redis
+      - RKN_RQ_HOST=valkey
 
   executions-worker:
     restart: always
@@ -85,6 +86,7 @@ services:
     hostname: executions-worker
     volumes:
       - rekono:/rekono
+      - ./config.yaml:/rekono/config.yaml:ro
     networks:
       - internal
       - external
@@ -93,7 +95,7 @@ services:
       - NET_RAW
       - NET_BIND_SERVICE
     depends_on:
-      redis:
+      valkey:
         condition: service_healthy
       initializer:
         condition: service_completed_successfully
@@ -101,7 +103,7 @@ services:
       - RKN_DB_HOST=postgres
       - RKN_DB_USER=postgres
       - RKN_DB_PASSWORD=postgres
-      - RKN_RQ_HOST=redis
+      - RKN_RQ_HOST=valkey
 
   findings-worker:
     restart: always
@@ -110,11 +112,12 @@ services:
     hostname: findings-worker
     volumes:
       - rekono:/rekono
+      - ./config.yaml:/rekono/config.yaml:ro
     networks:
       - internal
       - external
     depends_on:
-      redis:
+      valkey:
         condition: service_healthy
       initializer:
         condition: service_completed_successfully
@@ -122,8 +125,8 @@ services:
       - RKN_DB_HOST=postgres
       - RKN_DB_USER=postgres
       - RKN_DB_PASSWORD=postgres
-      - RKN_RQ_HOST=redis
-    
+      - RKN_RQ_HOST=valkey
+
   monitor-worker:
     restart: always
     image: pablosnt/rekono-backend:unstable
@@ -131,11 +134,12 @@ services:
     hostname: monitor-worker
     volumes:
       - rekono:/rekono
+      - ./config.yaml:/rekono/config.yaml:ro
     networks:
       - internal
       - external
     depends_on:
-      redis:
+      valkey:
         condition: service_healthy
       initializer:
         condition: service_completed_successfully
@@ -143,7 +147,7 @@ services:
       - RKN_DB_HOST=postgres
       - RKN_DB_USER=postgres
       - RKN_DB_PASSWORD=postgres
-      - RKN_RQ_HOST=redis
+      - RKN_RQ_HOST=valkey
 
   telegram-bot:
     restart: always
@@ -153,11 +157,12 @@ services:
     container_name: telegram-bot
     volumes:
       - rekono:/rekono
+      - ./config.yaml:/rekono/config.yaml:ro
     networks:
       - internal
       - external
     depends_on:
-      redis:
+      valkey:
         condition: service_healthy
       initializer:
         condition: service_completed_successfully
@@ -165,8 +170,8 @@ services:
       - RKN_DB_HOST=postgres
       - RKN_DB_USER=postgres
       - RKN_DB_PASSWORD=postgres
-      - RKN_RQ_HOST=redis
-  
+      - RKN_RQ_HOST=valkey
+
   backend:
     restart: always
     image: pablosnt/rekono-backend:unstable
@@ -174,7 +179,7 @@ services:
     hostname: backend
     container_name: backend
     healthcheck:
-      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://localhost:8000/api/schema/swagger-ui.html"]
+      test: ["CMD", "uv", "run", "python", "-c", "import requests; requests.get('http://localhost:8000/api/schema/swagger-ui/', timeout=5).raise_for_status()"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -183,11 +188,12 @@ services:
       - 8000
     volumes:
       - rekono:/rekono
+      - ./config.yaml:/rekono/config.yaml:ro
     networks:
       - internal
       - external
     depends_on:
-      redis:
+      valkey:
         condition: service_healthy
       initializer:
         condition: service_completed_successfully
@@ -195,7 +201,7 @@ services:
       - RKN_DB_HOST=postgres
       - RKN_DB_USER=postgres
       - RKN_DB_PASSWORD=postgres
-      - RKN_RQ_HOST=redis
+      - RKN_RQ_HOST=valkey
       - RKN_TRUSTED_PROXY=true
       - RKN_ALLOWED_HOSTS=*
   
@@ -225,6 +231,7 @@ services:
       - 443:443
     volumes:
       - nginx:/etc/nginx/tls/
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
       backend:
         condition: service_healthy

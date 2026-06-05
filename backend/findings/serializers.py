@@ -7,6 +7,8 @@ configuration, and custom update logic.
 
 from typing import Any
 
+from rest_framework.serializers import CharField, ListField, ModelSerializer
+
 from findings.enums import Severity, TriageStatus
 from findings.framework.serializers import FindingSerializer, TriageFindingSerializer
 from findings.models import (
@@ -50,62 +52,28 @@ class OSINTSerializer(TriageFindingSerializer):
         )
 
 
-class PortSerializer(FindingSerializer):
-    """Serializer for network port findings.
-
-    Handles JSON conversion for network port findings with nested
-    relationship serialization for comprehensive port data.
-    """
-
-    class Meta:
-        """Meta configuration for PortSerializer.
-
-        Defines field inclusion for port findings serialization
-        with nested relationships for complete port information.
-
-        Attributes:
-            model (type): Port model class.
-            fields (tuple): Included serializer fields with relationships.
-        """
-
-        model = Port
-        fields = FindingSerializer.Meta.fields + (
-            "host",
-            "port",
-            "status",
-            "protocol",
-            "service",
-            "path",
-            "technology",
-            "vulnerability",
-        )
-
-
-class HostSerializer(FindingSerializer):
+class SimpleHostSerializer(ModelSerializer):
     """Serializer for network host findings.
 
-    Handles JSON conversion for network host findings with nested
-    port relationship serialization for complete host inventory.
-
-    Attributes:
-        port (PortSerializer): Nested port relationships (read-only)
+    Handles JSON conversion for network host findings for complete
+    host inventory. Does not include nested port data; use HostSerializer
+    when port relationships are needed.
     """
 
-    port = PortSerializer(many=True, read_only=True)
-
     class Meta:
-        """Meta configuration for HostSerializer.
+        """Meta configuration for SimpleHostSerializer.
 
         Defines field inclusion for host findings serialization
-        including geolocation and nested port relationships.
+        including geolocation data without nested port relationships.
 
         Attributes:
             model (type): Host model class.
-            fields (tuple): Included serializer fields with port relations.
+            fields (tuple): Included serializer fields for host data.
         """
 
         model = Host
-        fields = FindingSerializer.Meta.fields + (
+        fields = (
+            "id",
             "ip",
             "domain",
             "os",
@@ -115,10 +83,88 @@ class HostSerializer(FindingSerializer):
             "latitude",
             "longitude",
             "reputation",
-            "harmless_votes",
-            "malicious_votes",
+            "malicious_analysis",
+            "suspicious_analysis",
+            "total_analysis",
             "whois",
+        )
+
+
+class HostSerializer(FindingSerializer):
+    """Serializer for network host findings with nested port data.
+
+    Extends FindingSerializer with SimpleHostSerializer fields to include
+    host data and nested port relationships for complete host inventory.
+    """
+
+    class Meta:
+        """Meta configuration for HostSerializer.
+
+        Defines field inclusion for host findings serialization combining
+        base finding fields, host data, and nested port relationships.
+
+        Attributes:
+            model (type): Host model class.
+            fields (tuple): Included serializer fields with port relations.
+        """
+
+        model = Host
+        fields = FindingSerializer.Meta.fields + SimpleHostSerializer.Meta.fields + ("port",)
+
+
+class SimplePortSerializer(ModelSerializer):
+    """Serializer for network port findings.
+
+    Handles JSON conversion for network port findings with nested
+    relationship serialization for comprehensive port data.
+    """
+
+    host = SimpleHostSerializer(many=False, read_only=True)
+
+    class Meta:
+        """Meta configuration for SimplePortSerializer.
+
+        Defines field inclusion for port findings serialization
+        with a nested host relationship without finding base fields.
+
+        Attributes:
+            model (type): Port model class.
+            fields (tuple): Included serializer fields with host relation.
+        """
+
+        model = Port
+        fields = (
+            "id",
+            "host",
             "port",
+            "status",
+            "protocol",
+            "service",
+        )
+
+
+class PortSerializer(FindingSerializer, SimplePortSerializer):
+    """Serializer for network port findings with nested host data.
+
+    Extends FindingSerializer with SimplePortSerializer fields to include
+    the nested host object and relationships to paths, technologies,
+    and vulnerabilities for complete port inventory.
+    """
+
+    class Meta:
+        """Meta configuration for PortSerializer.
+
+        Defines field inclusion for port findings serialization combining
+        base finding fields, port data, and nested entity relationships.
+
+        Attributes:
+            model (type): Port model class.
+            fields (tuple): Included serializer fields with relationships.
+        """
+
+        model = Port
+        fields = (
+            FindingSerializer.Meta.fields + SimplePortSerializer.Meta.fields + ("path", "technology", "vulnerability")
         )
 
 
@@ -127,7 +173,12 @@ class PathSerializer(FindingSerializer):
 
     Handles JSON conversion for web path findings with endpoint
     and file share classification for web application analysis.
+
+    Attributes:
+        port (SimplePortSerializer): Nested port relationship (read-only)
     """
+
+    port = SimplePortSerializer(many=False, read_only=True)
 
     class Meta:
         """Meta configuration for PathSerializer.
@@ -150,12 +201,72 @@ class PathSerializer(FindingSerializer):
         )
 
 
+class SimpleTechnologySerializer(ModelSerializer):
+    """Serializer for technology findings.
+
+    Handles JSON conversion for technology findings with a nested
+    port relationship for technology stack analysis. Does not include
+    finding base fields; use TechnologySerializer when those are needed.
+
+    Attributes:
+        port (SimplePortSerializer): Nested port relationship (read-only)
+    """
+
+    port = SimplePortSerializer(many=False, read_only=True)
+
+    class Meta:
+        """Meta configuration for SimpleTechnologySerializer.
+
+        Defines field inclusion for technology findings serialization
+        with a nested port relationship and core technology attributes.
+
+        Attributes:
+            model (type): Technology model class.
+            fields (tuple): Included serializer fields with port relation.
+        """
+
+        model = Technology
+        fields = ("id", "port", "name", "version", "description")
+
+
+class TechnologySerializer(FindingSerializer, SimpleTechnologySerializer):
+    """Serializer for technology findings with full relationship data.
+
+    Extends FindingSerializer with SimpleTechnologySerializer fields to include
+    nested port data and relationships to credentials, vulnerabilities,
+    and exploits for complete technology stack analysis.
+    """
+
+    class Meta:
+        """Meta configuration for TechnologySerializer.
+
+        Defines field inclusion for technology findings serialization combining
+        base finding fields, technology data, and nested entity relationships.
+
+        Attributes:
+            model (type): Technology model class.
+            fields (tuple): Included serializer fields with nested relations.
+        """
+
+        model = Technology
+        fields = (
+            FindingSerializer.Meta.fields
+            + SimpleTechnologySerializer.Meta.fields
+            + ("credential", "vulnerability", "exploit")
+        )
+
+
 class CredentialSerializer(TriageFindingSerializer):
     """Serializer for credential findings.
 
     Handles JSON conversion for credential findings with read-only
     restrictions for sensitive authentication data protection.
+
+    Attributes:
+        technology (SimpleTechnologySerializer): Nested technology relationship (read-only)
     """
+
+    technology = SimpleTechnologySerializer(many=False, read_only=True)
 
     class Meta:
         """Meta configuration for CredentialSerializer.
@@ -186,53 +297,69 @@ class CredentialSerializer(TriageFindingSerializer):
         )
 
 
-class TechnologySerializer(FindingSerializer):
-    """Serializer for technology findings.
+class SimpleVulnerabilitySerializer(ModelSerializer):
+    """Serializer for vulnerability findings.
 
-    Handles JSON conversion for technology findings with nested
-    credential relationship serialization for technology stack analysis.
+    Handles JSON conversion for vulnerability findings with nested port
+    and technology relationships for vulnerability assessment. Does not
+    include finding base fields; use VulnerabilitySerializer when those
+    are needed.
 
     Attributes:
-        credential (CredentialSerializer): Nested credential relationships
+        port (SimplePortSerializer): Nested port relationship (read-only)
+        technology (SimpleTechnologySerializer): Nested technology relationship (read-only)
+        severity (IntegerChoicesField): Severity level choice field
+        cwes (ListField): Sorted list of CWE identifiers
     """
 
-    credential = CredentialSerializer(many=True, read_only=True)
+    port = SimplePortSerializer(many=False, read_only=True)
+    technology = SimpleTechnologySerializer(many=False, read_only=True)
+    severity = IntegerChoicesField(model=Severity, required=False)
+    cwes = ListField(child=CharField(), read_only=True)
 
     class Meta:
-        """Meta configuration for TechnologySerializer.
+        """Meta configuration for SimpleVulnerabilitySerializer.
 
-        Defines field inclusion for technology findings serialization
-        with nested relationships for comprehensive technology information.
+        Defines field inclusion for vulnerability findings serialization
+        with nested port and technology relationships and CVE/CWE mapping.
 
         Attributes:
-            model (type): Technology model class.
-            fields (tuple): Included serializer fields with nested relations.
+            model (type): Vulnerability model class.
+            fields (tuple): Included serializer fields for vulnerabilities.
         """
 
-        model = Technology
-        fields = FindingSerializer.Meta.fields + (
+        model = Vulnerability
+        fields = (
+            "id",
             "port",
+            "technology",
             "name",
-            "version",
             "description",
+            "severity",
+            "cvss_version",
+            "cvss_vector",
+            "cvss_base_score",
+            "cve",
+            "euvd_id",
+            "ghsa_id",
+            "osv_generic_id",
+            "cwes",
+            "epss_score",
+            "epss_percentile",
+            "remediation",
             "reference",
-            "credential",
-            "vulnerability",
-            "exploit",
+            "trending",
         )
 
 
-class VulnerabilitySerializer(TriageFindingSerializer):
+class VulnerabilitySerializer(TriageFindingSerializer, SimpleVulnerabilitySerializer):
     """Serializer for vulnerability findings.
 
     Handles JSON conversion for vulnerability findings with severity
     field handling and automatic exploit triage on status updates.
-
-    Attributes:
-        severity (IntegerChoicesField): Severity level choice field
+    Inherits nested port, technology, and severity fields from
+    SimpleVulnerabilitySerializer.
     """
-
-    severity = IntegerChoicesField(model=Severity, required=False)
 
     class Meta:
         """Meta configuration for VulnerabilitySerializer.
@@ -247,37 +374,9 @@ class VulnerabilitySerializer(TriageFindingSerializer):
         """
 
         model = Vulnerability
-        fields = TriageFindingSerializer.Meta.fields + (
-            "port",
-            "technology",
-            "name",
-            "description",
-            "severity",
-            "cvss_version",
-            "cvss_vector",
-            "cvss_base_score",
-            "cve",
-            "cwe",
-            "remediation",
-            "reference",
-            "trending",
-            "exploit",
-        )
-        read_only_fields = TriageFindingSerializer.Meta.read_only_fields + (
-            "port",
-            "technology",
-            "name",
-            "description",
-            "severity",
-            "cvss_version",
-            "cvss_vector",
-            "cvss_base_score",
-            "cve",
-            "cwe",
-            "remediation",
-            "reference",
-            "trending",
-            "exploit",
+        fields = TriageFindingSerializer.Meta.fields + SimpleVulnerabilitySerializer.Meta.fields + ("exploit",)
+        read_only_fields = (
+            TriageFindingSerializer.Meta.read_only_fields + SimpleVulnerabilitySerializer.Meta.fields + ("exploit",)
         )
 
     def update(self, instance: Vulnerability, validated_data: dict[str, Any]) -> Vulnerability:
@@ -300,6 +399,7 @@ class VulnerabilitySerializer(TriageFindingSerializer):
             exploits_triage_comment = (
                 "Automatically triaged after triaging the related vulnerability as a false positive"
             )
+            exploits_queryset = None
             if instance.triage_status == TriageStatus.FALSE_POSITIVE:
                 exploits_triage_status = TriageStatus.FALSE_POSITIVE
                 exploits_queryset = instance.exploit.all()
@@ -308,15 +408,14 @@ class VulnerabilitySerializer(TriageFindingSerializer):
                 exploits_queryset = instance.exploit.filter(
                     triage_status=TriageStatus.FALSE_POSITIVE, triage_comment=exploits_triage_comment
                 )
-                exploits_triage_comment = (
-                    "Automatically untriaged after a triage status change on the related vulnerability"
+                exploits_triage_comment = f"Automatically untriaged after changing the triage status for the related vulnerability to {instance.triage_status}"
+            if exploits_queryset is not None:
+                exploits_queryset.update(
+                    triage_status=exploits_triage_status,
+                    triage_comment=exploits_triage_comment,
+                    triage_by=instance.triage_by,
+                    triage_date=instance.triage_date,
                 )
-            exploits_queryset.update(
-                triage_status=exploits_triage_status,
-                triage_comment=exploits_triage_comment,
-                triage_by=instance.triage_by,
-                triage_date=instance.triage_date,
-            )
         return instance
 
 
@@ -325,7 +424,14 @@ class ExploitSerializer(TriageFindingSerializer):
 
     Handles JSON conversion for exploit findings with read-only
     restrictions for exploit database references and links.
+
+    Attributes:
+        vulnerability (SimpleVulnerabilitySerializer): Nested vulnerability relationship (read-only)
+        technology (SimpleTechnologySerializer): Nested technology relationship (read-only)
     """
+
+    vulnerability = SimpleVulnerabilitySerializer(many=False, read_only=True)
+    technology = SimpleTechnologySerializer(many=False, read_only=True)
 
     class Meta:
         """Meta configuration for ExploitSerializer.

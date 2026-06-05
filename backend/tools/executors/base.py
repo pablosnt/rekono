@@ -178,7 +178,7 @@ class BaseExecutor(LoggingEntity):
                     + list(input_vulnerabilities)
                     + list(input_technologies)
                     + list(HttpHeader.objects.filter(target__isnull=True, user__isnull=True).all())
-                    + list(self.execution.task.executor.http_headers.all())
+                    + (list(self.execution.task.executor.http_headers.all()) if self.execution.task.executor else [])
                     + list(self.execution.task.target.http_headers.all())
                 ):
                     # Check if this input matches the argument's fallback type (less preferred)

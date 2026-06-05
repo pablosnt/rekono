@@ -50,7 +50,17 @@ class UserTest(ApiTest, TestCase):
     expected_string = "admin1@rekono.com"
     data = [SetupProject(targets_and_tasks=0)]
     cases = [
-        ApiTestCase([Role.AUDITOR, Role.READER], 403),
+        ApiTestCase(
+            [Role.AUDITOR, Role.READER],
+            expected=[
+                {"id": 6, "username": "reader2", "role": Role.READER.value, "is_active": True},
+                {"id": 5, "username": "reader1", "role": Role.READER.value, "is_active": True},
+                {"id": 4, "username": "auditor2", "role": Role.AUDITOR.value, "is_active": True},
+                {"id": 3, "username": "auditor1", "role": Role.AUDITOR.value, "is_active": True},
+                {"id": 2, "username": "admin2", "role": Role.ADMIN.value, "is_active": True},
+                {"id": 1, "username": "admin1", "role": Role.ADMIN.value, "is_active": True},
+            ],
+        ),
         ApiTestCase(
             [Role.ADMIN],
             expected=[
@@ -110,7 +120,11 @@ class UserTest(ApiTest, TestCase):
         DeleteApiTestCase(["admin2"], 403, endpoint="2"),
         DeleteApiTestCase(["admin1", "reader2"], endpoint="2"),
         PostApiTestCase(None, 401, {"username": "admin2", "password": "admin2"}, endpoint="/api/security/login/"),
-        ApiTestCase([Role.AUDITOR, "reader1"], 403, endpoint="2"),
+        ApiTestCase(
+            [Role.AUDITOR, "reader1"],
+            expected={"id": 2, "username": "admin2", "role": Role.ADMIN.value, "is_active": False},
+            endpoint="2",
+        ),
         ApiTestCase(
             ["admin1", "reader2"],
             expected={"id": 2, "username": "admin2", "role": Role.ADMIN.value, "is_active": False},
@@ -138,7 +152,11 @@ class UserTest(ApiTest, TestCase):
             expected={"id": 6, "username": "reader2", "role": Role.READER.value, "is_active": True},
             endpoint="6",
         ),
-        ApiTestCase([Role.AUDITOR, Role.READER], 403, endpoint="6"),
+        ApiTestCase(
+            [Role.AUDITOR, Role.READER],
+            expected={"id": 6, "username": "reader2", "role": Role.READER.value, "is_active": True},
+            endpoint="6",
+        ),
         DeleteApiTestCase(["admin1"], endpoint="7"),
         DeleteApiTestCase(["admin2"], 404, endpoint="7"),
         ApiTestCase([Role.ADMIN], 404, endpoint="7"),

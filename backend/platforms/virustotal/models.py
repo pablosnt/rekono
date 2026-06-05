@@ -21,7 +21,8 @@ class VirusTotalSettings(BaseEncrypted):
 
     Attributes:
         _api_token (TextField): Encrypted VirusTotal API token for authentication.
-                               Validated using SECRET regex pattern for security.
+            Validated using SECRET regex pattern for security.
+        is_available (BooleanField): Cached platform availability status (default False).
 
     Example:
         Configure VirusTotal API credentials:
@@ -44,6 +45,7 @@ class VirusTotalSettings(BaseEncrypted):
         blank=True,
         db_column="api_token",
     )
+    is_available = models.BooleanField(default=False)
 
     _encrypted_field = "_api_token"
 

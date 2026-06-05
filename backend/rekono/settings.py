@@ -64,6 +64,7 @@ INSTALLED_APPS = [
     "platforms.nvdnist",
     "platforms.telegram_app",
     "platforms.virustotal",
+    "platforms.vulncheck",
     "parameters",
     "projects",
     "reporting",
@@ -150,7 +151,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # JWT configuration
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=2),
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=10),
     "REFRESH_TOKEN_LIFETIME": timedelta(hours=1),
     "ROTATE_REFRESH_TOKENS": True,
     "BLACKLIST_AFTER_ROTATION": True,
@@ -159,6 +160,16 @@ SIMPLE_JWT = {
     "ALGORITHM": "HS512",
     "SIGNING_KEY": SECRET_KEY,
     "ISSUER": "Rekono",
+}
+
+# Cookies
+JWT_ACCESS_COOKIE = "rekono_access"
+JWT_REFRESH_COOKIE = "rekono_refresh"
+JWT_MFA_COOKIE = "rekono_mfa"
+COOKIES_CONFIG = {
+    "httponly": True,
+    "samesite": "None" if CONFIG.frontend_desktop else "Strict",
+    "secure": CONFIG.secure_cookies,
 }
 
 LOGGING: dict[str, Any] = {
@@ -216,7 +227,7 @@ REST_FRAMEWORK: dict[str, Any] = {
     "DEFAULT_PAGINATION_CLASS": "framework.pagination.Pagination",
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "security.authentication.api.ApiAuthentication",
-        "rest_framework_simplejwt.authentication.JWTAuthentication",
+        "security.authentication.jwt.CookieJWTAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
@@ -242,7 +253,7 @@ if not CONFIG.testing:
                 "anon": "100/min",
                 # 4 request by second by user
                 # It is enough for legitimate usage, but attacks will be blocked
-                "user": "300/min",
+                "user": "1000/min",
                 # Prevent brute force attacks in login and refresh token features
                 # Login is not authenticated, we can receive many requests from different users with same public IP address
                 "login": "30/min",
@@ -264,10 +275,13 @@ SPECTACULAR_SETTINGS = {
     "ENUM_NAME_OVERRIDES": {
         "AuthenticationType": "authentications.enums.AuthenticationType",
         "PathType": "findings.enums.PathType",
+        "PortStatus": "findings.enums.PortStatus",
         "TargetType": "targets.enums.TargetType",
+        "TriageStatus": "findings.enums.TriageStatus",
         "WordlistType": "wordlists.enums.WordlistType",
         "TimeUnit": "tasks.enums.TimeUnit",
         "Status": "executions.enums.Status",
+        "ReportStatus": "reporting.enums.ReportStatus",
     },
 }
 
@@ -334,7 +348,13 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = "static/"
-STATICFILES_DIRS = [CONFIG.base_dir.parent / "frontend" / "public" / "static"]
+frontend_public = CONFIG.base_dir.parent / "frontend" / "public"
+if frontend_public.exists():
+    STATICFILES_DIRS = [frontend_public]
+else:
+    custom_static = CONFIG.base_dir / "static"
+    custom_static.mkdir(exist_ok=True)
+    STATICFILES_DIRS = [custom_static]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field

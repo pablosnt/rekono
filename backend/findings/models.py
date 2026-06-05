@@ -61,11 +61,11 @@ class OSINT(TriageFinding):
         InputKeyword.URL: lambda instance, target: instance.get_url(target, instance.data),
     }
     _defectdojo_finding_mapping = {
-        "title": lambda instance: f"{instance.data_type} found using OSINT techniques",
+        "title": lambda instance: f"{instance.data_type} found on public sources",
         "description": lambda instance: "\n".join(
             [f"{k}: {v}" for k, v in [("Data", instance.data), ("Source", instance.source)] if v]
         ),
-        "severity": Severity.MEDIUM,
+        "severity": Severity.LOW,
     }
 
     def parse(self, target: Any, accumulated: dict[str, Any] = {}) -> dict[str, Any]:
@@ -101,6 +101,11 @@ class Host(Finding):
         city (TextField): Geolocation city name (optional, max 100 characters)
         latitude (FloatField): Geographic latitude coordinate (optional)
         longitude (FloatField): Geographic longitude coordinate (optional)
+        reputation (IntegerField): VirusTotal reputation score for the IP address (optional)
+        malicious_analysis (IntegerField): Number of malicious verdicts from VirusTotal analysis (optional)
+        suspicious_analysis (IntegerField): Number of suspicious verdicts from VirusTotal analysis (optional)
+        total_analysis (IntegerField): Total number of VirusTotal analysis engines that processed this host (optional)
+        whois (TextField): Raw WHOIS registration record for the IP address (optional)
 
     Example:
         Create a host finding with geolocation data:
@@ -126,8 +131,9 @@ class Host(Finding):
     latitude = models.FloatField(blank=True, null=True)
     longitude = models.FloatField(blank=True, null=True)
     reputation = models.IntegerField(blank=True, null=True)
-    harmless_votes = models.IntegerField(blank=True, null=True)
-    malicious_votes = models.IntegerField(blank=True, null=True)
+    malicious_analysis = models.IntegerField(blank=True, null=True)
+    suspicious_analysis = models.IntegerField(blank=True, null=True)
+    total_analysis = models.IntegerField(blank=True, null=True)
     whois = models.TextField(blank=True, null=True)
 
     unique_fields = ["ip"]
@@ -139,21 +145,28 @@ class Host(Finding):
     }
     _defectdojo_finding_mapping = {
         "title": "Host discovered",
-        "description": lambda instance: "\n".join(
-            [
-                f"{k}: {v}"
-                for k, v in [
-                    ("IP", instance.ip),
-                    ("Domain", instance.domain),
-                    ("OS type", instance.os_type),
-                    ("OS", instance.os),
-                    ("Country", instance.country),
-                    ("City", instance.city),
-                    ("Latitude", instance.latitude),
-                    ("Longitude", instance.longitude),
+        "description": lambda instance: (
+            "\n".join(
+                [
+                    f"{k}: {v}"
+                    for k, v in [
+                        ("IP", instance.ip),
+                        ("Domain", instance.domain),
+                        ("OS type", instance.os_type),
+                        ("OS", instance.os),
+                        ("Country", instance.country),
+                        ("City", instance.city),
+                        ("Latitude", instance.latitude),
+                        ("Longitude", instance.longitude),
+                        ("Reputation", instance.reputation),
+                        ("Malicious Analysis", instance.malicious_analysis),
+                        ("Suspicious Analysis", instance.suspicious_analysis),
+                        ("Total Analysis", instance.total_analysis),
+                    ]
+                    if v
                 ]
-                if v
-            ]
+            )
+            + (f"\nWHOIS:\n{instance.whois}" if instance.whois else "")
         ),
         "severity": Severity.INFO,
     }
@@ -214,6 +227,7 @@ class Port(Finding):
             ]
         ),
         "severity": Severity.INFO,
+        "endpoints": lambda instance: [path.defectdojo_endpoint() for path in instance.path.all()],
     }
     _filters = [
         Finding.Filter(int, "port"),
@@ -294,36 +308,16 @@ class Path(Finding):
     _parse_mapping = {
         InputKeyword.ENDPOINT: lambda instance, target: instance.clean_path(instance.path),
         InputKeyword.URL: lambda instance, target: (
-            instance.get_url(target, instance.port.host.ip, instance.port.port, instance.clean_path(instance.path))
-        )
-        if instance.port and instance.port.host
-        else None,
+            (instance.get_url(target, instance.port.host.ip, instance.port.port, instance.clean_path(instance.path)))
+            if instance.port and instance.port.host
+            else None
+        ),
     }
     _parse_dependencies = ["port"]
-    _defectdojo_finding_mapping = {
-        "title": "Path discovered",
-        "description": lambda instance: "\n".join(
-            [
-                f"{k}: {v}"
-                for k, v in [
-                    ("Host", instance.port.host.ip if instance.port and instance.port.host else None),
-                    ("Port", instance.port.port if instance.port else None),
-                    ("Path", instance.path),
-                    ("Type", instance.type),
-                    ("Status", instance.status),
-                    ("Info", instance.extra_info),
-                ]
-                if v
-            ]
-        ),
-        "severity": Severity.INFO,
-    }
     _defectdojo_endpoint_mapping = {
-        "protocol": lambda instance, target: instance.port.service if instance.port else None,
-        "host": lambda instance, target: instance.port.host.ip
-        if instance.port and instance.port.host
-        else target.target,
-        "port": lambda instance, target: instance.port.port if instance.port else None,
+        "protocol": lambda instance: instance.port.service if instance.port else None,
+        "host": lambda instance: instance.port.host.ip if instance.port and instance.port.host else None,
+        "port": lambda instance: instance.port.port if instance.port else None,
         "path": "path",
     }
 
@@ -415,8 +409,10 @@ class Technology(Finding):
     _parse_dependencies = ["port"]
     _defectdojo_finding_mapping = {
         "title": lambda instance: f"Technology {instance.name} detected",
-        "description": lambda instance: (f"{instance.description}\n\n" if instance.description else "")
-        + "\n".join([f"{k}: {v}" for k, v in [("Technology", instance.name), ("Version", instance.version)] if v]),
+        "description": lambda instance: (
+            (f"{instance.description}\n\n" if instance.description else "")
+            + "\n".join([f"{k}: {v}" for k, v in [("Technology", instance.name), ("Version", instance.version)] if v])
+        ),
         "severity": Severity.LOW,
         "cwe": 200,  # CWE-200: Exposure of Sensitive Information to Unauthorized Actor
         "references": "reference",
@@ -504,7 +500,12 @@ class Vulnerability(TriageFinding):
         cvss_vector (TextField): CVSS vector string for detailed scoring (optional, max 200 characters)
         cvss_base_score (FloatField): CVSS base score numerical value (optional)
         cve (TextField): Common Vulnerabilities and Exposures identifier (optional, max 20 characters)
-        cwe (TextField): Common Weakness Enumeration classification (optional, max 20 characters)
+        euvd_id (TextField): ENISA EUVD identifier (optional, max 30 characters)
+        ghsa_id (TextField): GitHub Security Advisory identifier (optional, max 30 characters)
+        osv_generic_id (TextField): OSV-native identifier for non-CVE/GHSA/EUVD ecosystems (optional, max 100 characters)
+        cwes (JSONField): Sorted list of CWE identifiers (e.g. ["CWE-79", "CWE-200"])
+        epss_score (FloatField): EPSS probability of exploitation in 30 days (optional, 0.0–1.0)
+        epss_percentile (FloatField): EPSS percentile rank among all scored CVEs (optional, 0.0–1.0)
         remediation (TextField): Recommended remediation steps or mitigation guidance (optional)
         reference (TextField): Security advisory or documentation links (optional, max 250 characters)
         trending (BooleanField): Active exploitation or trending status indicator (default: False)
@@ -549,8 +550,13 @@ class Vulnerability(TriageFinding):
     cvss_version = models.TextField(max_length=3, blank=True, null=True)
     cvss_vector = models.TextField(max_length=200, blank=True, null=True)
     cvss_base_score = models.FloatField(blank=True, null=True)
-    cve = models.TextField(max_length=20, blank=True, null=True)
-    cwe = models.TextField(max_length=20, blank=True, null=True)
+    cve = models.TextField(max_length=30, blank=True, null=True)
+    euvd_id = models.TextField(max_length=30, blank=True, null=True)
+    ghsa_id = models.TextField(max_length=30, blank=True, null=True)
+    osv_generic_id = models.TextField(max_length=100, blank=True, null=True)
+    cwes = models.JSONField(default=list, blank=True)
+    epss_score = models.FloatField(blank=True, null=True)
+    epss_percentile = models.FloatField(blank=True, null=True)
     remediation = models.TextField(blank=True, null=True)
     reference = models.TextField(max_length=250, blank=True, null=True)
     trending = models.BooleanField(default=False)
@@ -559,7 +565,7 @@ class Vulnerability(TriageFinding):
     _filters = [
         Finding.Filter(Severity, "severity"),
         Finding.Filter(str, "cve", contains=True, processor=lambda c: c.lower()),
-        Finding.Filter(str, "cwe", contains=True, processor=lambda c: c.lower()),
+        Finding.Filter(str, "cwes", contains=True, processor=lambda cwes: " ".join(c.lower() for c in (cwes or []))),
     ]
     _parse_mapping = {InputKeyword.CVE: "cve"}
     _parse_dependencies = ["technology", "port"]
@@ -568,7 +574,20 @@ class Vulnerability(TriageFinding):
         "description": "description",
         "severity": "severity",
         "cve": "cve",
-        "cwe": lambda instance: int(instance.cwe.split("-", 1)[1]) if instance.cwe else None,
+        "cwe": lambda instance: int(instance.cwes[-1].split("-", 1)[1]) if instance.cwes else None,
+        "cvss3": lambda instance: (
+            instance.cvss_vector if instance.cvss_version and instance.cvss_version.startswith("3") else None
+        ),
+        "cvss3_score": lambda instance: (
+            instance.cvss_base_score if instance.cvss_version and instance.cvss_version.startswith("3") else None
+        ),
+        "cvss4": lambda instance: (
+            instance.cvss_vector if instance.cvss_version and instance.cvss_version.startswith("4") else None
+        ),
+        "cvss4_score": lambda instance: (
+            instance.cvss_base_score if instance.cvss_version and instance.cvss_version.startswith("4") else None
+        ),
+        "mitigation": "remediation",
         "references": "reference",
     }
 

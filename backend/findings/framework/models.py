@@ -13,7 +13,6 @@ from django.db.models import (
     BooleanField,
     DateTimeField,
     ForeignKey,
-    IntegerField,
     Manager,
     ManyToManyField,
     QuerySet,
@@ -27,7 +26,6 @@ from framework.models import BaseInput
 from projects.models import Project
 from rekono.settings import AUTH_USER_MODEL
 from security.validators.input_validator import Regex, Validator
-from targets.models import Target
 
 
 class FindingManager(Manager):
@@ -83,7 +81,7 @@ class FindingManager(Manager):
             findings.fixed_by = fixed_by
             findings.save(update_fields=["is_fixed", "auto_fixed", "fixed_date", "fixed_by"])
         else:
-            findings = findings.update(
+            findings.update(
                 is_fixed=True,
                 auto_fixed=fixed_by is None,
                 fixed_date=timezone.now(),
@@ -171,8 +169,7 @@ class Finding(BaseInput):
 
     Provides common functionality for all finding types including fixing status
     tracking, DefectDojo integration, relationship management, and automatic
-    lifecycle operations with execution history. Enhanced with user input tracking
-    for distinguishing between tool-discovered and user-input-based findings.
+    lifecycle operations with execution history.
 
     Attributes:
         executions (ManyToManyField): Related executions that discovered this finding.
@@ -180,9 +177,8 @@ class Finding(BaseInput):
         auto_fixed (BooleanField): Whether finding was automatically fixed (default: False).
         fixed_date (DateTimeField): Timestamp when finding was fixed (optional).
         fixed_by (ForeignKey): User who fixed the finding (optional).
-        defectdojo_id (IntegerField): DefectDojo platform identifier (optional).
         hacktricks_link (TextField): HackTricks documentation link (optional, max 300 chars).
-        created_from_user_input (BooleanField): Whether finding was created based on an user input (default: False).
+        created_from_user_input (BooleanField): Whether finding was created from user input (default: False).
     """
 
     executions = ManyToManyField(Execution, related_name="%(class)s")
@@ -190,7 +186,6 @@ class Finding(BaseInput):
     auto_fixed = BooleanField(default=False)
     fixed_date = DateTimeField(blank=True, null=True)
     fixed_by = ForeignKey(AUTH_USER_MODEL, related_name="fixed_%(class)s", on_delete=SET_NULL, blank=True, null=True)
-    defectdojo_id = IntegerField(blank=True, null=True)
     hacktricks_link = TextField(max_length=300, blank=True, null=True)
     created_from_user_input = BooleanField(default=False)
 
@@ -215,15 +210,15 @@ class Finding(BaseInput):
         """
         return self.executions.first().task.target.project
 
-    def _apply_defectdojo_mapping(self, mapping: dict[str, Any], target: Target | None = None) -> dict[str, Any]:
+    def _apply_defectdojo_mapping(self, mapping: dict[str, Any]) -> dict[str, Any]:
         """Apply DefectDojo field mapping to finding data.
 
-        Processes finding data according to DefectDojo mapping configuration
-        supporting both static values and callable transformations.
+        Processes finding fields according to the mapping configuration. Callable
+        values are invoked with the finding instance; string values are resolved
+        as attribute names; all other values are used as-is.
 
         Args:
             mapping (dict[str, Any]): Field mapping configuration dictionary.
-            target (Target | None): Optional target for context-aware mapping.
 
         Returns:
             dict[str, Any]: Processed data dictionary for DefectDojo integration.
@@ -231,7 +226,7 @@ class Finding(BaseInput):
         data = {}
         for key, value in mapping.items():
             if callable(value):
-                data[key] = value(self, target) if target else value(self)
+                data[key] = value(self)
             else:
                 if isinstance(value, str) and hasattr(self, value):
                     data[key] = getattr(self, value)
@@ -248,21 +243,31 @@ class Finding(BaseInput):
         Returns:
             dict[str, Any]: DefectDojo-formatted finding data.
         """
-        return self._apply_defectdojo_mapping(self._defectdojo_finding_mapping)
+        default_mapping = {"active": lambda instance: not instance.is_fixed, "is_mitigated": "is_fixed"}
+        if hasattr(self, "triage_status"):
+            default_mapping.update(
+                {
+                    "active": lambda instance: (
+                        not instance.is_fixed
+                        and instance.triage_status in [TriageStatus.UNTRIAGED, TriageStatus.TRUE_POSITIVE]
+                    ),
+                    "verified": lambda instance: instance.triage_status == TriageStatus.TRUE_POSITIVE,
+                    "false_p": lambda instance: instance.triage_status == TriageStatus.FALSE_POSITIVE,
+                    "risk_accepted": lambda instance: instance.triage_status == TriageStatus.WONT_FIX,
+                }
+            )
+        return self._apply_defectdojo_mapping({**self._defectdojo_finding_mapping, **default_mapping})
 
-    def defectdojo_endpoint(self, target: Target) -> dict[str, Any]:
+    def defectdojo_endpoint(self) -> dict[str, Any]:
         """Generate DefectDojo endpoint data for platform integration.
 
         Creates formatted endpoint data suitable for DefectDojo platform
         integration using the configured endpoint mapping.
 
-        Args:
-            target (Target): Target context for endpoint configuration.
-
         Returns:
             dict[str, Any]: DefectDojo-formatted endpoint data.
         """
-        return self._apply_defectdojo_mapping(self._defectdojo_endpoint_mapping, target)
+        return self._apply_defectdojo_mapping(self._defectdojo_endpoint_mapping)
 
     def __str__(self) -> str:
         """String representation of the finding.

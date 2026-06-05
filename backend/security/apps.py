@@ -21,3 +21,14 @@ class SecurityConfig(BaseApp, AppConfig):
     """
 
     name = "security"
+
+    def ready(self) -> None:
+        """Initialise the security application after the app registry is loaded.
+
+        Calls the base class setup and then imports the OpenAPI extension
+        module so that drf-spectacular discovers CookieJWTAuthenticationScheme.
+        The import must happen here rather than at module level to ensure the
+        app registry is fully populated before drf-spectacular introspects it.
+        """
+        super().ready()
+        import security.authentication.openapi  # noqa: F401

@@ -82,7 +82,7 @@ class Cmseek(BaseParser):
                             name=vulnerability_name,
                             description=", ".join(paths),
                             severity=severity,
-                            cwe=cwe,
+                            cwes=[cwe],
                         )
             elif "_users" in key and value != "disabled":
                 for user in value.split(","):
@@ -102,7 +102,7 @@ class Cmseek(BaseParser):
                     name="Debug mode enabled",
                     description=f"{cms.name} debug mode enabled",
                     severity=Severity.LOW,
-                    cwe="CWE-489",  # CWE-489: Active Debug Code
+                    cwes=["CWE-489"],  # CWE-489: Active Debug Code
                 )
             elif "_vulns" in key and "vulnerabilities" in value:
                 for vulnerability in value["vulnerabilities"]:

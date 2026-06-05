@@ -56,4 +56,12 @@ class ExecutionFilter(FilterSet):
             "enqueued_at": ["gte", "lte", "exact"],
             "start": ["gte", "lte", "exact"],
             "end": ["gte", "lte", "exact"],
+            "osint": ["exact"],
+            "host": ["exact"],
+            "port": ["exact"],
+            "path": ["exact"],
+            "technology": ["exact"],
+            "credential": ["exact"],
+            "vulnerability": ["exact"],
+            "exploit": ["exact"],
         }

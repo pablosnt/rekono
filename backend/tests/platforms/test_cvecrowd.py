@@ -4,10 +4,11 @@ from unittest import mock
 
 from django.test import TestCase
 
-from alerts.enums import AlertItem, AlertMode
+from alerts.enums import AlertItem
 from alerts.models import Alert
 from findings.enums import Severity
 from findings.models import Vulnerability
+from integrations.models import Integration
 from platforms.cvecrowd.integrations import CveCrowd
 from platforms.cvecrowd.models import CveCrowdSettings
 from security.authorization.roles import Role
@@ -43,10 +44,13 @@ class CveCrowdTest(BaseTest, TestCase):
         )
         self.not_trending.executions.add(self.execution)
         self.trending.executions.add(self.execution)
+        integration = Integration.objects.get(key="cvecrowd")
+        integration.enabled = True
+        integration.save(update_fields=["enabled"])
         self.settings = CveCrowdSettings.objects.first()
         self.settings.secret = "fake-token"
         self.settings.save(update_fields=["_api_token"])
-        Alert.objects.create(project=self.project, item=AlertItem.CVE, mode=AlertMode.MONITOR, enabled=True)
+        Alert.objects.create(project=self.project, item=AlertItem.TRENDING_CVE, value=str(True), enabled=True)
         self.cvecrowd = CveCrowd()
 
     @mock.patch("platforms.cvecrowd.integrations.CveCrowd._request", success)
@@ -54,6 +58,8 @@ class CveCrowdTest(BaseTest, TestCase):
         self.cvecrowd.process_findings(self.execution, [self.trending, self.not_trending])
         self.assertTrue(Vulnerability.objects.get(pk=self.trending.id).trending)
         self.assertFalse(Vulnerability.objects.get(pk=self.not_trending.id).trending)
+        # Rerun to force cache usage
+        CveCrowd().process_findings(self.execution, [self.trending, self.not_trending])
 
     @mock.patch("platforms.cvecrowd.integrations.CveCrowd._request", not_found)
     def test_process_findings_not_found(self) -> None:
@@ -84,19 +90,22 @@ class CveCrowdTest(BaseTest, TestCase):
 
     @mock.patch("platforms.cvecrowd.integrations.CveCrowd._request", success)
     def test_is_available(self) -> None:
-        self.assertTrue(self.cvecrowd.is_available())
+        self.assertTrue(self.cvecrowd.live_is_available())
 
     @mock.patch("platforms.cvecrowd.integrations.CveCrowd._request", not_found)
     def test_is_not_available_1(self) -> None:
-        self.assertFalse(self.cvecrowd.is_available())
+        self.assertFalse(self.cvecrowd.live_is_available())
 
     @mock.patch("platforms.cvecrowd.integrations.CveCrowd._request", exception)
     def test_is_not_available_2(self) -> None:
+        self.assertFalse(self.cvecrowd.live_is_available())
+
+    def test_cached_is_available(self) -> None:
         self.assertFalse(self.cvecrowd.is_available())
 
 
-new_settings = {"api_token": "cve-crowd-token", "trending_span_days": 3, "execute_per_execution": False}
-invalid_settings = {**new_settings, "trending_span_days": 10}
+new_settings = {"api_token": "cve-crowd-token", "trending_span_days": 7, "execute_per_execution": False}
+invalid_settings = {**new_settings, "trending_span_days": 50}
 
 
 class CveCrowdSettingsTest(ApiTestNoData, TestCase):
@@ -106,7 +115,7 @@ class CveCrowdSettingsTest(ApiTestNoData, TestCase):
         ApiTestCase([Role.AUDITOR, Role.READER], 403),
         ApiTestCase(
             [Role.ADMIN],
-            expected={"id": 1, "api_token": None, "trending_span_days": 7, "execute_per_execution": True},
+            expected={"id": 1, "api_token": None, "trending_span_days": 1, "execute_per_execution": True},
         ),
         PutApiTestCase([Role.AUDITOR, Role.READER], 403, new_settings),
         PutApiTestCase([Role.ADMIN], 400, invalid_settings),

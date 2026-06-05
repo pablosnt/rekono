@@ -77,7 +77,7 @@ class Joomscan(BaseParser):
                     name="Debug mode enabled",
                     description="Joomla debug mode enabled",
                     severity=Severity.LOW,
-                    cwe="CWE-489",  # CWE-489: Active Debug Code
+                    cwes=["CWE-489"],  # CWE-489: Active Debug Code
                 )
 
             elif host in data:
@@ -111,5 +111,5 @@ class Joomscan(BaseParser):
                     name=name,
                     description=", ".join(paths),
                     severity=severity,
-                    cwe=cwe,
+                    cwes=[cwe],
                 )

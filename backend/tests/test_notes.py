@@ -10,11 +10,11 @@ from tests.framework.data import SetupProject
 
 # pytype: disable=wrong-arg-types
 
+# Model field values for direct DB creation
 private_note = {
     "project": 1,
     "target": None,
     "task": None,
-    "execution": None,
     "osint": None,
     "host": None,
     "port": None,
@@ -28,8 +28,31 @@ private_note = {
     "tags": ["test"],
     "public": False,
 }
-public_note = {**private_note, "public": True, "target": 1}
-invalid_note = {**private_note, "title": "Invalid;content"}
+
+# API request data for write operations: entity associations use *_id fields
+private_note_data = {
+    "project": 1,
+    "target_id": None,
+    "task_id": None,
+    "osint_id": None,
+    "host_id": None,
+    "port_id": None,
+    "path_id": None,
+    "credential_id": None,
+    "technology_id": None,
+    "vulnerability_id": None,
+    "exploit_id": None,
+    "title": "Title",
+    "body": "Important things to remember",
+    "tags": ["test"],
+    "public": False,
+}
+public_note_data = {**private_note_data, "public": True, "target_id": 1}
+invalid_note_data = {**private_note_data, "title": "Invalid;content"}
+
+# Expected API response data for read operations: entity associations are nested objects
+private_note_expected = {k.replace("_id", ""): v for k, v in private_note_data.items()}
+public_note_expected = {**private_note_expected, "public": True, "target": {"id": 1}}
 
 
 class NoteTest(ApiTest, TestCase):
@@ -38,17 +61,17 @@ class NoteTest(ApiTest, TestCase):
     data = [SetupProject(executions_per_task=0), SetupProject(executions_per_task=0)]
     cases = [
         ApiTestCase([Role.ADMIN, Role.AUDITOR, Role.READER]),
-        PostApiTestCase(["admin2", "auditor2", Role.READER], 403, private_note),
-        PostApiTestCase(["admin2", "auditor2", Role.READER], 403, public_note),
-        PostApiTestCase(["admin1", "auditor1"], 400, invalid_note),
-        PostApiTestCase(["admin1"], 400, {**private_note, "project": None}),
-        PostApiTestCase(["admin1"], 400, {**public_note, "project": None, "target": None}),
+        PostApiTestCase(["admin2", "auditor2", Role.READER], 403, private_note_data),
+        PostApiTestCase(["admin2", "auditor2", Role.READER], 403, public_note_data),
+        PostApiTestCase(["admin1", "auditor1"], 400, invalid_note_data),
+        PostApiTestCase(["admin1"], 400, {**private_note_data, "project": None}),
+        PostApiTestCase(["admin1"], 400, {**public_note_data, "project": None, "target_id": None}),
         PostApiTestCase(
             ["admin1"],
-            data=private_note,
+            data=private_note_data,
             expected={
                 "id": 1,
-                **private_note,
+                **private_note_expected,
                 "forked_from": None,
                 "forks": [],
                 "owner": {"id": 1, "username": "admin1"},
@@ -56,10 +79,10 @@ class NoteTest(ApiTest, TestCase):
         ),
         PostApiTestCase(
             ["auditor1"],
-            data=public_note,
+            data=public_note_data,
             expected={
                 "id": 2,
-                **public_note,
+                **public_note_expected,
                 "forked_from": None,
                 "forks": [],
                 "owner": {"id": 3, "username": "auditor1"},
@@ -69,14 +92,32 @@ class NoteTest(ApiTest, TestCase):
         ApiTestCase(
             ["admin1"],
             expected=[
-                {"id": 2, **public_note, "forked_from": None, "forks": [], "owner": {"id": 3, "username": "auditor1"}},
-                {"id": 1, **private_note, "forked_from": None, "forks": [], "owner": {"id": 1, "username": "admin1"}},
+                {
+                    "id": 2,
+                    **public_note_expected,
+                    "forked_from": None,
+                    "forks": [],
+                    "owner": {"id": 3, "username": "auditor1"},
+                },
+                {
+                    "id": 1,
+                    **private_note_expected,
+                    "forked_from": None,
+                    "forks": [],
+                    "owner": {"id": 1, "username": "admin1"},
+                },
             ],
         ),
         ApiTestCase(
             ["auditor1", "reader1"],
             expected=[
-                {"id": 2, **public_note, "forked_from": None, "forks": [], "owner": {"id": 3, "username": "auditor1"}}
+                {
+                    "id": 2,
+                    **public_note_expected,
+                    "forked_from": None,
+                    "forks": [],
+                    "owner": {"id": 3, "username": "auditor1"},
+                }
             ],
         ),
         PostApiTestCase([Role.READER], 403, endpoint="2/fork"),
@@ -86,7 +127,7 @@ class NoteTest(ApiTest, TestCase):
             ["admin1"],
             expected={
                 "id": 3,
-                **public_note,
+                **public_note_expected,
                 "public": False,
                 "forked_from": 2,
                 "forks": [],
@@ -99,31 +140,49 @@ class NoteTest(ApiTest, TestCase):
             expected=[
                 {
                     "id": 3,
-                    **public_note,
+                    **public_note_expected,
                     "public": False,
                     "forked_from": 2,
                     "forks": [],
                     "owner": {"id": 1, "username": "admin1"},
                 },
-                {"id": 2, **public_note, "forked_from": None, "forks": [3], "owner": {"id": 3, "username": "auditor1"}},
-                {"id": 1, **private_note, "forked_from": None, "forks": [], "owner": {"id": 1, "username": "admin1"}},
+                {
+                    "id": 2,
+                    **public_note_expected,
+                    "forked_from": None,
+                    "forks": [3],
+                    "owner": {"id": 3, "username": "auditor1"},
+                },
+                {
+                    "id": 1,
+                    **private_note_expected,
+                    "forked_from": None,
+                    "forks": [],
+                    "owner": {"id": 1, "username": "admin1"},
+                },
             ],
         ),
         ApiTestCase(
             ["auditor1", "reader1"],
             expected=[
-                {"id": 2, **public_note, "forked_from": None, "forks": [3], "owner": {"id": 3, "username": "auditor1"}},
+                {
+                    "id": 2,
+                    **public_note_expected,
+                    "forked_from": None,
+                    "forks": [3],
+                    "owner": {"id": 3, "username": "auditor1"},
+                },
             ],
         ),
-        PutApiTestCase(["admin2", Role.AUDITOR], 404, public_note, endpoint="1"),
-        PutApiTestCase([Role.READER], 403, public_note, endpoint="1"),
-        PutApiTestCase(["admin1"], 400, {**public_note, "target": 2}, endpoint="1"),
+        PutApiTestCase(["admin2", Role.AUDITOR], 404, public_note_data, endpoint="1"),
+        PutApiTestCase([Role.READER], 403, public_note_data, endpoint="1"),
+        PutApiTestCase(["admin1"], 400, {**public_note_data, "target_id": 2}, endpoint="1"),
         PutApiTestCase(
             ["admin1"],
-            data=public_note,
+            data=public_note_data,
             expected={
                 "id": 1,
-                **public_note,
+                **public_note_expected,
                 "forked_from": None,
                 "forks": [],
                 "owner": {"id": 1, "username": "admin1"},
@@ -135,7 +194,7 @@ class NoteTest(ApiTest, TestCase):
             ["members"],
             expected={
                 "id": 1,
-                **public_note,
+                **public_note_expected,
                 "forked_from": None,
                 "forks": [],
                 "owner": {"id": 1, "username": "admin1"},
@@ -144,10 +203,10 @@ class NoteTest(ApiTest, TestCase):
         ),
         PutApiTestCase(
             ["admin1"],
-            data={**public_note, "public": True},
+            data={**public_note_data, "public": True},
             expected={
                 "id": 3,
-                **public_note,
+                **public_note_expected,
                 "public": False,
                 "forked_from": 2,
                 "forks": [],
@@ -157,10 +216,10 @@ class NoteTest(ApiTest, TestCase):
         ),
         PutApiTestCase(
             ["auditor1"],
-            data={**public_note, "public": False},
+            data={**public_note_data, "public": False},
             expected={
                 "id": 2,
-                **public_note,
+                **public_note_expected,
                 "public": False,
                 "forked_from": None,
                 "forks": [],
@@ -172,7 +231,7 @@ class NoteTest(ApiTest, TestCase):
             ["admin1"],
             expected={
                 "id": 3,
-                **public_note,
+                **public_note_expected,
                 "public": False,
                 "forked_from": None,
                 "forks": [],
@@ -182,10 +241,10 @@ class NoteTest(ApiTest, TestCase):
         ),
         PutApiTestCase(
             ["admin1"],
-            data={**public_note, "public": True},
+            data={**public_note_data, "public": True},
             expected={
                 "id": 3,
-                **public_note,
+                **public_note_expected,
                 "public": True,
                 "forked_from": None,
                 "forks": [],
@@ -197,7 +256,7 @@ class NoteTest(ApiTest, TestCase):
             ["members"],
             expected={
                 "id": 3,
-                **public_note,
+                **public_note_expected,
                 "public": True,
                 "forked_from": None,
                 "forks": [],

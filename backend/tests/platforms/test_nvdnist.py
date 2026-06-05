@@ -16,41 +16,38 @@ from tests.framework.data import SetupProject
 # pytype: disable=wrong-arg-types
 
 data = {
-    "vulnerabilities": [
-        {
-            "cve": {
-                "descriptions": [{"lang": "en", "value": "description"}],
-                "weaknesses": [
-                    {"type": "Whatever", "description": [{"lang": "en", "value": "CWE-100"}]},
-                    {"type": "Primary", "description": [{"lang": "en", "value": "CWE-200"}]},
-                    {"type": "Secondary", "description": [{"lang": "en", "value": "CWE-300"}]},
-                ],
-                "metrics": {},
+    "cisaVulnerabilityName": "Log4Shell RCE",
+    "vulnStatus": "Modified",
+    "descriptions": [{"lang": "en", "value": "Remote code execution via JNDI lookup in Log4j2"}],
+    "weaknesses": [
+        {"type": "Primary", "description": [{"value": "CWE-917", "lang": "en"}]},
+    ],
+    "metrics": {
+        "cvssMetricV31": [
+            {
+                "type": "Primary",
+                "cvssData": {
+                    "baseScore": 10.0,
+                    "version": "3.1",
+                    "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H",
+                },
             }
-        }
-    ]
+        ]
+    },
+    "configurations": [{"nodes": [{"cpeMatch": [{"criteria": "cpe:2.3:a:apache:log4j:*:*:*:*:*:*:*:*"}]}]}],
 }
 
 
-def _success(impact_value: dict[str, Any]) -> dict[str, Any]:
-    data["vulnerabilities"][0]["cve"]["metrics"] = impact_value
-    return data
+def _mock_request_success(*args: Any, **kwargs: Any) -> dict[str, Any]:
+    return {"vulnerabilities": [{"cve": data}]}
 
 
-def success_cvss_3(*args: Any, **kwargs: Any) -> dict[str, Any]:
-    return _success({"cvssMetricV31": [{"type": "Primary", "cvssData": {"baseScore": 9}}]})
+def _mock_request_not_scheduled(*args: Any, **kwargs: Any) -> dict[str, Any]:
+    return {"vulnerabilities": [{"cve": {**data, "vulnStatus": "Deferred"}}]}
 
 
-def success_cvss_2(*args: Any, **kwargs: Any) -> dict[str, Any]:
-    return _success({"cvssMetricV2": [{"type": "Primary", "cvssData": {"baseScore": 8}}]})
-
-
-def success_empty(*args: Any, **kwargs: Any) -> dict[str, Any]:
+def _mock_request_empty(*args: Any, **kwargs: Any) -> dict[str, Any]:
     return {"vulnerabilities": []}
-
-
-def not_found(*args: Any, **kwargs: Any) -> dict:
-    raise Exception("CVE not found")
 
 
 class NvdNistTest(BaseTest, TestCase):
@@ -59,7 +56,7 @@ class NvdNistTest(BaseTest, TestCase):
     def setUp(self) -> None:
         super().setUp()
         self.vulnerability = Vulnerability.objects.create(
-            name="test", description="test", cve="CVE-2023-1111", severity=Severity.LOW
+            name="test", description="test", cve="CVE-2021-44228", severity=Severity.LOW
         )
         self.vulnerability.executions.add(self.execution)
         self.settings = NvdNistSettings.objects.first()
@@ -67,50 +64,54 @@ class NvdNistTest(BaseTest, TestCase):
         self.settings.save(update_fields=["_api_token"])
         self.nvdnist = NvdNist()
 
-    def _test(
-        self,
-        severity: Severity,
-        reference: str | None = None,
-        cwe: str | None = "CWE-200",
-        description: str = "description",
-    ) -> None:
-        self.nvdnist.process_finding(self.execution, self.vulnerability)
-        self.assertEqual(reference, self.vulnerability.reference)
-        self.assertEqual(cwe, self.vulnerability.cwe)
-        self.assertEqual(description, self.vulnerability.description)
-        self.assertEqual(severity, self.vulnerability.severity)
+    @mock.patch("platforms.nvdnist.integrations.NvdNist._request", _mock_request_success)
+    def test_enrichment(self) -> None:
+        # Retrieval
+        enrichment = self.nvdnist.get_cve(self.vulnerability.cve)
+        self.assertIsNotNone(enrichment)
+        self.assertEqual(data["cisaVulnerabilityName"], enrichment.name)
+        self.assertEqual(data["descriptions"][0]["value"], enrichment.description)
+        self.assertEqual([data["weaknesses"][0]["description"][0]["value"]], enrichment.cwes)
+        self.assertEqual(data["metrics"]["cvssMetricV31"][0]["cvssData"]["baseScore"], enrichment.cvss_base_score)
+        self.assertEqual(data["metrics"]["cvssMetricV31"][0]["cvssData"]["version"], enrichment.cvss_version)
+        self.assertEqual(data["metrics"]["cvssMetricV31"][0]["cvssData"]["vectorString"], enrichment.cvss_vector)
+        self.assertIsNone(enrichment.epss_score)
+        self.assertIsNone(enrichment.epss_percentile)
+        self.assertEqual([data["configurations"][0]["nodes"][0]["cpeMatch"][0]["criteria"]], enrichment.technologies)
+        self.assertEqual(self.nvdnist.reference.format(cve=self.vulnerability.cve), enrichment.reference)
+        self.assertEqual(data["vulnStatus"], enrichment.status)
 
-    @mock.patch("platforms.nvdnist.integrations.NvdNist._request", success_cvss_3)
-    def test_integration_cvss_3(self) -> None:
-        self._test(Severity.CRITICAL, self.nvdnist.reference.format(cve=self.vulnerability.cve))
+        # Quality Score
+        self.assertEqual(6, self.nvdnist.cve_quality_score(enrichment))
 
-    @mock.patch("platforms.nvdnist.integrations.NvdNist._request", success_cvss_2)
-    def test_integration_cvss_2(self) -> None:
-        self.settings.secret = None
-        self.settings.save(update_fields=["_api_token"])
-        self._test(Severity.HIGH, self.nvdnist.reference.format(cve=self.vulnerability.cve))
+        # Save
+        self.nvdnist.save(self.vulnerability, enrichment)
+        vuln = Vulnerability.objects.get(pk=self.vulnerability.pk)
+        self.assertEqual(Severity.CRITICAL, vuln.severity)
+        self.assertEqual(enrichment.name, vuln.name)
+        self.assertEqual(enrichment.description, vuln.description)
+        self.assertEqual(enrichment.cvss_base_score, vuln.cvss_base_score)
+        self.assertEqual(enrichment.cvss_vector, vuln.cvss_vector)
+        self.assertEqual(enrichment.cvss_version, vuln.cvss_version)
+        self.assertEqual(enrichment.cwes, vuln.cwes)
+        self.assertIsNone(vuln.epss_score)
+        self.assertIsNone(vuln.epss_percentile)
+        self.assertEqual(enrichment.reference, vuln.reference)
 
-    @mock.patch("platforms.nvdnist.integrations.NvdNist._request", not_found)
-    def test_integration_not_found(self) -> None:
-        self._test(Severity.LOW, None, None, "test")
+    @mock.patch("platforms.nvdnist.integrations.NvdNist._request", _mock_request_not_scheduled)
+    def test_not_scheduled(self) -> None:
+        e = self.nvdnist.get_cve(self.vulnerability.cve)
+        self.assertEqual("Deferred", e.status)
+        self.assertEqual(0, self.nvdnist.cve_quality_score(e))
 
-    @mock.patch("platforms.nvdnist.integrations.NvdNist._request", success_empty)
-    def test_integration_empty(self) -> None:
-        self._test(Severity.LOW, None, None, "test")
+    @mock.patch("platforms.nvdnist.integrations.NvdNist._request", _mock_request_success)
+    def test_is_available(self) -> None:
+        self.assertTrue(self.nvdnist.is_available())
 
-    @mock.patch("platforms.nvdnist.integrations.NvdNist._request", success_cvss_3)
-    def test_is_api_token_available(self) -> None:
-        self.assertTrue(self.nvdnist.is_api_token_available)
-
-    @mock.patch("platforms.nvdnist.integrations.NvdNist._request", success_cvss_3)
-    def test_is_api_token_not_available_1(self) -> None:
-        self.settings.secret = None
-        self.settings.save(update_fields=["_api_token"])
-        self.assertFalse(self.nvdnist.is_api_token_available)
-
-    @mock.patch("platforms.nvdnist.integrations.NvdNist._request", not_found)
-    def test_is_api_token_not_available_2(self) -> None:
-        self.assertFalse(self.nvdnist.is_api_token_available)
+    @mock.patch("platforms.nvdnist.integrations.NvdNist._request", _mock_request_empty)
+    def test_is_not_available(self) -> None:
+        self.assertFalse(self.nvdnist.is_available())
+        self.assertIsNone(self.nvdnist.get_cve(self.vulnerability.cve))
 
 
 new_settings = {"api_token": "nvd-nist-token"}

@@ -1,6 +1,6 @@
 """Enums for alert configuration and management.
 
-Defines enumeration classes for alert types, modes, and configuration options
+Defines enumeration classes for alert types and configuration options
 used throughout the alerts system.
 """
 
@@ -22,6 +22,7 @@ class AlertItem(TextChoices):
         CREDENTIAL (str): Credential discovery findings
         VULNERABILITY (str): General vulnerability findings
         CVE (str): Common Vulnerabilities and Exposures findings
+        TRENDING_CVE (str): Trending CVE findings from monitoring
     """
 
     OSINT = "OSINT"
@@ -32,25 +33,9 @@ class AlertItem(TextChoices):
     CREDENTIAL = "Credential"
     VULNERABILITY = "Vulnerability"
     CVE = "CVE"
-
-
-class AlertMode(TextChoices):
-    """Enumeration of alert trigger modes.
-
-    Defines how alerts can be configured to trigger based on findings.
-
-    Attributes:
-        NEW (str): Alert triggers when a new finding is discovered
-        FILTER (str): Alert triggers when a finding matches specific criteria
-        MONITOR (str): Alert triggers for trending or status changes
-    """
-
-    NEW = "New"
-    FILTER = "Filter"
-    MONITOR = "Monitor"
+    TRENDING_CVE = "Trending CVE"
 
 
 # Type annotation workaround for pytype compatibility
 # See: https://github.com/google/pytype/issues/1048
 AlertItem: type[Choices] = AlertItem
-AlertMode: type[Choices] = AlertMode

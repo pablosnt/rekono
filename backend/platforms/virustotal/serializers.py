@@ -5,7 +5,7 @@ and configuration management through REST API endpoints. Supports secure
 handling of API credentials and real-time platform availability checking.
 """
 
-from rest_framework.serializers import ModelSerializer, SerializerMethodField
+from rest_framework.serializers import ModelSerializer
 
 from framework.fields import ProtectedSecretField
 from platforms.virustotal.integrations import VirusTotal
@@ -22,39 +22,29 @@ class VirusTotalSettingsSerializer(ModelSerializer):
     Attributes:
         api_token (ProtectedSecretField): Secure API token field with
                                           encryption
-        is_available (SerializerMethodField): Real-time platform availability
-                                              status
-        client (VirusTotal): Integration client for availability checking
     """
 
     api_token = ProtectedSecretField(required=False, allow_null=True, source="secret")
-    is_available = SerializerMethodField(read_only=True)
-    client = VirusTotal()
 
     class Meta:
-        """Serializer metadata configuration.
-
-        Defines the model and fields for VirusTotal settings serialization.
-        Includes platform configuration ID, encrypted API token, and real-time
-        availability status for comprehensive platform management.
-        """
-
         model = VirusTotalSettings
         fields = ("id", "api_token", "is_available")
+        read_only_fields = ("is_available",)
 
-    def get_is_available(self, instance: VirusTotalSettings) -> bool:
-        """Get real-time availability status of the VirusTotal platform.
+    def update(self, instance, validated_data):
+        """Update VirusTotal settings and refresh the platform availability status.
 
-        Checks if the VirusTotal platform is currently accessible and
-        responsive
-        by performing a test API request with the configured credentials.
+        Delegates to the parent update method, then performs a live API check to
+        update the is_available field in the database.
 
         Args:
-            instance (VirusTotalSettings): The settings instance being
-                                          serialized
+            instance (VirusTotalSettings): The settings instance to update.
+            validated_data (dict): Validated data from the request.
 
         Returns:
-            bool: True if VirusTotal is available and accessible, False
-                  otherwise
+            VirusTotalSettings: The updated settings instance.
         """
-        return self.client.is_available()
+        instance = super().update(instance, validated_data)
+        instance.is_available = VirusTotal().live_is_available()
+        instance.save(update_fields=["is_available"])
+        return instance

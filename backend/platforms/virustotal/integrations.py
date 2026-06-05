@@ -6,7 +6,6 @@ assessment for discovered hosts and domains. The integration automatically proce
 Host findings to enrich them with comprehensive threat intelligence data.
 """
 
-from functools import cached_property
 from typing import Any, Callable
 
 from executions.models import Execution
@@ -41,7 +40,7 @@ class VirusTotal(BaseIntegration):
     finding_types = [Host]
     url = "https://www.virustotal.com/api/v3/"
 
-    @cached_property
+    @property
     def settings(self) -> VirusTotalSettings:
         """Get VirusTotal platform configuration settings from database.
 
@@ -51,6 +50,17 @@ class VirusTotal(BaseIntegration):
         return VirusTotalSettings.objects.first()
 
     def is_available(self) -> bool:
+        """Check if the VirusTotal platform is available and accessible.
+
+        Returns the availability status stored in the database, which is updated
+        each time the platform settings are saved.
+
+        Returns:
+            bool: True if the platform is available and accessible, False otherwise.
+        """
+        return self.settings.is_available
+
+    def live_is_available(self) -> bool:
         """Check if the VirusTotal platform is available and accessible.
 
         Validates platform connectivity by checking for valid API credentials
@@ -128,9 +138,18 @@ class VirusTotal(BaseIntegration):
                 data = self._request(self.session.get, f"ip_addresses/{finding.ip}")
             data = data.get("data", {}).get("attributes", {})
             finding.reputation = data.get("reputation")
-            finding.harmless_votes = data.get("total_votes", {}).get("harmless")
-            finding.malicious_votes = data.get("total_votes", {}).get("malicious")
+            stats = data.get("last_analysis_stats", {})
+            finding.malicious_analysis = stats.get("malicious", 0)
+            finding.suspicious_analysis = stats.get("suspicious", 0)
+            finding.total_analysis = (
+                stats.get("harmless", 0)
+                + stats.get("malicious", 0)
+                + stats.get("suspicious", 0)
+                + stats.get("undetected", 0)
+            )
             finding.whois = data.get("whois")
-            finding.save(update_fields=["reputation", "harmless_votes", "malicious_votes", "whois"])
+            finding.save(
+                update_fields=["reputation", "malicious_analysis", "suspicious_analysis", "total_analysis", "whois"]
+            )
         except Exception:
             pass

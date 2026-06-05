@@ -206,3 +206,47 @@ class LikeViewSet(BaseViewSet):
         else:
             self.get_object().liked_by.remove(request.user)
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class StatsViewSet(BaseViewSet):
+    """Base viewset for statistics endpoints.
+
+    Provides common configuration for all statistics views including
+    authentication requirements and HTTP method restrictions.
+
+    Attributes:
+        ordering_fields: No custom ordering fields defined
+        http_method_names: Restricted to GET requests only
+        permission_classes: Requires authenticated users
+    """
+
+    ordering = []
+    http_method_names = ["get"]
+    permission_classes = [IsAuthenticated]
+
+
+class LatestViewSet(StatsViewSet):
+    """Base viewset for retrieving latest items statistics.
+
+    Extends StatsViewSet to provide functionality for fetching the most
+    recent items with a configurable limit and no pagination.
+
+    Attributes:
+        top_items: Maximum number of items to return (default: 5)
+        pagination_class: Pagination disabled for latest views
+    """
+
+    top_items = 5
+    pagination_class = None
+
+    def filter_queryset(self, queryset):
+        """Apply filtering and limit results to top items.
+
+        Args:
+            queryset: Base queryset to filter
+
+        Returns:
+            Filtered queryset limited to top_items count
+        """
+        queryset = super().filter_queryset(queryset)
+        return queryset[: self.top_items]

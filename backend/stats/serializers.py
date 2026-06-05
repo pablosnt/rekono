@@ -83,21 +83,6 @@ class CountSerializer(Serializer):
     count = IntegerField()
 
 
-# Similar to the previous one, but we need it to group by is_fixed
-class VulnerabilityCountPerIsFixedSerializer(CountSerializer):
-    """Serializer for vulnerability counts grouped by remediation status flag.
-
-    Extends CountSerializer to include the is_fixed boolean field for
-    categorizing vulnerabilities by their remediation state.
-
-    Attributes:
-        count (IntegerField): Number of vulnerabilities in this category
-        is_fixed (BooleanField): Whether vulnerabilities in this group are fixed
-    """
-
-    is_fixed = BooleanField()
-
-
 class HostStatsSerializer(CountSerializer):
     """Serializer for host statistics grouped by operating system type.
 
@@ -237,30 +222,34 @@ class TriagingStatsSerializer(VulnerabilityCountPerStatusSerializer):
     triage_status = CharField()
 
 
-class EvolutionStatsSerializer(CountSerializer):
-    """Serializer for time-series evolution statistics.
+class ExploitCoverageStatsSerializer(CountSerializer):
+    """Serializer for exploit coverage statistics grouped by exploit availability.
 
-    Provides counts of items over time periods for trend analysis
-    and temporal security posture tracking.
-
-    Attributes:
-        count (IntegerField): Number of items for this date period
-        date (DateField): Date of the data point
-    """
-
-    date = DateField()
-
-
-class EvolutionPerSeverityStatsSerializer(EvolutionStatsSerializer):
-    """Serializer for time-series statistics broken down by severity level.
-
-    Extends EvolutionStatsSerializer to include severity categorization
-    for tracking security trends by risk level over time.
+    Provides counts of findings categorized by whether public exploits are
+    available, enabling prioritization of findings with active exploit code.
 
     Attributes:
-        count (IntegerField): Number of items for this date and severity
-        date (DateField): Date of the data point
-        severity (IntegerChoicesField): Severity level enumeration value
+        count (IntegerField): Number of findings in this category
+        has_exploits (BooleanField): Whether findings in this group have exploits
     """
 
-    severity = IntegerChoicesField(model=Severity)
+    has_exploits = BooleanField()
+
+
+class FindingsEvolutionStatsSerializer(Serializer):
+    """Serializer for monthly finding evolution statistics.
+
+    Provides per-month counts of discovered and fixed findings along with
+    a running total of active findings for security posture trend analysis.
+
+    Attributes:
+        month (DateField): First day of the month this data point represents
+        discovered (IntegerField): Findings first seen in this month
+        fixed (IntegerField): Findings fixed in this month
+        active (IntegerField): Total active findings at end of this month
+    """
+
+    month = DateField()
+    discovered = IntegerField()
+    fixed = IntegerField()
+    active = IntegerField()

@@ -14,7 +14,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.serializers import Serializer
 
-from alerts.enums import AlertMode
+from alerts.enums import AlertItem
 from alerts.filters import AlertFilter
 from alerts.models import Alert, MonitorSettings
 from alerts.serializers import (
@@ -58,8 +58,8 @@ class AlertViewSet(BaseViewSet):
         ProjectMemberPermission,
         OwnerPermission,
     ]
-    search_fields = ["value"]
-    ordering_fields = ["id", "project", "item", "mode", "owner"]
+    search_fields = ["item", "value"]
+    ordering_fields = ["id", "project", "item", "owner"]
 
     def get_serializer_class(self) -> Serializer:
         """Get the appropriate serializer class based on the request method.
@@ -72,14 +72,20 @@ class AlertViewSet(BaseViewSet):
     def get_queryset(self) -> QuerySet:
         """Get the queryset for this view.
 
-        For PUT requests, filters to only enabled filter-mode alerts.
+        For PUT requests, filters to only enabled alerts that support value updates.
         Otherwise returns all alerts.
 
         Returns:
             QuerySet: Filtered queryset based on request method
         """
         queryset = super().get_queryset()
-        return queryset.filter(enabled=True, mode=AlertMode.FILTER).all() if self.request.method == "PUT" else queryset
+        return (
+            queryset.filter(
+                enabled=True, item__in=[AlertItem.HOST, AlertItem.SERVICE, AlertItem.TECHNOLOGY, AlertItem.CVE]
+            ).all()
+            if self.request.method == "PUT"
+            else queryset
+        )
 
     @extend_schema(request=None, responses={204: None})
     @action(

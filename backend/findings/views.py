@@ -5,13 +5,14 @@ filtering, search capabilities, and custom actions for security findings
 management through the REST API.
 """
 
+from django.db.models import Max
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from findings.enums import OSINTDataType
+from findings.enums import OSINTDataType, TriageStatus
 from findings.filters import (
     CredentialFilter,
     ExploitFilter,
@@ -43,6 +44,7 @@ from findings.serializers import (
     TechnologySerializer,
     VulnerabilitySerializer,
 )
+from framework.views import LatestViewSet
 from targets.serializers import TargetSerializer
 
 
@@ -222,8 +224,22 @@ class VulnerabilityViewSet(TriageFindingViewSet):
     queryset = Vulnerability.objects.all()
     serializer_class = VulnerabilitySerializer
     filterset_class = VulnerabilityFilter
-    search_fields = ["name", "description", "cve", "cwe"]
-    ordering_fields = ["id", "technology", "port", "name", "severity", "cve", "cwe"]
+    search_fields = ["name", "description", "cve", "euvd_id", "ghsa_id", "osv_generic_id", "cwes"]
+    ordering_fields = [
+        "id",
+        "technology",
+        "port",
+        "name",
+        "severity",
+        "cvss_base_score",
+        "cve",
+        "euvd_id",
+        "ghsa_id",
+        "osv_generic_id",
+        "cwes",
+        "epss_score",
+        "epss_percentile",
+    ]
 
 
 class ExploitViewSet(TriageFindingViewSet):
@@ -252,3 +268,47 @@ class ExploitViewSet(TriageFindingViewSet):
         "edb_id",
         "reference",
     ]
+
+
+class LatestHostsViewSet(LatestViewSet):
+    """ViewSet for retrieving latest discovered host statistics.
+
+    Provides the most recently discovered hosts that are not fixed,
+    annotated with their latest execution timestamp.
+
+    Attributes:
+        queryset: Unfixed hosts with latest execution annotations
+        ordering: Most recently discovered hosts first
+        serializer_class: Host serialization
+        filterset_class: Host filtering capabilities
+    """
+
+    queryset = Host.objects.filter(is_fixed=False).annotate(latest=Max("executions__start"))
+    ordering = ["-latest"]
+    serializer_class = HostSerializer
+    filterset_class = HostFilter
+
+
+class LatestVulnerabilitiesViewSet(LatestViewSet):
+    """ViewSet for retrieving latest vulnerability statistics.
+
+    Provides the most recently discovered vulnerabilities that are unfixed,
+    not marked as false positives, and not created from user input, with
+    latest execution timestamps.
+
+    Attributes:
+        queryset: Active vulnerabilities with latest execution annotations
+        ordering: Most recently discovered vulnerabilities first
+        serializer_class: Vulnerability serialization
+        filterset_class: Vulnerability filtering capabilities
+    """
+
+    queryset = (
+        Vulnerability.objects.filter(is_fixed=False, created_from_user_input=False)
+        .exclude(triage_status=TriageStatus.FALSE_POSITIVE)
+        .exclude(triage_status=TriageStatus.WONT_FIX)
+        .annotate(latest=Max("executions__start"))
+    )
+    ordering = ["-latest"]
+    serializer_class = VulnerabilitySerializer
+    filterset_class = VulnerabilityFilter

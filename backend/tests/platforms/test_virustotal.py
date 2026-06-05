@@ -5,6 +5,7 @@ from unittest import mock
 from django.test import TestCase
 
 from findings.models import Host
+from integrations.models import Integration
 from platforms.virustotal.integrations import VirusTotal
 from platforms.virustotal.models import VirusTotalSettings
 from security.authorization.roles import Role
@@ -16,9 +17,7 @@ from tests.framework.data import SetupProject
 
 
 def success(*args: Any, **kwargs: Any) -> dict[str, Any]:
-    return {
-        "data": {"attributes": {"total_votes": {"harmless": 1, "malicious": 0}, "whois": "Admin: Me", "reputation": 1}}
-    }
+    return {"data": {"attributes": {"last_analysis_stats": {"harmless": 1}, "whois": "Admin: Me", "reputation": 1}}}
 
 
 def exception(*args: Any, **kwargs: Any):
@@ -30,6 +29,9 @@ class VirusTotalTest(BaseTest, TestCase):
 
     def setUp(self) -> None:
         super().setUp()
+        integration = Integration.objects.get(key="virustotal")
+        integration.enabled = True
+        integration.save(update_fields=["enabled"])
         self.settings = VirusTotalSettings.objects.first()
         self.settings.secret = "fake-token"
         self.settings.save(update_fields=["_api_token"])
@@ -41,8 +43,9 @@ class VirusTotalTest(BaseTest, TestCase):
         self.virustotal.process_findings(self.execution, [self.host])
         self.host = Host.objects.get(pk=self.host.id)
         self.assertEqual(1, self.host.reputation)
-        self.assertEqual(1, self.host.harmless_votes)
-        self.assertEqual(0, self.host.malicious_votes)
+        self.assertEqual(0, self.host.malicious_analysis)
+        self.assertEqual(0, self.host.suspicious_analysis)
+        self.assertEqual(1, self.host.total_analysis)
         self.assertEqual("Admin: Me", self.host.whois)
 
     @mock.patch("platforms.virustotal.integrations.VirusTotal._request", success)
@@ -56,8 +59,9 @@ class VirusTotalTest(BaseTest, TestCase):
         self.virustotal.process_findings(self.execution, [self.host])
         self.host = Host.objects.get(pk=self.host.id)
         self.assertIsNone(self.host.reputation)
-        self.assertIsNone(self.host.harmless_votes)
-        self.assertIsNone(self.host.malicious_votes)
+        self.assertIsNone(self.host.malicious_analysis)
+        self.assertIsNone(self.host.suspicious_analysis)
+        self.assertIsNone(self.host.total_analysis)
         self.assertIsNone(self.host.whois)
 
     @mock.patch("platforms.virustotal.integrations.VirusTotal._request", exception)
@@ -72,14 +76,17 @@ class VirusTotalTest(BaseTest, TestCase):
 
     @mock.patch("platforms.virustotal.integrations.VirusTotal._request", success)
     def test_is_available(self) -> None:
-        self.assertTrue(self.virustotal.is_available())
+        self.assertTrue(self.virustotal.live_is_available())
 
     @mock.patch("platforms.virustotal.integrations.VirusTotal._request", exception)
     def test_is_not_available(self) -> None:
-        self.assertFalse(self.virustotal.is_available())
+        self.assertFalse(self.virustotal.live_is_available())
 
         self.settings.secret = None
         self.settings.save(update_fields=["_api_token"])
+        self.assertFalse(self.virustotal.live_is_available())
+
+    def test_cached_is_available(self) -> None:
         self.assertFalse(self.virustotal.is_available())
 
 
