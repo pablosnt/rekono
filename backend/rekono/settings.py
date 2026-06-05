@@ -166,7 +166,11 @@ SIMPLE_JWT = {
 JWT_ACCESS_COOKIE = "rekono_access"
 JWT_REFRESH_COOKIE = "rekono_refresh"
 JWT_MFA_COOKIE = "rekono_mfa"
-COOKIES_CONFIG = {"httponly": True, "samesite": "Strict", "secure": CONFIG.secure_cookies}
+COOKIES_CONFIG = {
+    "httponly": True,
+    "samesite": "None" if CONFIG.frontend_desktop else "Strict",
+    "secure": CONFIG.secure_cookies,
+}
 
 LOGGING: dict[str, Any] = {
     "version": 1,

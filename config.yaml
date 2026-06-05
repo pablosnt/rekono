@@ -1,11 +1,12 @@
 database:
-  host: 127.0.0.1
   name: rekono
-  password: null
-  port: 5432
   user: null
+  password: null
+  host: 127.0.0.1
+  port: 5432
 frontend:
   url: https://localhost
+  desktop: true
 rootpath: null
 rq:
   host: 127.0.0.1
@@ -15,8 +16,6 @@ security:
   - 127.0.0.1
   - localhost
   - ::1
-  encryption-key: null
-  secret-key: null
   cookies:
     secure: false
 tools:
@@ -30,6 +29,3 @@ tools:
     directory: /opt/spring4shell-scan
 reports:
   pdf-template: null
-monitor:
-  cvecrowd:
-    hour: 0

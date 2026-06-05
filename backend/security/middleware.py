@@ -70,9 +70,10 @@ SECURITY_HEADERS = {
     "X-Content-Type-Options": "nosniff",
     "X-Frame-Options": "DENY",
     "Permissions-Policy": "camera=(), geolocation=(), microphone=(), midi=(), payment=(), usb=()",
-    "Access-Control-Allow-Origin": "app://.",
+    "Access-Control-Allow-Origin": None,
     "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
     "Access-Control-Allow-Headers": "content-type, authorization",
+    "Access-Control-Allow-Credentials": "true",
 }
 
 
@@ -160,14 +161,18 @@ class SecurityMiddleware(LoggingEntity):
         Returns:
             Response: Response object with security headers applied.
         """
+        origin = request.headers.get("Origin")
+        allowed_origins = ["tauri://localhost", "http://localhost:3000"] if CONFIG.frontend_desktop else []
         for header, value in SECURITY_HEADERS.items():
-            if header == "Referrer-Policy" and request.path.startswith("/admin"):
-                value = "strict-origin"  # pragma: no cover
             if header == "Content-Security-Policy":
                 for path, csp in CSP.items():
                     if request.path.startswith(path):
                         value = csp
                         break
+            elif header == "Access-Control-Allow-Origin":
+                value = origin if origin in allowed_origins else CONFIG.frontend_url
+            elif header == "Referrer-Policy" and request.path.startswith("/admin"):
+                value = "strict-origin"  # pragma: no cover
             response[header] = value
         return response
 

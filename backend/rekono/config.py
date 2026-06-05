@@ -88,11 +88,11 @@ class Property:
             found = True
             value_from_file = file_config
             for key in self.file.split("."):
-                if key not in file_config:
+                if key not in value_from_file:
                     found = False
                     break
                 value_from_file = value_from_file.get(key, {})
-            if found:
+            if found and value_from_file is not None:
                 value = value_from_file
         # Convert to bool if needed
         if isinstance(self.default, bool) and not isinstance(value, bool):
@@ -141,15 +141,6 @@ class RekonoConfig:
         testing (bool): Flag indicating if running in test mode.
         base_dir (Path): Base directory path for the application.
         _home (Property): Home directory configuration property.
-        _encryption_key (Property): Encryption key configuration property.
-        _pdf_report_template (Property): PDF report template path property.
-        _frotend_url (Property): Frontend URL configuration property.
-        _root_path (Property): Application root path configuration property.
-        _secret_key (Property): Django secret key configuration property.
-        _allowed_hosts (Property): Allowed hosts list configuration property.
-        _trusted_proxy (Property): Trusted proxy flag configuration property.
-        _otp_expiration_hours (Property): OTP expiration time configuration property.
-        _mfa_expiration_minutes (Property): MFA expiration time configuration property.
         _db_name (Property): Database name configuration property.
         _db_user (Property): Database username configuration property.
         _db_password (Property): Database password configuration property.
@@ -157,11 +148,17 @@ class RekonoConfig:
         _db_port (Property): Database port configuration property.
         _rq_host (Property): Redis Queue host configuration property.
         _rq_port (Property): Redis Queue port configuration property.
-        _smtp_host (Property): SMTP server host configuration property.
-        _smtp_port (Property): SMTP server port configuration property.
-        _smtp_user (Property): SMTP username configuration property.
-        _smtp_password (Property): SMTP password configuration property.
-        _smtp_tls (Property): SMTP TLS flag configuration property.
+        _frotend_url (Property): Frontend URL configuration property.
+        _frotend_desktop (Property): Frontend Desktop configuration property.
+        _root_path (Property): Application root path configuration property.
+        _trusted_proxy (Property): Trusted proxy flag configuration property.
+        _allowed_hosts (Property): Allowed hosts list configuration property.
+        _encryption_key (Property): Encryption key configuration property.
+        _secret_key (Property): Django secret key configuration property.
+        _secure_cookies (Property): Secure cookies configuration property.
+        _otp_expiration_hours (Property): OTP expiration time configuration property.
+        _mfa_expiration_minutes (Property): MFA expiration time configuration property.
+        _pdf_report_template (Property): PDF report template path property.
         _cmseek_dir (Property): CMSeek tool directory configuration property.
         _log4j_scan_dir (Property): Log4j scanner directory configuration property.
         _spring4shell_scan_dir (Property): Spring4Shell scanner directory configuration property.
@@ -178,30 +175,34 @@ class RekonoConfig:
     """
 
     testing = "test" in sys.argv
+    # Directories
     base_dir = Path(__file__).resolve().parent.parent
     _home = Property("REKONO_HOME", default="/opt/rekono")
-    _encryption_key = Property(None, "security.encryption-key", None)
-    _pdf_report_template = Property(None, "reports.pdf-template", None)
-    _frotend_url = Property("RKN_FRONTEND_URL", "frontend.url", "https://127.0.0.1")
-    _root_path = Property("RKN_ROOT_PATH", "rootpath", None)
-    _secret_key = Property("RKN_SECRET_KEY", "security.secret-key", Crypto.random(3000))
-    _secure_cookies = Property("RKN_COOKIES_SECURE", "security.cookies.secure", False)
-    _allowed_hosts = Property("RKN_ALLOWED_HOSTS", "security.allowed-hosts", ["localhost", "127.0.0.1", "::1"])
-    _trusted_proxy = Property("RKN_TRUSTED_PROXY", None, False)
-    _otp_expiration_hours = Property(None, None, 24)
-    _mfa_expiration_minutes = Property(None, None, 15)
+    # Database
     _db_name = Property("RKN_DB_NAME", "database.name", "rekono")
     _db_user = Property("RKN_DB_USER", "database.user", "")
     _db_password = Property("RKN_DB_PASSWORD", "database.password", "")
     _db_host = Property("RKN_DB_HOST", "database.host", "127.0.0.1")
     _db_port = Property("RKN_DB_PORT", "database.port", 5432)
+    # RQ
     _rq_host = Property("RKN_RQ_HOST", "rq.host", "127.0.0.1")
     _rq_port = Property("RKN_RQ_PORT", "rq.port", 6379)
-    _smtp_host = Property("RKN_SMTP_HOST", "email.host", None)
-    _smtp_port = Property("RKN_SMTP_PORT", "email.port", 587)
-    _smtp_user = Property("RKN_SMTP_USER", "email.user", None)
-    _smtp_password = Property("RKN_SMTP_PASSWORD", "email.password", None)
-    _smtp_tls = Property("RKN_SMTP_TLS", "email.tls", True)
+    # Frontend
+    _frotend_url = Property("RKN_FRONTEND_URL", "frontend.url", "https://127.0.0.1")
+    _frontend_desktop = Property("RKN_FRONTEND_DESKTOP", "frontend.desktop", False)
+    # Infrastructure context
+    _root_path = Property("RKN_ROOT_PATH", "rootpath", None)
+    _trusted_proxy = Property("RKN_TRUSTED_PROXY", None, False)
+    # Security
+    _allowed_hosts = Property("RKN_ALLOWED_HOSTS", "security.allowed-hosts", ["localhost", "127.0.0.1", "::1"])
+    _encryption_key = Property(None, "security.encryption-key", None)
+    _secret_key = Property("RKN_SECRET_KEY", "security.secret-key", Crypto.random(3000))
+    _secure_cookies = Property("RKN_COOKIES_SECURE", "security.cookies.secure", False)
+    _otp_expiration_hours = Property(None, None, 24)
+    _mfa_expiration_minutes = Property(None, None, 15)
+    # Templates
+    _pdf_report_template = Property(None, "reports.pdf-template", None)
+    # Tools
     _cmseek_dir = Property("RKN_CMSEEK_RESULTS", "tools.cmseek.directory", "/usr/share/cmseek")
     _log4j_scan_dir = Property("RKN_LOG4J_SCAN_DIR", "tools.log4j-scan.directory", "/opt/log4j-scan")
     _spring4shell_scan_dir = Property(
@@ -219,8 +220,7 @@ class RekonoConfig:
             Path: Path to the production home directory, falling back to
             parent directory structure if configured path doesn't exist.
         """
-        # Use the environment or config value if it exists and is a directory,
-        # otherwise fall back to the parent of the backend directory
+        # Fallback to the parent of the backend directory
         home_value = Path(self._home.read())
         return home_value if home_value.is_dir() else self.base_dir.parent
 
@@ -231,7 +231,6 @@ class RekonoConfig:
         Returns:
             Path: Path to the appropriate home directory (test or production).
         """
-        # In test mode, use a dedicated test home directory
         return self._initialize_directory(self.base_dir / "tests" / "home" if self.testing else self.pro_home)
 
     @cached_property
@@ -244,7 +243,6 @@ class RekonoConfig:
         Returns:
             Path: Path to the first found configuration file.
         """
-        # Search for the first config file that exists in the home directory
         for filename in ["config.yaml", "config.yml", "rekono.yaml", "rekono.yml"]:
             path = self.pro_home / filename
             if path.is_file():
@@ -271,7 +269,6 @@ class RekonoConfig:
         Returns:
             dict[str, Any]: Dictionary containing all configuration data from the YAML file.
         """
-        # Loads YAML from disk every time this property is accessed
         with self.config_file.open("r") as file:
             return yaml.safe_load(file)
 
@@ -282,7 +279,6 @@ class RekonoConfig:
         Returns:
             Path: Path to the reports directory, creating it if necessary.
         """
-        # Ensure the reports directory exists
         return self._initialize_directory(self.home / "reports")
 
     @property
@@ -292,7 +288,6 @@ class RekonoConfig:
         Returns:
             Path: Path to the generated reports subdirectory, creating it if necessary.
         """
-        # Ensure the generated reports directory exists
         return self._initialize_directory(self.reports / "generated")
 
     @property
@@ -302,7 +297,6 @@ class RekonoConfig:
         Returns:
             Path: Path to the wordlists directory, creating it if necessary.
         """
-        # Ensure the wordlists directory exists
         return self._initialize_directory(self.home / "wordlists")
 
     @property
@@ -312,7 +306,6 @@ class RekonoConfig:
         Returns:
             Path: Path to the logs directory, creating it if necessary.
         """
-        # Ensure the logs directory exists
         return self._initialize_directory(self.home / "logs")
 
     @property
@@ -351,6 +344,18 @@ class RekonoConfig:
             str: Base URL for the Rekono frontend application.
         """
         return self._frotend_url.read(self.config_from_file)
+
+    @property
+    def frontend_desktop(self) -> bool:
+        """Get whether desktop app (Electron) support is enabled.
+
+        When enabled, relaxes cookie SameSite policy to Lax and adds
+        CORS headers allowing requests from the Electron app:// origin.
+
+        Returns:
+            bool: True if desktop app support is enabled.
+        """
+        return self._frontend_desktop.read(self.config_from_file)
 
     @property
     def root_path(self) -> str:
@@ -485,51 +490,6 @@ class RekonoConfig:
         return self._rq_port.read(self.config_from_file)
 
     @property
-    def smtp_host(self) -> str:
-        """Get SMTP server host.
-
-        Returns:
-            str: SMTP server hostname for email delivery.
-        """
-        return self._smtp_host.read(self.config_from_file)
-
-    @property
-    def smtp_port(self) -> int:
-        """Get SMTP server port.
-
-        Returns:
-            int: SMTP server port number for email delivery.
-        """
-        return self._smtp_port.read(self.config_from_file)
-
-    @property
-    def smtp_user(self) -> str:
-        """Get SMTP username.
-
-        Returns:
-            str: SMTP authentication username for email delivery.
-        """
-        return self._smtp_user.read(self.config_from_file)
-
-    @property
-    def smtp_password(self) -> str:
-        """Get SMTP password.
-
-        Returns:
-            str: SMTP authentication password for email delivery.
-        """
-        return self._smtp_password.read(self.config_from_file)
-
-    @property
-    def smtp_tls(self) -> bool:
-        """Get SMTP TLS configuration.
-
-        Returns:
-            bool: True if SMTP should use TLS encryption, False otherwise.
-        """
-        return self._smtp_tls.read(self.config_from_file)
-
-    @property
     def cmseek_dir(self) -> str:
         """Get CMSeek tool directory.
 
@@ -574,6 +534,5 @@ class RekonoConfig:
         Returns:
             Path: The initialized directory path.
         """
-        # Create the directory if it does not exist
         path.mkdir(exist_ok=True)
         return path
