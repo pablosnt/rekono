@@ -1,6 +1,7 @@
 <template>
   <UCollapsible v-model:open="open">
-    <CrudPage
+    <CrudHeader
+      :api="api"
       :config="{
         entityNamePlural: 'MFA',
         entityName: 'MFA',
@@ -18,7 +19,7 @@
           @change="(value) => handleSwitch(value)"
         />
       </template>
-    </CrudPage>
+    </CrudHeader>
     <template #content>
       <template v-if="userStore.profile.mfa">
         <UAlert
