@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="min-w-0">
     <CrudPage ref="page" :config="config" :disable-url-sync="disableUrlSync">
       <template #actions="{ item }">
         <NotesDropdown
@@ -190,7 +190,7 @@ const config: CrudConfig<Finding> = reactive({
             );
           return h(
             "div",
-            { class: "flex items-center gap-1.5" },
+            { class: "flex items-center gap-3.5" },
             scanners.map((s) =>
               h(
                 resolveComponent("UChip"),
