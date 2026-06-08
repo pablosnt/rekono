@@ -45,6 +45,8 @@ services:
     volumes:
       - rekono:/rekono
       - ./config.yaml:/rekono/config.yaml:ro
+      - wordlists_seclists:/usr/share/seclists
+      - wordlists_dirb:/usr/share/dirb/wordlists
     networks:
       - internal
     depends_on:
@@ -60,12 +62,14 @@ services:
   
   tasks-worker:
     restart: always
-    image: pablosnt/rekono-worker:unstable
+    image: pablosnt/rekono-backend:unstable
     command: uv run --no-dev manage.py rqworker tasks
     hostname: tasks-worker
     volumes:
       - rekono:/rekono
       - ./config.yaml:/rekono/config.yaml:ro
+      - wordlists_seclists:/usr/share/seclists
+      - wordlists_dirb:/usr/share/dirb/wordlists
     networks:
       - internal
     depends_on:
@@ -245,6 +249,8 @@ volumes:
   postgres:
   nginx:
   rekono:
+  wordlists_seclists:
+  wordlists_dirb:
 
 networks:
   internal:
