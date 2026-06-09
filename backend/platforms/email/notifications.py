@@ -21,7 +21,7 @@ from alerts.models import Alert
 from executions.models import Execution
 from findings.framework.models import Finding
 from framework.platforms import BaseNotification
-from platforms.mail.models import SMTPSettings
+from platforms.email.models import SMTPSettings
 from rekono.settings import CONFIG
 
 
@@ -92,7 +92,7 @@ class SMTP(BaseNotification):
         using the certifi package to ensure secure connections to SMTP servers.
         """
         super().__init__()
-        # The trusted certificates must be defined
+        # Without this, SMTP TLS handshakes fail on systems that lack a system CA bundle
         os.environ["SSL_CERT_FILE"] = certifi.where()
 
     def is_available(self) -> bool:

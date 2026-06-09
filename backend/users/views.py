@@ -18,7 +18,7 @@ from rest_framework.serializers import Serializer
 from rest_framework.viewsets import GenericViewSet
 
 from framework.views import BaseViewSet
-from platforms.mail.notifications import SMTP
+from platforms.email.notifications import SMTP
 from security.authentication.jwt import CookieJWTAuthentication
 from security.authorization.permissions import IsNotAuthenticated, RekonoModelPermission
 from users.filters import UserFilter

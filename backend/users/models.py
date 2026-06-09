@@ -16,7 +16,7 @@ from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken, Ou
 
 from framework.logging import LoggingEntity
 from framework.models import BaseEncrypted
-from platforms.mail.notifications import SMTP
+from platforms.email.notifications import SMTP
 from rekono.settings import CONFIG
 from security.authentication.api import ApiToken
 from security.authorization.roles import Role

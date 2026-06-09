@@ -29,7 +29,7 @@ from findings.enums import Severity
 from findings.framework.models import Finding
 from findings.models import OSINT, Credential, Exploit, Host, Port, Technology, Vulnerability
 from framework.views import BaseViewSet
-from platforms.mail.notifications import SMTP
+from platforms.email.notifications import SMTP
 from platforms.telegram_app.notifications import Telegram
 from projects.models import Project
 from rekono.settings import CONFIG, STATIC_URL, STATICFILES_DIRS

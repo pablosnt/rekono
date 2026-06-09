@@ -8,8 +8,8 @@ for viewing and updating SMTP server settings.
 from rest_framework.permissions import IsAuthenticated
 
 from framework.views import BaseViewSet
-from platforms.mail.models import SMTPSettings
-from platforms.mail.serializers import SMTPSettingsSerializer
+from platforms.email.models import SMTPSettings
+from platforms.email.serializers import SMTPSettingsSerializer
 from security.authorization.permissions import RekonoModelPermission
 
 

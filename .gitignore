@@ -61,5 +61,8 @@ Result/
 .claude/
 docs/
 
+# Auto-generated Email Templates
+backend/platforms/email/templates/*.html
+
 # TODO Temporal ignore
 migrations/

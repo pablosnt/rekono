@@ -1,7 +1,7 @@
-"""Django application configuration for mail platform.
+"""Django application configuration for email notification platform.
 
-Configures the mail platform application with base functionality and
-model initialization for SMTP-based email notifications.
+Configures the email notification platform application with base functionality
+and model initialization for SMTP-based email delivery.
 """
 
 from typing import Any
@@ -11,19 +11,18 @@ from django.apps import AppConfig
 from framework.apps import BaseApp
 
 
-class MailConfig(BaseApp, AppConfig):
-    """Django application configuration for mail platform.
+class EmailConfig(BaseApp, AppConfig):
+    """Configuration class for email notification platform application.
 
-    Configures the mail platform with SMTP settings model initialization
-    and fixture management. Extends BaseApp for consistent application
-    configuration across the Rekono platform.
+    Extends BaseApp and AppConfig to provide proper Django application setup
+    with SMTP settings model registration and fixture management.
 
     Attributes:
         name (str): Application name for Django registry
         skip_fixtures_if_model_exists (bool): Skip fixtures if models exist
     """
 
-    name = "platforms.mail"
+    name = "platforms.email"
     skip_fixtures_if_model_exists = True
 
     def _get_models(self) -> list[Any]:
@@ -35,6 +34,6 @@ class MailConfig(BaseApp, AppConfig):
         Returns:
             list[Any]: List containing SMTPSettings model class
         """
-        from platforms.mail.models import SMTPSettings
+        from platforms.email.models import SMTPSettings
 
         return [SMTPSettings]
