@@ -1,0 +1,33 @@
+name: Email templates
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "email-templates/**"
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@0c366fd6a839edf440554fa01a7085ccba70ac98
+
+      - name: Install Node
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f
+        with:
+          node-version: 22
+
+      - name: Install PNPM
+        uses: pnpm/action-setup@6e7bdbda5fe05107efc88b23b7ed00aa05f84ca0
+        with:
+          version: 10
+
+      - name: Install dependencies
+        working-directory: email-templates
+        run: pnpm install --frozen-lockfile
+
+      - name: Build email templates
+        working-directory: email-templates
+        run: pnpm build
