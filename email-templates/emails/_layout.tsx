@@ -17,7 +17,6 @@ interface LayoutProps {
   children: React.ReactNode;
 }
 
-// TODO: Replace https://localhost by rekono_url + root path if any?
 export function Layout({ children }: LayoutProps) {
   return (
     <Tailwind
@@ -47,7 +46,7 @@ export function Layout({ children }: LayoutProps) {
               <Row>
                 <Column className="text-center">
                   <Img
-                    src={"https://localhost/logo-light.png"}
+                    src={"{{ rekono_url }}/logo-light.png"}
                     alt="Rekono"
                     height={36}
                     className="mx-auto"
