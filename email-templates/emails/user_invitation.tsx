@@ -14,8 +14,8 @@ export default function UserInvitation() {
         place.
       </Text>
       <Text className="text-gray-500 text-sm leading-relaxed m-0 mb-8">
-        Your account is ready to be claimed. Create it below and start uncovering
-        what is exposed before someone else does.
+        Your account is ready to be claimed. Create it below and start
+        uncovering what is exposed before someone else does.
       </Text>
       <Button
         href={"{{ rekono_url }}/signup?otp={{ user_otp }}"}

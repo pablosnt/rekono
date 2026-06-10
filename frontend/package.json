@@ -10,8 +10,7 @@
     "eslint": "eslint .",
     "eslint:fix": "eslint . --fix",
     "prettier": "prettier --check . --ignore-path=../.gitignore --ignore-path=.prettierignore",
-    "prettier:fix": "prettier --write --list-different . --ignore-path=../.gitignore --ignore-path=.prettierignore",
-    "typecheck": "nuxt typecheck"
+    "prettier:fix": "prettier --write --list-different . --ignore-path=../.gitignore --ignore-path=.prettierignore"
   },
   "dependencies": {
     "@iconify-json/codicon": "^1.2.58",

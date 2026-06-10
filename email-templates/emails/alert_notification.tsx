@@ -1,4 +1,4 @@
-import { Button, Heading, Hr, Preview, Text } from "react-email";
+import { Button, Heading, Preview, Text } from "react-email";
 import { Layout } from "./_layout";
 import { Field, hostDomainOrIp, ReferenceField } from "./_findings";
 
@@ -93,7 +93,9 @@ export default function AlertNotification() {
         {"{% endif %}"}
 
         {'{% elif finding.__class__.__name__ == "Vulnerability" %}'}
-        {"{% if finding.technology and finding.technology.port and finding.technology.port.host %}"}
+        {
+          "{% if finding.technology and finding.technology.port and finding.technology.port.host %}"
+        }
         <Field
           label="Host"
           value={hostDomainOrIp("finding.technology.port.host")}
@@ -142,7 +144,10 @@ export default function AlertNotification() {
         {"{% if finding.epss_score %}"}
         <Field label="EPSS" value={"{{ finding.epss_score }}"} mono />
         {"{% endif %}"}
-        <Field label="Trending" value={'{{ finding.trending|yesno:"Yes,No" }}'} />
+        <Field
+          label="Trending"
+          value={'{{ finding.trending|yesno:"Yes,No" }}'}
+        />
         {"{% if finding.reference %}"}
         <ReferenceField />
         {"{% endif %}"}

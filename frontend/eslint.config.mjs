@@ -9,4 +9,3 @@ export default withNuxt({
     "@typescript-eslint/no-dynamic-delete": "off",
   },
 }).append(eslintConfigPrettier);
-// Your custom configs here

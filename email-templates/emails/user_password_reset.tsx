@@ -21,8 +21,8 @@ export default function UserPasswordReset() {
       </Button>
       <Text className="text-gray-400 text-xs leading-relaxed m-0 mt-8 mb-0">
         This link can only be used once and expires shortly. If you did not
-        request a password reset, you can ignore this email. Your password
-        will remain unchanged.
+        request a password reset, you can ignore this email. Your password will
+        remain unchanged.
       </Text>
     </Layout>
   );

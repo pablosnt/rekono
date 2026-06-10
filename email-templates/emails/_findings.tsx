@@ -87,7 +87,6 @@ export type Column = {
   bold?: boolean;
 };
 
-
 export function FindingTable({
   title,
   list,

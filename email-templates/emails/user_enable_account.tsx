@@ -19,8 +19,8 @@ export default function UserEnableAccount() {
       </Heading>
       {"{% endif %}"}
       <Text className="text-gray-500 text-sm leading-relaxed m-0 mb-4">
-        Your Rekono account is active and ready to use. Set your password below to start
-        using it.
+        Your Rekono account is active and ready to use. Set your password below
+        to start using it.
       </Text>
       <Text className="text-gray-500 text-sm leading-relaxed m-0 mb-8">
         Once that is done, you can pick up right where you left off.

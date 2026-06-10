@@ -21,132 +21,136 @@ const summaryRows: [string, string, boolean][] = [
   ["Executor", "{{ execution.task.executor.username }}", false],
 ];
 
-const tables: { title: string; list: string; item: string; columns: Column[] }[] =
-  [
-    {
-      title: "OSINT",
-      list: "osint",
-      item: "o",
-      columns: [
-        { header: "Data", cell: cell("o.data"), bold: true },
-        { header: "Data type", cell: cell("o.data_type") },
-        { header: "Source", cell: cell("o.source") },
-      ],
-    },
-    {
-      title: "Hosts",
-      list: "host",
-      item: "h",
-      columns: [
-        { header: "IP", cell: cell("h.ip"), mono: true, bold: true },
-        { header: "Domain", cell: cell("h.domain"), mono: true },
-        { header: "OS", cell: cell("h.os") },
-        { header: "OS type", cell: cell("h.os_type") },
-        { header: "Country", cell: cell("h.country") },
-        { header: "City", cell: cell("h.city") },
-      ],
-    },
-    {
-      title: "Ports",
-      list: "port",
-      item: "p",
-      columns: [
-        { header: "Host", cell: hostCell("p.host"), mono: true },
-        { header: "Port", cell: cell("p.port"), mono: true, bold: true },
-        { header: "Status", cell: cell("p.status") },
-        { header: "Protocol", cell: cell("p.protocol") },
-        { header: "Service", cell: cell("p.service"), bold: true },
-      ],
-    },
-    {
-      title: "Paths",
-      list: "path",
-      item: "p",
-      columns: [
-        { header: "Host / Port", cell: hostPortCell("p.port"), mono: true },
-        { header: "Type", cell: cell("p.type") },
-        { header: "Path", cell: cell("p.path"), bold: true },
-        { header: "Status", cell: cell("p.status") },
-      ],
-    },
-    {
-      title: "Technologies",
-      list: "technology",
-      item: "t",
-      columns: [
-        { header: "Host / Port", cell: hostPortCell("t.port"), mono: true },
-        { header: "Name", cell: cell("t.name"), bold: true },
-        { header: "Version", cell: cell("t.version"), mono: true },
-        { header: "Reference", cell: ReferenceCell("t", "Link") },
-      ],
-    },
-    {
-      title: "Credentials",
-      list: "credential",
-      item: "c",
-      columns: [
-        { header: "Technology", cell: cell("c.technology.name") },
-        {
-          header: "Host / Port",
-          cell: hostPortCell("c.technology.port"),
-          mono: true,
-        },
-        { header: "Email", cell: cell("c.email"), bold: true },
-        { header: "Username", cell: cell("c.username"), bold: true },
-        { header: "Secret", cell: cell("c.secret"), mono: true, bold: true },
-        { header: "Context", cell: cell("c.context") },
-      ],
-    },
-    {
-      title: "Vulnerabilities",
-      list: "vulnerability",
-      item: "v",
-      columns: [
-        { header: "Technology", cell: cell("v.technology.name") },
-        {
-          header: "Host / Port",
-          cell: hostPortCell("v.port", "v.technology.port"),
-          mono: true,
-        },
-        { header: "Name", cell: cell("v.name"), bold: true },
-        { header: "Severity", cell: cell("v.get_severity_display") },
-        { header: "CVSS", cell: cell("v.cvss_base_score"), mono: true },
-        { header: "CVE", cell: cell("v.cve"), mono: true, bold: true },
-        {
-          header: "CWE",
-          cell: `{{ v.cwes|join:", "|default:"${DASH}" }}`,
-          mono: true,
-        },
-        { header: "EPSS", cell: cell("v.epss_score"), mono: true },
-        { header: "Trending", cell: '{{ v.trending|yesno:"Yes,No" }}' },
-        { header: "Reference", cell: ReferenceCell("v", "Link") },
-      ],
-    },
-    {
-      title: "Exploits",
-      list: "exploit",
-      item: "e",
-      columns: [
-        { header: "Vulnerability", cell: cell("e.vulnerability.name") },
-        {
-          header: "Technology",
-          cell: `{% if e.vulnerability.technology %}{{ e.vulnerability.technology.name }}{% elif e.technology %}{{ e.technology.name }}{% else %}${DASH}{% endif %}`,
-        },
-        {
-          header: "Host / Port",
-          cell: hostPortCell(
-            "e.vulnerability.port",
-            "e.vulnerability.technology.port",
-            "e.technology.port",
-          ),
-          mono: true,
-        },
-        { header: "Title", cell: cell("e.title"), bold: true },
-        { header: "Exploit DB", cell: cell("e.edb_id"), mono: true },
-        { header: "Reference", cell: ReferenceCell("e", "Link") },
-      ],
-    },
-  ];
+const tables: {
+  title: string;
+  list: string;
+  item: string;
+  columns: Column[];
+}[] = [
+  {
+    title: "OSINT",
+    list: "osint",
+    item: "o",
+    columns: [
+      { header: "Data", cell: cell("o.data"), bold: true },
+      { header: "Data type", cell: cell("o.data_type") },
+      { header: "Source", cell: cell("o.source") },
+    ],
+  },
+  {
+    title: "Hosts",
+    list: "host",
+    item: "h",
+    columns: [
+      { header: "IP", cell: cell("h.ip"), mono: true, bold: true },
+      { header: "Domain", cell: cell("h.domain"), mono: true },
+      { header: "OS", cell: cell("h.os") },
+      { header: "OS type", cell: cell("h.os_type") },
+      { header: "Country", cell: cell("h.country") },
+      { header: "City", cell: cell("h.city") },
+    ],
+  },
+  {
+    title: "Ports",
+    list: "port",
+    item: "p",
+    columns: [
+      { header: "Host", cell: hostCell("p.host"), mono: true },
+      { header: "Port", cell: cell("p.port"), mono: true, bold: true },
+      { header: "Status", cell: cell("p.status") },
+      { header: "Protocol", cell: cell("p.protocol") },
+      { header: "Service", cell: cell("p.service"), bold: true },
+    ],
+  },
+  {
+    title: "Paths",
+    list: "path",
+    item: "p",
+    columns: [
+      { header: "Host / Port", cell: hostPortCell("p.port"), mono: true },
+      { header: "Type", cell: cell("p.type") },
+      { header: "Path", cell: cell("p.path"), bold: true },
+      { header: "Status", cell: cell("p.status") },
+    ],
+  },
+  {
+    title: "Technologies",
+    list: "technology",
+    item: "t",
+    columns: [
+      { header: "Host / Port", cell: hostPortCell("t.port"), mono: true },
+      { header: "Name", cell: cell("t.name"), bold: true },
+      { header: "Version", cell: cell("t.version"), mono: true },
+      { header: "Reference", cell: ReferenceCell("t", "Link") },
+    ],
+  },
+  {
+    title: "Credentials",
+    list: "credential",
+    item: "c",
+    columns: [
+      { header: "Technology", cell: cell("c.technology.name") },
+      {
+        header: "Host / Port",
+        cell: hostPortCell("c.technology.port"),
+        mono: true,
+      },
+      { header: "Email", cell: cell("c.email"), bold: true },
+      { header: "Username", cell: cell("c.username"), bold: true },
+      { header: "Secret", cell: cell("c.secret"), mono: true, bold: true },
+      { header: "Context", cell: cell("c.context") },
+    ],
+  },
+  {
+    title: "Vulnerabilities",
+    list: "vulnerability",
+    item: "v",
+    columns: [
+      { header: "Technology", cell: cell("v.technology.name") },
+      {
+        header: "Host / Port",
+        cell: hostPortCell("v.port", "v.technology.port"),
+        mono: true,
+      },
+      { header: "Name", cell: cell("v.name"), bold: true },
+      { header: "Severity", cell: cell("v.get_severity_display") },
+      { header: "CVSS", cell: cell("v.cvss_base_score"), mono: true },
+      { header: "CVE", cell: cell("v.cve"), mono: true, bold: true },
+      {
+        header: "CWE",
+        cell: `{{ v.cwes|join:", "|default:"${DASH}" }}`,
+        mono: true,
+      },
+      { header: "EPSS", cell: cell("v.epss_score"), mono: true },
+      { header: "Trending", cell: '{{ v.trending|yesno:"Yes,No" }}' },
+      { header: "Reference", cell: ReferenceCell("v", "Link") },
+    ],
+  },
+  {
+    title: "Exploits",
+    list: "exploit",
+    item: "e",
+    columns: [
+      { header: "Vulnerability", cell: cell("e.vulnerability.name") },
+      {
+        header: "Technology",
+        cell: `{% if e.vulnerability.technology %}{{ e.vulnerability.technology.name }}{% elif e.technology %}{{ e.technology.name }}{% else %}${DASH}{% endif %}`,
+      },
+      {
+        header: "Host / Port",
+        cell: hostPortCell(
+          "e.vulnerability.port",
+          "e.vulnerability.technology.port",
+          "e.technology.port",
+        ),
+        mono: true,
+      },
+      { header: "Title", cell: cell("e.title"), bold: true },
+      { header: "Exploit DB", cell: cell("e.edb_id"), mono: true },
+      { header: "Reference", cell: ReferenceCell("e", "Link") },
+    ],
+  },
+];
 
 export default function ExecutionNotification() {
   return (
@@ -167,7 +171,8 @@ export default function ExecutionNotification() {
         {"{{ execution.configuration.tool.name }}"}
       </Heading>
       <Text className="text-gray-500 text-sm leading-relaxed m-0 mb-6">
-        Your scan just finished. Here is the summary and everything Rekono found.
+        Your scan just finished. Here is the summary and everything Rekono
+        found.
       </Text>
       <div className="bg-gray-50 border border-gray-200 rounded-md px-6 py-5 mb-8">
         <table cellPadding={0} cellSpacing={0} className="w-full">
