@@ -175,9 +175,9 @@ class SMTP(BaseNotification):
         for finding in findings:
             if finding.created_from_user_input:
                 continue
-            if findings.__class__.__name__.lower() not in findings_by_class:
-                findings_by_class[findings.__class__.__name__.lower()] = []
-            findings_by_class[findings.__class__.__name__.lower()].append(finding)
+            if finding.__class__.__name__.lower() not in findings_by_class:
+                findings_by_class[finding.__class__.__name__.lower()] = []
+            findings_by_class[finding.__class__.__name__.lower()].append(finding)
         # This is called from findings queue which is already asynchronous
         self._notify(
             users,

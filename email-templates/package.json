@@ -1,0 +1,19 @@
+{
+  "name": "rekono-email-templates",
+  "private": true,
+  "packageManager": "pnpm@10.21.0",
+  "scripts": {
+    "dev": "email dev",
+    "build": "email export --outDir ../backend/platforms/email/templates --pretty"
+  },
+  "dependencies": {
+    "react-email": "6.5.0",
+    "react-dom": "19.2.4",
+    "react": "19.2.4"
+  },
+  "devDependencies": {
+    "@react-email/ui": "6.5.0",
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3"
+  }
+}
