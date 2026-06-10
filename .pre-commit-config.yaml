@@ -1,20 +1,31 @@
 repos:
   - repo: local
     hooks:
-      - id: eslint
-        name: eslint
+      - id: eslint-frontend
+        name: eslint (frontend)
         entry: sh -c 'cd frontend; npm run eslint:fix'
         language: system
-        files: \.(js|jsx|ts|tsx|vue)$
-      - id: prettier
-        name: prettier
+        files: ^frontend/.*\.(js|jsx|ts|tsx|vue)$
+      - id: prettier-frontend
+        name: prettier (frontend)
         entry: sh -c 'cd frontend; npm run prettier:fix'
         language: system
-        files: \.(js|jsx|ts|tsx|vue)$
+        files: ^frontend/.*\.(js|jsx|ts|tsx|vue)$
+      - id: eslint-email-templates
+        name: eslint (email-templates)
+        entry: sh -c 'cd email-templates; npm run eslint:fix'
+        language: system
+        files: ^email-templates/.*\.(js|jsx|ts|tsx|vue)$
+      - id: prettier-email-templates
+        name: prettier (email-templates)
+        entry: sh -c 'cd email-templates; npm run prettier:fix'
+        language: system
+        files: ^email-templates/.*\.(js|jsx|ts|tsx|vue)$
   - repo: https://github.com/gitleaks/gitleaks.git
     rev: v8.28.0
     hooks:
       - id: gitleaks
+        name: GitLeaks
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.14.2
     hooks:

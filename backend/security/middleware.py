@@ -170,7 +170,7 @@ class SecurityMiddleware(LoggingEntity):
                         value = csp
                         break
             elif header == "Access-Control-Allow-Origin":
-                value = origin if origin in allowed_origins else CONFIG.frontend_url
+                value = origin if origin in allowed_origins else CONFIG.frontend_url.replace(CONFIG.root_path, "")
             elif header == "Referrer-Policy" and request.path.startswith("/admin"):
                 value = "strict-origin"  # pragma: no cover
             response[header] = value

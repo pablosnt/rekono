@@ -161,5 +161,5 @@ class Telegram(BaseNotification, BaseTelegram):
         )
         self._notify_if_enabled(
             [report.user],
-            f"New {report.format.upper()} report for {report_target} is [available](({CONFIG.frontend_url}/#/projects/{report.parent_project.id}/reports)) to be downloaded",
+            f"New {report.format.upper()} report for {report_target} is [available](({CONFIG.frontend_url}/projects/{report.parent_project.id}/reports)) to download",
         )
