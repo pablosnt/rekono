@@ -113,9 +113,6 @@ export default function AlertNotification() {
         <Field label="Technology" value={"{{ finding.technology.name }}"} />
         {"{% endif %}"}
         <Field label="Name" value={"{{ finding.name }}"} strong />
-        {"{% if finding.description %}"}
-        <Field label="Description" value={"{{ finding.description }}"} />
-        {"{% endif %}"}
         <Field label="Severity" value={"{{ finding.get_severity_display }}"} />
         {"{% if finding.cvss_base_score or finding.cvss_vector %}"}
         <Field

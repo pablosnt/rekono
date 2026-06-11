@@ -10,6 +10,9 @@ export default function ReportCreated() {
       </Heading>
       <Text className="text-gray-500 text-sm leading-relaxed m-0 mb-8">
         {"Good news! Your {{ report.format|upper }} report generated from "}
+        {
+          "{% if report.task %}task{% elif report.target %}target{% else %}project{% endif %} "
+        }
         <Link
           href={
             "{{ rekono_url }}/projects/{% if report.task %}{{ report.task.target.project.id }}/scans/{{ report.task.id }}{% elif report.target %}{{ report.target.project.id }}/targets/{{ report.target.id }}{% else %}{{ report.project.id }}{% endif %}"
@@ -17,7 +20,7 @@ export default function ReportCreated() {
           className="text-primary font-semibold underline"
         >
           {
-            "{% if report.task %}task #{{ report.task.id }}{% elif report.target %}target {{ report.target.target }}{% else %}project {{ report.project.name }}{% endif %}"
+            "{% if report.task %}#{{ report.task.id }}{% elif report.target %}{{ report.target.target }}{% else %}{{ report.project.name }}{% endif %}"
           }
         </Link>
         {" is ready to download."}

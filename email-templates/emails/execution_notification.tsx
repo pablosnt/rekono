@@ -106,7 +106,6 @@ const tables: {
     list: "vulnerability",
     item: "v",
     columns: [
-      { header: "Technology", cell: cell("v.technology.name") },
       {
         header: "Host / Port",
         cell: hostPortCell("v.port", "v.technology.port"),
@@ -116,13 +115,7 @@ const tables: {
       { header: "Severity", cell: cell("v.get_severity_display") },
       { header: "CVSS", cell: cell("v.cvss_base_score"), mono: true },
       { header: "CVE", cell: cell("v.cve"), mono: true, bold: true },
-      {
-        header: "CWE",
-        cell: `{{ v.cwes|join:", "|default:"${DASH}" }}`,
-        mono: true,
-      },
       { header: "EPSS", cell: cell("v.epss_score"), mono: true },
-      { header: "Trending", cell: '{{ v.trending|yesno:"Yes,No" }}' },
       { header: "Reference", cell: ReferenceCell("v", "Link") },
     ],
   },
@@ -135,15 +128,6 @@ const tables: {
       {
         header: "Technology",
         cell: `{% if e.vulnerability.technology %}{{ e.vulnerability.technology.name }}{% elif e.technology %}{{ e.technology.name }}{% else %}${DASH}{% endif %}`,
-      },
-      {
-        header: "Host / Port",
-        cell: hostPortCell(
-          "e.vulnerability.port",
-          "e.vulnerability.technology.port",
-          "e.technology.port",
-        ),
-        mono: true,
       },
       { header: "Title", cell: cell("e.title"), bold: true },
       { header: "Exploit DB", cell: cell("e.edb_id"), mono: true },
@@ -198,7 +182,7 @@ export default function ExecutionNotification() {
         }
         className="bg-primary text-white rounded-md px-7 py-3 font-bold text-sm no-underline mb-8"
       >
-        View task details
+        View scan
       </Button>
       <Hr className="border-gray-200 m-0 mb-8" />
       {tables.map((table) => (
