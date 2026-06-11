@@ -204,7 +204,7 @@ class SMTP(BaseNotification):
             users,
             f"[Rekono] {'New trending CVE' if alert.item == AlertItem.TRENDING_CVE else f'New {finding.__class__.__name__.lower()} detected'}",
             "alert_notification.html",
-            {"alert": alert, "finding": finding},
+            {"alert": alert, "finding": finding, "finding_type": finding.__class__.__name__},
             background=False,
         )
 

@@ -5,23 +5,23 @@ import { Field, hostDomainOrIp, ReferenceField } from "./_findings";
 export default function AlertNotification() {
   return (
     <Layout>
-      <Preview>{"New {{ finding.__class__.__name__ }} detected"}</Preview>
+      <Preview>{"New {{ finding_type }} detected"}</Preview>
       <Heading className="text-gray-900 text-2xl font-bold m-0 mb-4">
-        {"New {{ finding.__class__.__name__ }} detected"}
+        {"New {{ finding_type }} detected"}
       </Heading>
       <Text className="text-gray-500 text-sm leading-relaxed m-0 mb-6">
         Heads up! One of your alert rules just matched. Here is what Rekono
         found.
       </Text>
       <div className="bg-gray-50 border border-gray-200 rounded-md px-6 py-5 mb-8">
-        {'{% if finding.__class__.__name__ == "OSINT" %}'}
+        {'{% if finding_type == "OSINT" %}'}
         <Field label="Data" value={"{{ finding.data }}"} strong />
         <Field label="Data type" value={"{{ finding.data_type }}"} />
         {"{% if finding.source %}"}
         <Field label="Source" value={"{{ finding.source }}"} />
         {"{% endif %}"}
 
-        {'{% elif finding.__class__.__name__ == "Host" %}'}
+        {'{% elif finding_type == "Host" %}'}
         <Field label="IP" value={"{{ finding.ip }}"} mono strong />
         {"{% if finding.domain %}"}
         <Field label="Domain" value={"{{ finding.domain }}"} mono strong />
@@ -37,7 +37,7 @@ export default function AlertNotification() {
         <Field label="City" value={"{{ finding.city }}"} />
         {"{% endif %}"}
 
-        {'{% elif finding.__class__.__name__ == "Port" %}'}
+        {'{% elif finding_type == "Port" %}'}
         {"{% if finding.host %}"}
         <Field label="Host" value={hostDomainOrIp("finding.host")} mono />
         {"{% endif %}"}
@@ -50,7 +50,7 @@ export default function AlertNotification() {
         <Field label="Service" value={"{{ finding.service }}"} strong />
         {"{% endif %}"}
 
-        {'{% elif finding.__class__.__name__ == "Technology" %}'}
+        {'{% elif finding_type == "Technology" %}'}
         {"{% if finding.port and finding.port.host %}"}
         <Field label="Host" value={hostDomainOrIp("finding.port.host")} mono />
         {"{% endif %}"}
@@ -65,7 +65,7 @@ export default function AlertNotification() {
         <ReferenceField />
         {"{% endif %}"}
 
-        {'{% elif finding.__class__.__name__ == "Credential" %}'}
+        {'{% elif finding_type == "Credential" %}'}
         {"{% if finding.technology %}"}
         {"{% if finding.technology.port and finding.technology.port.host %}"}
         <Field
@@ -92,7 +92,7 @@ export default function AlertNotification() {
         <Field label="Context" value={"{{ finding.context }}"} />
         {"{% endif %}"}
 
-        {'{% elif finding.__class__.__name__ == "Vulnerability" %}'}
+        {'{% elif finding_type == "Vulnerability" %}'}
         {
           "{% if finding.technology and finding.technology.port and finding.technology.port.host %}"
         }
@@ -154,7 +154,7 @@ export default function AlertNotification() {
         {"{% endif %}"}
       </div>
       <Button
-        href={`{{ rekono_url }}/projects/{{ alert.project.id }}/{% if finding.__class__.__name__ == "OSINT" %}osint{% elif finding.__class__.__name__ == "Host" %}hosts{% elif finding.__class__.__name__ == "Port" %}ports{% elif finding.__class__.__name__ == "Technology" %}technologies{% elif finding.__class__.__name__ == "Credential" %}credentials{% else %}vulnerabilities{% endif %}/{{ finding.id }}`}
+        href={`{{ rekono_url }}/projects/{{ alert.project.id }}/{% if finding_type == "OSINT" %}osint{% elif finding_type == "Host" %}hosts{% elif finding_type == "Port" %}ports{% elif finding_type == "Technology" %}technologies{% elif finding_type == "Credential" %}credentials{% else %}vulnerabilities{% endif %}/{{ finding.id }}`}
         className="bg-primary text-white rounded-md px-7 py-3 font-bold text-sm no-underline"
       >
         Review finding
