@@ -47,9 +47,9 @@ jobs:
           tool-cache: true
       
       - name: Checkout
-        uses: actions/checkout@0c366fd6a839edf440554fa01a7085ccba70ac98
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
         with:
-          fetch-depth: 0
+          persist-credentials: false
 
       - name: Set up Docker
         uses: docker/setup-docker-action@5223f80f64587ec3bf588369be41ea8e6cda1dbb
