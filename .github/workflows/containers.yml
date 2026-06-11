@@ -1,4 +1,3 @@
-# TODO: Rename file to containers.yml. Keep it as it is for now, to execute the workflow before reaching main
 name: Containers
 on:
   workflow_dispatch:
@@ -115,13 +114,12 @@ jobs:
             LABEL_VERSION=${{ github.event.release.name }}
             LABEL_REVISION=${{ github.sha }}
 
-      # TODO: Disabling Trivy for now due to their action compromise
-      # - name: Trivy
-      #   uses: aquasecurity/trivy-action@0.30.0
-      #   with:
-      #     image-ref: ${{ secrets.DOCKER_USER }}/${{ matrix.image }}:unstable
-      #     format: table
-      #     exit-code: 0
+      - name: Trivy
+        uses: aquasecurity/trivy-action@bfa4b33a029b9aa80ddb784b45574c30e072c59e
+        with:
+          image-ref: ${{ secrets.DOCKER_USER }}/${{ matrix.image }}:unstable
+          format: table
+          exit-code: 0
       
       - name: Dockle
         uses: goodwithtech/dockle-action@e30e6af832aad6ea7dca2a248d31a85eab6dbd68
