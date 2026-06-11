@@ -41,12 +41,13 @@ export function Layout({ children }: LayoutProps) {
           <title>Rekono</title>
         </Head>
         <Body className="bg-gray-100 m-0 p-0 font-sans">
-          <Container className="max-w-[600px] mx-auto">
+          <Container className="max-w-[600px] mx-auto px-4">
             <Section className="py-8">
               <Row>
                 <Column className="text-center">
+                  {/* TODO: update branch to main once migration/2.0.0 is merged */}
                   <Img
-                    src={"{{ rekono_url }}/logo-light.png"}
+                    src="https://raw.githubusercontent.com/pablosnt/rekono/migration/2.0.0/frontend/public/logo-light.png"
                     alt="Rekono"
                     height={36}
                     className="mx-auto"
