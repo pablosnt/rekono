@@ -12,6 +12,10 @@ jobs:
   docker-images:
     runs-on: ubuntu-latest
     environment: docker-hub
+    permissions:
+      contents: read
+      id-token: write       # OIDC token is used to request a Sigstore signing certificate
+      attestations: write   # Persist the generated attestation
     strategy:
       fail-fast: false
       matrix:
@@ -81,6 +85,7 @@ jobs:
           echo "date=$(date --rfc-3339=seconds)" >> "$GITHUB_OUTPUT"
 
       - name: Build and push unstable
+        id: build-unstable
         if: ${{ github.event_name != 'release' }}
         uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f
         with:
@@ -98,6 +103,7 @@ jobs:
             LABEL_REVISION=${{ github.sha }}
       
       - name: Build and push release
+        id: build-release
         if: ${{ github.event_name == 'release' }}
         uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f
         with:
@@ -113,6 +119,13 @@ jobs:
             LABEL_CREATED=${{ steps.metadata.outputs.date }}
             LABEL_VERSION=${{ github.event.release.name }}
             LABEL_REVISION=${{ github.sha }}
+
+      - name: Attest provenance
+        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26
+        with:
+          subject-name: docker.io/${{ secrets.DOCKER_USER }}/${{ matrix.image }}
+          subject-digest: ${{ github.event_name == 'release' && steps.build-release.outputs.digest || steps.build-unstable.outputs.digest }}
+          push-to-registry: false
 
       - name: Trivy
         uses: aquasecurity/trivy-action@bfa4b33a029b9aa80ddb784b45574c30e072c59e
