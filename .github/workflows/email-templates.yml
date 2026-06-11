@@ -26,8 +26,8 @@ jobs:
 
       - name: Install dependencies
         working-directory: email-templates
-        run: pnpm install --frozen-lockfile
+        run: pnpm install . --ignore-scripts
 
       - name: Build email templates
         working-directory: email-templates
-        run: pnpm build
+        run: pnpm run build
