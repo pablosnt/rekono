@@ -7,19 +7,15 @@ export default function UserEnableAccount() {
       <Preview>
         Your account is active again. Set a password to get back in.
       </Preview>
-      {"{% if user.first_name %}"}
       <Heading className="text-gray-900 text-2xl font-bold m-0 mb-4">
+        {"{% if user.first_name %}"}
         {"Welcome back, {{ user.first_name }}!"}
-      </Heading>
-      {"{% elif user.username %}"}
-      <Heading className="text-gray-900 text-2xl font-bold m-0 mb-4">
+        {"{% elif user.username %}"}
         {"Welcome back, {{ user.username }}!"}
-      </Heading>
-      {"{% else %}"}
-      <Heading className="text-gray-900 text-2xl font-bold m-0 mb-4">
+        {"{% else %}"}
         Welcome back!
+        {"{% endif %}"}
       </Heading>
-      {"{% endif %}"}
       <Text className="text-gray-500 text-sm leading-relaxed m-0 mb-4">
         Your Rekono account is active and ready to use. Set your password below
         to start using it.

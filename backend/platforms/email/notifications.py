@@ -200,9 +200,14 @@ class SMTP(BaseNotification):
             finding (Finding): The security finding that triggered the alert
         """
         # This is called from findings queue which is already asynchronous
+        alert = (
+            f"{finding.cve} is trending"
+            if alert.item == AlertItem.TRENDING_CVE
+            else f"new {finding.__class__.__name__.lower().replace('osint', 'OSINT')} detected"
+        )
         self._notify(
             users,
-            f"Alert triggered: {f'{finding.cve} is trending' if alert.item == AlertItem.TRENDING_CVE else f'new {finding.__class__.__name__.lower()} detected'}",
+            f"Alert triggered: {alert}",
             "alert_notification.html",
             {"alert": alert, "finding": finding, "finding_type": finding.__class__.__name__},
             background=False,

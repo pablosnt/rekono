@@ -11,7 +11,7 @@ pnpm install
 ## Development
 
 ```bash
-pnpm dev
+pnpm run dev
 ```
 
 This deploys a development server in https://localhost:3000 where we can explore the templates preview.
@@ -19,7 +19,7 @@ This deploys a development server in https://localhost:3000 where we can explore
 ## Generating templates
 
 ```bash
-pnpm build
+pnpm run build
 ```
 
 This exports each component to a Django-compatible `.html` file in this directory.

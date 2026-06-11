@@ -124,7 +124,7 @@ class Telegram(BaseNotification, BaseTelegram):
             .get("template", "")
             .format(
                 **{
-                    k: self.escape(str(v) if not isinstance(v, Finding) else v.__str__())
+                    k: self.escape(", ".join(str(i) for i in v) if isinstance(v, list) else str(v))
                     for k, v in model_to_dict(finding).items()
                 }
             )

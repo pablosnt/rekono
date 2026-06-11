@@ -11,7 +11,7 @@ export default function ReportCreated() {
       <Text className="text-gray-500 text-sm leading-relaxed m-0 mb-8">
         {"Good news! Your {{ report.format|upper }} report generated from "}
         {
-          "{% if report.task %}task{% elif report.target %}target{% else %}project{% endif %} "
+          "{% if report.task %}scan{% elif report.target %}target{% else %}project{% endif %} "
         }
         <Link
           href={

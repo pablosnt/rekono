@@ -7,7 +7,9 @@ export default function AlertNotification() {
     <Layout>
       <Preview>A finding just matched one of your alert rules.</Preview>
       <Heading className="text-gray-900 text-2xl font-bold m-0 mb-4">
-        {"New {{ finding_type }} detected"}
+        {
+          'New {% if finding_type == "OSINT" %}OSINT{% else %}{{ finding_type|lower }}{% endif %} detected'
+        }
       </Heading>
       <Text className="text-gray-500 text-sm leading-relaxed m-0 mb-6">
         Heads up! One of your alert rules just matched. Here is what Rekono
@@ -114,14 +116,16 @@ export default function AlertNotification() {
         {"{% endif %}"}
         <Field label="Name" value={"{{ finding.name }}"} strong />
         <Field label="Severity" value={"{{ finding.get_severity_display }}"} />
-        {"{% if finding.cvss_base_score or finding.cvss_vector %}"}
+        {"{% if finding.cvss_base_score and finding.cvss_vector %}"}
         <Field
           label="CVSS"
-          value={
-            "{% if finding.cvss_base_score %}{{ finding.cvss_base_score }}{% endif %}{% if finding.cvss_vector %} ({{ finding.cvss_vector }}){% endif %}"
-          }
+          value={"{{ finding.cvss_base_score }} ({{ finding.cvss_vector }})"}
           mono
         />
+        {"{% elif finding.cvss_base_score %}"}
+        <Field label="CVSS" value={"{{ finding.cvss_base_score }}"} mono />
+        {"{% elif finding.cvss_vector %}"}
+        <Field label="CVSS" value={"{{ finding.cvss_vector }}"} mono />
         {"{% endif %}"}
         {"{% if finding.cve %}"}
         <Field label="CVE" value={"{{ finding.cve }}"} mono strong />
