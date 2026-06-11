@@ -29,8 +29,6 @@ jobs:
   zizmor:
     name: Zizmor
     runs-on: ubuntu-latest
-    permissions:
-      security-events: write  # Required to upload SARIF files
     steps:
       - name: Checkout repository
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
@@ -39,3 +37,5 @@ jobs:
 
       - name: Run zizmor 🌈
         uses: zizmorcore/zizmor-action@a687b25bf3aa149153e80ed5f45292e47589888c
+        with:
+          advanced-security: false
