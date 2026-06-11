@@ -16,7 +16,7 @@ from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken, Ou
 
 from framework.logging import LoggingEntity
 from framework.models import BaseEncrypted
-from platforms.mail.notifications import SMTP
+from platforms.email.notifications import SMTP
 from rekono.settings import CONFIG
 from security.authentication.api import ApiToken
 from security.authorization.roles import Role
@@ -307,7 +307,7 @@ class RekonoUserManager(UserManager, LoggingEntity, OtpManagerMixin, MfaManagerM
         """Disable user account and cleanup resources.
 
         Deactivates user account, makes password unusable, clears OTP,
-        removes project memberships, and deletes API tokens for security.
+        disables MFA, removes project memberships, and deletes API tokens for security.
 
         Args:
             user (Any): User instance to disable.
@@ -319,8 +319,10 @@ class RekonoUserManager(UserManager, LoggingEntity, OtpManagerMixin, MfaManagerM
         user.set_unusable_password()  # Make its password unusable
         user.otp = None  # Remove its OTP
         user.otp_expiration = None
+        user.mfa = False  # Disable MFA
+        user._mfa_key = None  # Remove MFA secret key
         user.projects.clear()  # Clear its projects
-        user.save(update_fields=["otp", "otp_expiration", "is_active"])
+        user.save(update_fields=["password", "otp", "otp_expiration", "is_active", "mfa", "_mfa_key"])
         ApiToken.objects.filter(user=user).delete()
         self.logger.info(f"[User] User {user.id} has been disabled")
         return user

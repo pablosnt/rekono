@@ -124,7 +124,7 @@ class Telegram(BaseNotification, BaseTelegram):
             .get("template", "")
             .format(
                 **{
-                    k: self.escape(str(v) if not isinstance(v, Finding) else v.__str__())
+                    k: self.escape(", ".join(str(i) for i in v) if isinstance(v, list) else str(v))
                     for k, v in model_to_dict(finding).items()
                 }
             )
@@ -161,5 +161,5 @@ class Telegram(BaseNotification, BaseTelegram):
         )
         self._notify_if_enabled(
             [report.user],
-            f"New {report.format.upper()} report for {report_target} is [available](({CONFIG.frontend_url}/#/projects/{report.parent_project.id}/reports)) to be downloaded",
+            f"New {report.format.upper()} report for {report_target} is [available](({CONFIG.frontend_url}/projects/{report.parent_project.id}/reports)) to download",
         )

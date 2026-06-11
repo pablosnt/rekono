@@ -2,7 +2,7 @@ from functools import cached_property
 
 from django.test import TestCase
 
-from platforms.mail.models import SMTPSettings
+from platforms.email.models import SMTPSettings
 from security.authorization.roles import Role
 from tests.framework import ApiTestNoData
 from tests.framework.cases import ApiTestCase, PutApiTestCase

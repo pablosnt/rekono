@@ -149,6 +149,10 @@ class SendEmailMfaView(GenericAPIView):
         Raises:
             ValidationError: If MFA is not enabled or user validation fails.
         """
+        if not request.data.get("token"):
+            cookie = request.COOKIES.get(JWT_MFA_COOKIE)
+            if cookie:
+                request._full_data = {"token": cookie}
         serializer = SendMfaEmailSerializer(data=request.data, context={"request": request})
         serializer.is_valid(raise_exception=True)
         serializer.save()

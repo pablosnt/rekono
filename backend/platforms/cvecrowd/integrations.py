@@ -19,7 +19,7 @@ from findings.framework.models import Finding
 from findings.models import Vulnerability
 from framework.platforms import BaseIntegration
 from platforms.cvecrowd.models import CveCrowdCache, CveCrowdSettings
-from platforms.mail.notifications import SMTP
+from platforms.email.notifications import SMTP
 from platforms.telegram_app.notifications import Telegram
 
 

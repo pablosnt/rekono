@@ -7,7 +7,7 @@ from django.test import TestCase
 from rest_framework.test import APIClient
 
 from executions.models import Execution
-from platforms.mail.notifications import SMTP
+from platforms.email.notifications import SMTP
 from platforms.telegram_app.models import TelegramChat
 from security.authorization.roles import Role
 from tests.framework import ApiTest, ApiTestNoData
@@ -164,7 +164,7 @@ class UserTest(ApiTest, TestCase):
         ApiTestCase([Role.ADMIN], 404, endpoint="8"),
     ]
 
-    @mock.patch("platforms.mail.notifications.SMTP.is_available", lambda self: True)
+    @mock.patch("platforms.email.notifications.SMTP.is_available", lambda self: True)
     def test_cases(self) -> None:
         super().test_cases()
 
@@ -173,7 +173,7 @@ class UserTest(ApiTest, TestCase):
         client.force_authenticate(self.admin1)
         self.assertEqual(400, client.post(self.endpoint, data=invitation1).status_code)
 
-    @mock.patch("platforms.mail.notifications.SMTP.is_available", lambda self: True)
+    @mock.patch("platforms.email.notifications.SMTP.is_available", lambda self: True)
     def test_invite_and_create(self) -> None:
         client = APIClient()
         client.force_authenticate(self.admin1)

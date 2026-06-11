@@ -16,7 +16,7 @@ from rest_framework.fields import SerializerMethodField
 from rest_framework.serializers import CharField, ChoiceField, EmailField, ModelSerializer, Serializer, URLField
 
 from framework.logging import LoggingEntity
-from platforms.mail.notifications import SMTP
+from platforms.email.notifications import SMTP
 from platforms.telegram_app.notifications import Telegram
 from security.authentication.serializers import MfaSerializer
 from security.authorization.roles import Role

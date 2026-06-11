@@ -17,6 +17,7 @@ from dataclasses import dataclass
 from functools import cached_property
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlparse
 
 import yaml
 
@@ -343,7 +344,12 @@ class RekonoConfig:
         Returns:
             str: Base URL for the Rekono frontend application.
         """
-        return self._frotend_url.read(self.config_from_file)
+        url = str(self._frotend_url.read(self.config_from_file))
+        root = self.root_path
+        if root and str(url).endswith(root):
+            parse = urlparse(url)
+            return f"{parse.scheme}://{parse.netloc}{root}"
+        return url
 
     @property
     def frontend_desktop(self) -> bool:

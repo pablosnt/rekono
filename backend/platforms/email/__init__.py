@@ -8,7 +8,8 @@ and platform activities in real-time.
 
 Key Features:
     - SMTP configuration management with encrypted credential storage
-    - HTML email templates for professional notification formatting
+    - HTML email templates authored in React (email-templates/) and built to
+      platforms/email/templates/ via react-email's export pipeline
     - Real-time notifications for security findings and alerts
     - User lifecycle notifications (invitations, password resets, MFA)
     - Background email processing for optimal performance

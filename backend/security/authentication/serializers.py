@@ -17,7 +17,7 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer, Toke
 from rest_framework_simplejwt.token_blacklist.models import OutstandingToken
 
 from framework.logging import LoggingEntity
-from platforms.mail.notifications import SMTP
+from platforms.email.notifications import SMTP
 from rekono.settings import CONFIG
 from security.authentication.tokens import MfaRequiredToken
 from security.authorization.roles import Role

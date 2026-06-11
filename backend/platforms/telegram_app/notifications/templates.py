@@ -91,7 +91,7 @@ _Context_       {context}
 _Name_              *{name}*
 _CVE_               *{cve}*
 _Severity_          *{severity}*
-_CWE_               {cwe}
+_CWE_               {cwes}
 _Port_              {port}
 _Technology_        {technology}
 _Reference_         {reference}

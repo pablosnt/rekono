@@ -7,8 +7,8 @@ sensitive credential data and service availability validation.
 from rest_framework.serializers import ModelSerializer, SerializerMethodField
 
 from framework.fields import ProtectedSecretField
-from platforms.mail.models import SMTPSettings
-from platforms.mail.notifications import SMTP
+from platforms.email.models import SMTPSettings
+from platforms.email.notifications import SMTP
 
 
 class SMTPSettingsSerializer(ModelSerializer):
@@ -27,14 +27,11 @@ class SMTPSettingsSerializer(ModelSerializer):
     is_available = SerializerMethodField(read_only=True)
 
     class Meta:
-        """Serializer metadata configuration for SMTPSettings model.
-
-        Defines the model to serialize and specifies the fields to include
-        in the serialized representation for REST API operations.
+        """Meta configuration for SMTPSettingsSerializer.
 
         Attributes:
-            model: SMTPSettings model class for serialization
-            fields: Tuple of field names to include in serialization
+            model (Model): The SMTPSettings model to serialize
+            fields (tuple): Field names to include in serialization
         """
 
         model = SMTPSettings

@@ -60,7 +60,7 @@ INSTALLED_APPS = [
     "notes",
     "platforms.cvecrowd",
     "platforms.defectdojo",
-    "platforms.mail",
+    "platforms.email",
     "platforms.nvdnist",
     "platforms.telegram_app",
     "platforms.virustotal",
@@ -98,7 +98,7 @@ ROOT_URLCONF = "rekono.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [BASE_DIR / "platforms" / "mail" / "templates"],
+        "DIRS": [BASE_DIR / "platforms" / "email" / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [

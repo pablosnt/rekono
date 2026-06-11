@@ -10,12 +10,28 @@ ARG LABEL_LICENSES="GPL-3.0"
 ARG BACKEND_DEBIAN_DEPENDENCIES="libpq-dev libmagic1 libgcc-s1 libxml2-dev libxslt-dev python3-dev python3-pil python3-pil.imagetk libjpeg-dev zlib1g-dev"
 
 
+FROM node:26.2.0-bookworm-slim AS build-email-templates
+
+ENV CI=true
+
+COPY email-templates /templates
+WORKDIR /templates
+
+# Build HTML templates compatible with Django
+RUN PNPM_VERSION=$(node -p "require('./package.json').packageManager.split('@')[1]") && \
+    npm install -g pnpm@${PNPM_VERSION} && \
+    pnpm install --frozen-lockfile --prod --ignore-scripts && \
+    pnpm email export --outDir /templates/dist && \
+    node scripts/unescape-django-tags.mjs /templates/dist
+
+
 FROM ghcr.io/astral-sh/uv:python3.13-bookworm-slim AS build-backend
 
 ARG BACKEND_DEBIAN_DEPENDENCIES
 
 COPY backend/ /code
 COPY frontend/public /code/static
+COPY --from=build-email-templates /templates/dist/ /code/platforms/email/templates/
 COPY config.yaml /rekono/
 WORKDIR /code
 

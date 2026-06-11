@@ -81,7 +81,7 @@ jobs:
 
       - name: Install Node dependencies
         if: ${{ steps.changes.outputs.frontend == 'true' || github.event_name != 'pull_request' }}
-        working-directory: frontend
+        working-directory: frontend/
         run: |
           pnpm install . --ignore-scripts
           pnpm nuxt prepare
@@ -94,4 +94,47 @@ jobs:
       - name: Prettier
         if: ${{ (steps.changes.outputs.frontend == 'true' || github.event_name != 'pull_request') && !cancelled() }}
         working-directory: frontend/
+        run: pnpm run prettier
+
+  email-templates:
+    name: Email Templates
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check changed files
+        uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36
+        id: changes
+        with:
+          filters: |
+            templates:
+              - 'email-templates/**'
+
+      - name: Checkout
+        if: ${{ steps.changes.outputs.templates == 'true' || github.event_name != 'pull_request' }}
+        uses: actions/checkout@0c366fd6a839edf440554fa01a7085ccba70ac98
+        with:
+          fetch-depth: 0
+      
+      - name: Install Node
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f
+        with:
+          node-version: 22
+
+      - name: Install PNPM
+        uses: pnpm/action-setup@6e7bdbda5fe05107efc88b23b7ed00aa05f84ca0
+        with:
+          version: 10
+
+      - name: Install Node dependencies
+        if: ${{ steps.changes.outputs.templates == 'true' || github.event_name != 'pull_request' }}
+        working-directory: email-templates/
+        run: pnpm install . --ignore-scripts
+
+      - name: ESLint
+        if: ${{ steps.changes.outputs.templates == 'true' || github.event_name != 'pull_request' }}
+        working-directory: email-templates/
+        run: pnpm run eslint
+
+      - name: Prettier
+        if: ${{ (steps.changes.outputs.templates == 'true' || github.event_name != 'pull_request') && !cancelled() }}
+        working-directory: email-templates/
         run: pnpm run prettier

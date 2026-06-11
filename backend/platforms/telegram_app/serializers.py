@@ -13,7 +13,7 @@ from rest_framework.serializers import ModelSerializer, SerializerMethodField
 
 from framework.fields import ProtectedSecretField
 from framework.logging import LoggingEntity
-from platforms.mail.notifications import SMTP
+from platforms.email.notifications import SMTP
 from platforms.telegram_app.models import TelegramChat, TelegramSettings
 from platforms.telegram_app.notifications import Telegram
 from security.cryptography import Crypto

@@ -21,7 +21,7 @@ from alerts.models import Alert
 from executions.models import Execution
 from findings.framework.models import Finding
 from framework.platforms import BaseNotification
-from platforms.mail.models import SMTPSettings
+from platforms.email.models import SMTPSettings
 from rekono.settings import CONFIG
 
 
@@ -92,7 +92,7 @@ class SMTP(BaseNotification):
         using the certifi package to ensure secure connections to SMTP servers.
         """
         super().__init__()
-        # The trusted certificates must be defined
+        # Without this, SMTP TLS handshakes fail on systems that lack a system CA bundle
         os.environ["SSL_CERT_FILE"] = certifi.where()
 
     def is_available(self) -> bool:
@@ -175,13 +175,13 @@ class SMTP(BaseNotification):
         for finding in findings:
             if finding.created_from_user_input:
                 continue
-            if findings.__class__.__name__.lower() not in findings_by_class:
-                findings_by_class[findings.__class__.__name__.lower()] = []
-            findings_by_class[findings.__class__.__name__.lower()].append(finding)
+            if finding.__class__.__name__.lower() not in findings_by_class:
+                findings_by_class[finding.__class__.__name__.lower()] = []
+            findings_by_class[finding.__class__.__name__.lower()].append(finding)
         # This is called from findings queue which is already asynchronous
         self._notify(
             users,
-            f"[Rekono] {execution.configuration.tool.name} execution completed",
+            f"{execution.configuration.tool.name} scan completed",
             "execution_notification.html",
             {"execution": execution, **findings_by_class},
             background=False,
@@ -200,11 +200,16 @@ class SMTP(BaseNotification):
             finding (Finding): The security finding that triggered the alert
         """
         # This is called from findings queue which is already asynchronous
+        alert = (
+            f"{finding.cve} is trending"
+            if alert.item == AlertItem.TRENDING_CVE
+            else f"new {finding.__class__.__name__.lower().replace('osint', 'OSINT')} detected"
+        )
         self._notify(
             users,
-            f"[Rekono] {'New trending CVE' if alert.item == AlertItem.TRENDING_CVE else f'New {finding.__class__.__name__.lower()} detected'}",
+            f"Alert triggered: {alert}",
             "alert_notification.html",
-            {"alert": alert, "finding": finding},
+            {"alert": alert, "finding": finding, "finding_type": finding.__class__.__name__},
             background=False,
         )
 
@@ -218,7 +223,9 @@ class SMTP(BaseNotification):
             user (Any): The invited user object
             otp (str): One-time password for account activation
         """
-        self._notify_if_available([user], "Welcome to Rekono", "user_invitation.html", {"user": user, "user_otp": otp})
+        self._notify_if_available(
+            [user], "You have been invited to Rekono", "user_invitation.html", {"user": user, "user_otp": otp}
+        )
 
     def reset_password(self, user: Any, otp: str) -> None:
         """Send password reset email with secure reset instructions.
@@ -231,7 +238,7 @@ class SMTP(BaseNotification):
             otp (str): One-time password for secure password reset
         """
         self._notify_if_available(
-            [user], "Reset Rekono password", "user_password_reset.html", {"user": user, "user_otp": otp}
+            [user], "Reset your password", "user_password_reset.html", {"user": user, "user_otp": otp}
         )
 
     def mfa(self, user: Any, otp: str) -> None:
@@ -244,9 +251,7 @@ class SMTP(BaseNotification):
             user (Any): The user requesting MFA token
             otp (str): One-time password for multi-factor authentication
         """
-        self._notify_if_available(
-            [user], "[Rekono] One Time Password", "user_mfa.html", {"user": user, "user_otp": otp}
-        )
+        self._notify_if_available([user], "Your verification code", "user_mfa.html", {"user": user, "user_otp": otp})
 
     def enable_user_account(self, user: Any, otp: str) -> None:
         """Send account enablement notification with activation instructions.
@@ -259,7 +264,7 @@ class SMTP(BaseNotification):
             otp (str): One-time password for account activation
         """
         self._notify_if_available(
-            [user], "Rekono user enabled", "user_enable_account.html", {"user": user, "user_otp": otp}
+            [user], "Welcome back to Rekono", "user_enable_account.html", {"user": user, "user_otp": otp}
         )
 
     def login_notification(self, user: Any) -> None:
@@ -273,7 +278,7 @@ class SMTP(BaseNotification):
         """
         self._notify_if_available(
             [user],
-            "New login in your Rekono account",
+            "New sign-in to your account",
             "user_login_notification.html",
             {"time": timezone.now().strftime(self.datetime_format)},
         )
@@ -289,7 +294,7 @@ class SMTP(BaseNotification):
         """
         self._notify_if_available(
             [user],
-            "Welcome to Rekono Bot",
+            "Telegram bot linked to your account",
             "user_telegram_linked_notification.html",
             {"time": timezone.now().strftime(self.datetime_format)},
         )
@@ -304,5 +309,5 @@ class SMTP(BaseNotification):
             report (Any): The generated report object with format and download details
         """
         self._notify_if_enabled(
-            [report.user], f"{report.format.upper()} report is ready", "report_created.html", {"report": report}
+            [report.user], f"Your {report.format.upper()} report is ready", "report_created.html", {"report": report}
         )

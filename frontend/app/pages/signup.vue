@@ -54,7 +54,7 @@
 <script setup lang="ts">
 import * as z from "zod";
 
-const api = useApi("/api/security/signup/", false);
+const api = useApi("/api/users/signup/", false);
 const validation = useValidation();
 const route = useRoute();
 const loading = ref(false);

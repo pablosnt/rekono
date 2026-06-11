@@ -33,7 +33,7 @@ urlpatterns = [
     path("api/", include("parameters.urls")),
     path("api/", include("platforms.cvecrowd.urls")),
     path("api/", include("platforms.defectdojo.urls")),
-    path("api/", include("platforms.mail.urls")),
+    path("api/", include("platforms.email.urls")),
     path("api/", include("platforms.nvdnist.urls")),
     path("api/", include("platforms.telegram_app.urls")),
     path("api/", include("platforms.virustotal.urls")),
