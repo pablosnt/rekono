@@ -77,4 +77,10 @@ const config = reactive({
   formFullscreen: breakpoints.smaller("lg"),
 });
 const openModal = ref(false);
+
+function open() {
+  openModal.value = true;
+}
+
+defineExpose({ open });
 </script>

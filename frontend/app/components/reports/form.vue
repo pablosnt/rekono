@@ -18,11 +18,14 @@
       <USelectMenu
         v-model="formData.target"
         class="w-full"
-        icon="i-lucide-locate-fixed"
+        :icon="
+          formData.target
+            ? targetOptions.find((t) => t.value === formData.target)?.icon
+            : 'i-lucide-locate-fixed'
+        "
         placeholder="Select a target"
         :items="targetOptions"
-        value-key="id"
-        label-key="target"
+        value-key="value"
         size="lg"
         @update:model-value="onTargetChange"
       >

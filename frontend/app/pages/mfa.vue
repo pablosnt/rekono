@@ -74,20 +74,19 @@ function handleMethodSwitch() {
 
 function submit(event: object) {
   loading.value = true;
-  try {
-    api
-      .create("", {
-        mfa: event.data.mfaEmail
-          ? event.data.mfaEmail
-          : event.data.mfaApp.join(""),
-      })
-      .then((response) => {
-        userStore.login(response);
-        navigateTo("/");
-      });
-  } finally {
-    loading.value = false;
-  }
+  api
+    .create("", {
+      mfa: event.data.mfaEmail
+        ? event.data.mfaEmail
+        : event.data.mfaApp.join(""),
+    })
+    .then((response) => {
+      userStore.login(response);
+      navigateTo("/");
+    })
+    .finally(() => {
+      loading.value = false;
+    });
 }
 
 onMounted(() => {

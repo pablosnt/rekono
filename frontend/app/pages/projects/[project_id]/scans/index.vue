@@ -1,8 +1,16 @@
 <template>
   <div>
-    <CrudPage ref="page" :config="config" @fetched="onFetched">
+    <CrudPage
+      ref="page"
+      :config="config"
+      @fetched="onFetched"
+      @create-click="tasksButton?.open()"
+    >
       <template #create-button>
-        <TasksButton :project="{ id: parseInt(route.params.project_id) }" />
+        <TasksButton
+          ref="tasksButton"
+          :project="{ id: parseInt(route.params.project_id) }"
+        />
       </template>
     </CrudPage>
     <ReportsButton
@@ -37,6 +45,7 @@ const api = useApi("/api/tasks/");
 const table = useTable();
 const { refreshPanelCounts } = usePanel();
 const page = ref();
+const tasksButton = ref();
 const notesButton = ref();
 const showReportModal = ref(false);
 const selectedTask = ref();

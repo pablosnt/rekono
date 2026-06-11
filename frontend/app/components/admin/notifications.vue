@@ -221,12 +221,18 @@ function fetch() {
   loadingSmtp.value = true;
   smtpApi
     .get("1/")
-    .then((response) => (smtpSettings.value = response))
+    .then((response) => {
+      smtpSettings.value = response;
+      integrations.updateSmtpSettings(response);
+    })
     .finally(() => (loadingSmtp.value = false));
   loadingTelegram.value = true;
   telegramApi
     .get("1/")
-    .then((response) => (telegramSettings.value = response))
+    .then((response) => {
+      telegramSettings.value = response;
+      integrations.updateTelegramSettings(response);
+    })
     .finally(() => (loadingTelegram.value = false));
 }
 

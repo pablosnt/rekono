@@ -1,6 +1,6 @@
 <template>
   <div>
-    <CrudPage :config="config">
+    <CrudPage :config="config" @deleted="refreshPanelCounts()">
       <template v-if="userStore.is_auditor" #actions="{ item }">
         <TasksButton
           :project="{ id: parseInt(route.params.project_id) }"
@@ -32,6 +32,7 @@ const userStore = useUserStore();
 const route = useRoute();
 const table = useTable();
 const integrations = useIntegrationsStore();
+const { refreshPanelCounts } = usePanel();
 const selectedTarget = ref<Target | null>(null);
 const showReportModal = ref(false);
 const notesButton = ref();

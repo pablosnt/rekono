@@ -35,11 +35,14 @@
       <USelectMenu
         :model-value="target"
         class="w-full"
-        icon="i-lucide-locate-fixed"
+        :icon="
+          target
+            ? targetOptions.find((option) => option.value === target)?.icon
+            : 'i-lucide-locate-fixed'
+        "
         placeholder="Select a target"
         :items="targetOptions"
-        value-key="id"
-        label-key="target"
+        value-key="value"
         size="xl"
         :disabled="!project"
         @update:model-value="(value) => onTarget(value)"
@@ -117,6 +120,7 @@ const emit = defineEmits<{
   "update-target-port-options": [hasOptions: boolean];
 }>();
 
+const options = useOptions();
 const project = ref(props.defaultProject);
 const projectOptions = ref([]);
 const target = ref(props.defaultTarget);
@@ -139,11 +143,7 @@ function onProject(projectId: number | undefined) {
   emit("update-target-port", undefined);
   emit("update-target-port-options", false);
   if (projectId) {
-    props.api
-      .list("targets/", { project: projectId }, true)
-      .then((response) => {
-        targetOptions.value = response.items;
-      });
+    options.targets(targetOptions, { project: projectId });
   }
 }
 
