@@ -5,7 +5,7 @@ import { Field, hostDomainOrIp, ReferenceField } from "./_findings";
 export default function AlertNotification() {
   return (
     <Layout>
-      <Preview>{"New {{ finding_type }} detected"}</Preview>
+      <Preview>A finding just matched one of your alert rules.</Preview>
       <Heading className="text-gray-900 text-2xl font-bold m-0 mb-4">
         {"New {{ finding_type }} detected"}
       </Heading>

@@ -4,7 +4,9 @@ import { Layout } from "./_layout";
 export default function UserLoginNotification() {
   return (
     <Layout>
-      <Preview>New sign-in to your Rekono account</Preview>
+      <Preview>
+        Was this you? Review the activity and secure your account.
+      </Preview>
       <Heading className="text-gray-900 text-2xl font-bold m-0 mb-4">
         New sign-in to your account
       </Heading>

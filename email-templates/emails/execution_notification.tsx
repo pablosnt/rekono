@@ -139,9 +139,7 @@ const tables: {
 export default function ExecutionNotification() {
   return (
     <Layout>
-      <Preview>
-        {"{{ execution.configuration.tool.name }} execution completed"}
-      </Preview>
+      <Preview>See the summary and every finding from this scan.</Preview>
       <Heading className="text-gray-900 text-2xl font-bold m-0 mb-2">
         {"{% if execution.configuration.tool.icon %}"}
         <Img

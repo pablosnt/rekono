@@ -4,13 +4,13 @@ import { Layout } from "./_layout";
 export default function UserTelegramLinkedNotification() {
   return (
     <Layout>
-      <Preview>Your Rekono account is now linked to Telegram</Preview>
+      <Preview>Launch scans and get notifications right from Telegram.</Preview>
       <Heading className="text-gray-900 text-2xl font-bold m-0 mb-4">
         Telegram bot linked to your account
       </Heading>
       <Text className="text-gray-500 text-sm leading-relaxed m-0 mb-4">
         {
-          "We linked your Rekono account to the Telegram bot on {{ time }}. You will now receive notifications directly in Telegram. If this was you, there is nothing else you need to do."
+          "We linked your Rekono account to the Telegram bot on {{ time }}. You can now launch scans, manage your projects and receive notifications, all directly from Telegram. If this was you, there is nothing else you need to do."
         }
       </Text>
       <Text className="text-gray-500 text-sm leading-relaxed m-0 mb-8">

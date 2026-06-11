@@ -4,7 +4,7 @@ import { Layout } from "./_layout";
 export default function UserMfa() {
   return (
     <Layout>
-      <Preview>Your Rekono verification code</Preview>
+      <Preview>Use it to finish signing in before it expires.</Preview>
       <Heading className="text-gray-900 text-2xl font-bold m-0 mb-2">
         Verify your sign-in
       </Heading>

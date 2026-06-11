@@ -4,7 +4,7 @@ import { Layout } from "./_layout";
 export default function ReportCreated() {
   return (
     <Layout>
-      <Preview>Your Rekono report is ready to download</Preview>
+      <Preview>Download it now and share your results.</Preview>
       <Heading className="text-gray-900 text-2xl font-bold m-0 mb-4">
         Your report is ready
       </Heading>

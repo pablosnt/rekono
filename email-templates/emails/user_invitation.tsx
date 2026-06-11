@@ -4,7 +4,9 @@ import { Layout } from "./_layout";
 export default function UserInvitation() {
   return (
     <Layout>
-      <Preview>You have been invited to join Rekono</Preview>
+      <Preview>
+        Claim your account and start mapping your attack surface.
+      </Preview>
       <Heading className="text-gray-900 text-2xl font-bold m-0 mb-4">
         You are invited to Rekono
       </Heading>

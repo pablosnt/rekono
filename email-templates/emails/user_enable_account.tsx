@@ -4,7 +4,9 @@ import { Layout } from "./_layout";
 export default function UserEnableAccount() {
   return (
     <Layout>
-      <Preview>Your Rekono account has been enabled</Preview>
+      <Preview>
+        Your account is active again. Set a password to get back in.
+      </Preview>
       {"{% if user.first_name %}"}
       <Heading className="text-gray-900 text-2xl font-bold m-0 mb-4">
         {"Welcome back, {{ user.first_name }}!"}

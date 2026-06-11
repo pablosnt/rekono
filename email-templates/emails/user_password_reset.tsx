@@ -4,7 +4,7 @@ import { Layout } from "./_layout";
 export default function UserPasswordReset() {
   return (
     <Layout>
-      <Preview>Reset your Rekono password</Preview>
+      <Preview>Choose a new password before this link expires.</Preview>
       <Heading className="text-gray-900 text-2xl font-bold m-0 mb-4">
         Reset your password
       </Heading>
