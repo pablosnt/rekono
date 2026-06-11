@@ -4,7 +4,7 @@
   "packageManager": "pnpm@10.21.0",
   "scripts": {
     "dev": "email dev",
-    "build": "email export --outDir ../backend/platforms/email/templates --pretty",
+    "build": "email export --outDir ../backend/platforms/email/templates && node scripts/unescape-django-tags.mjs ../backend/platforms/email/templates",
     "eslint": "eslint .",
     "eslint:fix": "eslint . --fix",
     "prettier": "prettier --check . --ignore-path=../.gitignore --ignore-path=.prettierignore",
@@ -22,6 +22,7 @@
     "@types/react-dom": "19.2.3",
     "eslint": "^10.4.1",
     "eslint-config-prettier": "^10.1.8",
+    "globals": "^17.6.0",
     "prettier": "^3.8.3",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.60.1"

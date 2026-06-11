@@ -21,7 +21,8 @@ WORKDIR /templates
 RUN PNPM_VERSION=$(node -p "require('./package.json').packageManager.split('@')[1]") && \
     npm install -g pnpm@${PNPM_VERSION} && \
     pnpm install --frozen-lockfile --prod --ignore-scripts && \
-    pnpm email export --outDir /templates/dist --pretty
+    pnpm email export --outDir /templates/dist && \
+    node scripts/unescape-django-tags.mjs /templates/dist
 
 
 FROM ghcr.io/astral-sh/uv:python3.13-bookworm-slim AS build-backend
