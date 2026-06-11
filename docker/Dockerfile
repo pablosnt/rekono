@@ -56,6 +56,7 @@ RUN mkdir -p /opt/python/ /dpkg && \
 
 FROM gcr.io/distroless/base-debian12:nonroot AS backend
 
+
 ARG LABEL_CREATED
 ARG LABEL_AUTHORS
 ARG LABEL_URL
