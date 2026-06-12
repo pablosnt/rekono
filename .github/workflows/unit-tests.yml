@@ -8,6 +8,9 @@ on:
 env:
   REQUIRED_COVERAGE: 95
 
+permissions:
+  contents: read
+
 jobs:
   unit-tests:
     name: Unit tests
