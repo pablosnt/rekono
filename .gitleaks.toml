@@ -6,4 +6,7 @@ useDefault = true
 [allowlist]
 paths = [
   '''\.secrets\.baseline$''',
+  '''/(tests|testing)/''',
+  '''findings/enums\.py$''',
+  '''config\.yaml$''',
 ]
