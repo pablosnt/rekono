@@ -10,6 +10,7 @@ from datetime import timedelta
 from functools import cached_property
 from typing import Any, Sequence
 
+from django.core.exceptions import ValidationError
 from django.db.models import Max
 from django.utils import timezone
 from django_rq import job
@@ -21,6 +22,8 @@ from executions.queues import ExecutionsQueue
 from framework.queues import BaseScanQueue
 from input_types.models import InputType
 from processes.models import Step
+from security.validators.enums import Regex
+from security.validators.target_validator import TargetValidator
 from tasks.models import Task
 from tools.enums import Intensity as IntensityValue
 from tools.models import Intensity
@@ -138,21 +141,37 @@ class TasksQueue(BaseScanQueue):
 
     @staticmethod
     @job("tasks")
-    def consume(task: Task) -> Task:
+    def consume(task: Task) -> Task | None:
         """Process a task by creating and enqueuing executions.
 
         Main task processing function that handles both single tool tasks
         and multi-step process tasks. Creates execution records and
         enqueues them for processing.
 
+        The task target is re-validated against the deny list before any
+        execution is created, because targets are only validated when created
+        and a deny list change or DNS rebinding afterwards could otherwise let a
+        previously-saved target be scanned. A denied target finishes the task
+        without producing executions.
+
         Args:
             task (Task): The task to process
 
         Returns:
-            Task: The processed task
+            Task | None: The processed task
         """
         if task.executions:
             task.executions.clear()
+        # Re-validate the shared target once before creating any execution so deny
+        # list changes and DNS rebinding are enforced at execution time as well
+        try:
+            TargetValidator(Regex.TARGET)(task.target.target)
+        except ValidationError:
+            TasksQueue.logger.warning(
+                f"[Security] Task {task.id} target '{task.target.target}' is denied by policy at execution time"
+            )
+            task.delete()
+            return
         if task.configuration:
             TasksQueue._consume_tool_task(task)
         elif task.process:

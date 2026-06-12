@@ -38,6 +38,8 @@ class TargetDenylistTest(ApiTest, TestCase):
             ["admin1"], data=invalid_regex_denylist, expected={"id": 17, "default": False, **invalid_regex_denylist}
         ),
         PostApiTestCase(["admin1", "auditor1"], 400, {"project": 1, "target": "rekono.com"}, endpoint="/api/targets/"),
+        PostApiTestCase(["admin1", "auditor1"], 400, {"project": 1, "target": "REKONO.COM"}, endpoint="/api/targets/"),
+        PostApiTestCase(["admin1", "auditor1"], 400, {"project": 1, "target": "rekono.com."}, endpoint="/api/targets/"),
         PostApiTestCase(
             ["admin1", "auditor1"], 400, {"project": 1, "target": "subdomain.rekono.com"}, endpoint="/api/targets/"
         ),
