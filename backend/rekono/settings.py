@@ -328,6 +328,11 @@ RQ_QUEUES = {
 RQ_QUEUES["executions"]["DEFAULT_TIMEOUT"] = 28800  # 8 hours
 RQ_QUEUES["findings"]["DEFAULT_TIMEOUT"] = 10800  # 3 hours
 
+# Enqueue jobs immediately instead of deferring them until the database transaction commits.
+# django-rq defaults to "on_db_commit", which returns None from enqueue() inside an atomic
+# block (e.g. during tests or atomic requests), breaking the code that reads the resulting Job.
+RQ = {"COMMIT_MODE": "auto"}
+
 
 ################################################################################
 # Miscellaneous                                                                #
