@@ -146,7 +146,8 @@ class SecurityTest(ApiTest, TestCase):
             401, APIClient().post(self.mfa_login, data={"token": content.get("mfa"), "mfa": "1111111"}).status_code
         )
         # Valid token and MFA
-        response = APIClient().post(self.mfa_login, data={"token": content.get("mfa"), "mfa": mfa_otp.now()})
+        mfa_token = content.get("mfa")
+        response = APIClient().post(self.mfa_login, data={"token": mfa_token, "mfa": mfa_otp.now()})
         self.assertEqual(200, response.status_code)
         content = json.loads((response.content or "{}".encode()).decode())
         self.assertIsNotNone(content.get("access"))
@@ -154,6 +155,10 @@ class SecurityTest(ApiTest, TestCase):
         self.assertIn(JWT_REFRESH_COOKIE, response.cookies)
         client = APIClient(HTTP_AUTHORIZATION=f"Bearer {content.get('access')}")
         self.assertEqual(200, client.get(self.profile).status_code)
+        # The MFA token is single-use: replaying it after a successful login is rejected
+        self.assertEqual(
+            401, APIClient().post(self.mfa_login, data={"token": mfa_token, "mfa": mfa_otp.now()}).status_code
+        )
 
         # Login with MFA via cookies
         response = APIClient().post(

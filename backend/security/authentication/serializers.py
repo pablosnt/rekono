@@ -13,8 +13,9 @@ from rest_framework import status
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.serializers import CharField, Serializer
+from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer, TokenObtainSerializer
-from rest_framework_simplejwt.token_blacklist.models import OutstandingToken
+from rest_framework_simplejwt.settings import api_settings
 
 from framework.logging import LoggingEntity
 from platforms.email.notifications import SMTP
@@ -194,9 +195,12 @@ class MfaRequiredSerializer(Serializer):
         attrs = super().validate(attrs)
         if attrs.get("token"):
             try:
-                self.token = OutstandingToken.objects.get(token=attrs.get("token"))
-                self.user = self.token.user
-            except Exception:
+                # Validate the token as a real MFA JWT so signature, expiry,
+                # token_type and blacklist state are all enforced
+                self.token = MfaRequiredToken(attrs.get("token"))
+                self.token.check_blacklist()
+                self.user = User.objects.get(id=self.token[api_settings.USER_ID_CLAIM])
+            except (TokenError, User.DoesNotExist):
                 raise AuthenticationFailed(code=status.HTTP_401_UNAUTHORIZED)
         if not self.user.mfa:
             raise ValidationError("MFA is not enabled yet for this user", code="mfa")
@@ -275,6 +279,8 @@ class MfaLoginSerializer(MfaSerializer, MfaRequiredSerializer, JwtAuthentication
             dict[str, Any]: Complete JWT token pair (access and refresh tokens).
         """
         super().validate(attrs)
+        # Blacklist MFA token not to be reused
+        self.token.blacklist()
         if self.user.otp:
             User.objects.remove_otp(self.user)
         return self.login()
