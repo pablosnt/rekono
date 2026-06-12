@@ -28,7 +28,7 @@ jobs:
           sudo systemctl start valkey-server
 
       - name: Install UV
-        uses: astral-sh/setup-uv@cb84d12dc6a0d495b82fcae14fa4559b90698660
+        uses: astral-sh/setup-uv@ca5ddd015e07666cb1f1340ad6171f5e7afffb3e
         with:
           activate-environment: true
       

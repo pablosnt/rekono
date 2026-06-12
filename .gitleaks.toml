@@ -1,0 +1,9 @@
+title = "Rekono GitLeaks configuration"
+
+[extend]
+useDefault = true
+
+[allowlist]
+paths = [
+  '''\.secrets\.baseline$''',
+]

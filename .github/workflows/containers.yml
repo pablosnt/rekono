@@ -58,7 +58,7 @@ jobs:
           persist-credentials: false
 
       - name: Set up Docker
-        uses: docker/setup-docker-action@5223f80f64587ec3bf588369be41ea8e6cda1dbb
+        uses: docker/setup-docker-action@0bda481195131bcde0ee38cc081893020c27ff20
         with:
           daemon-config: |
             {
@@ -69,14 +69,14 @@ jobs:
             }
 
       - name: Login to Docker Hub
-        uses: docker/login-action@36864503dc2a3702db7dc554479e3e1a29bb8337
+        uses: docker/login-action@37a9a4b3331f99f00a11099bab28fa3234301f65
         with:
           username: ${{ secrets.DOCKER_USER }}
           password: ${{ secrets.DOCKER_TOKEN }}
           logout: true
 
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@76c0984808678992dc9f24265d45acf8c8fc8a96
+        uses: docker/setup-qemu-action@259a565a6f30a57c28f9ea913f2d359b43ff5fc9
 
       - name: Get metadata
         id: metadata
@@ -89,7 +89,7 @@ jobs:
       - name: Build and push unstable
         id: build-unstable
         if: ${{ github.event_name != 'release' }}
-        uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f
+        uses: docker/build-push-action@d2aace88c215bf1196304f5a1f372aa8384f1b54
         with:
           file: ${{ matrix.dockerfile }}
           target: ${{ matrix.target }}
@@ -107,7 +107,7 @@ jobs:
       - name: Build and push release
         id: build-release
         if: ${{ github.event_name == 'release' }}
-        uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f
+        uses: docker/build-push-action@d2aace88c215bf1196304f5a1f372aa8384f1b54
         with:
           file: ${{ matrix.dockerfile }}
           target: ${{ matrix.target }}
@@ -123,7 +123,7 @@ jobs:
             LABEL_REVISION=${{ github.sha }}
 
       - name: Attest provenance
-        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26
+        uses: actions/attest@5ec407fab24e59f5df8672d92186d8c266c9b7fe
         with:
           subject-name: docker.io/${{ secrets.DOCKER_USER }}/${{ matrix.image }}
           subject-digest: ${{ github.event_name == 'release' && steps.build-release.outputs.digest || steps.build-unstable.outputs.digest }}
