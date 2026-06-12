@@ -51,7 +51,7 @@ jobs:
         uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be
         with:
           tool-cache: true
-      
+
       - name: Checkout
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
         with:
@@ -103,7 +103,7 @@ jobs:
             LABEL_CREATED=${{ steps.metadata.outputs.date }}
             LABEL_VERSION=${{ steps.metadata.outputs.version }}-dev
             LABEL_REVISION=${{ github.sha }}
-      
+
       - name: Build and push release
         id: build-release
         if: ${{ github.event_name == 'release' }}
@@ -129,6 +129,25 @@ jobs:
           subject-digest: ${{ github.event_name == 'release' && steps.build-release.outputs.digest || steps.build-unstable.outputs.digest }}
           push-to-registry: false
 
+  trivy:
+    name: Trivy (${{ matrix.name }})
+    if: ${{ github.event_name != 'release' }}
+    needs: docker-images
+    runs-on: ubuntu-latest
+    permissions: {}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Backend
+            image: rekono-backend
+          - name: Frontend
+            image: rekono-frontend
+          - name: Nginx
+            image: rekono-nginx
+          - name: Worker
+            image: rekono-worker
+    steps:
       - name: Trivy
         uses: aquasecurity/trivy-action@bfa4b33a029b9aa80ddb784b45574c30e072c59e
         with:
@@ -136,24 +155,50 @@ jobs:
           scanners: vuln
           format: json
           output: ${{ matrix.name }}-trivy.json
-          exit-code: 0
-      
+          exit-code: 1
+
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: ${{ matrix.name }}-trivy
+          path: ${{ matrix.name }}-trivy.json
+          if-no-files-found: warn
+
+  dockle:
+    name: Dockle (${{ matrix.name }})
+    if: ${{ github.event_name != 'release' }}
+    needs: docker-images
+    runs-on: ubuntu-latest
+    permissions: {}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Backend
+            image: rekono-backend
+          - name: Frontend
+            image: rekono-frontend
+          - name: Nginx
+            image: rekono-nginx
+          - name: Worker
+            image: rekono-worker
+    steps:
       - name: Dockle
         uses: goodwithtech/dockle-action@e30e6af832aad6ea7dca2a248d31a85eab6dbd68
         with:
           image: ${{ secrets.DOCKER_USER }}/${{ matrix.image }}:unstable
           format: json
           output: ${{ matrix.name }}-dockle.json
-          exit-code: 0
+          exit-code: 1
           exit-level: warn
-      
-      - name: Upload reports
+
+      - name: Upload report
+        if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
-          name: ${{ matrix.name }}
-          path: |
-            ${{ matrix.name }}-dockle.json
-            ${{ matrix.name }}-trivy.json
+          name: ${{ matrix.name }}-dockle
+          path: ${{ matrix.name }}-dockle.json
           if-no-files-found: warn
 
   kali-release:
@@ -186,7 +231,7 @@ jobs:
           new_changes = f'rekono-kbx ({release_name}) kali-dev; urgency=medium\n\n  * Update Rekono version to {release_name}.\n\n -- Pablo Santiago López <{gitlab_email}>  {change_time}\n\n'
           with open('changelog', 'w') as changelog:
             changelog.write(new_changes + old_changes)
-      
+
       - name: Commit changes to GitLab
         working-directory: rekono-kbx
         env:
@@ -202,7 +247,7 @@ jobs:
           git commit -m "Update Rekono version to $RELEASE_NAME"
           git config credential.helper '!f() { sleep 1; echo "username=${GITLAB_USER}"; echo "password=${GITLAB_TOKEN}"; }; f'
           git push --set-upstream origin "release/$RELEASE_NAME"
-      
+
       - name: GitLab merge request
         shell: python
         env:
