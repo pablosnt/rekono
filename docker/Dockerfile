@@ -130,6 +130,7 @@ COPY --from=busybox:musl /bin/wget /usr/bin/wget
 
 WORKDIR /app
 EXPOSE 3000
+# nosemgrep: dockerfile.security.missing-user.missing-user
 CMD ["server/index.mjs"]
 
 

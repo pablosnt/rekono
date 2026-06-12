@@ -11,7 +11,6 @@ from datetime import timedelta
 from functools import cached_property
 from pathlib import Path as PathFile
 from typing import Any, Callable
-from xmlrpc.client import boolean
 
 import requests
 from django.utils import timezone
@@ -205,7 +204,7 @@ class DefectDojo(BaseIntegration):
         engagement: int,
         test: int | None,
         tags: list[str],
-        close_old_findings: boolean,
+        close_old_findings: bool,
     ) -> dict[str, Any]:  # pragma: no cover
         """Import or reimport a scan report into DefectDojo.
 
