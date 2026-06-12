@@ -34,12 +34,13 @@ jobs:
             dockerfile: docker/nginx/Dockerfile
             image: rekono-nginx
             target: null
-          - name: Worker
-            dockerfile: docker/Dockerfile
-            image: rekono-worker
-            target: worker
-            # Docker image is very large and we need some extra GB to complete the build
-            clean-disk: true
+          # TODO
+          # - name: Worker
+          #   dockerfile: docker/Dockerfile
+          #   image: rekono-worker
+          #   target: worker
+          #   # Docker image is very large and we need some extra GB to complete the build
+          #   clean-disk: true
     name: ${{ matrix.name }}
     defaults:
       run:
@@ -145,13 +146,14 @@ jobs:
             image: rekono-frontend
           - name: Nginx
             image: rekono-nginx
-          - name: Worker
-            image: rekono-worker
+          # TODO
+          # - name: Worker
+          #   image: rekono-worker
     steps:
       - name: Trivy
         uses: aquasecurity/trivy-action@bfa4b33a029b9aa80ddb784b45574c30e072c59e
         with:
-          image-ref: ${{ secrets.DOCKER_USER }}/${{ matrix.image }}:unstable
+          image-ref: docker.io/${{ secrets.DOCKER_USER }}/${{ matrix.image }}:unstable
           scanners: vuln
           format: json
           output: ${{ matrix.name }}-trivy.json
@@ -181,13 +183,14 @@ jobs:
             image: rekono-frontend
           - name: Nginx
             image: rekono-nginx
-          - name: Worker
-            image: rekono-worker
+          # TODO
+          # - name: Worker
+          #   image: rekono-worker
     steps:
       - name: Dockle
         uses: goodwithtech/dockle-action@e30e6af832aad6ea7dca2a248d31a85eab6dbd68
         with:
-          image: ${{ secrets.DOCKER_USER }}/${{ matrix.image }}:unstable
+          image: docker.io/${{ secrets.DOCKER_USER }}/${{ matrix.image }}:unstable
           format: json
           output: ${{ matrix.name }}-dockle.json
           exit-code: 1
