@@ -135,6 +135,7 @@ jobs:
     if: ${{ github.event_name != 'release' }}
     needs: docker-images
     runs-on: ubuntu-latest
+    environment: docker-hub
     permissions: {}
     strategy:
       fail-fast: false
@@ -172,6 +173,7 @@ jobs:
     if: ${{ github.event_name != 'release' }}
     needs: docker-images
     runs-on: ubuntu-latest
+    environment: docker-hub
     permissions: {}
     strategy:
       fail-fast: false
