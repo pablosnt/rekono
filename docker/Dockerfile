@@ -7,7 +7,7 @@ ARG LABEL_DOCUMENTATION="https://github.com/pablosnt/rekono/wiki"
 ARG LABEL_AUTHORS="Pablo Santiago López"
 ARG LABEL_LICENSES="GPL-3.0"
 
-ARG BACKEND_DEBIAN_DEPENDENCIES="libpq-dev libmagic1 libgcc-s1 libxml2-dev libxslt-dev python3-dev python3-pil python3-pil.imagetk libjpeg-dev zlib1g-dev"
+ARG BACKEND_DEBIAN_DEPENDENCIES="libpq-dev libmagic1 libgcc-s1 libxml2-dev libxslt-dev python3-dev libjpeg-dev zlib1g-dev"
 
 
 FROM node:26.2.0-bookworm-slim AS build-email-templates
@@ -44,8 +44,8 @@ RUN mkdir -p /opt/python/ /dpkg && \
     apt update && \
     apt install --yes --no-install-recommends $BACKEND_DEBIAN_DEPENDENCIES && \
     # Install python dependencies
+    python -m pip install --upgrade pip && \
     uv sync --no-dev --locked --project /code --python /opt/python/bin/python && \
-    uv run pip install --upgrade pip && \
     # Download debian dependencies to export them to the next stage
     rm -rf /var/cache/apt/archives /var/lib/apt/lists && \
     apt update && \

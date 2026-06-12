@@ -1,9 +1,10 @@
-FROM nginx:1.28-alpine-slim
+FROM nginx:1.30-alpine-slim
 
 COPY docker/nginx/entrypoint.sh /usr/local/bin/
 COPY docker/nginx/nginx.conf /etc/nginx/nginx.conf
 
 RUN apk update && \
+    apk upgrade --no-cache && \
     apk add openssl --no-cache && \
     touch /run/nginx.pid && \
     mkdir -p /etc/nginx/tls/ && \
