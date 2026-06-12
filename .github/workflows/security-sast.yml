@@ -11,7 +11,7 @@ jobs:
     name: Semgrep
     runs-on: ubuntu-latest
     container:
-      image: semgrep/semgrep:1.166.0-nonroot@sha256:3b34104fa0eac1940fd96a2e18d2fb0fe7615dbd93a6d59e7d2c10e4cddcea1a
+      image: semgrep/semgrep:1.166.0@sha256:c180f0c93a17b420c0af5006214a29d3c747c5459c732b740191adf657dd0068
     steps:
       - name: Checkout
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
