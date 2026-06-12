@@ -34,13 +34,12 @@ jobs:
             dockerfile: docker/nginx/Dockerfile
             image: rekono-nginx
             target: null
-          # TODO
-          # - name: Worker
-          #   dockerfile: docker/Dockerfile
-          #   image: rekono-worker
-          #   target: worker
-          #   # Docker image is very large and we need some extra GB to complete the build
-          #   clean-disk: true
+          - name: Worker
+            dockerfile: docker/Dockerfile
+            image: rekono-worker
+            target: worker
+            # Docker image is very large and we need some extra GB to complete the build
+            clean-disk: true
     name: ${{ matrix.name }}
     defaults:
       run:
@@ -147,9 +146,8 @@ jobs:
             image: rekono-frontend
           - name: Nginx
             image: rekono-nginx
-          # TODO
-          # - name: Worker
-          #   image: rekono-worker
+          - name: Worker
+            image: rekono-worker
     steps:
       - name: Trivy
         uses: aquasecurity/trivy-action@bfa4b33a029b9aa80ddb784b45574c30e072c59e
@@ -186,9 +184,8 @@ jobs:
             image: rekono-frontend
           - name: Nginx
             image: rekono-nginx
-          # TODO
-          # - name: Worker
-          #   image: rekono-worker
+          - name: Worker
+            image: rekono-worker
     steps:
       - name: Dockle
         uses: goodwithtech/dockle-action@e30e6af832aad6ea7dca2a248d31a85eab6dbd68
