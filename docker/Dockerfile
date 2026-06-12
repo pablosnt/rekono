@@ -45,7 +45,7 @@ RUN mkdir -p /opt/python/ /dpkg && \
     apt install --yes --no-install-recommends $BACKEND_DEBIAN_DEPENDENCIES && \
     # Install python dependencies
     uv sync --no-dev --locked --project /code --python /opt/python/bin/python && \
-    /code/.venv/bin/pip install --upgrade pip && \
+    uv run pip install --upgrade pip && \
     # Download debian dependencies to export them to the next stage
     rm -rf /var/cache/apt/archives /var/lib/apt/lists && \
     apt update && \
