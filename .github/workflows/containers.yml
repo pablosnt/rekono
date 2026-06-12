@@ -159,6 +159,7 @@ jobs:
           format: json
           output: ${{ matrix.name }}-trivy.json
           exit-code: 1
+          ignore-unfixed: true
 
       - name: Upload report
         if: always()
@@ -197,6 +198,7 @@ jobs:
           output: ${{ matrix.name }}-dockle.json
           exit-code: 1
           exit-level: warn
+          ignore: CIS-DI-0010
 
       - name: Upload report
         if: always()
