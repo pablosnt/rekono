@@ -13,18 +13,13 @@ from tests.framework.cases import ApiTestCase, DeleteApiTestCase, PostApiTestCas
 
 authentication = {"name": "admin", "secret": "admin", "type": AuthenticationType.BASIC, "target_port": 1}
 invalid_authentication1 = {
+    **authentication,
     "name": "invalid;name",
-    "secret": "admin",
     "type": AuthenticationType.TOKEN,
-    "target_port": 1,
 }
-invalid_authentication2 = {
-    "name": "admin",
-    "secret": "invalid;secret",
-    "type": AuthenticationType.BEARER,
-    "target_port": 1,
-}
-invalid_authentication3 = {"name": "newadmin", "secret": "newadmin", "type": AuthenticationType.BASIC, "target_port": 1}
+invalid_authentication2 = {**authentication, "secret": "invalid;secret", "type": AuthenticationType.BEARER}
+invalid_authentication3 = {**authentication, "name": "newadmin", "secret": "newadmin"}
+env_injection_authentication = {**authentication, "secret": "admin LD_PRELOAD=/tmp/evil.so"}
 
 
 class AuthenticationTest(ApiTest, TestCase):
@@ -36,6 +31,7 @@ class AuthenticationTest(ApiTest, TestCase):
         ApiTestCase([Role.ADMIN, Role.AUDITOR, Role.READER], 404, endpoint="1"),
         PostApiTestCase(["admin1", "auditor1"], 400, invalid_authentication1),
         PostApiTestCase(["admin1", "auditor1"], 400, invalid_authentication2),
+        PostApiTestCase(["admin1", "auditor1"], 400, env_injection_authentication),
         PostApiTestCase(["admin2", "auditor2", Role.READER], 403, authentication),
         PostApiTestCase(
             ["admin1"],

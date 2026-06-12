@@ -14,6 +14,7 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
 
+from django.core.exceptions import ValidationError
 from django.forms.models import model_to_dict
 from django.utils import timezone
 
@@ -28,6 +29,8 @@ from http_headers.models import HttpHeader
 from parameters.models import InputTechnology, InputVulnerability
 from rekono.settings import CONFIG
 from security.cryptography import Crypto
+from security.validators.enums import Regex
+from security.validators.input_validator import Validator
 from settings.models import Settings
 from target_ports.models import TargetPort
 from tools.models import Intensity
@@ -66,6 +69,7 @@ class BaseExecutor(LoggingEntity):
     # so, we have the scanned port independently of its source, i.e.
     # port found in previous execution, target port or default URL port
     port_from_arguments = None
+    environment_validator = Validator(Regex.SENSITIVE_ENV, inverse_match=False)
 
     def __init__(self, execution: Execution) -> None:
         """Initialize the executor with execution context and configuration.
@@ -292,7 +296,9 @@ class BaseExecutor(LoggingEntity):
 
         Sets up the execution environment by copying system environment variables,
         processing tool-specific environment definitions, and configuring proxy
-        settings from global configuration.
+        settings from global configuration. Environment definitions parsed from the
+        pre-command arguments are filtered so user-controlled values cannot set
+        sensitive variables (PATH, LD_PRELOAD, etc.) that could hijack the subprocess.
 
         Returns:
             dict[str, Any]: Environment variables for tool execution
@@ -308,8 +314,16 @@ class BaseExecutor(LoggingEntity):
             for definition in self.arguments[:index]:
                 if "=" in definition:
                     variable, value = definition.split("=", 1)
+                    try:
+                        # Avoid malicious environment variables
+                        self.environment_validator(definition)
+                    except ValidationError:
+                        self.logger.warning(
+                            f"[Security] Refused to set sensitive environment variable '{variable}' from execution arguments"
+                        )
+                        continue
                     # Clean variable value by removing quotes that might interfere with execution
-                    environment[variable] = value.strip().replace("'", "").replace('"', "")
+                    environment[variable.strip()] = value.strip().replace("'", "").replace('"', "")
             # Remove environment definitions from arguments, keeping only the tool command and its parameters
             self.arguments = self.arguments[index:]
         settings = Settings.objects.first()

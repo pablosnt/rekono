@@ -42,6 +42,19 @@ class ToolExecutorTest(BaseTest, TestCase):
         self.executor.arguments = [f"{k}={v}" for k, v in expected_env.items()] + [self.fake_tool.command, "--foo=bar"]
         self._test_environment(expected_env)
 
+    def test_get_environment_skips_sensitive_variables(self) -> None:
+        self.executor.arguments = [
+            "SAFE=ok",
+            "LD_PRELOAD=/tmp/evil.so",
+            "PATH=/tmp/attacker",
+            self.fake_tool.command,
+            "--foo=bar",
+        ]
+        environment = self.executor.get_environment()
+        self.assertEqual("ok", environment.get("SAFE"))
+        self.assertIsNone(environment.get("LD_PRELOAD"))
+        self.assertNotEqual("/tmp/attacker", environment.get("PATH"))
+
     def test_get_environment_with_proxies(self) -> None:
         proxy = "10.10.10.10:80"
         expected_env = {f"{key.upper()}_PROXY": proxy for key in ["all", "http", "https", "ftp", "no"]}

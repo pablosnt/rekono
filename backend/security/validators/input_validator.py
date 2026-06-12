@@ -87,7 +87,16 @@ class Validator(RegexValidator, LoggingEntity):
         if (
             (self.inverse_match and not bool(regex_matches))
             or (not self.inverse_match and bool(regex_matches))
-            or (self.deny_injections and bool(re.findall(Regex.INJECTION.value, value)))
+            or (
+                self.deny_injections
+                and (
+                    bool(re.findall(Regex.INJECTION.value, value))
+                    # Reject values that embed a sensitive environment variable
+                    # assignment (e.g. LD_PRELOAD=...) which could hijack a tool
+                    # subprocess when the value is rendered before the command
+                    or bool(re.search(Regex.SENSITIVE_ENV.value, value))
+                )
+            )
         ):
             self.logger.warning(f"[Security] Value '{value}' doesn't match the allowed regex")
             raise ValidationError(self.message, code=self.code, params={"value": value})
