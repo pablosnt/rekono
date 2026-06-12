@@ -230,10 +230,10 @@ export default function (
     ).then((response) => {
       const a = document.createElement("a");
       a.href = window.URL.createObjectURL(response["_data"]);
-      a.download = response.headers
-        .get("content-disposition")
-        .replace('attachment; filename="', "")
-        .replace('"', "");
+      a.download =
+        response.headers
+          .get("content-disposition")
+          ?.match(/filename="?([^"]+)"?/)?.[1] ?? "";
       a.click();
     });
   }
