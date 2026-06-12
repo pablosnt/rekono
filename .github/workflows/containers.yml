@@ -133,7 +133,9 @@ jobs:
         uses: aquasecurity/trivy-action@bfa4b33a029b9aa80ddb784b45574c30e072c59e
         with:
           image-ref: ${{ secrets.DOCKER_USER }}/${{ matrix.image }}:unstable
-          format: table
+          scanners: vuln
+          format: json
+          output: ${{ matrix.name }}-trivy.json
           exit-code: 0
       
       - name: Dockle
@@ -145,11 +147,13 @@ jobs:
           exit-code: 0
           exit-level: warn
       
-      - name: Upload Dockle report
+      - name: Upload reports
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: ${{ matrix.name }}
-          path: ${{ matrix.name }}-dockle.json
+          path: |
+            ${{ matrix.name }}-dockle.json
+            ${{ matrix.name }}-trivy.json
           if-no-files-found: warn
 
   kali-release:
