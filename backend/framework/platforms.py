@@ -162,7 +162,7 @@ class BaseIntegration(BasePlatform):
         pass
 
     def process_finding(self, execution: Execution, finding: Finding) -> None:
-        """Process a finding with enable and type checks.
+        """Process a finding with enable, availability and type checks.
 
         Args:
             execution (Execution): The execution that generated the finding.
@@ -174,6 +174,8 @@ class BaseIntegration(BasePlatform):
 
     def process_findings(self, execution: Execution, findings: list[Finding]) -> None:
         """Process multiple findings from an execution.
+
+        Skips processing entirely when the integration is disabled or unavailable.
 
         Args:
             execution (Execution): The execution that generated the findings.

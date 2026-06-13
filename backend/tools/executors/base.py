@@ -45,11 +45,7 @@ class BaseExecutor(LoggingEntity):
     mapping from available inputs and configurations with proper authentication handling.
 
     Attributes:
-        arguments (list): Generated command-line arguments for tool execution
-        environment (dict): Environment variables for tool execution
-        findings_used_in_execution (dict): Findings used as inputs for this execution
-        targets_used_in_execution (dict): Targets used as inputs for this execution
-        authentication (Authentication | None): Authentication credentials if available
+        environment_validator (Validator): Rejects sensitive environment variable assignments
 
     Example:
         Execute a tool with proper parameter generation:

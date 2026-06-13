@@ -164,6 +164,9 @@ class Start(BaseCommand):
     async def _execute_command(self, update: Update, context: CallbackContext) -> int | None:
         """Execute the start command to generate account linking token.
 
+        Only runs in private chats. In a group or channel the request is rejected
+        so the linking token is never exposed to other members.
+
         Args:
             update (Update): The Telegram update containing the command.
             context (CallbackContext): The callback context for the command.
