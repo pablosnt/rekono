@@ -36,6 +36,6 @@ class Regex(Enum):
     PATH = r"[\w\.\-_/\\]{0,500}"
     PATH_WITH_QUERYPARAMS = r"[\w\.\-_/\\#?&%$]{0,500}"
     CVE = r"CVE-\d{4}-\d{1,10}"
-    SECRET = r"[\w\s\./\-=\+,:<>¿?¡!#&$()@%\[\]\{\}\*]{1,500}"
+    SECRET = r"[\w \t\./\-=\+,:<>¿?¡!#&$()@%\[\]\{\}\*]{1,500}"
     INJECTION = r"[;\"'&<>$]+"
     SENSITIVE_ENV = r".*(PATH|IFS|ENV|BASH_ENV|SHELLOPTS|PS4|PYTHONPATH|PYTHONSTARTUP|PYTHONHOME|PERL5LIB|PERLLIB|RUBYLIB|RUBYOPT|NODE_OPTIONS|NODE_PATH|LD_[A-Z_]+|DYLD_[A-Z_]+)\s*=?.*"

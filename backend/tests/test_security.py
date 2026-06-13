@@ -320,6 +320,14 @@ class SecurityTest(ApiTest, TestCase):
                 exception = True
             self.assertTrue(exception)
 
+    def test_secret_validation_rejects_line_breaks(self) -> None:
+        validator = Validator(Regex.SECRET, code="secret")
+        for valid in ["abcd efgh ijkl mnop", "dG9rZW4=", "tok\ttoken"]:
+            validator(valid)
+        for invalid in ["token\r\nHost: evil", "token\nx", "token\rx"]:
+            with self.assertRaises(ValidationError):
+                validator(invalid)
+
 
 BLOCKED = "https://evil.com/script.js"
 ORIGIN = "https://rekono.com/projects/"
