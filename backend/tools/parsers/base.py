@@ -6,7 +6,7 @@ _parse method to implement tool-specific parsing logic.
 """
 
 import json
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from functools import cached_property
 from pathlib import Path
 from typing import Any
@@ -56,7 +56,7 @@ class BaseParser:
 
     executor: BaseExecutor
     output: str | None
-    findings = []
+    findings: list = field(default_factory=list)
 
     @cached_property
     def report(self) -> Path | None:
@@ -310,5 +310,7 @@ class BaseParser:
         Calls the tool-specific _parse method to extract findings, then sanitizes
         the execution output to remove sensitive information.
         """
-        self._parse()
-        self._protect_execution()
+        try:
+            self._parse()
+        finally:
+            self._protect_execution()

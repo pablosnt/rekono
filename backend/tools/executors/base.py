@@ -60,15 +60,6 @@ class BaseExecutor(LoggingEntity):
         ```
     """
 
-    arguments = []
-    environment = {}
-    findings_used_in_execution = {}
-    targets_used_in_execution = {}
-    authentication = None
-    # This will save the port included in URL or TARGET parameters
-    # so, we have the scanned port independently of its source, i.e.
-    # port found in previous execution, target port or default URL port
-    port_from_arguments = None
     environment_validator = Validator(Regex.SENSITIVE_ENV, inverse_match=False)
 
     def __init__(self, execution: Execution) -> None:
@@ -80,6 +71,15 @@ class BaseExecutor(LoggingEntity):
         Args:
             execution (Execution): The execution instance to manage
         """
+        self.arguments = []
+        self.environment = {}
+        self.findings_used_in_execution = {}
+        self.targets_used_in_execution = {}
+        self.authentication = None
+        # This will save the port included in URL or TARGET parameters
+        # so, we have the scanned port independently of its source, i.e.
+        # port found in previous execution, target port or default URL port
+        self.port_from_arguments = None
         self.execution = execution
         self.intensity = (
             Intensity.objects.filter(tool=execution.configuration.tool, value__lte=execution.task.intensity)
@@ -426,6 +426,7 @@ class BaseExecutor(LoggingEntity):
         Args:
             reason (str): The reason why the execution was skipped
         """
+        self.logger.error(f"[Tool] {self.execution.configuration.tool.name} execution was skipped due to '{reason}'")
         self.execution.status = Status.SKIPPED
         self.execution.skipped_reason = reason
         self.execution.end = timezone.now()
@@ -438,6 +439,7 @@ class BaseExecutor(LoggingEntity):
         Updates execution status to ERROR and sets end timestamp.
         Triggers task end check.
         """
+        self.logger.error(f"[Tool] {self.execution.configuration.tool.name} execution finished with errors")
         self.execution.status = Status.ERROR
         self.execution.end = timezone.now()
         self.execution.save(update_fields=["status", "end"])
@@ -449,6 +451,7 @@ class BaseExecutor(LoggingEntity):
         Updates execution status to COMPLETED, sets end timestamp, and generates
         execution hash for deduplication. Triggers task end check.
         """
+        self.logger.info(f"[Tool] {self.execution.configuration.tool.name} execution has been completed")
         self.execution.status = Status.COMPLETED
         self.execution.end = timezone.now()
         self.execution.hash = Crypto.hash(
@@ -513,10 +516,7 @@ class BaseExecutor(LoggingEntity):
             if not CONFIG.testing:
                 self.run_tool(self.environment)
         except (RuntimeError, Exception):
-            self.logger.error(f"[Tool] {self.execution.configuration.tool.name} execution finished with errors")
             self.on_error()
             self.after_running()
             return
         self.after_running()
-        self.on_completed()
-        self.logger.info(f"[Tool] {self.execution.configuration.tool.name} execution has been completed")
