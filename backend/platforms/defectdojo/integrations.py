@@ -313,22 +313,24 @@ class DefectDojo(BaseIntegration):
                     indent=4,
                 )
             test_type_name = f"{execution.configuration.tool.name} ({scan_type})"
-        if project_sync.reimport and not created_engagement:
-            test_type = self._get_test_type(test_type_name)
-            if test_type:
-                test = self._get_test(engagement_id, test_type.get("id"), scan_type)
-                test_id = test.get("id") if test else None
-        execution.defectdojo_test_id = self._import_or_reimport_scan(
-            scan_type,
-            report,
-            f"{execution.task.target.target}:{execution.task.target_port.port}"
-            if execution.task.target_port
-            else execution.task.target.target,
-            engagement_id,
-            test_id,
-            [self.settings.tag],
-            project_sync.close_old_findings,
-        ).get("test_id")
-        execution.save(update_fields=["defectdojo_test_id"])
-        if not execution.output_file and report and report.is_file():
-            report.unlink()
+        try:
+            if project_sync.reimport and not created_engagement:
+                test_type = self._get_test_type(test_type_name)
+                if test_type:
+                    test = self._get_test(engagement_id, test_type.get("id"), scan_type)
+                    test_id = test.get("id") if test else None
+            execution.defectdojo_test_id = self._import_or_reimport_scan(
+                scan_type,
+                report,
+                f"{execution.task.target.target}:{execution.task.target_port.port}"
+                if execution.task.target_port
+                else execution.task.target.target,
+                engagement_id,
+                test_id,
+                [self.settings.tag],
+                project_sync.close_old_findings,
+            ).get("test_id")
+            execution.save(update_fields=["defectdojo_test_id"])
+        except Exception:
+            if not execution.output_file and report and report.is_file():
+                report.unlink()
