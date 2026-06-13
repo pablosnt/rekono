@@ -15,6 +15,7 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenBlacklistView, TokenObtainPairView, TokenRefreshView
 
 from rekono.settings import CONFIG, COOKIES_CONFIG, JWT_ACCESS_COOKIE, JWT_MFA_COOKIE, JWT_REFRESH_COOKIE
+from security.authentication.jwt import CookieJWTAuthentication
 from security.authentication.serializers import MfaLoginSerializer, SendMfaEmailSerializer
 from security.authorization.permissions import IsNotAuthenticated
 
@@ -189,8 +190,7 @@ class LogoutView(TokenBlacklistView):
                 request._full_data = {"refresh": cookie}
         response = super().post(request, *args, **kwargs)
         if response.status_code == status.HTTP_200_OK:
-            response.delete_cookie(JWT_ACCESS_COOKIE)
-            response.delete_cookie(JWT_REFRESH_COOKIE, f"{CONFIG.root_path or ''}/api/security/")
+            CookieJWTAuthentication.clear_cookies(response)
         return response
 
 

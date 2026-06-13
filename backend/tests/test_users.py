@@ -9,6 +9,7 @@ from rest_framework.test import APIClient
 from executions.models import Execution
 from platforms.email.notifications import SMTP
 from platforms.telegram_app.models import TelegramChat
+from rekono.settings import JWT_ACCESS_COOKIE, JWT_REFRESH_COOKIE
 from security.authorization.roles import Role
 from tests.framework import ApiTest, ApiTestNoData
 from tests.framework.cases import ApiTestCase, DeleteApiTestCase, PostApiTestCase, PutApiTestCase
@@ -325,7 +326,11 @@ class ResetPasswordTest(ApiTestNoData, TestCase):
         self.assertEqual(403, client.put(self.endpoint, data={"otp": otp, "password": new_valid_password}).status_code)
 
         client = APIClient()
-        self.assertEqual(200, client.put(self.endpoint, data={"otp": otp, "password": new_valid_password}).status_code)
+        response = client.put(self.endpoint, data={"otp": otp, "password": new_valid_password})
+        self.assertEqual(200, response.status_code)
+        for cookie in [JWT_ACCESS_COOKIE, JWT_REFRESH_COOKIE]:
+            self.assertIn(cookie, response.cookies)
+            self.assertEqual("", response.cookies[cookie].value)
         self.assertEqual(401, client.put(self.endpoint, data={"otp": otp, "password": new_valid_password}).status_code)
 
         response = client.post(

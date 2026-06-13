@@ -170,7 +170,10 @@ class UserViewSet(BaseViewSet):
         serializer = serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response(status=status.HTTP_200_OK)
+        response = Response(status=status.HTTP_200_OK)
+        if request.method.lower() == "put":
+            CookieJWTAuthentication.clear_cookies(response)
+        return response
 
     @extend_schema(request=UpdateRoleSerializer, responses={201: UserSerializer})
     def update(self, request, pk: str, *args, **kwargs):
@@ -326,7 +329,7 @@ class ProfileViewSet(BaseProfileViewSet):
             Response: HTTP 200 on successful password update
         """
         self._update(request, UpdatePasswordSerializer)
-        return Response(status=status.HTTP_200_OK)
+        return CookieJWTAuthentication.clear_cookies(Response(status=status.HTTP_200_OK))
 
 
 class MfaViewSet(BaseProfileViewSet):

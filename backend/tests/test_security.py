@@ -58,7 +58,12 @@ class SecurityTest(ApiTest, TestCase):
         self.assertEqual(200, client.get(self.profile).status_code)
 
         # Logout
-        self.assertEqual(200, client.post(self.logout, {"refresh": new_data["refresh"]}).status_code)
+        response = client.post(self.logout, {"refresh": new_data["refresh"]})
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(200, response.status_code)
+        for cookie in [JWT_ACCESS_COOKIE, JWT_REFRESH_COOKIE]:
+            self.assertIn(cookie, response.cookies)
+            self.assertEqual("", response.cookies[cookie].value)
 
         # Try to refresh tokens after logout
         self.assertEqual(401, client.post(self.refresh, data={"refresh": new_data["refresh"]}).status_code)
