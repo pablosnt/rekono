@@ -196,4 +196,4 @@ class FileHandler(LoggingEntity):
         with open(path, "rb+") as stored_file:
             lines = len(stored_file.readlines())
         self.logger.warning(f"[Security] New file uploaded to the server in the path {path}")
-        return str(path), str(checksum), lines
+        return str(path), checksum.hexdigest(), lines
