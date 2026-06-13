@@ -5,12 +5,14 @@ for automated enrichment of vulnerability findings with exploit probability scor
 and percentile rankings updated on a per-execution and bulk monitoring basis.
 """
 
+import re
 from datetime import date
 
 from executions.models import Execution
 from findings.framework.models import Finding
 from findings.models import Vulnerability
 from framework.platforms import BaseIntegration
+from security.validators.enums import Regex
 
 
 class First(BaseIntegration):
@@ -102,9 +104,16 @@ class First(BaseIntegration):
         """
         if not self.is_enabled():
             return
-        cves = list(
-            Vulnerability.objects.filter(cve__isnull=False, is_fixed=False).values_list("cve", flat=True).distinct()
-        )
+        # Keep only well-formed CVE identifiers. A single blank or malformed value inside a batch
+        # can make the FIRST API reject the whole request, and the except below would then drop all
+        # 100 CVEs in that batch. Filtering up front isolates bad data from valid CVEs.
+        cves = [
+            cve
+            for cve in Vulnerability.objects.filter(cve__isnull=False, is_fixed=False)
+            .values_list("cve", flat=True)
+            .distinct()
+            if cve and re.fullmatch(Regex.CVE.value, cve)
+        ]
         for i in range(0, len(cves), 100):
             try:
                 data = self._get_epss_for_cves(cves[i : i + 100], only_today_values=True)

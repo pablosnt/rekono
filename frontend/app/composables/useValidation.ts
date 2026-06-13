@@ -54,7 +54,7 @@ export default function () {
     required: boolean = true,
     max: number = 30,
   ) {
-    return applyRegex(field, required, max, /^CVE-\d{4}-\d{1,7}$/u);
+    return applyRegex(field, required, max, /^CVE-\d{4}-\d{1,10}$/u);
   }
 
   function target(
