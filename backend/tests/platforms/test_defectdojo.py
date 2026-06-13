@@ -40,12 +40,12 @@ def return_test(*args: Any, **kwargs: Any) -> dict[str, Any]:
     return {"id": 5}
 
 
-def get_engagement(*args: Any, **kwargs: Any) -> dict[str, Any]:
+def get_engagement(*args: Any, **kwargs: Any) -> tuple[dict[str, Any], bool]:
     # args: (self, "engagements", engagement_id); the engagement belongs to product 1
     return {"id": args[-1], "product": 1}, True
 
 
-def get_engagement_other_product(*args: Any, **kwargs: Any) -> dict[str, Any]:
+def get_engagement_other_product(*args: Any, **kwargs: Any) -> tuple[dict[str, Any], bool]:
     # The engagement exists but belongs to a different product
     return {"id": args[-1], "product": 999}, True
 
