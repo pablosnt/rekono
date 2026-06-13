@@ -8,6 +8,7 @@ from typing import Any
 
 from asgiref.sync import sync_to_async
 from telegram import Update
+from telegram.constants import ChatType
 from telegram.ext import CallbackContext, CommandHandler, ConversationHandler
 
 from framework.logging import LoggingEntity
@@ -171,6 +172,18 @@ class Start(BaseCommand):
             int | None: None for simple command execution.
         """
         self.validate_update(update)
+        # Only issue account-linking OTPs in private chats. In a group/supergroup/channel the token
+        # would be visible to every member, letting anyone bind the shared chat to their own account
+        # and receive that user's notifications and command output.
+        if update.effective_chat.type != ChatType.PRIVATE:
+            self.logger.warning(
+                f"[Security] Rejected Telegram /start account-linking from non-private chat {update.effective_chat.id}"
+            )
+            await self.reply(
+                update,
+                "Account linking is only available in private chats\. Please, send a direct message to the bot and run /start there",
+            )
+            return
         telegram_chat, plain_otp = await self._update_or_create_telegram_chat_async(update.effective_chat.id)
         self.logger.info(f"[Security] New login request using the Telegram bot from the chat {telegram_chat.chat_id}")
         await self.reply(
