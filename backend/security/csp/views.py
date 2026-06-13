@@ -48,9 +48,9 @@ class CspReportView(APIView):
         """
         if not value:
             return value
-        # Limit the length of each value
-        # Remove all control characters whose unicode category starts with "C"
-        return "".join(char for char in value[:1000] if unicodedata.category(char).startswith("C"))
+        # Cap the length of each value, then drop every character whose unicode category starts
+        # with "C" (control, format, surrogate, etc.) so CR/LF and other separators can't forge logs
+        return "".join(char for char in value[:1000] if not unicodedata.category(char).startswith("C"))
 
     def _log_violation(self, blocked: str | None, origin: str | None, directive: str | None) -> None:
         """Emit a structured warning log entry for a single CSP violation.
