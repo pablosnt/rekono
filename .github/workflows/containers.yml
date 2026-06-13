@@ -135,7 +135,8 @@ jobs:
     needs: docker-images
     runs-on: ubuntu-latest
     environment: docker-hub
-    permissions: {}
+    permissions:
+      contents: read
     strategy:
       fail-fast: false
       matrix:
@@ -149,6 +150,11 @@ jobs:
           - name: Worker
             image: rekono-worker
     steps:
+      - name: Checkout
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
+        with:
+          persist-credentials: false
+
       - name: Trivy
         uses: aquasecurity/trivy-action@bfa4b33a029b9aa80ddb784b45574c30e072c59e
         with:
