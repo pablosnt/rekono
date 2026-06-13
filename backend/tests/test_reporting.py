@@ -2,7 +2,7 @@ from functools import cached_property
 
 from django.test import TestCase
 
-from reporting.enums import FindingName, ReportFormat
+from reporting.enums import FindingName, ReportFormat, ReportStatus
 from reporting.models import Report
 from security.authorization.roles import Role
 from targets.enums import TargetType
@@ -67,6 +67,9 @@ class ReportingTest(ApiTest):
                         "user": 5,
                     },
                 ),
+                DeleteApiTestCase(["admin1"], 400, endpoint="1/"),
+                DeleteApiTestCase(["admin1"], 400, endpoint="2/"),
+                DeleteApiTestCase(["admin1"], 400, endpoint="3/"),
                 ApiTestCase(["not_members"], 404, endpoint="1"),
                 ApiTestCase(["not_members"], 404, endpoint="2"),
                 ApiTestCase(["not_members"], 404, endpoint="3"),
@@ -137,13 +140,23 @@ class ReportingTest(ApiTest):
                     ],
                 ),
                 # Downloads return a 400 error because reports are created within a thread execution and having two
-                # threads working on the same tables at the same time is not compatible with SQLite
+                # threads working on the same tables at the same time is not compatible with SQLite, so the reports are
+                # still PENDING
                 ApiTestCase(["members"], 400, endpoint="1/download"),
                 ApiTestCase(["not_members"], 404, endpoint="1/download"),
                 ApiTestCase(["members"], 400, endpoint="2/download"),
                 ApiTestCase(["not_members"], 404, endpoint="2/download"),
                 ApiTestCase(["members"], 400, endpoint="3/download"),
                 ApiTestCase(["not_members"], 404, endpoint="3/download"),
+            ]
+            super().test_cases()
+            # Mark reports as not-PENDING so they can be downloaded and deleted
+            Report.objects.update(status=ReportStatus.READY)
+            self.cases = [
+                # Downloads return a 404 error because their status is READY but the files don't exist on disk
+                ApiTestCase(["members", "not_members"], 404, endpoint="1/download"),
+                ApiTestCase(["members", "not_members"], 404, endpoint="2/download"),
+                ApiTestCase(["members", "not_members"], 404, endpoint="3/download"),
                 DeleteApiTestCase(["auditor2", "reader2"], 404, endpoint="1"),
                 DeleteApiTestCase(["auditor1", "reader1"], 403, endpoint="1"),
                 DeleteApiTestCase(["admin1"], endpoint="1"),
