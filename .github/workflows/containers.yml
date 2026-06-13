@@ -188,12 +188,19 @@ jobs:
         include:
           - name: Backend
             image: rekono-backend
+            # CIS-DI-0010: config.yaml has database.password/database.user placeholder fields
+            ignore: CIS-DI-0010
           - name: Frontend
             image: rekono-frontend
+            ignore: ""
           - name: Nginx
             image: rekono-nginx
+            ignore: ""
           - name: Worker
             image: rekono-worker
+            # CIS-DI-0010: config.yaml has database.password placeholder fields
+            # DKL-DI-0001: sudo required for runtime tool updates (nuclei/searchsploit) as non-root user
+            ignore: CIS-DI-0010,DKL-DI-0001
     steps:
       - name: Dockle
         uses: goodwithtech/dockle-action@e30e6af832aad6ea7dca2a248d31a85eab6dbd68
@@ -203,7 +210,7 @@ jobs:
           output: ${{ matrix.name }}-dockle.json
           exit-code: 1
           exit-level: warn
-          ignore: CIS-DI-0010
+          ignore: ${{ matrix.ignore }}
 
       - name: Upload report
         if: always()
