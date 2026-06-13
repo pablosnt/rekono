@@ -259,6 +259,8 @@ class DefectDojo(BaseIntegration):
             execution (Execution): Completed security tool execution.
             findings (list[Finding]): Security findings to synchronize.
         """
+        if not self.is_enabled() or not self.is_available():
+            return
         findings = [
             finding for finding in findings if not isinstance(finding, Path) and not finding.created_from_user_input
         ]
