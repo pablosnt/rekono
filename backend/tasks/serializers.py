@@ -196,6 +196,11 @@ class TaskSerializer(RelatedNotesSerializer):
         """
         if not attrs.get("intensity"):
             attrs["intensity"] = IntensityEnum.NORMAL
+        # Ensure the target port belongs to the task's target
+        target = attrs.get("target")
+        target_port = attrs.get("target_port")
+        if target_port and target and target_port.target_id != target.id:
+            raise ValidationError("The target port doesn't belong to the task target", code="target_port")
         if attrs.get("configuration"):
             if cast(Configuration, attrs.get("configuration")).deprecated:
                 raise ValidationError("Deprecated configurations can't be executed", code="configuration")

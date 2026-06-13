@@ -58,7 +58,12 @@ class SecurityTest(ApiTest, TestCase):
         self.assertEqual(200, client.get(self.profile).status_code)
 
         # Logout
-        self.assertEqual(200, client.post(self.logout, {"refresh": new_data["refresh"]}).status_code)
+        response = client.post(self.logout, {"refresh": new_data["refresh"]})
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(200, response.status_code)
+        for cookie in [JWT_ACCESS_COOKIE, JWT_REFRESH_COOKIE]:
+            self.assertIn(cookie, response.cookies)
+            self.assertEqual("", response.cookies[cookie].value)
 
         # Try to refresh tokens after logout
         self.assertEqual(401, client.post(self.refresh, data={"refresh": new_data["refresh"]}).status_code)
@@ -146,7 +151,8 @@ class SecurityTest(ApiTest, TestCase):
             401, APIClient().post(self.mfa_login, data={"token": content.get("mfa"), "mfa": "1111111"}).status_code
         )
         # Valid token and MFA
-        response = APIClient().post(self.mfa_login, data={"token": content.get("mfa"), "mfa": mfa_otp.now()})
+        mfa_token = content.get("mfa")
+        response = APIClient().post(self.mfa_login, data={"token": mfa_token, "mfa": mfa_otp.now()})
         self.assertEqual(200, response.status_code)
         content = json.loads((response.content or "{}".encode()).decode())
         self.assertIsNotNone(content.get("access"))
@@ -154,6 +160,10 @@ class SecurityTest(ApiTest, TestCase):
         self.assertIn(JWT_REFRESH_COOKIE, response.cookies)
         client = APIClient(HTTP_AUTHORIZATION=f"Bearer {content.get('access')}")
         self.assertEqual(200, client.get(self.profile).status_code)
+        # The MFA token is single-use: replaying it after a successful login is rejected
+        self.assertEqual(
+            401, APIClient().post(self.mfa_login, data={"token": mfa_token, "mfa": mfa_otp.now()}).status_code
+        )
 
         # Login with MFA via cookies
         response = APIClient().post(
@@ -315,10 +325,19 @@ class SecurityTest(ApiTest, TestCase):
                 exception = True
             self.assertTrue(exception)
 
+    def test_secret_validation_rejects_line_breaks(self) -> None:
+        validator = Validator(Regex.SECRET, code="secret")
+        for valid in ["abcd efgh ijkl mnop", "dG9rZW4=", "tok\ttoken"]:
+            validator(valid)
+        for invalid in ["token\r\nHost: evil", "token\nx", "token\rx"]:
+            with self.assertRaises(ValidationError):
+                validator(invalid)
+
 
 BLOCKED = "https://evil.com/script.js"
 ORIGIN = "https://rekono.com/projects/"
 DIRECTIVE = "script-src"
+INJECTED_BLOCKED = "https://evil.com/script.js\r\nWARNING forged log entry injected by attacker"
 
 
 class CspReportTest(ApiTestNoData):
@@ -326,6 +345,7 @@ class CspReportTest(ApiTestNoData):
     valid = {}
     no_origin = {}
     invalid = {}
+    malicious = {}
     anonymous_access_allowed = None
 
     def _post(self, payload: dict[str, Any]) -> int:
@@ -339,6 +359,9 @@ class CspReportTest(ApiTestNoData):
 
     def test_invalid(self) -> None:
         self.assertEqual(204, self._post(self.invalid))
+
+    def test_log_injection(self) -> None:
+        self.assertEqual(204, self._post(self.malicious))
 
 
 class CspReportToTest(CspReportTest, TestCase):
@@ -358,6 +381,13 @@ class CspReportToTest(CspReportTest, TestCase):
             "body": {"documentUrl": ORIGIN, "effectiveDirective": DIRECTIVE},
         }
     ]
+    malicious = [
+        {
+            "type": "csp-violation",
+            "url": ORIGIN,
+            "body": {"blockedURL": INJECTED_BLOCKED, "documentUrl": ORIGIN, "effectiveDirective": DIRECTIVE},
+        }
+    ]
 
 
 class CspReportUriTest(CspReportTest, TestCase):
@@ -365,3 +395,6 @@ class CspReportUriTest(CspReportTest, TestCase):
     valid = {"csp-report": {"blocked-uri": BLOCKED, "document-uri": ORIGIN, "effective-directive": DIRECTIVE}}
     no_origin = {"csp-report": {"blocked-uri": BLOCKED, "effective-directive": DIRECTIVE}}
     invalid = {"csp-report": {"blocked-uri": BLOCKED, "document-uri": ORIGIN}}
+    malicious = {
+        "csp-report": {"blocked-uri": INJECTED_BLOCKED, "document-uri": ORIGIN, "effective-directive": DIRECTIVE}
+    }

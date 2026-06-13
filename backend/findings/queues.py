@@ -88,14 +88,15 @@ class FindingsQueue(BaseQueue):
         """
         settings = Settings.objects.first()
         if findings:
-            # Initialize integration and notification platforms
-            cve_providers: list[BaseCveProvider] = [VulnCheck(), NvdNist(), GHSA(), EUVD(), OSV()]
+            cve_providers: list[BaseCveProvider] = [
+                provider
+                for provider in [VulnCheck(), NvdNist(), GHSA(), EUVD(), OSV()]
+                if provider.is_enabled() and provider.is_available()
+            ]
             integrations_per_finding: list[BaseIntegration] = [
-                HackTricks(),
-                CveCrowd(),
-                HostsMetadata(),
-                VirusTotal(),
-                First(),
+                integration
+                for integration in [HackTricks(), CveCrowd(), HostsMetadata(), VirusTotal(), First()]
+                if integration.is_enabled() and integration.is_available()
             ]
             integrations_per_execution: list[BaseIntegration] = [DefectDojo()]
             notifications: list[BaseNotification] = [SMTP(), Telegram()]

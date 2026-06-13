@@ -157,6 +157,12 @@ class ReportingViewSet(BaseViewSet):
             Response: Standard deletion response
         """
         report = self.get_object()
+        # The file is created in a background thread, deleting now would let that thread finish against a deleted row and orphan the file on disk.
+        if report.status == ReportStatus.PENDING:
+            return Response(
+                {"report": "Report can't be deleted while it is being generated"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         path = (CONFIG.generated_reports / report.path) if report.path else None
         if path and path.exists():
             path.unlink()

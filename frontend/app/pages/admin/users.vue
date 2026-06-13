@@ -117,6 +117,7 @@ const config: CrudConfig<User> = reactive({
   endpoint: "/api/users/",
   entityName: "User",
   entityNamePlural: "Users",
+  createLabel: "Invite",
   icon: "i-lucide-users",
   useGrid: true,
   searchable: true,

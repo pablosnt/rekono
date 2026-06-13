@@ -137,15 +137,26 @@ class DefectDojoSyncSerializer(DefectDojoClientMixin, ModelSerializer):
         if not self.client.is_available():
             raise ValidationError("DefectDojo integration is not configured", code="defectdojo")
         attrs = super().validate(attrs)
-        for entity in ["product", "engagement"]:
-            value = attrs.get(f"{entity}_id") or attrs.get(entity)
-            if value:
-                if not self.client.exists(f"{entity}s", value):
-                    raise ValidationError(f"{entity.capitalize().replace('_', '')} {value} doesn't exist", code=entity)
+        product_id = attrs.get("product_id") or attrs.get("product")
+        engagement_id = attrs.get("engagement_id") or attrs.get("engagement")
+        product = engagement = None
+        if product_id:
+            product, exists = self.client.exists("products", product_id)
+            if not exists:
+                raise ValidationError(f"Product {product_id} doesn't exist", code="product")
+        if engagement_id:
+            engagement, exists = self.client.exists("engagements", engagement_id)
+            if not exists:
+                raise ValidationError(f"Engagement {engagement_id} doesn't exist", code="engagement")
+            # Verify the engagement belongs to the referenced product
+            if product and engagement and engagement.get("product") != product_id:
+                raise ValidationError(
+                    f"Engagement {engagement_id} doesn't belong to product {product_id}", code="engagement"
+                )
         return attrs
 
 
-class DefectDojoTargetSyncSerializer(ModelSerializer):
+class DefectDojoTargetSyncSerializer(DefectDojoClientMixin, ModelSerializer):
     """Serializer for DefectDojo target-specific synchronization mappings.
 
     Provides serialization for target-level synchronization configurations

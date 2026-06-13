@@ -11,7 +11,6 @@ from datetime import timedelta
 from functools import cached_property
 from pathlib import Path as PathFile
 from typing import Any, Callable
-from xmlrpc.client import boolean
 
 import requests
 from django.utils import timezone
@@ -113,7 +112,7 @@ class DefectDojo(BaseIntegration):
         except Exception:
             return False
 
-    def exists(self, entity_name: str, id: int) -> bool:
+    def exists(self, entity_name: str, id: int) -> tuple[dict[str, Any] | None, bool]:
         """Check if a DefectDojo entity exists by ID.
 
         Verifies the existence of a DefectDojo entity (product type, product,
@@ -124,13 +123,13 @@ class DefectDojo(BaseIntegration):
             id (int): DefectDojo entity ID to check
 
         Returns:
-            bool: True if entity exists, False otherwise
+            tuple[dict[str, Any] | None, bool]: Tuple with the response and a flag indicating if the entity exists or not
         """
         try:
-            self._request(self.session.get, f"/{entity_name}/{id}/")
-            return True
+            response = self._request(self.session.get, f"/{entity_name}/{id}/")
+            return response, True
         except Exception:
-            return False
+            return None, False
 
     def create_engagement(
         self, product: int, name: str, description: str, tags: list[str]
@@ -205,7 +204,7 @@ class DefectDojo(BaseIntegration):
         engagement: int,
         test: int | None,
         tags: list[str],
-        close_old_findings: boolean,
+        close_old_findings: bool,
     ) -> dict[str, Any]:  # pragma: no cover
         """Import or reimport a scan report into DefectDojo.
 
@@ -260,6 +259,8 @@ class DefectDojo(BaseIntegration):
             execution (Execution): Completed security tool execution.
             findings (list[Finding]): Security findings to synchronize.
         """
+        if not self.is_enabled() or not self.is_available():
+            return
         findings = [
             finding for finding in findings if not isinstance(finding, Path) and not finding.created_from_user_input
         ]
@@ -312,22 +313,24 @@ class DefectDojo(BaseIntegration):
                     indent=4,
                 )
             test_type_name = f"{execution.configuration.tool.name} ({scan_type})"
-        if project_sync.reimport and not created_engagement:
-            test_type = self._get_test_type(test_type_name)
-            if test_type:
-                test = self._get_test(engagement_id, test_type.get("id"), scan_type)
-                test_id = test.get("id") if test else None
-        execution.defectdojo_test_id = self._import_or_reimport_scan(
-            scan_type,
-            report,
-            f"{execution.task.target.target}:{execution.task.target_port.port}"
-            if execution.task.target_port
-            else execution.task.target.target,
-            engagement_id,
-            test_id,
-            [self.settings.tag],
-            project_sync.close_old_findings,
-        ).get("test_id")
-        execution.save(update_fields=["defectdojo_test_id"])
-        if not execution.output_file and report and report.is_file():
-            report.unlink()
+        try:
+            if project_sync.reimport and not created_engagement:
+                test_type = self._get_test_type(test_type_name)
+                if test_type:
+                    test = self._get_test(engagement_id, test_type.get("id"), scan_type)
+                    test_id = test.get("id") if test else None
+            execution.defectdojo_test_id = self._import_or_reimport_scan(
+                scan_type,
+                report,
+                f"{execution.task.target.target}:{execution.task.target_port.port}"
+                if execution.task.target_port
+                else execution.task.target.target,
+                engagement_id,
+                test_id,
+                [self.settings.tag],
+                project_sync.close_old_findings,
+            ).get("test_id")
+            execution.save(update_fields=["defectdojo_test_id"])
+        finally:
+            if not execution.output_file and report and report.is_file():
+                report.unlink()

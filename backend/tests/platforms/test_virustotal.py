@@ -16,6 +16,10 @@ from tests.framework.data import SetupProject
 # pytype: disable=wrong-arg-types
 
 
+def return_true(*args: Any, **kwargs: Any) -> bool:
+    return True
+
+
 def success(*args: Any, **kwargs: Any) -> dict[str, Any]:
     return {"data": {"attributes": {"last_analysis_stats": {"harmless": 1}, "whois": "Admin: Me", "reputation": 1}}}
 
@@ -48,6 +52,7 @@ class VirusTotalTest(BaseTest, TestCase):
         self.assertEqual(1, self.host.total_analysis)
         self.assertEqual("Admin: Me", self.host.whois)
 
+    @mock.patch("platforms.virustotal.integrations.VirusTotal.is_available", return_true)
     @mock.patch("platforms.virustotal.integrations.VirusTotal._request", success)
     def test_process_findings(self) -> None:
         self._test_success()
@@ -72,6 +77,14 @@ class VirusTotalTest(BaseTest, TestCase):
     def test_not_processable(self) -> None:
         self.host.ip = "10.10.10.10"
         self.host.save(update_fields=["ip"])
+        self._test_no_data()
+
+    @mock.patch("platforms.virustotal.integrations.VirusTotal.is_available", return_true)
+    @mock.patch("platforms.virustotal.integrations.VirusTotal._request", success)
+    def test_private_ip_with_domain_not_processed(self) -> None:
+        self.host.ip = "10.10.10.10"
+        self.host.domain = "internal.local"
+        self.host.save(update_fields=["ip", "domain"])
         self._test_no_data()
 
     @mock.patch("platforms.virustotal.integrations.VirusTotal._request", success)

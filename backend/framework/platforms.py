@@ -162,24 +162,26 @@ class BaseIntegration(BasePlatform):
         pass
 
     def process_finding(self, execution: Execution, finding: Finding) -> None:
-        """Process a finding with enable and type checks.
+        """Process a finding with enable, availability and type checks.
 
         Args:
             execution (Execution): The execution that generated the finding.
             finding (Finding): The finding to process.
         """
-        if not self.is_enabled() or not self.is_finding_processable(finding):
+        if not self.is_enabled() or not self.is_available() or not self.is_finding_processable(finding):
             return
         self._process_finding(execution, finding)
 
     def process_findings(self, execution: Execution, findings: list[Finding]) -> None:
         """Process multiple findings from an execution.
 
+        Skips processing entirely when the integration is disabled or unavailable.
+
         Args:
             execution (Execution): The execution that generated the findings.
             findings (list[Finding]): List of findings to process.
         """
-        if not self.is_enabled():
+        if not self.is_enabled() or not self.is_available():
             return
         for finding in findings:
             self.process_finding(execution, finding)

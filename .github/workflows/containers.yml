@@ -1,0 +1,320 @@
+name: Containers
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'docker/**'
+      - 'docker-compose.yml'
+  release:
+    types: [published]
+
+permissions: {}
+
+env:
+  DOCKER_USER: pablosnt
+
+jobs:
+  docker-images:
+    runs-on: ubuntu-latest
+    environment: docker-hub
+    permissions:
+      contents: read
+      id-token: write       # OIDC token is used to request a Sigstore signing certificate
+      attestations: write   # Persist the generated attestation
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Backend
+            dockerfile: docker/Dockerfile
+            image: rekono-backend
+            target: backend
+          - name: Frontend
+            dockerfile: docker/Dockerfile
+            image: rekono-frontend
+            target: frontend
+          - name: Nginx
+            dockerfile: docker/nginx/Dockerfile
+            image: rekono-nginx
+            target: null
+          - name: Worker
+            dockerfile: docker/Dockerfile
+            image: rekono-worker
+            target: worker
+            # Docker image is very large and we need some extra GB to complete the build
+            clean-disk: true
+    name: ${{ matrix.name }}
+    defaults:
+      run:
+        shell: bash
+        working-directory: /mnt
+    steps:
+      - name: Free disk space
+        if: ${{ matrix.clean-disk == true }}
+        uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be
+        with:
+          tool-cache: true
+
+      - name: Checkout
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
+        with:
+          persist-credentials: false
+
+      - name: Set up Docker
+        uses: docker/setup-docker-action@0bda481195131bcde0ee38cc081893020c27ff20
+        with:
+          daemon-config: |
+            {
+              "debug": true,
+              "features": {
+                "containerd-snapshotter": true
+              }
+            }
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@37a9a4b3331f99f00a11099bab28fa3234301f65
+        with:
+          username: ${{ env.DOCKER_USER }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+          logout: true
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@259a565a6f30a57c28f9ea913f2d359b43ff5fc9
+
+      - name: Get metadata
+        id: metadata
+        working-directory: backend/rekono
+        run: |
+          REKONO_VERSION=$(grep -oP '^VERSION = "\K[^"]+' settings.py | head -1)
+          echo "version=$REKONO_VERSION" >> "$GITHUB_OUTPUT"
+          echo "date=$(date --rfc-3339=seconds)" >> "$GITHUB_OUTPUT"
+
+      - name: Build and push unstable
+        id: build-unstable
+        if: ${{ github.event_name != 'release' }}
+        uses: docker/build-push-action@d2aace88c215bf1196304f5a1f372aa8384f1b54
+        with:
+          file: ${{ matrix.dockerfile }}
+          target: ${{ matrix.target }}
+          platforms: linux/amd64,linux/arm64
+          tags: ${{ env.DOCKER_USER }}/${{ matrix.image }}:unstable
+          load: true
+          push: true
+          sbom: true
+          provenance: true
+          build-args: |
+            LABEL_CREATED=${{ steps.metadata.outputs.date }}
+            LABEL_VERSION=${{ steps.metadata.outputs.version }}-dev
+            LABEL_REVISION=${{ github.sha }}
+
+      - name: Build and push release
+        id: build-release
+        if: ${{ github.event_name == 'release' }}
+        uses: docker/build-push-action@d2aace88c215bf1196304f5a1f372aa8384f1b54
+        with:
+          file: ${{ matrix.dockerfile }}
+          target: ${{ matrix.target }}
+          platforms: linux/amd64,linux/arm64
+          tags: ${{ env.DOCKER_USER }}/${{ matrix.image }}:${{ github.event.release.name }},${{ env.DOCKER_USER }}/${{ matrix.image }}:latest,${{ env.DOCKER_USER }}/${{ matrix.image }}:unstable
+          load: true
+          push: true
+          sbom: true
+          provenance: true
+          build-args: |
+            LABEL_CREATED=${{ steps.metadata.outputs.date }}
+            LABEL_VERSION=${{ github.event.release.name }}
+            LABEL_REVISION=${{ github.sha }}
+
+      - name: Attest provenance
+        uses: actions/attest@5ec407fab24e59f5df8672d92186d8c266c9b7fe
+        with:
+          subject-name: docker.io/${{ env.DOCKER_USER }}/${{ matrix.image }}
+          subject-digest: ${{ github.event_name == 'release' && steps.build-release.outputs.digest || steps.build-unstable.outputs.digest }}
+          push-to-registry: false
+
+  trivy:
+    name: Trivy (${{ matrix.name }})
+    if: ${{ github.event_name != 'release' }}
+    needs: docker-images
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Backend
+            image: rekono-backend
+          - name: Frontend
+            image: rekono-frontend
+          - name: Nginx
+            image: rekono-nginx
+          - name: Worker
+            image: rekono-worker
+    steps:
+      - name: Checkout
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
+        with:
+          persist-credentials: false
+
+      - name: Trivy
+        uses: aquasecurity/trivy-action@bfa4b33a029b9aa80ddb784b45574c30e072c59e
+        with:
+          image-ref: docker.io/${{ env.DOCKER_USER }}/${{ matrix.image }}:unstable
+          scanners: vuln
+          format: json
+          output: ${{ matrix.name }}-trivy.json
+          exit-code: 1
+          ignore-unfixed: true
+        env:
+          TRIVY_IGNOREFILE: .trivyignore.yaml
+
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: ${{ matrix.name }}-trivy
+          path: ${{ matrix.name }}-trivy.json
+          if-no-files-found: warn
+
+  dockle:
+    name: Dockle (${{ matrix.name }})
+    if: ${{ github.event_name != 'release' }}
+    needs: docker-images
+    runs-on: ubuntu-latest
+    permissions: {}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Backend
+            image: rekono-backend
+            ignore: CIS-DI-0010
+          - name: Frontend
+            image: rekono-frontend
+            ignore: CIS-DI-0010
+          - name: Nginx
+            image: rekono-nginx
+            ignore: CIS-DI-0010
+          - name: Worker
+            image: rekono-worker
+            # DKL-DI-0001: sudo required for runtime tool updates (nuclei/searchsploit) as non-root user
+            ignore: CIS-DI-0010,DKL-DI-0001
+    steps:
+      - name: Dockle
+        uses: goodwithtech/dockle-action@e30e6af832aad6ea7dca2a248d31a85eab6dbd68
+        with:
+          image: docker.io/${{ env.DOCKER_USER }}/${{ matrix.image }}:unstable
+          format: json
+          output: ${{ matrix.name }}-dockle.json
+          exit-code: 1
+          exit-level: warn
+          # CIS-DI-0010: Flags some environment variables of the Dockerfile or the config.yaml due to having suspicious values that look like secrets
+          ignore: ${{ matrix.ignore }}
+
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: ${{ matrix.name }}-dockle
+          path: ${{ matrix.name }}-dockle.json
+          if-no-files-found: warn
+
+  kali-release:
+    name: Kali Release
+    if: ${{ github.event_name == 'release' }}
+    runs-on: ubuntu-latest
+    environment: gitlab
+    needs: docker-images
+    steps:
+      - name: Checkout GitLab repository
+        run: git clone https://gitlab.com/pablosnt/rekono.git rekono-kbx
+
+      - name: Update debian/changelog
+        working-directory: rekono-kbx/debian
+        shell: python
+        env:
+          RELEASE_NAME: ${{ github.event.release.name }}
+          GITLAB_EMAIL: ${{ secrets.GITLAB_EMAIL }}
+        run: |
+          import os
+          import pytz
+          from datetime import datetime
+          release_name = os.environ['RELEASE_NAME']
+          gitlab_email = os.environ['GITLAB_EMAIL']
+          with open('changelog', 'r') as changelog:
+            old_changes = changelog.read()
+          tz = pytz.timezone('Europe/Madrid')
+          d = tz.localize(datetime.now())
+          change_time = d.strftime('%a, %d %b %Y %H:%M:%S %z')
+          new_changes = f'rekono-kbx ({release_name}) kali-dev; urgency=medium\n\n  * Update Rekono version to {release_name}.\n\n -- Pablo Santiago López <{gitlab_email}>  {change_time}\n\n'
+          with open('changelog', 'w') as changelog:
+            changelog.write(new_changes + old_changes)
+
+      - name: Commit changes to GitLab
+        working-directory: rekono-kbx
+        env:
+          RELEASE_NAME: ${{ github.event.release.name }}
+          GITLAB_EMAIL: ${{ secrets.GITLAB_EMAIL }}
+          GITLAB_USER: ${{ secrets.GITLAB_USER }}
+          GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
+        run: |
+          git config user.name 'Pablo Santiago'
+          git config user.email "$GITLAB_EMAIL"
+          git checkout -b "release/$RELEASE_NAME"
+          git add .
+          git commit -m "Update Rekono version to $RELEASE_NAME"
+          git config credential.helper '!f() { sleep 1; echo "username=${GITLAB_USER}"; echo "password=${GITLAB_TOKEN}"; }; f'
+          git push --set-upstream origin "release/$RELEASE_NAME"
+
+      - name: GitLab merge request
+        shell: python
+        env:
+          RELEASE_NAME: ${{ github.event.release.name }}
+          GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
+          GITLAB_PROJECT_ID: 45783845
+        run: |
+          import os
+          import requests
+          release_name = os.environ['RELEASE_NAME']
+          project_id = os.environ['GITLAB_PROJECT_ID']
+          headers = {
+            'PRIVATE-TOKEN': os.environ['GITLAB_TOKEN']
+          }
+          data = {
+            'title': f'Update Rekono version to {release_name}',
+            'source_branch': f'release/{release_name}',
+            'target_branch': 'kali/master',
+          }
+          response = requests.post(f'https://gitlab.com/api/v4/projects/{project_id}/merge_requests', data=data, headers=headers)
+          if response.status_code != 201:
+            print(response.text)
+          response.raise_for_status()
+
+      - name: GitLab issue in Kali Linux repository
+        shell: python
+        env:
+          RELEASE_NAME: ${{ github.event.release.name }}
+          GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
+          GITLAB_PROJECT_ID: 48406619
+        run: |
+          import os
+          import requests
+          release_name = os.environ['RELEASE_NAME']
+          project_id = os.environ['GITLAB_PROJECT_ID']
+          headers = {
+            'PRIVATE-TOKEN': os.environ['GITLAB_TOKEN']
+          }
+          data = {
+            'title': f'New Rekono version {release_name}',
+            'description': f'''Please, upgrade the `rekono-kbx` Kali Linux package to the latest version `{release_name}`.
+
+            New version details:
+            - [GitHub release](https://github.com/pablosnt/rekono/releases/tag/{release_name})
+            - [Rekono changelog](https://github.com/pablosnt/rekono/blob/main/CHANGELOG.md)
+
+            Thank you very much!
+            ''',
+          }
+          response = requests.post(f'https://gitlab.com/api/v4/projects/{project_id}/issues', data=data, headers=headers)
+          response.raise_for_status()

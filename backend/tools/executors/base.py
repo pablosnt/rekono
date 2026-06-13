@@ -14,6 +14,7 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
 
+from django.core.exceptions import ValidationError
 from django.forms.models import model_to_dict
 from django.utils import timezone
 
@@ -28,6 +29,8 @@ from http_headers.models import HttpHeader
 from parameters.models import InputTechnology, InputVulnerability
 from rekono.settings import CONFIG
 from security.cryptography import Crypto
+from security.validators.enums import Regex
+from security.validators.input_validator import Validator
 from settings.models import Settings
 from target_ports.models import TargetPort
 from tools.models import Intensity
@@ -42,11 +45,7 @@ class BaseExecutor(LoggingEntity):
     mapping from available inputs and configurations with proper authentication handling.
 
     Attributes:
-        arguments (list): Generated command-line arguments for tool execution
-        environment (dict): Environment variables for tool execution
-        findings_used_in_execution (dict): Findings used as inputs for this execution
-        targets_used_in_execution (dict): Targets used as inputs for this execution
-        authentication (Authentication | None): Authentication credentials if available
+        environment_validator (Validator): Rejects sensitive environment variable assignments
 
     Example:
         Execute a tool with proper parameter generation:
@@ -57,15 +56,7 @@ class BaseExecutor(LoggingEntity):
         ```
     """
 
-    arguments = []
-    environment = {}
-    findings_used_in_execution = {}
-    targets_used_in_execution = {}
-    authentication = None
-    # This will save the port included in URL or TARGET parameters
-    # so, we have the scanned port independently of its source, i.e.
-    # port found in previous execution, target port or default URL port
-    port_from_arguments = None
+    environment_validator = Validator(Regex.SENSITIVE_ENV, inverse_match=False)
 
     def __init__(self, execution: Execution) -> None:
         """Initialize the executor with execution context and configuration.
@@ -76,6 +67,15 @@ class BaseExecutor(LoggingEntity):
         Args:
             execution (Execution): The execution instance to manage
         """
+        self.arguments = []
+        self.environment = {}
+        self.findings_used_in_execution = {}
+        self.targets_used_in_execution = {}
+        self.authentication = None
+        # This will save the port included in URL or TARGET parameters
+        # so, we have the scanned port independently of its source, i.e.
+        # port found in previous execution, target port or default URL port
+        self.port_from_arguments = None
         self.execution = execution
         self.intensity = (
             Intensity.objects.filter(tool=execution.configuration.tool, value__lte=execution.task.intensity)
@@ -292,7 +292,9 @@ class BaseExecutor(LoggingEntity):
 
         Sets up the execution environment by copying system environment variables,
         processing tool-specific environment definitions, and configuring proxy
-        settings from global configuration.
+        settings from global configuration. Environment definitions parsed from the
+        pre-command arguments are filtered so user-controlled values cannot set
+        sensitive variables (PATH, LD_PRELOAD, etc.) that could hijack the subprocess.
 
         Returns:
             dict[str, Any]: Environment variables for tool execution
@@ -308,8 +310,16 @@ class BaseExecutor(LoggingEntity):
             for definition in self.arguments[:index]:
                 if "=" in definition:
                     variable, value = definition.split("=", 1)
+                    try:
+                        # Avoid malicious environment variables
+                        self.environment_validator(definition)
+                    except ValidationError:
+                        self.logger.warning(
+                            f"[Security] Refused to set sensitive environment variable '{variable}' from execution arguments"
+                        )
+                        continue
                     # Clean variable value by removing quotes that might interfere with execution
-                    environment[variable] = value.strip().replace("'", "").replace('"', "")
+                    environment[variable.strip()] = value.strip().replace("'", "").replace('"', "")
             # Remove environment definitions from arguments, keeping only the tool command and its parameters
             self.arguments = self.arguments[index:]
         settings = Settings.objects.first()
@@ -412,6 +422,7 @@ class BaseExecutor(LoggingEntity):
         Args:
             reason (str): The reason why the execution was skipped
         """
+        self.logger.error(f"[Tool] {self.execution.configuration.tool.name} execution was skipped due to '{reason}'")
         self.execution.status = Status.SKIPPED
         self.execution.skipped_reason = reason
         self.execution.end = timezone.now()
@@ -424,6 +435,7 @@ class BaseExecutor(LoggingEntity):
         Updates execution status to ERROR and sets end timestamp.
         Triggers task end check.
         """
+        self.logger.error(f"[Tool] {self.execution.configuration.tool.name} execution finished with errors")
         self.execution.status = Status.ERROR
         self.execution.end = timezone.now()
         self.execution.save(update_fields=["status", "end"])
@@ -435,6 +447,7 @@ class BaseExecutor(LoggingEntity):
         Updates execution status to COMPLETED, sets end timestamp, and generates
         execution hash for deduplication. Triggers task end check.
         """
+        self.logger.info(f"[Tool] {self.execution.configuration.tool.name} execution has been completed")
         self.execution.status = Status.COMPLETED
         self.execution.end = timezone.now()
         self.execution.hash = Crypto.hash(
@@ -499,10 +512,7 @@ class BaseExecutor(LoggingEntity):
             if not CONFIG.testing:
                 self.run_tool(self.environment)
         except (RuntimeError, Exception):
-            self.logger.error(f"[Tool] {self.execution.configuration.tool.name} execution finished with errors")
             self.on_error()
             self.after_running()
             return
         self.after_running()
-        self.on_completed()
-        self.logger.info(f"[Tool] {self.execution.configuration.tool.name} execution has been completed")

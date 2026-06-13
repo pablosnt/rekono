@@ -4,11 +4,13 @@ on:
   schedule:
     - cron: "0 0 * * *"
 
+permissions: {}
+
 jobs:
   tools:
     runs-on: ubuntu-latest
     container:
-      image: kalilinux/kali-last-release:latest
+      image: kalilinux/kali-last-release:latest # zizmor: ignore[unpinned-images] Keep 'latest' to detect upstream tool updates
     strategy:
       fail-fast: false
       matrix:

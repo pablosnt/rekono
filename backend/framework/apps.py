@@ -42,6 +42,7 @@ class BaseApp:
         Returns:
             Path: Absolute path to the fixtures directory for this application.
         """
+        # nosemgrep: python.lang.security.audit.non-literal-import.non-literal-import
         module = importlib.import_module(self.__module__)
         return Path(module.__file__).resolve().parent / "fixtures"
 

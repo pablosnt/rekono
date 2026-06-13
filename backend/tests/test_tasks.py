@@ -25,6 +25,7 @@ class TaskTest(ApiTest, TestCase):
     endpoint = "/api/tasks/"
     expected_string = "10.10.10.10 - Nmap - TCP ports"
     data = [SetupProject(executions_per_task=2), SetupProject(), SetupProject(executions_per_task=0)]
+    target_parameters_flag = True
     cases = [
         ApiTestCase([Role.ADMIN, Role.AUDITOR, Role.READER]),
         ApiTestCase(
@@ -123,6 +124,20 @@ class TaskTest(ApiTest, TestCase):
                 "process": {"id": 1, "name": "All tools"},
                 "executor": {"id": 3, "username": "auditor1"},
                 "intensity": Intensity.NORMAL.name.capitalize(),
+            },
+        ),
+        PostApiTestCase(["admin1", "auditor1"], 400, {**task1, "target_port_id": 2}),
+        PostApiTestCase(
+            ["admin1"],
+            data={**task1, "target_port_id": 1},
+            expected={
+                "id": 7,
+                "target": {"id": 1, "target": "10.10.10.10"},
+                "target_port": {"id": 1},
+                "configuration": {"id": 1},
+                "process": None,
+                "executor": {"id": 1, "username": "admin1"},
+                "intensity": Intensity.HARD.name.capitalize(),
             },
         ),
     ]

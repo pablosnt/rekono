@@ -129,8 +129,12 @@ class SMTP(BaseNotification):
         """
         if not self.is_available():
             return
+        sender = "Rekono <noreply@rekono.com>"
         try:
-            message = EmailMultiAlternatives(subject, "", "Rekono <noreply@rekono.com>", [u.email for u in users])
+            # TOTEST
+            # Recipients in BCC not to leak their emails to other recipients
+            # Manual To header to avoid the message being discarded while not sending a copy to the sender
+            message = EmailMultiAlternatives(subject, "", sender, bcc=[u.email for u in users], headers={"To": sender})
             template = get_template(template_path)
             # nosemgrep: python.flask.security.xss.audit.direct-use-of-jinja2.direct-use-of-jinja2
             message.attach_alternative(template.render({**data, "rekono_url": CONFIG.frontend_url}), "text/html")

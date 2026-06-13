@@ -106,9 +106,9 @@ class VirusTotal(BaseIntegration):
     def is_finding_processable(self, finding: Host) -> bool:
         """Determine if a Host finding should be processed for threat intelligence.
 
-        Evaluates whether a Host finding meets the criteria for VirusTotal
-        threat intelligence processing based on domain availability or
-        public IP address classification.
+        Only hosts on a public IP are processed. A host on a private network is
+        skipped because its IP or domain would be an internal address or hostname
+        that must not be leaked to VirusTotal.
 
         Args:
             finding (Host): The Host finding to evaluate for processing
@@ -116,9 +116,9 @@ class VirusTotal(BaseIntegration):
         Returns:
             bool: True if the finding should be processed, False otherwise
         """
-        return super().is_finding_processable(finding) and (
-            finding.domain is not None or Target.get_type(finding.ip) is TargetType.PUBLIC_IP
-        )
+        # The IP type is the only gate: never send anything (IP or domain) for a host on a private
+        # network, since its domain would be an internal hostname that we must not leak to VirusTotal
+        return super().is_finding_processable(finding) and Target.get_type(finding.ip) is TargetType.PUBLIC_IP
 
     def _process_finding(self, execution: Execution, finding: Host) -> None:
         """Process a Host finding by enriching it with VirusTotal threat intelligence.

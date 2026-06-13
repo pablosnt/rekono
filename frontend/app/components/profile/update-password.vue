@@ -19,6 +19,7 @@
         @submit="
           entity = { password: '', old_password: '' };
           valid = false;
+          userStore.logout();
         "
         @validation-change="(isValid) => (valid = isValid)"
         @new-loading="(newLoading) => (loading = newLoading)"
@@ -51,9 +52,11 @@
 
 <script setup lang="ts">
 import * as z from "zod";
+import { useUserStore } from "~/store/user";
 
 const api = useApi("/api/profile/update-password/");
 const validation = useValidation();
+const userStore = useUserStore();
 const toast = useToast();
 const form = ref();
 const valid = ref(false);

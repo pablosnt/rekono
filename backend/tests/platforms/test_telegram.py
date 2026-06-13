@@ -68,6 +68,21 @@ class TelegramChatTest(ApiTestNoData, TestCase):
                 expected={"id": user.id, "username": user.username, "email": user.email, "telegram_chat": None},
             ).test_case(1, self, "/api/profile/")
 
+    def test_link_rejected_when_already_linked(self) -> None:
+        user = self.admin1
+        first_otp = User.objects.generate_otp(TelegramChat)
+        TelegramChat.objects.create(
+            otp=Crypto.hash(first_otp), otp_expiration=User.objects.get_otp_expiration_time(), chat_id=500
+        )
+        PostApiTestCase([user.username], data={"otp": first_otp}).test_case(1, self, self.endpoint)
+
+        # Second link attempt by an already-linked user
+        second_otp = User.objects.generate_otp(TelegramChat)
+        TelegramChat.objects.create(
+            otp=Crypto.hash(second_otp), otp_expiration=User.objects.get_otp_expiration_time(), chat_id=501
+        )
+        PostApiTestCase([user.username], status_code=400, data={"otp": second_otp}).test_case(1, self, self.endpoint)
+
     @cached_property
     def object(self) -> TelegramChat:
         return TelegramChat.objects.create(user=self.admin1, chat_id=1)

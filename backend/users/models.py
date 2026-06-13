@@ -479,24 +479,6 @@ class User(AbstractUser, BaseEncrypted):
     objects = RekonoUserManager()
     _encrypted_field = "_mfa_key"
 
-    @property
-    def secret(self) -> str | None:
-        """Get decrypted MFA secret.
-
-        Returns:
-            str | None: Decrypted MFA secret or None if not set.
-        """
-        return self._mfa_key
-
-    @secret.setter
-    def secret(self, value: str) -> None:
-        """Set MFA secret with encryption.
-
-        Args:
-            value (str): Plain text MFA secret to encrypt and store.
-        """
-        self._mfa_key = value
-
     def __str__(self) -> str:
         """Return string representation of the user.
 

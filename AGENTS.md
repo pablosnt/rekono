@@ -12,11 +12,13 @@ Offensive security platform that automates attack surface discovery and vulnerab
 - Vue.js
 - Nuxt
 - Nuxt UI
+- React
 
 ## Architecture
 
 - `/backend/`: Rekono backend
 - `/docker/`: Rekono Docker images
+- `/email-templates/`: React email templates to be used by the Rekono backend
 - `/frontend/`: Rekono UI
 
 ## Code Style
@@ -26,8 +28,8 @@ Offensive security platform that automates attack surface discovery and vulnerab
 - `uvx ruff check --select I --fix`: Fix `ruff` style issues on imports. Requires to be executed independently of the previous one
 - `uvx flake8 .`: Runs Flake8 linter to detect code style issues
 - `uvx pytype --disable "import-error,pyi-error,invalid-annotation" --keep-going --jobs 100 .`: Runs PyType to identify Python typing issues. Don't execute this on local as its execution takes long time, and we run it on CI/CD too
-- `pnpm run prettier:fix`: Format the frontend code with the `prettier` formatter
-- `pnpm run eslint:fix`: Runs ESLint linter with `fix` option to fix the issues that are automatically fixable
+- `pnpm run prettier:fix`: Format the frontend and email-templates code with the `prettier` formatter
+- `pnpm run eslint:fix`: Runs ESLint linter with `fix` option to fix the issues that are automatically fixable in the frontend and email-templates code
 
 ### Commands
 
@@ -41,11 +43,13 @@ Offensive security platform that automates attack surface discovery and vulnerab
 - `uv run manage.py rqworker monitor`: Deploys the worker for the monitor queue
 - `uv run manage.py telegram_bot`: Deploys the Rekono Telegram bot
 - `pnpm run dev`: Deploys the Rekono frontend
+- `pnpm run build`: In the email-templates, build the templates and place the email templates in HTML in `/backend/platforms/email/templates/` from where they will be used by the backend
 
 ### Important Notes
 
+- Don't run `git add`, `git commit` or `git push` to the remote repository, only work in the local git repository
 - Don't duplicate code, always reuse existing code if possible
 - Rekono is a cybersecurity project, don't introduce vulnerabilities in the code
 - Don't add comments to frontend code, as they would expose information to the users
 - Always use NuxtUI components in the frontend, don't write native HTML or CSS code if it's not needed
-- Reuse the @frontend/components/crud components to create new frontend pages, unlest it's not possible
+- Reuse the @frontend/components/crud components to create new frontend pages, unless it's not possible
