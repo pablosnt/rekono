@@ -251,15 +251,15 @@ if not CONFIG.testing:
                 # To allow requests from different users with same public IP address
                 # Note that most API requests requires authentication
                 "anon": "100/min",
-                # 4 request by second by user
+                # 17 request by second by user
                 # It is enough for legitimate usage, but attacks will be blocked
                 "user": "1000/min",
                 # Prevent brute force attacks in login and refresh token features
                 # Login is not authenticated, we can receive many requests from different users with same public IP address
                 "login": "30/min",
-                # The frontend can generate many refresh requests for the same user
+                # Same use case as login, just keeping an independent counter for each
                 "refresh": "30/min",
-                # It has to be hard enough to prevent brute force attacks
+                # MFA based on 6 digits is vulnerable to brute force attacks, we have to make it hard enough
                 "mfa": "5/min",
             },
         }
