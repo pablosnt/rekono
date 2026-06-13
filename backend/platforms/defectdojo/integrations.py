@@ -331,6 +331,6 @@ class DefectDojo(BaseIntegration):
                 project_sync.close_old_findings,
             ).get("test_id")
             execution.save(update_fields=["defectdojo_test_id"])
-        except Exception:
+        finally:
             if not execution.output_file and report and report.is_file():
                 report.unlink()
