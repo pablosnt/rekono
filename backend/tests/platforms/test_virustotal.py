@@ -79,6 +79,14 @@ class VirusTotalTest(BaseTest, TestCase):
         self.host.save(update_fields=["ip"])
         self._test_no_data()
 
+    @mock.patch("platforms.virustotal.integrations.VirusTotal.is_available", return_true)
+    @mock.patch("platforms.virustotal.integrations.VirusTotal._request", success)
+    def test_private_ip_with_domain_not_processed(self) -> None:
+        self.host.ip = "10.10.10.10"
+        self.host.domain = "internal.local"
+        self.host.save(update_fields=["ip", "domain"])
+        self._test_no_data()
+
     @mock.patch("platforms.virustotal.integrations.VirusTotal._request", success)
     def test_is_available(self) -> None:
         self.assertTrue(self.virustotal.live_is_available())

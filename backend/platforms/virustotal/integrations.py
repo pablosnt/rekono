@@ -116,9 +116,9 @@ class VirusTotal(BaseIntegration):
         Returns:
             bool: True if the finding should be processed, False otherwise
         """
-        return super().is_finding_processable(finding) and (
-            finding.domain is not None or Target.get_type(finding.ip) is TargetType.PUBLIC_IP
-        )
+        # The IP type is the only gate: never send anything (IP or domain) for a host on a private
+        # network, since its domain would be an internal hostname that we must not leak to VirusTotal
+        return super().is_finding_processable(finding) and Target.get_type(finding.ip) is TargetType.PUBLIC_IP
 
     def _process_finding(self, execution: Execution, finding: Host) -> None:
         """Process a Host finding by enriching it with VirusTotal threat intelligence.
