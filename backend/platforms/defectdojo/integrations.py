@@ -112,7 +112,7 @@ class DefectDojo(BaseIntegration):
         except Exception:
             return False
 
-    def exists(self, entity_name: str, id: int) -> tuple[dict[str, Any], bool]:
+    def exists(self, entity_name: str, id: int) -> tuple[dict[str, Any] | None, bool]:
         """Check if a DefectDojo entity exists by ID.
 
         Verifies the existence of a DefectDojo entity (product type, product,
@@ -123,7 +123,7 @@ class DefectDojo(BaseIntegration):
             id (int): DefectDojo entity ID to check
 
         Returns:
-            bool: True if entity exists, False otherwise
+            tuple[dict[str, Any] | None, bool]: Tuple with the response and a flag indicating if the entity exists or not
         """
         try:
             response = self._request(self.session.get, f"/{entity_name}/{id}/")
