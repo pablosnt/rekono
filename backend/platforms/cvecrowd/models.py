@@ -48,7 +48,7 @@ class CveCrowdSettings(BaseEncrypted):
     """
 
     _api_token = models.TextField(
-        max_length=50,
+        max_length=100,
         validators=[Validator(Regex.SECRET, code="api_token")],
         null=True,
         blank=True,

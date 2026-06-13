@@ -182,6 +182,7 @@ export default defineNuxtConfig({
         "@tiptap/pm/tables",
         "@tiptap/vue-3",
         "@unovis/ts",
+        "@unovis/ts/maps",
         "@unovis/vue",
         "@vue/devtools-core",
         "@vue/devtools-kit",

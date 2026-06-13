@@ -172,7 +172,7 @@ const integrationsSettings = ref({
         },
       ],
       editFormSchema: z.object({
-        api_token: validation.secret("api_token", false, 50).or(z.literal("")),
+        api_token: validation.secret("api_token", false, 100).or(z.literal("")),
         trending_span_days: z.union(cveCrowdDaysSpan.map((v) => z.literal(v))),
         execute_per_execution: z.boolean(),
       }),
