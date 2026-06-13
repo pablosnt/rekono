@@ -56,6 +56,7 @@ class DefectDojoIntegrationTest(BaseTest, TestCase):
     endpoint = "/api/defectdojo/"
     data = [SetupProject()]
 
+    @mock.patch("platforms.defectdojo.integrations.DefectDojo.is_enabled", return_true)
     @mock.patch("platforms.defectdojo.integrations.DefectDojo.is_available", return_true)
     @mock.patch("platforms.defectdojo.integrations.DefectDojo.exists", return_true)
     @mock.patch("platforms.defectdojo.integrations.DefectDojo._import_or_reimport_scan", import_scan)
@@ -69,6 +70,7 @@ class DefectDojoIntegrationTest(BaseTest, TestCase):
         DefectDojo().process_findings(self.execution, self.findings)
         self.assertEqual(1, self.execution.defectdojo_test_id)
 
+    @mock.patch("platforms.defectdojo.integrations.DefectDojo.is_enabled", return_true)
     @mock.patch("platforms.defectdojo.integrations.DefectDojo.is_available", return_true)
     @mock.patch("platforms.defectdojo.integrations.DefectDojo.exists", return_true)
     @mock.patch("platforms.defectdojo.integrations.DefectDojo.create_engagement", create_engagement)
@@ -89,6 +91,8 @@ class DefectDojoIntegrationTest(BaseTest, TestCase):
         DefectDojo().process_findings(self.execution, path_only)
         self.assertIsNone(self.execution.defectdojo_test_id)
 
+    @mock.patch("platforms.defectdojo.integrations.DefectDojo.is_enabled", return_true)
+    @mock.patch("platforms.defectdojo.integrations.DefectDojo.is_available", return_true)
     @mock.patch("platforms.defectdojo.integrations.DefectDojo._import_or_reimport_scan", import_scan)
     def test_import(self) -> None:
         DefectDojoSync.objects.create(project=self.project, product_id=1, engagement_id=1)
@@ -96,6 +100,8 @@ class DefectDojoIntegrationTest(BaseTest, TestCase):
         DefectDojo().process_findings(self.execution, self.findings)
         self.assertEqual(1, self.execution.defectdojo_test_id)
 
+    @mock.patch("platforms.defectdojo.integrations.DefectDojo.is_enabled", return_true)
+    @mock.patch("platforms.defectdojo.integrations.DefectDojo.is_available", return_true)
     @mock.patch("platforms.defectdojo.integrations.DefectDojo._get_test_type", return_test_type)
     @mock.patch("platforms.defectdojo.integrations.DefectDojo._get_test", return_test)
     @mock.patch("platforms.defectdojo.integrations.DefectDojo._import_or_reimport_scan", import_scan)

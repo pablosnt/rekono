@@ -19,6 +19,10 @@ from tests.framework.data import SetupProject
 # pytype: disable=wrong-arg-types
 
 
+def return_true(*args: Any, **kwargs: Any) -> bool:
+    return True
+
+
 def success(*args: Any, **kwargs: Any) -> list[str]:
     return ["CVE-2020-1111", "CVE-2021-1112", "CVE-2022-1113"]
 
@@ -53,6 +57,7 @@ class CveCrowdTest(BaseTest, TestCase):
         Alert.objects.create(project=self.project, item=AlertItem.TRENDING_CVE, value=str(True), enabled=True)
         self.cvecrowd = CveCrowd()
 
+    @mock.patch("platforms.cvecrowd.integrations.CveCrowd.is_available", return_true)
     @mock.patch("platforms.cvecrowd.integrations.CveCrowd._request", success)
     def test_process_findings(self) -> None:
         self.cvecrowd.process_findings(self.execution, [self.trending, self.not_trending])
