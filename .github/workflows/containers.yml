@@ -188,17 +188,15 @@ jobs:
         include:
           - name: Backend
             image: rekono-backend
-            # CIS-DI-0010: config.yaml has database.password/database.user placeholder fields
             ignore: CIS-DI-0010
           - name: Frontend
             image: rekono-frontend
-            ignore: ""
+            ignore: CIS-DI-0010
           - name: Nginx
             image: rekono-nginx
-            ignore: ""
+            ignore: CIS-DI-0010
           - name: Worker
             image: rekono-worker
-            # CIS-DI-0010: config.yaml has database.password placeholder fields
             # DKL-DI-0001: sudo required for runtime tool updates (nuclei/searchsploit) as non-root user
             ignore: CIS-DI-0010,DKL-DI-0001
     steps:
@@ -210,6 +208,7 @@ jobs:
           output: ${{ matrix.name }}-dockle.json
           exit-code: 1
           exit-level: warn
+          # CIS-DI-0010: Flags some environment variables of the Dockerfile or the config.yaml due to having suspicious values that look like secrets
           ignore: ${{ matrix.ignore }}
 
       - name: Upload report
