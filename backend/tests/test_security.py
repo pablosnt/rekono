@@ -324,6 +324,7 @@ class SecurityTest(ApiTest, TestCase):
 BLOCKED = "https://evil.com/script.js"
 ORIGIN = "https://rekono.com/projects/"
 DIRECTIVE = "script-src"
+INJECTED_BLOCKED = "https://evil.com/script.js\r\nWARNING forged log entry injected by attacker"
 
 
 class CspReportTest(ApiTestNoData):
@@ -331,6 +332,7 @@ class CspReportTest(ApiTestNoData):
     valid = {}
     no_origin = {}
     invalid = {}
+    malicious = {}
     anonymous_access_allowed = None
 
     def _post(self, payload: dict[str, Any]) -> int:
@@ -344,6 +346,9 @@ class CspReportTest(ApiTestNoData):
 
     def test_invalid(self) -> None:
         self.assertEqual(204, self._post(self.invalid))
+
+    def test_log_injection(self) -> None:
+        self.assertEqual(204, self._post(self.malicious))
 
 
 class CspReportToTest(CspReportTest, TestCase):
@@ -363,6 +368,13 @@ class CspReportToTest(CspReportTest, TestCase):
             "body": {"documentUrl": ORIGIN, "effectiveDirective": DIRECTIVE},
         }
     ]
+    malicious = [
+        {
+            "type": "csp-violation",
+            "url": ORIGIN,
+            "body": {"blockedURL": INJECTED_BLOCKED, "documentUrl": ORIGIN, "effectiveDirective": DIRECTIVE},
+        }
+    ]
 
 
 class CspReportUriTest(CspReportTest, TestCase):
@@ -370,3 +382,6 @@ class CspReportUriTest(CspReportTest, TestCase):
     valid = {"csp-report": {"blocked-uri": BLOCKED, "document-uri": ORIGIN, "effective-directive": DIRECTIVE}}
     no_origin = {"csp-report": {"blocked-uri": BLOCKED, "effective-directive": DIRECTIVE}}
     invalid = {"csp-report": {"blocked-uri": BLOCKED, "document-uri": ORIGIN}}
+    malicious = {
+        "csp-report": {"blocked-uri": INJECTED_BLOCKED, "document-uri": ORIGIN, "effective-directive": DIRECTIVE}
+    }

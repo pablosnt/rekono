@@ -8,6 +8,7 @@ format through separate concrete view classes that share a common parsing base.
 
 import json
 import logging
+import unicodedata
 from typing import Any
 
 from drf_spectacular.utils import extend_schema
@@ -36,6 +37,21 @@ class CspReportView(APIView):
     authentication_classes = []
     permission_classes = []
 
+    def _sanitize(self, value: str | None) -> str | None:
+        """Remove control characters and cap the length of a report field.
+
+        Args:
+            value (str | None): Raw, attacker-controlled field from the violation report.
+
+        Returns:
+            str | None: The value with control characters removed and length capped.
+        """
+        if not value:
+            return value
+        # Limit the length of each value
+        # Remove all control characters whose unicode category starts with "C"
+        return "".join(char for char in value[:1000] if unicodedata.category(char).startswith("C"))
+
     def _log_violation(self, blocked: str | None, origin: str | None, directive: str | None) -> None:
         """Emit a structured warning log entry for a single CSP violation.
 
@@ -48,7 +64,7 @@ class CspReportView(APIView):
         """
         if blocked and directive:
             logger.warning(
-                f"[Content-Security-Policy] URI {blocked} has been blocked{f' in {origin}' if origin else ''} due to {directive} directive"
+                f"[Content-Security-Policy] URI {self._sanitize(blocked)} has been blocked{f' in {self._sanitize(origin)}' if origin else ''} due to {self._sanitize(directive)} directive"
             )
 
     def _process_violation(self, data: dict[str, Any]) -> None:
