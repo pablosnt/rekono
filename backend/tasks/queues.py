@@ -162,8 +162,7 @@ class TasksQueue(BaseScanQueue):
         """
         if task.executions:
             task.executions.clear()
-        # Re-validate the shared target once before creating any execution so deny
-        # list changes and DNS rebinding are enforced at execution time as well
+        # Re-validate the task target before creating any execution
         try:
             TargetValidator(Regex.TARGET)(task.target.target)
         except ValidationError:

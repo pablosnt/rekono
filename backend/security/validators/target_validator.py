@@ -109,9 +109,7 @@ class TargetValidator(RegexValidator, LoggingEntity):
             from targets.models import Target
 
             target_type = Target.get_type(value)
-            # Resolution errors (no PTR record, name resolution failure) must not
-            # block validation, so they are swallowed and only the literal target
-            # is checked against the deny list
+            # Resolution errors must not block validation
             try:
                 if target_type in [TargetType.PRIVATE_IP, TargetType.PUBLIC_IP]:
                     resolved_domain, _, _ = socket.gethostbyaddr(value)
@@ -132,8 +130,7 @@ class TargetValidator(RegexValidator, LoggingEntity):
                 self.logger.warning(f"[Security] Target '{value}' is denied by policy")
                 raise ValidationError(self.message, code=self.code, params={"value": value})
             for denied_value in denylist:
-                # A malformed deny list entry (invalid regex) must be ignored, not
-                # confused with a deny match, so the matching is isolated from the raise
+                # A malformed deny list entry must be ignored
                 try:
                     regex_match = bool(re.fullmatch(denied_value, candidate))
                 except Exception:

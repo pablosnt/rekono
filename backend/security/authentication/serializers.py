@@ -195,8 +195,7 @@ class MfaRequiredSerializer(Serializer):
         attrs = super().validate(attrs)
         if attrs.get("token"):
             try:
-                # Validate the token as a real MFA JWT so signature, expiry,
-                # token_type and blacklist state are all enforced
+                # Validate the token's signature, expiry, token_type and blacklist state
                 self.token = MfaRequiredToken(attrs.get("token"))
                 self.token.check_blacklist()
                 self.user = User.objects.get(id=self.token[api_settings.USER_ID_CLAIM])
