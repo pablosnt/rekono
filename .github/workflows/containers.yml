@@ -10,6 +10,9 @@ on:
 
 permissions: {}
 
+env:
+  DOCKER_USER: pablosnt
+
 jobs:
   docker-images:
     runs-on: ubuntu-latest
@@ -71,7 +74,7 @@ jobs:
       - name: Login to Docker Hub
         uses: docker/login-action@37a9a4b3331f99f00a11099bab28fa3234301f65
         with:
-          username: ${{ secrets.DOCKER_USER }}
+          username: ${{ env.DOCKER_USER }}
           password: ${{ secrets.DOCKER_TOKEN }}
           logout: true
 
@@ -94,7 +97,7 @@ jobs:
           file: ${{ matrix.dockerfile }}
           target: ${{ matrix.target }}
           platforms: linux/amd64,linux/arm64
-          tags: ${{ secrets.DOCKER_USER }}/${{ matrix.image }}:unstable
+          tags: ${{ env.DOCKER_USER }}/${{ matrix.image }}:unstable
           load: true
           push: true
           sbom: true
@@ -112,7 +115,7 @@ jobs:
           file: ${{ matrix.dockerfile }}
           target: ${{ matrix.target }}
           platforms: linux/amd64,linux/arm64
-          tags: ${{ secrets.DOCKER_USER }}/${{ matrix.image }}:${{ github.event.release.name }},${{ secrets.DOCKER_USER }}/${{ matrix.image }}:latest,${{ secrets.DOCKER_USER }}/${{ matrix.image }}:unstable
+          tags: ${{ env.DOCKER_USER }}/${{ matrix.image }}:${{ github.event.release.name }},${{ env.DOCKER_USER }}/${{ matrix.image }}:latest,${{ env.DOCKER_USER }}/${{ matrix.image }}:unstable
           load: true
           push: true
           sbom: true
@@ -125,7 +128,7 @@ jobs:
       - name: Attest provenance
         uses: actions/attest@5ec407fab24e59f5df8672d92186d8c266c9b7fe
         with:
-          subject-name: docker.io/${{ secrets.DOCKER_USER }}/${{ matrix.image }}
+          subject-name: docker.io/${{ env.DOCKER_USER }}/${{ matrix.image }}
           subject-digest: ${{ github.event_name == 'release' && steps.build-release.outputs.digest || steps.build-unstable.outputs.digest }}
           push-to-registry: false
 
@@ -134,7 +137,6 @@ jobs:
     if: ${{ github.event_name != 'release' }}
     needs: docker-images
     runs-on: ubuntu-latest
-    environment: docker-hub
     permissions:
       contents: read
     strategy:
@@ -158,7 +160,7 @@ jobs:
       - name: Trivy
         uses: aquasecurity/trivy-action@bfa4b33a029b9aa80ddb784b45574c30e072c59e
         with:
-          image-ref: docker.io/${{ secrets.DOCKER_USER }}/${{ matrix.image }}:unstable
+          image-ref: docker.io/${{ env.DOCKER_USER }}/${{ matrix.image }}:unstable
           scanners: vuln
           format: json
           output: ${{ matrix.name }}-trivy.json
@@ -180,7 +182,6 @@ jobs:
     if: ${{ github.event_name != 'release' }}
     needs: docker-images
     runs-on: ubuntu-latest
-    environment: docker-hub
     permissions: {}
     strategy:
       fail-fast: false
@@ -203,7 +204,7 @@ jobs:
       - name: Dockle
         uses: goodwithtech/dockle-action@e30e6af832aad6ea7dca2a248d31a85eab6dbd68
         with:
-          image: docker.io/${{ secrets.DOCKER_USER }}/${{ matrix.image }}:unstable
+          image: docker.io/${{ env.DOCKER_USER }}/${{ matrix.image }}:unstable
           format: json
           output: ${{ matrix.name }}-dockle.json
           exit-code: 1
