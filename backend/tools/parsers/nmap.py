@@ -77,19 +77,25 @@ class Nmap(BaseParser):
                     technologies.append(technology)
                     # Process NSE scripts that provide additional vulnerability and service details
                     if service.scripts_results:
-                        self._parse_nse_scripts(service.scripts_results, technology)
+                        self._parse_nse_scripts(service.scripts_results, technology, port)
             if nmap_host.scripts_results:
                 self._parse_nse_scripts(nmap_host.scripts_results, technologies)
 
-    def _parse_nse_scripts(self, results: Any, technologies: list[Technology] | Technology) -> None:
+    def _parse_nse_scripts(
+        self, results: Any, technologies: list[Technology] | Technology, port: Port | None = None
+    ) -> None:
         """Parse NSE script results and extract vulnerability findings.
 
         Args:
             results (Any): NSE script results from Nmap output
             technologies (list[Technology] | Technology): Associated technology findings
+            port (Port | None): Port the scripts belong to, used as a fallback link when no
+                technology was fingerprinted so findings keep traceability to the service
         """
         # Normalize technology input to handle both single Technology objects and lists
-        technology = technologies if isinstance(technologies, Technology) else technologies[0]
+        technology = (
+            technologies if isinstance(technologies, Technology) else (technologies[0] if technologies else None)
+        )
         # Extract SMB-specific technologies for SMB-related vulnerabilities
         # SMB services use specific service names in Nmap output
         smb_technologies = (
@@ -98,16 +104,21 @@ class Nmap(BaseParser):
             else [t for t in technologies if t.port.service in ["microsoft-ds", "netbios-ssn"]]
         )
         smb_technology = smb_technologies[0] if smb_technologies else None
+        # Prepare links for vulnerabilities
+        technology_link = {"technology": technology} if technology else {"port": port}
+        is_technology_link = technology is not None or port is not None
+        smb_link = {"technology": smb_technology} if smb_technology else {"port": port}
+        is_smb_link = smb_technology is not None or port is not None
         # Process each NSE script result based on its ID (script type)
         for script in results:
             match script.get("id"):
                 case "vulners":
-                    self._parse_nse_vulners(script, technology)
+                    self._parse_nse_vulners(script, technology, port)
                 case "ftp-anon":
                     self.create_finding(
                         Vulnerability,
-                        linked_finding=True,
-                        technology=technology,
+                        linked_finding=is_technology_link,
+                        **technology_link,
                         name="Anonymous FTP",
                         description="Anonymous login is allowed in FTP",
                         severity=Severity.CRITICAL,
@@ -118,8 +129,8 @@ class Nmap(BaseParser):
                 case "ftp-proftpd-backdoor":
                     self.create_finding(
                         Vulnerability,
-                        linked_finding=True,
-                        technology=technology,
+                        linked_finding=is_technology_link,
+                        **technology_link,
                         name="FTP Backdoor",
                         description="FTP ProFTPD 1.3.3c Backdoor",
                         severity=Severity.CRITICAL,
@@ -129,32 +140,32 @@ class Nmap(BaseParser):
                 case "ftp-vsftpd-backdoor":
                     self.create_finding(
                         Vulnerability,
-                        linked_finding=True,
-                        technology=technology,
+                        linked_finding=is_technology_link,
+                        **technology_link,
                         name="vsFTPd Backdoor",
                         cve="CVE-2011-2523",
                     )
                 case "ftp-libopie":
                     self.create_finding(
                         Vulnerability,
-                        linked_finding=True,
-                        technology=technology,
+                        linked_finding=is_technology_link,
+                        **technology_link,
                         name="OPIE off-by-one stack overflow",
                         cve="CVE-2010-1938",
                     )
                 case "ftp-vuln-cve2010-4221":
                     self.create_finding(
                         Vulnerability,
-                        linked_finding=True,
-                        technology=technology,
+                        linked_finding=is_technology_link,
+                        **technology_link,
                         name="ProFTPD server TELNET IAC stack overflow",
                         cve="CVE-2010-4221",
                     )
                 case "smb-double-pulsar-backdoor":
                     self.create_finding(
                         Vulnerability,
-                        linked_finding=True,
-                        technology=smb_technology,
+                        linked_finding=is_smb_link,
+                        **smb_link,
                         name="SMB Server DOUBLEPULSAR Backdoor",
                         description=(
                             "NNM detected the presence of DOUBLEPULSAR on the remote Windows host. DOUBLEPULSAR is one of "
@@ -170,16 +181,16 @@ class Nmap(BaseParser):
                 case "smb-vuln-webexec":
                     self.create_finding(
                         Vulnerability,
-                        linked_finding=True,
-                        technology=smb_technology,
+                        linked_finding=is_smb_link,
+                        **smb_link,
                         name="Remote Code Execution vulnerability in WebExService",
                         cve="CVE-2018-15442",
                     )
                 case "smb-vuln-cve-2017-7494":
                     self.create_finding(
                         Vulnerability,
-                        linked_finding=True,
-                        technology=smb_technology,
+                        linked_finding=is_smb_link,
+                        **smb_link,
                         name="SAMBA Remote Code Execution from Writable Share",
                         cve="CVE-2017-7494",
                     )
@@ -190,14 +201,14 @@ class Nmap(BaseParser):
                     | "smb-vuln-ms10-061"
                     | "smb-vuln-ms17-010"
                 ):
-                    self._parse_nse_vulners(script, smb_technology)
+                    self._parse_nse_vulners(script, smb_technology, port)
                 case "smb-enum-users":
                     for line in script.get("output").split("\n"):
                         data = line.strip()
                         if data and " (RID:" in data:
                             self.create_finding(
                                 Credential,
-                                linked_finding=True,
+                                linked_finding=smb_technology is not None,
                                 technology=smb_technology,
                                 username=data.split(" (RID:", 1)[0],
                                 context="SMB user",
@@ -213,8 +224,8 @@ class Nmap(BaseParser):
                             # Create a Path finding for each discovered SMB share
                             self.create_finding(
                                 Path,
-                                linked_finding=bool(smb_technology),
-                                port=smb_technology.port if smb_technology else None,
+                                linked_finding=is_smb_link,
+                                port=smb_technology.port if smb_technology else port,
                                 path=path,
                                 extra_info=(
                                     f"{fields.get('Comment') or ''} "
@@ -229,8 +240,8 @@ class Nmap(BaseParser):
                             if "READ" in anonymous or "WRITE" in anonymous:
                                 self.create_finding(
                                     Vulnerability,
-                                    linked_finding=True,
-                                    technology=smb_technology,
+                                    linked_finding=is_smb_link,
+                                    **smb_link,
                                     name="Anonymous SMB",
                                     description=f"Anonymous access is allowed to the SMB share {path}",
                                     severity=(Severity.CRITICAL if "WRITE" in anonymous else Severity.HIGH),
@@ -242,17 +253,25 @@ class Nmap(BaseParser):
                         smb_technology.description = f"Protocols: {', '.join([p.split('[dangerous', 1)[0].strip() for p in script.get('elements', {}).get('dialects', {}).get(None)])}"
                         smb_technology.save(update_fields=["description"])
                 case _:
-                    self._parse_nse_vulners(script, technology)
+                    self._parse_nse_vulners(script, technology, port)
 
-    def _parse_nse_vulners(self, script: Any, technology: Technology) -> None:
+    def _parse_nse_vulners(self, script: Any, technology: Technology | None, port: Port | None = None) -> None:
         """Extract CVE references from NSE vulners script output.
 
         Args:
             script (Any): NSE script result containing vulnerability data
-            technology (Technology): Technology finding to associate vulnerabilities with
+            technology (Technology | None): Technology finding to associate vulnerabilities with
+            port (Port | None): Port used as a fallback link when no technology is available
         """
         cves = set()
         for cve in re.findall(Regex.CVE.value, script.get("output", "")):
             if cve not in cves:
                 cves.add(cve)
-                self.create_finding(Vulnerability, linked_finding=True, technology=technology, name=cve, cve=cve)
+                self.create_finding(
+                    Vulnerability,
+                    linked_finding=technology is not None or port is not None,
+                    name=cve,
+                    cve=cve,
+                    technology=technology,
+                    port=port if technology is None else None,
+                )
