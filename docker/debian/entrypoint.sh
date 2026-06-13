@@ -14,11 +14,22 @@ then
     cp -r $(cat /config/default_pgdata.txt) $PGDATA
 fi
 
+export PGVERSION=15
+# Compatibility fix for upgrades from version 1.6.5 where the PostgreSQL 16 was being used
+if [ -f "$PGDATA/PG_VERSION" ]
+then
+    CURRENT_VERSION=$(cat $PGDATA/PG_VERSION)
+    if [ "$CURRENT_VERSION" -eq "16" ]
+    then
+        sudo REKONO_HOME=$REKONO_HOME PGDATA=$PGDATA RKN_DB_NAME=$RKN_DB_NAME RKN_DB_USER=$RKN_DB_USER /downgrade_postgresql_16.sh
+    fi
+fi
+
 # Set proper permissions to resources
 sudo REKONO_HOME=$REKONO_HOME PGDATA=$PGDATA /set_permissions.sh
 
 # Start services
-sudo /etc/init.d/postgresql start
+sudo /etc/init.d/postgresql start $PGVERSION
 sudo /etc/init.d/redis-server start
 
 # Migrate database
@@ -41,3 +52,6 @@ python /code/manage.py telegram_bot &
 
 # Run Desktop app
 /usr/bin/rekono --no-sandbox
+
+sudo /etc/init.d/postgresql stop $PGVERSION
+sudo /etc/init.d/redis-server stop

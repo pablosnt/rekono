@@ -58,6 +58,54 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Upgrade `python-magic` version to `0.4.27` (https://github.com/pablosnt/rekono/issues/222)
 
 
+## [1.6.7] - 2025-04-21
+
+### Fixed
+
+- Upgrade `psycopg2` version to `2.9.10` (https://github.com/pablosnt/rekono/issues/330)
+
+
+## [1.6.6] - 2024-04-25
+
+### Fixed
+
+- Incompatibility issue between data from PostgreSQL 16.x and PostgreSQL 15.x in Rekono Desktop (https://github.com/pablosnt/rekono/issues/310)
+
+
+## [1.6.5] - 2024-03-29
+
+### Fixed
+
+- Upgrade NVD NIST API version to 2.0 after [decommissioning of version 1.0](https://nvd.nist.gov/general/news/api-20-announcements) (https://github.com/pablosnt/rekono/issues/287)
+
+### Security
+
+- Upgrade `Django` version to `3.2.25` (https://github.com/pablosnt/rekono/issues/286)
+- Upgrade `pycryptodome` version to `3.19.1` (https://github.com/pablosnt/rekono/issues/286)
+- Upgrade `axios` version to `0.28.0` (https://github.com/pablosnt/rekono/issues/286)
+
+
+## [1.6.4] - 2023-11-07
+
+### Security
+
+- Upgrade `Django` version to `3.2.23` (https://github.com/pablosnt/rekono/issues/252)
+
+
+## [1.6.3] - 2023-07-25
+
+### Fixed
+
+- Upgrade `pyyaml` version to `6.0.1` (https://github.com/pablosnt/rekono/issues/240)
+
+
+## [1.6.2] - 2023-07-08
+
+### Security
+
+- Upgrade `Django` version to `3.2.20` (https://github.com/pablosnt/rekono/issues/233)
+
+
 ## [1.6.1] - 2023-05-31
 
 ### Security

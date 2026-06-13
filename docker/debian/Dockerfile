@@ -1,4 +1,4 @@
-FROM kalilinux/kali-last-release:latest
+FROM debian:bookworm-20240423
 
 # Environment
 ENV PYTHONDONTWRITEBYTECODE 1
@@ -21,8 +21,8 @@ ENV EXECUTION_WORKERS 5
 ARG REKONO_VERSION
 
 # Install requirements
-RUN apt update -y && \
-    apt install python3-pip libpq-dev python3-dev libmagic1 libcap2-bin redis-server firefox-esr sudo libgbm-dev libasound2 postgresql -y && \
+RUN apt update && \
+    apt install python3-pip libpq-dev python3-dev libmagic1 redis-server firefox-esr sudo libgbm-dev libasound2 postgresql-15 wget libcap2-bin -y && \
     ln -s /usr/bin/python3 /usr/bin/python && \
     mkdir -p $REKONO_HOME $PGDATA /code /config /kaboxer && \
     chown -R postgres:postgres /config && \
@@ -69,13 +69,15 @@ RUN export RKN_DB_PASSWORD=$(cat /config/rkn_db_password.txt) && \
     psql ${RKN_DB_NAME} -c "GRANT ALL ON ALL TABLES IN SCHEMA public to ${RKN_DB_USER};" && \
     psql ${RKN_DB_NAME} -c "GRANT ALL ON ALL SEQUENCES IN SCHEMA public to ${RKN_DB_USER};" && \
     psql ${RKN_DB_NAME} -c "GRANT ALL ON ALL FUNCTIONS IN SCHEMA public to ${RKN_DB_USER};"
+
+# Tools
 USER root
 # sudo is required at runtime so the unprivileged 'rekono' user can start the
 # bundled postgresql/redis services in this all-in-one Kali desktop package. It
 # is locked down to a specific command allowlist in /etc/sudoers (see below).
 # nosemgrep: dockerfile.security.no-sudo-in-dockerfile.no-sudo-in-dockerfile
 RUN export RKN_DB_PASSWORD=$(cat /config/rkn_db_password.txt) && \
-    sudo /etc/init.d/postgresql start && \
+    /etc/init.d/postgresql start 15 && \
     python /code/manage.py migrate && \
     python /code/manage.py createsuperuser --no-input && \
     # System user
@@ -89,14 +91,18 @@ RUN export RKN_DB_PASSWORD=$(cat /config/rkn_db_password.txt) && \
     chown rekono:rekono /set_permissions.sh && \
     chmod 700 /set_permissions.sh && \
     /set_permissions.sh && \
+    chown rekono:rekono /downgrade_postgresql_16.sh && \
+    chmod 700 /downgrade_postgresql_16.sh && \
     chown -R rekono:rekono /code && \
     chown -R rekono:rekono /config && \
     chown -R rekono:rekono /opt && \
-    echo "rekono ALL=(ALL) NOPASSWD:SETENV:/etc/init.d/postgresql,/var/run/postgresql,/etc/init.d/redis-server,/set_permissions.sh" >> /etc/sudoers && \
+    chown -R rekono:rekono /home/kali && \
+    chown -R rekono:rekono /usr/share && \
+    echo "rekono ALL=(ALL) NOPASSWD:SETENV:/etc/init.d/postgresql,/var/run/postgresql,/etc/init.d/redis-server,/set_permissions.sh,/downgrade_postgresql_16.sh" >> /etc/sudoers && \
     export DEFAULT_PGDATA=$(cat /config/default_pgdata.txt) && \
     chown -R rekono:rekono $DEFAULT_PGDATA && \
     sed -i 's:'"$DEFAULT_PGDATA"':'"$PGDATA"':' $(cat /config/postgresql_config.txt) && \
     rm /config/postgresql_config.txt
 
-USER rekono
+USER root
 WORKDIR /code
