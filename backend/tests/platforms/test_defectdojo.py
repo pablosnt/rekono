@@ -20,10 +20,6 @@ def return_true(*args: Any, **kwargs: Any) -> bool:
     return True
 
 
-def return_false(*args: Any, **kwargs: Any) -> bool:
-    return False
-
-
 def return_id(*args: Any, **kwargs: Any) -> dict[str, int]:
     return {"id": 1}
 
@@ -44,6 +40,16 @@ def return_test(*args: Any, **kwargs: Any) -> dict[str, Any]:
     return {"id": 5}
 
 
+def get_engagement(*args: Any, **kwargs: Any) -> dict[str, Any]:
+    # args: (self, "engagements", engagement_id); the engagement belongs to product 1
+    return {"id": args[-1], "product": 1}, True
+
+
+def get_engagement_other_product(*args: Any, **kwargs: Any) -> dict[str, Any]:
+    # The engagement exists but belongs to a different product
+    return {"id": args[-1], "product": 999}, True
+
+
 def exception(*args: Any, **kwargs: Any) -> Any:
     raise Exception("Test")
 
@@ -58,7 +64,7 @@ class DefectDojoIntegrationTest(BaseTest, TestCase):
 
     @mock.patch("platforms.defectdojo.integrations.DefectDojo.is_enabled", return_true)
     @mock.patch("platforms.defectdojo.integrations.DefectDojo.is_available", return_true)
-    @mock.patch("platforms.defectdojo.integrations.DefectDojo.exists", return_true)
+    @mock.patch("platforms.defectdojo.integrations.DefectDojo.exists", get_engagement)
     @mock.patch("platforms.defectdojo.integrations.DefectDojo._import_or_reimport_scan", import_scan)
     def test_project_sync(self) -> None:
         self.execution.output_file = self.data_dir / "reports" / "nmap" / "enumeration-vulners.xml"
@@ -72,7 +78,7 @@ class DefectDojoIntegrationTest(BaseTest, TestCase):
 
     @mock.patch("platforms.defectdojo.integrations.DefectDojo.is_enabled", return_true)
     @mock.patch("platforms.defectdojo.integrations.DefectDojo.is_available", return_true)
-    @mock.patch("platforms.defectdojo.integrations.DefectDojo.exists", return_true)
+    @mock.patch("platforms.defectdojo.integrations.DefectDojo.exists", get_engagement)
     @mock.patch("platforms.defectdojo.integrations.DefectDojo.create_engagement", create_engagement)
     def test_target_sync(self) -> None:
         PostApiTestCase(
@@ -118,7 +124,7 @@ class DefectDojoIntegrationTest(BaseTest, TestCase):
         settings.save(update_fields=["server", "_api_token"])
         client = DefectDojo()
         self.assertEqual(expected, client.is_available())
-        self.assertEqual(expected, client.exists("product-types", 1))
+        self.assertEqual(expected, client.exists("product-types", 1)[1])
 
     @mock.patch("platforms.defectdojo.integrations.DefectDojo._request", return_true)
     def test_is_available_and_exists(self) -> None:
@@ -153,9 +159,14 @@ class DefectDojoSyncTest(ApiTest, TestCase):
     ]
 
     @mock.patch("platforms.defectdojo.integrations.DefectDojo.is_available", return_true)
-    @mock.patch("platforms.defectdojo.integrations.DefectDojo.exists", return_true)
+    @mock.patch("platforms.defectdojo.integrations.DefectDojo.exists", get_engagement)
     def test_cases(self) -> None:
         super().test_cases()
+
+    @mock.patch("platforms.defectdojo.integrations.DefectDojo.is_available", return_true)
+    @mock.patch("platforms.defectdojo.integrations.DefectDojo.exists", get_engagement_other_product)
+    def test_engagement_from_another_product_is_rejected(self) -> None:
+        PostApiTestCase(["admin1"], 400, data=sync).test_case(0, self, self.endpoint)
 
     @cached_property
     def object(self) -> DefectDojoSync:
