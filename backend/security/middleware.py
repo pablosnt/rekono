@@ -124,7 +124,10 @@ class SecurityMiddleware(LoggingEntity):
         """
         x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
         if x_forwarded_for and CONFIG.trusted_proxy:
-            return x_forwarded_for.split(",", 1)[0]  # pragma: no cover
+            # Trust the rightmost entry, not the leftmost: our nginx appends the real client IP on
+            # the right via $proxy_add_x_forwarded_for, so any value to its left was supplied by the
+            # client and is spoofable (throttle bypass / log forging).
+            return x_forwarded_for.split(",")[-1].strip()
         return request.META["REMOTE_ADDR"]
 
     def _get_options_response(self, request: HttpRequest) -> Response:
