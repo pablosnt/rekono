@@ -8,7 +8,7 @@ from typing import Any
 
 from django.utils import timezone
 from rest_framework import status
-from rest_framework.exceptions import AuthenticationFailed
+from rest_framework.exceptions import AuthenticationFailed, ValidationError
 from rest_framework.serializers import ModelSerializer, SerializerMethodField
 
 from framework.fields import ProtectedSecretField
@@ -122,9 +122,14 @@ class TelegramChatSerializer(ModelSerializer, LoggingEntity):
             dict[str, Any]: Validated attributes with matched Telegram chat.
 
         Raises:
+            ValidationError: If the requesting user already has a linked Telegram chat.
             AuthenticationFailed: If OTP is invalid or expired.
         """
         attrs = super().validate(attrs)
+        request = self.context.get("request")
+        # A user can only link one chat
+        if request and hasattr(request.user, "telegram_chat"):
+            raise ValidationError("This account is already linked to a Telegram chat")
         try:
             attrs["telegram_chat"] = TelegramChat.objects.get(
                 otp=Crypto.hash(attrs.get("otp")), otp_expiration__gt=timezone.now(), user=None
