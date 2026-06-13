@@ -10,7 +10,6 @@ ARG LABEL_LICENSES="GPL-3.0"
 ARG BACKEND_DEBIAN_DEPENDENCIES="libpq-dev libmagic1 libgcc-s1 libxml2-dev libxslt-dev python3-dev libjpeg-dev zlib1g-dev"
 
 
-
 FROM node:26.2.0-bookworm-slim AS build-email-templates
 
 ENV CI=true
