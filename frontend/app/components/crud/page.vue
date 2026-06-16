@@ -31,6 +31,7 @@
         "
         @ordering="
           (sorting: string) => {
+            state.loading = true;
             state.ordering = sorting;
             fetchFirstPage();
           }
