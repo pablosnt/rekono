@@ -54,7 +54,6 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       backendUrl: "",
-      backendRootPath: "",
     },
   },
 

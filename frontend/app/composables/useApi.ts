@@ -28,12 +28,12 @@ export default function (
       endpoint === "/api/security/refresh/"
         ? endpoint
         : base_endpoint + endpoint;
-    endpoint = config.public.backendRootPath
-      ? config.public.backendRootPath + endpoint
-      : endpoint;
     if (config.public.backendUrl) {
       const backendUrl = new URL(config.public.backendUrl);
-      backendUrl.pathname = endpoint;
+      if (backendUrl.pathname.endsWith("/")) {
+        backendUrl.pathname = backendUrl.pathname.slice(0, -1);
+      }
+      backendUrl.pathname += endpoint;
       return backendUrl.href;
     }
     return endpoint;

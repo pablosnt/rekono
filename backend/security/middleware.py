@@ -165,7 +165,11 @@ class SecurityMiddleware(LoggingEntity):
             Response: Response object with security headers applied.
         """
         origin = request.headers.get("Origin")
-        allowed_origins = ["tauri://localhost", "http://localhost:3000"] if CONFIG.frontend_desktop else []
+        allowed_origins = (
+            ["tauri://localhost", "http://localhost:3000", CONFIG.frontend_origin]
+            if CONFIG.frontend_desktop
+            else [CONFIG.frontend_origin]
+        )
         for header, value in SECURITY_HEADERS.items():
             if header == "Content-Security-Policy":
                 for path, csp in CSP.items():
@@ -173,7 +177,7 @@ class SecurityMiddleware(LoggingEntity):
                         value = csp
                         break
             elif header == "Access-Control-Allow-Origin":
-                value = origin if origin in allowed_origins else CONFIG.frontend_url.replace(CONFIG.root_path or "", "")
+                value = origin if origin in allowed_origins else CONFIG.frontend_origin
             elif header == "Referrer-Policy" and request.path.startswith("/admin"):
                 value = "strict-origin"  # pragma: no cover
             response[header] = value

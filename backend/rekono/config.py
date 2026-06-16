@@ -151,7 +151,6 @@ class RekonoConfig:
         _rq_port (Property): Redis Queue port configuration property.
         _frotend_url (Property): Frontend URL configuration property.
         _frotend_desktop (Property): Frontend Desktop configuration property.
-        _root_path (Property): Application root path configuration property.
         _trusted_proxy (Property): Trusted proxy flag configuration property.
         _allowed_hosts (Property): Allowed hosts list configuration property.
         _encryption_key (Property): Encryption key configuration property.
@@ -192,7 +191,6 @@ class RekonoConfig:
     _frotend_url = Property("RKN_FRONTEND_URL", "frontend.url", "https://127.0.0.1")
     _frontend_desktop = Property("RKN_FRONTEND_DESKTOP", "frontend.desktop", False)
     # Infrastructure context
-    _root_path = Property("RKN_ROOT_PATH", "rootpath", None)
     _trusted_proxy = Property("RKN_TRUSTED_PROXY", None, False)
     # Security
     _allowed_hosts = Property("RKN_ALLOWED_HOSTS", "security.allowed-hosts", ["localhost", "127.0.0.1", "::1"])
@@ -341,15 +339,27 @@ class RekonoConfig:
     def frontend_url(self) -> str:
         """Get frontend application URL.
 
+        The URL may include a path component when the frontend is exposed under
+        a root path by a reverse proxy (e.g. ``https://localhost/rekono``). Any
+        trailing slash is removed so links can be built as ``{frontend_url}/...``.
+
         Returns:
             str: Base URL for the Rekono frontend application.
         """
-        url = str(self._frotend_url.read(self.config_from_file))
-        root = self.root_path
-        if root and str(url).endswith(root):
-            parse = urlparse(url)
-            return f"{parse.scheme}://{parse.netloc}{root}"
-        return url
+        return str(self._frotend_url.read(self.config_from_file)).rstrip("/")
+
+    @property
+    def frontend_origin(self) -> str:
+        """Get the frontend origin (scheme and host) without any path.
+
+        Used for CORS headers, which must reference an origin rather than a full
+        URL with a path component.
+
+        Returns:
+            str: Origin of the frontend application (e.g. ``https://localhost``).
+        """
+        parsed = urlparse(self.frontend_url)
+        return f"{parsed.scheme}://{parsed.netloc}"
 
     @property
     def frontend_desktop(self) -> bool:
@@ -367,16 +377,17 @@ class RekonoConfig:
     def root_path(self) -> str:
         """Get application root path.
 
+        The root path is derived from the path component of the frontend URL,
+        since the frontend and backend are expected to be exposed under the same
+        prefix by a reverse proxy. A frontend URL without a path (or with just
+        ``/``) means no root path. The result is normalized with a leading slash
+        and without a trailing slash.
+
         Returns:
-            str: Root path prefix for the application.
+            str: Root path prefix for the application, or an empty string.
         """
-        path = self._root_path.read(self.config_from_file)
-        if path:
-            if not path.startswith("/"):
-                path = "/" + path
-            if path.endswith("/"):
-                path = path[:-1]
-        return path
+        path = urlparse(self.frontend_url).path.strip("/")
+        return f"/{path}" if path else ""
 
     @property
     def secret_key(self) -> str:
