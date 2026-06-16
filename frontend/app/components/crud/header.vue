@@ -33,11 +33,34 @@
             @update:model-value="
               () => {
                 $emit('search', search);
-                if (search && !disableUrlSync)
+                if (disableUrlSync) return;
+                if (search)
                   router.replace({ query: { ...route.query, ...{ search } } });
+                else
+                  router.replace({
+                    query: { ...route.query, search: undefined },
+                  });
               }
             "
-          />
+          >
+            <template v-if="search" #trailing>
+              <UButton
+                icon="i-lucide-x"
+                variant="ghost"
+                color="neutral"
+                size="sm"
+                aria-label="Clear search"
+                @click="
+                  search = '';
+                  $emit('search', '');
+                  if (!disableUrlSync)
+                    router.replace({
+                      query: { ...route.query, search: undefined },
+                    });
+                "
+              />
+            </template>
+          </UInput>
           <UButton
             v-if="config.filters?.length"
             :icon="openFilters ? 'i-lucide-filter-x' : 'i-lucide-filter'"
