@@ -21,6 +21,4 @@ import { useIntegrationsStore } from "~/store/integrations";
 defineProps<{ entity: string; id?: number; icon?: string; size?: string }>();
 
 const integrations = useIntegrationsStore();
-
-onMounted(integrations.fetchDefectDojo);
 </script>

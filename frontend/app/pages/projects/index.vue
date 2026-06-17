@@ -89,7 +89,6 @@ const config: CrudConfig<Project> = reactive({
     id: false,
     description: false,
     owner: false,
-    defectdojo: integrations.defectdojo.integration?.enabled,
   },
   itemLink: (project: Project) => `/projects/${project.id}`,
   searchable: true,

@@ -102,6 +102,7 @@ const table = useTable();
 const route = useRoute();
 const options = useOptions();
 const integrations = useIntegrationsStore();
+const { showDefectDojo } = useCurrentProject();
 const page = ref();
 const selectedExecution = ref();
 const outputOpen = ref(false);
@@ -195,7 +196,7 @@ const config: CrudConfig<Execution> = reactive({
       icon: "i-lucide-skip-forward",
       cell: ({ row }) => table.valueCell(row.original.skipped_reason),
     },
-    ...(integrations.defectdojo?.settings?.is_available
+    ...(showDefectDojo.value
       ? [
           {
             accessorKey: "defectdojo",
@@ -212,7 +213,7 @@ const config: CrudConfig<Execution> = reactive({
           },
         ]
       : []),
-  ] as CrudTableColumn<Execution>[],
+  ],
   tableColumnsVisibility: {
     skipped: false,
     id: false,

@@ -50,8 +50,7 @@
                   v-if="
                     (integrations.hacktricks?.enabled &&
                       finding.hacktricks_link) ||
-                    finding.reference ||
-                    finding.defectdojo_id
+                    finding.reference
                   "
                   :items="[
                     ...(finding.hacktricks_link &&

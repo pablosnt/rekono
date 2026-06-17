@@ -62,8 +62,7 @@
                   },
                 ]
               : []),
-            ...(integrations.defectdojo.settings?.is_available &&
-            target?.defectdojo_sync?.engagement_id
+            ...(showDefectDojo && target?.defectdojo_sync?.engagement_id
               ? [
                   {
                     label: 'DefectDojo',
@@ -165,6 +164,7 @@ import { useIntegrationsStore } from "~/store/integrations";
 
 const userStore = useUserStore();
 const integrations = useIntegrationsStore();
+const { showDefectDojo } = useCurrentProject();
 const route = useRoute();
 const api = useApi("/api/targets/");
 const target = ref();

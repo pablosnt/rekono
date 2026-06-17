@@ -8,7 +8,6 @@ export interface Finding {
   auto_fixed: boolean;
   fixed_date: string;
   fixed_by?: { id: number; username: string };
-  defectdojo_id?: number;
   hacktricks_link?: string;
   created_from_user_input: boolean;
   triage_status?: string;

@@ -22,7 +22,7 @@
 </template>
 
 <script setup lang="ts">
-import type { CrudConfig, CrudTableColumn } from "~/types/crud";
+import type { CrudConfig } from "~/types/crud";
 import { useUserStore } from "~/store/user";
 import type { Target } from "~/types/models";
 import { targetTypes } from "~/constants";
@@ -32,6 +32,7 @@ const userStore = useUserStore();
 const route = useRoute();
 const table = useTable();
 const integrations = useIntegrationsStore();
+const { showDefectDojo } = useCurrentProject();
 const { refreshPanelCounts } = usePanel();
 const selectedTarget = ref<Target | null>(null);
 const showReportModal = ref(false);
@@ -109,7 +110,7 @@ const config: CrudConfig<Target> = reactive({
           "Related reports",
         ),
     },
-    ...(integrations.defectdojo?.settings?.is_available
+    ...(showDefectDojo.value
       ? [
           {
             accessorKey: "defectdojo",
@@ -126,12 +127,11 @@ const config: CrudConfig<Target> = reactive({
           },
         ]
       : []),
-  ] as CrudTableColumn<Target>[],
+  ],
   tableColumnsVisibility: {
     id: false,
     notes: false,
     reports: false,
-    defectdojo: integrations.defectdojo?.integration?.enabled,
   },
   itemLink: (target: Target) =>
     `/projects/${route.params.project_id}/targets/${target.id}`,
