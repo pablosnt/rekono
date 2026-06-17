@@ -12,9 +12,18 @@
           :alt="currentProject.name"
           width="30"
         />
-        <h1 v-if="open" class="text-2xl font-bold font-mono">
-          {{ currentProject.name }}
-        </h1>
+        <UTooltip
+          v-if="open"
+          :text="nameRef && nameRef?.scrollWidth > nameRef?.clientWidth ? currentProject.name : undefined"
+          :content="{ side: 'right', sideOffset: 8, collisionPadding: 8 }"
+        >
+          <h1
+            ref="nameRef"
+            :class="['font-bold font-mono truncate min-w-0', namSizeClass]"
+          >
+            {{ currentProject.name }}
+          </h1>
+        </UTooltip>
       </div>
     </template>
     <template #content-header>
@@ -49,6 +58,14 @@ const userStore = useUserStore();
 const { panelRefresh, projectHasActiveFindings } = usePanel();
 const { currentProject, setCurrentProject } = useCurrentProject();
 const breakpoints = useBreakpoints(breakpointsTailwind);
+const nameRef = ref<HTMLElement | null>(null);
+const namSizeClass = computed(() => {
+  const len = currentProject.value?.name?.length ?? 0;
+  if (len <= 10) return "text-2xl";
+  if (len <= 16) return "text-xl";
+  if (len <= 24) return "text-lg";
+  return "text-base";
+});
 const breadcrumb = ref([]);
 const responsiveBreadcrum = computed(() =>
   breakpoints.smaller("sm").value && breadcrumb.value.length > 3
