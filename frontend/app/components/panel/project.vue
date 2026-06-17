@@ -14,7 +14,11 @@
         />
         <UTooltip
           v-if="open"
-          :text="nameRef && nameRef?.scrollWidth > nameRef?.clientWidth ? currentProject.name : undefined"
+          :text="
+            nameRef && nameRef?.scrollWidth > nameRef?.clientWidth
+              ? currentProject.name
+              : undefined
+          "
           :content="{ side: 'right', sideOffset: 8, collisionPadding: 8 }"
         >
           <h1
