@@ -1,39 +1,41 @@
 <template>
-  <UAuthForm
-    :schema="schema"
-    :title="title"
-    :description="description"
-    :fields="fields"
-    :validate-on="validateOn"
-    :submit="submit"
-    :loading="loading"
-    loading-auto
-    :ui="{ otp: 'w-full flex justify-center' }"
-    @submit="
-      (data) => {
-        $emit('submit', data);
-      }
-    "
-  >
-    <template #leading>
-      <div class="flex flex-col items-center justify-center mb-3 mt-3">
-        <UColorModeImage
-          light="/favicon-light.png"
-          dark="/favicon-dark.png"
-          :width="100"
-          :height="100"
-          alt="Rekono logo"
-        />
-      </div>
-    </template>
-    <template #title>
-      <h1>{{ title }}</h1>
-    </template>
-    <template #password-hint>
-      <slot name="password-hint" />
-    </template>
-  </UAuthForm>
-  <slot name="after-form" />
+  <div>
+    <UAuthForm
+      :schema="schema"
+      :title="title"
+      :description="description"
+      :fields="fields"
+      :validate-on="validateOn"
+      :submit="submit"
+      :loading="loading"
+      loading-auto
+      :ui="{ otp: 'w-full flex justify-center' }"
+      @submit="
+        (data) => {
+          $emit('submit', data);
+        }
+      "
+    >
+      <template #leading>
+        <div class="flex flex-col items-center justify-center mb-3 mt-3">
+          <UColorModeImage
+            light="/favicon-light.png"
+            dark="/favicon-dark.png"
+            :width="100"
+            :height="100"
+            alt="Rekono logo"
+          />
+        </div>
+      </template>
+      <template #title>
+        <h1>{{ title }}</h1>
+      </template>
+      <template #password-hint>
+        <slot name="password-hint" />
+      </template>
+    </UAuthForm>
+    <slot name="after-form" />
+  </div>
 </template>
 
 <script setup lang="ts">
