@@ -110,7 +110,7 @@ const donutTooltip = (d) =>
         : 100 - fpRate.value
       ).toPrecision(3)}%)`,
     },
-    d.data.label === "false positive" ? "False Positives" : "Real Findings",
+    d.data.label === "false positive" ? "False Positives" : "True Positives",
   );
 const donutData = computed(() => [
   {

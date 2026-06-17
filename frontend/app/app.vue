@@ -26,6 +26,7 @@ useSeoMeta({
 
 <template>
   <UApp :toaster="{ position: 'bottom-right', expand: false }">
+    <NuxtLoadingIndicator color="var(--ui-primary)" :height="3" />
     <NuxtLayout
       name="default"
       :class="{ '!min-h-0': !isPublicRoute($route.name) }"
