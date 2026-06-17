@@ -51,7 +51,7 @@ const config: CrudConfig<User> = reactive({
   ],
   ordering: [
     "id",
-    { id: "username", label: "Username" },
+    "username",
     { id: "first_name", label: "First Name" },
     { id: "last_name", label: "Last Name" },
     "email",

@@ -92,12 +92,7 @@ const config: CrudConfig<Alert> = reactive({
     },
   ],
   defaultFilters: { project: route.params.project_id },
-  ordering: [
-    "id",
-    { id: "project", label: "Project" },
-    { id: "item", label: "Item" },
-    { id: "owner", label: "Owner" },
-  ],
+  ordering: ["id", "item", "owner"],
   defaultOrdering: "-id",
   pageSize: 24,
   pageSizeOptions: [24, 50, 100],
@@ -179,7 +174,7 @@ function toggleSubscription(alert: Alert) {
     if (alert.subscribed) {
       alert.subscribers.push(userStore.user);
     } else {
-      alert.subscribers.splice(alert.subscribers.indexOf(userStore.user));
+      alert.subscribers.splice(alert.subscribers.indexOf(userStore.user), 1);
     }
   });
 }
