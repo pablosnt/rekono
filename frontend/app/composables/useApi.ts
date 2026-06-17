@@ -76,6 +76,7 @@ export default function (
               error.data.detail === "Incorrect authentication credentials." &&
               (requestUrl.includes("/api/profile/mfa/enable/") ||
                 requestUrl.includes("/api/profile/mfa/disable/") ||
+                requestUrl.includes("/api/security/mfa/") ||
                 requestUrl.includes("/api/telegram/link/") ||
                 requestUrl.includes("/api/profile/update-password/")))
           ) {

@@ -1,5 +1,5 @@
 <template>
-  <UCollapsible v-model:open="open">
+  <UCollapsible v-model:open="open" @animationend="onCollapseEnd">
     <CrudHeader
       :api="api"
       :config="{
@@ -58,13 +58,7 @@
             size="xl"
             color="neutral"
             aria-label="One-Time Password via app"
-            @complete="
-              (value) => {
-                userStore.profile.mfa
-                  ? disable(value.join(''))
-                  : enable(value.join(''));
-              }
-            "
+            @complete="(value) => switchEnableDisable(value.join(''))"
           />
         </div>
       </template>
@@ -134,36 +128,34 @@ const mailOtp = ref();
 const loading = ref(false);
 const open = ref(false);
 
-function enable(otp: strig) {
-  loading.value = true;
-  api
-    .create("enable/", { mfa: otp })
-    .then((response) => {
-      toast.add({
-        description: "MFA has been enabled",
-        color: "success",
-      });
-      userStore.updateProfile(response);
-      open.value = false;
-    })
-    .finally(() => {
-      loading.value = false;
-      mailOtp.value = undefined;
-      appOtp.value = undefined;
-    });
+const pendingProfile = ref();
+function onCollapseEnd(event: AnimationEvent) {
+  if (event.animationName === "collapsible-up" && pendingProfile.value) {
+    userStore.updateProfile(pendingProfile.value);
+    pendingProfile.value = undefined;
+  }
 }
 
-function disable(otp: string) {
+function switchEnableDisable(otp: string) {
   loading.value = true;
+  const word = userStore.profile.mfa ? "disable" : "enable";
   api
-    .create("disable/", { mfa: otp })
+    .create(`${word}/`, { mfa: otp })
     .then((response) => {
       toast.add({
-        description: "MFA has been disabled",
-        color: "warning",
+        description: `MFA has been ${word}d`,
+        color: userStore.profile.mfa ? "success" : "warning",
       });
-      userStore.updateProfile(response);
       open.value = false;
+      pendingProfile.value = response;
+    })
+    .catch((error) => {
+      if (error?.statusCode === 401) {
+        toast.add({
+          description: "Invalid MFA code. Please try again.",
+          color: "error",
+        });
+      }
     })
     .finally(() => {
       loading.value = false;

@@ -30,10 +30,11 @@ import { useUserStore } from "~/store/user";
 
 const userStore = useUserStore();
 const validation = useValidation();
+const toast = useToast();
 const api = useApi("/api/security/mfa/");
 const loading = ref(false);
 const fields = ref([]);
-let schema = z.object({});
+const schema = ref(z.object({}));
 const method = ref("email");
 handleMethodSwitch();
 
@@ -52,7 +53,7 @@ function handleMethodSwitch() {
         icon: "i-lucide-key",
       },
     ];
-    schema = z.object({
+    schema.value = z.object({
       mfaEmail: validation.secret("mfaEmail", true, 128),
     });
   } else {
@@ -66,7 +67,7 @@ function handleMethodSwitch() {
         required: true,
       },
     ];
-    schema = z.object({
+    schema.value = z.object({
       mfaApp: z.array(z.string()).length(6, "OTP must be exactly 6 digits"),
     });
   }
@@ -83,6 +84,14 @@ function submit(event: object) {
     .then((response) => {
       userStore.login(response);
       navigateTo("/");
+    })
+    .catch((error) => {
+      if (error?.statusCode === 401) {
+        toast.add({
+          description: "Invalid MFA code. Please try again.",
+          color: "error",
+        });
+      }
     })
     .finally(() => {
       loading.value = false;
