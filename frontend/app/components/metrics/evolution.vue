@@ -21,6 +21,12 @@
       :width="data.length > 12 ? data.length * 80 : undefined"
     >
       <VisLine :x="x" :y="activeY" :color="colors" />
+      <VisScatter
+        :x="x"
+        :y="y.filter((_, i) => !inactive[i])"
+        :color="colors.filter((_, i) => !inactive[i])"
+        :size="8"
+      />
       <VisAxis type="x" :tick-format="formatMonth" :tick-values="tickValues" />
       <VisAxis
         type="y"
@@ -38,6 +44,7 @@
 import {
   VisXYContainer,
   VisLine,
+  VisScatter,
   VisAxis,
   VisCrosshair,
   VisTooltip,
