@@ -6,6 +6,8 @@ import type {
   VirusTotalSettings,
 } from "~/types/models";
 
+const FETCH_TTL = 5 * 60 * 1000; // 5 minutes
+
 export const useIntegrationsStore = defineStore("integrations", {
   state: () => ({
     telegram: null as TelegramSettings | null,
@@ -18,6 +20,13 @@ export const useIntegrationsStore = defineStore("integrations", {
     defectdojo: {
       integration: null as Integration | null,
       settings: null as DefectDojoSettings | null,
+    },
+    lastFetched: {
+      telegram: null as number | null,
+      smtp: null as number | null,
+      virustotal: null as number | null,
+      hacktricks: null as number | null,
+      defectdojo: null as number | null,
     },
   }),
   getters: {
@@ -34,46 +43,68 @@ export const useIntegrationsStore = defineStore("integrations", {
     },
   },
   actions: {
+    isFresh(key: string): boolean {
+      const last = this.lastFetched[key];
+      return last && Date.now() - last < FETCH_TTL;
+    },
     fetchTelegram() {
+      if (this.isFresh("telegram")) return;
       useApi("/api/telegram/settings/")
         .get("1/")
-        .then((response: TelegramSettings) => (this.telegram = response));
+        .then((response: TelegramSettings) => {
+          this.telegram = response;
+          this.lastFetched.telegram = Date.now();
+        });
     },
     fetchSmtp() {
+      if (this.isFresh("smtp")) return;
       useApi("/api/smtp/")
         .get("1/")
-        .then((response: SmtpSettings) => (this.smtp = response));
+        .then((response: SmtpSettings) => {
+          this.smtp = response;
+          this.lastFetched.smtp = Date.now();
+        });
     },
     fetchVirusTotal() {
-      useApi("/api/integrations/")
-        .get("5/")
-        .then(
-          (response: Integration) => (this.virustotal.integration = response),
-        );
-      useApi("/api/virustotal/")
-        .get("1/")
-        .then(
-          (response: VirusTotalSettings) =>
-            (this.virustotal.settings = response),
-        );
+      if (this.isFresh("virustotal")) return;
+      Promise.all([
+        useApi("/api/integrations/")
+          .get("5/")
+          .then(
+            (response: Integration) => (this.virustotal.integration = response),
+          ),
+        useApi("/api/virustotal/")
+          .get("1/")
+          .then(
+            (response: VirusTotalSettings) =>
+              (this.virustotal.settings = response),
+          ),
+      ]).then(() => (this.lastFetched.virustotal = Date.now()));
     },
     fetchHackTricks() {
+      if (this.isFresh("hacktricks")) return;
       useApi("/api/integrations/")
         .get("3/")
-        .then((response: Integration) => (this.hacktricks = response));
+        .then((response: Integration) => {
+          this.hacktricks = response;
+          this.lastFetched.hacktricks = Date.now();
+        });
     },
     fetchDefectDojo() {
-      useApi("/api/integrations/")
-        .get("1/")
-        .then(
-          (response: Integration) => (this.defectdojo.integration = response),
-        );
-      useApi("/api/defectdojo/settings/")
-        .get("1/")
-        .then(
-          (response: DefectDojoSettings) =>
-            (this.defectdojo.settings = response),
-        );
+      if (this.isFresh("defectdojo")) return;
+      Promise.all([
+        useApi("/api/integrations/")
+          .get("1/")
+          .then(
+            (response: Integration) => (this.defectdojo.integration = response),
+          ),
+        useApi("/api/defectdojo/settings/")
+          .get("1/")
+          .then(
+            (response: DefectDojoSettings) =>
+              (this.defectdojo.settings = response),
+          ),
+      ]).then(() => (this.lastFetched.defectdojo = Date.now()));
     },
     fetch() {
       this.fetchTelegram();
