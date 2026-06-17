@@ -73,8 +73,10 @@
       <slot name="content">
         <UProgress
           :class="[
-            state.loading && state.items.length === 0 ? 'visible' : 'invisible',
-            'mb-1',
+            state.loading && (config.useGrid || state.items.length === 0)
+              ? 'visible'
+              : 'invisible',
+            'mb-2',
           ]"
         />
         <template v-if="config.tableColumns">
