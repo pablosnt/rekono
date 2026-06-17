@@ -47,7 +47,7 @@ class ProjectViewSet(BaseViewSet):
     filterset_class = ProjectFilter
     permission_classes = [IsAuthenticated, RekonoModelPermission, ProjectMemberPermission]
     search_fields = ["name", "description", "targets__target"]
-    ordering_fields = ["id", "name"]
+    ordering_fields = ["id", "name", "owner"]
 
     @action(detail=True, methods=["POST", "DELETE"], url_path="members/(?P<member_id>[0-9])")
     def members(self, request: Request, member_id: str, pk: str) -> Response:

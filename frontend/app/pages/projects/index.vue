@@ -117,7 +117,7 @@ const config: CrudConfig<Project> = reactive({
       options: userOptions,
     },
   ],
-  ordering: ["id", "name"],
+  ordering: ["id", "name", "owner"],
   defaultOrdering: "-id",
   pageSize: 25,
   pageSizeOptions: [25, 50, 100],

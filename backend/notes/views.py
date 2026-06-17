@@ -58,7 +58,6 @@ class NoteViewSet(LikeViewSet):
         + links
         + [
             "title",
-            "tags",
             "owner",
             "created_at",
             "updated_at",
