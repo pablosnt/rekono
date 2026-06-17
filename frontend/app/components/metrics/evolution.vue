@@ -13,7 +13,7 @@
     class="overflow-x-auto"
     :class="{ 'min-h-[500px]': loading }"
   >
-    <UProgress v-if="loading" />
+    <USkeleton v-if="loading" class="h-[500px] w-full rounded-lg" />
     <VisXYContainer
       v-else-if="data.length"
       :data="data"

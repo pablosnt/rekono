@@ -1,8 +1,6 @@
 <template>
   <div ref="containerRef">
-    <div v-if="loading" class="flex items-center justify-center">
-      <UButton variant="ghost" loading size="xl" />
-    </div>
+    <USkeleton v-if="loading" class="h-[180px] w-full rounded-lg" />
     <VisSingleContainer
       v-else-if="hasValues"
       :data="data"

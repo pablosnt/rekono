@@ -1,6 +1,16 @@
 <template>
   <div class="space-y-8">
-    <UProgress v-if="loading && !hasFindings" />
+    <div v-if="loading && !hasFindings">
+      <div
+        class="mb-5 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between"
+      >
+        <USkeleton class="h-8 w-56" />
+        <div class="flex flex-wrap gap-3">
+          <USkeleton v-for="i in 8" :key="`legend-${i}`" class="h-4 w-20" />
+        </div>
+      </div>
+      <USkeleton class="h-[500px] w-full rounded-lg" />
+    </div>
     <template v-else-if="hasFindings">
       <MetricsEvolution :project="$route.params.project_id" />
       <UTabs

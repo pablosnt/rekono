@@ -1,8 +1,6 @@
 <template>
   <UPageCard :title="title" :ui="{ container: 'min-w-0' }">
-    <div v-if="loading" class="flex items-center justify-center">
-      <UButton variant="ghost" loading size="xl" />
-    </div>
+    <USkeleton v-if="loading" class="h-64 w-full rounded-lg" />
     <template v-else-if="data.length">
       <VisBulletLegend
         v-if="series.length > 1"
