@@ -59,6 +59,7 @@ const apiTokensConfig = ref({
       size: "xl",
       icon: "i-lucide-calendar",
       minValue: today(getLocalTimeZone()).add({ days: 1 }),
+      initialCalendarDate: today(getLocalTimeZone()).add({ months: 6 }),
     },
   ],
   formSchema: z.object({

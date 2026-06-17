@@ -177,6 +177,7 @@
                   <UCalendar
                     v-model="formData[field.key]"
                     :min-value="field.minValue || today(getLocalTimeZone())"
+                    :default-placeholder="field.initialCalendarDate as any"
                     class="p-2"
                   />
                 </template>
@@ -266,10 +267,8 @@ function initFormData() {
     } else if (field.type === "file") {
       data[field.key] = null;
       isFileUpload.value = true;
-    } else {
-      if (props.entity) {
-        data[field.key] = props.entity[field.key] ?? "";
-      }
+    } else if (props.entity) {
+      data[field.key] = props.entity[field.key] ?? "";
     }
   }
   return data;

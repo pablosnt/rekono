@@ -36,6 +36,7 @@ export interface FormField {
   fileUploadDescription?: string;
   minValue?: unknown;
   maxValue?: unknown;
+  initialCalendarDate?: unknown;
   valueKey?: string;
   labelKey?: string;
   inputMode?: string;
