@@ -159,14 +159,7 @@ function updateFilter(key: string, value: unknown, delay?: number) {
   } else {
     delete currentFilters.value[key];
     if (!props.disableUrlSync)
-      router.replace({
-        query: Object.assign(
-          {},
-          ...Object.entries(route.query)
-            .filter(([k, _]) => k !== key)
-            .map(([k, v]) => ({ [k]: v })),
-        ),
-      });
+      router.replace({ query: { ...route.query, [key]: undefined } });
   }
   updating.splice(updating.indexOf(key));
   if (delay) {

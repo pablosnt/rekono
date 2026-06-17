@@ -13,6 +13,10 @@
           (search: string) => {
             state.loading = true;
             state.searchQuery = search;
+            if (!disableUrlSync)
+              router.replace({
+                query: { ...route.query, search: search || undefined },
+              });
             fetchFirstPage();
           }
         "
@@ -25,7 +29,13 @@
                 Object.keys(config.defaultFilters || {}).length &&
               !disableUrlSync
             )
-              router.replace({ query: {} });
+              router.replace({
+                query: Object.fromEntries(
+                  Object.entries(route.query).filter(
+                    ([key]) => !urlFilterKeys.has(key),
+                  ),
+                ),
+              });
             fetchFirstPage();
           }
         "
@@ -33,6 +43,14 @@
           (sorting: string) => {
             state.loading = true;
             state.ordering = sorting;
+            if (!disableUrlSync)
+              router.replace({
+                query: {
+                  ...route.query,
+                  ordering:
+                    sorting === config.defaultOrdering ? undefined : sorting,
+                },
+              });
             fetchFirstPage();
           }
         "
@@ -271,7 +289,10 @@ const state = reactive<CrudState>({
     props.config.searchable && !props.disableUrlSync && route.query.search
       ? route.query.search
       : undefined,
-  ordering: props.config.defaultOrdering,
+  ordering:
+    !props.disableUrlSync && route.query.ordering
+      ? (route.query.ordering as string)
+      : props.config.defaultOrdering,
 });
 
 function fetch() {

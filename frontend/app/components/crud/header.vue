@@ -30,18 +30,7 @@
             :aria-label="config.searchPlaceholder || 'Search'"
             icon="i-lucide-search"
             class="w-full min-w-48 sm:w-64"
-            @update:model-value="
-              () => {
-                $emit('search', search);
-                if (disableUrlSync) return;
-                if (search)
-                  router.replace({ query: { ...route.query, ...{ search } } });
-                else
-                  router.replace({
-                    query: { ...route.query, search: undefined },
-                  });
-              }
-            "
+            @update:model-value="$emit('search', search)"
           >
             <template v-if="search" #trailing>
               <UButton
@@ -53,10 +42,6 @@
                 @click="
                   search = '';
                   $emit('search', '');
-                  if (!disableUrlSync)
-                    router.replace({
-                      query: { ...route.query, search: undefined },
-                    });
                 "
               />
             </template>
@@ -202,6 +187,7 @@
         <LazyCrudFilters
           :config="config"
           :state="state"
+          :disable-url-sync="disableUrlSync"
           @filters="(filters) => $emit('filters', filters)"
         />
       </template>
@@ -230,8 +216,6 @@ const emit = defineEmits<{
   openCreate: [open: boolean];
 }>();
 
-const route = useRoute();
-const router = useRouter();
 const search = ref(props.state?.searchQuery ?? "");
 const openFilters = ref(props.filtersOpen ?? false);
 
