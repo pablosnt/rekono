@@ -218,6 +218,7 @@ const config: CrudConfig<Execution> = reactive({
     skipped: false,
     id: false,
   },
+  pageSizeOptions: [24, 50, 100],
   onItemClick: (item: Execution) => {
     if (item.output_plain) {
       selectedExecution.value = item;
