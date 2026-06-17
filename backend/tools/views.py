@@ -44,7 +44,7 @@ class ToolViewSet(LikeViewSet):
     filterset_class = ToolFilter
     permission_classes = [IsAuthenticated, RekonoModelPermission]
     search_fields = ["name", "command", "script"]
-    ordering_fields = ["id", "name", "command"]
+    ordering_fields = ["id", "name", "command", "likes_count"]
     # "post" and "delete" are needed to allow POST requests to like and dislike tools
     http_method_names = ["get", "post", "delete"]
 

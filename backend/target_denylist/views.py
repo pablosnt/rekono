@@ -36,7 +36,7 @@ class TargetDenylistViewSet(BaseViewSet):
     serializer_class = TargetDenylistSerializer
     permission_classes = [IsAuthenticated, RekonoModelPermission]
     search_fields = ["target"]
-    ordering_fields = ["id", "target"]
+    ordering_fields = ["id", "target", "default"]
     http_method_names = ["get", "post", "put", "delete"]
 
     def get_queryset(self) -> QuerySet:

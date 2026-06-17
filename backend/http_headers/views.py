@@ -45,7 +45,7 @@ class HttpHeaderViewSet(BaseViewSet):
         ProjectMemberPermission,
     ]
     search_fields = ["key", "value"]
-    ordering_fields = ["id", "target", "user", "key"]
+    ordering_fields = ["id", "target", "user", "key", "value"]
     http_method_names = ["get", "put", "post", "delete"]
 
     def get_queryset(self) -> QuerySet:
