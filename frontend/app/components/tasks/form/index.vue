@@ -192,6 +192,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   submit: [data: Record<string, unknown>];
   "validation-change": [isValid: boolean];
+  "new-loading": [loading: boolean];
 }>();
 emit("validation-change", false);
 
@@ -290,6 +291,7 @@ function validate(): FormError[] {
 
 function submit() {
   loading.value = true;
+  emit("new-loading", true);
   props.api
     .create(
       "",
@@ -299,7 +301,9 @@ function submit() {
         process_id: process.value,
         configuration_id: configuration.value,
         intensity: intensities[intensity.value - 1]?.label,
-        scheduled_at: scheduledAt.value ? scheduledAt.value.toString() : null,
+        scheduled_at: scheduledAt.value
+          ? scheduledAt.value.toAbsoluteString()
+          : null,
         repeat_in: repeatIn.value,
         repeat_time_unit: repeatTimeUnit.value,
         wordlists: wordlists.value,
@@ -314,6 +318,7 @@ function submit() {
     })
     .finally(() => {
       loading.value = false;
+      emit("new-loading", false);
     });
 }
 
