@@ -118,6 +118,9 @@ function removeTarget(index: number) {
 }
 
 function submit() {
+  if (targetInput.value.trim()) {
+    addTargetsFromInput();
+  }
   if (project.value) {
     if (targets.value.length > 0) {
       loading.value = true;
