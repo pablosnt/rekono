@@ -4,7 +4,7 @@
       ref="page"
       :config="config"
       :disable-url-sync="disableUrlSync"
-      @fetched="(items) => $emit('fetched', items)"
+      @fetched="(items) => onExecutions(items)"
     >
       <template #actions="{ item }">
         <UTooltip v-if="item.has_report" text="Download report">
@@ -95,7 +95,10 @@ const props = defineProps<{
   findingType?: string;
   disableUrlSync?: boolean;
 }>();
-defineEmits<{ fetched: [items: Execution[]] }>();
+const emit = defineEmits<{
+  fetched: [items: Execution[]];
+  finished: [count: number];
+}>();
 
 const api = useApi("/api/executions/");
 const table = useTable();
@@ -103,8 +106,10 @@ const route = useRoute();
 const options = useOptions();
 const integrations = useIntegrationsStore();
 const { showDefectDojo } = useCurrentProject();
+const { refreshPanelCounts } = usePanel();
 const page = ref();
 const selectedExecution = ref();
+const runningExecutions = ref(0);
 const outputOpen = ref(false);
 const toolOptions = ref<FilterOption[]>([]);
 
@@ -262,6 +267,18 @@ const config: CrudConfig<Execution> = reactive({
   canEdit: false,
   canDelete: false,
 });
+
+function onExecutions(data: Execution[]) {
+  emit("fetched", data);
+  const count = data.filter(
+    (e) => e.status === "Running" || e.status === "Requested",
+  ).length;
+  if (count < runningExecutions.value) {
+    emit("finished", runningExecutions.value - count);
+    refreshPanelCounts();
+  }
+  runningExecutions.value = count;
+}
 
 onMounted(() => {
   options.tools(toolOptions);

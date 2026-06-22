@@ -55,22 +55,24 @@ const executorOptions = ref<FilterOption[]>([]);
 const toolOptions = ref<FilterOption[]>([]);
 const configurationOptions = ref<FilterOption[]>([]);
 const processOptions = ref<FilterOption[]>([]);
+const runningTasks = ref(0);
 
 function onFetched(items: Task[]) {
-  if (
-    items.some(
-      (task) =>
-        task.status === "Running" ||
-        task.status === "Requested" ||
-        task.executions.length === 0,
-    )
-  ) {
+  const count = items.filter(
+    (task) =>
+      task.status === "Running" ||
+      task.status === "Requested" ||
+      task.executions.length === 0,
+  ).length;
+  if (count < runningTasks.value) {
+    refreshPanelCounts();
+  }
+  runningTasks.value = count;
+  if (count > 0) {
     refresh.value = setTimeout(() => {
       page.value?.fetch();
-      refreshPanelCounts();
     }, 5000);
   } else if (refresh.value) {
-    refreshPanelCounts();
     clearTimeout(refresh.value);
     refresh.value = null;
   }

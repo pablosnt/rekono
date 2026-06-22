@@ -228,7 +228,11 @@
       class="mb-8"
     />
 
-    <Executions ref="executions" :task="route.params.scan_id" />
+    <Executions
+      ref="executions"
+      :task="route.params.scan_id"
+      @finished="findings.fetch()"
+    />
 
     <LazyCrudDeleteModal
       :open="cancelOpen"
@@ -270,7 +274,6 @@ const route = useRoute();
 const tasksApi = useApi("/api/tasks/");
 const userStore = useUserStore();
 const options = useOptions();
-const { refreshPanelCounts } = usePanel();
 const cancelOpen = ref(false);
 const reportOpen = ref(false);
 const task = ref<Task | null>();
@@ -302,12 +305,10 @@ function processTask(data?: Task) {
     refresh.value = setTimeout(() => {
       fetchTask();
       executions.value?.page?.fetch();
-      findings.value?.fetch();
-      refreshPanelCounts();
     }, 5000);
   } else if (refresh.value) {
-    refreshPanelCounts();
     clearTimeout(refresh.value);
+    refresh.value = null;
   }
 }
 
