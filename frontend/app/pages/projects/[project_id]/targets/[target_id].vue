@@ -62,16 +62,6 @@
                   },
                 ]
               : []),
-            ...(showDefectDojo && target?.defectdojo_sync?.engagement_id
-              ? [
-                  {
-                    label: 'DefectDojo',
-                    avatar: { src: integrations.defectdojo.integration?.icon },
-                    to: `${integrations.defectdojo.settings.server}/engagement/${target.defectdojo_sync?.engagement_id}`,
-                    target: '_blank',
-                  },
-                ]
-              : []),
             ...(target?.reports.length > 0
               ? [
                   {
@@ -89,6 +79,16 @@
                     icon: 'i-lucide-notebook',
                     color: 'neutral',
                     to: `/projects/${$route.params.project_id}/notes?target=${route.params.target_id}`,
+                  },
+                ]
+              : []),
+              ...(showDefectDojo && target?.defectdojo_sync?.engagement_id
+              ? [
+                  {
+                    label: 'DefectDojo',
+                    avatar: { src: integrations.defectdojo.integration?.icon },
+                    to: `${integrations.defectdojo.settings.server}/engagement/${target.defectdojo_sync?.engagement_id}`,
+                    target: '_blank',
                   },
                 ]
               : []),
