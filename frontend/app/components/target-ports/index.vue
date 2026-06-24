@@ -82,7 +82,7 @@ const config: CrudConfig<TargetPort> = reactive({
       cell: ({ row }) => table.valueCell(row.getValue("path")),
     },
     {
-      accessorKey: "authentication.type",
+      accessorKey: "authentication",
       header: "Authentication",
       icon: "i-lucide-key",
       cell: ({ row }) =>
