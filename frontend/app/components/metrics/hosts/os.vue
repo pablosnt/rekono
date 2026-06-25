@@ -34,7 +34,7 @@ import {
 import { Donut } from "@unovis/ts";
 import { hostOS } from "~/constants";
 
-const props = defineProps<{ project?: string | number }>();
+const props = defineProps<{ project?: number }>();
 
 const api = useApi("/api/stats/");
 const loading = ref(true);

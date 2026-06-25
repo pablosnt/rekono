@@ -14,8 +14,8 @@
       <template #header-actions>
         <TasksButton
           v-if="userStore.is_auditor"
-          :project="{ id: parseInt($route.params.project_id) }"
-          :target="{ id: parseInt($route.params.target_id) }"
+          :project="{ id: projectId }"
+          :target="{ id: targetId }"
         />
         <UDropdownMenu
           v-if="userStore.is_auditor"
@@ -82,7 +82,7 @@
                   },
                 ]
               : []),
-              ...(showDefectDojo && target?.defectdojo_sync?.engagement_id
+            ...(showDefectDojo && target?.defectdojo_sync?.engagement_id
               ? [
                   {
                     label: 'DefectDojo',
@@ -103,13 +103,10 @@
         </UDropdownMenu>
         <ReportsButton
           v-model:open="showReportModal"
-          :target-id="parseInt($route.params.target_id)"
+          :target-id="targetId"
           only-modal
         />
-        <NotesButton
-          ref="notesButton"
-          :target="parseInt($route.params.target_id)"
-        />
+        <NotesButton ref="notesButton" :target="targetId" />
         <UDropdownMenu
           v-if="userStore.is_auditor"
           :items="[
@@ -144,9 +141,14 @@
       </template>
     </CrudHeader>
     <div class="space-y-14">
+      <FindingsCounterAll
+        :target-id="targetId"
+        :project-id="projectId"
+        only-active
+      />
       <TargetPorts />
       <HttpHeaders
-        :target="parseInt($route.params.target_id)"
+        :target="targetId"
         :can-read="true"
         :can-edit="userStore.is_auditor"
         :can-delete="userStore.is_auditor"
@@ -166,6 +168,8 @@ const userStore = useUserStore();
 const integrations = useIntegrationsStore();
 const { showDefectDojo } = useCurrentProject();
 const route = useRoute();
+const targetId = route.params.target_id ? parseInt(route.params.target_id) : undefined;
+const projectId = route.params.project_id ? parseInt(route.params.project_id) : undefined;
 const api = useApi("/api/targets/");
 const target = ref();
 const notesButton = ref();

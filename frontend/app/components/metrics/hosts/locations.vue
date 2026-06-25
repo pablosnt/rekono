@@ -11,7 +11,7 @@
 </template>
 
 <script setup lang="ts">
-const props = defineProps<{ project?: string | number }>();
+const props = defineProps<{ project?: number }>();
 
 const api = useApi("/api/hosts/");
 const loading = ref(true);

@@ -1,13 +1,19 @@
 <template>
   <NuxtLink
     :to="
-      projectId
-        ? `/projects/${projectId}/${counter.plural.toLowerCase()}${taskId ? `?task=${taskId}` : ''}`
-        : `/${counter.plural.toLowerCase()}`
+      counter.count > 0
+        ? projectId
+          ? `/projects/${projectId}/${counter.plural.toLowerCase()}${taskId ? `?task=${taskId}` : targetId ? `?target=${targetId}` : ''}`
+          : `/${counter.plural.toLowerCase()}`
+        : undefined
     "
     :aria-label="`${formatCount(counter.count as number)} ${counter.plural}`"
-    color="primary"
-    class="group relative flex flex-col items-center justify-center gap-1.5 p-3 rounded-xl border border-default bg-elevated hover:bg-muted/50 hover:border-default/80 transition-all duration-200 text-center overflow-hidden"
+    :class="[
+      'group relative flex flex-col items-center justify-center gap-1.5 p-3 rounded-xl border border-default bg-elevated transition-all duration-200 text-center overflow-hidden',
+      counter.count > 0
+        ? 'hover:bg-muted/50 hover:border-default/80 cursor-pointer'
+        : 'cursor-default',
+    ]"
   >
     <div
       v-if="counter.count > 0"
@@ -15,7 +21,8 @@
     />
     <div
       :class="[
-        'size-8 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-200',
+        'size-8 rounded-lg flex items-center justify-center transition-transform duration-200',
+        counter.count > 0 ? 'group-hover:scale-110' : undefined,
         counter.iconBgClass,
       ]"
     >
@@ -44,8 +51,9 @@
 
 <script setup lang="ts">
 defineProps<{
-  taskId?: string | number;
-  projectId?: string | number;
+  taskId?: number;
+  targetId?: number;
+  projectId?: number;
   counter: Record<string, string | number>;
 }>();
 </script>

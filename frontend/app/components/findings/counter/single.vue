@@ -1,6 +1,7 @@
 <template>
   <FindingsCounter
     :task-id="taskId"
+    :target-id="targetId"
     :project-id="projectId"
     :counter="{ ...findingType, count: total, loading: loading }"
   />
@@ -10,8 +11,9 @@
 import { findingTypes } from "~/constants";
 
 const props = defineProps<{
-  taskId?: string | number;
-  projectId?: string | number;
+  taskId?: number;
+  targetId?: number;
+  projectId?: number;
   onlyActive?: boolean;
   isTriageable?: boolean;
   findingNamePlural: string;
@@ -42,9 +44,11 @@ function fetch() {
       `${props.findingNamePlural.toLowerCase()}/`,
       props.taskId
         ? { task: props.taskId, ...defaultFilters }
-        : props.projectId
-          ? { project: props.projectId, ...defaultFilters }
-          : defaultFilters,
+        : props.targetId
+          ? { target: props.targetId, ...defaultFilters }
+          : props.projectId
+            ? { project: props.projectId, ...defaultFilters }
+            : defaultFilters,
       false,
       1,
       1,

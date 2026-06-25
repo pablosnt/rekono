@@ -27,7 +27,7 @@
 import { VisSingleContainer, VisTreemap, VisTooltip } from "@unovis/vue";
 import { Treemap } from "@unovis/ts";
 
-const props = defineProps<{ project?: string | number }>();
+const props = defineProps<{ project?: number }>();
 
 const api = useApi("/api/stats/");
 const loading = ref(true);

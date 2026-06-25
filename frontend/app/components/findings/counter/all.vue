@@ -6,6 +6,7 @@
     <template v-for="item in counters" :key="item.plural">
       <FindingsCounter
         :task-id="taskId"
+        :target-id="targetId"
         :project-id="projectId"
         :counter="item"
       />
@@ -17,8 +18,9 @@
 import { findingTypes } from "~/constants";
 
 const props = defineProps<{
-  taskId?: string | number;
-  projectId?: string | number;
+  taskId?: number;
+  targetId?: number;
+  projectId?: number;
   onlyActive?: boolean;
   showZeroOnLoading?: boolean;
 }>();
@@ -38,9 +40,11 @@ function getFilters(isTriageable: boolean) {
     : {};
   return props.taskId
     ? { task: props.taskId, ...defaultFilters }
-    : props.projectId
-      ? { project: props.projectId, ...defaultFilters }
-      : defaultFilters;
+    : props.targetId
+      ? { target: props.targetId, ...defaultFilters }
+      : props.projectId
+        ? { project: props.projectId, ...defaultFilters }
+        : defaultFilters;
 }
 
 function fetch() {

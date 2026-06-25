@@ -15,5 +15,5 @@
 </template>
 
 <script setup lang="ts">
-defineProps<{ project?: string | number }>();
+defineProps<{ project?: number }>();
 </script>

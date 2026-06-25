@@ -55,7 +55,7 @@ import { VisSingleContainer, VisTreemap, VisTooltip } from "@unovis/vue";
 import { Treemap } from "@unovis/ts";
 import { triageStatuses } from "~/constants";
 
-const props = defineProps<{ project?: string | number }>();
+const props = defineProps<{ project?: number }>();
 
 const api = useApi("/api/stats/");
 const loading = ref(true);

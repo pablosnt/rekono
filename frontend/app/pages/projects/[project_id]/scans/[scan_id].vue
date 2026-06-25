@@ -222,8 +222,8 @@
     <FindingsCounterAll
       v-if="task"
       ref="findings"
-      :task-id="route.params.scan_id"
-      :project-id="route.params.project_id"
+      :task-id="task.id"
+      :project-id="task.target.project"
       :show-zero-on-loading="false"
       class="mb-8"
     />

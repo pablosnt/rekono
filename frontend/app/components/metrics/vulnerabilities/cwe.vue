@@ -13,7 +13,7 @@
 <script setup lang="ts">
 import type { BarSeries } from "~/types/stats";
 
-const props = defineProps<{ project?: string | number }>();
+const props = defineProps<{ project?: number }>();
 
 const api = useApi("/api/stats/");
 const loading = ref(true);

@@ -90,10 +90,7 @@
     <div v-if="projectHasActiveFindings">
       <USeparator class="mb-8 mt-8" />
       <h2 class="text-2xl font-bold text-default m-5">Findings</h2>
-      <LazyFindingsCounterAll
-        :project-id="route.params.project_id"
-        only-active
-      />
+      <LazyFindingsCounterAll :project-id="currentProject.id" only-active />
     </div>
   </div>
 </template>

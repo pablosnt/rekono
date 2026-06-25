@@ -12,7 +12,7 @@
       <USkeleton class="h-[500px] w-full rounded-lg" />
     </div>
     <template v-else-if="hasFindings">
-      <MetricsEvolution :project="$route.params.project_id" />
+      <MetricsEvolution :project="projectId" />
       <UTabs
         :items="tabs"
         class="w-full"
@@ -22,25 +22,25 @@
         }"
       >
         <template #hosts>
-          <MetricsHosts :project="$route.params.project_id" />
+          <MetricsHosts :project="projectId" />
         </template>
         <template #ports>
-          <LazyMetricsPorts :project="$route.params.project_id" />
+          <LazyMetricsPorts :project="projectId" />
         </template>
         <template #technologies>
-          <LazyMetricsTechnologies :project="$route.params.project_id" />
+          <LazyMetricsTechnologies :project="projectId" />
         </template>
         <template #vulnerabilities>
-          <LazyMetricsVulnerabilities :project="$route.params.project_id" />
+          <LazyMetricsVulnerabilities :project="projectId" />
         </template>
         <template #exploits>
-          <LazyMetricsExploits :project="$route.params.project_id" />
+          <LazyMetricsExploits :project="projectId" />
         </template>
         <template #others>
-          <LazyMetricsOthers :project="$route.params.project_id" />
+          <LazyMetricsOthers :project="projectId" />
         </template>
         <template #triage>
-          <LazyMetricsTriage :project="$route.params.project_id" />
+          <LazyMetricsTriage :project="projectId" />
         </template>
       </UTabs>
     </template>
@@ -61,11 +61,7 @@
             label="Scan"
             not-rounded
             size="xl"
-            :project="
-              $route.params.project_id
-                ? { id: parseInt($route.params.project_id) }
-                : undefined
-            "
+            :project="$route.params.project_id ? { id: projectId } : undefined"
           />
         </template>
       </UEmpty>
@@ -78,6 +74,9 @@ import { useUserStore } from "~/store/user";
 
 const api = useApi();
 const route = useRoute();
+const projectId = route.params.project_id
+  ? parseInt(route.params.project_id)
+  : undefined;
 const userStore = useUserStore();
 const counts = reactive({
   hosts: { value: 0, loading: true },
