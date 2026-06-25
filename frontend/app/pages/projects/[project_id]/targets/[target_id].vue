@@ -168,8 +168,12 @@ const userStore = useUserStore();
 const integrations = useIntegrationsStore();
 const { showDefectDojo } = useCurrentProject();
 const route = useRoute();
-const targetId = route.params.target_id ? parseInt(route.params.target_id) : undefined;
-const projectId = route.params.project_id ? parseInt(route.params.project_id) : undefined;
+const targetId = route.params.target_id
+  ? parseInt(route.params.target_id)
+  : undefined;
+const projectId = route.params.project_id
+  ? parseInt(route.params.project_id)
+  : undefined;
 const api = useApi("/api/targets/");
 const target = ref();
 const notesButton = ref();

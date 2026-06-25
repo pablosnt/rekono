@@ -63,7 +63,7 @@ function onFetched(items: Task[]) {
       (!task.scheduled_at || new Date(task.scheduled_at) <= new Date()) &&
       (task.status === "Running" ||
         task.status === "Requested" ||
-        task.executions.length === 0)
+        task.executions.length === 0),
   ).length;
   if (count < runningTasks.value) {
     refreshPanelCounts();
