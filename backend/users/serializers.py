@@ -23,11 +23,13 @@ from security.authorization.roles import Role
 from users.models import User
 
 
-class UserSerializer(ModelSerializer):
-    """Serializer for User model with role information.
+class SimpleUserSerializer(ModelSerializer):
+    """Simplified serializer for User model with minimal fields.
 
-    Handles serialization of User objects for API operations including
-    computed role field from Django groups.
+    Provides basic user information for references in other models and acts as
+    the base for the richer user serializers. Email is intentionally excluded to
+    avoid exposing other users' addresses to roles that don't need them (phishing
+    and social engineering prevention).
 
     Attributes:
         role (SerializerMethodField): Computed role field from user groups
@@ -36,7 +38,7 @@ class UserSerializer(ModelSerializer):
     role = SerializerMethodField()
 
     class Meta:
-        """Meta configuration for the UserSerializer.
+        """Meta configuration for the SimpleUserSerializer.
 
         Attributes:
             model (Model): The User model to serialize
@@ -44,17 +46,7 @@ class UserSerializer(ModelSerializer):
         """
 
         model = User
-        fields = (
-            "id",
-            "username",
-            "first_name",
-            "last_name",
-            "email",
-            "is_active",
-            "date_joined",
-            "last_login",
-            "role",
-        )
+        fields = ("id", "username", "role")
 
     def get_role(self, instance: User) -> str:
         """Get user's role from Django groups.
@@ -69,14 +61,15 @@ class UserSerializer(ModelSerializer):
         return role.name if role else Role.READER.value
 
 
-class SimpleUserSerializer(UserSerializer):
-    """Simplified serializer for User model with minimal fields.
+class RestrictedUserSerializer(SimpleUserSerializer):
+    """Serializer for User model that hides the email address.
 
-    Provides basic user information for references in other models.
+    Used to list users for non-admin roles, exposing the data needed to
+    identify and reference users without leaking their email addresses.
     """
 
     class Meta:
-        """Meta configuration for the SimpleUserSerializer.
+        """Meta configuration for the RestrictedUserSerializer.
 
         Attributes:
             model (Model): The User model to serialize
@@ -84,7 +77,32 @@ class SimpleUserSerializer(UserSerializer):
         """
 
         model = User
-        fields = ("id", "username", "email", "role")
+        fields = SimpleUserSerializer.Meta.fields + (
+            "first_name",
+            "last_name",
+            "is_active",
+            "date_joined",
+            "last_login",
+        )
+
+
+class UserSerializer(RestrictedUserSerializer):
+    """Serializer for User model including the email address.
+
+    Extends the restricted serializer with the email field, which is only
+    exposed to roles allowed to manage users (admins and the user themselves).
+    """
+
+    class Meta:
+        """Meta configuration for the UserSerializer.
+
+        Attributes:
+            model (Model): The User model to serialize
+            fields (tuple): Field names to include in serialization
+        """
+
+        model = User
+        fields = RestrictedUserSerializer.Meta.fields + ("email",)
 
 
 class InviteUserSerializer(ModelSerializer):

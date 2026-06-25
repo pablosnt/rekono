@@ -185,7 +185,7 @@
             Executor
           </p>
           <p class="font-medium">
-            @{{ task.executor?.username || task.executor?.email }}
+            @{{ task.executor?.username }}
           </p>
         </div>
         <div>

@@ -365,8 +365,7 @@ class RekonoUserManager(UserManager, LoggingEntity, OtpManagerMixin, MfaManagerM
         user = self.update_password(user, password)
         user.otp = None
         user.otp_expiration = None
-        user.is_active = True
-        user.save(update_fields=["otp", "otp_expiration", "is_active"])
+        user.save(update_fields=["otp", "otp_expiration"])
         return user
 
     def invalidate_all_tokens(self, user: Any) -> Any:

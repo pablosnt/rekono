@@ -21,6 +21,7 @@ from framework.views import BaseViewSet
 from platforms.email.notifications import SMTP
 from security.authentication.jwt import CookieJWTAuthentication
 from security.authorization.permissions import IsNotAuthenticated, RekonoModelPermission
+from security.authorization.roles import Role
 from users.filters import UserFilter
 from users.models import User
 from users.serializers import (
@@ -32,6 +33,7 @@ from users.serializers import (
     RegisterMfaSerializer,
     RequestPasswordResetSerializer,
     ResetPasswordSerializer,
+    RestrictedUserSerializer,
     UpdatePasswordSerializer,
     UpdateRoleSerializer,
     UserSerializer,
@@ -62,6 +64,21 @@ class UserViewSet(BaseViewSet):
     search_fields = ["username", "first_name", "last_name", "email"]
     ordering_fields = ["id", "username", "first_name", "last_name", "email", "date_joined", "last_login"]
     http_method_names = ["get", "post", "put", "delete"]
+
+    def get_serializer_class(self) -> type[Serializer]:
+        """Get the serializer class based on the requesting user's role.
+
+        Admins receive the full serializer including email addresses, which they
+        legitimately need to manage users and project members. Any other role
+        receives a restricted serializer that hides other users' emails to
+        prevent phishing and social engineering.
+
+        Returns:
+            type[Serializer]: UserSerializer for admins, RestrictedUserSerializer otherwise
+        """
+        if self.request.user.is_authenticated and self.request.user.groups.filter(name=Role.ADMIN.value).exists():
+            return UserSerializer
+        return RestrictedUserSerializer
 
     def get_object_if_not_current_user(self, request: Request, pk: str) -> User:
         """Get user object ensuring it's not the current user.
