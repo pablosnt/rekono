@@ -1,6 +1,6 @@
 <template>
   <div
-    v-if="total > 0 || (loading && showZeroOnLoading)"
+    v-if="total > 0"
     class="grid grid-cols-2 sm:grid-cols-4 xl:grid-cols-8 gap-3"
   >
     <template v-for="item in counters" :key="item.plural">
@@ -22,7 +22,6 @@ const props = defineProps<{
   targetId?: number;
   projectId?: number;
   onlyActive?: boolean;
-  showZeroOnLoading?: boolean;
 }>();
 
 const api = useApi("/api/");

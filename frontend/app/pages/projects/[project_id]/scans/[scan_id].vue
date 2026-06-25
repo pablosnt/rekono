@@ -224,7 +224,6 @@
       ref="findings"
       :task-id="task.id"
       :project-id="task.target.project"
-      :show-zero-on-loading="false"
       class="mb-8"
     />
 
