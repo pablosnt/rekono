@@ -60,9 +60,10 @@ const runningTasks = ref(0);
 function onFetched(items: Task[]) {
   const count = items.filter(
     (task) =>
-      task.status === "Running" ||
-      task.status === "Requested" ||
-      task.executions.length === 0,
+      (!task.scheduled_at || new Date(task.scheduled_at) <= new Date()) &&
+      (task.status === "Running" ||
+        task.status === "Requested" ||
+        task.executions.length === 0)
   ).length;
   if (count < runningTasks.value) {
     refreshPanelCounts();

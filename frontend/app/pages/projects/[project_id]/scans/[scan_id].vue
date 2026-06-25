@@ -296,9 +296,10 @@ function processTask(data?: Task) {
   if (!data) return;
   task.value = data;
   if (
-    data.status === "Running" ||
-    data.status === "Requested" ||
-    (data.executions.length === 0 && data.status !== "Cancelled")
+    (!data.scheduled_at || new Date(data.scheduled_at) <= new Date()) &&
+    (data.status === "Running" ||
+      data.status === "Requested" ||
+      (data.executions.length === 0 && data.status !== "Cancelled"))
   ) {
     if (refresh.value) clearTimeout(refresh.value);
     refresh.value = setTimeout(() => {
