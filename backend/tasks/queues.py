@@ -311,10 +311,5 @@ class TasksQueue(BaseScanQueue):
             new_task.wordlists.set(result.wordlists.all())
             new_task.input_technologies.set(result.input_technologies.all())
             new_task.input_vulnerabilities.set(result.input_vulnerabilities.all())
-            self = TasksQueue()
-            job = self.queue.enqueue_at(
-                result.enqueued_at, self.consume, task=result, on_success=self._scheduled_callback
-            )
-            BaseScanQueue.logger.info(f"[Task] Scheduled task {result.id} has been enqueued again")
-            new_task.rq_job_id = job.id
-            new_task.save(update_fields=["rq_job_id"])
+            TasksQueue().enqueue(new_task)
+            BaseScanQueue.logger.info(f"[Task] Recurring task {new_task.id} has been scheduled")

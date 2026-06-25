@@ -1,6 +1,8 @@
 import copy
+from datetime import timedelta
 
 from django.test import TestCase
+from django.utils import timezone
 
 from executions.enums import Status
 from executions.models import Execution
@@ -9,6 +11,7 @@ from framework.queues import ExecutionParametersToEnqueue
 from parameters.models import InputTechnology, InputVulnerability
 from processes.models import Process, Step
 from target_ports.models import TargetPort
+from tasks.enums import TimeUnit
 from tasks.models import Task
 from tests.framework import QueueTest
 from tests.framework.data import SetupProject
@@ -143,3 +146,22 @@ class TasksQueueTest(QueueTest, TestCase):
                     execution.status,
                 )
                 self.assertIsNone(execution.start)
+
+    def test_recurring_task(self) -> None:
+        existing_ids = set(Task.objects.values_list("pk", flat=True))
+        enqueued_at = timezone.now()
+        task = Task.objects.create(
+            target=self.target,
+            configuration=self.configuration,
+            intensity=IntensityEnum.NORMAL,
+            enqueued_at=enqueued_at,
+            repeat_in=2,
+            repeat_time_unit=TimeUnit.HOURS,
+        )
+        task.wordlists.set([self.wordlist])
+        task.input_technologies.set([self.input_technology])
+        task.input_vulnerabilities.set([self.input_vulnerability])
+        self.queue._scheduled_callback(None, None, task)
+        new_task = Task.objects.exclude(pk__in=existing_ids | {task.pk}).get()
+        self.assertEqual(enqueued_at + timedelta(hours=2), new_task.scheduled_at)
+        self.assertIsNotNone(new_task.rq_job_id)
