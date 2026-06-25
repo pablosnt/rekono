@@ -166,7 +166,15 @@ export default function () {
   function counterCell(count: number, link: string, internal: boolean = true) {
     return count === 0
       ? valueCell("0", "text-muted-foreground")
-      : linkCell(link, undefined, undefined, formatCount(count), internal);
+      : linkCell(
+          link,
+          undefined,
+          undefined,
+          formatCount(count),
+          internal,
+          undefined,
+          "px-0",
+        );
   }
 
   function linkCell(
@@ -176,11 +184,12 @@ export default function () {
     text?: string,
     internal: boolean = true,
     ariaLabel?: string,
+    extraClass?: string,
   ) {
     return link
       ? h(UButton, {
           to: link,
-          class: `hover:text-primary hover:underline`,
+          class: `hover:text-primary hover:underline${extraClass ? ` ${extraClass}` : ""}`,
           icon,
           avatar: avatar
             ? { src: avatar, alt: text || ariaLabel || "" }
