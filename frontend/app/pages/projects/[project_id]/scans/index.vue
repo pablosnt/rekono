@@ -70,6 +70,7 @@ function onFetched(items: Task[]) {
   }
   runningTasks.value = count;
   if (count > 0) {
+    if (refresh.value) clearTimeout(refresh.value);
     refresh.value = setTimeout(() => {
       page.value?.fetch();
     }, 5000);
@@ -89,7 +90,7 @@ onMounted(() => {
 });
 
 onUnmounted(() => {
-  if (refresh.value) clearInterval(refresh.value);
+  if (refresh.value) clearTimeout(refresh.value);
 });
 
 const config: CrudConfig<Task> = reactive({

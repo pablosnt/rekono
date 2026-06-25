@@ -209,8 +209,13 @@ const dropdownActions = computed(() =>
 );
 
 function processExecutions(items: Execution[]) {
-  if (items.filter((e) => ["Running", "Requested"].includes(e.status))) {
-    refresh.value = setTimeout(executions.value?.page?.fetch, 5000);
+  const running = items.filter((e) => ["Running", "Requested"].includes(e.status)).length;
+  if (running > 0) {
+    if (refresh.value) clearTimeout(refresh.value);
+    refresh.value = setTimeout(() => executions.value?.page?.fetch(), 5000);
+  } else if (refresh.value) {
+    clearTimeout(refresh.value);
+    refresh.value = null;
   }
 }
 
