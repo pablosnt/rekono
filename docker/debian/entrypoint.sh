@@ -39,7 +39,7 @@ python /code/manage.py migrate
 python /code/manage.py runserver 0.0.0.0:8000 &
 
 # Run RQ workers
-python /code/manage.py rqworker tasks &
+python /code/manage.py rqworker tasks --with-scheduler &
 for worker in $(seq 1 $EXECUTION_WORKERS)
 do
     python /code/manage.py rqworker executions &

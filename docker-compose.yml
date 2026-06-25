@@ -63,7 +63,7 @@ services:
   tasks-worker:
     restart: always
     image: pablosnt/rekono-backend:unstable
-    command: uv run --no-dev manage.py rqworker tasks
+    command: uv run --no-dev manage.py rqworker tasks --with-scheduler
     hostname: tasks-worker
     volumes:
       - rekono:/rekono
@@ -134,7 +134,7 @@ services:
   monitor-worker:
     restart: always
     image: pablosnt/rekono-backend:unstable
-    command: uv run --no-dev manage.py rqworker monitor
+    command: uv run --no-dev manage.py rqworker monitor --with-scheduler
     hostname: monitor-worker
     volumes:
       - rekono:/rekono
