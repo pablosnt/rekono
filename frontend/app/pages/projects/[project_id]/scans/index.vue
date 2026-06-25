@@ -60,6 +60,7 @@ const runningTasks = ref(0);
 function onFetched(items: Task[]) {
   const count = items.filter(
     (task) =>
+      task.status !== "Cancelled" &&
       (!task.scheduled_at || new Date(task.scheduled_at) <= new Date()) &&
       (task.status === "Running" ||
         task.status === "Requested" ||

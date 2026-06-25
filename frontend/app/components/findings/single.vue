@@ -209,7 +209,9 @@ const dropdownActions = computed(() =>
 );
 
 function processExecutions(items: Execution[]) {
-  const running = items.filter((e) => ["Running", "Requested"].includes(e.status)).length;
+  const running = items.filter((e) =>
+    ["Running", "Requested"].includes(e.status),
+  ).length;
   if (running > 0) {
     if (refresh.value) clearTimeout(refresh.value);
     refresh.value = setTimeout(() => executions.value?.page?.fetch(), 5000);
