@@ -10,6 +10,8 @@
 </template>
 
 <script setup lang="ts">
+import type { Note } from "~/types/models";
+
 const props = defineProps<{
   show?: boolean;
   project?: number;
@@ -29,6 +31,7 @@ const props = defineProps<{
 }>();
 const api = useApi("/api/notes/");
 const route = useRoute();
+const createdNote = useState<Note | null>("created-note", () => null);
 
 function createNote() {
   api
@@ -50,6 +53,7 @@ function createNote() {
       public: false,
     })
     .then((response) => {
+      createdNote.value = response;
       return navigateTo(`/projects/${response.project}/notes/${response.id}`);
     });
 }

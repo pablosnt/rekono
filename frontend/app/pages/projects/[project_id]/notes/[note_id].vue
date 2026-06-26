@@ -62,6 +62,7 @@
                 description: `Note '${note.title}' has been forked`,
                 color: 'success',
               });
+              createdNote = response;
               navigateTo(
                 `/projects/${$route.params.project_id}/notes/${response.id}`,
               );
@@ -167,6 +168,7 @@
 
 <script setup lang="ts">
 import { useUserStore } from "~/store/user";
+import type { Note } from "~/types/models";
 import * as z from "zod";
 
 const route = useRoute();
@@ -174,6 +176,7 @@ const userStore = useUserStore();
 const toast = useToast();
 const api = useApi("/api/notes/");
 const validation = useValidation();
+const createdNote = useState<Note | null>("created-note", () => null);
 const note = ref();
 const canEdit = ref(false);
 const deleteOpen = ref(false);
@@ -190,12 +193,22 @@ const deleteConfig = {
   deleteMessage: () => buildDeleteMessage("note", note.value?.title),
 };
 
+function applyNote(response: Note) {
+  note.value = response;
+  note.value.related_entity = getNoteRelatedEntity(response);
+  canEdit.value = userStore.isOwner(note.value);
+  createdNote.value = null;
+}
+
 function fetchNote() {
-  api.get(`${route.params.note_id}/`).then((response) => {
-    response.related_entity = getNoteRelatedEntity(response);
-    note.value = response;
-    canEdit.value = userStore.isOwner(note.value);
-  });
+  if (
+    createdNote.value &&
+    String(createdNote.value.id) === String(route.params.note_id)
+  ) {
+    applyNote(createdNote.value);
+  } else {
+    api.get(`${route.params.note_id}/`).then(applyNote);
+  }
 }
 
 function updateNote() {
