@@ -19,6 +19,7 @@
     :visibility="{ paths: false, technologies: false, vulnerabilities: false }"
     :custom-default-filters="host ? { host: host } : undefined"
     is-asset
+    has-hacktricks
     :disable-url-sync="disableUrlSync"
   />
 </template>

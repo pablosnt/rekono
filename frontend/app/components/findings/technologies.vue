@@ -20,6 +20,7 @@
     }"
     :custom-default-filters="port ? { port: port } : undefined"
     is-asset
+    has-hacktricks
     :disable-url-sync="disableUrlSync"
   />
 </template>

@@ -26,6 +26,7 @@
       ]"
       :visibility="{ whois: false, ports: false }"
       is-asset
+      has-hacktricks
       :disable-url-sync="disableUrlSync"
     />
     <LazyUModal

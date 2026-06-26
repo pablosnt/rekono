@@ -72,6 +72,7 @@ const props = defineProps<{
   visibility?: CrudConfig["tableColumnsVisibility"];
   isTriageable?: boolean;
   isAsset?: boolean;
+  hasHacktricks?: boolean;
   customFixVerb?: string;
   extraDropdownActions?: (
     item: Record<string, unknown>,
@@ -113,7 +114,7 @@ onMounted(() => {
     route.params.project_id ? { project: route.params.project_id } : undefined,
   );
   options.tools(toolOptions);
-  integrations.fetchHackTricks();
+  if (props.hasHacktricks) integrations.fetchHackTricks();
 });
 
 const config: CrudConfig<Finding> = reactive({
@@ -259,7 +260,7 @@ const config: CrudConfig<Finding> = reactive({
               });
         },
       },
-      ...(integrations.hacktricks?.enabled
+      ...(props.hasHacktricks && integrations.hacktricks?.enabled
         ? [
             {
               accessorKey: "hacktricks",

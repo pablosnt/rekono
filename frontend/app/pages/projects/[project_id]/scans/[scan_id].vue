@@ -184,9 +184,7 @@
           <p class="text-xs text-muted uppercase tracking-wider mb-1.5">
             Executor
           </p>
-          <p class="font-medium">
-            @{{ task.executor?.username }}
-          </p>
+          <p class="font-medium">@{{ task.executor?.username }}</p>
         </div>
         <div>
           <p class="text-xs text-muted uppercase tracking-wider mb-1.5">
