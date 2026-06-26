@@ -55,7 +55,6 @@ class FindingSerializer(RelatedNotesSerializer):
             "auto_fixed",
             "fixed_date",
             "fixed_by",
-            "hacktricks_link",
             "created_from_user_input",
             "notes",
         )
@@ -66,7 +65,6 @@ class FindingSerializer(RelatedNotesSerializer):
             "auto_fixed",
             "fixed_date",
             "fixed_by",
-            "hacktricks_link",
             "created_from_user_input",
             "notes",
         )
@@ -81,6 +79,31 @@ class FindingSerializer(RelatedNotesSerializer):
             int: The ID of the parent project.
         """
         return instance.parent_project.id
+
+
+class HacktricksFindingSerializer(FindingSerializer):
+    """Base serializer for findings enriched with HackTricks documentation.
+
+    Extends FindingSerializer to expose the HackTricks documentation link for
+    finding types supported by the HackTricks integration (hosts, ports, and
+    technologies).
+    """
+
+    class Meta:
+        """Meta configuration for HacktricksFindingSerializer.
+
+        Extends FindingSerializer.Meta to include the read-only HackTricks
+        documentation link.
+
+        Attributes:
+            model (type): Default model class (Host, overridden by subclasses)
+            fields (tuple): Field names including the HackTricks link from parent
+            read_only_fields (tuple): Fields restricted from modification including the HackTricks link
+        """
+
+        model = Host  # It's needed to define a non-abstract model as default. It will be overwritten
+        fields = FindingSerializer.Meta.fields + ("hacktricks_link",)
+        read_only_fields = FindingSerializer.Meta.read_only_fields + ("hacktricks_link",)
 
 
 class TriageFindingSerializer(FindingSerializer):

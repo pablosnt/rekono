@@ -17,7 +17,7 @@ from findings.enums import (
     Severity,
     TransportProtocol,
 )
-from findings.framework.models import Finding, TriageFinding
+from findings.framework.models import Finding, HacktricksFinding, TriageFinding
 from framework.enums import InputKeyword
 from target_ports.models import TargetPort
 from targets.enums import TargetType
@@ -84,7 +84,7 @@ class OSINT(TriageFinding):
         return super().parse(target, accumulated) if self.data_type in [OSINTDataType.IP, OSINTDataType.DOMAIN] else {}
 
 
-class Host(Finding):
+class Host(HacktricksFinding):
     """Model representing network hosts discovered during reconnaissance and scanning.
 
     Represents network hosts identified during active and passive reconnaissance phases.
@@ -172,7 +172,7 @@ class Host(Finding):
     }
 
 
-class Port(Finding):
+class Port(HacktricksFinding):
     """Model representing network services discovered during port scanning and enumeration.
 
     Represents network ports and associated services identified during active reconnaissance
@@ -362,7 +362,7 @@ class Path(Finding):
         return filter
 
 
-class Technology(Finding):
+class Technology(HacktricksFinding):
     """Model representing software technologies discovered during service fingerprinting.
 
     Represents software technologies, frameworks, and applications identified through

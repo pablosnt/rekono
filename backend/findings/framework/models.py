@@ -177,7 +177,6 @@ class Finding(BaseInput):
         auto_fixed (BooleanField): Whether finding was automatically fixed (default: False).
         fixed_date (DateTimeField): Timestamp when finding was fixed (optional).
         fixed_by (ForeignKey): User who fixed the finding (optional).
-        hacktricks_link (TextField): HackTricks documentation link (optional, max 300 chars).
         created_from_user_input (BooleanField): Whether finding was created from user input (default: False).
     """
 
@@ -186,7 +185,6 @@ class Finding(BaseInput):
     auto_fixed = BooleanField(default=False)
     fixed_date = DateTimeField(blank=True, null=True)
     fixed_by = ForeignKey(AUTH_USER_MODEL, related_name="fixed_%(class)s", on_delete=SET_NULL, blank=True, null=True)
-    hacktricks_link = TextField(max_length=300, blank=True, null=True)
     created_from_user_input = BooleanField(default=False)
 
     objects = FindingManager()
@@ -279,6 +277,23 @@ class Finding(BaseInput):
             str: Formatted string representation of the finding.
         """
         return " - ".join([getattr(self, field).__str__() for field in self.unique_fields if getattr(self, field)])
+
+
+class HacktricksFinding(Finding):
+    """Abstract base model for findings enriched with HackTricks documentation.
+
+    Extends Finding to add HackTricks integration support. Only finding types
+    whose characteristics can be mapped to a HackTricks penetration testing
+    guide (hosts, ports, and technologies) should inherit from this class.
+
+    Attributes:
+        hacktricks_link (TextField): HackTricks documentation link (optional, max 300 chars).
+    """
+
+    hacktricks_link = TextField(max_length=300, blank=True, null=True)
+
+    class Meta:
+        abstract = True
 
 
 class TriageFinding(Finding):

@@ -10,7 +10,11 @@ from typing import Any
 from rest_framework.serializers import CharField, ListField, ModelSerializer
 
 from findings.enums import Severity, TriageStatus
-from findings.framework.serializers import FindingSerializer, TriageFindingSerializer
+from findings.framework.serializers import (
+    FindingSerializer,
+    HacktricksFindingSerializer,
+    TriageFindingSerializer,
+)
 from findings.models import (
     OSINT,
     Credential,
@@ -90,10 +94,10 @@ class SimpleHostSerializer(ModelSerializer):
         )
 
 
-class HostSerializer(FindingSerializer):
+class HostSerializer(HacktricksFindingSerializer):
     """Serializer for network host findings with nested port data.
 
-    Extends FindingSerializer with SimpleHostSerializer fields to include
+    Extends HacktricksFindingSerializer with SimpleHostSerializer fields to include
     host data and nested port relationships for complete host inventory.
     """
 
@@ -109,7 +113,7 @@ class HostSerializer(FindingSerializer):
         """
 
         model = Host
-        fields = FindingSerializer.Meta.fields + SimpleHostSerializer.Meta.fields + ("port",)
+        fields = HacktricksFindingSerializer.Meta.fields + SimpleHostSerializer.Meta.fields + ("port",)
 
 
 class SimplePortSerializer(ModelSerializer):
@@ -143,10 +147,10 @@ class SimplePortSerializer(ModelSerializer):
         )
 
 
-class PortSerializer(FindingSerializer, SimplePortSerializer):
+class PortSerializer(HacktricksFindingSerializer, SimplePortSerializer):
     """Serializer for network port findings with nested host data.
 
-    Extends FindingSerializer with SimplePortSerializer fields to include
+    Extends HacktricksFindingSerializer with SimplePortSerializer fields to include
     the nested host object and relationships to paths, technologies,
     and vulnerabilities for complete port inventory.
     """
@@ -164,7 +168,9 @@ class PortSerializer(FindingSerializer, SimplePortSerializer):
 
         model = Port
         fields = (
-            FindingSerializer.Meta.fields + SimplePortSerializer.Meta.fields + ("path", "technology", "vulnerability")
+            HacktricksFindingSerializer.Meta.fields
+            + SimplePortSerializer.Meta.fields
+            + ("path", "technology", "vulnerability")
         )
 
 
@@ -229,10 +235,10 @@ class SimpleTechnologySerializer(ModelSerializer):
         fields = ("id", "port", "name", "version", "description")
 
 
-class TechnologySerializer(FindingSerializer, SimpleTechnologySerializer):
+class TechnologySerializer(HacktricksFindingSerializer, SimpleTechnologySerializer):
     """Serializer for technology findings with full relationship data.
 
-    Extends FindingSerializer with SimpleTechnologySerializer fields to include
+    Extends HacktricksFindingSerializer with SimpleTechnologySerializer fields to include
     nested port data and relationships to credentials, vulnerabilities,
     and exploits for complete technology stack analysis.
     """
@@ -250,7 +256,7 @@ class TechnologySerializer(FindingSerializer, SimpleTechnologySerializer):
 
         model = Technology
         fields = (
-            FindingSerializer.Meta.fields
+            HacktricksFindingSerializer.Meta.fields
             + SimpleTechnologySerializer.Meta.fields
             + ("credential", "vulnerability", "exploit")
         )
