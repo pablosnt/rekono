@@ -45,6 +45,7 @@ class MonitorQueue(BaseQueue):
         """
         settings = MonitorSettings.objects.first()
         job = self.queue.enqueue(self.consume, on_success=self._scheduled_callback)
+        self.logger.info("[Monitor] Monitor job has been enqueued")
         settings.rq_job_id = job.id
         settings.save(update_fields=["rq_job_id"])
         return job

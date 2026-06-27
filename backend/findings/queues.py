@@ -86,6 +86,7 @@ class FindingsQueue(BaseQueue):
             execution (Execution): Source execution for the findings.
             findings (list[Finding]): List of findings to process.
         """
+        BaseQueue.logger.info(f"[Findings] Processing of {len(findings)} findings from execution {execution.id} has started")
         settings = Settings.objects.first()
         if findings:
             cve_providers: list[BaseCveProvider] = [

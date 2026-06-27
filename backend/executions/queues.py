@@ -114,6 +114,10 @@ class ExecutionsQueue(BaseScanQueue):
         Returns:
             tuple[Execution, list[Finding]]: Execution and resulting findings
         """
+        BaseScanQueue.logger.info(
+            f"[Execution] Execution {execution.id} ({execution.configuration.tool.name} - "
+            f"{execution.configuration.name}) has started"
+        )
         # Initialize the tool-specific executor for this execution
         executor: BaseExecutor = execution.configuration.tool.executor_class(execution)
         current_job = rq.get_current_job()

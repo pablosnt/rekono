@@ -160,6 +160,7 @@ class TasksQueue(BaseScanQueue):
         Returns:
             Task | None: The processed task
         """
+        BaseScanQueue.logger.info(f"[Task] Task {task.id} has started")
         # Re-validate the task target before creating any execution
         try:
             TargetValidator(Regex.TARGET)(task.target.target)
