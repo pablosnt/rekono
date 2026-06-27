@@ -313,47 +313,48 @@ const config: CrudConfig<Task> = reactive({
   pageSize: 25,
   pageSizeOptions: [25, 50, 100],
   tableCopyId: true,
-  customDropdownActions: (task: Task) => {
-    if (!userStore.is_auditor) return [];
-    return [
-      ...(task.progress === 100
-        ? [
-            {
-              label: "Repeat",
-              icon: "i-lucide-play",
-              color: "success",
-              onSelect: () => {
-                api
-                  .create(`${task.id}/repeat/`, {}, {}, "Scan")
-                  .then((response) =>
-                    navigateTo(
-                      `/projects/${route.params.project_id}/scans/${response.id}`,
-                    ),
-                  );
-              },
+  customDropdownActions: (task: Task) => [
+    ...(task.progress === 100
+      ? [
+          ...(userStore.is_auditor
+            ? [
+                {
+                  label: "Repeat",
+                  icon: "i-lucide-play",
+                  color: "success",
+                  onSelect: () => {
+                    api
+                      .create(`${task.id}/repeat/`, {}, {}, "Scan")
+                      .then((response) =>
+                        navigateTo(
+                          `/projects/${route.params.project_id}/scans/${response.id}`,
+                        ),
+                      );
+                  },
+                },
+              ]
+            : []),
+          {
+            label: "Generate a report",
+            icon: "i-lucide-file-text",
+            color: "neutral",
+            onSelect: (t: Task) => {
+              selectedTask.value = t;
+              showReportModal.value = true;
             },
-            {
-              label: "Generate a report",
-              icon: "i-lucide-file-text",
-              color: "neutral",
-              onSelect: (t: Task) => {
-                selectedTask.value = t;
-                showReportModal.value = true;
-              },
-            },
-          ]
-        : []),
-      {
-        label: "Take note",
-        icon: "i-lucide-notebook",
-        color: "neutral",
-        onSelect: () => {
-          selectedTask.value = task;
-          return nextTick(() => notesButton.value?.createNote());
-        },
+          },
+        ]
+      : []),
+    {
+      label: "Take note",
+      icon: "i-lucide-notebook",
+      color: "neutral",
+      onSelect: () => {
+        selectedTask.value = task;
+        return nextTick(() => notesButton.value?.createNote());
       },
-    ];
-  },
+    },
+  ],
   deleteMessage: (task: Task) =>
     buildDeleteMessage(
       "scan",
@@ -364,7 +365,7 @@ const config: CrudConfig<Task> = reactive({
     ),
   deleteVerb: "Cancel",
   deleteIcon: "i-lucide-x",
-  canRead: userStore.is_auditor,
+  canRead: true,
   canCreate: userStore.is_auditor,
   canEdit: false,
   canDelete: (task: Task) => userStore.is_auditor && task.progress !== 100,

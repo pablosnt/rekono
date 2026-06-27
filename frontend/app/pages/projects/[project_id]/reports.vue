@@ -18,11 +18,13 @@
 import type { CrudConfig, CrudTableColumn, FilterOption } from "~/types/crud";
 import type { Report } from "~/types/models";
 import { reportFormats, reportStatuses } from "~/constants";
+import { useUserStore } from "~/store/user";
 
 const options = useOptions();
 const api = useApi();
 const route = useRoute();
 const table = useTable();
+const userStore = useUserStore();
 const userOptions = ref<FilterOption[]>([]);
 
 onMounted(() => {
@@ -164,6 +166,7 @@ const config: CrudConfig<Report> = reactive({
   canRead: true,
   canCreate: true,
   canEdit: false,
-  canDelete: true,
+  canDelete: (report: Report) =>
+    userStore.is_admin || userStore.isOwner(report, "user"),
 });
 </script>
