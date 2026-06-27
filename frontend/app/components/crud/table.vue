@@ -87,15 +87,25 @@ const columns = computed(() => {
             onSelect: () => copyText(String(item.id), "ID copied to clipboard"),
           });
         } else if (props.config.itemLink) {
-          actions.push({
-            label: "Copy link",
-            icon: "i-lucide-copy",
-            onSelect: () =>
-              copyText(
-                `${url.origin}${String(props.config.itemLink(item))}`,
-                "Link copied to clipboard",
-              ),
-          });
+          actions.push(
+            ...[
+              {
+                label: "Copy link",
+                icon: "i-lucide-copy",
+                onSelect: () =>
+                  copyText(
+                    `${url.origin}${String(props.config.itemLink(item))}`,
+                    "Link copied to clipboard",
+                  ),
+              },
+              {
+                label: "Open in new tab",
+                icon: "i-lucide-external-link",
+                to: `${url.origin}${String(props.config.itemLink(item))}`,
+                target: "_blank",
+              },
+            ],
+          );
         }
       }
 
