@@ -256,7 +256,14 @@ const config: CrudConfig<Finding> = reactive({
           const dates = getExposureWindow(row.original);
           if (dates.length === 0) return table.noDataCell;
           return dates.length === 1
-            ? table.valueCell(dates[0].date.toDateString())
+            ? h(
+                "span",
+                {
+                  class:
+                    "inline-flex items-center font-medium px-2.5 py-1.5 text-sm",
+                },
+                dates[0].date.toDateString(),
+              )
             : h(resolveComponent("UButton"), {
                 label: `${dates[0].date.toDateString()} - ${dates.at(-1).date.toDateString()}`,
                 color: "neutral",
