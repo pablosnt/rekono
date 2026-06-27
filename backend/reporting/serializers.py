@@ -137,8 +137,9 @@ class CreateReportSerializer(ModelSerializer):
         if no_mandatory_field:
             raise ValidationError("At lest one task, target or project must be provided", code="report")
         # Finding types included in PDF reports are not customizable
-        if "finding_types" in attrs and attrs.get("finding_types") and attrs.get("format") != ReportFormat.PDF:
-            self.validated_finding_types = attrs.pop("finding_types")
+        finding_types = attrs.pop("finding_types", None)
+        if finding_types and attrs.get("format") != ReportFormat.PDF:
+            self.validated_finding_types = finding_types
         else:
             self.validated_finding_types = list(FindingName)
         return attrs

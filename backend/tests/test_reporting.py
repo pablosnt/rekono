@@ -206,6 +206,11 @@ class PdfReportTest(ReportingTest, TestCase):
         Target.objects.create(project=self.project, target="10.10.10.15", type=TargetType.PRIVATE_IP)
 
 
+class PdfReportWithFindingTypesTest(PdfReportTest):
+    # PDF reports ignore the requested finding types, but providing them must not break report creation
+    finding_types: list[str] | None = [name.value for name in FindingName]
+
+
 class PdfReportWithoutFindingsTest(ApiTest, TestCase):
     endpoint = "/api/reports/"
     data = [SetupProject(executions_per_task=0)]
