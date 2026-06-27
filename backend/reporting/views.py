@@ -218,7 +218,7 @@ class ReportingViewSet(BaseViewSet):
                 if hasattr(model, "triage_status")
                 else serializer.validated_filter
             )
-            query = model.objects.filter(**query_filter).all()
+            query = model.objects.filter(**query_filter).distinct()
             if model == Vulnerability:
                 query = query.order_by("-severity")
             findings[model.__name__.lower()] = [
@@ -255,14 +255,14 @@ class ReportingViewSet(BaseViewSet):
             results["stats_by_target"][target.id] = {severity.name.lower(): 0 for severity in Severity}
             _osint = OSINT.objects.filter(
                 **{**scope_filter, **serializer.validated_filter, **serializer.validated_triage_filter}
-            )
+            ).distinct()
             _target_count = _osint.count()
             _findings = {FindingName.OSINT.value: _osint.all(), FindingName.HOST.value: []}
-            for host in Host.objects.filter(**{**scope_filter, **serializer.validated_filter}).all():
-                _ports = Port.objects.filter(**{**scope_filter, "host": host, **serializer.validated_filter})
+            for host in Host.objects.filter(**{**scope_filter, **serializer.validated_filter}).distinct():
+                _ports = Port.objects.filter(**{**scope_filter, "host": host, **serializer.validated_filter}).distinct()
                 _technologies = Technology.objects.filter(
                     **{**scope_filter, "port__host": host, **serializer.validated_filter}
-                )
+                ).distinct()
                 _credentials = Credential.objects.filter(
                     **{
                         **scope_filter,
@@ -270,20 +270,25 @@ class ReportingViewSet(BaseViewSet):
                         **serializer.validated_filter,
                         **serializer.validated_triage_filter,
                     }
-                )
+                ).distinct()
                 _vulnerabilities = (
                     Vulnerability.objects.filter(
                         **{**scope_filter, **serializer.validated_filter, **serializer.validated_triage_filter}
                     )
                     .filter(Q(technology__port__host=host) | Q(port__host=host))
                     .order_by("-severity")
+                    .distinct()
                 )
-                _exploits = Exploit.objects.filter(
-                    **{**scope_filter, **serializer.validated_filter, **serializer.validated_triage_filter}
-                ).filter(
-                    Q(technology__port__host=host)
-                    | Q(vulnerability__technology__port__host=host)
-                    | Q(vulnerability__port__host=host)
+                _exploits = (
+                    Exploit.objects.filter(
+                        **{**scope_filter, **serializer.validated_filter, **serializer.validated_triage_filter}
+                    )
+                    .filter(
+                        Q(technology__port__host=host)
+                        | Q(vulnerability__technology__port__host=host)
+                        | Q(vulnerability__port__host=host)
+                    )
+                    .distinct()
                 )
                 _target_count += (
                     1  # The host finding counts
