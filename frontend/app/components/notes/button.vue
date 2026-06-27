@@ -34,7 +34,7 @@ const route = useRoute();
 const createdNote = useState<Note | null>("created-note", () => null);
 
 function createNote() {
-  api
+  return api
     .create("", {
       project: props.project || route.params.project_id,
       target_id: props.target,

@@ -8,7 +8,7 @@
           (item) => (item.related_entity = getNoteRelatedEntity(item)),
         )
     "
-    @create-click="notesButton?.createNote()"
+    :on-create="() => notesButton?.createNote()"
   >
     <template #create-button>
       <NotesButton ref="notesButton" show />

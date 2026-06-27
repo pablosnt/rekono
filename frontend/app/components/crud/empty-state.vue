@@ -15,9 +15,7 @@ import type { CrudConfig } from "~/types/crud";
 const props = defineProps<{
   config: CrudConfig;
   state: Record<string, unknown>;
-}>();
-const emit = defineEmits<{
-  createClick: [];
+  onCreate?: () => unknown;
 }>();
 
 const description = computed(() => {
@@ -39,9 +37,8 @@ const actions = computed(() => {
         {
           icon: "i-lucide-plus",
           label: "Create new",
-          onClick: () => {
-            emit("createClick");
-          },
+          loadingAuto: true,
+          onClick: () => props.onCreate?.(),
         },
       ]
     : [];

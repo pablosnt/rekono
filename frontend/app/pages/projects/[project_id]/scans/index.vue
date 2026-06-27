@@ -4,7 +4,7 @@
       ref="page"
       :config="config"
       @fetched="onFetched"
-      @create-click="tasksButton?.open()"
+      :on-create="() => tasksButton?.open()"
     >
       <template #create-button>
         <TasksButton
