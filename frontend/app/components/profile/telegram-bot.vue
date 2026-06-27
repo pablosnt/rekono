@@ -80,7 +80,15 @@
           ref="form"
           :api="api"
           :config="config"
-          @submit="userStore.fetchProfile()"
+          @submit="
+            () => {
+              userStore.fetchProfile();
+              toast.add({
+                description: 'Account successfully linked to Telegram Bot',
+                color: 'success',
+              });
+            }
+          "
           @validation-change="(isValid) => (valid = isValid)"
           @new-loading="(newLoading) => (loading = newLoading)"
         />
@@ -112,11 +120,11 @@ const api = useApi("/api/telegram/link/");
 const integrations = useIntegrationsStore();
 const validation = useValidation();
 const userStore = useUserStore();
+const toast = useToast();
 const loading = ref(false);
 const valid = ref(false);
 const form = ref();
 const config = ref({
-  entityName: "Telegram Bot",
   formFields: [
     {
       key: "otp",

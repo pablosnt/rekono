@@ -63,6 +63,8 @@ const props = withDefaults(
 
 const reportModalOpen = ref(false);
 const entityNameLowerCase = props.entityName.toLowerCase();
-const targetId = entityNameLowerCase === "target" ? props.relatedEntity.id : undefined;
-const taskId = entityNameLowerCase === "task" ? props.relatedEntity.id : undefined
+const targetId =
+  entityNameLowerCase === "target" ? props.relatedEntity.id : undefined;
+const taskId =
+  entityNameLowerCase === "task" ? props.relatedEntity.id : undefined;
 </script>

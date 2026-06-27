@@ -329,7 +329,9 @@ function save() {
   loading.value = true;
   emit("new-loading", true);
   const data = body();
-  const entityName = firstUpper(props.config.entityName);
+  const entityName = props.config.entityName
+    ? firstUpper(props.config.entityName)
+    : props.config.entityName;
   const request = props.entity
     ? props.config.putEndpoint
       ? useApi("", true).update(
