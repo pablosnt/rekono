@@ -51,7 +51,7 @@ class FindingFilter(MultipleFieldFilterSet):
         fields = {
             "executions": ["exact"],
             "is_fixed": ["exact"],
-            "auto_fixed": ["exact"],
+            "auto_fixed": ["exact", "isnull"],
             "fixed_date": ["gte", "lte", "exact"],
             "fixed_by": ["exact"],
             "created_from_user_input": ["exact"],

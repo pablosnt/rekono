@@ -5,7 +5,7 @@ export interface Finding {
   project: number;
   executions: Execution[];
   is_fixed: boolean;
-  auto_fixed: boolean;
+  auto_fixed?: string;
   fixed_date: string;
   fixed_by?: { id: number; username: string };
   hacktricks_link?: string;

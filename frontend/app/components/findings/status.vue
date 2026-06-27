@@ -3,7 +3,7 @@
     v-if="finding.is_fixed"
     :text="
       finding.auto_fixed
-        ? `Auto-${fixVerb}ed`
+        ? `Auto-${fixVerb}ed. ${finding.auto_fixed}`.replace('fix', fixVerb)
         : `${fixVerb}ed by ${finding.fixed_by.username} ${useTimeAgo(new Date(finding.fixed_date)).value}`
     "
     :content="{ side: 'left', sideOffset: 8, collisionPadding: 8 }"

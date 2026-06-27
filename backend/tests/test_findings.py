@@ -2,7 +2,15 @@ from functools import cached_property
 
 from django.test import TestCase
 
-from findings.enums import HostOS, OSINTDataType, PortStatus, Severity, TransportProtocol, TriageStatus
+from findings.enums import (
+    AutoFixedReason,
+    HostOS,
+    OSINTDataType,
+    PortStatus,
+    Severity,
+    TransportProtocol,
+    TriageStatus,
+)
 from findings.framework.models import Finding
 from findings.models import OSINT, Credential, Exploit, Host, Path, Port, Technology, Vulnerability
 from security.authorization.roles import Role
@@ -35,12 +43,12 @@ class FindingTest(ApiTest):
             PostApiTestCase([Role.READER], 403, endpoint="1/fix/"),
             PostApiTestCase(["auditor1"], 204, endpoint="1/fix/"),
             PostApiTestCase(["admin1"], 400, endpoint="1/fix/"),
-            ApiTestCase(["members"], expected=[{"id": 1, "is_fixed": True}]),
+            ApiTestCase(["members"], expected=[{"id": 1, "is_fixed": True, "auto_fixed": None}]),
             DeleteApiTestCase(["admin2", "auditor2"], 404, endpoint="1/fix/"),
             DeleteApiTestCase([Role.READER], 403, endpoint="1/fix/"),
             DeleteApiTestCase(["admin1"], endpoint="1/fix/"),
             DeleteApiTestCase(["auditor1"], 400, endpoint="1/fix/"),
-            ApiTestCase(["members"], expected=[{"id": 1, "is_fixed": False}]),
+            ApiTestCase(["members"], expected=[{"id": 1, "is_fixed": False, "auto_fixed": None}]),
         ]
         if hasattr(finding, "triage_status"):
             cases.extend(
@@ -81,6 +89,35 @@ class FindingTest(ApiTest):
             parsed = finding.defectdojo_finding()
             for key, value in self.expected_defectdojo.items():
                 self.assertEqual(value, parsed[key])
+
+    def test_auto_fixed(self) -> None:
+        finding = self.model.objects.first()
+        related_findings = self.model.objects._get_related_findings(finding)
+
+        # No longer detected
+        self.model.objects.fix(finding)
+        finding.refresh_from_db()
+        self.assertTrue(finding.is_fixed)
+        self.assertIsNone(finding.fixed_by)
+        self.assertEqual(AutoFixedReason.NO_LONGER_DETECTED, finding.auto_fixed)
+        # Related findings are auto-fixed because their parent finding got fixed
+        for related_finding in related_findings:
+            related_finding.refresh_from_db()
+            self.assertTrue(related_finding.is_fixed)
+            self.assertEqual(AutoFixedReason.PARENT_FIXED, related_finding.auto_fixed)
+
+        # Auto-fix removed
+        self.model.objects.remove_fix(finding)
+        finding.refresh_from_db()
+        self.assertFalse(finding.is_fixed)
+        self.assertIsNone(finding.auto_fixed)
+
+        # Manual fix
+        self.model.objects.fix(finding, self.auditor1)
+        finding.refresh_from_db()
+        self.assertTrue(finding.is_fixed)
+        self.assertEqual(self.auditor1, finding.fixed_by)
+        self.assertIsNone(finding.auto_fixed)
 
     @cached_property
     def object(self) -> Finding:

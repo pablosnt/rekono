@@ -21,7 +21,7 @@ from django.db.models import (
 from django.utils import timezone
 
 from executions.models import Execution
-from findings.enums import TriageStatus
+from findings.enums import AutoFixedReason, TriageStatus
 from framework.models import BaseInput
 from projects.models import Project
 from rekono.settings import AUTH_USER_MODEL
@@ -74,16 +74,19 @@ class FindingManager(Manager):
         Returns:
             Any | QuerySet: The fixed finding(s) with updated status.
         """
+        # A fix without a user is an automatic one triggered because the finding is no longer
+        # detected; a user-driven fix is manual and keeps the auto-fix reason empty
+        auto_fixed_reason = AutoFixedReason.NO_LONGER_DETECTED if fixed_by is None else None
         if isinstance(findings, Finding):
             findings.is_fixed = True
-            findings.auto_fixed = fixed_by is None
+            findings.auto_fixed = auto_fixed_reason
             findings.fixed_date = timezone.now()
             findings.fixed_by = fixed_by
             findings.save(update_fields=["is_fixed", "auto_fixed", "fixed_date", "fixed_by"])
         else:
             findings.update(
                 is_fixed=True,
-                auto_fixed=fixed_by is None,
+                auto_fixed=auto_fixed_reason,
                 fixed_date=timezone.now(),
                 fixed_by=fixed_by,
             )
@@ -91,7 +94,7 @@ class FindingManager(Manager):
         for finding in [findings] if isinstance(findings, Finding) else findings:
             for related_finding in self._get_related_findings(finding):
                 related_finding.is_fixed = True
-                related_finding.auto_fixed = True
+                related_finding.auto_fixed = AutoFixedReason.PARENT_FIXED
                 related_finding.fixed_date = timezone.now()
                 related_finding.fixed_by = fixed_by
                 related_finding.save(update_fields=["is_fixed", "auto_fixed", "fixed_date", "fixed_by"])
@@ -113,15 +116,15 @@ class FindingManager(Manager):
         if fixed_by:
             # Remove auto-fix from related findings that were auto-fixed
             for auto_fixed_and_related_finding in self._get_related_findings(
-                finding, is_fixed=True, auto_fixed=True, fixed_by=finding.fixed_by
+                finding, is_fixed=True, auto_fixed__isnull=False, fixed_by=finding.fixed_by
             ):
                 auto_fixed_and_related_finding.is_fixed = False
-                auto_fixed_and_related_finding.auto_fixed = False
+                auto_fixed_and_related_finding.auto_fixed = None
                 auto_fixed_and_related_finding.fixed_date = None
                 auto_fixed_and_related_finding.fixed_by = None
                 auto_fixed_and_related_finding.save(update_fields=["is_fixed", "auto_fixed", "fixed_date", "fixed_by"])
         finding.is_fixed = False
-        finding.auto_fixed = False
+        finding.auto_fixed = None
         finding.fixed_date = None
         finding.fixed_by = None
         finding.save(update_fields=["is_fixed", "auto_fixed", "fixed_date", "fixed_by"])
@@ -174,7 +177,7 @@ class Finding(BaseInput):
     Attributes:
         executions (ManyToManyField): Related executions that discovered this finding.
         is_fixed (BooleanField): Whether finding has been marked as fixed (default: False).
-        auto_fixed (BooleanField): Whether finding was automatically fixed (default: False).
+        auto_fixed (TextField): Reason for automatic fixing (None if manually fixed, values from AutoFixedReason).
         fixed_date (DateTimeField): Timestamp when finding was fixed (optional).
         fixed_by (ForeignKey): User who fixed the finding (optional).
         created_from_user_input (BooleanField): Whether finding was created from user input (default: False).
@@ -182,7 +185,7 @@ class Finding(BaseInput):
 
     executions = ManyToManyField(Execution, related_name="%(class)s")
     is_fixed = BooleanField(default=False)
-    auto_fixed = BooleanField(default=False)
+    auto_fixed = TextField(max_length=50, blank=True, null=True, choices=AutoFixedReason.choices)
     fixed_date = DateTimeField(blank=True, null=True)
     fixed_by = ForeignKey(AUTH_USER_MODEL, related_name="fixed_%(class)s", on_delete=SET_NULL, blank=True, null=True)
     created_from_user_input = BooleanField(default=False)

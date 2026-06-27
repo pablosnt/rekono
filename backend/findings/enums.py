@@ -2,7 +2,7 @@
 
 Provides enumeration classes for categorizing and prioritizing security findings
 discovered during assessments, including severity levels, data types, status values,
-and triage classifications.
+triage classifications, and automatic fixing reasons.
 """
 
 from django.db import models
@@ -140,6 +140,22 @@ class PathType(models.TextChoices):
     SHARE = "Share"
 
 
+class AutoFixedReason(models.TextChoices):
+    """Reasons for automatic finding fixing.
+
+    Categorizes why a finding was automatically marked as fixed to help
+    users understand the context behind auto-fix operations without
+    needing to investigate the relationship tree manually.
+
+    Attributes:
+        NO_LONGER_DETECTED (str): Finding is no longer detected by the same executions.
+        PARENT_FIXED (str): Finding's parent finding was fixed, cascading the fix.
+    """
+
+    NO_LONGER_DETECTED = "No longer detected by same executions"
+    PARENT_FIXED = "Parent finding got fixed"
+
+
 class TriageStatus(models.TextChoices):
     """Finding triage workflow status classifications.
 
@@ -161,6 +177,7 @@ class TriageStatus(models.TextChoices):
 
 # Type annotation workaround for pytype compatibility
 # See: https://github.com/google/pytype/issues/1048
+AutoFixedReason: type[Choices] = AutoFixedReason
 Severity: type[Choices] = Severity
 OSINTDataType: type[Choices] = OSINTDataType
 HostOS: type[Choices] = HostOS

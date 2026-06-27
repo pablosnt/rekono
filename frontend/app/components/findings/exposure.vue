@@ -55,7 +55,7 @@ const tooltipTriggers = {
     const date = new Date(d.timestamp).toDateString();
     return d.fixed
       ? props.finding?.auto_fixed
-        ? `Automatically fixed on ${date}`
+        ? `Automatically fixed on ${date}. ${props.finding?.auto_fixed}`
         : `Fixed${props.finding.fixed_by ? ` by ${props.finding.fixed_by.username}` : ""} on ${date}`
       : `Detected${d.tools.length > 0 ? ` by ${d.tools.join(", ")}` : ""} on ${date}`;
   },
