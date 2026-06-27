@@ -3,7 +3,6 @@
     ref="form"
     :state="formData"
     :validate-on="['input', 'change']"
-    :validate="validate"
     :schema="formSchema"
     :loading="loading"
     class="mx-auto"
@@ -225,7 +224,6 @@ const loading = ref(false);
 const showPassword = ref({});
 const form = ref();
 const isFileUpload = ref(false);
-
 const formFields = computed(() => {
   if (props.entity && props.config.editFormFields) {
     return props.config.editFormFields;
@@ -235,7 +233,6 @@ const formFields = computed(() => {
   }
   return props.config.formFields || [];
 });
-
 const formSchema = computed(() => {
   if (props.entity && props.config.editFormSchema) {
     return props.config.editFormSchema;
@@ -245,7 +242,6 @@ const formSchema = computed(() => {
   }
   return props.config.formSchema;
 });
-
 const formData = ref<Record<string, unknown>>({});
 
 watch(
@@ -255,6 +251,7 @@ watch(
   },
   { immediate: true },
 );
+watch(formData, (data) => validate(data), { deep: true, immediate: true });
 
 function initFormData() {
   const data: Record<string, unknown> = {};
