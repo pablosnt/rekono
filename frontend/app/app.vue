@@ -22,10 +22,12 @@ useSeoMeta({
     "https://raw.githubusercontent.com/pablosnt/rekono/refs/heads/main/frontend/public/logo-light.png",
   twitterCard: "summary_large_image",
 });
+
+const toastPosition = useToastPosition();
 </script>
 
 <template>
-  <UApp :toaster="{ position: 'bottom-right', expand: false }">
+  <UApp :toaster="{ position: toastPosition, expand: false }">
     <NuxtLoadingIndicator color="var(--ui-primary)" :height="3" />
     <NuxtLayout
       name="default"

@@ -133,6 +133,29 @@ const submitButton = computed(
 const formValid = ref(!!props.item);
 const loading = ref(false);
 
+const toastPosition = useToastPosition();
+let resetTimer: ReturnType<typeof setTimeout> | null = null;
+
+watch(
+  () => props.open,
+  (value) => {
+    if (resetTimer) {
+      clearTimeout(resetTimer);
+      resetTimer = null;
+    }
+    if (!props.config.formFullscreen) return;
+    resetTimer = setTimeout(
+      () => (toastPosition.value = value ? "bottom-left" : "bottom-right"),
+      5000,
+    );
+  },
+  { immediate: true },
+);
+
+onUnmounted(() => {
+  if (resetTimer) clearTimeout(resetTimer);
+});
+
 const handleSubmit = (data: Record<string, unknown>) => {
   if (props.config.onCreation) {
     props.config.onCreation(data);
