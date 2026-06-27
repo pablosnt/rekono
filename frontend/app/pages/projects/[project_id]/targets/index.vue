@@ -93,7 +93,7 @@ const config: CrudConfig<Target> = reactive({
       cell: ({ row }) =>
         table.counterCell(
           row.getValue("notes").length || 0,
-          `/projects/${route.params.project_id}/notes?related_target=${row.original.id}`,
+          `/projects/${route.params.project_id}/notes?target=${row.original.id}`,
         ),
     },
     {
@@ -172,34 +172,30 @@ const config: CrudConfig<Target> = reactive({
   canEdit: false,
   canCreate: userStore.is_auditor,
   canDelete: userStore.is_auditor,
-  customDropdownActions: (target: Target) => {
-    return userStore.is_auditor
+  customDropdownActions: (target: Target) => [
+    ...(target?.tasks.length > 0
       ? [
-          ...(target.tasks && target.tasks.length > 0
-            ? [
-                {
-                  label: "Generate a report",
-                  icon: "i-lucide-file-text",
-                  color: "neutral",
-                  onSelect: (t: Target) => {
-                    selectedTarget.value = t;
-                    showReportModal.value = true;
-                  },
-                },
-              ]
-            : []),
           {
-            label: "Take note",
-            icon: "i-lucide-notebook",
+            label: "Generate a report",
+            icon: "i-lucide-file-text",
             color: "neutral",
-            onSelect: () => {
-              selectedTarget.value = target;
-              return nextTick(() => notesButton.value?.createNote());
+            onSelect: (t: Target) => {
+              selectedTarget.value = t;
+              showReportModal.value = true;
             },
           },
         ]
-      : [];
-  },
+      : []),
+    {
+      label: "Take note",
+      icon: "i-lucide-notebook",
+      color: "neutral",
+      onSelect: () => {
+        selectedTarget.value = target;
+        return nextTick(() => notesButton.value?.createNote());
+      },
+    },
+  ],
 });
 
 onMounted(integrations.fetchDefectDojo);

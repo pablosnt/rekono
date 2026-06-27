@@ -79,66 +79,21 @@
               />
             </UTooltip>
           </template>
-          <UDropdownMenu
-            v-if="userStore.is_auditor"
-            :items="[
-              ...(task.progress === 100
-                ? [
-                    {
-                      label: 'Generate a report',
-                      icon: 'i-lucide-file-text',
-                      color: 'neutral',
-                      onSelect: () => (reportOpen = true),
-                    },
-                  ]
-                : []),
-              {
-                label: 'Take note',
-                icon: 'i-lucide-notebook',
-                color: 'neutral',
-                onSelect: () => notesButton.createNote(),
-              },
-            ]"
-          >
-            <UButton
-              icon="i-lucide-plus"
-              variant="subtle"
-              color="neutral"
-              aria-label="Scan actions"
-            />
-          </UDropdownMenu>
-          <UDropdownMenu
-            v-if="task.notes.length + task.reports.length > 0"
-            :items="[
-              ...(task.reports.length > 0
-                ? [
-                    {
-                      label: `${task.reports.length} Reports`,
-                      icon: 'i-lucide-file-text',
-                      color: 'neutral',
-                      to: `/projects/${$route.params.project_id}/reports?target=${task.target.id}&task=${task.id}`,
-                    },
-                  ]
-                : []),
-              ...(task.notes.length > 0
-                ? [
-                    {
-                      label: `${task.notes.length} Notes`,
-                      icon: 'i-lucide-notebook',
-                      color: 'neutral',
-                      to: `/projects/${$route.params.project_id}/notes?related_task=${task.id}`,
-                    },
-                  ]
-                : []),
-            ]"
-          >
-            <UButton
-              icon="i-lucide-link"
-              variant="subtle"
-              color="neutral"
-              aria-label="View scan resources"
-            />
-          </UDropdownMenu>
+          <NotesDropdown
+            :related-entity="task"
+            entity-name="Task"
+            :project="parseInt($route.params.project_id)"
+            variant="subtle"
+          />
+          <ReportsDropdown
+            v-if="task.progress === 100"
+            :related-entity="task"
+            entity-name="Task"
+            :project="parseInt($route.params.project_id)"
+            :can-create="task.progress === 100"
+            color="neutral"
+            variant="subtle"
+          />
         </div>
       </div>
       <USeparator />
@@ -248,16 +203,6 @@
         executions.page.fetch();
       "
     />
-
-    <ReportsButton
-      v-if="task"
-      v-model:open="reportOpen"
-      :target-id="task.target.id"
-      :task-id="task.id"
-      only-modal
-    />
-
-    <NotesButton v-if="task" ref="notesButton" :task="task.id" />
   </div>
 </template>
 
@@ -272,11 +217,9 @@ const tasksApi = useApi("/api/tasks/");
 const userStore = useUserStore();
 const options = useOptions();
 const cancelOpen = ref(false);
-const reportOpen = ref(false);
 const task = ref<Task | null>();
 const executions = ref();
 const findings = ref();
-const notesButton = ref();
 const refresh = ref<ReturnType<typeof setTimeout> | null>(null);
 const toolOptions = ref<FilterOption[]>([]);
 

@@ -1,5 +1,5 @@
 <template>
-  <div v-if="userStore.is_auditor || relatedEntity.notes.length > 0">
+  <div>
     <template v-if="relatedEntity.notes.length > 0">
       <UDropdownMenu
         :items="[
@@ -7,18 +7,14 @@
             label: `${relatedEntity.notes.length} Notes`,
             icon: 'i-lucide-notebook',
             color: 'neutral',
-            to: `/projects/${project}/notes?${filter}=${relatedEntity.id}`,
+            to: `/projects/${project}/notes?${entityNameLower}=${relatedEntity.id}`,
           },
-          ...(userStore.is_auditor
-            ? [
-                {
-                  label: 'Take note',
-                  icon: 'i-lucide-plus',
-                  color: 'neutral',
-                  onSelect: () => nextTick(() => notesButton?.createNote()),
-                },
-              ]
-            : []),
+          {
+            label: 'Take note',
+            icon: 'i-lucide-plus',
+            color: 'neutral',
+            onSelect: () => nextTick(() => notesButton?.createNote()),
+          },
         ]"
         :content="{ align: 'end' }"
       >
@@ -30,7 +26,7 @@
         >
           <UButton
             icon="i-lucide-notebook"
-            variant="ghost"
+            :variant="variant"
             color="neutral"
             aria-label="Related notes"
           />
@@ -38,27 +34,27 @@
       </UDropdownMenu>
     </template>
     <NotesButton
-      v-if="userStore.is_auditor"
       ref="notesButton"
       :show="relatedEntity.notes.length === 0"
       v-bind="noteProps"
       icon="i-lucide-notebook"
       color="neutral"
-      variant="ghost"
+      :variant="variant"
     />
   </div>
 </template>
 
 <script setup lang="ts">
-import { useUserStore } from "~/store/user";
+const props = withDefaults(
+  defineProps<{
+    relatedEntity: object;
+    entityName: string;
+    project: number;
+    variant?: string;
+  }>(),
+  { variant: "ghost" },
+);
 
-const props = defineProps<{
-  relatedEntity: object;
-  entityName: string;
-  project: number;
-}>();
-
-const userStore = useUserStore();
 const notesButton = ref();
 const entityNameLower = props.entityName.toLowerCase();
 const noteProps = computed(() => {
@@ -67,14 +63,4 @@ const noteProps = computed(() => {
     project: props.project,
   };
 });
-const filter = [
-  "target",
-  "task",
-  "host",
-  "port",
-  "technology",
-  "vulnerability",
-].includes(entityNameLower)
-  ? `related_${entityNameLower}`
-  : entityNameLower;
 </script>

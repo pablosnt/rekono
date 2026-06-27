@@ -73,7 +73,7 @@
               }
             "
           />
-          <div v-if="userStore.is_auditor" class="flex items-center gap-1">
+          <div class="flex items-center gap-1">
             <UButton
               v-if="item.forked || !userStore.isOwner(item)"
               icon="i-lucide-git-fork"
@@ -206,31 +206,31 @@ const config: CrudConfig<Note> = reactive({
   searchPlaceholder: "Search notes...",
   acceptedFilters: [
     {
-      key: "related_target",
+      key: "target",
       label: "Target",
       icon: "i-lucide-locate-fixed",
       loadOption: (value) => options.target(value),
     },
     {
-      key: "related_task",
+      key: "task",
       label: "Scan",
       icon: "i-lucide-play",
       loadOption: (value) => options.task(value),
     },
     {
-      key: "related_host",
+      key: "host",
       label: "Host",
       icon: "i-lucide-server",
       loadOption: (value) => options.host(value),
     },
     {
-      key: "related_port",
+      key: "port",
       label: "Port",
       icon: "i-lucide-ethernet-port",
       loadOption: (value) => options.port(value),
     },
     {
-      key: "related_technology",
+      key: "technology",
       label: "Technology",
       icon: "i-lucide-code",
       loadOption: (value) => options.technology(value),
@@ -242,7 +242,7 @@ const config: CrudConfig<Note> = reactive({
       loadOption: (value) => options.credential(value),
     },
     {
-      key: "related_vulnerability",
+      key: "vulnerability",
       label: "Vulnerability",
       icon: "i-lucide-bug",
       loadOption: (value) => options.vulnerability(value),
@@ -301,13 +301,10 @@ const config: CrudConfig<Note> = reactive({
   defaultBody: { project: route.params.project_id },
   deleteMessage: (note: Note) => buildDeleteMessage("note", note.title),
   canRead: true,
-  canCreate: userStore.is_auditor,
+  canCreate: true,
   canEdit: false,
   canDelete: (note: Note) => userStore.isOwner(note),
 });
 
-onMounted(() => {
-  options.users(userOptions, { role: "Admin", is_active: true });
-  options.users(userOptions, { role: "Auditor", is_active: true });
-});
+onMounted(() => options.users(userOptions, { is_active: true }));
 </script>

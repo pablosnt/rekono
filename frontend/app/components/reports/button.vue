@@ -2,13 +2,13 @@
   <UButton
     v-if="!onlyModal"
     icon="i-lucide-file-text"
-    color="info"
-    variant="subtle"
+    :color="color"
+    :variant="variant"
     aria-label="Generate report"
     @click="openModal = !openModal"
   />
   <LazyCrudFormModal
-    :open="open ?? openModal"
+    :open="onlyModal ? open : openModal"
     :api="api"
     :config="config"
     :item="
@@ -25,12 +25,17 @@
 </template>
 
 <script setup lang="ts">
-defineProps<{
-  targetId?: number;
-  taskId?: number;
-  open?: boolean;
-  onlyModal?: boolean;
-}>();
+withDefaults(
+  defineProps<{
+    targetId?: number;
+    taskId?: number;
+    open?: boolean;
+    onlyModal?: boolean;
+    color?: string;
+    variant?: string;
+  }>(),
+  { color: "info", variant: "subtle" },
+);
 const emit = defineEmits<{
   "update:open": [value: boolean];
 }>();

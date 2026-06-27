@@ -18,16 +18,19 @@
           :target="{ id: targetId }"
         />
         <UDropdownMenu
-          v-if="userStore.is_auditor"
           :items="[
-            {
-              label: 'Generate a report',
-              icon: 'i-lucide-file-text',
-              color: 'neutral',
-              onSelect: () => {
-                showReportModal = true;
-              },
-            },
+            ...(target?.tasks.length > 0
+              ? [
+                  {
+                    label: 'Generate a report',
+                    icon: 'i-lucide-file-text',
+                    color: 'neutral',
+                    onSelect: () => {
+                      showReportModal = true;
+                    },
+                  },
+                ]
+              : []),
             {
               label: 'Take note',
               icon: 'i-lucide-notebook',
@@ -78,7 +81,7 @@
                     label: `${target?.notes.length} Notes`,
                     icon: 'i-lucide-notebook',
                     color: 'neutral',
-                    to: `/projects/${$route.params.project_id}/notes?related_target=${route.params.target_id}`,
+                    to: `/projects/${$route.params.project_id}/notes?target=${route.params.target_id}`,
                   },
                 ]
               : []),

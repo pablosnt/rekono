@@ -192,9 +192,9 @@ ROLES = {
     },
     "note": {
         "view": [Role.ADMIN, Role.AUDITOR, Role.READER],
-        "add": [Role.ADMIN, Role.AUDITOR],
-        "change": [Role.ADMIN, Role.AUDITOR],
-        "delete": [Role.ADMIN, Role.AUDITOR],
+        "add": [Role.ADMIN, Role.AUDITOR, Role.READER],
+        "change": [Role.ADMIN, Role.AUDITOR, Role.READER],
+        "delete": [Role.ADMIN, Role.AUDITOR, Role.READER],
     },
     "integration": {"view": [Role.ADMIN, Role.AUDITOR, Role.READER], "add": [], "change": [Role.ADMIN], "delete": []},
     "report": {

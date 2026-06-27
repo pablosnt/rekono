@@ -50,7 +50,7 @@
           :to="`/projects/${$route.params.project_id}/notes/${note.forked_from}`"
         />
         <UButton
-          v-else-if="!canEdit && userStore.is_auditor"
+          v-else-if="!canEdit"
           icon="i-lucide-git-fork"
           color="neutral"
           variant="subtle"
@@ -70,7 +70,7 @@
           "
         />
         <UButton
-          v-if="canEdit"
+          v-else
           as="span"
           icon="i-lucide-git-fork"
           color="neutral"
