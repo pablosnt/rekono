@@ -323,18 +323,34 @@ const config: CrudConfig<Finding> = reactive({
         : []),
       {
         key: "is_fixed",
-        label: `${fixVerb.value}ed`,
-        type: "checkbox",
-      },
-      {
-        key: "auto_fixed",
-        label: `Auto-${fixVerb.value}ed`,
-        type: "checkbox",
+        label: "Status",
+        icon: "i-lucide-activity",
+        type: "select" as const,
+        options: [
+          { label: "Open", value: "false", icon: "i-lucide-shield-alert" },
+          {
+            label: `${fixVerb.value}ed`,
+            value: "true",
+            icon:
+              fixVerb.value === "Fix"
+                ? "i-lucide-badge-check"
+                : "i-lucide-eye-off",
+          },
+        ],
       },
       {
         key: "created_from_user_input",
-        label: "From user input",
-        type: "checkbox",
+        label: "Origin",
+        icon: "i-lucide-toolbox",
+        type: "select" as const,
+        options: [
+          {
+            label: "Detected",
+            value: "false",
+            icon: "i-lucide-square-terminal",
+          },
+          { label: "User input", value: "true", icon: "i-lucide-user-cog" },
+        ],
       },
     ];
   },
