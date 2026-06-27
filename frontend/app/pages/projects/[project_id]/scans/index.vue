@@ -349,7 +349,7 @@ const config: CrudConfig<Task> = reactive({
         color: "neutral",
         onSelect: () => {
           selectedTask.value = task;
-          notesButton.value.createNote();
+          return nextTick(() => notesButton.value?.createNote());
         },
       },
     ];

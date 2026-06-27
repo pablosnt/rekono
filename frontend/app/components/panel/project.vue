@@ -337,15 +337,39 @@ function getProjectBreadcrum(project: Project) {
   mounting.value = false;
 }
 
+const secondaryParams = [
+  "target_id",
+  "scan_id",
+  "note_id",
+  "osint_id",
+  "host_id",
+  "port_id",
+  "path_id",
+  "credential_id",
+  "technology_id",
+  "vulnerability_id",
+  "exploit_id",
+];
+
+function hasActiveSecondary(): boolean {
+  return secondaryParams.some((param) => route.params[param]);
+}
+
 function cleanSecondaryLinks(
   entityId: number,
   entitiesLink: Record<string, string>,
 ): boolean {
+  if (!route.params.project_id) {
+    return false;
+  }
+  if (!entityId) {
+    if (!hasActiveSecondary() && breadcrumb.value.length > 3) {
+      breadcrumb.value = breadcrumb.value.slice(0, 3);
+    }
+    return false;
+  }
   if (breadcrumb.value.length > 3) {
     breadcrumb.value = breadcrumb.value.slice(0, 3);
-  }
-  if (!route.params.project_id || !entityId) {
-    return false;
   }
   breadcrumb.value.push(entitiesLink);
   return true;

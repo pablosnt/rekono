@@ -1,4 +1,4 @@
-import { hostOS } from "~/constants";
+import { hostOS, targetTypes } from "~/constants";
 import type { Note } from "~/types/models";
 
 export function getNoteRelatedEntity(

@@ -93,7 +93,7 @@ const config: CrudConfig<Target> = reactive({
       cell: ({ row }) =>
         table.counterCell(
           row.getValue("notes").length || 0,
-          `/projects/${route.params.project_id}/notes?target=${row.original.id}`,
+          `/projects/${route.params.project_id}/notes?related_target=${row.original.id}`,
         ),
     },
     {
@@ -194,7 +194,7 @@ const config: CrudConfig<Target> = reactive({
             color: "neutral",
             onSelect: () => {
               selectedTarget.value = target;
-              notesButton.value.createNote();
+              return nextTick(() => notesButton.value?.createNote());
             },
           },
         ]
