@@ -22,6 +22,7 @@
     is-asset
     has-hacktricks
     :disable-url-sync="disableUrlSync"
+    :link-to-original-page="linkToOriginalPage"
   />
 </template>
 
@@ -33,6 +34,7 @@ import type { Port } from "~/types/models";
 const props = defineProps<{
   host?: number;
   disableUrlSync?: boolean;
+  linkToOriginalPage?: string;
 }>();
 
 const route = useRoute();

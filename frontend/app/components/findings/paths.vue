@@ -16,6 +16,7 @@
     :custom-default-filters="port ? { port: port } : undefined"
     is-asset
     :disable-url-sync="disableUrlSync"
+    :link-to-original-page="linkToOriginalPage"
   />
 </template>
 
@@ -27,6 +28,7 @@ import type { Path } from "~/types/models";
 const props = defineProps<{
   port?: number;
   disableUrlSync?: boolean;
+  linkToOriginalPage?: string;
 }>();
 
 const table = useTable();

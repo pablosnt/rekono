@@ -37,6 +37,7 @@
     "
     is-triageable
     :disable-url-sync="disableUrlSync"
+    :link-to-original-page="linkToOriginalPage"
   />
 </template>
 
@@ -51,6 +52,7 @@ const props = defineProps<{
   port?: number;
   technology?: number;
   disableUrlSync?: boolean;
+  linkToOriginalPage?: string;
 }>();
 
 const route = useRoute();

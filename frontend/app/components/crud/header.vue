@@ -179,6 +179,8 @@
               @click="$emit('openCreate', true)"
             />
           </slot>
+
+          <slot name="header-extra-actions" />
         </slot>
       </div>
     </div>

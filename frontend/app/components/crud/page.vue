@@ -66,6 +66,9 @@
         <template v-if="$slots['create-button']" #create-button>
           <slot name="create-button" />
         </template>
+        <template v-if="$slots['header-extra-actions']" #header-extra-actions>
+          <slot name="header-extra-actions" />
+        </template>
       </CrudHeader>
 
       <CrudAcceptedFilters

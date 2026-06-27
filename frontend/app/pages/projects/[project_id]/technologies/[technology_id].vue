@@ -34,20 +34,32 @@
         variant="outline"
         :ui="{ header: 'w-full', container: 'min-w-0' }"
       >
-        <FindingsCredentials :technology="technology.id" disable-url-sync />
+        <FindingsCredentials
+          :technology="technology.id"
+          :link-to-original-page="`/projects/${route.params.project_id}/credentials?technology=${technology.id}`"
+          disable-url-sync
+        />
       </UPageCard>
       <UPageCard
         v-if="technology?.vulnerability.length > 0"
         variant="outline"
         :ui="{ header: 'w-full', container: 'min-w-0' }"
       >
-        <FindingsVulnerabilities :technology="technology.id" disable-url-sync />
+        <FindingsVulnerabilities
+          :technology="technology.id"
+          :link-to-original-page="`/projects/${route.params.project_id}/vulnerabilities?technology=${technology.id}`"
+          disable-url-sync
+        />
       </UPageCard>
       <UPageCard
         variant="outline"
         :ui="{ header: 'w-full', container: 'min-w-0' }"
       >
-        <FindingsExploits :technology="technology.id" disable-url-sync />
+        <FindingsExploits
+          :technology="technology.id"
+          :link-to-original-page="`/projects/${route.params.project_id}/exploits?technology=${technology.id}`"
+          disable-url-sync
+        />
       </UPageCard>
     </template>
   </FindingsSingle>

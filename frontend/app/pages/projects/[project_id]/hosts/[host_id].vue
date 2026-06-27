@@ -131,7 +131,10 @@
         variant="outline"
         :ui="{ header: 'w-full', container: 'min-w-0' }"
       >
-        <FindingsPorts :host="host.id" />
+        <FindingsPorts
+          :host="host.id"
+          :link-to-original-page="`/projects/${route.params.project_id}/ports?host=${host.id}`"
+        />
       </UPageCard>
     </template>
   </FindingsSingle>

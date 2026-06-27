@@ -35,20 +35,32 @@
         variant="outline"
         :ui="{ header: 'w-full', container: 'min-w-0' }"
       >
-        <FindingsPaths :port="port.id" disable-url-sync />
+        <FindingsPaths
+          :port="port.id"
+          :link-to-original-page="`/projects/${route.params.project_id}/paths?port=${port.id}`"
+          disable-url-sync
+        />
       </UPageCard>
       <UPageCard
         v-if="port?.technology.length > 0"
         variant="outline"
         :ui="{ header: 'w-full', container: 'min-w-0' }"
       >
-        <FindingsTechnologies :port="port.id" disable-url-sync />
+        <FindingsTechnologies
+          :port="port.id"
+          :link-to-original-page="`/projects/${route.params.project_id}/technologies?port=${port.id}`"
+          disable-url-sync
+        />
       </UPageCard>
       <UPageCard
         variant="outline"
         :ui="{ header: 'w-full', container: 'min-w-0' }"
       >
-        <FindingsVulnerabilities :port="port.id" disable-url-sync />
+        <FindingsVulnerabilities
+          :port="port.id"
+          :link-to-original-page="`/projects/${route.params.project_id}/vulnerabilities?port=${port.id}`"
+          disable-url-sync
+        />
       </UPageCard>
     </template>
   </FindingsSingle>

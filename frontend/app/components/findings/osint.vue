@@ -25,6 +25,7 @@
     is-triageable
     custom-fix-verb="Discard"
     :disable-url-sync="disableUrlSync"
+    :link-to-original-page="linkToOriginalPage"
   />
 </template>
 
@@ -34,7 +35,7 @@ import { osintDataTypes } from "~/constants";
 import type { OSINT } from "~/types/models";
 import { useUserStore } from "~/store/user";
 
-defineProps<{ disableUrlSync?: boolean }>();
+defineProps<{ disableUrlSync?: boolean; linkToOriginalPage?: string }>();
 const api = useApi("/api/osint/");
 const table = useTable();
 const userStore = useUserStore();

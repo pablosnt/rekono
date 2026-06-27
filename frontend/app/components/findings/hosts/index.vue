@@ -28,6 +28,7 @@
       is-asset
       has-hacktricks
       :disable-url-sync="disableUrlSync"
+      :link-to-original-page="linkToOriginalPage"
     />
     <LazyUModal
       v-if="selectedHost"
@@ -66,7 +67,7 @@ import { h } from "vue";
 import { hostOS } from "~/constants";
 import { useIntegrationsStore } from "~/store/integrations";
 
-defineProps<{ disableUrlSync?: boolean }>();
+defineProps<{ disableUrlSync?: boolean; linkToOriginalPage?: string }>();
 const route = useRoute();
 const table = useTable();
 const integrations = useIntegrationsStore();

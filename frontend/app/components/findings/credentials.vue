@@ -17,6 +17,7 @@
       technology ? { technology: technology } : undefined
     "
     :disable-url-sync="disableUrlSync"
+    :link-to-original-page="linkToOriginalPage"
     is-triageable
   />
 </template>
@@ -28,6 +29,7 @@ import type { Credential } from "~/types/models";
 const props = defineProps<{
   technology?: number;
   disableUrlSync?: boolean;
+  linkToOriginalPage?: string;
 }>();
 
 const table = useTable();

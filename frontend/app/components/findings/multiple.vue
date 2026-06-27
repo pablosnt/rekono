@@ -1,6 +1,18 @@
 <template>
   <div class="min-w-0">
     <CrudPage ref="page" :config="config" :disable-url-sync="disableUrlSync">
+      <template v-if="linkToOriginalPage" #header-extra-actions>
+        <UTooltip :text="`Go to ${smartLowerCase(entityNamePlural)} page`">
+          <UButton
+            icon="i-lucide-external-link"
+            :to="linkToOriginalPage"
+            target="_blank"
+            variant="outline"
+            color="neutral"
+            :aria-label="`${firstUpper(smartLowerCase(entityNamePlural))} page`"
+          />
+        </UTooltip>
+      </template>
       <template #actions="{ item }">
         <NotesDropdown
           :related-entity="item"
@@ -81,6 +93,7 @@ const props = defineProps<{
   customDefaultFilters?: Rercord<string, unknown>;
   headerHideTitle?: boolean;
   disableUrlSync?: boolean;
+  linkToOriginalPage?: string;
 }>();
 
 const userStore = useUserStore();
