@@ -76,8 +76,7 @@ const acceptedFilters = computed(() =>
           key: "technology",
           label: "Technology",
           icon: "i-lucide-layers",
-          loadOption: (value: string | number) =>
-            options.technology(value),
+          loadOption: (value: string | number) => options.technology(value),
         },
       ],
 );

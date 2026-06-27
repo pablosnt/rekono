@@ -78,7 +78,7 @@
                     label: `${target?.notes.length} Notes`,
                     icon: 'i-lucide-notebook',
                     color: 'neutral',
-                    to: `/projects/${$route.params.project_id}/notes?target=${route.params.target_id}`,
+                    to: `/projects/${$route.params.project_id}/notes?related_target=${route.params.target_id}`,
                   },
                 ]
               : []),

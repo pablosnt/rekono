@@ -7,7 +7,7 @@
             label: `${relatedEntity.notes.length} Notes`,
             icon: 'i-lucide-notebook',
             color: 'neutral',
-            to: `/projects/${project}/notes?${entityName.toLowerCase()}=${relatedEntity.id}`,
+            to: `/projects/${project}/notes?${filter}=${relatedEntity.id}`,
           },
           ...(userStore.is_auditor
             ? [
@@ -60,10 +60,21 @@ const props = defineProps<{
 
 const userStore = useUserStore();
 const notesButton = ref();
+const entityNameLower = props.entityName.toLowerCase();
 const noteProps = computed(() => {
   return {
-    [props.entityName.toLowerCase()]: props.relatedEntity.id,
+    [entityNameLower]: props.relatedEntity.id,
     project: props.project,
   };
 });
+const filter = [
+  "target",
+  "task",
+  "host",
+  "port",
+  "technology",
+  "vulnerability",
+].includes(entityNameLower)
+  ? `related_${entityNameLower}`
+  : entityNameLower;
 </script>
