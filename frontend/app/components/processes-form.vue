@@ -36,6 +36,7 @@
               @validation-change="
                 (isValid) => $emit('validation-change', isValid)
               "
+              @new-loading="(newLoading) => $emit('new-loading', newLoading)"
             />
           </template>
           <template v-else>
