@@ -131,10 +131,14 @@ class SMTP(BaseNotification):
             return
         sender = "Rekono <noreply@rekono.com>"
         try:
-            # TOTEST
             # Recipients in BCC not to leak their emails to other recipients
-            # Manual To header to avoid the message being discarded while not sending a copy to the sender
-            message = EmailMultiAlternatives(subject, "", sender, bcc=[u.email for u in users], headers={"To": sender})
+            message = EmailMultiAlternatives(
+                subject,
+                "",
+                sender,
+                to=[users[0].email] if len(users) == 1 else None,
+                bcc=[u.email for u in users] if len(users) > 0 else None,
+            )
             template = get_template(template_path)
             # nosemgrep: python.flask.security.xss.audit.direct-use-of-jinja2.direct-use-of-jinja2
             message.attach_alternative(template.render({**data, "rekono_url": CONFIG.frontend_url}), "text/html")
