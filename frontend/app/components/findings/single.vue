@@ -111,8 +111,8 @@
         v-if="!finding.created_from_user_input"
         class="mt-5"
         :description="
-          finding.executions.length > 0
-            ? `First detected ${useTimeAgo(finding.executions.map((e) => new Date(e.start)).sort((a, b) => a - b)[0]).value} across ${finding.executions.length} executions${finding.is_fixed ? `. ${firstUpper(fixVerb)}ed ${useTimeAgo(new Date(finding.fixed_date)).value}` : ''}`
+          (executionsTotal ?? finding.executions.length) > 0
+            ? `First detected ${useTimeAgo(finding.executions.map((e) => new Date(e.start)).sort((a, b) => a - b)[0]).value} across ${executionsTotal ?? finding.executions.length} executions${finding.is_fixed ? `. ${firstUpper(fixVerb)}ed ${useTimeAgo(new Date(finding.fixed_date)).value}` : ''}`
             : 'Executions where the finding was detected'
         "
         variant="outline"
@@ -131,7 +131,7 @@
           :finding="finding"
           :finding-type="entityName"
           disable-url-sync
-          @fetched="(items) => processExecutions(items)"
+          @fetched="processExecutions"
         />
       </UPageCard>
       <LazyFindingsModalTriage
@@ -190,6 +190,7 @@ const unfixVerb = computed(() =>
 const triageModalOpen = ref(false);
 const fixModalOpen = ref(false);
 const executions = ref();
+const executionsTotal = ref();
 const refresh = ref();
 const dropdownActions = computed(() =>
   props.finding
@@ -208,7 +209,8 @@ const dropdownActions = computed(() =>
     : [],
 );
 
-function processExecutions(items: Execution[]) {
+function processExecutions(items: Execution[], total: number) {
+  executionsTotal.value = total;
   const running = items.filter((e) =>
     ["Running", "Requested"].includes(e.status),
   ).length;

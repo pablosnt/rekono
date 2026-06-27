@@ -221,7 +221,7 @@ import type { CrudConfig, CrudState } from "~/types/crud";
 
 const props = defineProps<{ config: CrudConfig; disableUrlSync?: boolean }>();
 const emit = defineEmits<{
-  fetched: [items: unknown[]];
+  fetched: [items: unknown[], total: number];
   deleted: [];
   createClick: [];
 }>();
@@ -311,7 +311,7 @@ function fetch() {
     .then((response: object) => {
       state.items = response.items;
       state.total = response.total;
-      emit("fetched", response.items);
+      emit("fetched", response.items, response.total);
     })
     .finally(() => {
       state.loading = false;

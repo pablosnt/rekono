@@ -4,7 +4,7 @@
       ref="page"
       :config="config"
       :disable-url-sync="disableUrlSync"
-      @fetched="(items) => onExecutions(items)"
+      @fetched="onExecutions"
     >
       <template #actions="{ item }">
         <UTooltip v-if="item.has_report" text="Download report">
@@ -96,7 +96,7 @@ const props = defineProps<{
   disableUrlSync?: boolean;
 }>();
 const emit = defineEmits<{
-  fetched: [items: Execution[]];
+  fetched: [items: Execution[], total: number];
   finished: [count: number];
 }>();
 
@@ -268,9 +268,9 @@ const config: CrudConfig<Execution> = reactive({
   canDelete: false,
 });
 
-function onExecutions(data: Execution[]) {
-  emit("fetched", data);
-  const count = data.filter(
+function onExecutions(items: Execution[], total: number) {
+  emit("fetched", items, total);
+  const count = items.filter(
     (e) => e.status === "Running" || e.status === "Requested",
   ).length;
   if (count < runningExecutions.value) {
