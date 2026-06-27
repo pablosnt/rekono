@@ -58,6 +58,13 @@ export interface FilterConfig {
   multiple?: boolean;
 }
 
+export interface AcceptedFilterConfig {
+  key: string;
+  label: string;
+  icon?: string;
+  loadOption: (value: string | number) => Promise<FilterOption>;
+}
+
 export type CrudTableColumn<T> = TableColumn<T> & {
   icon?: string;
   avatar?: { src: string };
@@ -92,6 +99,7 @@ export interface CrudConfig<T = unknown> {
   searchable: boolean;
   searchPlaceholder?: string;
   filters?: FilterConfig[];
+  acceptedFilters?: AcceptedFilterConfig[];
   defaultFilters?: Record<string, string | number>;
   ordering?: Array<string | { id: string; label: string }>;
   defaultOrdering: string;

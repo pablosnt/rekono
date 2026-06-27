@@ -24,13 +24,9 @@ const api = useApi();
 const route = useRoute();
 const table = useTable();
 const userOptions = ref<FilterOption[]>([]);
-const targetOptions = ref<FilterOption[]>([]);
-const taskOptions = ref<FilterOption[]>([]);
 
 onMounted(() => {
   options.users(userOptions, { is_active: true });
-  options.targets(targetOptions, { project: route.params.project_id });
-  options.tasks(taskOptions, { project: route.params.project_id });
 });
 
 const config: CrudConfig<Report> = reactive({
@@ -115,21 +111,21 @@ const config: CrudConfig<Report> = reactive({
   },
   searchable: true,
   searchPlaceholder: "Search reports...",
-  filters: [
+  acceptedFilters: [
     {
       key: "task",
       label: "Task",
       icon: "i-lucide-play",
-      type: "select" as const,
-      options: taskOptions,
+      loadOption: (value) => options.task(value),
     },
     {
       key: "target",
       label: "Target",
       icon: "i-lucide-locate-fixed",
-      type: "select" as const,
-      options: targetOptions,
+      loadOption: (value) => options.target(value),
     },
+  ],
+  filters: [
     {
       key: "report_format",
       label: "Format",

@@ -12,6 +12,14 @@ import type {
 import { targetTypes } from "~/constants";
 import { getTaskName } from "~/utils/tasks";
 
+function parseTarget(target: Target): FilterOption {
+  return {
+    value: target.id,
+    label: target.target,
+    icon: targetTypes.find((t) => t.value === target.type)?.icon,
+  };
+}
+
 export default function () {
   const api = useApi("/api/");
   const userStore = useUserStore();
@@ -96,152 +104,75 @@ export default function () {
     queryParams: Record<string, string> = {},
   ) {
     api.list("targets/", queryParams, true).then((response) => {
-      optionsRef.value = (response.items as Target[]).map((target) => ({
-        value: target.id,
-        label: target.target,
-        icon: targetTypes.find((t) => t.value === target.type)?.icon,
-      }));
+      optionsRef.value = (response.items as Target[]).map(parseTarget);
     });
   }
 
-  function tasks(
-    optionsRef: Ref<FilterOption[]>,
-    queryParams: Record<string, string> = {},
-  ) {
-    api.list("tasks/", queryParams, true).then((response) => {
-      optionsRef.value = (response.items as Task[]).map((task) => ({
-        label: getTaskName(task, true),
-        value: task.id,
-      }));
-    });
+  function option<T>(
+    endpoint: string,
+    value: string | number,
+    parser: (item: T) => FilterOption,
+  ): Promise<FilterOption> {
+    return api.get(`${endpoint}${value}/`).then((item) => parser(item as T));
   }
 
-  function findings(
-    findingType: string,
-    parser: (item: Finding) => FilterOption,
-    optionsRef: Ref<FilterOption[]>,
-    queryParams: Record<string, string> = {},
-  ) {
-    api.list(`${findingType}/`, queryParams, true).then((response) => {
-      optionsRef.value = (response.items as Finding[]).map((finding) =>
-        parser(finding),
-      );
-    });
+  function target(value: string | number): Promise<FilterOption> {
+    return option("targets/", value, parseTarget);
   }
 
-  function osint(
-    optionsRef: Ref<FilterOption[]>,
-    queryParams: Record<string, string> = {},
-  ) {
-    findings(
-      "osint",
-      (item) => {
-        return { label: item.data, value: item.id };
-      },
-      optionsRef,
-      queryParams,
-    );
+  function task(value: string | number): Promise<FilterOption> {
+    return option<Task>("tasks/", value, (task) => ({
+      label: getTaskName(task, true),
+      value: task.id,
+    }));
   }
 
-  function hosts(
-    optionsRef: Ref<FilterOption[]>,
-    queryParams: Record<string, string> = {},
-  ) {
-    findings(
-      "hosts",
-      (host) => {
-        return { label: host.ip, value: host.id };
-      },
-      optionsRef,
-      queryParams,
-    );
+  function host(value: string | number): Promise<FilterOption> {
+    return option<Finding>("hosts/", value, (host) => ({
+      label: host.ip,
+      value: host.id,
+    }));
   }
 
-  function ports(
-    optionsRef: Ref<FilterOption[]>,
-    queryParams: Record<string, string> = {},
-  ) {
-    findings(
-      "ports",
-      (port) => {
-        return {
-          label: port.host
-            ? `${port.host?.ip}:${port.port}`
-            : port.port.toString(),
-          value: port.id,
-          icon: getPortIcon(port.port, port.service),
-        };
-      },
-      optionsRef,
-      queryParams,
-    );
+  function port(value: string | number): Promise<FilterOption> {
+    return option<Finding>("ports/", value, (port) => ({
+      label: port.host ? `${port.host?.ip}:${port.port}` : port.port.toString(),
+      value: port.id,
+      icon: getPortIcon(port.port, port.service),
+    }));
   }
 
-  function technologies(
-    optionsRef: Ref<FilterOption[]>,
-    queryParams: Record<string, string> = {},
-  ) {
-    findings(
-      "technologies",
-      (technology) => {
-        return {
-          label: technology.version
-            ? `${technology.name} ${technology.version}`
-            : technology.name,
-          value: technology.id,
-        };
-      },
-      optionsRef,
-      queryParams,
-    );
+  function technology(value: string | number): Promise<FilterOption> {
+    return option<Finding>("technologies/", value, (technology) => ({
+      label: technology.version
+        ? `${technology.name} ${technology.version}`
+        : technology.name,
+      value: technology.id,
+    }));
   }
 
-  function credentials(
-    optionsRef: Ref<FilterOption[]>,
-    queryParams: Record<string, string> = {},
-  ) {
-    findings(
-      "credentials",
-      (credential) => {
-        return {
-          label:
-            credential.email ||
-            credential.username ||
-            `Credential #${credential.id}`,
-          value: credential.id,
-        };
-      },
-      optionsRef,
-      queryParams,
-    );
+  function credential(value: string | number): Promise<FilterOption> {
+    return option<Finding>("credentials/", value, (credential) => ({
+      label:
+        credential.email ||
+        credential.username ||
+        `Credential #${credential.id}`,
+      value: credential.id,
+    }));
   }
 
-  function vulnerabilities(
-    optionsRef: Ref<FilterOption[]>,
-    queryParams: Record<string, string> = {},
-  ) {
-    findings(
-      "vulnerabilities",
-      (vulnerability) => {
-        return { label: vulnerability.name, value: vulnerability.id };
-      },
-      optionsRef,
-      queryParams,
-    );
+  function vulnerability(value: string | number): Promise<FilterOption> {
+    return option<Finding>("vulnerabilities/", value, (vulnerability) => ({
+      label: vulnerability.name,
+      value: vulnerability.id,
+    }));
   }
 
-  function exploits(
-    optionsRef: Ref<FilterOption[]>,
-    queryParams: Record<string, string> = {},
-  ) {
-    findings(
-      "exploits",
-      (exploit) => {
-        return { label: exploit.title, value: exploit.id };
-      },
-      optionsRef,
-      queryParams,
-    );
+  function exploit(value: string | number): Promise<FilterOption> {
+    return option<Finding>("exploits/", value, (exploit) => ({
+      label: exploit.title,
+      value: exploit.id,
+    }));
   }
 
   return {
@@ -250,13 +181,13 @@ export default function () {
     configurations,
     processes,
     targets,
-    tasks,
-    osint,
-    hosts,
-    ports,
-    technologies,
-    credentials,
-    vulnerabilities,
-    exploits,
+    target,
+    task,
+    host,
+    port,
+    technology,
+    credential,
+    vulnerability,
+    exploit,
   };
 }

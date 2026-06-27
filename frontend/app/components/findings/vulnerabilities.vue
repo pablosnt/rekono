@@ -6,6 +6,7 @@
     icon="i-lucide-bug"
     :columns="columns"
     :filters="filters"
+    :accepted-filters="acceptedFilters"
     :ordering="[
       'id',
       ...(port || technology ? [] : ['technology', 'port']),
@@ -55,35 +56,32 @@ const props = defineProps<{
 const route = useRoute();
 const table = useTable();
 const options = useOptions();
-const hostOptions = ref();
-const portOptions = ref();
-const technologyOptions = ref();
-const filters = computed(() => [
-  ...(props.port || props.technology
+const acceptedFilters = computed(() =>
+  props.port || props.technology
     ? []
     : [
         {
           key: "host",
           label: "Host",
           icon: "i-lucide-server",
-          type: "select" as const,
-          options: hostOptions,
+          loadOption: (value: string | number) => options.host(value),
         },
         {
           key: "port",
           label: "Port",
           icon: "i-lucide-ethernet-port",
-          type: "select" as const,
-          options: portOptions,
+          loadOption: (value: string | number) => options.port(value),
         },
         {
           key: "technology",
           label: "Technology",
           icon: "i-lucide-layers",
-          type: "select" as const,
-          options: technologyOptions,
+          loadOption: (value: string | number) =>
+            options.technology(value),
         },
-      ]),
+      ],
+);
+const filters = computed(() => [
   {
     key: "severity",
     label: "Severity",
@@ -365,14 +363,4 @@ function dropdownActions(item: Vulnerability) {
       : []),
   ];
 }
-
-onMounted(() => {
-  if (props.port || props.technology) return;
-  const query = route.params.project_id
-    ? { project: route.params.project_id }
-    : {};
-  options.hosts(hostOptions, query);
-  options.ports(portOptions, query);
-  options.technologies(technologyOptions, query);
-});
 </script>

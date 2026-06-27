@@ -3,8 +3,8 @@
     <CrudPage
       ref="page"
       :config="config"
-      @fetched="onFetched"
       :on-create="() => tasksButton?.open()"
+      @fetched="onFetched"
     >
       <template #create-button>
         <TasksButton

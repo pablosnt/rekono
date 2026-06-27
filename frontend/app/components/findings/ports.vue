@@ -6,6 +6,7 @@
     icon="i-lucide-ethernet-port"
     :columns="columns"
     :filters="filters"
+    :accepted-filters="acceptedFilters"
     :ordering="
       [
         'id',
@@ -37,18 +38,20 @@ const props = defineProps<{
 const route = useRoute();
 const table = useTable();
 const options = useOptions();
-const hostOptions = ref();
-const filters = computed(() =>
-  [
-    props.host
-      ? {}
-      : {
+const acceptedFilters = computed(() =>
+  props.host
+    ? []
+    : [
+        {
           key: "host",
           label: "Host",
           icon: "i-lucide-server",
-          type: "select" as const,
-          options: hostOptions,
+          loadOption: (value: string | number) => options.host(value),
         },
+      ],
+);
+const filters = computed(() =>
+  [
     {
       key: "status",
       label: "Port Status",
@@ -151,11 +154,4 @@ const columns: CrudTableColumn<Port>[] = [
     },
   },
 ].filter((c) => Object.keys(c).length > 0);
-
-onMounted(() => {
-  options.hosts(
-    hostOptions,
-    route.params.project_id ? { project: route.params.project_id } : {},
-  );
-});
 </script>

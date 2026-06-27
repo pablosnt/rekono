@@ -68,6 +68,20 @@
         </template>
       </CrudHeader>
 
+      <CrudAcceptedFilters
+        v-if="acceptedFilters.length > 0"
+        :filters="acceptedFilters"
+        class="px-3 pb-3"
+        @clear="
+          (key: string) => {
+            state.loading = true;
+            router
+              .replace({ query: { ...route.query, [key]: undefined } })
+              .then(() => fetchFirstPage());
+          }
+        "
+      />
+
       <slot name="before" :state="state" />
 
       <slot name="content">
@@ -227,7 +241,6 @@ const props = defineProps<{
 const emit = defineEmits<{
   fetched: [items: unknown[], total: number];
   deleted: [];
-  createClick: [];
 }>();
 
 const api = useApi(props.config.endpoint);
@@ -272,6 +285,19 @@ const initialFiltersFromUrl = props.disableUrlSync
         }),
     );
 
+const acceptedFilters = computed(() =>
+  props.disableUrlSync
+    ? []
+    : (props.config.acceptedFilters ?? [])
+        .map((filter) => ({ ...filter, value: route.query[filter.key] }))
+        .filter(
+          (filter) =>
+            filter.value !== undefined &&
+            filter.value !== null &&
+            filter.value !== "",
+        ),
+);
+
 const defaultPageSize = props.config.pageSize || 24;
 const state = reactive<CrudState>({
   items: [],
@@ -303,7 +329,10 @@ const state = reactive<CrudState>({
 
 function fetch() {
   state.loading = true;
-  let params = state.filters;
+  let params = { ...state.filters };
+  for (const filter of acceptedFilters.value) {
+    params = { ...params, [filter.key]: filter.value };
+  }
   if (props.config.searchable && state.searchQuery) {
     params = { ...params, search: state.searchQuery };
   }

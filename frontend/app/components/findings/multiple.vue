@@ -68,6 +68,7 @@ const props = defineProps<{
   icon: string;
   columns?: CrudConfig["tableColumns"];
   filters?: CrudConfig["filters"];
+  acceptedFilters?: CrudConfig["acceptedFilters"];
   ordering?: CrudConfig["ordering"];
   visibility?: CrudConfig["tableColumnsVisibility"];
   isTriageable?: boolean;
@@ -101,16 +102,11 @@ const unfixVerb = computed(() =>
   fixVerb.value === "Fix" ? "Reopen" : "Restore",
 );
 const targetOptions = ref();
-const taskOptions = ref();
 const toolOptions = ref();
 
 onMounted(() => {
   options.targets(
     targetOptions,
-    route.params.project_id ? { project: route.params.project_id } : undefined,
-  );
-  options.tasks(
-    taskOptions,
     route.params.project_id ? { project: route.params.project_id } : undefined,
   );
   options.tools(toolOptions);
@@ -285,6 +281,17 @@ const config: CrudConfig<Finding> = reactive({
   }),
   searchable: true,
   searchPlaceholder: `Search ${smartLowerCase(props.entityNamePlural)}...`,
+  get acceptedFilters() {
+    return [
+      {
+        key: "task",
+        label: "Task",
+        icon: "i-lucide-play",
+        loadOption: (value: string | number) => options.task(value),
+      },
+      ...(props.acceptedFilters || []),
+    ];
+  },
   get filters() {
     return [
       {
@@ -293,13 +300,6 @@ const config: CrudConfig<Finding> = reactive({
         icon: "i-lucide-locate-fixed",
         type: "select" as const,
         options: targetOptions,
-      },
-      {
-        key: "task",
-        label: "Task",
-        icon: "i-lucide-play",
-        type: "select" as const,
-        options: taskOptions,
       },
       {
         key: "tool",

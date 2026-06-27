@@ -2,13 +2,13 @@
   <CrudPage
     ref="page"
     :config="config"
+    :on-create="() => notesButton?.createNote()"
     @fetched="
       (items) =>
         items.forEach(
           (item) => (item.related_entity = getNoteRelatedEntity(item)),
         )
     "
-    :on-create="() => notesButton?.createNote()"
   >
     <template #create-button>
       <NotesButton ref="notesButton" show />
@@ -144,15 +144,6 @@ const api = useApi("/api/notes/");
 const page = ref();
 const notesButton = ref();
 const userOptions = ref<FilterOption[]>([]);
-const targetOptions = ref();
-const taskOptions = ref();
-const osintOptions = ref();
-const hostOptions = ref();
-const portOptions = ref();
-const credentialOptions = ref();
-const technologyOptions = ref();
-const vulnerabilityOptions = ref();
-const exploitOptions = ref();
 
 function getNoteDescription(note: Note): string {
   const created_ago = useTimeAgo(new Date(note.created_at)).value;
@@ -192,64 +183,58 @@ const config: CrudConfig<Note> = reactive({
   useGrid: true,
   searchable: true,
   searchPlaceholder: "Search notes...",
+  acceptedFilters: [
+    {
+      key: "related_target",
+      label: "Target",
+      icon: "i-lucide-locate-fixed",
+      loadOption: (value) => options.target(value),
+    },
+    {
+      key: "related_task",
+      label: "Scan",
+      icon: "i-lucide-play",
+      loadOption: (value) => options.task(value),
+    },
+    {
+      key: "related_host",
+      label: "Host",
+      icon: "i-lucide-server",
+      loadOption: (value) => options.host(value),
+    },
+    {
+      key: "related_port",
+      label: "Port",
+      icon: "i-lucide-ethernet-port",
+      loadOption: (value) => options.port(value),
+    },
+    {
+      key: "related_technology",
+      label: "Technology",
+      icon: "i-lucide-code",
+      loadOption: (value) => options.technology(value),
+    },
+    {
+      key: "credential",
+      label: "Credential",
+      icon: "i-lucide-key",
+      loadOption: (value) => options.credential(value),
+    },
+    {
+      key: "related_vulnerability",
+      label: "Vulnerability",
+      icon: "i-lucide-bug",
+      loadOption: (value) => options.vulnerability(value),
+    },
+    {
+      key: "exploit",
+      label: "Exploit",
+      icon: "i-lucide-flame",
+      loadOption: (value) => options.exploit(value),
+    },
+  ],
   get filters() {
     return [
-      {
-        key: "related_target",
-        label: "Target",
-        icon: "i-lucide-locate-fixed",
-        type: "select" as const,
-        options: targetOptions,
-      },
-      {
-        key: "related_task",
-        label: "Scan",
-        icon: "i-lucide-play",
-        type: "select" as const,
-        options: taskOptions,
-      },
-      {
-        key: "related_host",
-        label: "Host",
-        icon: "i-lucide-server",
-        type: "select" as const,
-        options: hostOptions,
-      },
-      {
-        key: "related_port",
-        label: "Port",
-        icon: "i-lucide-ethernet-port",
-        type: "select" as const,
-        options: portOptions,
-      },
-      {
-        key: "related_technology",
-        label: "Technology",
-        icon: "i-lucide-code",
-        type: "select" as const,
-        options: technologyOptions,
-      },
-      {
-        key: "credential",
-        label: "Credential",
-        icon: "i-lucide-key",
-        type: "select" as const,
-        options: credentialOptions,
-      },
-      {
-        key: "related_vulnerability",
-        label: "Vulnerability",
-        icon: "i-lucide-bug",
-        type: "select" as const,
-        options: vulnerabilityOptions,
-      },
-      {
-        key: "exploit",
-        label: "Exploit",
-        icon: "i-lucide-flame",
-        type: "select" as const,
-        options: exploitOptions,
-      },
       {
         key: "tag",
         label: "Tag",
@@ -303,16 +288,5 @@ const config: CrudConfig<Note> = reactive({
 onMounted(() => {
   options.users(userOptions, { role: "Admin", is_active: true });
   options.users(userOptions, { role: "Auditor", is_active: true });
-  options.targets(targetOptions, { project: route.params.project_id });
-  options.tasks(taskOptions, { project: route.params.project_id });
-  options.osint(osintOptions, { project: route.params.project_id });
-  options.hosts(hostOptions, { project: route.params.project_id });
-  options.ports(portOptions, { project: route.params.project_id });
-  options.technologies(technologyOptions, { project: route.params.project_id });
-  options.credentials(credentialOptions, { project: route.params.project_id });
-  options.vulnerabilities(vulnerabilityOptions, {
-    project: route.params.project_id,
-  });
-  options.exploits(exploitOptions, { project: route.params.project_id });
 });
 </script>
