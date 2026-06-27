@@ -69,6 +69,16 @@
             })
           "
         />
+        <UButton
+          v-if="canEdit"
+          as="span"
+          icon="i-lucide-git-fork"
+          color="neutral"
+          variant="subtle"
+          size="lg"
+          :label="`${note.forks.length} Forks`"
+          class="pointer-events-none"
+        />
         <Likes
           size="lg"
           :item-id="note.id"
@@ -138,6 +148,7 @@
         :icon="note.public ? 'i-lucide-globe' : 'i-lucide-lock'"
         variant="subtle"
         size="xs"
+        :disabled="note.forked_from"
         @click="
           note.public = !note.public;
           updateNote();

@@ -20,7 +20,11 @@
         variant="subtle"
         spotlight
         class="cursor-pointer"
-        :ui="{ leading: 'flex w-full items-center justify-between mb-2.5' }"
+        :ui="{
+          container: 'min-w-0',
+          wrapper: 'min-w-0',
+          leading: 'flex w-full items-center justify-between mb-2.5',
+        }"
         @click="
           navigateTo(`/projects/${route.params.project_id}/notes/${item.id}`)
         "
@@ -35,21 +39,27 @@
               color="neutral"
               size="xl"
               variant="ghost"
+              class="shrink-0"
               :aria-label="item.public ? 'Public note' : 'Private note'"
             />
           </UTooltip>
-          <UButton
+          <div
             v-if="item.related_entity"
-            :icon="item.related_entity.icon"
-            :to="item.related_entity.to"
-            :label="item.related_entity.label"
-            color="primary"
-            variant="ghost"
-            @click.stop
-          />
+            class="min-w-0 flex-1 flex justify-end"
+          >
+            <UButton
+              :icon="item.related_entity.icon"
+              :to="item.related_entity.to"
+              :label="item.related_entity.label"
+              color="primary"
+              variant="ghost"
+              class="min-w-0 max-w-full"
+              @click.stop
+            />
+          </div>
         </template>
         <Tags :tags="item.tags" />
-        <div class="flex items-center justify-between mt-4" @click.stop>
+        <div class="flex items-center justify-between gap-2 mt-4" @click.stop>
           <Likes
             size="lg"
             :item-id="item.id"
@@ -63,7 +73,41 @@
               }
             "
           />
-          <template v-if="userStore.is_auditor">
+          <div v-if="userStore.is_auditor" class="flex items-center gap-1">
+            <UButton
+              v-if="item.forked || !userStore.isOwner(item)"
+              icon="i-lucide-git-fork"
+              color="neutral"
+              :variant="item.forked ? 'solid' : 'subtle'"
+              :label="`${item.forks.length} Forks`"
+              :to="
+                item.forked
+                  ? `/projects/${$route.params.project_id}/notes/${item.forked}`
+                  : undefined
+              "
+              @click="
+                item.forked
+                  ? undefined
+                  : api.create(`${item.id}/fork/`, {}).then(() => {
+                      page.fetch();
+                      toast.add({
+                        title: 'Forked',
+                        description: `Note '${item.title}' has been forked`,
+                        color: 'success',
+                      });
+                    })
+              "
+            />
+            <UButton
+              v-else
+              as="span"
+              icon="i-lucide-git-fork"
+              color="neutral"
+              variant="subtle"
+              size="lg"
+              :label="`${item.forks.length} Forks`"
+              class="pointer-events-none"
+            />
             <UDropdownMenu
               v-if="userStore.isOwner(item)"
               :items="[
@@ -89,6 +133,7 @@
                   onSelect: onDelete,
                 },
               ]"
+              :content="{ align: 'end', side: 'bottom', collisionPadding: 8 }"
               @click.stop
             >
               <UButton
@@ -99,31 +144,7 @@
                 @click.stop
               />
             </UDropdownMenu>
-            <UButton
-              v-else
-              icon="i-lucide-git-fork"
-              color="neutral"
-              :variant="item.forked ? 'solid' : 'subtle'"
-              :label="`${item.forks.length} Forks`"
-              :to="
-                item.forked
-                  ? `/projects/${$route.params.project_id}/notes/${item.forked}`
-                  : undefined
-              "
-              @click="
-                item.forked
-                  ? undefined
-                  : api.create(`${item.id}/fork/`, {}).then(() => {
-                      page.fetch();
-                      toast.add({
-                        title: 'Note Forked',
-                        description: `Note '${item.title}' has been forked`,
-                        color: 'success',
-                      });
-                    })
-              "
-            />
-          </template>
+          </div>
         </div>
       </UPageCard>
     </template>
