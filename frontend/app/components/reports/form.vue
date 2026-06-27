@@ -27,7 +27,6 @@
         :items="targetOptions"
         value-key="value"
         size="lg"
-        @update:model-value="onTargetChange"
       >
         <template #trailing>
           <UIcon
@@ -42,43 +41,7 @@
             color="neutral"
             size="sm"
             aria-label="Clear target"
-            @click="onTargetChange(undefined)"
-          />
-        </template>
-      </USelectMenu>
-    </UFormField>
-    <UFormField
-      v-if="!entity"
-      name="task"
-      label="Task"
-      class="mt-3"
-      hint="Filter report's findings by task"
-    >
-      <USelectMenu
-        v-model="formData.task"
-        class="w-full"
-        icon="i-lucide-play"
-        placeholder="Select a task"
-        :items="taskOptions"
-        value-key="id"
-        label-key="label"
-        size="lg"
-        :disabled="taskOptions.length === 0"
-      >
-        <template #trailing>
-          <UIcon
-            v-if="!formData.task"
-            class="group-data-[state=open]:rotate-180 transition-transform duration-200"
-            name="i-lucide-chevron-down"
-          />
-          <UButton
-            v-else
-            icon="i-lucide-x"
-            variant="ghost"
-            color="neutral"
-            size="sm"
-            aria-label="Clear scan"
-            @click="formData.task = undefined"
+            @click="formData.target = undefined"
           />
         </template>
       </USelectMenu>
@@ -173,9 +136,7 @@ const emit = defineEmits<{
 const options = useOptions();
 const route = useRoute();
 const toast = useToast();
-const genericApi = useApi("/api/");
 const targetOptions = ref([]);
-const taskOptions = ref([]);
 const formData = ref<Record<string, unknown>>({
   project: parseInt(route.params.project_id),
   target: props.entity ? props.entity.target : undefined,
@@ -198,25 +159,8 @@ const form = ref();
 
 onMounted(() => {
   options.targets(targetOptions, { project: route.params.project_id });
-  if (formData.value.target) {
-    onTargetChange(formData.value.target as number);
-  }
   validate(formData.value);
 });
-
-function onTargetChange(targetId: number | undefined) {
-  formData.value.target = targetId;
-  formData.value.task = undefined;
-  taskOptions.value = [];
-  if (targetId) {
-    genericApi.list("tasks/", { target: targetId }, true).then((response) => {
-      taskOptions.value = response.items.map((task) => ({
-        id: task.id,
-        label: getTaskName(task, false),
-      }));
-    });
-  }
-}
 
 function validate(data) {
   if (schema) {
