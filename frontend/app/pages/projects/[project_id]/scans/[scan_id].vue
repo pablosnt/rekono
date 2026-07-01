@@ -256,7 +256,9 @@ function processTask(data?: Task) {
 }
 
 function fetchTask(initial: boolean = false) {
-  (initial ? tasksApi.getOrError : tasksApi.get)(`${route.params.scan_id}/`).then((response: Task) => processTask(response));
+  (initial ? tasksApi.getOrError : tasksApi.get)(
+    `${route.params.scan_id}/`,
+  ).then((response: Task) => processTask(response));
 }
 
 onMounted(() => {

@@ -34,8 +34,7 @@ const description = ref(
 switch (props.error.statusCode) {
   case 403:
     title.value = "Access denied";
-    description.value =
-      "You don't have permission to view this page";
+    description.value = "You don't have permission to view this page";
     break;
   case 404:
     title.value = "Page not found";

@@ -224,20 +224,18 @@ function onProjectChange() {
   ];
   Object.keys(projectBadges).forEach((key) => (projectBadges[key] = ""));
   projectHasActiveFindings.value = false;
-  api
-    .getOrError(`/api/projects/${route.params.project_id}/`)
-    .then((data) => {
-      setCurrentProject(data);
-      loadProjectBadges();
-      if (allProjects.value.length === 0) {
-        api.list("/api/projects/", {}, true).then((response) => {
-          allProjects.value = response.items;
-          getProjectBreadcrum(data);
-        });
-      } else {
+  api.getOrError(`/api/projects/${route.params.project_id}/`).then((data) => {
+    setCurrentProject(data);
+    loadProjectBadges();
+    if (allProjects.value.length === 0) {
+      api.list("/api/projects/", {}, true).then((response) => {
+        allProjects.value = response.items;
         getProjectBreadcrum(data);
-      }
-    });
+      });
+    } else {
+      getProjectBreadcrum(data);
+    }
+  });
 }
 
 function loadProjectBadges() {
