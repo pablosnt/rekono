@@ -181,6 +181,7 @@
     />
 
     <Executions
+      v-if="task"
       ref="executions"
       :task="route.params.scan_id"
       @finished="findings.fetch()"
@@ -254,14 +255,12 @@ function processTask(data?: Task) {
   }
 }
 
-function fetchTask() {
-  tasksApi.get(`${route.params.scan_id}/`).then((response: Task) => {
-    processTask(response);
-  });
+function fetchTask(initial: boolean = false) {
+  (initial ? tasksApi.getOrError : tasksApi.get)(`${route.params.scan_id}/`).then((response: Task) => processTask(response));
 }
 
 onMounted(() => {
-  fetchTask();
+  fetchTask(true);
   options.tools(toolOptions);
 });
 

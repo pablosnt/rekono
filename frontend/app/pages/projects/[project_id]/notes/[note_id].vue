@@ -218,7 +218,7 @@ function fetchNote() {
   ) {
     applyNote(createdNote.value);
   } else {
-    api.get(`${route.params.note_id}/`).then(applyNote);
+    api.getOrError(`${route.params.note_id}/`).then(applyNote);
   }
 }
 

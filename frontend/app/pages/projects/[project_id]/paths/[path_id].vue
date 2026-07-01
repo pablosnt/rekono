@@ -34,10 +34,9 @@ const path = ref();
 const pathType = ref();
 const loading = ref(true);
 
-function fetch() {
+function fetch(initial: boolean = false) {
   loading.value = true;
-  api
-    .get(`${route.params.path_id}/`)
+  (initial ? api.getOrError : api.get)(`${route.params.path_id}/`)
     .then((response) => {
       path.value = response;
       pathType.value = pathTypes.find((t) => t.value === response.type);
@@ -47,5 +46,5 @@ function fetch() {
     });
 }
 
-onMounted(fetch);
+onMounted(() => fetch(true));
 </script>

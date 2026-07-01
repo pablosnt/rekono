@@ -59,15 +59,14 @@ const route = useRoute();
 const credential = ref();
 const loading = ref(true);
 
-function fetch() {
+function fetch(initial: boolean = false) {
   loading.value = true;
-  api
-    .get(`${route.params.credential_id}/`)
+  (initial ? api.getOrError : api.get)(`${route.params.credential_id}/`)
     .then((response) => (credential.value = response))
     .finally(() => {
       loading.value = false;
     });
 }
 
-onMounted(fetch);
+onMounted(() => fetch(true));
 </script>

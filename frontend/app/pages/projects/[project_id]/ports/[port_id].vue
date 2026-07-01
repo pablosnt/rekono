@@ -75,10 +75,9 @@ const port = ref();
 const portStatus = ref();
 const loading = ref(true);
 
-function fetch() {
+function fetch(initial: boolean = false) {
   loading.value = true;
-  api
-    .get(`${route.params.port_id}/`)
+  (initial ? api.getOrError : api.get)(`${route.params.port_id}/`)
     .then((response) => {
       port.value = response;
       portStatus.value = portStatuses.find((s) => s.value === response.status);
@@ -88,5 +87,5 @@ function fetch() {
     });
 }
 
-onMounted(fetch);
+onMounted(() => fetch(true));
 </script>

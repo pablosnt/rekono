@@ -151,10 +151,9 @@ const host = ref();
 const osConfig = ref();
 const loading = ref(true);
 
-function fetch() {
+function fetch(initial: boolean = false) {
   loading.value = true;
-  api
-    .get(`${route.params.host_id}/`)
+  (initial ? api.getOrError : api.get)(`${route.params.host_id}/`)
     .then((response) => {
       host.value = response;
       osConfig.value = hostOS.find((h) => h.value === host.value.os_type);
@@ -165,7 +164,7 @@ function fetch() {
 }
 
 onMounted(() => {
-  fetch();
+  fetch(true);
   integrations.fetchVirusTotal();
 });
 </script>

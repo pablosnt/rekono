@@ -41,10 +41,9 @@ const osint = ref();
 const typeConfig = ref();
 const loading = ref(true);
 
-function fetch() {
+function fetch(initial: boolean = false) {
   loading.value = true;
-  api
-    .get(`${route.params.osint_id}/`)
+  (initial ? api.getOrError : api.get)(`${route.params.osint_id}/`)
     .then((response) => {
       osint.value = response;
       typeConfig.value = osintDataTypes.find(
@@ -56,5 +55,5 @@ function fetch() {
     });
 }
 
-onMounted(fetch);
+onMounted(() => fetch(true));
 </script>

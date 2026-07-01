@@ -143,7 +143,7 @@
         />
       </template>
     </CrudHeader>
-    <div class="space-y-14">
+    <div v-if="target" class="space-y-14">
       <FindingsCounterAll
         :target-id="targetId"
         :project-id="projectId"
@@ -188,7 +188,7 @@ const deleteConfig = {
 };
 
 onMounted(() => {
-  api.get(`${route.params.target_id}/`).then((response) => {
+  api.getOrError(`${route.params.target_id}/`).then((response) => {
     target.value = response;
   });
   integrations.fetchDefectDojo();

@@ -9,7 +9,7 @@
       :submit="submit"
       :loading="loading"
       loading-auto
-      :ui="{ otp: 'w-full flex justify-center' }"
+      :ui="{ otp: 'w-full flex justify-center', description: 'mt-3' }"
       @submit="
         (data) => {
           $emit('submit', data);
@@ -33,6 +33,9 @@
       <template #password-hint>
         <slot name="password-hint" />
       </template>
+      <template v-if="$slots.footer" #footer>
+        <slot name="footer" />
+      </template>
     </UAuthForm>
     <slot name="after-form" />
   </div>
@@ -45,8 +48,8 @@ withDefaults(
   defineProps<{
     title: string;
     description?: string;
-    fields: object[];
-    schema: z.ZodObject;
+    fields?: object[];
+    schema?: z.ZodObject;
     validateOn?: string[];
     submit?: object;
     loading?: boolean;
@@ -54,6 +57,8 @@ withDefaults(
   }>(),
   {
     description: undefined,
+    fields: () => [],
+    schema: undefined,
     validateOn: () => ["input", "change"],
     submit: () => ({ label: "Submit", autoFocus: true, size: "xl" }),
     loading: false,

@@ -71,15 +71,14 @@ const route = useRoute();
 const technology = ref();
 const loading = ref(true);
 
-function fetch() {
+function fetch(initial: boolean = false) {
   loading.value = true;
-  api
-    .get(`${route.params.technology_id}/`)
+  (initial ? api.getOrError : api.get)(`${route.params.technology_id}/`)
     .then((response) => (technology.value = response))
     .finally(() => {
       loading.value = false;
     });
 }
 
-onMounted(fetch);
+onMounted(() => fetch(true));
 </script>
