@@ -23,6 +23,7 @@ export interface FormField {
     | "datetime";
   required?: boolean;
   disabled?: boolean;
+  hidden?: boolean;
   placeholder?: string;
   hint?: string;
   size?: string;

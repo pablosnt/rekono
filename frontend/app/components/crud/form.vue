@@ -11,6 +11,7 @@
     <div :class="['grid gap-4', gridCols]">
       <template v-for="field in formFields" :key="field.key">
         <UFormField
+          v-if="!field.hidden"
           :name="field.key"
           :label="field.type !== 'checkbox' ? field.label : undefined"
           :aria-label="field.label"

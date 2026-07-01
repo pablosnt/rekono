@@ -57,18 +57,18 @@ let redirectTimer: ReturnType<typeof setTimeout> | undefined;
 const states = {
   verifying: {
     title: "Verifying your email",
-    description: "Hold on while we confirm your new address."
+    description: "Hold on while we confirm your new address",
   },
   verified: {
     title: "Email Verified",
-    description: "Your new address is active. We'll take you back in a moment.",
+    description: "Your new address is active. We'll take you back in a moment",
     icon: "i-lucide-circle-check",
     color: "text-success",
   },
   failed: {
     title: "Verification Failed",
     description:
-      "This link is invalid or has expired. Start the email change again from your profile.",
+      "This link is invalid or has expired. Start the email change again from your profile",
     icon: "i-lucide-circle-x",
     color: "text-error",
   },
@@ -94,7 +94,7 @@ onMounted(() => {
       if (userStore.is_authenticated) userStore.fetchProfile();
       redirectTimer = setTimeout(() => navigateTo(target.value.to), 10000);
     })
-    .catch(() => status.value = "failed");
+    .catch(() => (status.value = "failed"));
 });
 
 onUnmounted(() => {

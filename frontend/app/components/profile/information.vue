@@ -43,17 +43,19 @@
 
 <script setup lang="ts">
 import { useUserStore } from "~/store/user";
+import { useIntegrationsStore } from "~/store/integrations";
 import * as z from "zod";
 
 const api = useApi("/api/profile/");
 const userStore = useUserStore();
+const integrations = useIntegrationsStore();
 const validation = useValidation();
 const form = ref();
 const profile = ref(userStore.profile);
 const loading = ref(false);
 const valid = ref(false);
 const notificationScopes = ["Disabled", "Only my executions", "All executions"];
-const config = ref({
+const config = computed(() => ({
   entityName: "Profile",
   editFormFields: [
     {
@@ -95,18 +97,23 @@ const config = ref({
       required: true,
       options: notificationScopes,
       icon: "i-lucide-bell-ring",
+      hidden:
+        integrations.smtp?.is_available !== true &&
+        integrations.telegram?.is_available !== true,
     },
     {
       key: "email_notifications",
       label: "Email notifications",
       type: "checkbox",
       required: true,
+      hidden: integrations.smtp?.is_available !== true,
     },
     {
       key: "telegram_notifications",
       label: "Telegram notifications",
       type: "checkbox",
       required: true,
+      hidden: integrations.telegram?.is_available !== true,
     },
   ],
   editFormSchema: z.object({
@@ -119,5 +126,10 @@ const config = ref({
     telegram_notifications: z.boolean(),
   }),
   putEndpoint: () => "/api/profile/",
+}));
+
+onMounted(() => {
+  integrations.fetchSmtp();
+  integrations.fetchTelegram();
 });
 </script>
