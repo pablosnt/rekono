@@ -1,5 +1,8 @@
 <template>
-  <div v-if="isPublicRoute($route.name)" class="h-screen overflow-hidden">
+  <div
+    v-if="isPublicRoute($route.name) || isNeutralRoute($route.name)"
+    class="h-screen overflow-hidden"
+  >
     <UMain class="flex flex-col items-center justify-center gap-4 p-4">
       <UPageCard class="w-full max-w-md" variant="ghost">
         <UMain>

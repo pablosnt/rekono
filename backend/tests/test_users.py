@@ -342,7 +342,7 @@ class ProfileTest(ApiTest, TestCase):
         ApiTestCase(["reader1"], expected={"id": 5, "username": "reader1", "role": Role.READER.value}),
         PutApiTestCase(
             ["admin2"],
-            data=new_profile,
+            data={**new_profile, "email": "admin2@rekono.com"},
             expected={
                 "id": 2,
                 "username": "admin2",
@@ -378,6 +378,41 @@ class ProfileTest(ApiTest, TestCase):
         super().test_cases()
         # Linked Telegram Chats are removed after a password change
         self.assertFalse(hasattr(User.objects.get(pk=cast(User, self.admin1).id), "telegram_chat"))
+
+    @mock.patch("platforms.email.notifications.SMTP.is_available", lambda self: True)
+    def test_email_change(self) -> None:
+        new_email = "new-admin1@rekono.com"
+        client = APIClient()
+        client.force_authenticate(self.admin1)
+
+        # Request email address change
+        response = client.put(self.endpoint, data={**new_profile, "email": new_email})
+        self.assertEqual(200, response.status_code)
+        self.admin1.refresh_from_db()
+        self.assertEqual("admin1@rekono.com", self.admin1.email)
+        self.assertEqual(new_email, self.admin1.pending_email)
+
+        # Verify the new address
+        verify_endpoint = "/api/users/verify-email/"
+        otp = User.objects.setup_otp(self.admin1)
+        self.assertEqual(200, client.post(verify_endpoint, data={"otp": otp}).status_code)
+        self.admin1.refresh_from_db()
+        self.assertEqual(new_email, self.admin1.email)
+        self.assertIsNone(self.admin1.pending_email)
+        self.assertIsNone(self.admin1.otp)
+
+        anonymous = APIClient()
+        # Invalid OTP
+        self.assertEqual(401, anonymous.post(verify_endpoint, data={"otp": "invalid otp"}).status_code)
+        # No pending email
+        otp = User.objects.setup_otp(self.admin1)
+        self.assertEqual(401, anonymous.post(verify_endpoint, data={"otp": otp}).status_code)
+
+    def test_email_change_without_smtp(self) -> None:
+        client = APIClient()
+        client.force_authenticate(self.admin1)
+        response = client.put(self.endpoint, data={**new_profile, "email": "another@rekono.com"})
+        self.assertEqual(400, response.status_code)
 
     def test_notification_scope(self) -> None:
         notification = SMTP()

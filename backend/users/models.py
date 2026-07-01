@@ -368,6 +368,51 @@ class RekonoUserManager(UserManager, LoggingEntity, OtpManagerMixin, MfaManagerM
         user.save(update_fields=["otp", "otp_expiration"])
         return user
 
+    def request_email_change(self, user: Any, new_email: str) -> Any:
+        """Start the verification workflow for an email address change.
+
+        Stores the requested address in the pending_email field without touching the
+        active email, generates a one-time password, sends a verification link to the
+        new address, and notifies the current address about the requested change. The
+        active email is only updated once the user confirms the new address, so an
+        unverified or malicious change can never lock the account out.
+
+        Args:
+            user (Any): User instance requesting the email change.
+            new_email (str): New email address awaiting verification.
+
+        Returns:
+            Any: Updated user instance with the pending email set.
+        """
+        user.pending_email = new_email
+        user.save(update_fields=["pending_email"])
+        plain_otp = self.setup_otp(user)
+        SMTP().verify_email(user, plain_otp)
+        SMTP().email_change_notification(user)
+        self.logger.info(f"[User] User {user.id} requested an email change", extra={"user": user.id})
+        return user
+
+    def update_email(self, user: Any) -> Any:
+        """Confirm a pending email change after OTP verification.
+
+        Promotes the pending_email to the active email, clears the pending address, and
+        removes the OTP. Called after the user verifies the new address through the
+        email link.
+
+        Args:
+            user (Any): User instance with a pending email awaiting confirmation.
+
+        Returns:
+            Any: Updated user instance with the new email address applied.
+        """
+        user.email = user.pending_email
+        user.pending_email = None
+        user.otp = None
+        user.otp_expiration = None
+        user.save(update_fields=["email", "pending_email", "otp", "otp_expiration"])
+        self.logger.info(f"[User] User {user.id} verified its new email address", extra={"user": user.id})
+        return user
+
     def invalidate_all_tokens(self, user: Any) -> Any:
         """Invalidate all JWT tokens for user.
 
@@ -420,6 +465,7 @@ class User(AbstractUser, BaseEncrypted):
         first_name (TextField): User's first name (optional, max 100 chars)
         last_name (TextField): User's last name (optional, max 100 chars)
         email (EmailField): Unique email address (required, max 150 chars)
+        pending_email (EmailField): New email address awaiting OTP verification (optional, max 150 chars)
         is_active (BooleanField): Account status (None/True/False for invitation/active/disabled)
         otp (TextField): Hashed one-time password for secure operations (max 200 chars)
         otp_expiration (DateTimeField): OTP expiration timestamp with future validation
@@ -450,6 +496,8 @@ class User(AbstractUser, BaseEncrypted):
         max_length=100, blank=True, null=True, validators=[Validator(Regex.NAME, code="last_name")]
     )
     email = models.EmailField(max_length=150, unique=True)
+    # New email address awaiting confirmation
+    pending_email = models.EmailField(max_length=150, blank=True, null=True)
     is_active = models.BooleanField(blank=True, null=True, default=None)
 
     # One Time Password used to invite and enable users or reset passwords and MFA via email

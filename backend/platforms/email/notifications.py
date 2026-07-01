@@ -114,7 +114,9 @@ class SMTP(BaseNotification):
         except Exception:
             return False
 
-    def _send_messages(self, users: list[Any], subject: str, template_path: str, data: dict[str, Any]) -> None:
+    def _send_messages(
+        self, users: list[Any] | list[str], subject: str, template_path: str, data: dict[str, Any]
+    ) -> None:
         """Send HTML email messages to specified users using configured template.
 
         Renders HTML email template with provided data and sends formatted emails
@@ -127,8 +129,10 @@ class SMTP(BaseNotification):
             template_path (str): Path to HTML email template
             data (dict[str, Any]): Template context data for rendering
         """
-        if not self.is_available():
+        if not self.is_available() or len(users) == 0:
             return
+        if not isinstance(users[0], str):
+            users = [u.email for u in users]
         sender = "Rekono <noreply@rekono.com>"
         try:
             # Recipients in BCC not to leak their emails to other recipients
@@ -136,8 +140,8 @@ class SMTP(BaseNotification):
                 subject,
                 "",
                 sender,
-                to=[users[0].email] if len(users) == 1 else None,
-                bcc=[u.email for u in users] if len(users) > 0 else None,
+                to=[users[0]] if len(users) == 1 else None,
+                bcc=users if len(users) > 1 else None,
             )
             template = get_template(template_path)
             # nosemgrep: python.flask.security.xss.audit.direct-use-of-jinja2.direct-use-of-jinja2
@@ -247,6 +251,41 @@ class SMTP(BaseNotification):
         """
         self._notify_if_available(
             [user], "Reset your password", "user_password_reset.html", {"user": user, "user_otp": otp}
+        )
+
+    def verify_email(self, user: Any, otp: str) -> None:
+        """Send an email verification message to a pending email address.
+
+        Delivers a verification link with a one-time password to the new address a user
+        wants to switch to. The message is sent to the pending address, not the current
+        one, so only someone with access to the new inbox can confirm the change.
+
+        Args:
+            user (Any): The user requesting the email change.
+            otp (str): One-time password for confirming the new email address.
+        """
+        self._notify_if_available(
+            [user.pending_email],
+            "Verify your email address",
+            "user_email_verification.html",
+            {"user": user, "user_otp": otp},
+        )
+
+    def email_change_notification(self, user: Any) -> None:
+        """Send a security notice about a requested email change to the current address.
+
+        Warns the current email address that a change to a different address was
+        requested, so the user can react (for example by resetting their password) if
+        the request was not made by them.
+
+        Args:
+            user (Any): The user whose email change was requested.
+        """
+        self._notify_if_available(
+            [user],
+            "Your account email is being changed",
+            "user_email_change_notification.html",
+            {"time": timezone.now().strftime(self.datetime_format)},
         )
 
     def mfa(self, user: Any, otp: str) -> None:

@@ -16,6 +16,7 @@
           :aria-label="field.label"
           :required="field.required"
           :hint="field.hint"
+          :help="field.help"
         >
           <UInput
             v-if="field.type === 'text' || field.type === 'password'"

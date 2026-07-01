@@ -11,7 +11,7 @@ from django.core.exceptions import PermissionDenied
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.serializers import Serializer
@@ -37,6 +37,7 @@ from users.serializers import (
     UpdatePasswordSerializer,
     UpdateRoleSerializer,
     UserSerializer,
+    VerifyEmailSerializer,
 )
 
 
@@ -191,6 +192,26 @@ class UserViewSet(BaseViewSet):
         if request.method.lower() == "put":
             CookieJWTAuthentication.clear_cookies(response)
         return response
+
+    @extend_schema(request=VerifyEmailSerializer, responses={200: None})
+    @action(detail=False, methods=["POST"], url_path="verify-email", permission_classes=[AllowAny])
+    def verify_email(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        """Confirm a pending email address change.
+
+        Verifies the OTP sent to the new address and applies the email change. Public
+        endpoint because the verification link may be opened while the user is still
+        logged in or from a different device.
+
+        Args:
+            request (Request): HTTP request with the OTP to verify
+
+        Returns:
+            Response: HTTP 200 on success, HTTP 401 if the OTP is invalid or expired
+        """
+        serializer = VerifyEmailSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(status=status.HTTP_200_OK)
 
     @extend_schema(request=UpdateRoleSerializer, responses={201: UserSerializer})
     def update(self, request, pk: str, *args, **kwargs):

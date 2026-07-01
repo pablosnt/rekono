@@ -19,7 +19,7 @@ from tests.framework import ApiTest
 from tests.framework.cases import ApiTestCase, DeleteApiTestCase, PostApiTestCase, PutApiTestCase
 from tests.framework.data import SetupProject
 
-# pytype: disable=wrong-arg-types
+# pytype: disable=wrong-arg-types,attribute-error
 
 
 class FindingTest(ApiTest):

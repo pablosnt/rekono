@@ -1,12 +1,14 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 import { resolve } from "path";
 import type { NuxtPage } from "nuxt/schema";
-import { isPublicRoute } from "./app/utils/routes";
+import { isNeutralRoute, isPublicRoute } from "./app/utils/routes";
 
 function setMiddleware(nuxtPages: NuxtPage[]) {
   for (const page of nuxtPages) {
     page.meta ||= {};
-    page.meta.middleware = [isPublicRoute(page.name) ? "public" : "private"];
+    page.meta.middleware = isNeutralRoute(page.name)
+      ? []
+      : [isPublicRoute(page.name) ? "public" : "private"];
     if (page.children) {
       setMiddleware(page.children);
     }

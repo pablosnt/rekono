@@ -71,8 +71,8 @@ const config = ref({
       type: "text",
       placeholder: "Enter your email address",
       required: true,
-      disabled: true,
       icon: "i-lucide-mail",
+      help: "Changing your email sends a verification link to the new address. Your current email stays active until you confirm it.",
     },
     {
       key: "first_name",

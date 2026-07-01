@@ -183,8 +183,10 @@ class UpdateRoleSerializer(Serializer):
 class ProfileSerializer(UserSerializer):
     """Serializer for user profile management.
 
-    Handles user profile data including notification preferences
-    with appropriate read-only fields for security.
+    Handles user profile data including notification preferences with appropriate
+    read-only fields for security. The email address is writable but changes are not
+    applied directly: a verification workflow updates the address only after the user
+    confirms the new one, so the pending value is never exposed through the API.
     """
 
     class Meta:
@@ -212,7 +214,44 @@ class ProfileSerializer(UserSerializer):
             "email_notifications",
             "telegram_notifications",
         )
-        read_only_fields = ("username", "email", "date_joined", "last_login", "mfa", "role", "telegram_chat")
+        read_only_fields = ("username", "date_joined", "last_login", "mfa", "role", "telegram_chat")
+
+    def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
+        """Validate profile data, requiring SMTP availability for email changes.
+
+        Args:
+            attrs (dict[str, Any]): Serializer data to validate
+
+        Returns:
+            dict[str, Any]: Validated data
+
+        Raises:
+            ValidationError: If the email changes while SMTP is unavailable to verify it
+        """
+        attrs = super().validate(attrs)
+        new_email = attrs.get("email")
+        if self.instance and new_email and new_email != self.instance.email and not SMTP().is_available():
+            raise ValidationError("SMTP client is not available to verify the new email", code="smtp")
+        return attrs
+
+    def update(self, instance: User, validated_data: dict[str, Any]) -> User:
+        """Update profile fields, routing email changes through OTP verification.
+
+        The email address is never written directly. When it differs from the current
+        one, a verification workflow is started instead and the active email is kept
+        until the user confirms the new address.
+
+        Args:
+            instance (User): User instance to update
+            validated_data (dict[str, Any]): Validated profile data
+
+        Returns:
+            User: Updated user instance
+        """
+        new_email = validated_data.pop("email", None)
+        if new_email and new_email != instance.email:
+            User.objects.request_email_change(instance, new_email)
+        return super().update(instance, validated_data)
 
 
 class PasswordSerializer(UserSerializer):
@@ -284,6 +323,39 @@ class OTPSerializer(UserSerializer):
             raise AuthenticationFailed(code=status.HTTP_401_UNAUTHORIZED)
         attrs["user"] = user
         return attrs
+
+
+class VerifyEmailSerializer(OTPSerializer):
+    """Serializer for confirming a pending email address change.
+
+    Verifies the OTP sent to the new address and ensures the associated user actually
+    has a pending email change awaiting confirmation.
+    """
+
+    def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
+        """Validate the OTP and ensure a pending email change exists.
+
+        Args:
+            attrs (dict[str, Any]): Serializer data to validate
+
+        Returns:
+            dict[str, Any]: Validated data with the associated user
+
+        Raises:
+            AuthenticationFailed: If the OTP is invalid or there is no pending email change
+        """
+        attrs = super().validate(attrs)
+        if not attrs["user"].pending_email:
+            raise AuthenticationFailed(code=status.HTTP_401_UNAUTHORIZED)
+        return attrs
+
+    def save(self, **kwargs: Any) -> User:
+        """Apply the verified email address change.
+
+        Returns:
+            User: Updated user instance with the new email address applied
+        """
+        return User.objects.update_email(self.validated_data.get("user"))
 
 
 class CreateUserSerializer(OTPSerializer, PasswordSerializer):
