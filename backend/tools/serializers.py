@@ -63,7 +63,7 @@ class SimpleConfigurationSerializer(ModelSerializer):
         """
 
         model = Configuration
-        fields = ("id", "name", "stage", "default", "deprecated")
+        fields = ("id", "name", "stage", "default")
 
 
 class ToolSerializer(LikeSerializer):
@@ -75,11 +75,22 @@ class ToolSerializer(LikeSerializer):
 
     Attributes:
         intensities (IntensitySerializer): Nested intensity configurations
-        configurations (SimpleConfigurationSerializer): Nested tool configurations
+        configurations (SerializerMethodField): Non-deprecated tool configurations only
     """
 
     intensities = IntensitySerializer(many=True, read_only=True)
-    configurations = SimpleConfigurationSerializer(many=True, read_only=True)
+    configurations = SerializerMethodField(read_only=True)
+
+    def get_configurations(self, instance: Tool) -> list[SimpleConfigurationSerializer]:
+        """Serialize the tool's non-deprecated configurations.
+
+        Args:
+            instance (Tool): The tool instance being serialized
+
+        Returns:
+            list[SimpleConfigurationSerializer]: Serialized non-deprecated configurations
+        """
+        return SimpleConfigurationSerializer(instance.configurations.filter(deprecated=False), many=True).data
 
     class Meta:
         """Meta configuration for the ToolSerializer.

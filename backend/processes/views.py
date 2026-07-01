@@ -48,7 +48,7 @@ class StepViewSet(BaseViewSet):
     with filtering and search capabilities across process and tool configurations.
 
     Attributes:
-        queryset (QuerySet): All Step objects
+        queryset (QuerySet): Step objects backed by non-deprecated configurations
         serializer_class (Serializer): StepSerializer for step operations
         filterset_class (FilterSet): StepFilter for querying steps
         permission_classes (list): Required permissions for access control
@@ -57,7 +57,7 @@ class StepViewSet(BaseViewSet):
         http_method_names (list): Allowed HTTP methods (GET, POST, DELETE)
     """
 
-    queryset = Step.objects.all()
+    queryset = Step.objects.filter(configuration__deprecated=False)
     serializer_class = StepSerializer
     filterset_class = StepFilter
     permission_classes = [IsAuthenticated, RekonoModelPermission, OwnerPermission]

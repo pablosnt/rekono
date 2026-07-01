@@ -84,5 +84,4 @@ class ConfigurationFilter(FilterSet):
             "command_template": ["exact", "icontains"],
             "stage": ["exact"],
             "default": ["exact"],
-            "deprecated": ["exact"],
         }

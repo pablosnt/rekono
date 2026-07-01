@@ -121,13 +121,13 @@ class ProcessSerializer(TaggitSerializer, LikeSerializer):
     wordlist compatibility detection.
 
     Attributes:
-        steps (SimpleStepSerializer): Nested step information (read-only)
+        steps (SerializerMethodField): Non-deprecated step information (read-only)
         owner (SimpleUserSerializer): Process owner details (read-only)
         tags (TagField): Tag management field for categorization
         wordlists (SerializerMethodField): Wordlist compatibility information
     """
 
-    steps = SimpleStepSerializer(read_only=True, many=True)
+    steps = SerializerMethodField(read_only=True)
     owner = SimpleUserSerializer(many=False, read_only=True)
     tags = TagField()
     wordlists = SerializerMethodField(read_only=True)
@@ -148,6 +148,20 @@ class ProcessSerializer(TaggitSerializer, LikeSerializer):
 
         model = Process
         fields = ("id", "name", "description", "owner", "liked", "likes", "steps", "tags", "wordlists")
+
+    def get_steps(self, instance: Process) -> list[SimpleStepSerializer]:
+        """Serialize the process steps whose configuration is not deprecated.
+
+        Deprecated configurations are kept in the database to preserve historical
+        data consistency, but they must not be exposed as selectable process steps.
+
+        Args:
+            instance (Process): The Process instance being serialized.
+
+        Returns:
+            list[SimpleStepSerializer]: Serialized steps backed by non-deprecated configurations.
+        """
+        return SimpleStepSerializer(instance.steps.filter(configuration__deprecated=False), many=True).data
 
     def get_wordlists(self, instance: Any) -> dict[str, bool]:
         """Determine wordlist compatibility for the process.

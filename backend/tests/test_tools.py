@@ -1,6 +1,7 @@
 from functools import cached_property
 
 from django.test import TestCase
+from rest_framework.test import APIClient
 
 from security.authorization.roles import Role
 from tests.framework import ApiTestNoData
@@ -61,6 +62,14 @@ class ToolTest(ApiTestNoData, TestCase):
     def object(self) -> Tool:
         return Tool.objects.get(pk=1)
 
+    def test_configurations_exclude_deprecated(self) -> None:
+        client = APIClient()
+        client.force_authenticate(self.users[Role.ADMIN][0])
+        configuration = Configuration.objects.filter(tool__pk=1).first()
+        configuration.deprecated = True
+        configuration.save(update_fields=["deprecated"])
+        self.assertNotIn(configuration.pk, [c["id"] for c in client.get("/api/tools/1/").json()["configurations"]])
+
 
 first_nmap_configuration = "TCP ports"
 
@@ -80,6 +89,18 @@ class ConfigurationTest(ApiTestNoData, TestCase):
     @cached_property
     def object(self) -> Configuration:
         return Configuration.objects.get(pk=1)
+
+    def test_endpoint_excludes_deprecated(self) -> None:
+        client = APIClient()
+        client.force_authenticate(self.users[Role.ADMIN][0])
+        configuration = Configuration.objects.filter(deprecated=False).first()
+        configuration.deprecated = True
+        configuration.save(update_fields=["deprecated"])
+        self.assertEqual(404, client.get(f"/api/configurations/{configuration.pk}/").status_code)
+        self.assertNotIn(
+            configuration.pk,
+            [s["id"] for s in client.get(f"/api/configurations/?tool={configuration.tool.id}").json()["results"]],
+        )
 
 
 class IntensityTest(ApiTestNoData, TestCase):

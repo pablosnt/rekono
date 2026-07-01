@@ -1,11 +1,13 @@
 from functools import cached_property
 
 from django.test import TestCase
+from rest_framework.test import APIClient
 
 from processes.models import Process, Step
 from security.authorization.roles import Role
 from tests.framework import ApiTestNoData
 from tests.framework.cases import ApiTestCase, DeleteApiTestCase, PostApiTestCase, PutApiTestCase
+from tools.models import Configuration
 
 # pytype: disable=wrong-arg-types
 
@@ -102,6 +104,13 @@ class ProcessTest(ApiTestNoData, TestCase):
     def object(self) -> Process:
         return Process.objects.first()
 
+    def test_steps_exclude_deprecated(self) -> None:
+        client = APIClient()
+        client.force_authenticate(self.users[Role.ADMIN][0])
+        step = Step.objects.filter(process_id=1, configuration__deprecated=False).first()
+        Configuration.objects.filter(pk=step.configuration_id).update(deprecated=True)
+        self.assertNotIn(step.pk, [s["id"] for s in client.get("/api/processes/1/").json()["steps"]])
+
 
 step1 = {"process_id": 8, "configuration_id": 1}
 expected_step1 = {"process": {"id": step1["process_id"]}, "configuration": {"id": step1["configuration_id"]}}
@@ -118,14 +127,14 @@ class StepTest(ApiTestNoData, TestCase):
             endpoint="1",
         ),
         PostApiTestCase([Role.AUDITOR, Role.READER], 403, step1),
-        PostApiTestCase(["admin1"], data=step1, expected={"id": 73, **expected_step1}),
+        PostApiTestCase(["admin1"], data=step1, expected={"id": 76, **expected_step1}),
         PostApiTestCase(["admin2"], 400, step1),
-        ApiTestCase([Role.READER], 403, endpoint="73"),
-        ApiTestCase([Role.ADMIN, Role.AUDITOR], expected={"id": 73, **expected_step1}, endpoint="73"),
-        DeleteApiTestCase([Role.AUDITOR, Role.READER], 403, endpoint="73"),
-        DeleteApiTestCase(["admin2"], endpoint="73"),
-        DeleteApiTestCase(["admin1"], 404, endpoint="73"),
-        ApiTestCase([Role.ADMIN, Role.AUDITOR], 404, endpoint="73"),
+        ApiTestCase([Role.READER], 403, endpoint="76"),
+        ApiTestCase([Role.ADMIN, Role.AUDITOR], expected={"id": 76, **expected_step1}, endpoint="76"),
+        DeleteApiTestCase([Role.AUDITOR, Role.READER], 403, endpoint="76"),
+        DeleteApiTestCase(["admin2"], endpoint="76"),
+        DeleteApiTestCase(["admin1"], 404, endpoint="76"),
+        ApiTestCase([Role.ADMIN, Role.AUDITOR], 404, endpoint="76"),
     ]
 
     def setUp(self) -> None:
@@ -135,3 +144,12 @@ class StepTest(ApiTestNoData, TestCase):
     @cached_property
     def object(self) -> Step:
         return Step.objects.first()
+
+    def test_endpoint_excludes_deprecated(self) -> None:
+        client = APIClient()
+        client.force_authenticate(self.users[Role.ADMIN][0])
+        self.assertEqual(0, Step.objects.filter(configuration__deprecated=True).count())
+        step = Step.objects.filter(process_id=1, configuration__deprecated=False).first()
+        Configuration.objects.filter(pk=step.configuration_id).update(deprecated=True)
+        self.assertEqual(404, client.get(f"/api/steps/{step.pk}/").status_code)
+        self.assertNotIn(step.pk, [s["id"] for s in client.get("/api/steps/?process=1").json()["results"]])

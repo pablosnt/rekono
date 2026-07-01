@@ -91,7 +91,7 @@ class ConfigurationViewSet(BaseViewSet):
     through fixtures and system configuration.
 
     Attributes:
-        queryset (QuerySet): All Configuration objects
+        queryset (QuerySet): Non-deprecated Configuration objects
         serializer_class (Serializer): Serializer for Configuration model
         filterset_class (FilterSet): Filter class for query filtering
         permission_classes (list): Required permissions for access control
@@ -99,7 +99,7 @@ class ConfigurationViewSet(BaseViewSet):
         http_method_names (list): Allowed HTTP methods (GET only)
     """
 
-    queryset = Configuration.objects.all()
+    queryset = Configuration.objects.filter(deprecated=False)
     serializer_class = ConfigurationSerializer
     filterset_class = ConfigurationFilter
     permission_classes = [IsAuthenticated, RekonoModelPermission]
