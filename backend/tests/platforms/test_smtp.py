@@ -17,9 +17,8 @@ class SmtpSettingsTest(ApiTestNoData, TestCase):
     endpoint = "/api/smtp/1/"
     expected_string = f"{config['host']}:{config['port']}"
     cases = [
-        ApiTestCase([Role.AUDITOR, Role.READER], status_code=403),
         ApiTestCase(
-            [Role.ADMIN],
+            [Role.ADMIN, Role.AUDITOR, Role.READER],
             expected={
                 "id": 1,
                 "host": None,
@@ -38,7 +37,7 @@ class SmtpSettingsTest(ApiTestNoData, TestCase):
             expected={"id": 1, **config, "password": "*" * len(str(config.get("password", ""))), "is_available": False},
         ),
         ApiTestCase(
-            [Role.ADMIN],
+            [Role.ADMIN, Role.AUDITOR, Role.READER],
             expected={"id": 1, **config, "password": "*" * len(str(config.get("password", ""))), "is_available": False},
         ),
     ]

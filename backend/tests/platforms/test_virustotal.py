@@ -111,8 +111,7 @@ class VirusTotalSettingsTest(ApiTestNoData, TestCase):
     endpoint = "/api/virustotal/1/"
     expected_string = "Virus Total"
     cases = [
-        ApiTestCase([Role.AUDITOR, Role.READER], 403),
-        ApiTestCase([Role.ADMIN], expected={"id": 1, "api_token": None}),
+        ApiTestCase([Role.ADMIN, Role.AUDITOR, Role.READER], expected={"id": 1, "api_token": None}),
         PutApiTestCase([Role.AUDITOR, Role.READER], 403, new_settings),
         PutApiTestCase([Role.ADMIN], 400, invalid_settings),
         PutApiTestCase(
@@ -126,7 +125,7 @@ class VirusTotalSettingsTest(ApiTestNoData, TestCase):
             },
         ),
         ApiTestCase(
-            [Role.ADMIN],
+            [Role.ADMIN, Role.AUDITOR, Role.READER],
             expected={
                 "id": 1,
                 **new_settings,

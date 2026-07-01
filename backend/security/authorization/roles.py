@@ -169,7 +169,12 @@ ROLES = {
         "change": [],
         "delete": [Role.ADMIN, Role.AUDITOR],
     },
-    "defectdojosettings": {"view": [Role.ADMIN], "add": [], "change": [Role.ADMIN], "delete": []},
+    "defectdojosettings": {
+        "view": [Role.ADMIN, Role.AUDITOR, Role.READER],
+        "add": [],
+        "change": [Role.ADMIN],
+        "delete": [],
+    },
     "defectdojosync": {
         "view": [],
         "add": [Role.ADMIN, Role.AUDITOR],
@@ -177,7 +182,12 @@ ROLES = {
         "delete": [Role.ADMIN, Role.AUDITOR],
     },
     "defectdojotargetsync": {"view": [], "add": [], "change": [], "delete": []},
-    "smtpsettings": {"view": [Role.ADMIN], "add": [], "change": [Role.ADMIN], "delete": []},
+    "smtpsettings": {
+        "view": [Role.ADMIN, Role.AUDITOR, Role.READER],
+        "add": [],
+        "change": [Role.ADMIN],
+        "delete": [],
+    },
     "telegramsettings": {
         "view": [Role.ADMIN, Role.AUDITOR, Role.READER],
         "add": [],
@@ -218,6 +228,11 @@ ROLES = {
     "cvecrowdsettings": {"view": [Role.ADMIN], "add": [], "change": [Role.ADMIN], "delete": []},
     "monitorsettings": {"view": [Role.ADMIN], "add": [], "change": [Role.ADMIN], "delete": []},
     "nvdnistsettings": {"view": [Role.ADMIN], "add": [], "change": [Role.ADMIN], "delete": []},
-    "virustotalsettings": {"view": [Role.ADMIN], "add": [], "change": [Role.ADMIN], "delete": []},
+    "virustotalsettings": {
+        "view": [Role.ADMIN, Role.AUDITOR, Role.READER],
+        "add": [],
+        "change": [Role.ADMIN],
+        "delete": [],
+    },
     "vulnchecksettings": {"view": [Role.ADMIN], "add": [], "change": [Role.ADMIN], "delete": []},
 }

@@ -207,8 +207,7 @@ class DefectDojoSettingsTest(ApiTestNoData, TestCase):
     endpoint = "/api/defectdojo/settings/1/"
     expected_string = "DefectDojoSettings"
     cases = [
-        ApiTestCase([Role.AUDITOR, Role.READER], 403),
-        ApiTestCase([Role.ADMIN], expected={"id": 1, **settings}),
+        ApiTestCase([Role.ADMIN, Role.AUDITOR, Role.READER], expected={"id": 1, **settings}),
         PutApiTestCase([Role.AUDITOR, Role.READER], 403, data=new_settings),
         PutApiTestCase([Role.ADMIN], 400, data=invalid_settings),
         PutApiTestCase(
@@ -223,7 +222,7 @@ class DefectDojoSettingsTest(ApiTestNoData, TestCase):
             },
         ),
         ApiTestCase(
-            [Role.ADMIN],
+            [Role.ADMIN, Role.AUDITOR, Role.READER],
             expected={
                 "id": 1,
                 **new_settings,
