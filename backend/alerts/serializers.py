@@ -1,7 +1,7 @@
 """Django REST framework serializers for alert management.
 
-Serializer classes for converting alert and monitoring settings models
-to/from JSON for API operations. Includes validation logic and computed fields.
+Serializer classes for converting alert models to/from JSON for API operations.
+Includes validation logic and computed fields.
 """
 
 from typing import Any
@@ -10,7 +10,7 @@ from django.db import transaction
 from rest_framework.serializers import ModelSerializer, SerializerMethodField
 
 from alerts.enums import AlertItem
-from alerts.models import Alert, MonitorSettings
+from alerts.models import Alert
 from users.serializers import SimpleUserSerializer
 
 
@@ -144,24 +144,3 @@ class EditAlertSerializer(AlertSerializer):
             "subscribed",
             "subscribers",
         )
-
-
-class MonitorSettingsSerializer(ModelSerializer):
-    """Serializer for MonitorSettings model.
-
-    Handles serialization and deserialization of MonitorSettings objects
-    for API operations. Provides read-only access to monitoring state.
-    """
-
-    class Meta:
-        """Meta configuration for the MonitorSettingsSerializer.
-
-        Attributes:
-            model (Model): The MonitorSettings model to serialize
-            fields (tuple): Field names to include in serialization
-            read_only_fields (tuple): Fields that cannot be modified
-        """
-
-        model = MonitorSettings
-        fields = ("id", "last_monitor", "hour_span")
-        read_only_fields = ("id", "last_monitor")

@@ -29,6 +29,7 @@ urlpatterns = [
     path("api/", include("findings.urls")),
     path("api/", include("http_headers.urls")),
     path("api/", include("integrations.urls")),
+    path("api/", include("monitor.urls")),
     path("api/", include("notes.urls")),
     path("api/", include("parameters.urls")),
     path("api/", include("platforms.cvecrowd.urls")),

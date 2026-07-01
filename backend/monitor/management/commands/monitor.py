@@ -1,14 +1,14 @@
-"""Management command to trigger the monitor system for alerts.
+"""Management command to trigger the monitor system.
 
 Defines a Django management command that enqueues a background monitoring
-job for the alerts system.
+job for immediate execution.
 """
 
 from typing import Any
 
 from django.core.management.base import BaseCommand
 
-from alerts.queues import MonitorQueue
+from monitor.queues import MonitorQueue
 
 
 class Command(BaseCommand):
@@ -23,8 +23,8 @@ class Command(BaseCommand):
     def handle(self, *args: Any, **options: Any) -> None:
         """Handle the management command execution.
 
-        Enqueues a monitoring job for the alerts system to check for
-        security events or updates.
+        Enqueues a monitoring job to refresh trending CVE and EPSS data
+        from the configured threat intelligence platforms.
 
         Args:
             *args (Any): Positional arguments passed to the command

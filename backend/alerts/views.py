@@ -1,8 +1,8 @@
 """Django REST framework views for alert management.
 
-Provides REST API endpoints for managing alerts and monitoring settings.
-Includes ViewSets for CRUD operations and custom actions for subscription
-management and alert enabling/disabling.
+Provides REST API endpoints for managing alerts. Includes ViewSets for
+CRUD operations and custom actions for subscription management and alert
+enabling/disabling.
 """
 
 from django.db.models import QuerySet
@@ -16,12 +16,8 @@ from rest_framework.serializers import Serializer
 
 from alerts.enums import AlertItem
 from alerts.filters import AlertFilter
-from alerts.models import Alert, MonitorSettings
-from alerts.serializers import (
-    AlertSerializer,
-    EditAlertSerializer,
-    MonitorSettingsSerializer,
-)
+from alerts.models import Alert
+from alerts.serializers import AlertSerializer, EditAlertSerializer
 from framework.views import BaseViewSet
 from security.authorization.permissions import (
     OwnerPermission,
@@ -158,22 +154,3 @@ class AlertViewSet(BaseViewSet):
             return Response({"enable": bad_request}, status=status.HTTP_400_BAD_REQUEST)
         alert.save(update_fields=["enabled"])
         return Response(self.get_serializer(instance=alert).data, status=status.HTTP_200_OK)
-
-
-class MonitorSettingsViewSet(BaseViewSet):
-    """ViewSet for managing monitoring settings.
-
-    Provides REST API endpoints for viewing and updating monitoring
-    configuration settings. Supports GET and PUT operations only.
-
-    Attributes:
-        queryset (QuerySet): All MonitorSettings objects
-        serializer_class (Serializer): Serializer for monitor settings
-        permission_classes (list): Required permissions for access
-        http_method_names (list): Allowed HTTP methods (GET, PUT only)
-    """
-
-    queryset = MonitorSettings.objects.all()
-    serializer_class = MonitorSettingsSerializer
-    permission_classes = [IsAuthenticated, RekonoModelPermission]
-    http_method_names = ["get", "put"]

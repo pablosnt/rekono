@@ -1,25 +1,22 @@
-"""Django models for alert management and monitoring.
+"""Django models for alert management.
 
-This module provides the core data models for Rekono's alerting system,
-which enables security teams to receive real-time notifications about security findings.
-The alerting system supports both real-time alerts and monitoring modes with flexible filtering
-capabilities to reduce noise and focus on relevant threats.
+This module provides the core data model for Rekono's alerting system, which
+enables security teams to receive real-time notifications about security findings.
+Alerts support both immediate triggers and trending CVE monitoring mode, with
+flexible filtering capabilities to reduce noise and focus on relevant threats.
 
 Key Components:
     Alert: Configurable alert rules that trigger notifications based on finding types,
-           monitoring settings, and custom filters. Supports project-level alerting with
+           monitoring mode, and custom filters. Supports project-level alerting with
            fine-grained subscriber management.
-    MonitorSettings: Configuration for automated background monitoring jobs that
-                    periodically check for trending vulnerabilities and security events.
 
 Architecture:
     The alerting system uses a mapping-based approach where each alert item type
     (OSINT, hosts, ports, etc.) is mapped to specific Django models and supports
-    both immediate alerts and monitoring capabilities. This design allows for type-safe
+    both immediate alerts and trending CVE monitoring. This design allows for type-safe
     alert processing and easy extension for new finding types.
 """
 
-from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
 from alerts.enums import AlertItem
@@ -175,41 +172,3 @@ class Alert(BaseModel):
             not self.value
             or (self.value and (str(getattr(finding, data.get("field", "")) or "")).lower()) == self.value.lower()
         ) and (self.item == AlertItem.TRENDING_CVE or not finding.executions.exclude(id=execution.id).exists())
-
-
-class MonitorSettings(BaseModel):
-    """Model for configuring automated threat intelligence monitoring.
-
-    Manages configuration for background monitoring jobs that periodically query
-    external threat intelligence sources.
-    Follows a singleton pattern - only one instance should exist.
-
-    The monitoring system schedules itself using RQ jobs and triggers monitoring
-    alerts when needed.
-
-    Attributes:
-        rq_job_id (TextField): ID of the current scheduled monitoring job
-        last_monitor (DateTimeField): Timestamp of the last monitoring execution
-        hour_span (IntegerField): Hours between monitoring runs (24-168 hours)
-
-    Example:
-        Configure monitoring to run every 48 hours:
-
-        ```python
-        settings = MonitorSettings.objects.first()
-        settings.hour_span = 48
-        settings.save()
-        ```
-    """
-
-    rq_job_id = models.TextField(max_length=50, blank=True, null=True)
-    last_monitor = models.DateTimeField(blank=True, null=True)
-    hour_span = models.IntegerField(default=24, validators=[MinValueValidator(24), MaxValueValidator(168)])
-
-    def __str__(self) -> str:
-        """Return string representation of monitor settings.
-
-        Returns:
-            str: Description of last monitor time and next scheduled run
-        """
-        return f"Last monitor was at {self.last_monitor}. Next one in {self.hour_span} hours"

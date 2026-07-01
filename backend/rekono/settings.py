@@ -57,6 +57,7 @@ INSTALLED_APPS = [
     "http_headers",
     "input_types",
     "integrations",
+    "monitor",
     "notes",
     "platforms.cvecrowd",
     "platforms.defectdojo",

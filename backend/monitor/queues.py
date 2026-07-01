@@ -1,4 +1,4 @@
-"""Background job queues for alert monitoring.
+"""Background job queues for automated threat intelligence monitoring.
 
 Queue classes and job functions for handling background monitoring tasks.
 Includes trending CVE monitoring, EPSS score updates, and automated job scheduling.
@@ -11,8 +11,8 @@ from django.utils import timezone
 from django_rq import job
 from rq.job import Job
 
-from alerts.models import MonitorSettings
 from framework.queues import BaseQueue
+from monitor.models import MonitorSettings
 from platforms.cvecrowd.integrations import CveCrowd
 from platforms.first import First
 
