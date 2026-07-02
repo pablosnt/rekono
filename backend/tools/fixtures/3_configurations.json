@@ -83,7 +83,7 @@
         "fields": {
             "tool": 1,
             "name": "Fast TCP ports",
-            "command_template": "--privileged {host} {intensity} {ports} -F -sS -oX {output}",
+            "command_template": "--privileged {host} {intensity} -F -sS -oX {output}",
             "stage": 2,
             "default": false,
             "default_scanned_port": null,
@@ -96,7 +96,7 @@
         "fields": {
             "tool": 1,
             "name": "Fast UDP ports",
-            "command_template": "--privileged {host} {intensity} {ports} -F -sU -oX {output}",
+            "command_template": "--privileged {host} {intensity} -F -sU -oX {output}",
             "stage": 2,
             "default": false,
             "default_scanned_port": null,
@@ -109,7 +109,7 @@
         "fields": {
             "tool": 1,
             "name": "Fast TCP ports & service versions",
-            "command_template": "--privileged {host} {intensity} {ports} -F -sS -sV -A -oX {output}",
+            "command_template": "--privileged {host} {intensity} -F -sS -sV -A -oX {output}",
             "stage": 2,
             "default": false,
             "default_scanned_port": null,
@@ -122,7 +122,7 @@
         "fields": {
             "tool": 1,
             "name": "Fast UDP ports & service versions",
-            "command_template": "--privileged {host} {intensity} {ports} -F -sU -sV -A -oX {output}",
+            "command_template": "--privileged {host} {intensity} -F -sU -sV -A -oX {output}",
             "stage": 2,
             "default": false,
             "default_scanned_port": null,
@@ -135,7 +135,7 @@
         "fields": {
             "tool": 1,
             "name": "Fast TCP & UDP ports",
-            "command_template": "--privileged {host} {intensity} {ports} -F -sS -sU -oX {output}",
+            "command_template": "--privileged {host} {intensity} -F -sS -sU -oX {output}",
             "stage": 2,
             "default": false,
             "default_scanned_port": null,
@@ -148,7 +148,7 @@
         "fields": {
             "tool": 1,
             "name": "Fast TCP & UDP ports & service versions",
-            "command_template": "--privileged {host} {intensity} {ports} -F -sS -sU -sV -A -oX {output}",
+            "command_template": "--privileged {host} {intensity} -F -sS -sU -sV -A -oX {output}",
             "stage": 2,
             "default": false,
             "default_scanned_port": null,
