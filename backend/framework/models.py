@@ -13,6 +13,7 @@ import requests
 import urllib3
 from django.db.models import ManyToManyField, Model, Q, TextChoices
 
+from framework.cache import Cache
 from framework.enums import InputKeyword
 from framework.logging import LoggingEntity
 from rekono.settings import AUTH_USER_MODEL, CONFIG
@@ -187,6 +188,8 @@ class BaseInput(BaseModel):
         _filters (list[Filter]): List of Filter instances for input validation.
         _parse_mapping (dict): Mapping of InputKeyword to field names or functions.
         _parse_dependencies (list[str]): List of dependent fields to parse first.
+        _url_cache (Cache): Shared cache of probed URL reachability results, used by
+                          get_url to avoid repeating the same HTTP request.
 
     Example:
         Create an input model with filtering:
@@ -217,6 +220,8 @@ class BaseInput(BaseModel):
         """
 
         abstract = True
+
+    _url_cache = Cache(prefix="url")
 
     @dataclass
     class Filter:
@@ -328,7 +333,11 @@ class BaseInput(BaseModel):
 
         Attempts to construct a valid URL by testing different protocols and
         validating connectivity. Enhanced with target context to use target
-        ports when no specific port is provided.
+        ports when no specific port is provided. Each protocol/port
+        combination's reachability is looked up in _url_cache before issuing
+        a request, and the result is cached afterwards, so repeated calls
+        for the same URL (e.g. across multiple tool arguments) don't repeat
+        the same HTTP request.
 
         Args:
             target (Any): Target context containing port information
@@ -367,15 +376,23 @@ class BaseInput(BaseModel):
                     continue
                 # Construct the URL using the current protocol/port combination
                 url_to_test = schema.format(protocol=protocol, host=host, port=port, endpoint=endpoint)
+                # Reuse a previous probe of this exact URL instead of issuing another request
+                cached_result = self._url_cache.get(url_to_test)
+                if cached_result is not None:
+                    if cached_result == "1":
+                        return url_to_test
+                    continue
                 try:
                     # Attempt to connect to the URL to verify it's accessible
                     # Use disabled SSL verification for testing purposes and short timeout for efficiency
                     # nosemgrep: python.requests.security.disabled-cert-validation.disabled-cert-validation
                     requests.get(url_to_test, timeout=5, verify=False)
                     # If the request succeeds, return this working URL
+                    self._url_cache.set(url_to_test, "1")
                     return url_to_test
                 except Exception:
                     # If connection fails, try the next protocol/port combination
+                    self._url_cache.set(url_to_test, "0")
                     continue
 
     def filter(self, argument_input: Any, target: Any = None) -> bool:

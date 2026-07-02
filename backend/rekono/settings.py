@@ -324,6 +324,7 @@ RQ_QUEUES = {
     "executions": default_rq_queue,
     "findings": default_rq_queue,
     "monitor": default_rq_queue,
+    "cache": default_rq_queue,  # Not an RQ job queue; used by framework.cache.Cache to reuse this Redis connection
 }
 
 RQ_QUEUES["executions"]["DEFAULT_TIMEOUT"] = 28800  # 8 hours
