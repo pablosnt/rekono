@@ -68,17 +68,22 @@
           <UDropdownMenu
             v-if="config.ordering?.length"
             :items="
-              config.ordering?.map(
-                (ordering: string | { id: string; label: string }) => {
-                  const id =
-                    typeof ordering === 'string' ? ordering : ordering.id;
-                  const label =
-                    typeof ordering === 'string'
-                      ? firstUpper(smartLowerCase(ordering))
-                      : ordering.label;
-                  return { id, label };
-                },
+              !orderingOptions.some(
+                ({ id }) =>
+                  id === config.defaultOrdering ||
+                  `-${id}` === config.defaultOrdering,
               )
+                ? [
+                    [
+                      {
+                        id: '__default__',
+                        label: 'Default order',
+                        isDefault: true,
+                      },
+                    ],
+                    orderingOptions,
+                  ]
+                : orderingOptions
             "
             :content="{ align: 'end' }"
           >
@@ -89,7 +94,22 @@
               aria-label="Sort results"
             />
             <template #item="{ item }">
-              <div class="flex items-center justify-between flex-1 gap-2">
+              <div
+                v-if="item.isDefault"
+                class="flex items-center justify-between flex-1 gap-2 cursor-pointer"
+                @click.stop="emit('ordering', config.defaultOrdering)"
+              >
+                <span class="text-sm font-medium">{{ item.label }}</span>
+                <UIcon
+                  v-if="state?.ordering === config.defaultOrdering"
+                  name="i-lucide-check"
+                  class="size-4 text-primary"
+                />
+              </div>
+              <div
+                v-else
+                class="flex items-center justify-between flex-1 gap-2"
+              >
                 <span class="text-sm font-medium">{{ item.label }}</span>
                 <div class="flex items-center gap-1">
                   <UTooltip text="Ascending">
@@ -220,6 +240,18 @@ const emit = defineEmits<{
 
 const search = ref(props.state?.searchQuery ?? "");
 const openFilters = ref(props.filtersOpen ?? false);
+const orderingOptions = computed(() =>
+  (props.config.ordering ?? []).map(
+    (ordering: string | { id: string; label: string }) => {
+      const id = typeof ordering === "string" ? ordering : ordering.id;
+      const label =
+        typeof ordering === "string"
+          ? firstUpper(smartLowerCase(ordering))
+          : ordering.label;
+      return { id, label };
+    },
+  ),
+);
 
 function columnLabel(columnId: string): string {
   const colDef = props.config.tableColumns?.find(
