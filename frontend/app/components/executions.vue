@@ -225,11 +225,10 @@ const config: CrudConfig<Execution> = reactive({
   },
   pageSizeOptions: [24, 50, 100],
   onItemClick: (item: Execution) => {
-    if (item.output_plain) {
-      selectedExecution.value = item;
-      outputOpen.value = true;
-    }
+    selectedExecution.value = item;
+    outputOpen.value = true;
   },
+  isRowClickable: (item: Execution) => !!item.output_plain,
   searchable: true,
   searchPlaceholder: "Search executions...",
   filters: [

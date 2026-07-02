@@ -6,12 +6,11 @@
     :loading="state.loading"
     loading-color="primary"
     :columns="columns"
-    :ui="{
-      th: 'min-w-42',
-      td: 'min-w-42',
-      ...(config.itemLink || config.onItemClick
-        ? { tbody: '[&>tr]:cursor-pointer' }
-        : {}),
+    :ui="{ th: 'min-w-42', td: 'min-w-42' }"
+    :meta="{
+      class: {
+        tr: (row) => (isRowClickable(row.original) ? 'cursor-pointer' : ''),
+      },
     }"
     v-on="
       config.itemLink || config.onItemClick
@@ -161,7 +160,16 @@ const columns = computed(() => {
   return cols;
 });
 
+function isRowClickable(item: unknown): boolean {
+  return !props.config.itemLink && !props.config.onItemClick
+    ? false
+    : props.config.isRowClickable
+      ? props.config.isRowClickable(item)
+      : true;
+}
+
 function onTableSelect(event: unknown, row: unknown) {
+  if (!isRowClickable(row.original)) return;
   if (props.config.itemLink) {
     navigateTo(props.config.itemLink(row.original));
   } else if (props.config.onItemClick) {

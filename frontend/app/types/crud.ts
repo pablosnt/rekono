@@ -97,6 +97,7 @@ export interface CrudConfig<T = unknown> {
   useGrid?: boolean;
   itemLink?: (item: T) => string;
   onItemClick?: (item: T) => void;
+  isItemClickable?: (item: T) => boolean;
   searchable: boolean;
   searchPlaceholder?: string;
   filters?: FilterConfig[];
