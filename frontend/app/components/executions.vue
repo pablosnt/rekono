@@ -259,7 +259,7 @@ const config: CrudConfig<Execution> = reactive({
   defaultFilters: props.task
     ? { task: props.task }
     : { [props.findingType.toLowerCase()]: props.finding.id },
-  defaultOrdering: "-start,id",
+  defaultOrdering: "-started,-start,id",
   emptyMessage: `No executions yet.${props.task ? " The task may still be waiting to be processed" : ""}`,
   tableCopyId: false,
   canRead: true,

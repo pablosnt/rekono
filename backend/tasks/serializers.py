@@ -136,7 +136,7 @@ class TaskSerializer(RelatedNotesSerializer):
             str: The computed task status
         """
         for status in [Status.RUNNING, Status.CANCELLED, Status.ERROR]:
-            if instance.executions.filter(status=status).count() > 0:
+            if instance.executions.filter(status=status).exists():
                 return status
         if (
             instance.executions.count() > 0
@@ -145,7 +145,7 @@ class TaskSerializer(RelatedNotesSerializer):
             return Status.COMPLETED
         if instance.executions.count() == 0 and instance.end:
             return Status.CANCELLED
-        if instance.executions.exclude(status=Status.REQUESTED).count() > 0:
+        if instance.executions.exclude(status=Status.REQUESTED).exists():
             return Status.RUNNING
         return Status.REQUESTED
 

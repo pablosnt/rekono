@@ -4,6 +4,7 @@ Provides REST API views for execution records including list, retrieve
 operations and report download functionality with proper security controls.
 """
 
+from django.db.models import BooleanField, Case, When
 from django.http import FileResponse
 from drf_spectacular.utils import OpenApiResponse, extend_schema
 from rest_framework.decorators import action
@@ -44,7 +45,9 @@ class ExecutionViewSet(BaseViewSet):
         http_method_names (list): Allowed HTTP methods (GET only)
     """
 
-    queryset = Execution.objects.all()
+    queryset = Execution.objects.all().annotate(
+        started=Case(When(start__isnull=False, then=True), default=False, output_field=BooleanField())
+    )
     serializer_class = ExecutionSerializer
     filterset_class = ExecutionFilter
     permission_classes = [
@@ -66,6 +69,7 @@ class ExecutionViewSet(BaseViewSet):
         "creation",
         "enqueued_at",
         "start",
+        "started",
         "end",
     ]
     http_method_names = ["get"]
