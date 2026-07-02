@@ -109,7 +109,7 @@
             "
           />
         </template>
-        <template v-if="repeatIn" #description>
+        <template v-if="monitor" #description>
           <div class="flex items-center gap-2">
             <span>Run this scan each</span
             ><UInput

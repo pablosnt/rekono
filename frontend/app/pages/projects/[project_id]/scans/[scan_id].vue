@@ -75,6 +75,7 @@
                 color="success"
                 variant="subtle"
                 aria-label="Repeat scan"
+                :loading="repeating"
                 @click="repeatScan"
               />
             </UTooltip>
@@ -169,6 +170,15 @@
             }}
           </p>
         </div>
+        <div v-if="task.repeat_in && task.repeat_time_unit">
+          <p class="text-xs text-muted uppercase tracking-wider mb-1.5">
+            Monitor
+          </p>
+          <p class="font-medium flex items-center gap-1.5">
+            <UIcon name="i-lucide-repeat" />
+            <span>Every {{ task.repeat_in }} {{ task.repeat_time_unit }}</span>
+          </p>
+        </div>
       </div>
     </UPageCard>
 
@@ -218,6 +228,7 @@ const tasksApi = useApi("/api/tasks/");
 const userStore = useUserStore();
 const options = useOptions();
 const cancelOpen = ref(false);
+const repeating = ref(false);
 const task = ref<Task | null>();
 const executions = ref();
 const findings = ref();
@@ -225,12 +236,16 @@ const refresh = ref<ReturnType<typeof setTimeout> | null>(null);
 const toolOptions = ref<FilterOption[]>([]);
 
 function repeatScan() {
+  repeating.value = true;
   tasksApi
     .create(`${route.params.scan_id}/repeat/`, {}, {}, "Scan")
     .then((response: Task) => {
       return navigateTo(
         `/projects/${route.params.project_id}/scans/${response.id}`,
       );
+    })
+    .finally(() => {
+      repeating.value = false;
     });
 }
 

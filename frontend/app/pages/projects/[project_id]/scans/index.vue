@@ -221,7 +221,7 @@ const config: CrudConfig<Task> = reactive({
       icon: "i-lucide-calendar-clock",
       cell: ({ row }) =>
         table.valueCell(
-          !row.original.start && row.original.scheduled_at
+          row.original.scheduled_at
             ? new Date(row.original.scheduled_at).toLocaleString()
             : undefined,
         ),
