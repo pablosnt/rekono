@@ -70,13 +70,23 @@
           <LazyHomeTopProjects @create="createProjectOpen = true" />
           <LazyHomeLatestScans :tasks="tasks" />
         </div>
-        <LazyFindingsCounterAll only-active />
-        <div
-          v-if="hosts.length > 0 || vulnerabilities.length > 0"
-          class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start"
-        >
-          <LazyHomeLatestHosts :hosts="hosts" />
-          <LazyHomeLatestVulnerabilities :vulnerabilities="vulnerabilities" />
+        <div class="space-y-6">
+          <div class="flex items-center gap-4">
+            <UIcon
+              name="i-lucide-scan"
+              class="text-2xl"
+              aria-label="Findings"
+            />
+            <h2 class="font-bold text-default text-2xl">Findings</h2>
+          </div>
+          <LazyFindingsCounterAll only-active />
+          <div
+            v-if="hosts.length > 0 || vulnerabilities.length > 0"
+            class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start"
+          >
+            <LazyHomeLatestHosts :hosts="hosts" />
+            <LazyHomeLatestVulnerabilities :vulnerabilities="vulnerabilities" />
+          </div>
         </div>
       </div>
       <div v-else>
