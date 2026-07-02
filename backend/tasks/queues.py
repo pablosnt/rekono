@@ -5,7 +5,7 @@ tool tasks and complex multi-step process tasks. Handles task scheduling,
 dependency management, and execution planning.
 """
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import timedelta
 from functools import cached_property
 from typing import Any, Sequence
@@ -44,8 +44,8 @@ class PlanJob:
     """
 
     step: Step
-    dependencies = []
-    jobs = []
+    dependencies: list["PlanJob"] = field(default_factory=list)
+    jobs: list[Job] = field(default_factory=list)
 
     @cached_property
     def inputs(self) -> Sequence[InputType]:

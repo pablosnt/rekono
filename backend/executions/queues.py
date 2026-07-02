@@ -83,6 +83,7 @@ class ExecutionsQueue(BaseScanQueue):
         job.meta["input_vulnerabilities"] = input_vulnerabilities
         job.meta["input_technologies"] = input_technologies
         job.meta["wordlists"] = wordlists
+        job.save_meta()
         execution.enqueued_at = timezone.now()
         execution.rq_job_id = job.id
         execution.save(update_fields=["rq_job_id"])

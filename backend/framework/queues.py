@@ -310,7 +310,7 @@ class BaseScanQueue(BaseQueue):
                         if not base_inputs:
                             continue
                     else:
-                        base_inputs = filtered_base_inputs.copy()
+                        base_inputs = list(set(filtered_base_inputs))
                     input_types_used.add(input_type)
                     # If the tool argument allows multiple values, extend the execution batch
                     if tool_input.argument.multiple:
