@@ -20,6 +20,7 @@
       { id: 'cwes', label: 'CWE' },
       { id: 'epss_score', label: 'EPSS' },
     ]"
+    default-ordering="-severity,-id"
     :visibility="{
       description: false,
       euvd_id: false,

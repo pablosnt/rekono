@@ -82,6 +82,7 @@ const props = defineProps<{
   filters?: CrudConfig["filters"];
   acceptedFilters?: CrudConfig["acceptedFilters"];
   ordering?: CrudConfig["ordering"];
+  defaultOrdering?: CrudConfig["defaultOrdering"];
   visibility?: CrudConfig["tableColumnsVisibility"];
   isTriageable?: boolean;
   isAsset?: boolean;
@@ -379,7 +380,7 @@ const config: CrudConfig<Finding> = reactive({
       ? { project: route.params.project_id }
       : undefined,
   ordering: props.ordering || [],
-  defaultOrdering: "-id",
+  defaultOrdering: props.defaultOrdering || "-id",
   pageSize: 25,
   pageSizeOptions: [25, 50, 100],
   tableCopyId: true,
