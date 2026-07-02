@@ -65,12 +65,12 @@
         :config="projectsConfig"
         @open="createProjectOpen = $event"
       />
-      <div v-if="hasScans" class="mt-10 space-y-10">
+      <div v-if="hasScans" class="mt-10 space-y-15">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
           <LazyHomeTopProjects @create="createProjectOpen = true" />
           <LazyHomeLatestScans :tasks="tasks" />
         </div>
-        <div class="space-y-6">
+        <div class="space-y-10">
           <div class="flex items-center gap-4">
             <UIcon
               name="i-lucide-scan"
