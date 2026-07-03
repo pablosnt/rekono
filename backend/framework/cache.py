@@ -67,7 +67,7 @@ class Cache:
                         the key isn't cached or has expired.
         """
         value = self.connection.get(self._key(key))
-        return None if value is None else value.decode()
+        return value.decode() if isinstance(value, bytes) else value
 
     def set(self, key: str, value: str) -> None:
         """Store a value in the cache with this instance's TTL.

@@ -169,9 +169,7 @@ class ToolExecutorTest(BaseTest, TestCase):
     @mock.patch("framework.models.BaseInput.get_url", return_value=None)
     def test_get_arguments_skips_when_required_url_not_reachable(self, get_url_mock: mock.MagicMock) -> None:
         with self.assertRaises(RuntimeError):
-            self.executor.get_arguments(
-                [self.host, self.port, self.technology, self.vulnerability], [], [], [], []
-            )
+            self.executor.get_arguments([self.host, self.port, self.technology, self.vulnerability], [], [], [], [])
 
     def test_check_arguments_no_base_inputs(self) -> None:
         self.assertFalse(self.executor.check_arguments([], [], [], [], []))

@@ -4,7 +4,6 @@ Processes Gobuster output to extract discovered paths, subdomains, and virtual h
 from brute force enumeration scans.
 """
 
-import re
 
 from findings.enums import OSINTDataType, PathType
 from findings.models import OSINT, Path
