@@ -8,6 +8,7 @@ tool-specific executors inherit from BaseExecutor.
 import os
 import re
 import subprocess
+import sys
 import uuid
 from functools import cached_property
 from pathlib import Path
@@ -27,7 +28,7 @@ from framework.enums import InputKeyword
 from framework.logging import LoggingEntity
 from http_headers.models import HttpHeader
 from parameters.models import InputTechnology, InputVulnerability
-from rekono.settings import CONFIG
+from rekono.settings import BASE_DIR, CONFIG
 from security.cryptography import Crypto
 from security.validators.enums import Regex
 from security.validators.input_validator import Validator
@@ -295,11 +296,21 @@ class BaseExecutor(LoggingEntity):
         settings from global configuration. Environment definitions parsed from the
         pre-command arguments are filtered so user-controlled values cannot set
         sensitive variables (PATH, LD_PRELOAD, etc.) that could hijack the subprocess.
+        Rekono's own virtualenv bin directory is removed from PATH so external tools
+        that shell out to a bare `python3` (e.g. EmailHarvester, Log4j Scan,
+        Spring4Shell Scan) resolve the system interpreter, which has their required
+        dependencies installed, instead of Rekono's isolated venv, which only has
+        Rekono's own dependencies.
 
         Returns:
             dict[str, Any]: Environment variables for tool execution
         """
         environment = os.environ.copy()
+        venv_bin = str(Path(sys.executable).parent)
+        if environment.get("PATH") and venv_bin.startswith(BASE_DIR):
+            environment["PATH"] = os.pathsep.join(
+                path for path in environment["PATH"].split(os.pathsep) if path != venv_bin
+            )
         # Ensure tool command is at the beginning of arguments list
         if self.execution.configuration.tool.command not in self.arguments:
             self.arguments.insert(0, self.execution.configuration.tool.command)
