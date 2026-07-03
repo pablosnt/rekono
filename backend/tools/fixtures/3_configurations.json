@@ -590,7 +590,7 @@
         "fields": {
             "tool": 20,
             "name": "Subdomains enumeration",
-            "command_template": "dns {target} {wordlist} {intensity} --wildcard --show-ips --no-color --no-progress --output {output}",
+            "command_template": "dns {target} {wordlist} {intensity} --wildcard --no-color --no-progress --output {output}",
             "stage": 1,
             "default": true,
             "default_scanned_port": null,
