@@ -4,6 +4,8 @@ Processes Gobuster output to extract discovered paths, subdomains, and virtual h
 from brute force enumeration scans.
 """
 
+import re
+
 from findings.enums import OSINTDataType, PathType
 from findings.models import OSINT, Path
 from tools.parsers.base import BaseParser
@@ -42,9 +44,8 @@ class Gobuster(BaseParser):
                     self.create_finding(
                         OSINT, data=vhost.strip(), data_type=OSINTDataType.VHOST, source="VHOST enumeration"
                     )
-            elif " [" in line and "]" in line:  # Subdomain format
-                subdomain, addresses = line.replace("Found: ", "").split(" [")
-                addresses = addresses.replace("]", "").split(",")
+            elif len(line.split(" ", 1)) == 2:  # Subdomain format: "<subdomain> <ip1>,<ip2>..."
+                subdomain, addresses = line.split(" ", 1)
                 self.create_finding(OSINT, data=subdomain.strip(), data_type=OSINTDataType.DOMAIN, source="DNS")
-                for address in addresses:
+                for address in addresses.strip().split(","):
                     self.create_finding(OSINT, data=address.strip(), data_type=OSINTDataType.IP, source="DNS")
