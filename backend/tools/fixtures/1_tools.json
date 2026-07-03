@@ -236,7 +236,7 @@
             "script": null,
             "script_directory_property": null,
             "run_directory_property": null,
-            "ignore_exit_code": false,
+            "ignore_exit_code": true,
             "is_installed": false,
             "version": null,
             "version_argument": "--help",
