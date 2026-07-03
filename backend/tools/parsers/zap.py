@@ -40,7 +40,7 @@ class Zap(BaseParser):
         root = self.load_xml_report()
         if not root:
             return
-        for site in root:
+        for site in root.findall("site"):
             url_base = site.attrib["name"]
             for alert in site.findall("alerts/alertitem"):
                 name = alert.findtext("alert")

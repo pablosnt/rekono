@@ -307,7 +307,7 @@ class BaseExecutor(LoggingEntity):
         """
         environment = os.environ.copy()
         venv_bin = str(Path(sys.executable).parent)
-        if environment.get("PATH") and venv_bin.startswith(BASE_DIR):
+        if environment.get("PATH") and venv_bin.startswith(str(BASE_DIR)):
             environment["PATH"] = os.pathsep.join(
                 path for path in environment["PATH"].split(os.pathsep) if path != venv_bin
             )
