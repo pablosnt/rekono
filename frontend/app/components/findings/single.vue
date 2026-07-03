@@ -1,6 +1,5 @@
 <template>
   <div class="space-y-5">
-    {{}}
     <UProgress :class="[loading ? 'visible' : 'invisible', 'mb-1']" />
     <template v-if="finding">
       <UPageCard
@@ -46,6 +45,7 @@
                   :entity-name="entityName"
                   :project="finding.project"
                 />
+                <!-- TODO: Avoid auto-displayed reference for Exploits -->
                 <UDropdownMenu
                   v-if="
                     (integrations.hacktricks?.enabled &&
@@ -64,7 +64,7 @@
                           },
                         ]
                       : []),
-                    ...(finding.reference
+                    ...(!ignoreReference && finding.reference
                       ? [
                           {
                             label: 'Reference',
@@ -179,6 +179,7 @@ const props = defineProps<{
   fixVerb: string;
   disableTitleCopy?: boolean;
   customDropdownActions?: DropdownAction[];
+  ignoreReference?: boolean;
 }>();
 defineEmits<{ update: [] }>();
 
