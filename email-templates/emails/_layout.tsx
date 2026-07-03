@@ -45,9 +45,8 @@ export function Layout({ children }: LayoutProps) {
             <Section className="py-8">
               <Row>
                 <Column className="text-center">
-                  {/* TODO: update branch to main once migration/2.0.0 is merged */}
                   <Img
-                    src="https://raw.githubusercontent.com/pablosnt/rekono/migration/2.0.0/frontend/public/logo-light.png"
+                    src="https://raw.githubusercontent.com/pablosnt/rekono/main/frontend/public/logo-light.png"
                     alt="Rekono"
                     height={36}
                     className="mx-auto"
