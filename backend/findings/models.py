@@ -260,9 +260,11 @@ class Port(HacktricksFinding):
                 {
                     InputKeyword.TARGET.name.lower(): f"{self.host.ip}:{self.port}",
                     InputKeyword.HOST.name.lower(): self.host.ip,
-                    InputKeyword.URL.name.lower(): self.get_url(target, self.host.ip, self.port),
                 }
             )
+            url = self.get_url(target, self.host.ip, self.port)
+            if url is not None:
+                output[InputKeyword.URL.name.lower()] = url
         return output
 
 

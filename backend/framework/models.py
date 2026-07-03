@@ -487,9 +487,8 @@ class BaseInput(BaseModel):
                 if isinstance(field_or_function, str) and hasattr(self, field_or_function)
                 else (field_or_function(self, target) if callable(field_or_function) else field_or_function)
             )
-            # Ensure we always have a string value (empty string if None)
             if value is None:
-                value = ""
+                continue
             key = keyword.name.lower()
             current_value = accumulated.get(key)
             # Handle accumulation logic for different data types

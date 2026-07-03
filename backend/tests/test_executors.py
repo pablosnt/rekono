@@ -1,4 +1,7 @@
 import base64
+import os
+import sys
+from pathlib import Path
 from typing import Any
 from unittest import mock
 
@@ -65,6 +68,10 @@ class ToolExecutorTest(BaseTest, TestCase):
         self.executor.arguments = [self.fake_tool.command, "--foo=bar"]
         self._test_environment(expected_env)
 
+    def test_get_environment_excludes_own_venv_from_path(self) -> None:
+        self.executor.arguments = [self.fake_tool.command, "--foo=bar"]
+        self.assertNotIn(str(Path(sys.executable).parent), self.executor.get_environment()["PATH"].split(os.pathsep))
+
     @mock.patch("framework.models.BaseInput.get_url", get_url)
     def test_get_arguments_only_findings(self) -> None:
         expected = "-p 10.10.10.11 -p http://10.10.10.10:80/index.html -p 80 -p /index.html -p WordPress -p admin -p CVE-2025-3010 -p ReverseShell 10 -p root"
@@ -123,7 +130,7 @@ class ToolExecutorTest(BaseTest, TestCase):
         self.target.target = "10.10.10.12"
         self.target.save(update_fields=["target"])
         self.assertEqual(
-            f"-p 10.10.10.10 -p http://10.10.10.12:80/ -p 80 -p -p Joomla -p CVE-2023-2222 -p root -p {self.wordlist.path}",
+            f"-p 10.10.10.10 -p http://10.10.10.12:80/ -p 80 -p Joomla -p CVE-2023-2222 -p root -p {self.wordlist.path}",
             " ".join(
                 self.executor.get_arguments(
                     [], [self.targetport], [self.input_vulnerability], [self.input_technology], [self.wordlist]
@@ -135,7 +142,7 @@ class ToolExecutorTest(BaseTest, TestCase):
     def test_get_arguments_no_findings(self) -> None:
         self.target.target = "10.10.10.12"
         self.target.save(update_fields=["target"])
-        expected = f"-p 10.10.10.12 -p http://10.10.10.12:80/ -p 80 -p -p Joomla -p CVE-2023-2222 -p {{secret}} -p {self.wordlist.path}"
+        expected = f"-p 10.10.10.12 -p http://10.10.10.12:80/ -p 80 -p Joomla -p CVE-2023-2222 -p {{secret}} -p {self.wordlist.path}"
         self.assertEqual(
             expected.format(secret="root"),
             " ".join(
@@ -158,6 +165,13 @@ class ToolExecutorTest(BaseTest, TestCase):
                 )
             ),
         )
+
+    @mock.patch("framework.models.BaseInput.get_url", return_value=None)
+    def test_get_arguments_skips_when_required_url_not_reachable(self, get_url_mock: mock.MagicMock) -> None:
+        with self.assertRaises(RuntimeError):
+            self.executor.get_arguments(
+                [self.host, self.port, self.technology, self.vulnerability], [], [], [], []
+            )
 
     def test_check_arguments_no_base_inputs(self) -> None:
         self.assertFalse(self.executor.check_arguments([], [], [], [], []))

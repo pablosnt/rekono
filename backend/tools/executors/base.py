@@ -227,22 +227,32 @@ class BaseExecutor(LoggingEntity):
                             self.port_from_arguments = parse.port
                     except Exception:
                         pass
-                # Special handling for HTTP headers - format each header individually then join
-                if InputKeyword.HEADERS.name.lower() in parsed_data:
-                    parameters[argument.name] = " ".join(
-                        [
-                            argument.argument.format(
-                                **{
-                                    InputKeyword.HEADER_KEY.name.lower(): k,
-                                    InputKeyword.HEADER_VALUE.name.lower(): v,
-                                }
-                            )
-                            for k, v in parsed_data.get(InputKeyword.HEADERS.name.lower(), {}).items()
-                        ]
-                    )
-                else:
-                    # Standard parameter formatting using argument template with parsed data
-                    parameters[argument.name] = argument.argument.format(**parsed_data)
+                try:
+                    # Special handling for HTTP headers - format each header individually then join
+                    if InputKeyword.HEADERS.name.lower() in parsed_data:
+                        parameters[argument.name] = " ".join(
+                            [
+                                argument.argument.format(
+                                    **{
+                                        InputKeyword.HEADER_KEY.name.lower(): k,
+                                        InputKeyword.HEADER_VALUE.name.lower(): v,
+                                    }
+                                )
+                                for k, v in parsed_data.get(InputKeyword.HEADERS.name.lower(), {}).items()
+                            ]
+                        )
+                    else:
+                        # Standard parameter formatting using argument template with parsed data
+                        parameters[argument.name] = argument.argument.format(**parsed_data)
+                except KeyError:
+                    # A placeholder couldn't be resolved (e.g. no reachable URL), so skip the
+                    # execution when the argument is required, otherwise drop the argument
+                    if argument.required:
+                        raise RuntimeError(
+                            f"Argument '{argument.name}' is required to execute configuration "
+                            f"'{argument.configuration.name}'"
+                        )
+                    parameters[argument.name] = ""
             elif not argument.required:
                 parameters[argument.name] = ""
             else:
