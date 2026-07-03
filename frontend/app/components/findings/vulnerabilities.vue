@@ -314,15 +314,6 @@ function dropdownActions(item: Vulnerability) {
           },
         ]
       : []),
-    ...(item.cve
-      ? [
-          {
-            label: "Copy CVE",
-            icon: "i-lucide-hash",
-            onSelect: () => copyText(item.cve, "CVE copied to clipboard"),
-          },
-        ]
-      : []),
     ...(item.euvd_id
       ? [
           {
