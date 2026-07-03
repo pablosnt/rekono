@@ -119,5 +119,5 @@ class TargetPort(BaseInput):
         host = self.target.create_finding_from_user_input(execution)
         if host:
             return Port.objects.create_finding(
-                Port, execution, **{**fields, "host": host, "port": self.port, "created_from_user_input": True}
+                execution, **{**fields, "host": host, "port": self.port, "created_from_user_input": True}
             )

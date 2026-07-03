@@ -155,4 +155,4 @@ class Target(BaseInput):
             fields["ip"] = self.target
         else:
             return None
-        return Host.objects.create_finding(Host, execution, **{**fields, "created_from_user_input": True})
+        return Host.objects.create_finding(execution, **{**fields, "created_from_user_input": True})

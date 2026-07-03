@@ -120,7 +120,7 @@ class BaseParser:
         """
         has_parent_findings = finding_type not in [OSINT, Host]
         if has_parent_findings:
-            # PHASE 1: Attempt to link with findings already discovered in this execution
+            # Attempt to link with findings already discovered in this execution
             # This creates hierarchical relationships like Host > Port > Technology > Vulnerability > Exploit
             if not linked_finding:
                 # Iterate through all findings that have been used as inputs in this execution
@@ -135,7 +135,7 @@ class BaseParser:
                         linked_finding = True
                         # Stop after first successful link to avoid multiple relationships
                         break
-            # PHASE 2: If no existing findings to link with, try to create relationships from user inputs
+            # If no existing findings to link with, try to create relationships from user inputs
             if not linked_finding:
                 port_for_input_parameter = None
                 # Check if we're dealing with input parameters that require port associations
@@ -188,7 +188,7 @@ class BaseParser:
                             port_for_input_parameter = related_finding
                         # Stop after first successful relationship
                         break
-                # PHASE 3: Handle special case for input parameters (Technologies/Vulnerabilities)
+                # Handle special case for input parameters (Technologies/Vulnerabilities)
                 # These need to be associated with ports when creating findings
                 if is_port_for_input_parameter and port_for_input_parameter and not linked_finding:
                     # Process technology and vulnerability input parameters
@@ -217,12 +217,12 @@ class BaseParser:
                             break
             if not linked_finding and not CONFIG.testing:
                 return
-        # PHASE 4: Create the finding if relationships were established or
-        # we're in testing mode, as we need to test parsers completely
+        # Create the finding if relationships were established or we're in testing mode,
+        # as we need to test parsers completely
         # Mark as tool-generated (not from user input) since this is from parser output
         fields["created_from_user_input"] = False
         # Use the manager's create_finding method for proper duplicate handling
-        finding = finding_type.objects.create_finding(finding_type, self.executor.execution, **fields)
+        finding = finding_type.objects.create_finding(self.executor.execution, **fields)
         # Add to the parser's findings list for tracking
         self.findings.append(finding)
         return finding

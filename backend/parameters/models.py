@@ -81,9 +81,7 @@ class InputTechnology(InputParameter):
 
         if "port" in fields:
             return Technology.objects.create_finding(
-                Technology,
-                execution,
-                **{**fields, "name": self.name, "version": self.version, "created_from_user_input": True},
+                execution, **{**fields, "name": self.name, "version": self.version, "created_from_user_input": True}
             )
 
 
@@ -143,7 +141,5 @@ class InputVulnerability(InputParameter):
 
         if "port" in fields:
             return Vulnerability.objects.create_finding(
-                Vulnerability,
-                execution,
-                **{**fields, "name": self.cve, "cve": self.cve, "created_from_user_input": True},
+                execution, **{**fields, "name": self.cve, "cve": self.cve, "created_from_user_input": True}
             )

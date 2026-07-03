@@ -53,7 +53,8 @@ rekono-kbx
 *.kaboxer.yaml
 
 # Tools paths
-Result/
+backend/Result/
+backend/reports.json
 
 # AI
 .agent/

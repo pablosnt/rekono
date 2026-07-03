@@ -54,7 +54,7 @@ class OSINT(TriageFinding):
     data_type = models.TextField(max_length=10, choices=OSINTDataType.choices)
     source = models.TextField(max_length=50, blank=True, null=True)
 
-    unique_fields = ["data", "data_type"]
+    _unique_fields = [Finding.UniqueField("data"), Finding.UniqueField("data_type")]
     _parse_mapping = {
         InputKeyword.TARGET: "data",
         InputKeyword.HOST: "data",
@@ -136,7 +136,7 @@ class Host(HacktricksFinding):
     total_analysis = models.IntegerField(blank=True, null=True)
     whois = models.TextField(blank=True, null=True)
 
-    unique_fields = ["ip"]
+    _unique_fields = [Finding.UniqueField("ip")]
     _filters = [Finding.Filter(TargetType, "ip", processor=lambda a: Target.get_type(a))]
     _parse_mapping = {
         InputKeyword.TARGET: "ip",
@@ -208,7 +208,11 @@ class Port(HacktricksFinding):
     protocol = models.TextField(max_length=5, choices=TransportProtocol.choices, blank=True, null=True)
     service = models.TextField(max_length=50, blank=True, null=True)
 
-    unique_fields = ["host", "port", "protocol"]
+    _unique_fields = [
+        Finding.UniqueField("host"),
+        Finding.UniqueField("port"),
+        Finding.UniqueField("protocol", match_null_and_empty=True),
+    ]
     # _parse_dependencies is not used to avoid recalculation of URLs
     _parse_mapping = {InputKeyword.PORT: "port", InputKeyword.PORTS: lambda instance, target: [instance.port]}
     _defectdojo_finding_mapping = {
@@ -299,7 +303,7 @@ class Path(Finding):
     # Path type depending on the protocol where it's found
     type = models.TextField(choices=PathType.choices, default=PathType.ENDPOINT)
 
-    unique_fields = ["port", "path"]
+    _unique_fields = [Finding.UniqueField("port"), Finding.UniqueField("path")]
     _filters = [
         Finding.Filter(PathType, "type"),
         Finding.Filter(int, "status"),
@@ -403,7 +407,11 @@ class Technology(HacktricksFinding):
     description = models.TextField(max_length=200, blank=True, null=True)
     reference = models.TextField(max_length=250, blank=True, null=True)
 
-    unique_fields = ["port", "name", "version"]
+    _unique_fields = [
+        Finding.UniqueField("port"),
+        Finding.UniqueField("name"),
+        Finding.UniqueField("version", match_null_and_empty=True),
+    ]
     _filters = [Finding.Filter(str, "name", contains=True, processor=lambda n: n.lower())]
     _parse_mapping = {InputKeyword.TECHNOLOGY: "name", InputKeyword.VERSION: "version"}
     _parse_dependencies = ["port"]
@@ -460,7 +468,12 @@ class Credential(TriageFinding):
     secret = models.TextField(max_length=300, blank=True, null=True)
     context = models.TextField(max_length=300, blank=True, null=True)
 
-    unique_fields = ["technology", "email", "username", "secret"]
+    _unique_fields = [
+        Finding.UniqueField("technology"),
+        Finding.UniqueField("email"),
+        Finding.UniqueField("username"),
+        Finding.UniqueField("secret"),
+    ]
     _parse_mapping = {InputKeyword.EMAIL: "email", InputKeyword.USERNAME: "username", InputKeyword.SECRET: "secret"}
     _parse_dependencies = ["technology"]
     _defectdojo_finding_mapping = {
@@ -561,7 +574,14 @@ class Vulnerability(TriageFinding):
     reference = models.TextField(max_length=250, blank=True, null=True)
     trending = models.BooleanField(default=False)
 
-    unique_fields = ["technology", "port", "name", "cve"]
+    _unique_fields = [
+        # A user-provided vulnerability (from a CVE parameter) never carries a technology
+        Finding.UniqueField("technology", ignore_for_user_input=True),
+        Finding.UniqueField("port", user_input_lookups=["port", "technology__port"]),
+        # Vulnerabilities with CVE modify their name on enrichment time, which is not available for deduplication
+        Finding.UniqueField("name", active=lambda fields: not fields.get("cve")),
+        Finding.UniqueField("cve"),
+    ]
     _filters = [
         Finding.Filter(Severity, "severity"),
         Finding.Filter(str, "cve", contains=True, processor=lambda c: c.lower()),
@@ -638,7 +658,12 @@ class Exploit(TriageFinding):
     edb_id = models.IntegerField(blank=True, null=True)  # Id in Exploit-DB
     reference = models.TextField(max_length=250, blank=True, null=True)
 
-    unique_fields = ["vulnerability", "technology", "edb_id", "reference"]
+    _unique_fields = [
+        Finding.UniqueField("vulnerability"),
+        Finding.UniqueField("technology"),
+        Finding.UniqueField("edb_id", match_null_and_empty=True),
+        Finding.UniqueField("reference", match_null_and_empty=True),
+    ]
     _parse_mapping = {InputKeyword.EXPLOIT: "title"}
     _parse_dependencies = ["vulnerability", "technology"]
     _defectdojo_finding_mapping = {

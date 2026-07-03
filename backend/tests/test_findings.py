@@ -157,6 +157,19 @@ class OSINTTest(FindingTest, TestCase):
         ]
         super().test_cases()
 
+    def test_deduplication(self):
+        first = OSINT.objects.create_finding(
+            self.execution, data="10.10.10.90", data_type=OSINTDataType.IP, source="Shodan"
+        )
+        second = OSINT.objects.create_finding(self.execution, data="10.10.10.90", data_type=OSINTDataType.IP)
+        self.assertEqual(first.id, second.id)
+        self.assertEqual(1, OSINT.objects.filter(data="10.10.10.90", data_type=OSINTDataType.IP).count())
+        self.assertEqual("Shodan", second.source)
+        self.assertNotEqual(
+            second.id,
+            OSINT.objects.create_finding(self.execution, data="10.10.10.90", data_type=OSINTDataType.DOMAIN).id,
+        )
+
 
 class HostTest(FindingTest, TestCase):
     model = Host
@@ -168,6 +181,32 @@ class HostTest(FindingTest, TestCase):
     }
     expected_string = "10.10.10.10"
 
+    def test_deduplication(self):
+        first = Host.objects.create_finding(self.execution, ip="10.10.10.60", os="Windows Server 2022")
+        second = Host.objects.create_finding(self.execution, ip="10.10.10.60")
+        self.assertEqual(first.id, second.id)
+        self.assertEqual(1, Host.objects.filter(ip="10.10.10.60").count())
+        self.assertEqual("Windows Server 2022", second.os)
+        self.assertNotEqual(second.id, Host.objects.create_finding(self.execution, ip="10.10.10.61").id)
+
+    def test_deduplication_with_user_input(self):
+        user_finding = Host.objects.create_finding(self.execution, ip="10.10.10.62", created_from_user_input=True)
+        detected_finding = Host.objects.create_finding(
+            self.execution, ip="10.10.10.62", os="Ubuntu 22.04", created_from_user_input=False
+        )
+        self.assertEqual(user_finding.id, detected_finding.id)
+        self.assertEqual(1, Host.objects.filter(ip="10.10.10.62").count())
+        self.assertEqual("Ubuntu 22.04", detected_finding.os)
+        self.assertFalse(detected_finding.created_from_user_input)
+
+    def test_deduplication_with_new_user_input(self):
+        detected_finding = Host.objects.create_finding(self.execution, ip="10.10.10.63", os="Debian 12")
+        user_finding = Host.objects.create_finding(self.execution, ip="10.10.10.63", created_from_user_input=True)
+        self.assertEqual(detected_finding.id, user_finding.id)
+        self.assertEqual(1, Host.objects.filter(ip="10.10.10.63").count())
+        self.assertEqual("Debian 12", user_finding.os)
+        self.assertFalse(user_finding.created_from_user_input)
+
 
 class PortTest(FindingTest, TestCase):
     model = Port
@@ -178,6 +217,52 @@ class PortTest(FindingTest, TestCase):
         "severity": Severity.INFO,
     }
     expected_string = f"10.10.10.10 - 80 - {TransportProtocol.TCP.value}"
+
+    def test_deduplication(self):
+        first = Port.objects.create_finding(
+            self.execution, host=self.host, port=8443, protocol=TransportProtocol.TCP, service="https-alt"
+        )
+        second = Port.objects.create_finding(self.execution, host=self.host, port=8443)
+        self.assertEqual(first.id, second.id)
+        self.assertEqual(1, Port.objects.filter(host=self.host, port=8443).count())
+        self.assertEqual(TransportProtocol.TCP, second.protocol)
+        self.assertNotEqual(
+            second.id,
+            Port.objects.create_finding(
+                self.execution, host=self.host, port=8443, protocol=TransportProtocol.UDP, service="unknown"
+            ).id,
+        )
+
+    def test_deduplication_with_user_input(self):
+        user_finding = Port.objects.create_finding(
+            self.execution, host=self.host, port=8080, created_from_user_input=True
+        )
+        detected_finding = Port.objects.create_finding(
+            self.execution,
+            host=self.host,
+            port=8080,
+            protocol=TransportProtocol.TCP,
+            service="http-alt",
+            created_from_user_input=False,
+        )
+        self.assertEqual(user_finding.id, detected_finding.id)
+        self.assertEqual(1, Port.objects.filter(host=self.host, port=8080).count())
+        self.assertEqual(TransportProtocol.TCP, detected_finding.protocol)
+        self.assertEqual("http-alt", detected_finding.service)
+        self.assertFalse(detected_finding.created_from_user_input)
+
+    def test_deduplication_with_new_user_input(self):
+        detected_finding = Port.objects.create_finding(
+            self.execution, host=self.host, port=9090, protocol=TransportProtocol.TCP, service="websocket"
+        )
+        user_finding = Port.objects.create_finding(
+            self.execution, host=self.host, port=9090, created_from_user_input=True
+        )
+        self.assertEqual(detected_finding.id, user_finding.id)
+        self.assertEqual(1, Port.objects.filter(host=self.host, port=9090).count())
+        self.assertEqual(TransportProtocol.TCP, user_finding.protocol)
+        self.assertEqual("websocket", user_finding.service)
+        self.assertFalse(user_finding.created_from_user_input)
 
 
 class PathTest(FindingTest, TestCase):
@@ -192,6 +277,14 @@ class PathTest(FindingTest, TestCase):
         for key, value in defectdojo_endpoint.items():
             self.assertEqual(value, parsed[key])
 
+    def test_deduplication(self):
+        first = Path.objects.create_finding(self.execution, port=self.port, path="/admin", status=403)
+        second = Path.objects.create_finding(self.execution, port=self.port, path="/admin")
+        self.assertEqual(first.id, second.id)
+        self.assertEqual(1, Path.objects.filter(port=self.port, path="/admin").count())
+        self.assertEqual(403, second.status)
+        self.assertNotEqual(second.id, Path.objects.create_finding(self.execution, port=self.port, path="/login").id)
+
 
 class TechnologyTest(FindingTest, TestCase):
     model = Technology
@@ -204,6 +297,45 @@ class TechnologyTest(FindingTest, TestCase):
         "references": "https://wordpress.org",
     }
     expected_string = f"10.10.10.10 - 80 - {TransportProtocol.TCP.value} - WordPress - 1.0.10"
+
+    def test_deduplication(self):
+        first = Technology.objects.create_finding(self.execution, port=self.port, name="Grafana", version="10.1.0")
+        second = Technology.objects.create_finding(self.execution, port=self.port, name="Grafana")
+        self.assertEqual(first.id, second.id)
+        self.assertEqual(1, Technology.objects.filter(port=self.port, name="Grafana").count())
+        self.assertEqual("10.1.0", second.version)
+        self.assertNotEqual(
+            second.id,
+            Technology.objects.create_finding(self.execution, port=self.port, name="Grafana", version="10.2.0").id,
+        )
+
+    def test_deduplication_with_user_input(self):
+        user_finding = Technology.objects.create_finding(
+            self.execution, port=self.port, name="Joomla", created_from_user_input=True
+        )
+        detected_finding = Technology.objects.create_finding(
+            self.execution,
+            port=self.port,
+            name="Joomla",
+            version="4.2.0",
+            created_from_user_input=False,
+        )
+        self.assertEqual(user_finding.id, detected_finding.id)
+        self.assertEqual(1, Technology.objects.filter(port=self.port, name="Joomla").count())
+        self.assertEqual("4.2.0", detected_finding.version)
+        self.assertFalse(detected_finding.created_from_user_input)
+
+    def test_deduplication_with_new_user_input(self):
+        detected_finding = Technology.objects.create_finding(
+            self.execution, port=self.port, name="Drupal", version="9.5.0"
+        )
+        user_finding = Technology.objects.create_finding(
+            self.execution, port=self.port, name="Drupal", created_from_user_input=True
+        )
+        self.assertEqual(detected_finding.id, user_finding.id)
+        self.assertEqual(1, Technology.objects.filter(port=self.port, name="Drupal").count())
+        self.assertEqual("9.5.0", user_finding.version)
+        self.assertFalse(user_finding.created_from_user_input)
 
 
 class CredentialTest(FindingTest, TestCase):
@@ -218,6 +350,33 @@ class CredentialTest(FindingTest, TestCase):
     expected_string = (
         f"10.10.10.10 - 80 - {TransportProtocol.TCP.value} - WordPress - 1.0.10 - admin10@rekono.com - admin10 - admin"
     )
+
+    def test_deduplication(self):
+        first = Credential.objects.create_finding(
+            self.execution,
+            technology=self.technology,
+            email="root@rekono.com",
+            username="root",
+            secret="toor",
+            context="Found in backup file",
+        )
+        second = Credential.objects.create_finding(
+            self.execution, technology=self.technology, email="root@rekono.com", username="root", secret="toor"
+        )
+        self.assertEqual(first.id, second.id)
+        self.assertEqual(
+            1,
+            Credential.objects.filter(
+                technology=self.technology, email="root@rekono.com", username="root", secret="toor"
+            ).count(),
+        )
+        self.assertEqual("Found in backup file", second.context)
+        self.assertNotEqual(
+            second.id,
+            Credential.objects.create_finding(
+                self.execution, technology=self.technology, email="root@rekono.com", username="root", secret="different"
+            ).id,
+        )
 
 
 class VulnerabilityTest(FindingTest, TestCase):
@@ -234,6 +393,63 @@ class VulnerabilityTest(FindingTest, TestCase):
         f"10.10.10.10 - 80 - {TransportProtocol.TCP.value} - WordPress - 1.0.10 - Vulnerability 10 - CVE-2025-3010"
     )
 
+    def test_deduplication_with_user_input(self):
+        user_finding = Vulnerability.objects.create_finding(
+            self.execution,
+            port=self.port,
+            name="CVE-2025-9999",
+            cve="CVE-2025-9999",
+            created_from_user_input=True,
+        )
+        detected_finding = Vulnerability.objects.create_finding(
+            self.execution,
+            port=self.port,
+            technology=self.technology,
+            name="CVE-2025-9999",
+            cve="CVE-2025-9999",
+            created_from_user_input=False,
+        )
+        self.assertEqual(user_finding.id, detected_finding.id)
+        self.assertEqual(1, Vulnerability.objects.filter(port=self.port, cve="CVE-2025-9999").count())
+        self.assertEqual(self.technology, detected_finding.technology)
+        self.assertFalse(detected_finding.created_from_user_input)
+
+    def test_deduplication_with_new_user_input(self):
+        detected_finding = Vulnerability.objects.create_finding(
+            self.execution, port=self.port, name="Already enriched finding", cve="CVE-2024-1111"
+        )
+        user_finding = Vulnerability.objects.create_finding(
+            self.execution, port=self.port, name="CVE-2024-1111", cve="CVE-2024-1111", created_from_user_input=True
+        )
+        self.assertEqual(detected_finding.id, user_finding.id)
+        self.assertEqual("Already enriched finding", user_finding.name)
+        self.assertEqual(1, Vulnerability.objects.filter(port=self.port, cve="CVE-2024-1111").count())
+        self.assertFalse(user_finding.created_from_user_input)
+
+    def test_deduplication_with_new_user_input_via_lookup(self):
+        self.assertIsNone(self.vulnerability.port)
+        original_name = self.vulnerability.name
+        user_finding = Vulnerability.objects.create_finding(
+            self.execution,
+            port=self.vulnerability.technology.port,
+            name=self.vulnerability.cve,
+            cve=self.vulnerability.cve,
+            created_from_user_input=True,
+        )
+        self.assertEqual(self.vulnerability.id, user_finding.id)
+        self.assertEqual(1, Vulnerability.objects.filter(cve=self.vulnerability.cve).count())
+        self.assertEqual(original_name, user_finding.name)
+        self.assertFalse(user_finding.created_from_user_input)
+
+    def test_deduplication_not_merged(self):
+        algorithm_finding = Vulnerability.objects.create_finding(
+            self.execution, technology=self.technology, name="Insecure MAC algorithm: hmac-md5"
+        )
+        cve_finding = Vulnerability.objects.create_finding(
+            self.execution, technology=self.technology, name="CVE-2023-48795", cve="CVE-2023-48795"
+        )
+        self.assertNotEqual(algorithm_finding.id, cve_finding.id)
+
 
 class ExploitTest(FindingTest, TestCase):
     model = Exploit
@@ -245,6 +461,33 @@ class ExploitTest(FindingTest, TestCase):
         "references": "https://www.exploit-db.com/exploits/1",
     }
     expected_string = f"10.10.10.10 - 80 - {TransportProtocol.TCP.value} - WordPress - 1.0.10 - Vulnerability 10 - CVE-2025-3010 - 1 - https://www.exploit-db.com/exploits/1"
+
+    def test_deduplication(self):
+        first = Exploit.objects.create_finding(
+            self.execution,
+            vulnerability=self.vulnerability,
+            title="Custom PoC",
+            reference="https://example.com/poc",
+            edb_id=99999,
+        )
+        second = Exploit.objects.create_finding(
+            self.execution, vulnerability=self.vulnerability, title="Custom PoC", reference="https://example.com/poc"
+        )
+        self.assertEqual(first.id, second.id)
+        self.assertEqual(
+            1, Exploit.objects.filter(vulnerability=self.vulnerability, reference="https://example.com/poc").count()
+        )
+        self.assertEqual(99999, second.edb_id)
+        self.assertNotEqual(
+            second.id,
+            Exploit.objects.create_finding(
+                self.execution,
+                vulnerability=self.vulnerability,
+                title="Custom PoC",
+                reference="https://example.com/poc",
+                edb_id=11111,
+            ).id,
+        )
 
 
 class LatestHostsTest(ApiTest, TestCase):
