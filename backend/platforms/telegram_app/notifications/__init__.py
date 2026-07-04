@@ -78,6 +78,7 @@ class Telegram(BaseNotification, BaseTelegram):
             start=self.escape(execution.start.strftime(self.date_format)),
             end=self.escape(execution.end.strftime(self.date_format)),
             executor=self.escape(execution.task.executor.username if execution.task.executor else "System"),
+            frontend_link=f"{CONFIG.frontend_url}/projects/{execution.task.target.project.id}/scans/{execution.task.id}",
             findings="\n\n".join(
                 [
                     MESSAGE.format(

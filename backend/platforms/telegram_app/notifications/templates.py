@@ -12,10 +12,11 @@ EXECUTION = """
 ✅ _Status_            *{status}*
 🎯 _Target_            *{target}*
 🛠 _Tool_              *{tool}*
-⚙️ _Configuration_      {configuration}
+⚙️ _Configuration_     {configuration}
 🔜 _Start_             {start}
 🔚 _End_               {end}
 👤 _Executor_          {executor}
+🔗 _Scan_              {frontend_link}
 
 🎁 *Findings*
 
