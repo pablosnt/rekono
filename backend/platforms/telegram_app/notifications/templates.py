@@ -1,7 +1,9 @@
-"""Telegram message templates for security notifications.
+"""Telegram MarkdownV2 message templates for security notifications.
 
-Defines message templates and formatting for Telegram Bot notifications
-including execution reports, findings display, and alert formatting.
+Defines the format strings used to render Telegram Bot notifications: execution
+reports (EXECUTION), per-finding sections (MESSAGE), and alert titles (ALERT,
+ALERT_TRENDING_CVE). FINDINGS maps each finding model to its icon and field
+template so findings can be rendered uniformly by type.
 """
 
 from findings.models import OSINT, Credential, Exploit, Host, Path, Port, Technology, Vulnerability
@@ -17,8 +19,6 @@ EXECUTION = """
 🔚 _End_               {end}
 👤 _Executor_          {executor}
 🔗 _Scan_              {frontend_link}
-
-🎁 *Findings*
 
 {findings}
 """

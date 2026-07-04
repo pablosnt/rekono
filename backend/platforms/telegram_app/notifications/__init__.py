@@ -7,6 +7,7 @@ execution results, alerts, and findings through Bot messaging.
 from typing import Any
 
 from django.forms.models import model_to_dict
+from telegram.constants import MessageLimit
 
 from alerts.enums import AlertItem
 from alerts.models import Alert
@@ -20,17 +21,20 @@ from users.models import User
 
 
 class Telegram(BaseNotification, BaseTelegram):
-    """Telegram notification delivery system for security events.
+    """Telegram notification delivery for security events.
 
-    Handles delivery of security notifications through Telegram Bot messaging
-    including execution results, alerts, and findings. Integrates with the
-    base notification framework to provide real-time security event delivery.
+    Delivers execution reports, alerts, and findings to users over Telegram Bot
+    messaging, splitting long reports across multiple messages to stay within
+    Telegram's per-message length limit.
 
     Attributes:
-        enable_field (str): User profile field name to check if notifications are enabled.
+        enable_field (str): User field name that toggles Telegram notifications.
+        initial_findings_per_message (int): Findings per message when a report is
+            split because it exceeds Telegram's length limit.
     """
 
     enable_field = "telegram_notifications"
+    initial_findings_per_message = 10
 
     def is_available(self) -> bool:
         """Check if Telegram notifications are available.
@@ -55,21 +59,64 @@ class Telegram(BaseNotification, BaseTelegram):
         """Send execution completion notification with findings summary.
 
         Formats and sends a comprehensive execution report including tool details,
-        execution timing, and organized findings by type.
+        execution timing, and organized findings by type. The full report is sent as a
+        single message, but if it exceeds Telegram's message length limit the findings are
+        split into groups of `initial_findings_per_message`, keeping the execution details only in
+        the first message. Any resulting message that is still too long is split in half
+        again until every message fits within the limit.
 
         Args:
             users (list[User]): Users to notify about the execution.
             execution (Execution): The completed security tool execution.
             findings (list[Finding]): List of security findings discovered.
         """
-        texts_by_type: dict[Any, list[str]] = {}
-        for finding in findings:
-            if finding.created_from_user_input:
-                continue
-            if finding.__class__ not in texts_by_type:
-                texts_by_type[finding.__class__] = []
-            texts_by_type[finding.__class__].append(self._format_finding(finding))
-        message = EXECUTION.format(
+        findings = [finding for finding in findings if not finding.created_from_user_input]
+        message = self._execution_message(execution, findings)
+        if len(message) <= MessageLimit.MAX_TEXT_LENGTH:
+            self._notify(users, message)
+        else:
+            # The full report is too long, so send the findings in groups
+            for index in range(0, len(findings), self.initial_findings_per_message):
+                self._notify_execution_group(
+                    users,
+                    execution,
+                    findings[index : index + self.initial_findings_per_message],
+                    with_execution=index == 0,
+                )
+
+    def _notify_execution_group(
+        self, users: list[User], execution: Execution, findings: list[Finding], with_execution: bool
+    ) -> None:
+        """Send a group of findings, splitting it in half if it exceeds the length limit.
+
+        Args:
+            users (list[User]): Users to notify about the execution.
+            execution (Execution): The completed security tool execution.
+            findings (list[Finding]): Findings included in this group.
+            with_execution (bool): Whether to prepend the execution details to the message.
+        """
+        message = self._execution_message(execution, findings) if with_execution else self._format_findings(findings)
+        if len(message) <= MessageLimit.MAX_TEXT_LENGTH:
+            self._notify(users, message)
+        elif len(findings) == 1:
+            # A single finding can't be split further, so truncate it to fit within the limit
+            self._notify(users, message[: MessageLimit.MAX_TEXT_LENGTH - 3] + "...")
+        else:
+            half = (len(findings) + 1) // 2
+            self._notify_execution_group(users, execution, findings[:half], with_execution)
+            self._notify_execution_group(users, execution, findings[half:], with_execution=False)
+
+    def _execution_message(self, execution: Execution, findings: list[Finding]) -> str:
+        """Build the execution report message with its findings summary.
+
+        Args:
+            execution (Execution): The completed security tool execution.
+            findings (list[Finding]): Findings to include in this message.
+
+        Returns:
+            str: Formatted execution report ready to be sent.
+        """
+        return EXECUTION.format(
             project=self.escape(execution.task.target.project.name),
             target=self.escape(execution.task.target.target),
             tool=self.escape(execution.configuration.tool.name),
@@ -78,37 +125,31 @@ class Telegram(BaseNotification, BaseTelegram):
             start=self.escape(execution.start.strftime(self.date_format)),
             end=self.escape(execution.end.strftime(self.date_format)),
             executor=self.escape(execution.task.executor.username if execution.task.executor else "System"),
-            frontend_link=f"{CONFIG.frontend_url}/projects/{execution.task.target.project.id}/scans/{execution.task.id}",
-            findings="\n\n".join(
-                [
-                    MESSAGE.format(
-                        icon=FINDINGS[finding_type].get("icon", ""),
-                        title=finding_type.__name__,
-                        details="\n\n".join(texts),
-                    )
-                    for finding_type, texts in texts_by_type.items()
-                ]
+            frontend_link=self.escape(
+                f"{CONFIG.frontend_url}/projects/{execution.task.target.project.id}/scans/{execution.task.id}"
             ),
+            findings=self._format_findings(findings),
         )
-        self._notify(users, message)
 
-    def _notify_alert(self, users: list[User], alert: Alert, finding: Finding) -> None:
-        """Send security alert notification for a specific finding.
+    def _format_findings(self, findings: list[Finding]) -> str:
+        """Format a group of findings organized by type for a Telegram message.
 
         Args:
-            users (list[User]): Users subscribed to the alert.
-            alert (Alert): The alert configuration that triggered.
-            finding (Finding): The security finding that triggered the alert.
+            findings (list[Finding]): Findings to format.
+
+        Returns:
+            str: Findings summary grouped by type with the corresponding icons and titles.
         """
-        self._notify(
-            users,
+        texts_by_type: dict[Any, list[str]] = {}
+        for finding in findings:
+            texts_by_type.setdefault(finding.__class__, []).append(self._format_finding(finding))
+        return "\n\n".join(
             MESSAGE.format(
-                icon=FINDINGS[finding.__class__].get("icon", ""),
-                title=ALERT_TRENDING_CVE
-                if alert.item == AlertItem.TRENDING_CVE
-                else ALERT.format(finding=finding.__class__.__name__.lower()),
-                details=self._format_finding(finding),
-            ),
+                icon=FINDINGS[finding_type].get("icon", ""),
+                title=finding_type.__name__,
+                details="\n\n".join(texts),
+            )
+            for finding_type, texts in texts_by_type.items()
         )
 
     def _format_finding(self, finding: Finding) -> str:
@@ -129,6 +170,25 @@ class Telegram(BaseNotification, BaseTelegram):
                     for k, v in model_to_dict(finding).items()
                 }
             )
+        )
+
+    def _notify_alert(self, users: list[User], alert: Alert, finding: Finding) -> None:
+        """Send security alert notification for a specific finding.
+
+        Args:
+            users (list[User]): Users subscribed to the alert.
+            alert (Alert): The alert configuration that triggered.
+            finding (Finding): The security finding that triggered the alert.
+        """
+        self._notify(
+            users,
+            MESSAGE.format(
+                icon=FINDINGS[finding.__class__].get("icon", ""),
+                title=ALERT_TRENDING_CVE
+                if alert.item == AlertItem.TRENDING_CVE
+                else ALERT.format(finding=finding.__class__.__name__.lower()),
+                details=self._format_finding(finding),
+            ),
         )
 
     def welcome_message(self, user: User) -> None:

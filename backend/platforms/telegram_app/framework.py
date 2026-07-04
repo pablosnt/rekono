@@ -25,9 +25,9 @@ class BaseTelegram(LoggingEntity):
     initialization, message sending, token validation, and error handling.
 
     Attributes:
-        date_format (str): Standard date format for message timestamps.
-        _app (Application | None): Telegram application client
-        _initialized (bool): Indicates if the Telegram bot has been initialized or not
+        date_format (str): Date format used for execution timestamps in messages.
+        _app (Application | None): Cached Telegram application client.
+        _initialized (bool): Whether the bot application has been initialized.
     """
 
     date_format = "%Y-%m-%d %H:%M:%S"
@@ -46,7 +46,8 @@ class BaseTelegram(LoggingEntity):
     def initialize(self) -> None:
         """Initialize the Telegram Bot application.
 
-        Initializes the bot application if available and handles authentication errors.
+        Runs the bot's async initialization once; the _initialized guard makes
+        repeated calls no-ops. Clears the stored token if authentication fails.
         """
         if not self._initialized and self.app and self.app.bot:  # pytype: disable=attribute-error
             try:
@@ -105,16 +106,29 @@ class BaseTelegram(LoggingEntity):
         """
         if self.app and self.app.bot:
             try:
-                asyncio.run(
-                    self.app.bot.send_message(
-                        chat.chat_id,
-                        message,
-                        parse_mode=ParseMode.MARKDOWN_V2,
-                        reply_markup=reply_markup,
-                    )
-                )
+                asyncio.run(self._send_message(chat, message, reply_markup))
             except NetworkError:
                 pass
+
+    async def _send_message(self, chat: TelegramChat, message: str, reply_markup: Any = None) -> None:
+        """Send a message with a bot HTTP client bound to the current event loop.
+
+        Each call runs in its own `asyncio.run` loop, so the bot's HTTP client is opened and
+        closed within that loop. Reusing it across loops would bind its connection pool to an
+        already closed loop, raising "Event loop is closed" and silently dropping notifications.
+
+        Args:
+            chat (TelegramChat): The target chat for the message.
+            message (str): The message content to send.
+            reply_markup (Any, optional): Keyboard markup for interactive messages.
+        """
+        async with self.app.bot as bot:
+            await bot.send_message(
+                chat.chat_id,
+                message,
+                parse_mode=ParseMode.MARKDOWN_V2,
+                reply_markup=reply_markup,
+            )
 
     def escape(self, value: str) -> str:
         """Escape text for Telegram Markdown V2 formatting.
