@@ -20,14 +20,12 @@ EXECUTION = """
 👤 _Executor_          {executor}
 🔗 _Scan_              {frontend_link}
 
-{findings}
-"""
+{findings}"""
 
 MESSAGE = """
 {icon} *{title}*
 
-{details}
-"""
+{details}"""
 
 FINDINGS = {
     OSINT: {
@@ -35,8 +33,7 @@ FINDINGS = {
         "template": """
 _Data_          *{data}*
 _Data type_     {data_type}
-_Source_        {source}
-""",
+_Source_        {source}""",
     },
     Host: {
         "icon": "🖥",
@@ -44,10 +41,8 @@ _Source_        {source}
 _Address_   *{ip}*
 _Domain_    {domain}
 _OS_        {os}
-_OS type_   {os_type}
 _Country_   {country}
-_City_      {city}
-""",
+_City_      {city}""",
     },
     Port: {
         "icon": "📥",
@@ -56,8 +51,7 @@ _Host_          {host}
 _Port_          *{port}*
 _Service_       {service}
 _Status_        {status}
-_Protocol_      {protocol}
-""",
+_Protocol_      {protocol}""",
     },
     Path: {
         "icon": "🛣",
@@ -65,16 +59,14 @@ _Protocol_      {protocol}
 _Port_          {port}
 _Path_          *{path}*
 _Type_          {type}
-_Status_        {status}
-""",
+_Status_        {status}""",
     },
     Technology: {
         "icon": "🖲",
         "template": """
 _Port_          {port}
 _Name_          *{name}*
-_Version_       {version}
-""",
+_Version_       {version}""",
     },
     Credential: {
         "icon": "🔑",
@@ -83,8 +75,7 @@ _Technology_    {technology}
 _Email_         *{email}*
 _Username_      *{username}*
 _Secret_        *{secret}*
-_Context_       {context}
-""",
+_Context_       {context}""",
     },
     Vulnerability: {
         "icon": "🐛",
@@ -101,10 +92,7 @@ _CVSS_              {cvss_base_score}
 _EPSS_              {epss_score}
 _CWE_               {cwes}
 _Trending_          {trending}
-_Reference_         {reference}
-
-{description}
-""",
+_Reference_         {reference}""",
     },
     Exploit: {
         "icon": "💣",
@@ -113,8 +101,7 @@ _Vulnerability_     {vulnerability}
 _Technology_        {technology}
 _Title_             *{title}*
 _EDB_               {edb_id}
-_Reference_         {reference}
-""",
+_Reference_         {reference}""",
     },
 }
 

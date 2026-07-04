@@ -30,7 +30,7 @@ class BaseTelegram(LoggingEntity):
         _initialized (bool): Whether the bot application has been initialized.
     """
 
-    date_format = "%Y-%m-%d %H:%M:%S"
+    date_format = "%Y-%m-%d %H:%M:%S %Z"
     _app = None
     _initialized = False
 
@@ -130,16 +130,19 @@ class BaseTelegram(LoggingEntity):
                 reply_markup=reply_markup,
             )
 
-    def escape(self, value: str) -> str:
+    def escape(self, value: str, entity_type: str | None = None) -> str:
         """Escape text for Telegram Markdown V2 formatting.
 
         Args:
             value (str): The text to escape.
+            entity_type (str | None, optional): Markdown V2 entity the text belongs to. Use
+                "text_link" to escape a link URL, where only ")" and "\\" must be escaped instead
+                of the full set of special characters. Defaults to None (general text escaping).
 
         Returns:
             str: The escaped text safe for Markdown V2 parsing.
         """
-        return escape_markdown(value, version=2)
+        return escape_markdown(value, version=2, entity_type=entity_type)
 
     async def handle_error(self, update: object, context: CallbackContext) -> None:
         """Global error handler for uncaught exceptions raised by bot handlers.

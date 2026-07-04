@@ -125,9 +125,7 @@ class Telegram(BaseNotification, BaseTelegram):
             start=self.escape(execution.start.strftime(self.date_format)),
             end=self.escape(execution.end.strftime(self.date_format)),
             executor=self.escape(execution.task.executor.username if execution.task.executor else "System"),
-            frontend_link=self.escape(
-                f"{CONFIG.frontend_url}/projects/{execution.task.target.project.id}/scans/{execution.task.id}"
-            ),
+            frontend_link=f"[Check scan in Rekono]({self.escape(f'{CONFIG.frontend_url}/projects/{execution.task.target.project.id}/scans/{execution.task.id}', entity_type='text_link')})",
             findings=self._format_findings(findings),
         )
 
@@ -161,16 +159,13 @@ class Telegram(BaseNotification, BaseTelegram):
         Returns:
             str: Formatted finding message with escaped content.
         """
-        return (
-            FINDINGS[finding.__class__]
-            .get("template", "")
-            .format(
-                **{
-                    k: self.escape(", ".join(str(i) for i in v) if isinstance(v, list) else str(v))
-                    for k, v in model_to_dict(finding).items()
-                }
+        values = {}
+        for field in model_to_dict(finding):
+            value = getattr(finding, field)
+            values[field] = self.escape(
+                ", ".join(str(item) for item in value) if isinstance(value, list) else str(value)
             )
-        )
+        return FINDINGS[finding.__class__].get("template", "").format(**values)
 
     def _notify_alert(self, users: list[User], alert: Alert, finding: Finding) -> None:
         """Send security alert notification for a specific finding.
