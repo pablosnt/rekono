@@ -1,7 +1,7 @@
 from django.test import TestCase
 
 from findings.enums import PathType, Severity
-from findings.models import Credential, Path, Technology, Vulnerability
+from findings.models import Credential, Path, Port, Technology, Vulnerability
 from tests.framework import ParserTest
 from tests.framework.cases import ParserTestCase
 
@@ -99,6 +99,7 @@ class NucleiTest(ParserTest, TestCase):
         ParserTestCase(
             "2025-dvwa.json",
             [
+                {"model": Port, "port": 4280},
                 {"model": Credential, "username": "admin", "secret": "password", "context": "DVWA Default Login"},
                 {
                     "model": Vulnerability,
@@ -268,6 +269,40 @@ class NucleiTest(ParserTest, TestCase):
                 {"model": Path, "path": "/README.md", "type": PathType.ENDPOINT},
                 {"model": Path, "path": "/robots.txt", "type": PathType.ENDPOINT},
                 {"model": Path, "path": "/login.php", "type": PathType.ENDPOINT},
+            ],
+        ),
+        ParserTestCase(
+            "mixed-ports.json",
+            [
+                {"model": Port, "port": 80},
+                {
+                    "model": Technology,
+                    "name": "Apache/2.4.25",
+                    "version": None,
+                    "description": "Apache Detection",
+                    "reference": None,
+                },
+                {"model": Port, "port": 22},
+                {
+                    "model": Vulnerability,
+                    "name": "OpenSSH Terrapin Attack - Detection: Vulnerable to Terrapin",
+                    "description": None,
+                    "severity": Severity.MEDIUM,
+                    "cvss_vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:H/A:N",
+                    "cve": "CVE-2023-48795",
+                    "cwes": ["CWE-354"],
+                    "reference": None,
+                },
+                {
+                    "model": Vulnerability,
+                    "name": "SSH Weak MAC Algorithms Enabled",
+                    "description": None,
+                    "severity": Severity.INFO,
+                    "cvss_vector": None,
+                    "cve": None,
+                    "cwes": [],
+                    "reference": None,
+                },
             ],
         ),
     ]

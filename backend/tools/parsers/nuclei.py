@@ -1,7 +1,9 @@
 """Nuclei vulnerability scanner output parser.
 
 Processes Nuclei JSON output to extract vulnerabilities, technology fingerprints,
-and credential findings from web application security scans.
+credential findings, exposed ports, and discovered paths from web application
+security scans. Findings are linked to the port they were detected on whenever
+Nuclei reports one.
 """
 
 import json
@@ -9,16 +11,17 @@ from typing import cast
 from urllib.parse import urlparse
 
 from findings.enums import PathType, Severity
-from findings.models import Credential, Path, Technology, Vulnerability
+from findings.models import Credential, Path, Port, Technology, Vulnerability
 from tools.parsers.base import BaseParser
 
 
 class Nuclei(BaseParser):
     """Parser for Nuclei JSON output files.
 
-    Extracts vulnerability findings, technology detections, and exposed credentials
-    from Nuclei template-based security scans. Handles multiple finding types based
-    on template tags and metadata.
+    Extracts vulnerability findings, technology detections, exposed credentials,
+    ports, and paths from Nuclei template-based security scans. Handles multiple
+    finding types based on template tags and metadata, associating findings with
+    the port they were detected on when available.
 
     Attributes:
         Inherits all attributes from BaseParser
@@ -28,18 +31,39 @@ class Nuclei(BaseParser):
         """Parse Nuclei JSON output and extract security findings.
 
         Processes line-delimited JSON output to create Vulnerability, Technology,
-        and Credential findings based on template tags and extracted results.
+        Credential, Port, and Path findings based on template tags and extracted
+        results. Technology and Vulnerability findings are linked to the Port they
+        were detected on when Nuclei reports a port for the matched target.
         """
         # Parse each line of the JSON output as a separate finding
         data = [json.loads(line) for line in self.load_report_by_lines()]
         paths = []
+        # Cache ports by number so the same port is reported only once
+        ports: dict[int, Port | None] = {}
         for item in data:
+            port = None
+            # Nuclei reports the port explicitly for some templates
+            _port_number = item.get("port")
             # Save the path where the Nuclei alert was triggered
             matched_at = item.get("matched-at")
             if matched_at and "://" in matched_at:
                 parse = urlparse(item.get("matched-at"))
                 if parse.path and parse.path != "/" and parse.path not in paths:
                     paths.append(parse.path)
+                # Fall back to the port embedded in the matched URL
+                if not _port_number and parse.port:
+                    _port_number = parse.port
+            if _port_number:
+                # Guard against malformed port values so a bad entry doesn't abort the scan
+                try:
+                    port_number = int(_port_number)
+                except (TypeError, ValueError):
+                    port_number = None
+                if port_number:
+                    # Reuse the Port finding already created for this number in this scan
+                    if port_number not in ports:
+                        ports[port_number] = self.create_finding(Port, port=port_number)
+                    port = ports[port_number]
             # Extract matcher information from Nuclei results
             # Matcher provides specific details about what triggered the template
             matcher = None
@@ -62,6 +86,7 @@ class Nuclei(BaseParser):
                 # Technology detection templates - create Technology findings
                 self.create_finding(
                     Technology,
+                    **({"port": port, "linked_finding": True} if port else {}),
                     name=matcher or name,
                     description=description.strip() if description else (name if matcher else None),
                     reference=reference[0] if reference else None,
@@ -91,6 +116,9 @@ class Nuclei(BaseParser):
                     "remediation": remediation.strip() if remediation else None,
                     "reference": reference[0] if reference else None,
                 }
+                if port:
+                    attributes["port"] = port
+                    attributes["linked_finding"] = True
                 if cve and isinstance(cve, list):
                     for cve_value in cve:
                         attributes["cve"] = cve_value.upper()
@@ -100,4 +128,4 @@ class Nuclei(BaseParser):
                     self.create_finding(Vulnerability, **attributes)
         # Create identified paths
         for path in paths:
-            self.create_finding(Path, path=path, type=PathType.ENDPOINT)
+            self.create_finding(Path, path=Path.clean_path(path), type=PathType.ENDPOINT)
