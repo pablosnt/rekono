@@ -8,9 +8,10 @@ import asyncio
 from functools import cached_property
 from typing import Any
 
+from telegram import Update
 from telegram.constants import ParseMode
 from telegram.error import Forbidden, InvalidToken, NetworkError
-from telegram.ext import Application
+from telegram.ext import Application, CallbackContext
 from telegram.helpers import escape_markdown
 
 from framework.logging import LoggingEntity
@@ -66,6 +67,7 @@ class BaseTelegram(LoggingEntity):
         if not self._app and self.settings and self.settings.secret:
             try:
                 self._app = Application.builder().token(self.settings.secret).post_init(self.post_init).build()
+                self._app.add_error_handler(self.handle_error)
             except (InvalidToken, Forbidden):
                 self.handle_invalid_token()
         return self._app
@@ -124,6 +126,24 @@ class BaseTelegram(LoggingEntity):
             str: The escaped text safe for Markdown V2 parsing.
         """
         return escape_markdown(value, version=2)
+
+    async def handle_error(self, update: object, context: CallbackContext) -> None:
+        """Global error handler for uncaught exceptions raised by bot handlers.
+
+        Registered as the Application's error handler so exceptions raised while
+        processing an update (e.g. transient network disconnections) are logged
+        instead of being silently dropped by python-telegram-bot with a
+        "No error handlers are registered" warning.
+
+        Args:
+            update (object): The update that caused the error, if any.
+            context (CallbackContext): The callback context holding the raised error.
+        """
+        chat_id = update.effective_chat.id if isinstance(update, Update) and update.effective_chat else None
+        self.logger.error(
+            f"[Telegram] Unhandled exception while processing update from chat {chat_id}: {context.error}",
+            exc_info=context.error,
+        )
 
     def handle_invalid_token(self, log_error: bool = True) -> None:
         """Handle invalid Telegram Bot token errors.
