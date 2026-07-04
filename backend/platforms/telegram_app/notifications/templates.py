@@ -17,6 +17,8 @@ EXECUTION = """
 🔚 _End_               {end}
 👤 _Executor_          {executor}
 
+🎁 *Findings*
+
 {findings}
 """
 
