@@ -98,6 +98,7 @@ Are you sure?
         """
         chat = await self.get_active_telegram_chat(update)
         next_state = ConversationHandler.END
+        instance = None
         if chat and update.callback_query and update.callback_query.data:
             if update.callback_query.data == self.yes:
                 target = self.get_context_value(context, Context.TARGET)
