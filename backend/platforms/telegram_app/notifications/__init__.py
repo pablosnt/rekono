@@ -14,7 +14,7 @@ from executions.models import Execution
 from findings.framework.models import Finding
 from framework.platforms import BaseNotification
 from platforms.telegram_app.framework import BaseTelegram
-from platforms.telegram_app.notifications.templates import ALERT, ALERT_TRENDING_CVE, EXECUTION, FINDINGS, HEADER
+from platforms.telegram_app.notifications.templates import ALERT, ALERT_TRENDING_CVE, EXECUTION, FINDINGS, MESSAGE
 from rekono.settings import CONFIG
 from users.models import User
 
@@ -80,7 +80,7 @@ class Telegram(BaseNotification, BaseTelegram):
             executor=self.escape(execution.task.executor.username if execution.task.executor else "System"),
             findings="\n\n".join(
                 [
-                    HEADER.format(
+                    MESSAGE.format(
                         icon=FINDINGS[finding_type].get("icon", ""),
                         title=finding_type.__name__,
                         details="\n\n".join(texts),
@@ -101,7 +101,7 @@ class Telegram(BaseNotification, BaseTelegram):
         """
         self._notify(
             users,
-            HEADER.format(
+            MESSAGE.format(
                 icon=FINDINGS[finding.__class__].get("icon", ""),
                 title=ALERT_TRENDING_CVE
                 if alert.item == AlertItem.TRENDING_CVE

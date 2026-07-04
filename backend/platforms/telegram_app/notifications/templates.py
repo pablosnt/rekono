@@ -20,9 +20,7 @@ EXECUTION = """
 {findings}
 """
 
-HEADER = """
-\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
-
+MESSAGE = """
 {icon} *{title}*
 
 {details}
@@ -51,49 +49,55 @@ _City_      {city}
     Port: {
         "icon": "📥",
         "template": """
+_Host_          {host}
 _Port_          *{port}*
-_Service_       *{service}*
+_Service_       {service}
 _Status_        {status}
 _Protocol_      {protocol}
-_Host_          {host}
 """,
     },
     Path: {
         "icon": "🛣",
         "template": """
+_Port_          {port}
 _Path_          *{path}*
 _Type_          {type}
 _Status_        {status}
-_Port_          {port}
 """,
     },
     Technology: {
         "icon": "🖲",
         "template": """
+_Port_          {port}
 _Name_          *{name}*
 _Version_       {version}
-_Port_          {port}
 """,
     },
     Credential: {
         "icon": "🔑",
         "template": """
+_Technology_    {technology}
 _Email_         *{email}*
 _Username_      *{username}*
 _Secret_        *{secret}*
-_Technology_    {technology}
 _Context_       {context}
 """,
     },
     Vulnerability: {
         "icon": "🐛",
         "template": """
-_Name_              *{name}*
-_CVE_               *{cve}*
-_Severity_          *{severity}*
-_CWE_               {cwes}
 _Port_              {port}
 _Technology_        {technology}
+_Name_              *{name}*
+_CVE_               *{cve}*
+_EUVD_              {euvd_id}
+_GHSA_              {ghsa_id}
+_OSV_               {osv_generic_id}
+_Severity_          {severity}
+_CVSS_              {cvss_base_score}
+_EPSS_              {epss_score}
+_CWE_               {cwes}
+_Trending_          {trending}
 _Reference_         {reference}
 
 {description}
@@ -102,9 +106,10 @@ _Reference_         {reference}
     Exploit: {
         "icon": "💣",
         "template": """
-_Title_             *{title}*
 _Vulnerability_     {vulnerability}
 _Technology_        {technology}
+_Title_             *{title}*
+_EDB_               {edb_id}
 _Reference_         {reference}
 """,
     },
