@@ -4,9 +4,12 @@ Provides a management command to start and deploy the Telegram Bot
 service through Django's command-line interface.
 """
 
+import warnings
 from typing import Any
 
 from django.core.management.base import BaseCommand
+
+warnings.filterwarnings("ignore", category=SyntaxWarning, module="platforms.telegram_app")
 
 from platforms.telegram_app.bot import TelegramBot
 
@@ -32,4 +35,8 @@ class Command(BaseCommand):
             *args: Positional arguments passed to the command.
             **options: Keyword arguments passed to the command.
         """
-        self.bot.deploy()
+        try:
+            self.bot.logger.info("Deploying telegram bot")
+            self.bot.deploy()
+        except KeyboardInterrupt:
+            self.bot.logger.info("Telegram bot is down")
