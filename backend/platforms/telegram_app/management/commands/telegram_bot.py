@@ -9,7 +9,7 @@ from typing import Any
 
 from django.core.management.base import BaseCommand
 
-warnings.filterwarnings("ignore", category=SyntaxWarning, module="platforms.telegram_app")
+warnings.filterwarnings("ignore", category=SyntaxWarning, module=r".*telegram_app.*")
 
 from platforms.telegram_app.bot import TelegramBot
 

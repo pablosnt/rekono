@@ -143,7 +143,8 @@ class BaseTelegramBot(BaseTelegram):
         Returns:
             TelegramChat: The active Telegram chat instance or None.
         """
-        return TelegramChat.objects.filter(chat_id=chat_id, user__is_active=True).first()
+        # select_related caches the user so later user access doesn't trigger a lazy query outside this sync context
+        return TelegramChat.objects.select_related("user").filter(chat_id=chat_id, user__is_active=True).first()
 
     @sync_to_async
     def is_auditor_async(self, telegram_chat: TelegramChat) -> bool:
