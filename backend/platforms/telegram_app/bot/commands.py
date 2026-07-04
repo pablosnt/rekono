@@ -113,6 +113,7 @@ class Help(BaseCommand):
         """
         # await super().execute_command(update, context)
         chat = await self.get_active_telegram_chat(update)
+        await self.log_command_execution(update, self.command_name, chat.user if chat else None)
         if chat:
             await self.reply(
                 update,
@@ -175,6 +176,7 @@ class Start(BaseCommand):
             int | None: None for simple command execution.
         """
         self.validate_update(update)
+        await self.log_command_execution(update, self.command_name)
         # Only issue account-linking OTPs in private chats. In a group/supergroup/channel the token
         # would be visible to every member, letting anyone bind the shared chat to their own account
         # and receive that user's notifications and command output.
@@ -246,6 +248,7 @@ class Logout(BaseCommand):
         """
         # await super().execute_command(update, context)
         self.validate_update(update)
+        await self.log_command_execution(update, self.command_name)
         await self._logout_user_in_telegram_async(update.effective_chat.id)
         await self.reply(update, "Bye\!")
 
@@ -276,6 +279,7 @@ class Cancel(BaseCommand):
         """
         # await super().execute_command(update, context)
         self.validate_update(update)
+        await self.log_command_execution(update, self.command_name)
         self.remove_all_context_values(context)
         await self.reply(update, "Operation has been cancelled")
         return ConversationHandler.END
@@ -318,6 +322,7 @@ class ShowProject(SelectionCommands):
         """
         # await super().execute_command(update, context)
         self.validate_update(update)
+        await self.log_command_execution(update, self.command_name)
         project = self.get_context_value(context, Context.PROJECT)
         if project:
             await self.reply(update, f"💼 _Project_   *{self.escape(project.name)}*")
@@ -349,5 +354,6 @@ class ClearProject(SelectionCommands):
         """
         # await super().execute_command(update, context)
         self.validate_update(update)
+        await self.log_command_execution(update, self.command_name)
         self.remove_context_value(context, Context.PROJECT)
         await self.reply(update, "Project selection has been cleared")

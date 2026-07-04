@@ -15,6 +15,7 @@ from telegram.ext import CallbackContext
 from platforms.telegram_app.bot.enums import Context
 from platforms.telegram_app.framework import BaseTelegram
 from platforms.telegram_app.models import TelegramChat
+from users.models import User
 
 
 class BaseTelegramBot(BaseTelegram):
@@ -155,6 +156,34 @@ class BaseTelegramBot(BaseTelegram):
             bool: True if the user has auditor or admin permissions.
         """
         return telegram_chat.is_auditor()
+
+    async def log_command_execution(
+        self, update: Update, command_name: str, user: User | None = None
+    ) -> None:
+        """Log the execution of a Telegram bot command for audit purposes.
+
+        Records the chat where the command was executed and, when known, the
+        user that ran it. Callers that already resolved the chat's user (e.g.
+        via get_active_telegram_chat) should pass it in to avoid an extra
+        lookup; otherwise it's resolved from the update, falling back to
+        logging the user as anonymous when the chat isn't linked to anyone.
+
+        Args:
+            update (Update): The Telegram update containing the command.
+            command_name (str): The name of the command being executed.
+            user (User | None, optional): The user that triggered the command,
+                if already known.
+        """
+        if update.effective_chat is None:
+            return
+        if user is None:
+            chat = await self._get_active_telegram_chat_async(update.effective_chat.id)
+            user = chat.user if chat else None
+        self.logger.info(
+            f"[TelegramBot] Command /{command_name} executed in chat {update.effective_chat.id} "
+            f"by user {user.id if user else 'anonymous'}",
+            extra={"user": user.id} if user else {},
+        )
 
     async def get_active_telegram_chat(self, update: Update) -> TelegramChat | None:
         """Get and validate the active Telegram chat for the update.

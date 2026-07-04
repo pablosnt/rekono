@@ -92,6 +92,7 @@ class BaseConversation(ConversationHandler, BaseTelegramBot):
         Returns:
             int: The result of the first state method execution.
         """
+        await self.log_command_execution(update, self.command_name)
         self.add_context_value(context, Context.COMMAND, self.command_name)
         return await self.states_methods[0](update, context)
 
