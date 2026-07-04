@@ -215,17 +215,15 @@ class BaseExecutor(LoggingEntity):
                 if parsed_data:
                     break
             if parsed_data:
-                if InputKeyword.URL.name.lower() in parsed_data or InputKeyword.TARGET.name.lower() in parsed_data:
+                if self.port_from_arguments is None:
+                    url_key = InputKeyword.URL.name.lower()
+                    port_key = InputKeyword.PORT.name.lower()
                     try:
-                        parse = urlparse(
-                            parsed_data.get(
-                                InputKeyword.URL.name.lower(),
-                                f"https://{parsed_data.get(InputKeyword.TARGET.name.lower(), '')}",
-                            )
-                        )
-                        if parse and parse.port and self.port_from_arguments is None:
-                            self.port_from_arguments = parse.port
-                    except Exception:
+                        if f"{{{port_key}}}" in argument.argument and parsed_data.get(port_key):
+                            self.port_from_arguments = int(parsed_data[port_key])
+                        if f"{{{url_key}}}" in argument.argument and parsed_data.get(url_key):
+                            self.port_from_arguments = urlparse(parsed_data[url_key]).port
+                    except:
                         pass
                 try:
                     # Special handling for HTTP headers - format each header individually then join
