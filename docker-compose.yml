@@ -72,6 +72,7 @@ services:
       - wordlists_dirb:/usr/share/dirb/wordlists
     networks:
       - internal
+      - external
     depends_on:
       valkey:
         condition: service_healthy
