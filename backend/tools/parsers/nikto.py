@@ -50,4 +50,4 @@ class Nikto(BaseParser):
                 )
             if endpoint and endpoint not in endpoints:
                 endpoints.add(endpoint)
-                self.create_finding(Path, path=endpoint, type=PathType.ENDPOINT)
+                self.create_finding(Path, path=Path.clean_path(endpoint), type=PathType.ENDPOINT)

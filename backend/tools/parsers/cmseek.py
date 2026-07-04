@@ -67,7 +67,7 @@ class Cmseek(BaseParser):
             if paths:
                 for path in paths:
                     if path and path != "/":
-                        self.create_finding(Path, path=path.replace("//", "/"), type=PathType.ENDPOINT)
+                        self.create_finding(Path, path=Path.clean_path(path.replace("//", "/")), type=PathType.ENDPOINT)
                 for search_key, vulnerability_name, severity, cwe in [
                     # CWE-530: Exposure of Backup File to an Unauthorized Control Sphere
                     ("backup_file", "Backup files found", Severity.HIGH, "CWE-530"),

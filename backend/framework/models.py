@@ -310,8 +310,14 @@ class BaseInput(BaseModel):
         reference = f"{self._meta.app_label}.{self._meta.model_name}"
         return InputType.objects.filter(Q(model=reference) | Q(fallback_model=reference)).first()
 
-    def clean_path(self, value: str | None) -> str | None:
+    @staticmethod
+    def clean_path(value: str | None) -> str | None:
         """Normalize a path string by ensuring it starts with a forward slash.
+
+        Defined as a static method so parsers can normalize a raw path value before
+        creating a Path finding, keeping deduplication consistent regardless of whether
+        the source tool reports the leading slash (e.g. gobuster emits ``images`` while
+        dirsearch emits ``/images``).
 
         Args:
             value (str | None): The path string to normalize.

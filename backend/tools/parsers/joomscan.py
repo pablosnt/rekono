@@ -92,7 +92,7 @@ class Joomscan(BaseParser):
                     ]:
                         if search in data:
                             list.add(endpoint)
-                    self.create_finding(Path, path=endpoint, type=PathType.ENDPOINT)
+                    self.create_finding(Path, path=Path.clean_path(endpoint), type=PathType.ENDPOINT)
         for name, paths, severity, cwe in [
             # CWE-530: Exposure of Backup File to an Unauthorized Control Sphere
             ("Backup files found", backups, Severity.HIGH, "CWE-530"),

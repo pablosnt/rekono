@@ -37,7 +37,10 @@ class Dirsearch(BaseParser):
                 url = urlparse(item.get("url", ""))
                 if url.path:
                     self.create_finding(
-                        Path, path=url.path.strip(), status=item.get("status", 0), type=PathType.ENDPOINT
+                        Path,
+                        path=Path.clean_path(url.path.strip()),
+                        status=item.get("status", 0),
+                        type=PathType.ENDPOINT,
                     )
             else:
                 # Old report format: list of findings per target URL
@@ -48,7 +51,7 @@ class Dirsearch(BaseParser):
                         if finding.get("path"):
                             self.create_finding(
                                 Path,
-                                path=finding.get("path").strip(),
+                                path=Path.clean_path(finding.get("path").strip()),
                                 status=finding.get("status", 0),
                                 type=PathType.ENDPOINT,
                             )

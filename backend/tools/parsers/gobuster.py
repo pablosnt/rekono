@@ -31,7 +31,10 @@ class Gobuster(BaseParser):
             if " (Status: " in line and ") [Size: " in line:  # Endpoint format
                 aux = line.split(" (Status: ")
                 self.create_finding(
-                    Path, path=aux[0].strip(), status=int(aux[1].split(")")[0].strip()), type=PathType.ENDPOINT
+                    Path,
+                    path=Path.clean_path(aux[0].strip()),
+                    status=int(aux[1].split(")")[0].strip()),
+                    type=PathType.ENDPOINT,
                 )
             elif " Status: " in line and " [Size: " in line:  # VHOST format
                 vhost, status = line.replace("Found: ", "").split(" Status: ")

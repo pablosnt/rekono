@@ -5,6 +5,7 @@ and discovered endpoints from security scans.
 """
 
 from html import unescape
+from urllib.parse import urlparse
 
 from findings.enums import PathType, Severity
 from findings.models import Path, Vulnerability
@@ -41,7 +42,6 @@ class Zap(BaseParser):
         if not root:
             return
         for site in root.findall("site"):
-            url_base = site.attrib["name"]
             for alert in site.findall("alerts/alertitem"):
                 name = alert.findtext("alert")
                 description = alert.findtext("desc") or ""
@@ -56,10 +56,12 @@ class Zap(BaseParser):
                         url = instance.findtext("uri")
                         description += f"[{instance.findtext('method')}] {url}\n"
                         if url:
-                            endpoint = url.replace(url_base, "")
-                            if endpoint and endpoint not in endpoints:
-                                endpoints.add(endpoint)
-                                self.create_finding(Path, path=endpoint, type=PathType.ENDPOINT)
+                            parsed = urlparse(url)
+                            if parsed and parsed.path:
+                                endpoint = Path.clean_path(parsed.path)
+                                if endpoint not in endpoints:
+                                    endpoints.add(endpoint)
+                                    self.create_finding(Path, path=endpoint, type=PathType.ENDPOINT)
                 if name:
                     name = self._clean(name)
                     self.create_finding(
