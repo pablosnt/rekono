@@ -11,7 +11,7 @@ from django.core.management.base import BaseCommand
 
 warnings.filterwarnings("ignore", category=SyntaxWarning, module=r".*telegram_app.*")
 
-from platforms.telegram_app.bot import TelegramBot
+from platforms.telegram_app.bot import TelegramBot  # noqa: E402
 
 
 class Command(BaseCommand):

@@ -158,9 +158,7 @@ class BaseTelegramBot(BaseTelegram):
         """
         return telegram_chat.is_auditor()
 
-    async def log_command_execution(
-        self, update: Update, command_name: str, user: User | None = None
-    ) -> None:
+    async def log_command_execution(self, update: Update, command_name: str, user: User | None = None) -> None:
         """Log the execution of a Telegram bot command for audit purposes.
 
         Records the chat where the command was executed and, when known, the
