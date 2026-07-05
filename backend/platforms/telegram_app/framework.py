@@ -156,7 +156,9 @@ class BaseTelegram(LoggingEntity):
             update (object): The update that caused the error, if any.
             context (CallbackContext): The callback context holding the raised error.
         """
-        chat_id = update.effective_chat.id if isinstance(update, Update) and update.effective_chat else None
+        if not isinstance(update, Update):
+            return
+        chat_id = update.effective_chat.id if update.effective_chat else None
         self.logger.error(
             f"[Telegram] Unhandled exception while processing update from chat {chat_id}: {context.error}",
             exc_info=context.error,
