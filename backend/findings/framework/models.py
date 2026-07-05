@@ -263,7 +263,7 @@ class Finding(BaseInput):
             field_query = cls._get_deduplication_field_query(unique_field, fields.get(unique_field.field))
             if field_query is not None:
                 query &= field_query
-        return cls.objects.filter(query).first()
+        return cls.objects.filter(query).order_by("id").first()
 
     @classmethod
     def _get_deduplication_field_query(cls, unique_field: UniqueField, new_value: Any) -> Q | None:

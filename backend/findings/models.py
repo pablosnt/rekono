@@ -637,15 +637,21 @@ class Vulnerability(TriageFinding):
         technology = fields.get("technology")
         identity = models.Q(cve=fields["cve"]) if fields.get("cve") else models.Q(name=fields.get("name"))
         if technology:
-            search = cls.objects.filter(identity, executions__task__target=execution.task.target, technology=technology)
+            search = cls.objects.filter(
+                identity, executions__task__target=execution.task.target, technology=technology
+            ).order_by("id")
             if search.exists():
                 return search.first()
         port = fields.get("port") or (technology.port if technology else None)
-        return cls.objects.filter(
-            identity,
-            models.Q(port=port) | models.Q(technology__port=port),
-            executions__task__target=execution.task.target,
-        ).first()
+        return (
+            cls.objects.filter(
+                identity,
+                models.Q(port=port) | models.Q(technology__port=port),
+                executions__task__target=execution.task.target,
+            )
+            .order_by("id")
+            .first()
+        )
 
 
 class Exploit(TriageFinding):
@@ -736,10 +742,30 @@ class Exploit(TriageFinding):
                 query &= field_query
         vulnerability = fields.get("vulnerability")
         if vulnerability:
-            search = cls.objects.filter(query & models.Q(vulnerability=vulnerability))
+            search = cls.objects.filter(query & models.Q(vulnerability=vulnerability)).order_by("id")
             if search.exists():
                 return search.first()
         technology = fields.get("technology") or (vulnerability.technology if vulnerability else None)
-        return cls.objects.filter(
-            query, models.Q(technology=technology) | models.Q(vulnerability__technology=technology)
+        if technology:
+            search = cls.objects.filter(
+                query, models.Q(technology=technology) | models.Q(vulnerability__technology=technology)
+            ).order_by("id")
+            if search.exists():
+                return search.first()
+        port = (
+            (vulnerability.technology.port if vulnerability.technology else vulnerability.port)
+            if vulnerability
+            else technology.port
+        )
+        return (
+            cls.objects.filter(
+                query,
+                models.Q(technology__port=port)
+                | models.Q(vulnerability__technology__port=port)
+                | models.Q(vulnerability__port=port),
+            )
+            .order_by("id")
+            .first()
+            if port
+            else None
         )
