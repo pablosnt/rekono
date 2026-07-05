@@ -223,7 +223,7 @@ class BaseExecutor(LoggingEntity):
                             self.port_from_arguments = int(parsed_data[port_key])
                         if f"{{{url_key}}}" in argument.argument and parsed_data.get(url_key):
                             self.port_from_arguments = urlparse(parsed_data[url_key]).port
-                    except:
+                    except Exception:
                         pass
                 try:
                     # Special handling for HTTP headers - format each header individually then join

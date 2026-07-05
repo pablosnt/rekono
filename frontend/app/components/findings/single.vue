@@ -45,7 +45,6 @@
                   :entity-name="entityName"
                   :project="finding.project"
                 />
-                <!-- TODO: Avoid auto-displayed reference for Exploits -->
                 <UDropdownMenu
                   v-if="
                     (integrations.hacktricks?.enabled &&

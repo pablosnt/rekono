@@ -132,130 +132,65 @@ class FindingManager(Manager):
         finding.save(update_fields=["is_fixed", "auto_fixed", "fixed_date", "fixed_by"])
         return finding
 
-    def _resolve_unique_value(self, lookups: list[str], fields: dict[str, Any]) -> Any:
-        """Resolve the value to match on when a user-provided finding is involved.
+    def create_finding(self, execution: Execution, **fields: Any) -> Any:
+        """Create or update a finding with duplicate prevention.
 
-        A user-provided finding only carries partial information, so a field it's matched on
-        might not be set directly, only reachable through a related field instead. This method
-        only runs for fields with ``user_input_lookups``, and tries each declared path in order,
-        returning the first one with a value. For example, a Vulnerability normally has its
-        "port" set directly, but a finding built from a technology alone has no "port" key at
-        all; ``user_input_lookups = ["port", "technology__port"]`` lets this method fall back to
-        reading ``.port`` off ``fields["technology"]`` in that case.
-
-        Args:
-            lookups (list[str]): Paths to try, in order, as declared on ``user_input_lookups``.
-            fields (dict[str, Any]): Field values the finding is being created/matched with.
-
-        Returns:
-            Any: The first resolved, non-empty value, or None if no path resolves.
-        """
-        for lookup in lookups:
-            segments = lookup.split("__")
-            value = fields.get(segments[0])
-            for segment in segments[1:]:
-                if value is None:
-                    break
-                value = getattr(value, segment)
-            if value:
-                return value
-        return None
-
-    def _unique_findings_query(
-        self,
-        execution: Execution,
-        fields: dict[str, Any],
-        skip_user_input_ignorable: bool,
-        use_user_input_lookups: bool,
-    ) -> Q:
-        """Build the query matching findings sharing the same unique characteristics.
+        Reuses the existing finding returned by ``self.model._find_duplicate`` or creates a new one.
+        A detected finding completes the one it matched (``_merge``); a user-provided finding attaches
+        without modifying it. The finding is always associated with the current execution.
 
         Args:
             execution (Execution): The execution context for this finding.
-            fields (dict[str, Any]): Field values the finding is being created/matched with.
-            skip_user_input_ignorable (bool): Whether to drop fields marked ``ignore_for_user_input`` from
-                the query, because either side of the match is user-provided.
-            use_user_input_lookups (bool): Whether to use each field's ``user_input_lookups``.
+            **fields (Any): Field values for the finding.
 
         Returns:
-            Q: Query matching findings for the same target sharing the finding's unique fields.
-        """
-        query = Q(executions__task__target=execution.task.target)
-        for unique_field in self.model._unique_fields:
-            if not unique_field.active(fields) or (skip_user_input_ignorable and unique_field.ignore_for_user_input):
-                continue
-            value = fields.get(unique_field.field)
-            lookups = [unique_field.field]
-            if use_user_input_lookups:
-                lookups = unique_field.user_input_lookups or lookups
-                if len(lookups) > 1:
-                    value = self._resolve_unique_value(lookups, fields)
-            if unique_field.match_null_and_empty and value in (None, ""):
-                continue
-            field_query = Q()
-            for field in lookups:
-                field_query |= Q(**{field: value})
-                if unique_field.match_null_and_empty:
-                    field_query |= Q(**{f"{field}__isnull": True})
-                    # Always check the primary field's type, even for a lookup fallback path,
-                    # since both are expected to point to fields of the same type
-                    if self.model._meta.get_field(unique_field.field).get_internal_type() in ["CharField", "TextField"]:
-                        field_query |= Q(**{field: ""})
-            query &= field_query
-        return query
-
-    def create_finding(self, execution: Execution, **fields: Any) -> Any:
-        """Create or update a finding with duplicate prevention and user input handling.
-
-        Creates a new finding for the current target, or reuses an existing one that already
-        represents it. A detected finding (created from parser output) matches strictly on its
-        own unique fields, but also checks for a looser-matching user-provided finding it can
-        complete. A user-provided finding matches loosely, ignoring fields it structurally can't
-        supply and following its declared ``user_input_lookups`` fallbacks, and always attaches
-        to the finding it matches without overwriting it.
-
-        Args:
-            execution (Execution): The execution context for this finding
-            **fields (Any): Field values for the finding
-
-        Returns:
-            Any: The created or updated finding instance
+            Any: The created or updated finding instance.
         """
         is_user_input = bool(fields.get("created_from_user_input"))
-        if is_user_input:
-            query = self._unique_findings_query(
-                execution, fields, skip_user_input_ignorable=True, use_user_input_lookups=True
-            )
-        else:
-            # A detected finding can duplicate either another detected finding, or a
-            # user-provided one it should complete instead of creating a new duplicate
-            query = self._unique_findings_query(
-                execution, fields, skip_user_input_ignorable=False, use_user_input_lookups=False
-            ) | (
-                Q(created_from_user_input=True)
-                & self._unique_findings_query(
-                    execution, fields, skip_user_input_ignorable=True, use_user_input_lookups=True
-                )
-            )
-        unique_finding = self.model.objects.filter(query)
-        if unique_finding.exists():
-            finding = unique_finding.first()
+        finding = self.model._find_duplicate(execution, fields)
+        if finding:
             if not is_user_input:
-                # Fill in blanks left by the matched finding, but never overwrite an already
-                # known value with a blank one. A blank value is None or an empty string, not
-                # any falsy value, so meaningful flags like created_from_user_input=False are
-                # still applied
-                for field, value in fields.items():
-                    if value in (None, "") and getattr(finding, field):
-                        continue
-                    setattr(finding, field, value)
-                finding.save(update_fields=fields.keys())
+                self._merge(finding, fields)
         else:
-            # Create new finding if no duplicate exists
-            finding = self.model.objects.create(**fields)
-        # Associate this finding with the current execution for tracking
+            finding = self.create(**fields)
         finding.executions.add(execution)
         return finding
+
+    def _merge(self, finding: Any, fields: dict[str, Any]) -> None:
+        """Complete an existing finding with the incoming detected values.
+
+        Fills blank fields without overwriting known ones, skipping root fields. Then applies the
+        directional root rule: if the incoming finding provides a deeper root (``_root_findings`` are
+        declared deep-first) that the existing finding lacks, upgrade by adopting the incoming deep
+        root and clearing the shallower one to keep a single parent link; otherwise the existing
+        (richer or equal) root is preserved untouched.
+
+        Args:
+            finding (Any): The existing finding to complete.
+            fields (dict[str, Any]): Field values from the incoming finding.
+        """
+        updated_fields = []
+        for field, value in fields.items():
+            # Never overwrite an already known value with a blank one
+            if field in self.model._root_findings or (
+                value in (None, "") and getattr(finding, field) not in (None, "")
+            ):
+                continue
+            setattr(finding, field, value)
+            updated_fields.append(field)
+        if len(self.model._root_findings) > 1:
+            for index, root_finding in enumerate(self.model._root_findings):
+                if getattr(finding, root_finding) is not None:
+                    break
+                elif fields.get(root_finding) is not None:
+                    setattr(finding, root_finding, fields.get(root_finding))
+                    updated_fields.append(root_finding)
+                    for pending_root_finding in self.model._root_findings[index + 1 :]:
+                        setattr(finding, pending_root_finding, None)
+                        updated_fields.append(pending_root_finding)
+                    break
+        if updated_fields:
+            finding.save(update_fields=updated_fields)
 
 
 class Finding(BaseInput):
@@ -282,6 +217,11 @@ class Finding(BaseInput):
     created_from_user_input = BooleanField(default=False)
 
     objects = FindingManager()
+    _unique_fields: list["Finding.UniqueField"] = []
+    # Fields linking this finding to its parent finding(s), ordered by priority for deduplication:
+    # the deepest (most specific) root comes first, so a match can be upgraded to its deepest known
+    # root while the shallower roots are cleared to keep a single parent link (see FindingManager._merge)
+    _root_findings: tuple[str, ...] = ()
     _project_field = "executions__task__target__project"
     _defectdojo_finding_mapping: dict[str, Any | Callable] = {}
     _defectdojo_endpoint_mapping: dict[str, Any | Callable] = {}
@@ -295,37 +235,60 @@ class Finding(BaseInput):
 
         Attributes:
             field (str): Model field name to match on.
-            match_null_and_empty (bool): Whether a blank value (null or, for char/text fields,
-                empty) is treated as compatible with anything on this field. An existing finding
-                still blank on this field matches an incoming real value, so it can be completed
-                by a later, more detailed finding. Conversely, when the incoming value itself is
-                blank, this field is dropped from the match entirely rather than requiring the
-                existing finding to also be blank, so fields a finding leaves unset (e.g. a
-                user-provided port has no protocol) don't block it from matching an already
-                fully-detected finding.
-            ignore_for_user_input (bool): Whether to drop this field from the query whenever a
-                user-provided finding is involved on either side of the match, because a
-                user-provided finding structurally never supplies it (e.g. a vulnerability added
-                from a CVE parameter never carries a technology).
-            user_input_lookups (list[str] | None): Extra query paths OR'd in alongside ``field``,
-                used only while a user-provided finding searches outward for a match. A
-                user-provided finding is temporary and partial, so it is forced to attach to a
-                detected finding reachable through an alternate relation (e.g. a vulnerability
-                tied directly to a port, matching one a tool already tied to a technology found
-                on that same port).
-            active (Callable[[dict[str, Any]], bool]): Whether this field currently participates
-                in the match, given the incoming field values. Defaults to always active. Lets a
-                field yield to a more specific one without a per-model method override (e.g. a
-                vulnerability name is dropped from matching once its CVE is known).
+            match_null_and_empty (bool): Whether a blank value (null or, for char/text fields, empty)
+                is treated as compatible with anything on this field: an existing finding blank on it
+                matches an incoming real value, and an incoming blank value drops it from the match.
         """
 
         field: str
         match_null_and_empty: bool = False
-        ignore_for_user_input: bool = False
-        user_input_lookups: list[str] | None = None
-        active: Callable[[dict[str, Any]], bool] = lambda fields: True
 
-    _unique_fields: list["Finding.UniqueField"] = []
+    @classmethod
+    def _find_duplicate(cls, execution: Execution, fields: dict[str, Any]) -> "Finding | None":
+        """Find an existing finding that duplicates the incoming one, or None.
+
+        Matches on every ``_unique_fields`` value for the same target. A ``match_null_and_empty``
+        field is dropped when the incoming value is blank, and otherwise also matches existing blanks
+        so a partial finding can be completed. Complex finding types override this method.
+
+        Args:
+            execution (Execution): The execution context for this finding.
+            fields (dict[str, Any]): Field values the finding is being created/matched with.
+
+        Returns:
+            Finding | None: The matched finding, or None if there is no duplicate.
+        """
+        query = Q(executions__task__target=execution.task.target)
+        for unique_field in cls._unique_fields:
+            field_query = cls._get_deduplication_field_query(unique_field, fields.get(unique_field.field))
+            if field_query is not None:
+                query &= field_query
+        return cls.objects.filter(query).first()
+
+    @classmethod
+    def _get_deduplication_field_query(cls, unique_field: UniqueField, new_value: Any) -> Q | None:
+        """Build the deduplication query fragment for a single unique field.
+
+        Returns None when the field should not constrain the match: a ``match_null_and_empty`` field
+        is dropped entirely when the incoming value is blank. Otherwise it matches the value, and for
+        a ``match_null_and_empty`` field it also matches existing blanks (null, and empty string for
+        char/text fields) so a partial finding can still be completed by a more detailed one.
+
+        Args:
+            unique_field (UniqueField): The unique field configuration to build the fragment for.
+            new_value (Any): The incoming value for that field.
+
+        Returns:
+            Q | None: Query fragment matching this field, or None if it should not constrain the match.
+        """
+        if unique_field.match_null_and_empty and new_value in (None, ""):
+            return
+        field_query = Q(**{unique_field.field: new_value})
+        if unique_field.match_null_and_empty:
+            field_query |= Q(**{f"{unique_field.field}__isnull": True})
+            if cls._meta.get_field(unique_field.field).get_internal_type() in ["CharField", "TextField"]:
+                field_query |= Q(**{unique_field.field: ""})
+        return field_query
 
     @cached_property
     def parent_project(self) -> Project:

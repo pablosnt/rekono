@@ -9,6 +9,7 @@ from typing import Any
 
 from django.db import models
 
+from executions.models import Execution
 from findings.enums import (
     HostOS,
     OSINTDataType,
@@ -213,6 +214,7 @@ class Port(HacktricksFinding):
         Finding.UniqueField("port"),
         Finding.UniqueField("protocol", match_null_and_empty=True),
     ]
+    _root_findings = ("host",)
     # _parse_dependencies is not used to avoid recalculation of URLs
     _parse_mapping = {InputKeyword.PORT: "port", InputKeyword.PORTS: lambda instance, target: [instance.port]}
     _defectdojo_finding_mapping = {
@@ -306,6 +308,7 @@ class Path(Finding):
     type = models.TextField(choices=PathType.choices, default=PathType.ENDPOINT)
 
     _unique_fields = [Finding.UniqueField("port"), Finding.UniqueField("path")]
+    _root_findings = ("port",)
     _filters = [
         Finding.Filter(PathType, "type"),
         Finding.Filter(int, "status"),
@@ -414,6 +417,7 @@ class Technology(HacktricksFinding):
         Finding.UniqueField("name"),
         Finding.UniqueField("version", match_null_and_empty=True),
     ]
+    _root_findings = ("port",)
     _filters = [Finding.Filter(str, "name", contains=True, processor=lambda n: n.lower())]
     _parse_mapping = {InputKeyword.TECHNOLOGY: "name", InputKeyword.VERSION: "version"}
     _parse_dependencies = ["port"]
@@ -476,6 +480,7 @@ class Credential(TriageFinding):
         Finding.UniqueField("username"),
         Finding.UniqueField("secret"),
     ]
+    _root_findings = ("technology",)
     _parse_mapping = {InputKeyword.EMAIL: "email", InputKeyword.USERNAME: "username", InputKeyword.SECRET: "secret"}
     _parse_dependencies = ["technology"]
     _defectdojo_finding_mapping = {
@@ -577,13 +582,13 @@ class Vulnerability(TriageFinding):
     trending = models.BooleanField(default=False)
 
     _unique_fields = [
-        # A user-provided vulnerability (from a CVE parameter) never carries a technology
-        Finding.UniqueField("technology", ignore_for_user_input=True),
-        Finding.UniqueField("port", user_input_lookups=["port", "technology__port"]),
-        # Vulnerabilities with CVE modify their name on enrichment time, which is not available for deduplication
-        Finding.UniqueField("name", active=lambda fields: not fields.get("cve")),
+        Finding.UniqueField("technology"),
+        Finding.UniqueField("port"),
+        Finding.UniqueField("name"),
         Finding.UniqueField("cve"),
     ]
+    # Ordered by priority for deduplication: technology is a deeper root than port
+    _root_findings = ("technology", "port")
     _filters = [
         Finding.Filter(Severity, "severity"),
         Finding.Filter(str, "cve", contains=True, processor=lambda c: c.lower()),
@@ -612,6 +617,35 @@ class Vulnerability(TriageFinding):
         "mitigation": "remediation",
         "references": "reference",
     }
+
+    @classmethod
+    def _find_duplicate(cls, execution: Execution, fields: dict[str, Any]) -> "Vulnerability | None":
+        """Find an existing vulnerability that duplicates the incoming one, or None.
+
+        Matches on identity (the CVE, or the name when no CVE is known) plus location: the same
+        technology or the same port. When only a port is known, it also reaches up to vulnerabilities
+        recorded against the technologies found on that port, so a port-level finding can complete a
+        technology-level one.
+
+        Args:
+            execution (Execution): The execution context for this finding.
+            fields (dict[str, Any]): Field values the finding is being created/matched with.
+
+        Returns:
+            Vulnerability | None: The matched vulnerability, or None if there is no duplicate.
+        """
+        technology = fields.get("technology")
+        identity = models.Q(cve=fields["cve"]) if fields.get("cve") else models.Q(name=fields.get("name"))
+        if technology:
+            search = cls.objects.filter(identity, executions__task__target=execution.task.target, technology=technology)
+            if search.exists():
+                return search.first()
+        port = fields.get("port") or (technology.port if technology else None)
+        return cls.objects.filter(
+            identity,
+            models.Q(port=port) | models.Q(technology__port=port),
+            executions__task__target=execution.task.target,
+        ).first()
 
 
 class Exploit(TriageFinding):
@@ -666,6 +700,8 @@ class Exploit(TriageFinding):
         Finding.UniqueField("edb_id", match_null_and_empty=True),
         Finding.UniqueField("reference", match_null_and_empty=True),
     ]
+    # Ordered by priority for deduplication: vulnerability is a deeper root than technology
+    _root_findings = ("vulnerability", "technology")
     _parse_mapping = {InputKeyword.EXPLOIT: "title"}
     _parse_dependencies = ["vulnerability", "technology"]
     _defectdojo_finding_mapping = {
@@ -674,3 +710,36 @@ class Exploit(TriageFinding):
         "severity": lambda instance: instance.vulnerability.severity if instance.vulnerability else Severity.MEDIUM,
         "references": "reference",
     }
+
+    @classmethod
+    def _find_duplicate(cls, execution: Execution, fields: dict[str, Any]) -> "Exploit | None":
+        """Find an existing exploit that duplicates the incoming one, or None.
+
+        Matches on edb_id and reference (each only when known) plus location: the same vulnerability
+        or the same technology. When only a technology is known, it also reaches up to exploits
+        recorded against the vulnerabilities found on it. An exploit tied to a port-level vulnerability
+        (no technology) matches on the vulnerability alone.
+
+        Args:
+            execution (Execution): The execution context for this finding.
+            fields (dict[str, Any]): Field values the finding is being created/matched with.
+
+        Returns:
+            Exploit | None: The matched exploit, or None if there is no duplicate.
+        """
+        query = models.Q(executions__task__target=execution.task.target)
+        for unique_field in cls._unique_fields:
+            if unique_field.field in cls._root_findings:
+                continue
+            field_query = cls._get_deduplication_field_query(unique_field, fields.get(unique_field.field))
+            if field_query is not None:
+                query &= field_query
+        vulnerability = fields.get("vulnerability")
+        if vulnerability:
+            search = cls.objects.filter(query & models.Q(vulnerability=vulnerability))
+            if search.exists():
+                return search.first()
+        technology = fields.get("technology") or (vulnerability.technology if vulnerability else None)
+        return cls.objects.filter(
+            query, models.Q(technology=technology) | models.Q(vulnerability__technology=technology)
+        )
