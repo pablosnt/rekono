@@ -499,7 +499,7 @@
         "fields": {
             "tool": 18,
             "name": "All templates",
-            "command_template": "{url} {authentication} {cookie} {headers} -follow-redirects -no-color -jsonl-export {output}",
+            "command_template": "{host} {authentication} {cookie} {headers} -follow-redirects -no-color -jsonl-export {output}",
             "stage": 4,
             "default": true,
             "default_scanned_port": null,
@@ -512,7 +512,7 @@
         "fields": {
             "tool": 18,
             "name": "Automatic technology detection",
-            "command_template": "{url} -automatic-scan {authentication} {cookie} {headers} -follow-redirects -no-color -jsonl-export {output}",
+            "command_template": "{host} -automatic-scan {authentication} {cookie} {headers} -follow-redirects -no-color -jsonl-export {output}",
             "stage": 4,
             "default": false,
             "default_scanned_port": null,
@@ -525,7 +525,7 @@
         "fields": {
             "tool": 18,
             "name": "CVE templates",
-            "command_template": "{url} -tags cve {authentication} {cookie} {headers} -follow-redirects -no-color -jsonl-export {output}",
+            "command_template": "{host} -tags cve {authentication} {cookie} {headers} -follow-redirects -no-color -jsonl-export {output}",
             "stage": 4,
             "default": false,
             "default_scanned_port": null,

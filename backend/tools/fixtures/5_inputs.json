@@ -1111,22 +1111,12 @@
     },
     {
         "model": "tools.input",
-        "pk": 112,
-        "fields": {
-            "argument": 82,
-            "type": 3,
-            "filter": "http",
-            "order": 1
-        }
-    },
-    {
-        "model": "tools.input",
         "pk": 113,
         "fields": {
             "argument": 82,
             "type": 2,
             "filter": "!ip_range and !network",
-            "order": 2
+            "order": 1
         }
     },
     {
@@ -1161,22 +1151,12 @@
     },
     {
         "model": "tools.input",
-        "pk": 117,
-        "fields": {
-            "argument": 86,
-            "type": 3,
-            "filter": "http",
-            "order": 1
-        }
-    },
-    {
-        "model": "tools.input",
         "pk": 118,
         "fields": {
             "argument": 86,
             "type": 2,
             "filter": "!ip_range and !network",
-            "order": 2
+            "order": 1
         }
     },
     {
@@ -1211,22 +1191,12 @@
     },
     {
         "model": "tools.input",
-        "pk": 122,
-        "fields": {
-            "argument": 90,
-            "type": 3,
-            "filter": "http",
-            "order": 1
-        }
-    },
-    {
-        "model": "tools.input",
         "pk": 123,
         "fields": {
             "argument": 90,
             "type": 2,
             "filter": "!ip_range and !network",
-            "order": 2
+            "order": 1
         }
     },
     {

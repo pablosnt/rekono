@@ -895,8 +895,8 @@
         "pk": 82,
         "fields": {
             "configuration": 39,
-            "name": "url",
-            "argument": "-u {url}",
+            "name": "host",
+            "argument": "-u {host}",
             "required": true,
             "multiple": false
         }
@@ -939,8 +939,8 @@
         "pk": 86,
         "fields": {
             "configuration": 40,
-            "name": "url",
-            "argument": "-u {url}",
+            "name": "host",
+            "argument": "-u {host}",
             "required": true,
             "multiple": false
         }
@@ -983,8 +983,8 @@
         "pk": 90,
         "fields": {
             "configuration": 41,
-            "name": "url",
-            "argument": "-u {url}",
+            "name": "host",
+            "argument": "-u {host}",
             "required": true,
             "multiple": false
         }
