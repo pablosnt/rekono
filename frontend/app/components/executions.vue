@@ -76,8 +76,7 @@
       <template #body>
         <pre
           class="font-mono text-sm whitespace-pre-wrap break-all bg-neutral-950 text-neutral-100 p-4 rounded-lg overflow-auto h-full leading-relaxed"
-          >{{ selectedExecution?.output_plain }}</pre
-        >
+          >{{ selectedExecution?.output_plain }}</pre>
       </template>
     </LazyUSlideover>
   </div>
