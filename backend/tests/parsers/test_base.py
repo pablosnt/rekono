@@ -49,11 +49,12 @@ class BaseParserTest(ParserTest, TestCase):
         self.assertEqual(self.input_vulnerability.cve, finding.vulnerability.cve)
         self.assertEqual(self.targetport.port, finding.vulnerability.port.port)
         self.assertEqual(self.target.target, finding.vulnerability.port.host.ip)
+        other_target_port = TargetPort.objects.create(target=self.target, port=8080, path=None)
         self.executor.targets_used_in_execution = {
-            TargetPort: self.targetport,
+            TargetPort: other_target_port,
             InputTechnology: self.input_technology,
         }
         finding = parser.create_finding(Exploit, title="Test")
         self.assertEqual(self.input_technology.name, finding.technology.name)
-        self.assertEqual(self.targetport.port, finding.technology.port.port)
+        self.assertEqual(other_target_port.port, finding.technology.port.port)
         self.assertEqual(self.target.target, finding.technology.port.host.ip)
