@@ -46,12 +46,12 @@ class Nuclei(BaseParser):
             _port_number = item.get("port")
             # Save the path where the Nuclei alert was triggered
             matched_at = item.get("matched-at")
-            if matched_at and "://" in matched_at:
-                parse = urlparse(item.get("matched-at"))
+            if matched_at:
+                parse = urlparse(matched_at if "://" in matched_at else f"//{matched_at}")
                 if parse.path and parse.path != "/" and parse.path not in paths:
                     paths.append(parse.path)
                 # Fall back to the port embedded in the matched URL
-                if not _port_number and parse.port:
+                if not _port_number:
                     _port_number = parse.port
             if _port_number:
                 # Guard against malformed port values so a bad entry doesn't abort the scan
