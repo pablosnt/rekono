@@ -721,10 +721,13 @@ class Exploit(TriageFinding):
     def _find_duplicate(cls, execution: Execution, fields: dict[str, Any]) -> "Exploit | None":
         """Find an existing exploit that duplicates the incoming one, or None.
 
-        Matches on edb_id and reference (each only when known) plus location: the same vulnerability
-        or the same technology. When only a technology is known, it also reaches up to exploits
-        recorded against the vulnerabilities found on it. An exploit tied to a port-level vulnerability
-        (no technology) matches on the vulnerability alone.
+        Matches on edb_id and reference (each only when known) plus location, in decreasing order of
+        precedence. When a vulnerability is known, it looks first for an exploit on the same
+        vulnerability, then on that vulnerability's technology, and finally for any exploit attached
+        to a technology on the same port; exploits recorded directly against a different vulnerability
+        are left out of that last step so distinct vulnerabilities are never merged. When only a
+        technology is known, it looks first for an exploit on that technology (directly or through a
+        vulnerability found on it) and then for any exploit at its port.
 
         Args:
             execution (Execution): The execution context for this finding.
@@ -742,30 +745,34 @@ class Exploit(TriageFinding):
                 query &= field_query
         vulnerability = fields.get("vulnerability")
         if vulnerability:
-            search = cls.objects.filter(query & models.Q(vulnerability=vulnerability)).order_by("id")
+            search = cls.objects.filter(query, vulnerability=vulnerability).order_by("id")
             if search.exists():
                 return search.first()
-        technology = fields.get("technology") or (vulnerability.technology if vulnerability else None)
+            port = vulnerability.port
+            if vulnerability.technology:
+                search = cls.objects.filter(query, technology=vulnerability.technology).order_by("id")
+                if search.exists():
+                    return search.first()
+                port = vulnerability.technology.port
+            # The exploits for different vulnerabilities must not match
+            return cls.objects.filter(query, models.Q(technology__port=port)).order_by("id").first()
+        technology = fields.get("technology")
         if technology:
             search = cls.objects.filter(
                 query, models.Q(technology=technology) | models.Q(vulnerability__technology=technology)
             ).order_by("id")
             if search.exists():
                 return search.first()
-        port = (
-            (vulnerability.technology.port if vulnerability.technology else vulnerability.port)
-            if vulnerability
-            else technology.port
-        )
-        return (
-            cls.objects.filter(
-                query,
-                models.Q(technology__port=port)
-                | models.Q(vulnerability__technology__port=port)
-                | models.Q(vulnerability__port=port),
+            return (
+                cls.objects.filter(
+                    query,
+                    models.Q(technology__port=technology.port)
+                    | models.Q(vulnerability__technology__port=technology.port)
+                    | models.Q(vulnerability__port=technology.port),
+                )
+                .order_by("id")
+                .first()
+                if technology.port
+                else None
             )
-            .order_by("id")
-            .first()
-            if port
-            else None
-        )
+        return None

@@ -162,8 +162,9 @@ class FindingManager(Manager):
         Fills blank fields without overwriting known ones, skipping root fields. Then applies the
         directional root rule: if the incoming finding provides a deeper root (``_root_findings`` are
         declared deep-first) that the existing finding lacks, upgrade by adopting the incoming deep
-        root and clearing the shallower one to keep a single parent link; otherwise the existing
-        (richer or equal) root is preserved untouched.
+        root; a shallower root is kept only when the incoming finding also asserts it (keeping the most
+        informative link) and cleared otherwise. When the existing finding already holds an equal or
+        deeper root it is preserved untouched.
 
         Args:
             finding (Any): The existing finding to complete.
@@ -185,8 +186,10 @@ class FindingManager(Manager):
                 elif fields.get(root_finding) is not None:
                     setattr(finding, root_finding, fields.get(root_finding))
                     updated_fields.append(root_finding)
+                    # Adopt each shallower root from the incoming finding, keeping it when asserted
+                    # and clearing it otherwise so the deeper root just adopted stays the single link
                     for pending_root_finding in self.model._root_findings[index + 1 :]:
-                        setattr(finding, pending_root_finding, None)
+                        setattr(finding, pending_root_finding, fields.get(pending_root_finding))
                         updated_fields.append(pending_root_finding)
                     break
         if updated_fields:
