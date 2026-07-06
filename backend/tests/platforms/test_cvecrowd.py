@@ -113,6 +113,7 @@ new_settings = {"api_token": "cve-crowd-token", "trending_span_days": 7, "execut
 invalid_settings = {**new_settings, "trending_span_days": 50}
 
 
+@mock.patch("platforms.cvecrowd.integrations.CveCrowd._request", not_found)
 class CveCrowdSettingsTest(ApiTestNoData, TestCase):
     endpoint = "/api/cvecrowd/1/"
     expected_string = "CVE Crowd"

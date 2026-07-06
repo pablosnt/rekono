@@ -122,7 +122,7 @@ class BaseTelegram(LoggingEntity):
             message (str): The message content to send.
             reply_markup (Any, optional): Keyboard markup for interactive messages.
         """
-        async with self.app.bot as bot:
+        async with self.app.bot as bot:  # pytype: disable=attribute-error
             await bot.send_message(
                 chat.chat_id,
                 message,
@@ -158,7 +158,7 @@ class BaseTelegram(LoggingEntity):
         """
         if not isinstance(update, Update):
             return
-        chat_id = update.effective_chat.id if update.effective_chat else None
+        chat_id = update.effective_chat.id if update.effective_chat else None  # pytype: disable=attribute-error
         self.logger.error(
             f"[Telegram] Unhandled exception while processing update from chat {chat_id}: {context.error}",
             exc_info=context.error,
