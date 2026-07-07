@@ -91,7 +91,7 @@ const props = defineProps<{
   extraDropdownActions?: (
     item: Record<string, unknown>,
   ) => DropdownAction<Record<string, unknown>>[];
-  customDefaultFilters?: Rercord<string, unknown>;
+  customDefaultFilters?: Record<string, string | number>;
   headerHideTitle?: boolean;
   disableUrlSync?: boolean;
   linkToOriginalPage?: string;
@@ -375,10 +375,10 @@ const config: CrudConfig<Finding> = reactive({
       },
     ];
   },
-  defaultFilters:
-    props.customDefaultFilters || route.params.project_id
-      ? { project: route.params.project_id }
-      : undefined,
+  defaultFilters: {
+    ...(route.params.project_id ? { project: route.params.project_id } : {}),
+    ...(props.customDefaultFilters || {}),
+  },
   ordering: props.ordering || [],
   defaultOrdering: props.defaultOrdering || "-id",
   pageSize: 25,
