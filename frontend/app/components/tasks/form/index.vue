@@ -17,6 +17,7 @@
           :api="genericApi"
           :default-project="entity.project"
           :default-target="entity.target"
+          :default-target-port="entity.targetPort"
           @update-project="
             (newProject: number | undefined) => {
               project = newProject;
@@ -130,6 +131,7 @@
           v-show="item.title === 'Technologies'"
           :api="genericApi"
           :required="requiredInputTechnology"
+          :target-port-selected="Boolean(targetPort)"
           @update-technologies="
             (newTechnologies) => {
               inputTechnologies = newTechnologies;
@@ -141,6 +143,7 @@
           v-show="item.title === 'Vulnerabilities'"
           :api="genericApi"
           :required="requiredInputVulnerability"
+          :target-port-selected="Boolean(targetPort)"
           @update-vulnerabilities="
             (newVulnerabilities) => {
               inputVulnerabilities = newVulnerabilities;

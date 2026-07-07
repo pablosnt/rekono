@@ -67,6 +67,6 @@ When debugging or researching a bug, the following resources are useful:
 - Don't run `git add`, `git commit` or `git push`, only work in the local git repository and I will review and test any change manually before contributing it to the repository
 - Don't duplicate code, always reuse existing code if possible
 - Don't add comments to frontend code, as they would expose information to the users
-- Don't run linters, formatters or type checks if the user didn't request it. They take your valued time, and are usually useless if I add changes on top of yours
+- Don't run linters, formatters or type checks if the user didn't request it. They take valued time, and are usually useless if changes are not definitive
 - Rekono is a cybersecurity project, don't introduce vulnerabilities in the code
 - Always use NuxtUI components in the frontend, don't write native HTML or CSS code if it's not needed

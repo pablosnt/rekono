@@ -1,5 +1,13 @@
 <template>
   <div class="space-y-4 mx-auto mt-3">
+    <UAlert
+      v-if="!targetPortSelected"
+      color="warning"
+      variant="subtle"
+      icon="i-lucide-triangle-alert"
+      description="No target port selected. Findings discovered for these technologies won't be saved to keep the findings chain integrity. Select a target port in the Target section"
+      class="mb-4"
+    />
     <UFormField :required="required" label="Technologies" name="technologies">
       <USelectMenu
         :model-value="technologies"
@@ -54,6 +62,7 @@ import * as z from "zod";
 const props = defineProps<{
   api: typeof useApi;
   required: boolean;
+  targetPortSelected: boolean;
 }>();
 const emit = defineEmits<{
   "update-technologies": [newTechnologies: Array<number>];

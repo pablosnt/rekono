@@ -112,6 +112,7 @@ const props = defineProps<{
   api: typeof useApi;
   defaultProject: number | undefined;
   defaultTarget: number | undefined;
+  defaultTargetPort: number | undefined;
 }>();
 const emit = defineEmits<{
   "update-target": [newTarget: number | undefined];
@@ -125,7 +126,7 @@ const project = ref(props.defaultProject);
 const projectOptions = ref([]);
 const target = ref(props.defaultTarget);
 const targetOptions = ref([]);
-const targetPort = ref();
+const targetPort = ref(props.defaultTargetPort);
 const targetPortOptions = ref([]);
 
 function loadProjects() {
@@ -150,23 +151,25 @@ function onProject(projectId: number | undefined) {
 function onTarget(targetId: number | undefined) {
   target.value = targetId;
   emit("update-target", targetId);
-  targetPort.value = undefined;
-  emit("update-target-port", undefined);
-  targetPortOptions.value = [];
-  emit("update-target-port-options", false);
-  if (targetId) {
-    props.api
-      .list("target-ports/", { target: targetId }, true)
-      .then((response) => {
-        targetPortOptions.value = response.items.map((port) => ({
-          id: port.id,
-          label: port.path
-            ? `${port.port} - ${port.path}`
-            : port.port.toString(),
-          icon: getPortIcon(port.port),
-        }));
-        emit("update-target-port-options", response.items.length > 0);
-      });
+  if (!props.defaultTargetPort) {
+    targetPort.value = undefined;
+    emit("update-target-port", undefined);
+    targetPortOptions.value = [];
+    emit("update-target-port-options", false);
+    if (targetId) {
+      props.api
+        .list("target-ports/", { target: targetId }, true)
+        .then((response) => {
+          targetPortOptions.value = response.items.map((port) => ({
+            id: port.id,
+            label: port.path
+              ? `${port.port} - ${port.path}`
+              : port.port.toString(),
+            icon: getPortIcon(port.port),
+          }));
+          emit("update-target-port-options", response.items.length > 0);
+        });
+    }
   }
 }
 
