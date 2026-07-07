@@ -86,7 +86,7 @@ jobs:
         if: ${{ steps.changes.outputs.frontend == 'true' || github.event_name != 'pull_request' }}
         working-directory: frontend/
         run: |
-          pnpm install . --ignore-scripts
+          pnpm install --frozen-lockfile --ignore-scripts
           pnpm nuxt prepare
 
       - name: ESLint
@@ -130,7 +130,7 @@ jobs:
       - name: Install Node dependencies
         if: ${{ steps.changes.outputs.templates == 'true' || github.event_name != 'pull_request' }}
         working-directory: email-templates/
-        run: pnpm install . --ignore-scripts
+        run: pnpm install --frozen-lockfile --ignore-scripts
 
       - name: ESLint
         if: ${{ steps.changes.outputs.templates == 'true' || github.event_name != 'pull_request' }}
