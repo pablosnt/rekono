@@ -20,5 +20,5 @@ import { hostOS } from "~/constants";
 import type { Host } from "~/types/models";
 
 const props = defineProps<{ host: Host }>();
-const osConfig = hostOS.find((o) => o.value === props.host.os_type);
+const osConfig = hostOS.find((o) => o.value === props.host?.os_type);
 </script>
