@@ -1,5 +1,6 @@
-minimumReleaseAge: 2880
+minimumReleaseAge: 10080
 ignoreScripts: true
+shamefullyHoist: true
 ignoredBuiltDependencies:
   - "@parcel/watcher"
   - "@tailwindcss/oxide"

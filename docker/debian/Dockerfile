@@ -71,6 +71,7 @@ RUN export RKN_DB_PASSWORD=$(cat /config/rkn_db_password.txt) && \
     psql ${RKN_DB_NAME} -c "GRANT ALL ON ALL FUNCTIONS IN SCHEMA public to ${RKN_DB_USER};"
 
 # Tools
+# nosemgrep: dockerfile.security.last-user-is-root.last-user-is-root
 USER root
 # sudo is required at runtime so the unprivileged 'rekono' user can start the
 # bundled postgresql/redis services in this all-in-one Kali desktop package. It
@@ -104,5 +105,6 @@ RUN export RKN_DB_PASSWORD=$(cat /config/rkn_db_password.txt) && \
     sed -i 's:'"$DEFAULT_PGDATA"':'"$PGDATA"':' $(cat /config/postgresql_config.txt) && \
     rm /config/postgresql_config.txt
 
+# nosemgrep: dockerfile.security.last-user-is-root.last-user-is-root
 USER root
 WORKDIR /code
