@@ -42,9 +42,9 @@
   <certificate type="short">
    <signature-algorithm>sha256WithRSAEncryption</signature-algorithm>
    <pk error="false" type="RSA" bits="2048" />
-   <subject><![CDATA[atsserver.acute.local]]></subject>
-   <altnames><![CDATA[DNS:atsserver.acute.local, DNS:atsserver]]></altnames>
-   <issuer><![CDATA[acute-ATSSERVER-CA]]></issuer>
+   <subject><![CDATA[example.com]]></subject>
+   <altnames><![CDATA[DNS:example.com, DNS:host1.example.com]]></altnames>
+   <issuer><![CDATA[Example CA]]></issuer>
    <self-signed>false</self-signed>
    <not-valid-before>Jan  6 06:34:58 2022 GMT</not-valid-before>
    <not-valid-after>Jan  4 06:34:58 2030 GMT</not-valid-after>

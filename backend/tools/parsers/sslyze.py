@@ -135,14 +135,26 @@ class Sslyze(BaseParser):
                                 cwes=["CWE-326"],
                             )
             for deploy in result["certificate_info"]["result"]["certificate_deployments"] or []:
-                if not deploy["leaf_certificate_subject_matches_hostname"]:
+                # The certificate is valid only when it passes validation against every trust store
+                if not all(validation["was_validation_successful"] for validation in deploy["path_validation_results"]):
                     self.create_finding(
                         Vulnerability,
                         linked_finding=self.generic_tech is not None,
                         technology=self.generic_tech,
-                        name="Certificate subject error",
-                        description="Certificate subject doesn't match hostname",
-                        severity=Severity.INFO,
+                        name="Certificate validation error",
+                        description="The certificate is not valid for the scanned host",
+                        severity=Severity.LOW,
+                        # CWE-295: Improper Certificate Validation
+                        cwes=["CWE-295"],
+                    )
+                if deploy.get("verified_chain_has_legacy_symantec_anchor"):
+                    self.create_finding(
+                        Vulnerability,
+                        linked_finding=self.generic_tech is not None,
+                        technology=self.generic_tech,
+                        name="Distrusted certificate authority",
+                        description="The certificate was issued by a distrusted Symantec CA",
+                        severity=Severity.MEDIUM,
                         # CWE-295: Improper Certificate Validation
                         cwes=["CWE-295"],
                     )

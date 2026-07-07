@@ -216,6 +216,9 @@ class BaseParser:
                             # Stop after first successful parameter association
                             break
             if not linked_finding and not CONFIG.testing:
+                self.executor.logger.warning(
+                    f"[{{self.executor.execution.configuration.tool.name}}] {finding_type.__name__} finding found during execution {self.executor.execution.id} is discarded because it has no parent finding to link to"
+                )
                 return
         # Create the finding if relationships were established or we're in testing mode,
         # as we need to test parsers completely

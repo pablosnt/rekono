@@ -37,7 +37,7 @@
    <pk error="false" type="RSA" bits="2048" />
    <subject><![CDATA[10.10.10.10]]></subject>
    <altnames><![CDATA[DNS:10.10.10.10]]></altnames>
-   <issuer><![CDATA[DigiCert SHA2 Secure Server CA]]></issuer>
+   <issuer><![CDATA[Example CA]]></issuer>
    <self-signed>false</self-signed>
    <not-valid-before>Jul 21 00:00:00 2020 GMT</not-valid-before>
    <not-valid-after>Sep  8 12:00:00 2022 GMT</not-valid-after>
