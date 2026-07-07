@@ -30,17 +30,10 @@ class HackTricks(BaseIntegration):
 
     Attributes:
         finding_types (list): List of finding types processed by this integration
-        sitemap_url (str): HackTricks sitemap URL for dynamic link discovery
         url (str): Base HackTricks documentation URL
-        services_base_url (str): Base URL for network service pentesting guides
-        web_base_url (str): Base URL for web application pentesting guides
-        host_type_mapping (dict): OS-specific privilege escalation guide URLs
-        services_mapping (dict): Service name to documentation URL mappings
-        all_links (list): Cached list of all available HackTricks documentation links
     """
 
     finding_types = [Host, Port, Technology]
-    sitemap_url = "https://hacktricks.wiki/en/sitemap.xml"
     url = "https://hacktricks.wiki/en/"
 
     def __init__(self) -> None:
@@ -50,6 +43,7 @@ class HackTricks(BaseIntegration):
         documentation links from the HackTricks sitemap for dynamic matching.
         """
         super().__init__()
+        self.sitemap_url = f"{self.url}sitemap.xml"
         self.services_base_url = f"{self.url}network-services-pentesting/"
         self.web_base_url = f"{self.url}pentesting-web/"
         self.host_type_mapping = {

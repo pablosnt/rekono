@@ -19,7 +19,7 @@ jobs:
           - name: Nmap
             install: apt install nmap -y
             command: nmap --version
-            expected: 7.95
+            expected: 7.99
           - name: Dirsearch
             install: apt install python3-dev dirsearch -y
             command: dirsearch --version
@@ -27,19 +27,19 @@ jobs:
           - name: theHarvester
             install: apt install theharvester -y
             command: theHarvester --help
-            expected: 4.8.0
+            expected: 4.11.1
           - name: Nikto
             install: apt install nikto -y
             command: nikto -Version
-            expected: 2.5.0
+            expected: 2.6.0
           - name: Sslscan
             install: apt install sslscan -y
             command: sslscan --version
-            expected: 2.1.5
+            expected: 2.2.2 # 2.1.5 kali
           - name: SSLyze
             install: apt install sslyze -y
             command: sslyze --help
-            expected: 6.1.0
+            expected: 6.3.1
           - name: CMSeeK
             install: apt install cmseek -y
             command: cmseek --version
@@ -47,11 +47,11 @@ jobs:
           - name: ZAP
             install: apt install zaproxy -y
             command: zaproxy -version
-            expected: 2.16.1
+            expected: 2.17.0
           - name: Metasploit
             install: apt install metasploit-framework -y
             command: msfconsole --version 2>&1
-            expected: 6.4.64-dev
+            expected: 6.4.142 # 6.4.135-dev kali 
           - name: EmailFinder
             install: python3 -m pip install emailfinder --break-system-packages
             command: emailfinder --version
@@ -67,20 +67,20 @@ jobs:
           - name: Nuclei
             install: apt install nuclei -y
             command: nuclei --version 2>&1
-            expected: v3.4.4
+            expected: v3.11.0 # v3.10.0 kali
           - name: Gobuster
             install: apt install gobuster -y
-            command: gobuster version
-            expected: 3.6
+            command: gobuster --version
+            expected: 3.8.2
           - name: SSH Audit
             install: python3 -m pip install ssh-audit --break-system-packages
             command: ssh-audit --help
-            expected: v3.3.0
+            expected: v3.9.0
           - name: SMBMap
             install: apt install smbmap -y
             command: smbmap --help
-            expected: v1.10.7
-    name: ${{ matrix.name }} version
+            expected: v1.10.8 # v1.10.7 kali
+    name: Detect ${{ matrix.name }} updates
     defaults:
       run:
         shell: bash
