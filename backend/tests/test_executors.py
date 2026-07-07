@@ -14,6 +14,7 @@ from settings.models import Settings
 from target_ports.models import TargetPort
 from tests.framework import BaseTest
 from tests.framework.data import SetupProject
+from tools.executors.zap import Zap
 
 # pytype: disable=attribute-error
 
@@ -179,3 +180,23 @@ class ToolExecutorTest(BaseTest, TestCase):
         self.assertFalse(
             self.executor.check_arguments([self.osint, self.host, self.port, self.technology], [], [], [], [])
         )
+
+
+class ZapExecutorTest(BaseTest, TestCase):
+    data = [SetupProject()]
+    fake_tool_flag = True
+    target_parameters_flag = True
+    task_parameters_flag = True
+
+    def setUp(self) -> None:
+        super().setUp()
+        self.execution.configuration = self.fake_configuration
+        self.execution.save(update_fields=["configuration"])
+        self.executor = Zap(self.execution)
+
+    def test_before_running_isolates_home_and_proxy_port(self) -> None:
+        self.executor.arguments = [self.fake_tool.command, "-cmd"]
+        self.executor.before_running()
+        arguments = " ".join(self.executor.arguments)
+        self.assertIn(f"-dir {self.executor.zap_home}", arguments)
+        self.assertIn("-config network.localServers.mainProxy.port=", arguments)
