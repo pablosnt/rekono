@@ -257,6 +257,8 @@ class BaseInput(BaseModel):
             Returns:
                 bool: True if the value passes the filter, False otherwise.
             """
+            if value is None:
+                return False
             # If a processor is defined, preprocess the value before filtering
             if self.processor:
                 value = self.processor(value)
