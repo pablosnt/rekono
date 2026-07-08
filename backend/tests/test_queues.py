@@ -6,7 +6,9 @@ from django.utils import timezone
 
 from executions.enums import Status
 from executions.models import Execution
+from executions.queues import ExecutionsQueue
 from findings.models import Host
+from framework.models import BaseInput
 from framework.queues import ExecutionParametersToEnqueue
 from parameters.models import InputTechnology, InputVulnerability
 from processes.models import Process, Step
@@ -62,6 +64,11 @@ class GenericQueueTest(QueueTest, TestCase):
             expected + last_expected,
             self.queue.calculate_executions(self.fake_configuration, self.findings, [], [], [], []),
         )
+
+    def test_filter_ignores_none_value(self) -> None:
+        finding_filter = BaseInput.Filter(str, "cve", contains=True, processor=lambda c: c.lower())
+        self.assertFalse(finding_filter.filter("CVE-2023-1111", None))
+        self.assertTrue(finding_filter.filter("cve-2023", "CVE-2023-1111"))
 
     def test_calculate_executions_from_only_hosts(self) -> None:
         # Expected:
@@ -129,6 +136,7 @@ class TasksQueueTest(QueueTest, TestCase):
         self.assertEqual(configuration.id, execution.configuration.id)
         self.assertEqual(Status.REQUESTED, execution.status)
         self.assertIsNone(execution.start)
+        self.assertIsNotNone(execution.enqueued_at)
 
     def test_process_task(self) -> None:
         process = Process.objects.get(pk=1)
