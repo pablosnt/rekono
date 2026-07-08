@@ -57,10 +57,12 @@ Offensive security platform that automates attack surface discovery and vulnerab
 
 ## Debug
 
-When debugging or researching a bug, the following resources are useful:
+If the application is running locally from source, the following resources are useful to research and debug issues:
 
 - `logs/rekono.log`: this file contains the logs from all the application components (except the frontend), so if the bug was found during some user or testing activity, this file will contain what actually was executed and what happened
 - `uv run manage.py shell`: this command allows to run the Django shell in interactive mode, which is helpful to directly test backend features, explore data about recent activity in the database, etc. It requires to pass the local database credentials via environment variables `RKN_DB_USER` and `RKN_DB_PASSWORD`
+
+If the application is running in the docker compose environment, logs are accesible with `docker compose logs` command.
 
 ## Important Notes
 
