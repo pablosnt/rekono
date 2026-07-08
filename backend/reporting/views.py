@@ -331,7 +331,11 @@ class ReportingViewSet(BaseViewSet):
             *findings (Any): Findings data for report content
         """
         filename = f"{str(uuid.uuid4())}.{report.format.lower()}"
-        success = getattr(self, f"_create_{report.format.lower()}_report")(filename, report, *findings)
+        try:
+            success = getattr(self, f"_create_{report.format.lower()}_report")(filename, report, *findings)
+        except Exception:
+            self.logger.error(f"Error while generating the {report.format} report {report.id}")
+            success = False
         if success:
             report.path = filename
             report.status = ReportStatus.READY
