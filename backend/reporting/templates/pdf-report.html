@@ -73,7 +73,7 @@
                 <div>
                     <canvas type="graph" width="320" height="190">
                         {
-                                "data": [{{ stats.critical }}, {{ stats.high }}, {{ stats.medium }}, {{ stats.low }}, {{ stats.info }}],
+                                "data": [[{{ stats.critical }}, {{ stats.high }}, {{ stats.medium }}, {{ stats.low }}, {{ stats.info }}]],
                                 "labels": ["Critical", "High", "Medium", "Low", "Info"],
                                 "title": {"_text": "Vulnerabilities by Severity", "x": 280, "y": 180},
                                 "type": "verticalbar",
@@ -97,7 +97,7 @@
                             <br>
                             <canvas type="graph" width="320" height="190">
                                 {
-                                        "data": [{{ items.critical }}, {{ items.high }}, {{ items.medium }}, {{ items.low }}, {{ items.info }}],
+                                        "data": [[{{ items.critical }}, {{ items.high }}, {{ items.medium }}, {{ items.low }}, {{ items.info }}]],
                                         "labels": ["Critical", "High", "Medium", "Low", "Info"],
                                         "title": {"_text": "Vulnerabilities by Severity", "x": 280, "y": 180},
                                         "type": "verticalbar",
