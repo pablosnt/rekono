@@ -21,6 +21,8 @@ services:
       - POSTGRES_DB=rekono
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
+    security_opt:
+      - no-new-privileges:true
   
   valkey:
     restart: always
@@ -36,6 +38,8 @@ services:
       - 6379
     networks:
       - internal
+    security_opt:
+      - no-new-privileges:true
 
   initializer:
     restart: 'no'
@@ -83,6 +87,8 @@ services:
       - RKN_DB_USER=postgres
       - RKN_DB_PASSWORD=postgres
       - RKN_RQ_HOST=valkey
+    security_opt:
+      - no-new-privileges:true
 
   executions-worker:
     restart: always
@@ -131,6 +137,8 @@ services:
       - RKN_DB_USER=postgres
       - RKN_DB_PASSWORD=postgres
       - RKN_RQ_HOST=valkey
+    security_opt:
+      - no-new-privileges:true
 
   monitor-worker:
     restart: always
@@ -153,6 +161,8 @@ services:
       - RKN_DB_USER=postgres
       - RKN_DB_PASSWORD=postgres
       - RKN_RQ_HOST=valkey
+    security_opt:
+      - no-new-privileges:true
 
   telegram-bot:
     restart: always
@@ -176,6 +186,8 @@ services:
       - RKN_DB_USER=postgres
       - RKN_DB_PASSWORD=postgres
       - RKN_RQ_HOST=valkey
+    security_opt:
+      - no-new-privileges:true
 
   backend:
     restart: always
@@ -209,6 +221,8 @@ services:
       - RKN_RQ_HOST=valkey
       - RKN_TRUSTED_PROXY=true
       - RKN_ALLOWED_HOSTS=*
+    security_opt:
+      - no-new-privileges:true
   
   frontend:
     restart: always
@@ -225,6 +239,8 @@ services:
       - 3000
     networks:
       - internal
+    security_opt:
+      - no-new-privileges:true
 
   nginx:
     restart: always
@@ -245,6 +261,8 @@ services:
     networks:
       - internal
       - external
+    security_opt:
+      - no-new-privileges:true
 
 volumes:
   postgres:
