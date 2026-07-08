@@ -85,7 +85,6 @@ COPY --from=build-backend /opt/python /opt/python
 COPY --from=build-backend /usr/local/bin/uv /bin/
 
 WORKDIR /code
-EXPOSE 8000
 
 
 FROM node:26.2.0-bookworm-slim AS build-frontend
