@@ -7,7 +7,7 @@ dependency management, and result processing for background execution workflows.
 import rq
 from django.utils import timezone
 from django_rq import job
-from rq.job import Job
+from rq.job import Dependency, Job
 from rq.registry import DeferredJobRegistry
 
 from executions.models import Execution
@@ -71,7 +71,7 @@ class ExecutionsQueue(BaseScanQueue):
             input_technologies=input_technologies,
             wordlists=wordlists,
             result_ttl=7200,
-            depends_on=dependencies,
+            depends_on=Dependency(jobs=dependencies, allow_failure=True) if dependencies else [],
             at_front=at_front,
         )
         self.logger.info(
@@ -86,7 +86,7 @@ class ExecutionsQueue(BaseScanQueue):
         job.save_meta()
         execution.enqueued_at = timezone.now()
         execution.rq_job_id = job.id
-        execution.save(update_fields=["rq_job_id"])
+        execution.save(update_fields=["rq_job_id", "enqueued_at"])
         return job
 
     @staticmethod
@@ -235,10 +235,11 @@ class ExecutionsQueue(BaseScanQueue):
             for pending_job_id in registry.get_job_ids():
                 pending_job = self.fetch_job(pending_job_id)
                 if pending_job and current_job.id in pending_job._dependency_ids:
-                    dependencies = pending_job._dependency_ids
                     meta = pending_job.get_meta()
-                    # Cancel and recreate the pending job with updated dependencies
-                    self.cancel_job(pending_job_id)
+                    if "execution" not in meta:
+                        continue
+                    dependencies = pending_job._dependency_ids
+                    # Recreate the pending job with updated dependencies
                     self.delete_job(pending_job_id)
                     self.enqueue(
                         meta["execution"],
