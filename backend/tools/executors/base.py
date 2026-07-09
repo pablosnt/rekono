@@ -157,6 +157,8 @@ class BaseExecutor(LoggingEntity):
         for argument in self.execution.configuration.arguments.all():
             for argument_input in argument.inputs.all().order_by("order"):
                 parsed_data: dict[str, Any] = {}
+                # Track if we already have data from the primary base inputs
+                has_primary_model_data = False
                 # Create a comprehensive list of all available input sources in priority order
                 # This includes findings, wordlists, authentications, targets, HTTP headers and user-provided parameters
                 for base_input in (
@@ -187,7 +189,7 @@ class BaseExecutor(LoggingEntity):
                         base_input, argument_input.type.fallback_model_class
                     )
                     # If we already have data from primary sources, skip fallback inputs
-                    if is_fallback and parsed_data:
+                    if is_fallback and has_primary_model_data:
                         break
                     # Check if this input matches the argument's primary type (preferred)
                     is_model = argument_input.type.model_class and isinstance(
@@ -205,6 +207,7 @@ class BaseExecutor(LoggingEntity):
                             self.targets_used_in_execution[base_input.__class__] = base_input
                         else:
                             self.findings_used_in_execution[base_input.__class__] = base_input
+                            has_primary_model_data = True
                         # Store authentication credentials for later use
                         if isinstance(base_input, Authentication):
                             self.authentication = base_input

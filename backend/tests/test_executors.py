@@ -108,6 +108,18 @@ class ToolExecutorTest(BaseTest, TestCase):
         )
 
     @mock.patch("framework.models.BaseInput.get_url", get_url)
+    def test_get_arguments_multiple_target_ports(self) -> None:
+        second_target_port = TargetPort.objects.create(target=self.target, port=22, path=None)
+        self.assertEqual(
+            "-p 10.10.10.10 -p http://10.10.10.10:80/ -p 80,22 -p WordPress -p CVE-2025-3010 -p root",
+            " ".join(
+                self.executor.get_arguments(
+                    [self.host, self.technology, self.vulnerability], [self.targetport, second_target_port], [], [], []
+                )
+            ),
+        )
+
+    @mock.patch("framework.models.BaseInput.get_url", get_url)
     def test_get_arguments_with_path_filter(self) -> None:
         self.assertEqual(
             "-p 10.10.10.10 -p http://10.10.10.10:80/index.html -p 80 -p /index.html -p WordPress -p CVE-2025-3010 -p root",
