@@ -331,13 +331,15 @@ class BaseInput(BaseModel):
             value (str | None): The path string to normalize.
 
         Returns:
-            str | None: The normalized path with leading slash or None if empty.
+            str | None: The normalized path with leading slash, "/" for an empty
+            string, or None when the value is None (so callers omit the argument).
         """
-        if value:
-            # Drop a leading ":<port>" with or without a leading slash
-            value = re.sub(r"^/?:\d+(?=/|$)", "", value)
-            if len(value) > 1 and value[0] != "/":
-                value = f"/{value}"
+        if value is None:
+            return None
+        # Drop a leading ":<port>" with or without a leading slash
+        value = re.sub(r"^/?:\d+(?=/|$)", "", value)
+        if len(value) > 1 and value[0] != "/":
+            value = f"/{value}"
         return "/" if not value else value
 
     def get_url(
