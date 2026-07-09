@@ -40,8 +40,8 @@
             .critical { color: red; }
             .high { color: orange; }
             .medium { color: blue; }
-            .badge.low { color: green; }
-            .badge.info { color: black; }
+            .low { color: green; }
+            .info { color: black; }
         </style>
     </head>
     <body>
@@ -198,7 +198,7 @@
                                 {% if h.Vulnerability %}
                                     <h4>Vulnerabilities</h4>
                                     {% for v in h.Vulnerability %}
-                                        {% if v.severity.name == "CRITICAL" or v.severity.name == "HIGH" %}
+                                        {% if v.get_severity_display|upper == "CRITICAL" or v.get_severity_display|upper == "HIGH" %}
                                             <table border="1" cellspacing="1" cellpadding="5">
                                                 <tbody>
                                                     <tr>
@@ -237,7 +237,7 @@
                                                     </tr>
                                                     <tr>
                                                         <th bgcolor="#dc3545" class="white" width="20%">Severity</th>
-                                                        <td width="60%" class="{{ v.severity.name|lower }}">{{ v.severity.name|upper }}</td>
+                                                        <td width="60%" class="{{ v.get_severity_display|lower }}">{{ v.get_severity_display|upper }}</td>
                                                     </tr>
                                                     <tr>
                                                         <th bgcolor="#dc3545" class="white" width="20%">CVE</th>
@@ -358,7 +358,7 @@
 
                                 {% if h.Vulnerability %}
                                     {% for v in h.Vulnerability %}
-                                        {% if v.severity.name == "MEDIUM" or v.severity.name == "LOW" %}
+                                        {% if v.get_severity_display|upper == "MEDIUM" or v.get_severity_display|upper == "LOW" %}
                                             <table border="1" cellspacing="1" cellpadding="5">
                                                 <tbody>
                                                     <tr>
@@ -397,7 +397,7 @@
                                                     </tr>
                                                     <tr>
                                                         <th bgcolor="#dc3545" class="white" width="20%">Severity</th>
-                                                        <td width="60%" class="{{ v.severity.name|lower }}">{{ v.severity.name|upper }}</td>
+                                                        <td width="60%" class="{{ v.get_severity_display|lower }}">{{ v.get_severity_display|upper }}</td>
                                                     </tr>
                                                     <tr>
                                                         <th bgcolor="#dc3545" class="white" width="20%">CVE</th>
@@ -514,7 +514,7 @@
 
                                 {% if h.Vulnerability %}
                                     {% for v in h.Vulnerability %}
-                                        {% if v.severity.name == "INFO" %}
+                                        {% if v.get_severity_display|upper == "INFO" %}
                                             <table border="1" cellspacing="1" cellpadding="5">
                                                 <tbody>
                                                     <tr>
@@ -553,7 +553,7 @@
                                                     </tr>
                                                     <tr>
                                                         <th bgcolor="#dc3545" class="white" width="20%">Severity</th>
-                                                        <td width="60%" class="{{ v.severity.name|lower }}">{{ v.severity.name|upper }}</td>
+                                                        <td width="60%" class="{{ v.get_severity_display|lower }}">{{ v.get_severity_display|upper }}</td>
                                                     </tr>
                                                     <tr>
                                                         <th bgcolor="#dc3545" class="white" width="20%">CVE</th>

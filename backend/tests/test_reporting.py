@@ -1,9 +1,14 @@
 from functools import cached_property
 
+from django.template.loader import get_template
 from django.test import TestCase
 
+from findings.enums import OSINTDataType, Severity
+from findings.models import OSINT, Credential, Exploit, Host, Port, Technology, Vulnerability
+from projects.models import Project
 from reporting.enums import FindingName, ReportFormat, ReportStatus
 from reporting.models import Report
+from rekono.settings import CONFIG
 from security.authorization.roles import Role
 from targets.enums import TargetType
 from targets.models import Target
@@ -209,6 +214,106 @@ class PdfReportTest(ReportingTest, TestCase):
 class PdfReportWithFindingTypesTest(PdfReportTest):
     # PDF reports ignore the requested finding types, but providing them must not break report creation
     finding_types: list[str] | None = [name.value for name in FindingName]
+
+
+class PdfReportTemplateRenderingTest(ApiTest, TestCase):
+    data = [
+        SetupProject(
+            osint_fields=[{"data": "osint.example.com", "data_type": OSINTDataType.DOMAIN}],
+            credentials_fields=[
+                {"secret": "TopSecretValue", "username": "secretuser"},  # Rendered in the secret section
+                {"secret": None, "username": "plainuser"},  # Rendered in the non-secret section
+            ],
+            vulnerabilities_fields=[
+                {"severity": Severity.CRITICAL},
+                {"severity": Severity.HIGH},
+                {"severity": Severity.MEDIUM},
+                {"severity": Severity.LOW},
+                {"severity": Severity.INFO},
+            ],
+        )
+    ]
+
+    def test_pdf_template_renders_all_findings_and_stats_chart(self) -> None:
+        project = Project.objects.first()
+        target = project.targets.first()
+        host = Host.objects.first()
+        osint = OSINT.objects.filter(executions__task__target=target).distinct()
+        ports = Port.objects.filter(host=host)
+        technologies = Technology.objects.filter(port__host=host)
+        credentials = Credential.objects.filter(technology__port__host=host)
+        vulnerabilities = Vulnerability.objects.filter(technology__port__host=host).order_by("-severity")
+        exploits = Exploit.objects.filter(vulnerability__technology__port__host=host)
+        findings = {
+            target.id: {
+                FindingName.OSINT.value: osint,
+                FindingName.HOST.value: [
+                    {
+                        FindingName.HOST.value: host,
+                        FindingName.PORT.value: ports,
+                        FindingName.TECHNOLOGY.value: technologies,
+                        FindingName.CREDENTIAL.value: credentials,
+                        FindingName.VULNERABILITY.value: vulnerabilities,
+                        FindingName.EXPLOIT.value: exploits,
+                    }
+                ],
+            }
+        }
+        # Compute stats
+        stats = {severity.name.lower(): 0 for severity in Severity}
+        for vulnerability in vulnerabilities:
+            stats[Severity(vulnerability.severity).name.lower()] += 1
+        for credential in credentials:
+            stats[(Severity.HIGH if credential.secret else Severity.LOW).name.lower()] += 1
+        html = get_template(CONFIG.pdf_report_template).render(
+            {
+                "project": project,
+                "targets": [target],
+                "findings": findings,
+                "stats_by_target": {target.id: stats},
+                "stats": stats,
+            }
+        )
+
+        # Project header
+        self.assertIn(project.name, html)
+
+        # OSINT
+        for finding in osint:
+            self.assertIn(finding.data, html)
+
+        # Host
+        self.assertIn(host.ip, html)
+    
+        # Ports
+        for port in ports:
+            self.assertIn(str(port.port), html)
+        
+        # Technologies
+        for technology in technologies:
+            self.assertIn(technology.name, html)
+        
+        # Credentials, both the secret and the non-secret rendering branches
+        for credential in credentials:
+            self.assertIn(credential.username, html)
+        self.assertIn("Credential found", html)
+        self.assertIn("User found", html)
+
+        # Vulnerabilities
+        for vulnerability in vulnerabilities:
+            self.assertIn(vulnerability.name, html)
+        
+        # Exploits
+        for exploit in exploits:
+            self.assertIn(exploit.title, html)
+        
+        # Stats chart with the severity counts
+        self.assertIn('<canvas type="graph"', html)
+        self.assertIn('"title": {"_text": "Vulnerabilities by Severity"', html)
+        self.assertIn(
+            f'"data": [[{stats["critical"]}, {stats["high"]}, {stats["medium"]}, {stats["low"]}, {stats["info"]}]]',
+            html,
+        )
 
 
 class PdfReportWithoutFindingsTest(ApiTest, TestCase):
