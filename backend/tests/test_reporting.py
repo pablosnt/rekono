@@ -6,9 +6,9 @@ from django.test import TestCase
 from findings.enums import OSINTDataType, Severity
 from findings.models import OSINT, Credential, Exploit, Host, Port, Technology, Vulnerability
 from projects.models import Project
+from rekono.settings import CONFIG
 from reporting.enums import FindingName, ReportFormat, ReportStatus
 from reporting.models import Report
-from rekono.settings import CONFIG
 from security.authorization.roles import Role
 from targets.enums import TargetType
 from targets.models import Target
@@ -284,15 +284,15 @@ class PdfReportTemplateRenderingTest(ApiTest, TestCase):
 
         # Host
         self.assertIn(host.ip, html)
-    
+
         # Ports
         for port in ports:
             self.assertIn(str(port.port), html)
-        
+
         # Technologies
         for technology in technologies:
             self.assertIn(technology.name, html)
-        
+
         # Credentials, both the secret and the non-secret rendering branches
         for credential in credentials:
             self.assertIn(credential.username, html)
@@ -302,11 +302,11 @@ class PdfReportTemplateRenderingTest(ApiTest, TestCase):
         # Vulnerabilities
         for vulnerability in vulnerabilities:
             self.assertIn(vulnerability.name, html)
-        
+
         # Exploits
         for exploit in exploits:
             self.assertIn(exploit.title, html)
-        
+
         # Stats chart with the severity counts
         self.assertIn('<canvas type="graph"', html)
         self.assertIn('"title": {"_text": "Vulnerabilities by Severity"', html)
