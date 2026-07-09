@@ -167,6 +167,8 @@ WORKDIR /code
 RUN apt update && \
     TOOLS="nmap theharvester nikto sslscan sslyze cmseek zaproxy exploitdb metasploit-framework emailharvester joomscan gitleaks smbmap nuclei gobuster seclists dirb" && \
     apt install --yes --no-install-recommends $TOOLS $BACKEND_DEBIAN_DEPENDENCIES libcap2-bin git ca-certificates sudo && \
+    # Finish any pending package configuration so dpkg is left in a clean state
+    dpkg --configure -a && \
     # Grant capabilities required to nmap in order to get it running in a rootless environment
     setcap cap_net_raw,cap_net_admin,cap_net_bind_service+eip $(which nmap) && \
     # Clean apt resources
