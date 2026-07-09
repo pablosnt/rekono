@@ -1,6 +1,6 @@
 from django.test import TestCase
 
-from findings.enums import Severity, TransportProtocol, TriageStatus
+from findings.enums import TransportProtocol, TriageStatus
 from findings.models import Port, Technology, Vulnerability
 from tests.findings.base import FindingTest
 from tests.framework import ApiTest

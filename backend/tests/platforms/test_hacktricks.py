@@ -19,6 +19,7 @@ def links(*args: Any, **kwargs: Any) -> list[str]:
         f"{base_url}network-services-pentesting/pentesting-smtp/index.html",
     ]
 
+
 def exception(*args: Any, **kwargs: Any):
     raise Exception("test")
 
@@ -64,7 +65,7 @@ class HackTricksTest(BaseTest, TestCase):
         self.port.save(update_fields=["port", "service"])
         self.expected[self.port] = f"{base_url}network-services-pentesting/pentesting-smtp/index.html"
         self._assert_links()
-    
+
     @mock.patch("platforms.hacktricks.HackTricks._get_all_hacktricks_links", links)
     @mock.patch("platforms.hacktricks.HackTricks.process_finding", exception)
     def test_handled_exception(self) -> None:

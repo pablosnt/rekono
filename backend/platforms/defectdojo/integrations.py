@@ -339,5 +339,6 @@ class DefectDojo(BaseIntegration):
         try:
             return self._process_findings(execution, findings)
         except Exception as ex:
-            self.logger.error(f"[{self.__class__.__name__}] Error processing {len(findings)} findings from execution {execution.id}: {str(ex)}")
-        
+            self.logger.error(
+                f"[{self.__class__.__name__}] Error processing {len(findings)} findings from execution {execution.id}: {str(ex)}"
+            )

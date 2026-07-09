@@ -101,7 +101,7 @@ class VirusTotalTest(BaseTest, TestCase):
 
     def test_cached_is_available(self) -> None:
         self.assertFalse(self.virustotal.is_available())
-    
+
     @mock.patch("platforms.virustotal.integrations.VirusTotal.process_finding", exception)
     @mock.patch("platforms.virustotal.integrations.VirusTotal.is_available", return_true)
     def test_handled_exception(self) -> None:

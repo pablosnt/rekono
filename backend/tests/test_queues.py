@@ -6,7 +6,6 @@ from django.utils import timezone
 
 from executions.enums import Status
 from executions.models import Execution
-from executions.queues import ExecutionsQueue
 from findings.models import Host
 from framework.models import BaseInput
 from framework.queues import ExecutionParametersToEnqueue
