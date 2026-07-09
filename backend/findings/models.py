@@ -599,7 +599,7 @@ class Vulnerability(TriageFinding):
     _defectdojo_finding_mapping = {
         "title": "name",
         "description": "description",
-        "severity": "severity",
+        "severity": lambda instance: str(Severity(instance.severity)),
         "cve": "cve",
         "cwe": lambda instance: int(instance.cwes[-1].split("-", 1)[1]) if instance.cwes else None,
         "cvss3": lambda instance: (
