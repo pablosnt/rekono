@@ -134,6 +134,13 @@ class DefectDojoIntegrationTest(BaseTest, TestCase):
     def test_is_not_available_and_does_not_exist(self) -> None:
         self._test_is_available_and_exists(False)
 
+    @mock.patch("platforms.defectdojo.integrations.DefectDojo.is_enabled", return_true)
+    @mock.patch("platforms.defectdojo.integrations.DefectDojo.is_available", return_true)
+    @mock.patch("platforms.defectdojo.integrations.DefectDojo._process_findings", exception)
+    def test_handled_exception(self) -> None:
+        DefectDojo().process_findings(self.execution, self.findings)
+        self.assertTrue(True)
+
 
 class DefectDojoSyncTest(ApiTest, TestCase):
     endpoint = "/api/defectdojo/sync/"

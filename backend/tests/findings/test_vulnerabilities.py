@@ -16,7 +16,7 @@ class VulnerabilityTest(FindingTest, TestCase):
     expected_defectdojo = {
         "title": "Vulnerability 10",
         "description": "Vulnerability 10",
-        "severity": Severity.MEDIUM,
+        "severity": "Medium",
         "cve": "CVE-2025-3010",
         "cwe": 200,
     }
