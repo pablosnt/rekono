@@ -245,7 +245,7 @@ class DefectDojo(BaseIntegration):
                 files={"file": _report},
             )
 
-    def process_findings(self, execution: Execution, findings: list[Finding]) -> None:
+    def _process_findings(self, execution: Execution, findings: list[Finding]) -> None:
         """Synchronize security findings to DefectDojo after execution completion.
 
         Resolves the engagement to use (from an existing target sync, the project sync,
@@ -259,8 +259,6 @@ class DefectDojo(BaseIntegration):
             execution (Execution): Completed security tool execution.
             findings (list[Finding]): Security findings to synchronize.
         """
-        if not self.is_enabled() or not self.is_available():
-            return
         findings = [
             finding for finding in findings if not isinstance(finding, Path) and not finding.created_from_user_input
         ]
@@ -334,3 +332,12 @@ class DefectDojo(BaseIntegration):
         finally:
             if not execution.output_file and report and report.is_file():
                 report.unlink()
+
+    def process_findings(self, execution: Execution, findings: list[Finding]) -> None:
+        if not self.is_enabled() or not self.is_available():
+            return
+        try:
+            return self._process_findings(execution, findings)
+        except Exception as ex:
+            self.logger.error(f"[{self.__class__.__name__}] Error processing {len(findings)} findings from execution {execution.id}: {str(ex)}")
+        

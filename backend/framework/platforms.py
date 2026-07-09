@@ -184,7 +184,11 @@ class BaseIntegration(BasePlatform):
         if not self.is_enabled() or not self.is_available():
             return
         for finding in findings:
-            self.process_finding(execution, finding)
+            try:
+                self.process_finding(execution, finding)
+            except Exception as ex:
+                self.logger.error(f"[{self.__class__.__name__}] Error processing finding {finding.id} from execution {execution.id}: {str(ex)}")
+        
 
 
 class BaseCveProvider(BaseIntegration):
@@ -511,7 +515,10 @@ class BaseNotification(BasePlatform):
         """
         if not self.is_available():
             return
-        self._notify_execution(self._get_users_to_notify_execution(execution), execution, findings)
+        try:
+            self._notify_execution(self._get_users_to_notify_execution(execution), execution, findings)
+        except Exception as ex:
+            self.logger.error(f"[{self.__class__.__name__}] Error processing {len(findings)} findings from execution {execution.id}: {str(ex)}")
 
     def _get_users_to_notify_alert(self, alert: Alert) -> list[Any]:
         """Get list of users to notify about an alert.
