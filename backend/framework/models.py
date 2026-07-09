@@ -5,6 +5,7 @@ common functionality used across all Rekono modules. Includes project-level
 access control, input parsing capabilities, and secure field handling.
 """
 
+import re
 from dataclasses import dataclass
 from functools import cached_property
 from typing import Any, Callable, cast
@@ -321,13 +322,23 @@ class BaseInput(BaseModel):
         the source tool reports the leading slash (e.g. gobuster emits ``images`` while
         dirsearch emits ``/images``).
 
+        A leading ``:<port>`` left over from a parsed URL is stripped as well (e.g.
+        ``/:80/images`` and ``:80/images`` both become ``/images``), which happens when a
+        tool reports paths built by splitting a full URL by its host. This is generic so
+        no caller needs to know the port.
+
         Args:
             value (str | None): The path string to normalize.
 
         Returns:
             str | None: The normalized path with leading slash or None if empty.
         """
-        return f"/{value}" if value and len(value) > 1 and value[0] != "/" else value
+        if value:
+            # Drop a leading ":<port>" with or without a leading slash
+            value = re.sub(r"^/?:\d+(?=/|$)", "", value)
+            if len(value) > 1 and value[0] != "/":
+                value = f"/{value}"
+        return "/" if not value else value
 
     def get_url(
         self,
