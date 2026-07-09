@@ -89,6 +89,8 @@ services:
       - RKN_RQ_HOST=valkey
     security_opt:
       - no-new-privileges:true
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   executions-worker:
     restart: always
@@ -115,6 +117,8 @@ services:
       - RKN_DB_USER=postgres
       - RKN_DB_PASSWORD=postgres
       - RKN_RQ_HOST=valkey
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   findings-worker:
     restart: always
@@ -139,6 +143,8 @@ services:
       - RKN_RQ_HOST=valkey
     security_opt:
       - no-new-privileges:true
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   monitor-worker:
     restart: always
@@ -163,6 +169,8 @@ services:
       - RKN_RQ_HOST=valkey
     security_opt:
       - no-new-privileges:true
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   telegram-bot:
     restart: always
@@ -188,6 +196,8 @@ services:
       - RKN_RQ_HOST=valkey
     security_opt:
       - no-new-privileges:true
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   backend:
     restart: always
@@ -223,6 +233,8 @@ services:
       - RKN_ALLOWED_HOSTS=*
     security_opt:
       - no-new-privileges:true
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
   
   frontend:
     restart: always
