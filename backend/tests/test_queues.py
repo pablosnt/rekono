@@ -1,5 +1,6 @@
 import copy
 from datetime import timedelta
+from unittest import mock
 
 from django.test import TestCase
 from django.utils import timezone
@@ -12,6 +13,8 @@ from framework.queues import ExecutionParametersToEnqueue
 from parameters.models import InputTechnology, InputVulnerability
 from processes.models import Process, Step
 from target_ports.models import TargetPort
+from targets.enums import TargetType
+from targets.models import Target
 from tasks.enums import TimeUnit
 from tasks.models import Task
 from tests.framework import QueueTest
@@ -172,3 +175,57 @@ class TasksQueueTest(QueueTest, TestCase):
         new_task = Task.objects.exclude(pk__in=existing_ids | {task.pk}).get()
         self.assertEqual(enqueued_at + timedelta(hours=2), new_task.scheduled_at)
         self.assertIsNotNone(new_task.rq_job_id)
+
+    def test_get_scoped_target_ports_without_task_target_port(self) -> None:
+        TargetPort.objects.create(target=self.target, port=8080, path=None)
+        task = Task.objects.create(target=self.target, configuration=self.configuration)
+        self.assertEqual(list(self.target.target_ports.all()), task.get_scoped_target_ports())
+
+    def test_get_scoped_target_ports_with_task_target_port(self) -> None:
+        TargetPort.objects.create(target=self.target, port=8080, path=None)
+        task = Task.objects.create(target=self.target, configuration=self.configuration, target_port=self.targetport)
+        self.assertEqual([self.targetport], task.get_scoped_target_ports())
+
+    def test_get_scoped_target_ports_when_target_has_no_ports(self) -> None:
+        target = Target.objects.create(project=self.project, target="10.10.10.99", type=TargetType.PRIVATE_IP)
+        task = Task.objects.create(target=target, configuration=self.configuration)
+        self.assertEqual([], task.get_scoped_target_ports())
+
+    @mock.patch("tasks.queues.ExecutionsQueue.enqueue")
+    def test_consume_tool_uses_task_target_port(self, enqueue_mock: mock.MagicMock) -> None:
+        TargetPort.objects.create(target=self.target, port=8080, path=None)
+        task = Task.objects.create(
+            target=self.target, configuration=self.fake_configuration, target_port=self.targetport
+        )
+        self.queue._consume_tool_task(task)
+        self.assertEqual(
+            [self.targetport.port], [tp.port for call in enqueue_mock.call_args_list for tp in call.args[2]]
+        )
+
+    @mock.patch("tasks.queues.ExecutionsQueue.enqueue")
+    def test_consume_tool_uses_all_ports_without_task_target_port(self, enqueue_mock: mock.MagicMock) -> None:
+        extra = TargetPort.objects.create(target=self.target, port=8080, path=None)
+        task = Task.objects.create(target=self.target, configuration=self.fake_configuration)
+        self.queue._consume_tool_task(task)
+        self.assertEqual(
+            [self.targetport.port, extra.port], [tp.port for call in enqueue_mock.call_args_list for tp in call.args[2]]
+        )
+
+    @mock.patch("tasks.queues.ExecutionsQueue.enqueue")
+    def test_consume_process_uses_task_target_port(self, enqueue_mock: mock.MagicMock) -> None:
+        TargetPort.objects.create(target=self.target, port=8080, path=None)
+        task = Task.objects.create(target=self.target, process=Process.objects.get(pk=1), target_port=self.targetport)
+        self.queue._consume_process_task(task)
+        self.assertEqual(
+            set([self.targetport.port]), set([tp.port for call in enqueue_mock.call_args_list for tp in call.args[2]])
+        )
+
+    @mock.patch("tasks.queues.ExecutionsQueue.enqueue")
+    def test_consume_process_uses_all_ports_without_task_target_port(self, enqueue_mock: mock.MagicMock) -> None:
+        extra = TargetPort.objects.create(target=self.target, port=8080, path=None)
+        task = Task.objects.create(target=self.target, process=Process.objects.get(pk=1))
+        self.queue._consume_process_task(task)
+        self.assertEqual(
+            set([self.targetport.port, extra.port]),
+            set([tp.port for call in enqueue_mock.call_args_list for tp in call.args[2]]),
+        )

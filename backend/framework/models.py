@@ -205,7 +205,7 @@ class BaseInput(BaseModel):
             ]
             _parse_mapping = {
                 InputKeyword.PORT: "port",
-                InputKeyword.TARGET: lambda instance, target: f"{instance.host}:{instance.port}"
+                InputKeyword.TARGET: lambda instance, task: f"{instance.host}:{instance.port}"
             }
         ```
     """
@@ -344,28 +344,31 @@ class BaseInput(BaseModel):
 
     def get_url(
         self,
-        target: Any,
         host: str,
         port: int | None = None,
         endpoint: str | None = None,
         protocols: list[str] = ["http", "https"],
+        task: Any = None,
     ) -> str | None:
         """Construct and validate a URL with automatic protocol detection.
 
         Attempts to construct a valid URL by testing different protocols and
-        validating connectivity. Enhanced with target context to use target
-        ports when no specific port is provided. Each protocol/port
-        combination's reachability is looked up in _url_cache before issuing
-        a request, and the result is cached afterwards, so repeated calls
-        for the same URL (e.g. across multiple tool arguments) don't repeat
-        the same HTTP request.
+        validating connectivity. When no specific port is given, the ports to
+        probe are taken from the task's scope if a task is provided, otherwise
+        from the target's ports, otherwise from common web ports. Each
+        protocol/port combination's reachability is looked up in _url_cache
+        before issuing a request, and the result is cached afterwards, so
+        repeated calls for the same URL (e.g. across multiple tool arguments)
+        don't repeat the same HTTP request.
 
         Args:
-            target (Any): Target context containing port information
             host (str): The hostname or IP address.
-            port (int | None): The port number (optional).
+            port (int | None): The port number (optional). When set, only this
+                               port is probed and task/target are ignored.
             endpoint (str | None): The endpoint path (optional).
             protocols (list[str]): List of protocols to test (default: ["http", "https"]).
+            task (Any): Task whose scoped target ports restrict probing when no
+                        explicit port is given (preferred over target).
 
         Returns:
             str | None: A valid URL string or None if no working URL found.
@@ -382,14 +385,15 @@ class BaseInput(BaseModel):
         # Define URL schema template with placeholders for dynamic components
         schema = "{protocol}://{host}:{port}/{endpoint}"
         # Determine which ports to test based on input parameters
-        ports = (
-            [port]
-            if port
-            # If no port specified, try to use target ports, otherwise default to common web ports
-            else ([tp.port for tp in target.target_ports.all()] if target.target_ports.exists() else [80, 443])
-        )
+        default_ports = [80, 443]
+        if port:
+            ports = [port]
+        elif task is not None:
+            ports = [tp.port for tp in task.get_scoped_target_ports()] or default_ports
+        else:
+            ports = default_ports
         # Test all combinations of ports and protocols to find a working URL
-        for port in ports:
+        for port in set(ports):
             for protocol in protocols:
                 # Skip invalid protocol/port combinations to avoid unnecessary requests
                 # Don't try HTTPS on port 80 or HTTP on port 443 when both protocols are available
@@ -468,15 +472,17 @@ class BaseInput(BaseModel):
             conclusion = conclusion and filter_conclusion
         return conclusion
 
-    def parse(self, target: Any, accumulated: dict[str, Any] = {}) -> dict[str, Any]:
+    def parse(self, task: Any, accumulated: dict[str, Any] = {}) -> dict[str, Any]:
         """Parse input data into a format suitable for tool execution.
 
         Processes the input data according to the configured parse mapping,
-        handling dependencies and accumulation strategies. Enhanced with target
-        context for improved URL generation.
+        handling dependencies and accumulation strategies. The task context is
+        forwarded to parse mappings that build URLs so probing stays within the
+        task's target port scope.
 
         Args:
-            target (Any): Target context for parsing (e.g., for URL generation)
+            task (Any): Task context for parsing (e.g., for URL generation).
+                        May be None when no task is available.
             accumulated (dict[str, Any]): Previously accumulated parsing data.
 
         Returns:
@@ -496,7 +502,7 @@ class BaseInput(BaseModel):
                 and isinstance(getattr(self, dependency), BaseInput)
             ):
                 # Recursively parse dependent inputs and merge results
-                result.update(getattr(self, dependency).parse(accumulated))
+                result.update(getattr(self, dependency).parse(task))
         # Process the main parsing mappings
         for keyword, field_or_function in self._parse_mapping.items():
             # Extract value based on mapping type:
@@ -506,7 +512,7 @@ class BaseInput(BaseModel):
             value = (
                 getattr(self, field_or_function)
                 if isinstance(field_or_function, str) and hasattr(self, field_or_function)
-                else (field_or_function(self, target) if callable(field_or_function) else field_or_function)
+                else (field_or_function(self, task) if callable(field_or_function) else field_or_function)
             )
             if value is None:
                 continue

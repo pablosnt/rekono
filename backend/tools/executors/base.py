@@ -201,7 +201,7 @@ class BaseExecutor(LoggingEntity):
                     # Apply input-specific filtering to ensure compatibility with tool requirements
                     if base_input.filter(argument_input, self.execution.task.target):
                         # Parse the input data and accumulate results
-                        parsed_data = base_input.parse(self.execution.task.target, parsed_data)
+                        parsed_data = base_input.parse(self.execution.task, parsed_data)
                         # Track which inputs are being used for this execution
                         if is_fallback:
                             self.targets_used_in_execution[base_input.__class__] = base_input

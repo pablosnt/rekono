@@ -4,12 +4,14 @@ import sys
 from pathlib import Path
 from typing import Any
 from unittest import mock
+from urllib.parse import urlparse
 
 from django.test import TestCase
 
 from authentications.enums import AuthenticationType
 from findings.enums import OSINTDataType, TransportProtocol
 from findings.models import Port
+from framework.models import BaseInput
 from settings.models import Settings
 from target_ports.models import TargetPort
 from tests.framework import BaseTest
@@ -19,7 +21,7 @@ from tools.executors.zap import Zap
 # pytype: disable=attribute-error
 
 
-def get_url(self, target: Any, host: str, port: int | None = None, endpoint: str | None = None, *args: Any) -> str:
+def get_url(self, host: str, port: int | None = None, endpoint: str | None = None, *args: Any, **kwargs: Any) -> str:
     return f"http://{host}" + (f":{port}" if port else "") + (endpoint or "/")
 
 
@@ -192,6 +194,40 @@ class ToolExecutorTest(BaseTest, TestCase):
         self.assertFalse(
             self.executor.check_arguments([self.osint, self.host, self.port, self.technology], [], [], [], [])
         )
+
+    @mock.patch.object(BaseInput._url_cache, "get", return_value=None)
+    @mock.patch("framework.models.requests.get", side_effect=Exception("unreachable"))
+    def test_get_url_probes_only_task_scoped_port(self, requests_get: mock.MagicMock, *args, **kwargs) -> None:
+        task = self.execution.task
+        task.target_port = self.targetport
+        task.save(update_fields=["target_port"])
+        TargetPort.objects.create(target=self.target, port=8080, path=None)
+        self.assertIsNone(self.target.get_url(self.target.target, task=task))
+        self.assertEqual(
+            set([self.targetport.port]), set([urlparse(call.args[0]).port for call in requests_get.call_args_list])
+        )
+
+    @mock.patch.object(BaseInput._url_cache, "get", return_value=None)
+    @mock.patch("framework.models.requests.get", side_effect=Exception("unreachable"))
+    def test_get_url_falls_back_to_all_task_scoped_ports(self, requests_get: mock.MagicMock, *args, **kwargs) -> None:
+        task = self.execution.task
+        task.target_port = None
+        task.save(update_fields=["target_port"])
+        tp = TargetPort.objects.create(target=self.target, port=8080, path=None)
+        self.assertIsNone(self.target.get_url(self.target.target, task=task))
+        self.assertEqual(
+            set([self.targetport.port, tp.port]),
+            set([urlparse(call.args[0]).port for call in requests_get.call_args_list]),
+        )
+
+    @mock.patch.object(BaseInput._url_cache, "get", return_value=None)
+    @mock.patch("framework.models.requests.get", side_effect=Exception("unreachable"))
+    def test_get_url_falls_back_to_default_ports_without_task(
+        self, requests_get: mock.MagicMock, *args, **kwargs
+    ) -> None:
+        TargetPort.objects.create(target=self.target, port=8080, path=None)
+        self.assertIsNone(self.target.get_url(self.target.target))
+        self.assertEqual(set([80, 443]), set([urlparse(call.args[0]).port for call in requests_get.call_args_list]))
 
 
 class ZapExecutorTest(BaseTest, TestCase):

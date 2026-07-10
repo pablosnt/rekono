@@ -59,7 +59,7 @@ class OSINT(TriageFinding):
     _parse_mapping = {
         InputKeyword.TARGET: "data",
         InputKeyword.HOST: "data",
-        InputKeyword.URL: lambda instance, target: instance.get_url(target, instance.data),
+        InputKeyword.URL: lambda instance, task: instance.get_url(instance.data, task=task),
     }
     _defectdojo_finding_mapping = {
         "title": lambda instance: f"{instance.data_type} found on public sources",
@@ -69,20 +69,20 @@ class OSINT(TriageFinding):
         "severity": Severity.LOW,
     }
 
-    def parse(self, target: Any, accumulated: dict[str, Any] = {}) -> dict[str, Any]:
+    def parse(self, task: Any, accumulated: dict[str, Any] = {}) -> dict[str, Any]:
         """Parse OSINT data for tool execution input.
 
         Processes IP and Domain OSINT data types for use as tool execution
         targets, filtering out non-targetable data types.
 
         Args:
-            target (Any): Target context for parsing
+            task (Any): Task context for parsing (e.g., for URL generation)
             accumulated (dict[str, Any]): Previously accumulated parsing data.
 
         Returns:
             dict[str, Any]: Parsed data for target creation, empty for non-targetable types.
         """
-        return super().parse(target, accumulated) if self.data_type in [OSINTDataType.IP, OSINTDataType.DOMAIN] else {}
+        return super().parse(task, accumulated) if self.data_type in [OSINTDataType.IP, OSINTDataType.DOMAIN] else {}
 
 
 class Host(HacktricksFinding):
@@ -142,7 +142,7 @@ class Host(HacktricksFinding):
     _parse_mapping = {
         InputKeyword.TARGET: "ip",
         InputKeyword.HOST: "ip",
-        InputKeyword.URL: lambda instance, target: instance.get_url(target, instance.ip),
+        InputKeyword.URL: lambda instance, task: instance.get_url(instance.ip, task=task),
     }
     _defectdojo_finding_mapping = {
         "title": "Host discovered",
@@ -216,7 +216,7 @@ class Port(HacktricksFinding):
     ]
     _root_findings = ("host",)
     # _parse_dependencies is not used to avoid recalculation of URLs
-    _parse_mapping = {InputKeyword.PORT: "port", InputKeyword.PORTS: lambda instance, target: [instance.port]}
+    _parse_mapping = {InputKeyword.PORT: "port", InputKeyword.PORTS: lambda instance, task: [instance.port]}
     _defectdojo_finding_mapping = {
         "title": "Port discovered",
         "description": lambda instance: "\n".join(
@@ -240,20 +240,20 @@ class Port(HacktricksFinding):
         Finding.Filter(str, "service", contains=True, processor=lambda s: s.lower()),
     ]
 
-    def parse(self, target: Any, accumulated: dict[str, Any] = {}) -> dict[str, Any]:
+    def parse(self, task: Any, accumulated: dict[str, Any] = {}) -> dict[str, Any]:
         """Parse port data for tool execution targeting.
 
         Generates target specifications combining host and port information
         for detailed service-specific security analysis.
 
         Args:
-            target (Any): Target context for parsing
+            task (Any): Task context for parsing (e.g., for URL generation)
             accumulated (dict[str, Any]): Previously accumulated parsing data.
 
         Returns:
             dict[str, Any]: Port-specific target data including host:port combinations.
         """
-        output = super().parse(target, accumulated)
+        output = super().parse(task, accumulated)
         output[InputKeyword.PORTS_COMMAS.name.lower()] = ",".join(
             [str(p) for p in output.get(InputKeyword.PORTS.name.lower()) or []]
         )
@@ -264,7 +264,7 @@ class Port(HacktricksFinding):
                     InputKeyword.HOST.name.lower(): self.host.ip,
                 }
             )
-            url = self.get_url(target, self.host.ip, self.port)
+            url = self.get_url(self.host.ip, self.port, task=task)
             if url is not None:
                 output[InputKeyword.URL.name.lower()] = url
         return output
@@ -315,9 +315,9 @@ class Path(Finding):
         Finding.Filter(str, "path", contains=True, processor=lambda p: p.lower()),
     ]
     _parse_mapping = {
-        InputKeyword.ENDPOINT: lambda instance, target: instance.clean_path(instance.path),
-        InputKeyword.URL: lambda instance, target: (
-            (instance.get_url(target, instance.port.host.ip, instance.port.port, instance.clean_path(instance.path)))
+        InputKeyword.ENDPOINT: lambda instance, task: instance.clean_path(instance.path),
+        InputKeyword.URL: lambda instance, task: (
+            (instance.get_url(instance.port.host.ip, instance.port.port, instance.clean_path(instance.path), task=task))
             if instance.port and instance.port.host
             else None
         ),

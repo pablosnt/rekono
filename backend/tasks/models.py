@@ -107,3 +107,19 @@ class Task(BaseModel):
             str: String in format "target - process/configuration"
         """
         return f"{self.target.__str__()} - {(self.process or self.configuration).__str__()}"
+
+    def get_scoped_target_ports(self) -> list[TargetPort]:
+        """Return the target ports that define this task's scan scope.
+
+        A task-specific target port restricts scanning to that single port so a
+        scan does not spread to the whole target. When no task target port is set,
+        all of the target's ports are used. Findings discovered by previous
+        executions still take priority at runtime, since Port findings and
+        TargetPorts share the same Port input type and seeded target ports are
+        skipped once findings of that type exist.
+
+        Returns:
+            list[TargetPort]: The single task target port when set, otherwise all
+                              of the target's ports (empty when it has none).
+        """
+        return [self.target_port] if self.target_port else list(self.target.target_ports.all())

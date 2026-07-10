@@ -49,13 +49,13 @@ class TargetPort(BaseInput):
     _filters = [BaseInput.Filter(type=int, field="port")]
     # _parse_dependencies is not used to avoid recalculation of URLs
     _parse_mapping = {
-        InputKeyword.TARGET: lambda instance, target: f"{instance.target.target}:{instance.port}",
-        InputKeyword.HOST: lambda instance, target: instance.target.target,
+        InputKeyword.TARGET: lambda instance, task: f"{instance.target.target}:{instance.port}",
+        InputKeyword.HOST: lambda instance, task: instance.target.target,
         InputKeyword.PORT: "port",
-        InputKeyword.PORTS: lambda instance, target: [instance.port],
-        InputKeyword.ENDPOINT: lambda instance, target: instance.clean_path(instance.path),
-        InputKeyword.URL: lambda instance, target: instance.get_url(
-            target, instance.target.target, instance.port, instance.clean_path(instance.path)
+        InputKeyword.PORTS: lambda instance, task: [instance.port],
+        InputKeyword.ENDPOINT: lambda instance, task: instance.clean_path(instance.path),
+        InputKeyword.URL: lambda instance, task: instance.get_url(
+            instance.target.target, instance.port, instance.clean_path(instance.path), task=task
         ),
     }
     _parse_dependencies = ["authentication"]
@@ -74,19 +74,20 @@ class TargetPort(BaseInput):
 
         constraints = [models.UniqueConstraint(fields=["target", "port"], name="unique_target_port")]
 
-    def parse(self, target: Any, accumulated: dict[str, Any] = {}) -> dict[str, Any]:
+    def parse(self, task: Any, accumulated: dict[str, Any] = {}) -> dict[str, Any]:
         """Parse target port data for security tool integration.
 
         Extends the base parsing functionality to include comma-separated ports
         format for tools that require specific port list formatting.
 
         Args:
+            task (Any): Task context for parsing (e.g., for URL generation)
             accumulated (dict): Accumulated parsing data from other inputs
 
         Returns:
             dict: Parsed data including port information in multiple formats
         """
-        output = super().parse(target, accumulated)
+        output = super().parse(task, accumulated)
         output[InputKeyword.PORTS_COMMAS.name.lower()] = ",".join(
             [str(p) for p in output.get(InputKeyword.PORTS.name.lower()) or []]
         )

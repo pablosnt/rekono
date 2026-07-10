@@ -189,7 +189,7 @@ class TasksQueue(BaseScanQueue):
         executions = TasksQueue.calculate_executions(
             task.configuration,
             [],
-            task.target.target_ports.all(),
+            task.get_scoped_target_ports(),
             task.input_vulnerabilities.all(),
             task.input_technologies.all(),
             task.wordlists.all(),
@@ -258,7 +258,7 @@ class TasksQueue(BaseScanQueue):
             executions = TasksQueue.calculate_executions(
                 execution_job.step.configuration,
                 [],  # No findings from previous steps yet (will be resolved by dependencies)
-                task.target.target_ports.all(),
+                task.get_scoped_target_ports(),
                 task.input_vulnerabilities.all(),
                 task.input_technologies.all(),
                 task.wordlists.all(),

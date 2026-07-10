@@ -54,7 +54,7 @@ class Target(BaseInput):
     _parse_mapping = {
         InputKeyword.TARGET: "target",
         InputKeyword.HOST: "target",
-        InputKeyword.URL: lambda instance, target: instance.get_url(target, instance.target),
+        InputKeyword.URL: lambda instance, task: instance.get_url(instance.target, task=task),
     }
     _project_field = "project"
 
