@@ -13,7 +13,7 @@ class TechnologyTest(FindingTest, TestCase):
     expected_defectdojo = {
         "title": "Technology WordPress detected",
         "description": "Typical CMS\n\nTechnology: WordPress\nVersion: 1.0.10",
-        "severity": Severity.LOW,
+        "severity": str(Severity.LOW),
         "cwe": 200,
         "references": "https://wordpress.org",
     }

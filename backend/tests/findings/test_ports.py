@@ -13,7 +13,7 @@ class PortTest(FindingTest, TestCase):
     expected_defectdojo = {
         "title": "Port discovered",
         "description": f"Host: 10.10.10.10\nPort: 80\nStatus: {PortStatus.OPEN.value}\nProtocol: {TransportProtocol.TCP.value}\nService: http",
-        "severity": Severity.INFO,
+        "severity": str(Severity.INFO),
     }
     expected_string = f"10.10.10.10 - 80 - {TransportProtocol.TCP.value}"
 

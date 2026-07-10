@@ -14,7 +14,7 @@ class CredentialTest(FindingTest, TestCase):
         "title": "Credentials exposure",
         "description": "Technology: WordPress\nEmail: admin10@rekono.com\nUsername: admin10\nSecret: admin",
         "cwe": 200,
-        "severity": Severity.HIGH,
+        "severity": str(Severity.HIGH),
     }
     expected_string = (
         f"10.10.10.10 - 80 - {TransportProtocol.TCP.value} - WordPress - 1.0.10 - admin10@rekono.com - admin10 - admin"

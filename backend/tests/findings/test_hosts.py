@@ -16,7 +16,7 @@ class HostTest(FindingTest, TestCase):
     expected_defectdojo = {
         "title": "Host discovered",
         "description": f"IP: 10.10.10.10\nOS type: {HostOS.LINUX.value}",
-        "severity": Severity.INFO,
+        "severity": str(Severity.INFO),
     }
     expected_string = "10.10.10.10"
 

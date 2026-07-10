@@ -16,7 +16,7 @@ class OSINTTest(FindingTest, TestCase):
     expected_defectdojo = {
         "title": f"{OSINTDataType.USER.value} found on public sources",
         "description": "Data: admin10\nSource: Google",
-        "severity": Severity.LOW,
+        "severity": str(Severity.LOW),
     }
     expected_string = f"admin10 - {OSINTDataType.USER.value}"
 

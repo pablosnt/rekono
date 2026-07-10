@@ -599,19 +599,19 @@ class Vulnerability(TriageFinding):
     _defectdojo_finding_mapping = {
         "title": "name",
         "description": "description",
-        "severity": lambda instance: str(Severity(instance.severity)),
+        "severity": "severity",
         "cve": "cve",
         "cwe": lambda instance: int(instance.cwes[-1].split("-", 1)[1]) if instance.cwes else None,
-        "cvss3": lambda instance: (
+        "cvssv3": lambda instance: (
             instance.cvss_vector if instance.cvss_version and instance.cvss_version.startswith("3") else None
         ),
-        "cvss3_score": lambda instance: (
+        "cvssv3_score": lambda instance: (
             instance.cvss_base_score if instance.cvss_version and instance.cvss_version.startswith("3") else None
         ),
-        "cvss4": lambda instance: (
+        "cvssv4": lambda instance: (
             instance.cvss_vector if instance.cvss_version and instance.cvss_version.startswith("4") else None
         ),
-        "cvss4_score": lambda instance: (
+        "cvssv4_score": lambda instance: (
             instance.cvss_base_score if instance.cvss_version and instance.cvss_version.startswith("4") else None
         ),
         "mitigation": "remediation",

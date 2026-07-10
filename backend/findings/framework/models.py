@@ -23,7 +23,7 @@ from django.db.models import (
 from django.utils import timezone
 
 from executions.models import Execution
-from findings.enums import AutoFixedReason, TriageStatus
+from findings.enums import AutoFixedReason, Severity, TriageStatus
 from framework.models import BaseInput
 from projects.models import Project
 from rekono.settings import AUTH_USER_MODEL
@@ -332,8 +332,9 @@ class Finding(BaseInput):
     def defectdojo_finding(self) -> dict[str, Any]:
         """Generate DefectDojo finding data for platform integration.
 
-        Creates formatted finding data suitable for DefectDojo platform
-        integration using the configured finding mapping.
+        Creates formatted finding data suitable for DefectDojo platform integration using
+        the configured finding mapping. The severity is emitted as its DefectDojo label
+        ("Info", "Low", "Medium", "High", "Critical") as required by the import endpoints.
 
         Returns:
             dict[str, Any]: DefectDojo-formatted finding data.
@@ -351,7 +352,10 @@ class Finding(BaseInput):
                     "risk_accepted": lambda instance: instance.triage_status == TriageStatus.WONT_FIX,
                 }
             )
-        return self._apply_defectdojo_mapping({**self._defectdojo_finding_mapping, **default_mapping})
+        data = self._apply_defectdojo_mapping({**self._defectdojo_finding_mapping, **default_mapping})
+        if data.get("severity") is not None:
+            data["severity"] = str(Severity(int(data["severity"])))
+        return data
 
     def defectdojo_endpoint(self) -> dict[str, Any]:
         """Generate DefectDojo endpoint data for platform integration.
