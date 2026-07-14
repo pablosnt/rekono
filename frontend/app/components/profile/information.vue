@@ -18,6 +18,7 @@
         :entity="profile"
         @submit="
           (data) => {
+            notifyEmailChange(data.email);
             profile = data;
             userStore.updateProfile(data);
             valid = false;
@@ -47,6 +48,7 @@ import { useIntegrationsStore } from "~/store/integrations";
 import * as z from "zod";
 
 const api = useApi("/api/profile/");
+const toast = useToast();
 const userStore = useUserStore();
 const integrations = useIntegrationsStore();
 const validation = useValidation();
@@ -127,6 +129,18 @@ const config = computed(() => ({
   }),
   putEndpoint: () => "/api/profile/",
 }));
+
+
+function notifyEmailChange(savedEmail: string) {
+  const requestedEmail = form.value?.formData?.email;
+  if (!requestedEmail || requestedEmail === savedEmail) return;
+  toast.add({
+    title: "Confirm your new email address",
+    description: `A verification link has been sent to ${requestedEmail}. Confirm it to get your email updated, ${savedEmail} stays active meanwhile`,
+    color: "info",
+    icon: "i-lucide-mail-check",
+  });
+}
 
 onMounted(() => {
   integrations.fetchSmtp();

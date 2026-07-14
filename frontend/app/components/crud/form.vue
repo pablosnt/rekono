@@ -364,5 +364,5 @@ function submit() {
   form.value.submit();
 }
 
-defineExpose({ submit });
+defineExpose({ submit, formData });
 </script>
