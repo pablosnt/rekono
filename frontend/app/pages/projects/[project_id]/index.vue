@@ -84,6 +84,7 @@
           color="neutral"
           aria-label="Description"
           :disabled="!userStore.is_admin"
+          @update:model-value="update()"
         />
       </UFormField>
     </UForm>
