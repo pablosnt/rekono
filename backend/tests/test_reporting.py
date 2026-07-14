@@ -373,7 +373,7 @@ class PdfReportTemplateRenderingTest(ApiTest, TestCase):
                 self.assertIn(f'href="https://cwe.mitre.org/data/definitions/{cwe.replace("CWE-", "")}.html"', html)
             if vulnerability.trending:
                 self.assertIn("Trending on CVECrowd", html)
-            
+
         # Exploits
         for exploit in exploits:
             if exploit.edb_id:

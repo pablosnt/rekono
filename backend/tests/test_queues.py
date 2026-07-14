@@ -246,8 +246,17 @@ class ExecutionsQueueTest(QueueTest, TestCase):
     ]
 
     def test_calculate_executions_uses_child_findings_without_parent_input(self) -> None:
-        executions = self.queue.calculate_executions(Configuration.objects.get(tool__name="SearchSploit", name="Search by technology"), self.findings, [], [], [], [])
-        planned = [finding for execution in executions for finding in execution.findings if isinstance(finding, Technology)]
+        executions = self.queue.calculate_executions(
+            Configuration.objects.get(tool__name="SearchSploit", name="Search by technology"),
+            self.findings,
+            [],
+            [],
+            [],
+            [],
+        )
+        planned = [
+            finding for execution in executions for finding in execution.findings if isinstance(finding, Technology)
+        ]
         technology_ids = set(Technology.objects.values_list("id", flat=True))
         self.assertEqual(technology_ids, set(technology.id for technology in planned))
         self.assertEqual(len(technology_ids), len([execution for execution in executions if execution.findings]))
