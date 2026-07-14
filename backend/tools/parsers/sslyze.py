@@ -40,7 +40,7 @@ class Sslyze(BaseParser):
         """
         if finding_type == Vulnerability and not fields.get("technology"):
             if not self.generic_tech:
-                self.generic_tech = super().create_finding(Technology, name="Generic TLS")
+                self.generic_tech = super().create_finding(Technology, name="TLS")
             fields["technology"] = self.generic_tech
             linked_finding = True
         return super().create_finding(finding_type, linked_finding, **fields)
