@@ -184,8 +184,22 @@ class ExecutionsQueue(BaseScanQueue):
         # Each dependency job returns (execution, findings) tuple, so we take findings[1]
         for dependency_id in current_job._dependency_ids:
             dependency = self.queue.fetch_job(dependency_id)
-            if dependency and dependency.result:
+            if not dependency:
+                BaseScanQueue.logger.info(
+                    f"[Execution] Execution {executor.execution.id} received no result from not found dependency job {dependency_id}"
+                )
+            elif dependency.result:
                 findings.extend(dependency.result[1])
+                BaseScanQueue.logger.info(
+                    f"[Execution] Execution {executor.execution.id} received {len(dependency.result[1])} findings of type {', '.join(sorted({f.__class__.__name__ for f in dependency.result[1]}))} from dependency job {dependency_id}"
+                )
+            else:
+                BaseScanQueue.logger.info(
+                    f"[Execution] Execution {executor.execution.id} received empty result from dependency job {dependency_id}"
+                )
+        BaseScanQueue.logger.info(
+            f"[Execution] Execution {executor.execution.id} collected {len(findings)} findings of type {', '.join(sorted({f.__class__.__name__ for f in findings}))} from {len(current_job._dependency_ids)} dependencies"
+        )
         # If no findings from dependencies, return only one execution with original parameters
         if not findings:
             return ExecutionParametersToEnqueue(
@@ -194,20 +208,23 @@ class ExecutionsQueue(BaseScanQueue):
         # Calculate new executions based on findings from dependencies
         # This enables automatic tool chaining where findings from one tool
         # trigger executions of other tools
-        executions = [
-            e
-            for e in ExecutionsQueue.calculate_executions(
-                executor.execution.configuration,
-                findings,
-                target_ports,
-                input_vulnerabilities,
-                input_technologies,
-                wordlists,
-            )
+        executions = []
+        for e in ExecutionsQueue.calculate_executions(
+            executor.execution.configuration,
+            findings,
+            target_ports,
+            input_vulnerabilities,
+            input_technologies,
+            wordlists,
+        ):
             if executor.check_arguments(
                 e.findings, e.target_ports, e.input_vulnerabilities, e.input_technologies, e.wordlists
-            )
-        ]
+            ):
+                executions.append(e)
+            else:
+                BaseScanQueue.logger.info(
+                    f"[Execution] Execution {executor.execution.id} discarded a parameter batch ({len(e.findings)} findings of type {', '.join(sorted({f.__class__.__name__ for f in e.findings}))}, {len(e.target_ports)} target ports, {len(e.input_vulnerabilities)} input vulnerabilities, {len(e.input_technologies)} input technologies, and {len(e.wordlists)} wordlists) that can't satisfy the required arguments"
+                )
         BaseScanQueue.logger.info(f"[Execution] New {len(executions) - 1} executions from previous findings")
         # Create new execution records and queue jobs for additional executions
         # executions[0] is the current execution, executions[1:] are new ones

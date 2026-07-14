@@ -42,6 +42,7 @@
             .medium { color: blue; }
             .low { color: green; }
             .info { color: black; }
+            .longtext { word-wrap: break-word; -pdf-word-wrap: CJK; }
         </style>
     </head>
     <body>
@@ -50,7 +51,7 @@
             {% load static %}
             <div class="center">
                 <br>
-                <h1 style="font-size:100px;">{{  project.name }}</h1>
+                <h1 style="font-size:100px;">{{ project.name }}</h1>
                 <div style="width:1000px; margin-top:150px;">
                     <img src="{% static 'logo-light.png' %}" alt="Rekono""/>
                 </div>
@@ -110,28 +111,28 @@
                         {% endif %}
                     {% endfor %}
                 {% endif %}
-                
+
                 {% for key, items in findings.items %}
                     {% if key == target.id %}
 
                         {% if items.OSINT %}
                             <h3>OSINT</h3>
-                            <table repeat="1" border="1" cellspacing="1" cellpadding="5">
+                            <table repeat="1" border="1" cellspacing="1" cellpadding="5" width="100%">
                                 <thead class="white">
                                     <tr bgcolor="#dc3545">
-                                        <th scope="col">Data</th>
-                                        <th scope="col">Data type</th>
-                                        <th scope="col">Source</th>
-                                        <th scope="col">Reference</th>
+                                        <th scope="col" width="40%">Data</th>
+                                        <th scope="col" width="15%">Data type</th>
+                                        <th scope="col" width="20%">Source</th>
+                                        <th scope="col" width="25%">Reference</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {% for o in items.OSINT %}
                                         <tr>
-                                            <td>{{ o.data }}</td>
-                                            <td class="center">{{ o.data_type }}</td>
-                                            <td class="center">{{ o.source|default_if_none:"" }}</td>
-                                            <td>
+                                            <td width="40%" class="longtext">{{ o.data }}</td>
+                                            <td class="center" width="15%">{{ o.data_type }}</td>
+                                            <td class="center" width="20%">{{ o.source|default_if_none:"" }}</td>
+                                            <td width="25%">
                                                 {% if o.reference %}
                                                     <!-- nosemgrep: javascript.express.security.audit.xss.mustache.var-in-href.var-in-href, python.django.security.audit.xss.template-href-var.template-href-var, python.flask.security.xss.audit.template-href-var.template-href-var -->
                                                     <a href="{{ o.reference }}">Link</a>
@@ -148,27 +149,75 @@
                         {% if items.Host %}
                             {% for h in items.Host %}
                                 <h3>{{ h.Host.ip}}</h3>
-                                <p class="relevant">[{{ h.Host.os_type }}] {{ h.Host.os|default_if_none:"Unknown OS" }}</p>
+                                {% if h.Host.os or h.Host.domain or h.Host.country or h.Host.city or h.Host.reputation != None or h.Host.malicious_analysis != None or h.Host.suspicious_analysis != None or h.Host.total_analysis != None %}
+                                    <table border="1" cellspacing="1" cellpadding="5">
+                                        <tbody>
+                                            {% if h.Host.domain %}
+                                                <tr>
+                                                    <th bgcolor="#dc3545" class="white" width="30%">Domain</th>
+                                                    <td width="70%" class="longtext">{{ h.Host.domain }}</td>
+                                                </tr>
+                                            {% endif %}
+                                            {% if h.Host.os %}
+                                                <tr>
+                                                    <th bgcolor="#dc3545" class="white" width="30%">OS</th>
+                                                    <td width="70%" class="longtext">{{ h.Host.os }}</td>
+                                                </tr>
+                                            {% endif %}
+                                            {% if h.Host.country %}
+                                                <tr>
+                                                    <th bgcolor="#dc3545" class="white" width="30%">Country</th>
+                                                    <td width="70%" class="longtext">{{ h.Host.country }}</td>
+                                                </tr>
+                                            {% endif %}
+                                            {% if h.Host.city %}
+                                                <tr>
+                                                    <th bgcolor="#dc3545" class="white" width="30%">City</th>
+                                                    <td width="70%" class="longtext">{{ h.Host.city }}</td>
+                                                </tr>
+                                            {% endif %}
+                                            {% if h.Host.reputation != None %}
+                                                <tr>
+                                                    <th bgcolor="#dc3545" class="white" width="30%">Reputation</th>
+                                                    <td width="70%">{{ h.Host.reputation }}</td>
+                                                </tr>
+                                            {% endif %}
+                                            {% if h.Host.malicious_analysis != None %}
+                                                <tr>
+                                                    <th bgcolor="#dc3545" class="white" width="30%">Malicious analysis</th>
+                                                    <td width="70%">{{ h.Host.malicious_analysis }}/{{ h.Host.total_analysis }}</td>
+                                                </tr>
+                                            {% endif %}
+                                            {% if h.Host.suspicious_analysis != None %}
+                                                <tr>
+                                                    <th bgcolor="#dc3545" class="white" width="30%">Suspicious analysis</th>
+                                                    <td width="70%">{{ h.Host.suspicious_analysis }}/{{ h.Host.total_analysis }}</td>
+                                                </tr>
+                                            {% endif %}
+                                        </tbody>
+                                    </table>
+                                    <br>
+                                {% endif %}
                                 {% if h.Port %}
                                     <h4>Ports & Technologies</h4>
-                                    <table repeat="1" border="1" cellspacing="1" cellpadding="5">
+                                    <table repeat="1" border="1" cellspacing="1" cellpadding="5" width="100%">
                                         <thead class="white">
                                             <tr bgcolor="#dc3545">
-                                                <th scope="col">Port</th>
-                                                <th scope="col">Status</th>
-                                                <th scope="col">Protocol</th>
-                                                <th scope="col">Service</th>
-                                                <th scope="col">Technologies</th>
+                                                <th scope="col" width="10%">Port</th>
+                                                <th scope="col" width="13%">Status</th>
+                                                <th scope="col" width="13%">Protocol</th>
+                                                <th scope="col" width="17%">Service</th>
+                                                <th scope="col" width="47%">Technologies</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             {% for p in h.Port %}
                                                 <tr>
-                                                    <td class="center">{{ p.port }}</td>
-                                                    <td class="center port {{ p.status|lower }}">{{ p.status }}</td>
-                                                    <td class="center">{{ p.protocol|default_if_none:"" }}</td>
-                                                    <td class="center">{{ p.service|default_if_none:"" }}</td>
-                                                    <td>
+                                                    <td class="center" width="10%">{{ p.port }}</td>
+                                                    <td class="center port {{ p.status|lower }}" width="13%">{{ p.status }}</td>
+                                                    <td class="center" width="13%">{{ p.protocol|default_if_none:"" }}</td>
+                                                    <td class="center" width="17%">{{ p.service|default_if_none:"" }}</td>
+                                                    <td width="47%" class="longtext">
                                                         <ul>
                                                         {% for t in h.Technology %}
                                                             {% if t.port.id == p.id %}
@@ -201,20 +250,22 @@
                                         {% if v.get_severity_display|upper == "CRITICAL" or v.get_severity_display|upper == "HIGH" %}
                                             <table border="1" cellspacing="1" cellpadding="5">
                                                 <tbody>
-                                                    <tr>
-                                                        <th bgcolor="#dc3545" class="white" width="20%">Port</th>
-                                                        <td width="60%">
-                                                            {% if v.technology and v.technology.port %}
-                                                                {{ v.technology.port.port }}
-                                                            {% elif v.port %}
-                                                                {{ v.port.port }}
-                                                            {% endif %}
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th bgcolor="#dc3545" class="white" width="20%">Technology</th>
-                                                        <td width="60%">
-                                                            {% if v.technology %}
+                                                    {% if v.technology.port or v.port %}
+                                                        <tr>
+                                                            <th bgcolor="#dc3545" class="white" width="20%">Port</th>
+                                                            <td width="60%">
+                                                                {% if v.technology.port %}
+                                                                    {{ v.technology.port.port }}
+                                                                {% else %}
+                                                                    {{ v.port.port }}
+                                                                {% endif %}
+                                                            </td>
+                                                        </tr>
+                                                    {% endif %}
+                                                    {% if v.technology %}
+                                                        <tr>
+                                                            <th bgcolor="#dc3545" class="white" width="20%">Technology</th>
+                                                            <td width="60%" class="longtext">
                                                                 {% if v.technology.reference %}
                                                                     <!-- nosemgrep: javascript.express.security.audit.xss.mustache.var-in-href.var-in-href, python.django.security.audit.xss.template-href-var.template-href-var, python.flask.security.xss.audit.template-href-var.template-href-var -->
                                                                     <a href="{{ v.technology.reference }}">{{ v.technology.name }}</a>
@@ -224,57 +275,148 @@
                                                                 {% if v.technology.version %}
                                                                     - {{ v.technology.version }}
                                                                 {% endif %}
-                                                            {% endif %}
-                                                        </td>
-                                                    </tr>
+                                                            </td>
+                                                        </tr>
+                                                    {% endif %}
                                                     <tr>
                                                         <th bgcolor="#dc3545" class="white" width="20%">Name</th>
-                                                        <td width="60%">{{ v.name }}</td>
+                                                        <td width="60%" class="longtext">{{ v.name }}</td>
                                                     </tr>
-                                                    <tr>
-                                                        <th bgcolor="#dc3545" class="white" width="20%">Description</th>
-                                                        <td width="60%">{{ v.description|default_if_none:"" }}</td>
-                                                    </tr>
+                                                    {% if v.description %}
+                                                        <tr>
+                                                            <th bgcolor="#dc3545" class="white" width="20%">Description</th>
+                                                            <td width="60%">{{ v.description|linebreaksbr }}</td>
+                                                        </tr>
+                                                    {% endif %}
+                                                    {% if v.remediation %}
+                                                        <tr>
+                                                            <th bgcolor="#dc3545" class="white" width="20%">Remediation</th>
+                                                            <td width="60%">{{ v.remediation|linebreaksbr }}</td>
+                                                        </tr>
+                                                    {% endif %}
                                                     <tr>
                                                         <th bgcolor="#dc3545" class="white" width="20%">Severity</th>
                                                         <td width="60%" class="{{ v.get_severity_display|lower }}">{{ v.get_severity_display|upper }}</td>
                                                     </tr>
-                                                    <tr>
-                                                        <th bgcolor="#dc3545" class="white" width="20%">CVE</th>
-                                                        <td width="60%">{{ v.cve|default_if_none:"" }}</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th bgcolor="#dc3545" class="white" width="20%">CWE</th>
-                                                        <td width="60%">{{ v.cwe|default_if_none:"" }}</td>
-                                                    </tr>
+                                                    {% if v.cvss_base_score != None %}
+                                                        <tr>
+                                                            <th bgcolor="#dc3545" class="white" width="20%">CVSS</th>
+                                                            <td width="60%">
+                                                                {{ v.cvss_base_score }}{% if v.cvss_version %} (v{{ v.cvss_version }}){% endif %}
+                                                                {% if v.cvss_vector %}
+                                                                    <br>
+                                                                    {% if v.cvss_version %}
+                                                                        <!-- nosemgrep: javascript.express.security.audit.xss.mustache.var-in-href.var-in-href, python.django.security.audit.xss.template-href-var.template-href-var, python.flask.security.xss.audit.template-href-var.template-href-var -->
+                                                                        <a href="https://www.first.org/cvss/calculator/{{ v.cvss_version }}#{{ v.cvss_vector }}" class="longtext">{{ v.cvss_vector }}</a>
+                                                                    {% else %}
+                                                                        <span class="longtext">{{ v.cvss_vector }}</span>
+                                                                    {% endif %}
+                                                                {% endif %}
+                                                            </td>
+                                                        </tr>
+                                                    {% endif %}
+                                                    {% if v.cve %}
+                                                        <tr>
+                                                            <th bgcolor="#dc3545" class="white" width="20%">CVE</th>
+                                                            <td width="60%">
+                                                                <!-- nosemgrep: javascript.express.security.audit.xss.mustache.var-in-href.var-in-href, python.django.security.audit.xss.template-href-var.template-href-var, python.flask.security.xss.audit.template-href-var.template-href-var -->
+                                                                <a href="https://nvd.nist.gov/vuln/detail/{{ v.cve|upper }}" class="longtext">{{ v.cve|upper }}</a>
+                                                            </td>
+                                                        </tr>
+                                                    {% endif %}
+                                                    {% if v.euvd_id %}
+                                                        <tr>
+                                                            <th bgcolor="#dc3545" class="white" width="20%">EUVD</th>
+                                                            <td width="60%">
+                                                                <!-- nosemgrep: javascript.express.security.audit.xss.mustache.var-in-href.var-in-href, python.django.security.audit.xss.template-href-var.template-href-var, python.flask.security.xss.audit.template-href-var.template-href-var -->
+                                                                <a href="https://euvd.enisa.europa.eu/vulnerability/{{ v.euvd_id }}" class="longtext">{{ v.euvd_id }}</a>
+                                                            </td>
+                                                        </tr>
+                                                    {% endif %}
+                                                    {% if v.ghsa_id %}
+                                                        <tr>
+                                                            <th bgcolor="#dc3545" class="white" width="20%">GHSA</th>
+                                                            <td width="60%">
+                                                                <!-- nosemgrep: javascript.express.security.audit.xss.mustache.var-in-href.var-in-href, python.django.security.audit.xss.template-href-var.template-href-var, python.flask.security.xss.audit.template-href-var.template-href-var -->
+                                                                <a href="https://github.com/advisories/{{ v.ghsa_id }}" class="longtext">{{ v.ghsa_id }}</a>
+                                                            </td>
+                                                        </tr>
+                                                    {% endif %}
+                                                    {% if v.osv_generic_id %}
+                                                        <tr>
+                                                            <th bgcolor="#dc3545" class="white" width="20%">OSV</th>
+                                                            <td width="60%">
+                                                                <!-- nosemgrep: javascript.express.security.audit.xss.mustache.var-in-href.var-in-href, python.django.security.audit.xss.template-href-var.template-href-var, python.flask.security.xss.audit.template-href-var.template-href-var -->
+                                                                <a href="https://osv.dev/vulnerability/{{ v.osv_generic_id }}" class="longtext">{{ v.osv_generic_id }}</a>
+                                                            </td>
+                                                        </tr>
+                                                    {% endif %}
+                                                    {% if v.cwes %}
+                                                        <tr>
+                                                            <th bgcolor="#dc3545" class="white" width="20%">CWE</th>
+                                                            <td width="60%">
+                                                                {% for cwe in v.cwes %}
+                                                                    <!-- nosemgrep: javascript.express.security.audit.xss.mustache.var-in-href.var-in-href, python.django.security.audit.xss.template-href-var.template-href-var, python.flask.security.xss.audit.template-href-var.template-href-var -->
+                                                                    <a href="https://cwe.mitre.org/data/definitions/{{ cwe|upper|cut:"CWE-" }}.html">{{ cwe|upper }}</a>{% if not forloop.last %}, {% endif %}
+                                                                {% endfor %}
+                                                            </td>
+                                                        </tr>
+                                                    {% endif %}
+                                                    {% if v.trending %}
+                                                        <tr>
+                                                            <th bgcolor="#dc3545" class="white" width="20%">Trending</th>
+                                                            <td width="60%">
+                                                                <!-- nosemgrep: javascript.express.security.audit.xss.mustache.var-in-href.var-in-href, python.django.security.audit.xss.template-href-var.template-href-var, python.flask.security.xss.audit.template-href-var.template-href-var -->
+                                                                <a href="https://cvecrowd.com/">Trending on CVECrowd</a>
+                                                            </td>
+                                                        </tr>
+                                                    {% endif %}
+                                                    {% if v.epss_score != None %}
+                                                        <tr>
+                                                            <th bgcolor="#dc3545" class="white" width="20%">EPSS Score</th>
+                                                            <td width="60%">{{ v.epss_score }}</td>
+                                                        </tr>
+                                                    {% endif %}
+                                                    {% if v.epss_percentile != None %}
+                                                        <tr>
+                                                            <th bgcolor="#dc3545" class="white" width="20%">EPSS Percentile</th>
+                                                            <td width="60%">{{ v.epss_percentile }}</td>
+                                                        </tr>
+                                                    {% endif %}
                                                     <tr>
                                                         <th bgcolor="#dc3545" class="white" width="20%">Exploits</th>
-                                                        <td width="60%">
+                                                        <td width="60%" class="longtext">
                                                             {% if h.Exploit %}
                                                                 <ul>
                                                                     {% for e in h.Exploit %}
                                                                         {% if e.vulnerability.id == v.id %}
-                                                                            {% if e.reference %}
-                                                                                <!-- nosemgrep: javascript.express.security.audit.xss.mustache.var-in-href.var-in-href, python.django.security.audit.xss.template-href-var.template-href-var, python.flask.security.xss.audit.template-href-var.template-href-var -->
-                                                                                <li><a href="{{ e.reference }}">{{ e.title }}</a></li>
-                                                                            {% else %}
-                                                                                <li>{{ e.title }}</li>
-                                                                            {% endif %}
+                                                                            <li>
+                                                                                {% if e.edb_id %}
+                                                                                    <a href="https://www.exploit-db.com/exploits/{{ e.edb_id }}">EDB-{{ e.edb_id }}</a>
+                                                                                {% elif e.reference|slice:":8" == "https://" or e.reference|slice:":7" == "http://" %}
+                                                                                    <!-- nosemgrep: javascript.express.security.audit.xss.mustache.var-in-href.var-in-href, python.django.security.audit.xss.template-href-var.template-href-var, python.flask.security.xss.audit.template-href-var.template-href-var -->
+                                                                                    <a href="{{ e.reference }}">{{ e.title }}</a>
+                                                                                {% elif e.reference %}
+                                                                                    <span class="longtext">{{ e.reference }}</span>
+                                                                                {% else %}
+                                                                                    {{ e.title }}
+                                                                                {% endif %}
+                                                                            </li>
                                                                         {% endif %}
                                                                     {% endfor %}
                                                                 </ul>
                                                             {% endif %}
                                                         </td>
                                                     </tr>
-                                                    <tr>
-                                                        <th bgcolor="#dc3545" class="white" width="20%">Reference</th>
-                                                        <td width="60%">
-                                                            {% if v.reference %}
+                                                    {% if v.reference %}
+                                                        <tr>
+                                                            <th bgcolor="#dc3545" class="white" width="20%">Reference</th>
+                                                            <td width="60%">
                                                                 <!-- nosemgrep: javascript.express.security.audit.xss.mustache.var-in-href.var-in-href, python.django.security.audit.xss.template-href-var.template-href-var, python.flask.security.xss.audit.template-href-var.template-href-var -->
                                                                 <a href="{{ v.reference }}">Link</a>
-                                                            {% endif %}
-                                                        </td>
-                                                    </tr>
+                                                            </td>
+                                                        </tr>
+                                                    {% endif %}
                                                 </tbody>
                                             </table>
                                             <br>
@@ -290,14 +432,16 @@
                                         {% if c.secret %}
                                             <table border="1" cellspacing="1" cellpadding="5">
                                                 <tbody>
-                                                    <tr>
-                                                        <th bgcolor="#dc3545" class="white" width="20%">Port</th>
-                                                        <td width="60%">{{ c.technology.port.port }}</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th bgcolor="#dc3545" class="white" width="20%">Technology</th>
-                                                        <td width="60%">
-                                                            {% if c.technology %}
+                                                    {% if c.technology.port %}
+                                                        <tr>
+                                                            <th bgcolor="#dc3545" class="white" width="20%">Port</th>
+                                                            <td width="60%">{{ c.technology.port.port }}</td>
+                                                        </tr>
+                                                    {% endif %}
+                                                    {% if c.technology %}
+                                                        <tr>
+                                                            <th bgcolor="#dc3545" class="white" width="20%">Technology</th>
+                                                            <td width="60%" class="longtext">
                                                                 {% if c.technology.reference %}
                                                                     <!-- nosemgrep: javascript.express.security.audit.xss.mustache.var-in-href.var-in-href, python.django.security.audit.xss.template-href-var.template-href-var, python.flask.security.xss.audit.template-href-var.template-href-var -->
                                                                     <a href="{{ c.technology.reference }}">{{ c.technology.name }}</a>
@@ -307,9 +451,9 @@
                                                                 {% if c.technology.version %}
                                                                     - {{ c.technology.version }}
                                                                 {% endif %}
-                                                            {% endif %}
-                                                        </td>
-                                                    </tr>
+                                                            </td>
+                                                        </tr>
+                                                    {% endif %}
                                                     <tr>
                                                         <th bgcolor="#dc3545" class="white" width="20%">Name</th>
                                                         <td width="60%">Credential found</td>
@@ -317,15 +461,17 @@
                                                     <tr>
                                                         <th bgcolor="#dc3545" class="white" width="20%">Description</th>
                                                         <td width="60%">
-                                                            <p>{{ c.context|default_if_none:"" }}</p>
+                                                            {% if c.context %}
+                                                                <p>{{ c.context|linebreaksbr }}</p>
+                                                            {% endif %}
                                                             <ul>
                                                                 {% if c.email %}
-                                                                    <li>Email: {{ c.email }}</li>
+                                                                    <li>Email: <span class="longtext">{{ c.email }}</span></li>
                                                                 {% endif %}
                                                                 {% if c.username %}
-                                                                    <li>Username: {{ c.username }}</li>
+                                                                    <li>Username: <span class="longtext">{{ c.username }}</span></li>
                                                                 {% endif %}
-                                                                <li>Secret: {{ c.secret }}</li>
+                                                                <li>Secret: <span class="longtext">{{ c.secret }}</span></li>
                                                             </ul>
                                                         </td>
                                                     </tr>
@@ -334,20 +480,11 @@
                                                         <td width="60%" class="high">High</td>
                                                     </tr>
                                                     <tr>
-                                                        <th bgcolor="#dc3545" class="white" width="20%">CVE</th>
-                                                        <td width="60%"></td>
-                                                    </tr>
-                                                    <tr>
                                                         <th bgcolor="#dc3545" class="white" width="20%">CWE</th>
-                                                        <td width="20%">CWE-200</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th bgcolor="#dc3545" class="white" width="20%">Exploits</th>
-                                                        <td width="60%"></td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th bgcolor="#dc3545" class="white" width="20%">Reference</th>
-                                                        <td width="60%"></td>
+                                                        <td width="60%">
+                                                            <!-- nosemgrep: javascript.express.security.audit.xss.mustache.var-in-href.var-in-href, python.django.security.audit.xss.template-href-var.template-href-var, python.flask.security.xss.audit.template-href-var.template-href-var -->
+                                                            <a href="https://cwe.mitre.org/data/definitions/200.html">CWE-200</a>
+                                                        </td>
                                                     </tr>
                                                 </tbody>
                                             </table>
@@ -361,20 +498,22 @@
                                         {% if v.get_severity_display|upper == "MEDIUM" or v.get_severity_display|upper == "LOW" %}
                                             <table border="1" cellspacing="1" cellpadding="5">
                                                 <tbody>
-                                                    <tr>
-                                                        <th bgcolor="#dc3545" class="white" width="20%">Port</th>
-                                                        <td width="60%">
-                                                            {% if v.technology and v.technology.port %}
-                                                                {{ v.technology.port.port }}
-                                                            {% elif v.port %}
-                                                                {{ v.port.port }}
-                                                            {% endif %}
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th bgcolor="#dc3545" class="white" width="20%">Technology</th>
-                                                        <td width="60%">
-                                                            {% if v.technology %}
+                                                    {% if v.technology.port or v.port %}
+                                                        <tr>
+                                                            <th bgcolor="#dc3545" class="white" width="20%">Port</th>
+                                                            <td width="60%">
+                                                                {% if v.technology.port %}
+                                                                    {{ v.technology.port.port }}
+                                                                {% else %}
+                                                                    {{ v.port.port }}
+                                                                {% endif %}
+                                                            </td>
+                                                        </tr>
+                                                    {% endif %}
+                                                    {% if v.technology %}
+                                                        <tr>
+                                                            <th bgcolor="#dc3545" class="white" width="20%">Technology</th>
+                                                            <td width="60%" class="longtext">
                                                                 {% if v.technology.reference %}
                                                                     <!-- nosemgrep: javascript.express.security.audit.xss.mustache.var-in-href.var-in-href, python.django.security.audit.xss.template-href-var.template-href-var, python.flask.security.xss.audit.template-href-var.template-href-var -->
                                                                     <a href="{{ v.technology.reference }}">{{ v.technology.name }}</a>
@@ -384,57 +523,148 @@
                                                                 {% if v.technology.version %}
                                                                     - {{ v.technology.version }}
                                                                 {% endif %}
-                                                            {% endif %}
-                                                        </td>
-                                                    </tr>
+                                                            </td>
+                                                        </tr>
+                                                    {% endif %}
                                                     <tr>
                                                         <th bgcolor="#dc3545" class="white" width="20%">Name</th>
-                                                        <td width="60%">{{ v.name }}</td>
+                                                        <td width="60%" class="longtext">{{ v.name }}</td>
                                                     </tr>
-                                                    <tr>
-                                                        <th bgcolor="#dc3545" class="white" width="20%">Description</th>
-                                                        <td width="60%">{{ v.description|default_if_none:"" }}</td>
-                                                    </tr>
+                                                    {% if v.description %}
+                                                        <tr>
+                                                            <th bgcolor="#dc3545" class="white" width="20%">Description</th>
+                                                            <td width="60%">{{ v.description|linebreaksbr }}</td>
+                                                        </tr>
+                                                    {% endif %}
+                                                    {% if v.remediation %}
+                                                        <tr>
+                                                            <th bgcolor="#dc3545" class="white" width="20%">Remediation</th>
+                                                            <td width="60%">{{ v.remediation|linebreaksbr }}</td>
+                                                        </tr>
+                                                    {% endif %}
                                                     <tr>
                                                         <th bgcolor="#dc3545" class="white" width="20%">Severity</th>
                                                         <td width="60%" class="{{ v.get_severity_display|lower }}">{{ v.get_severity_display|upper }}</td>
                                                     </tr>
-                                                    <tr>
-                                                        <th bgcolor="#dc3545" class="white" width="20%">CVE</th>
-                                                        <td width="60%">{{ v.cve|default_if_none:"" }}</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th bgcolor="#dc3545" class="white" width="20%">CWE</th>
-                                                        <td width="60%">{{ v.cwe|default_if_none:"" }}</td>
-                                                    </tr>
+                                                    {% if v.cvss_base_score != None %}
+                                                        <tr>
+                                                            <th bgcolor="#dc3545" class="white" width="20%">CVSS</th>
+                                                            <td width="60%">
+                                                                {{ v.cvss_base_score }}{% if v.cvss_version %} (v{{ v.cvss_version }}){% endif %}
+                                                                {% if v.cvss_vector %}
+                                                                    <br>
+                                                                    {% if v.cvss_version %}
+                                                                        <!-- nosemgrep: javascript.express.security.audit.xss.mustache.var-in-href.var-in-href, python.django.security.audit.xss.template-href-var.template-href-var, python.flask.security.xss.audit.template-href-var.template-href-var -->
+                                                                        <a href="https://www.first.org/cvss/calculator/{{ v.cvss_version }}#{{ v.cvss_vector }}" class="longtext">{{ v.cvss_vector }}</a>
+                                                                    {% else %}
+                                                                        <span class="longtext">{{ v.cvss_vector }}</span>
+                                                                    {% endif %}
+                                                                {% endif %}
+                                                            </td>
+                                                        </tr>
+                                                    {% endif %}
+                                                    {% if v.cve %}
+                                                        <tr>
+                                                            <th bgcolor="#dc3545" class="white" width="20%">CVE</th>
+                                                            <td width="60%">
+                                                                <!-- nosemgrep: javascript.express.security.audit.xss.mustache.var-in-href.var-in-href, python.django.security.audit.xss.template-href-var.template-href-var, python.flask.security.xss.audit.template-href-var.template-href-var -->
+                                                                <a href="https://nvd.nist.gov/vuln/detail/{{ v.cve|upper }}" class="longtext">{{ v.cve|upper }}</a>
+                                                            </td>
+                                                        </tr>
+                                                    {% endif %}
+                                                    {% if v.euvd_id %}
+                                                        <tr>
+                                                            <th bgcolor="#dc3545" class="white" width="20%">EUVD</th>
+                                                            <td width="60%">
+                                                                <!-- nosemgrep: javascript.express.security.audit.xss.mustache.var-in-href.var-in-href, python.django.security.audit.xss.template-href-var.template-href-var, python.flask.security.xss.audit.template-href-var.template-href-var -->
+                                                                <a href="https://euvd.enisa.europa.eu/vulnerability/{{ v.euvd_id }}" class="longtext">{{ v.euvd_id }}</a>
+                                                            </td>
+                                                        </tr>
+                                                    {% endif %}
+                                                    {% if v.ghsa_id %}
+                                                        <tr>
+                                                            <th bgcolor="#dc3545" class="white" width="20%">GHSA</th>
+                                                            <td width="60%">
+                                                                <!-- nosemgrep: javascript.express.security.audit.xss.mustache.var-in-href.var-in-href, python.django.security.audit.xss.template-href-var.template-href-var, python.flask.security.xss.audit.template-href-var.template-href-var -->
+                                                                <a href="https://github.com/advisories/{{ v.ghsa_id }}" class="longtext">{{ v.ghsa_id }}</a>
+                                                            </td>
+                                                        </tr>
+                                                    {% endif %}
+                                                    {% if v.osv_generic_id %}
+                                                        <tr>
+                                                            <th bgcolor="#dc3545" class="white" width="20%">OSV</th>
+                                                            <td width="60%">
+                                                                <!-- nosemgrep: javascript.express.security.audit.xss.mustache.var-in-href.var-in-href, python.django.security.audit.xss.template-href-var.template-href-var, python.flask.security.xss.audit.template-href-var.template-href-var -->
+                                                                <a href="https://osv.dev/vulnerability/{{ v.osv_generic_id }}" class="longtext">{{ v.osv_generic_id }}</a>
+                                                            </td>
+                                                        </tr>
+                                                    {% endif %}
+                                                    {% if v.cwes %}
+                                                        <tr>
+                                                            <th bgcolor="#dc3545" class="white" width="20%">CWE</th>
+                                                            <td width="60%">
+                                                                {% for cwe in v.cwes %}
+                                                                    <!-- nosemgrep: javascript.express.security.audit.xss.mustache.var-in-href.var-in-href, python.django.security.audit.xss.template-href-var.template-href-var, python.flask.security.xss.audit.template-href-var.template-href-var -->
+                                                                    <a href="https://cwe.mitre.org/data/definitions/{{ cwe|upper|cut:"CWE-" }}.html">{{ cwe|upper }}</a>{% if not forloop.last %}, {% endif %}
+                                                                {% endfor %}
+                                                            </td>
+                                                        </tr>
+                                                    {% endif %}
+                                                    {% if v.trending %}
+                                                        <tr>
+                                                            <th bgcolor="#dc3545" class="white" width="20%">Trending</th>
+                                                            <td width="60%">
+                                                                <!-- nosemgrep: javascript.express.security.audit.xss.mustache.var-in-href.var-in-href, python.django.security.audit.xss.template-href-var.template-href-var, python.flask.security.xss.audit.template-href-var.template-href-var -->
+                                                                <a href="https://cvecrowd.com/">Trending on CVECrowd</a>
+                                                            </td>
+                                                        </tr>
+                                                    {% endif %}
+                                                    {% if v.epss_score != None %}
+                                                        <tr>
+                                                            <th bgcolor="#dc3545" class="white" width="20%">EPSS Score</th>
+                                                            <td width="60%">{{ v.epss_score }}</td>
+                                                        </tr>
+                                                    {% endif %}
+                                                    {% if v.epss_percentile != None %}
+                                                        <tr>
+                                                            <th bgcolor="#dc3545" class="white" width="20%">EPSS Percentile</th>
+                                                            <td width="60%">{{ v.epss_percentile }}</td>
+                                                        </tr>
+                                                    {% endif %}
                                                     <tr>
                                                         <th bgcolor="#dc3545" class="white" width="20%">Exploits</th>
-                                                        <td width="60%">
+                                                        <td width="60%" class="longtext">
                                                             {% if h.Exploit %}
                                                                 <ul>
                                                                     {% for e in h.Exploit %}
                                                                         {% if e.vulnerability.id == v.id %}
-                                                                            {% if e.reference %}
-                                                                                <!-- nosemgrep: javascript.express.security.audit.xss.mustache.var-in-href.var-in-href, python.django.security.audit.xss.template-href-var.template-href-var, python.flask.security.xss.audit.template-href-var.template-href-var -->
-                                                                                <li><a href="{{ e.reference }}">{{ e.title }}</a></li>
-                                                                            {% else %}
-                                                                                <li>{{ e.title }}</li>
-                                                                            {% endif %}
+                                                                            <li>
+                                                                                {% if e.edb_id %}
+                                                                                    <a href="https://www.exploit-db.com/exploits/{{ e.edb_id }}">EDB-{{ e.edb_id }}</a>
+                                                                                {% elif e.reference|slice:":8" == "https://" or e.reference|slice:":7" == "http://" %}
+                                                                                    <!-- nosemgrep: javascript.express.security.audit.xss.mustache.var-in-href.var-in-href, python.django.security.audit.xss.template-href-var.template-href-var, python.flask.security.xss.audit.template-href-var.template-href-var -->
+                                                                                    <a href="{{ e.reference }}">{{ e.title }}</a>
+                                                                                {% elif e.reference %}
+                                                                                    <span class="longtext">{{ e.reference }}</span>
+                                                                                {% else %}
+                                                                                    {{ e.title }}
+                                                                                {% endif %}
+                                                                            </li>
                                                                         {% endif %}
                                                                     {% endfor %}
                                                                 </ul>
                                                             {% endif %}
                                                         </td>
                                                     </tr>
-                                                    <tr>
-                                                        <th bgcolor="#dc3545" class="white" width="20%">Reference</th>
-                                                        <td width="60%">
-                                                            {% if v.reference %}
+                                                    {% if v.reference %}
+                                                        <tr>
+                                                            <th bgcolor="#dc3545" class="white" width="20%">Reference</th>
+                                                            <td width="60%">
                                                                 <!-- nosemgrep: javascript.express.security.audit.xss.mustache.var-in-href.var-in-href, python.django.security.audit.xss.template-href-var.template-href-var, python.flask.security.xss.audit.template-href-var.template-href-var -->
                                                                 <a href="{{ v.reference }}">Link</a>
-                                                            {% endif %}
-                                                        </td>
-                                                    </tr>
+                                                            </td>
+                                                        </tr>
+                                                    {% endif %}
                                                 </tbody>
                                             </table>
                                             <br>
@@ -447,14 +677,16 @@
                                         {% if not c.secret %}
                                             <table border="1" cellspacing="1" cellpadding="5">
                                                 <tbody>
-                                                    <tr>
-                                                        <th bgcolor="#dc3545" class="white" width="20%">Port</th>
-                                                        <td width="60%">{{ c.technology.port.port }}</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th bgcolor="#dc3545" class="white" width="20%">Technology</th>
-                                                        <td width="60%">
-                                                            {% if c.technology %}
+                                                    {% if c.technology.port %}
+                                                        <tr>
+                                                            <th bgcolor="#dc3545" class="white" width="20%">Port</th>
+                                                            <td width="60%">{{ c.technology.port.port }}</td>
+                                                        </tr>
+                                                    {% endif %}
+                                                    {% if c.technology %}
+                                                        <tr>
+                                                            <th bgcolor="#dc3545" class="white" width="20%">Technology</th>
+                                                            <td width="60%" class="longtext">
                                                                 {% if c.technology.reference %}
                                                                     <!-- nosemgrep: javascript.express.security.audit.xss.mustache.var-in-href.var-in-href, python.django.security.audit.xss.template-href-var.template-href-var, python.flask.security.xss.audit.template-href-var.template-href-var -->
                                                                     <a href="{{ c.technology.reference }}">{{ c.technology.name }}</a>
@@ -464,46 +696,43 @@
                                                                 {% if c.technology.version %}
                                                                     - {{ c.technology.version }}
                                                                 {% endif %}
-                                                            {% endif %}
-                                                        </td>
-                                                    </tr>
+                                                            </td>
+                                                        </tr>
+                                                    {% endif %}
                                                     <tr>
                                                         <th bgcolor="#dc3545" class="white" width="20%">Name</th>
                                                         <td width="60%">User found</td>
                                                     </tr>
-                                                    <tr>
-                                                        <th bgcolor="#dc3545" class="white" width="20%">Description</th>
-                                                        <td width="60%">
-                                                            <p>{{ c.context|default_if_none:"" }}</p>
-                                                            <ul>
-                                                                {% if c.email %}
-                                                                    <li>Email: {{ c.email }}</li>
+                                                    {% if c.context or c.email or c.username %}
+                                                        <tr>
+                                                            <th bgcolor="#dc3545" class="white" width="20%">Description</th>
+                                                            <td width="60%" class="longtext">
+                                                                {% if c.context %}
+                                                                    <p>{{ c.context|linebreaksbr }}</p>
                                                                 {% endif %}
-                                                                {% if c.username %}
-                                                                    <li>Username: {{ c.username }}</li>
+                                                                {% if c.email or c.username %}
+                                                                    <ul>
+                                                                        {% if c.email %}
+                                                                            <li>Email: {{ c.email }}</li>
+                                                                        {% endif %}
+                                                                        {% if c.username %}
+                                                                            <li>Username: {{ c.username }}</li>
+                                                                        {% endif %}
+                                                                    </ul>
                                                                 {% endif %}
-                                                            </ul>
-                                                        </td>
-                                                    </tr>
+                                                            </td>
+                                                        </tr>
+                                                    {% endif %}
                                                     <tr>
                                                         <th bgcolor="#dc3545" class="white" width="20%">Severity</th>
                                                         <td width="60%" class="low">Low</td>
                                                     </tr>
                                                     <tr>
-                                                        <th bgcolor="#dc3545" class="white" width="20%">CVE</th>
-                                                        <td width="60%"></td>
-                                                    </tr>
-                                                    <tr>
                                                         <th bgcolor="#dc3545" class="white" width="20%">CWE</th>
-                                                        <td width="20%">CWE-200</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th bgcolor="#dc3545" class="white" width="20%">Exploits</th>
-                                                        <td width="60%"></td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th bgcolor="#dc3545" class="white" width="20%">Reference</th>
-                                                        <td width="60%"></td>
+                                                        <td width="60%">
+                                                            <!-- nosemgrep: javascript.express.security.audit.xss.mustache.var-in-href.var-in-href, python.django.security.audit.xss.template-href-var.template-href-var, python.flask.security.xss.audit.template-href-var.template-href-var -->
+                                                            <a href="https://cwe.mitre.org/data/definitions/200.html">CWE-200</a>
+                                                        </td>
                                                     </tr>
                                                 </tbody>
                                             </table>
@@ -517,20 +746,22 @@
                                         {% if v.get_severity_display|upper == "INFO" %}
                                             <table border="1" cellspacing="1" cellpadding="5">
                                                 <tbody>
-                                                    <tr>
-                                                        <th bgcolor="#dc3545" class="white" width="20%">Port</th>
-                                                        <td width="60%">
-                                                            {% if v.technology and v.technology.port %}
-                                                                {{ v.technology.port.port }}
-                                                            {% elif v.port %}
-                                                                {{ v.port.port }}
-                                                            {% endif %}
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th bgcolor="#dc3545" class="white" width="20%">Technology</th>
-                                                        <td width="60%">
-                                                            {% if v.technology %}
+                                                    {% if v.technology.port or v.port %}
+                                                        <tr>
+                                                            <th bgcolor="#dc3545" class="white" width="20%">Port</th>
+                                                            <td width="60%">
+                                                                {% if v.technology.port %}
+                                                                    {{ v.technology.port.port }}
+                                                                {% else %}
+                                                                    {{ v.port.port }}
+                                                                {% endif %}
+                                                            </td>
+                                                        </tr>
+                                                    {% endif %}
+                                                    {% if v.technology %}
+                                                        <tr>
+                                                            <th bgcolor="#dc3545" class="white" width="20%">Technology</th>
+                                                            <td width="60%" class="longtext">
                                                                 {% if v.technology.reference %}
                                                                     <!-- nosemgrep: javascript.express.security.audit.xss.mustache.var-in-href.var-in-href, python.django.security.audit.xss.template-href-var.template-href-var, python.flask.security.xss.audit.template-href-var.template-href-var -->
                                                                     <a href="{{ v.technology.reference }}">{{ v.technology.name }}</a>
@@ -540,57 +771,149 @@
                                                                 {% if v.technology.version %}
                                                                     - {{ v.technology.version }}
                                                                 {% endif %}
-                                                            {% endif %}
-                                                        </td>
-                                                    </tr>
+                                                            </td>
+                                                        </tr>
+                                                    {% endif %}
                                                     <tr>
                                                         <th bgcolor="#dc3545" class="white" width="20%">Name</th>
-                                                        <td width="60%">{{ v.name }}</td>
+                                                        <td width="60%" class="longtext">{{ v.name }}</td>
                                                     </tr>
-                                                    <tr>
-                                                        <th bgcolor="#dc3545" class="white" width="20%">Description</th>
-                                                        <td width="60%">{{ v.description|default_if_none:"" }}</td>
-                                                    </tr>
+                                                    {% if v.description %}
+                                                        <tr>
+                                                            <th bgcolor="#dc3545" class="white" width="20%">Description</th>
+                                                            <td width="60%">{{ v.description|linebreaksbr }}</td>
+                                                        </tr>
+                                                    {% endif %}
+                                                    {% if v.remediation %}
+                                                        <tr>
+                                                            <th bgcolor="#dc3545" class="white" width="20%">Remediation</th>
+                                                            <td width="60%">{{ v.remediation|linebreaksbr }}</td>
+                                                        </tr>
+                                                    {% endif %}
                                                     <tr>
                                                         <th bgcolor="#dc3545" class="white" width="20%">Severity</th>
                                                         <td width="60%" class="{{ v.get_severity_display|lower }}">{{ v.get_severity_display|upper }}</td>
                                                     </tr>
-                                                    <tr>
-                                                        <th bgcolor="#dc3545" class="white" width="20%">CVE</th>
-                                                        <td width="60%">{{ v.cve|default_if_none:"" }}</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th bgcolor="#dc3545" class="white" width="20%">CWE</th>
-                                                        <td width="60%">{{ v.cwe|default_if_none:"" }}</td>
-                                                    </tr>
+                                                    {% if v.cvss_base_score != None %}
+                                                        <tr>
+                                                            <th bgcolor="#dc3545" class="white" width="20%">CVSS</th>
+                                                            <td width="60%">
+                                                                {{ v.cvss_base_score }}{% if v.cvss_version %} (v{{ v.cvss_version }}){% endif %}
+                                                                {% if v.cvss_vector %}
+                                                                    <br>
+                                                                    {% if v.cvss_version %}
+                                                                        <!-- nosemgrep: javascript.express.security.audit.xss.mustache.var-in-href.var-in-href, python.django.security.audit.xss.template-href-var.template-href-var, python.flask.security.xss.audit.template-href-var.template-href-var -->
+                                                                        <a href="https://www.first.org/cvss/calculator/{{ v.cvss_version }}#{{ v.cvss_vector }}" class="longtext">{{ v.cvss_vector }}</a>
+                                                                    {% else %}
+                                                                        <span class="longtext">{{ v.cvss_vector }}</span>
+                                                                    {% endif %}
+                                                                {% endif %}
+                                                            </td>
+                                                        </tr>
+                                                    {% endif %}
+                                                    
+                                                    {% if v.cve %}
+                                                        <tr>
+                                                            <th bgcolor="#dc3545" class="white" width="20%">CVE</th>
+                                                            <td width="60%">
+                                                                <!-- nosemgrep: javascript.express.security.audit.xss.mustache.var-in-href.var-in-href, python.django.security.audit.xss.template-href-var.template-href-var, python.flask.security.xss.audit.template-href-var.template-href-var -->
+                                                                <a href="https://nvd.nist.gov/vuln/detail/{{ v.cve|upper }}" class="longtext">{{ v.cve|upper }}</a>
+                                                            </td>
+                                                        </tr>
+                                                    {% endif %}
+                                                    {% if v.euvd_id %}
+                                                        <tr>
+                                                            <th bgcolor="#dc3545" class="white" width="20%">EUVD</th>
+                                                            <td width="60%">
+                                                                <!-- nosemgrep: javascript.express.security.audit.xss.mustache.var-in-href.var-in-href, python.django.security.audit.xss.template-href-var.template-href-var, python.flask.security.xss.audit.template-href-var.template-href-var -->
+                                                                <a href="https://euvd.enisa.europa.eu/vulnerability/{{ v.euvd_id }}" class="longtext">{{ v.euvd_id }}</a>
+                                                            </td>
+                                                        </tr>
+                                                    {% endif %}
+                                                    {% if v.ghsa_id %}
+                                                        <tr>
+                                                            <th bgcolor="#dc3545" class="white" width="20%">GHSA</th>
+                                                            <td width="60%">
+                                                                <!-- nosemgrep: javascript.express.security.audit.xss.mustache.var-in-href.var-in-href, python.django.security.audit.xss.template-href-var.template-href-var, python.flask.security.xss.audit.template-href-var.template-href-var -->
+                                                                <a href="https://github.com/advisories/{{ v.ghsa_id }}" class="longtext">{{ v.ghsa_id }}</a>
+                                                            </td>
+                                                        </tr>
+                                                    {% endif %}
+                                                    {% if v.osv_generic_id %}
+                                                        <tr>
+                                                            <th bgcolor="#dc3545" class="white" width="20%">OSV</th>
+                                                            <td width="60%">
+                                                                <!-- nosemgrep: javascript.express.security.audit.xss.mustache.var-in-href.var-in-href, python.django.security.audit.xss.template-href-var.template-href-var, python.flask.security.xss.audit.template-href-var.template-href-var -->
+                                                                <a href="https://osv.dev/vulnerability/{{ v.osv_generic_id }}" class="longtext">{{ v.osv_generic_id }}</a>
+                                                            </td>
+                                                        </tr>
+                                                    {% endif %}
+                                                    {% if v.cwes %}
+                                                        <tr>
+                                                            <th bgcolor="#dc3545" class="white" width="20%">CWE</th>
+                                                            <td width="60%">
+                                                                {% for cwe in v.cwes %}
+                                                                    <!-- nosemgrep: javascript.express.security.audit.xss.mustache.var-in-href.var-in-href, python.django.security.audit.xss.template-href-var.template-href-var, python.flask.security.xss.audit.template-href-var.template-href-var -->
+                                                                    <a href="https://cwe.mitre.org/data/definitions/{{ cwe|upper|cut:"CWE-" }}.html">{{ cwe|upper }}</a>{% if not forloop.last %}, {% endif %}
+                                                                {% endfor %}
+                                                            </td>
+                                                        </tr>
+                                                    {% endif %}
+                                                    {% if v.trending %}
+                                                        <tr>
+                                                            <th bgcolor="#dc3545" class="white" width="20%">Trending</th>
+                                                            <td width="60%">
+                                                                <!-- nosemgrep: javascript.express.security.audit.xss.mustache.var-in-href.var-in-href, python.django.security.audit.xss.template-href-var.template-href-var, python.flask.security.xss.audit.template-href-var.template-href-var -->
+                                                                <a href="https://cvecrowd.com/">Trending on CVECrowd</a>
+                                                            </td>
+                                                        </tr>
+                                                    {% endif %}
+                                                    {% if v.epss_score != None %}
+                                                        <tr>
+                                                            <th bgcolor="#dc3545" class="white" width="20%">EPSS Score</th>
+                                                            <td width="60%">{{ v.epss_score }}</td>
+                                                        </tr>
+                                                    {% endif %}
+                                                    {% if v.epss_percentile != None %}
+                                                        <tr>
+                                                            <th bgcolor="#dc3545" class="white" width="20%">EPSS Percentile</th>
+                                                            <td width="60%">{{ v.epss_percentile }}</td>
+                                                        </tr>
+                                                    {% endif %}
                                                     <tr>
                                                         <th bgcolor="#dc3545" class="white" width="20%">Exploits</th>
-                                                        <td width="60%">
+                                                        <td width="60%" class="longtext">
                                                             {% if h.Exploit %}
                                                                 <ul>
                                                                     {% for e in h.Exploit %}
                                                                         {% if e.vulnerability.id == v.id %}
-                                                                            {% if e.reference %}
-                                                                            <!-- nosemgrep: javascript.express.security.audit.xss.mustache.var-in-href.var-in-href, python.django.security.audit.xss.template-href-var.template-href-var, python.flask.security.xss.audit.template-href-var.template-href-var -->
-                                                                                <li><a href="{{ e.reference }}">{{ e.title }}</a></li>
-                                                                            {% else %}
-                                                                                <li>{{ e.title }}</li>
-                                                                            {% endif %}
+                                                                            <li>
+                                                                                {% if e.edb_id %}
+                                                                                    <a href="https://www.exploit-db.com/exploits/{{ e.edb_id }}">EDB-{{ e.edb_id }}</a>
+                                                                                {% elif e.reference|slice:":8" == "https://" or e.reference|slice:":7" == "http://" %}
+                                                                                    <!-- nosemgrep: javascript.express.security.audit.xss.mustache.var-in-href.var-in-href, python.django.security.audit.xss.template-href-var.template-href-var, python.flask.security.xss.audit.template-href-var.template-href-var -->
+                                                                                    <a href="{{ e.reference }}">{{ e.title }}</a>
+                                                                                {% elif e.reference %}
+                                                                                    <span class="longtext">{{ e.reference }}</span>
+                                                                                {% else %}
+                                                                                    {{ e.title }}
+                                                                                {% endif %}
+                                                                            </li>
                                                                         {% endif %}
                                                                     {% endfor %}
                                                                 </ul>
                                                             {% endif %}
                                                         </td>
                                                     </tr>
-                                                    <tr>
-                                                        <th bgcolor="#dc3545" class="white" width="20%">Reference</th>
-                                                        <td width="60%">
-                                                            {% if v.reference %}
-                                                            <!-- nosemgrep: javascript.express.security.audit.xss.mustache.var-in-href.var-in-href, python.django.security.audit.xss.template-href-var.template-href-var, python.flask.security.xss.audit.template-href-var.template-href-var -->
+                                                    {% if v.reference %}
+                                                        <tr>
+                                                            <th bgcolor="#dc3545" class="white" width="20%">Reference</th>
+                                                            <td width="60%">
+                                                                <!-- nosemgrep: javascript.express.security.audit.xss.mustache.var-in-href.var-in-href, python.django.security.audit.xss.template-href-var.template-href-var, python.flask.security.xss.audit.template-href-var.template-href-var -->
                                                                 <a href="{{ v.reference }}">Link</a>
-                                                            {% endif %}
-                                                        </td>
-                                                    </tr>
+                                                            </td>
+                                                        </tr>
+                                                    {% endif %}
                                                 </tbody>
                                             </table>
                                             <br>
