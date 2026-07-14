@@ -157,7 +157,7 @@ onUnmounted(() => {
 });
 
 const handleSubmit = (data: Record<string, unknown>) => {
-  if (props.config.onCreation) {
+  if (props.config.onCreation && !props.item?.id) {
     props.config.onCreation(data);
   }
   emit("submit", data);

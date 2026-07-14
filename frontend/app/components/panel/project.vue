@@ -522,4 +522,6 @@ onMounted(() => {
   mounting.value = true;
   onProjectChange();
 });
+
+onUnmounted(() => setCurrentProject(null));
 </script>
