@@ -56,7 +56,11 @@ const form = ref();
 const profile = ref(userStore.profile);
 const loading = ref(false);
 const valid = ref(false);
-const notificationScopes = ["Only alerts", "Only my executions", "All executions"];
+const notificationScopes = [
+  "Only alerts",
+  "Only my executions",
+  "All executions",
+];
 const config = computed(() => ({
   entityName: "Profile",
   editFormFields: [
@@ -129,7 +133,6 @@ const config = computed(() => ({
   }),
   putEndpoint: () => "/api/profile/",
 }));
-
 
 function notifyEmailChange(savedEmail: string) {
   const requestedEmail = form.value?.formData?.email;

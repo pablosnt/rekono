@@ -36,7 +36,10 @@
             :inputmode="field.inputMode"
           >
             <template
-              v-if="field.type === 'password' && !isMaskedSecret(formData[field.key])"
+              v-if="
+                field.type === 'password' &&
+                !isMaskedSecret(formData[field.key])
+              "
               #trailing
             >
               <UButton
@@ -289,7 +292,7 @@ function validate(data) {
 }
 
 function isMaskedSecret(value: string | undefined) {
-  return  Boolean(value) && /^\*+$/u.test(value)
+  return Boolean(value) && /^\*+$/u.test(value);
 }
 
 function body() {

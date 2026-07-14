@@ -29,7 +29,7 @@ class SslyzeTest(ParserTest, TestCase):
                     "cwes": ["CWE-326"],
                 },
                 {"model": Technology, "name": "TLS", "version": "1.2"},
-                {"model": Technology, "name": "Generic TLS"},
+                {"model": Technology, "name": "TLS"},
                 {
                     "model": Vulnerability,
                     "name": "Certificate validation error",
@@ -42,7 +42,7 @@ class SslyzeTest(ParserTest, TestCase):
         ParserTestCase(
             "vulnerabilities.json",
             [
-                {"model": Technology, "name": "Generic TLS"},
+                {"model": Technology, "name": "TLS"},
                 {"model": Vulnerability, "name": "Heartbleed", "cve": "CVE-2014-0160"},
                 {"model": Vulnerability, "name": "OpenSSL CSS Injection", "cve": "CVE-2014-0224"},
                 {
@@ -99,7 +99,7 @@ class SslyzeTest(ParserTest, TestCase):
         ParserTestCase(
             "insecure-renegotiation.json",
             [
-                {"model": Technology, "name": "Generic TLS"},
+                {"model": Technology, "name": "TLS"},
                 {
                     "model": Vulnerability,
                     "name": "Insecure TLS renegotiation supported",
