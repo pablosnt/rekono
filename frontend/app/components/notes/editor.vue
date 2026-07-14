@@ -348,14 +348,14 @@ function tableBubbleItems(editor: Editor) {
     ],
     [
       {
-        icon: "material-symbols:add-row-above",
+        icon: "mdi:table-row-plus-before",
         tooltip: { text: "Add row above" },
         onClick: () => {
           editor.chain().focus().addRowBefore().run();
         },
       },
       {
-        icon: "material-symbols:add-row-below",
+        icon: "mdi:table-row-plus-after",
         tooltip: { text: "Add row below" },
         onClick: () => {
           editor.chain().focus().addRowAfter().run();
@@ -371,14 +371,14 @@ function tableBubbleItems(editor: Editor) {
     ],
     [
       {
-        icon: "material-symbols:add-column-left",
+        icon: "mdi:table-column-plus-before",
         tooltip: { text: "Add column before" },
         onClick: () => {
           editor.chain().focus().addColumnBefore().run();
         },
       },
       {
-        icon: "material-symbols:add-column-right",
+        icon: "mdi:table-column-plus-after",
         tooltip: { text: "Add column after" },
         onClick: () => {
           editor.chain().focus().addColumnAfter().run();

@@ -37,8 +37,6 @@
     "tiptap-extension-code-block-shiki": "^1.2.0"
   },
   "devDependencies": {
-    "@iconify-json/lineicons": "^1.2.6",
-    "@iconify-json/material-symbols": "^1.2.83",
     "@types/node": "^26.1.0",
     "eslint": "^10.6.0",
     "eslint-config-prettier": "^10.1.8",
