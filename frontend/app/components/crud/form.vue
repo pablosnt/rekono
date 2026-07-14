@@ -64,6 +64,7 @@
             :min="field.min"
             :max="field.max"
             :step="field.step"
+            :format-options="{ useGrouping: false }"
             :required="field.required"
             :size="field.size || 'lg'"
             :disabled="field.disabled === true"

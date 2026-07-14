@@ -105,6 +105,7 @@
                 class="w-full"
                 :min="24"
                 :max="168"
+                :format-options="{ useGrouping: false }"
                 required
                 size="lg"
                 @change="() => updateMonitor()"
