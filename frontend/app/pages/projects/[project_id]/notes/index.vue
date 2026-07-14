@@ -89,7 +89,7 @@
                 item.forked
                   ? undefined
                   : api.create(`${item.id}/fork/`, {}).then(() => {
-                      page.fetch();
+                      page.fetchFirstPage();
                       toast.add({
                         title: 'Forked',
                         description: `Note '${item.title}' has been forked`,

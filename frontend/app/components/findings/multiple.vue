@@ -416,5 +416,8 @@ const config: CrudConfig<Finding> = reactive({
   },
 });
 
-defineExpose({ fetch: () => page.value?.fetch() });
+defineExpose({
+  fetch: () => page.value?.fetch(),
+  fetchFirstPage: () => page.value?.fetchFirstPage(),
+});
 </script>

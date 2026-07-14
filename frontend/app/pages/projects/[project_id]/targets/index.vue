@@ -149,7 +149,7 @@ const config: CrudConfig<Target> = reactive({
   ],
   defaultFilters: { project: route.params.project_id },
   ordering: ["id", "target", "type"],
-  defaultOrdering: "id",
+  defaultOrdering: "-id",
   pageSize: 25,
   pageSizeOptions: [25, 50, 100],
   defaultBody: { project: route.params.project_id },

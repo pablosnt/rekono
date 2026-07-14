@@ -54,7 +54,7 @@
             fetchFirstPage();
           }
         "
-        @create="fetch()"
+        @create="fetchFirstPage()"
         @open-create="(open: boolean) => (openCreateModal = open)"
       >
         <template v-if="$slots['header-leading']" #header-leading>
@@ -342,9 +342,12 @@ function fetch() {
   if (state.ordering) {
     params = { ...params, ordering: state.ordering };
   }
-  api
+  return api
     .list("", params, false, state.page, state.pageSize)
     .then((response: object) => {
+      if (response.items.length === 0 && state.page > 1) {
+        return fetchFirstPage();
+      }
       state.items = response.items;
       state.total = response.total;
       emit("fetched", response.items, response.total);
@@ -356,7 +359,7 @@ function fetch() {
 
 function fetchFirstPage() {
   state.page = 1;
-  fetch();
+  return fetch();
 }
 
 function onCreateClick() {
@@ -371,5 +374,5 @@ onMounted(() => {
   }
 });
 
-defineExpose({ fetch });
+defineExpose({ fetch, fetchFirstPage });
 </script>

@@ -87,7 +87,7 @@ const config: CrudConfig = reactive({
   searchPlaceholder: "Search HTTP headers...",
   filters: [],
   ordering: ["id", "key", "value"],
-  defaultOrdering: "id",
+  defaultOrdering: "-id",
   defaultBody,
   defaultFilters,
   formFields: [
