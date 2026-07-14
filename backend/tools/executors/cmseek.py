@@ -4,6 +4,7 @@ Executes CMSeek tool for Content Management System detection, version
 fingerprinting, and vulnerability assessment with result file management.
 """
 
+from genericpath import isfile
 import pathlib
 import shutil
 from pathlib import Path
@@ -39,3 +40,6 @@ class Cmseek(BaseExecutor):
             if report.is_file():
                 shutil.move(report, self.report)
                 shutil.rmtree(pathlib.Path(report).parent)
+                result_index = Path("reports.json")
+                if result_index.is_file():
+                    result_index.unlink()
