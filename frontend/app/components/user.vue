@@ -2,15 +2,22 @@
   <UPageCard variant="subtle" spotlight>
     <template #leading>
       <UUser
-        :name="truncateText(getUserDisplayName(user), 15)"
+        :name="displayName"
         :description="user.role"
         :avatar="{
-          text: getUserDisplayName(user).charAt(0).toUpperCase(),
+          text: displayName.charAt(0).toUpperCase(),
           class: user.id === userStore.user ? 'bg-primary-500' : '',
           ui: user.id === userStore.user ? { fallback: 'text-white' } : {},
         }"
         size="xl"
-      />
+      >
+        <template #name>
+          <UTooltip v-if="truncatedName !== displayName" :text="displayName">
+            <span>{{ truncatedName }}</span>
+          </UTooltip>
+          <template v-else>{{ displayName }}</template>
+        </template>
+      </UUser>
     </template>
     <div class="absolute top-4 right-4">
       <UTooltip v-if="user.is_active && (user.last_login || user.date_joined)">
@@ -43,6 +50,8 @@ import type { User } from "~/types/models";
 import { useUserStore } from "~/store/user";
 import { useTimeAgo } from "@vueuse/core";
 
-defineProps<{ user: User }>();
+const props = defineProps<{ user: User }>();
 const userStore = useUserStore();
+const displayName = ref(getUserDisplayName(props.user));
+const truncatedName = ref(truncateText(displayName.value, 15));
 </script>
