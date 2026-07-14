@@ -5,13 +5,6 @@
         v-if="currentProject"
         class="flex items-center w-full justify-start gap-2"
       >
-        <UAvatar
-          :text="currentProject.name.charAt(0).toUpperCase()"
-          class="bg-primary-500"
-          :ui="{ fallback: 'text-white' }"
-          :alt="currentProject.name"
-          width="30"
-        />
         <UTooltip
           v-if="open"
           :text="
@@ -28,6 +21,14 @@
             {{ currentProject.name }}
           </h1>
         </UTooltip>
+        <UAvatar
+          v-else
+          :text="currentProject.name.charAt(0).toUpperCase()"
+          class="bg-primary-500"
+          :ui="{ fallback: 'text-white' }"
+          :alt="currentProject.name"
+          width="30"
+        />
       </div>
     </template>
     <template #content-header>
