@@ -47,7 +47,11 @@ class ExecutionsQueue(BaseScanQueue):
         """Enqueue an execution job for background processing.
 
         Queues a security tool execution with all necessary parameters and
-        dependencies for background processing.
+        dependencies for background processing. Dependencies are wired with
+        allow_failure=True so a dependent execution still runs when a dependency
+        fails, treating its input as optional rather than being orphaned as
+        stuck. The enqueue timestamp is persisted alongside the job id so the
+        execution reflects when it entered the queue.
 
         Args:
             execution (Execution): The execution instance to queue
@@ -253,6 +257,7 @@ class ExecutionsQueue(BaseScanQueue):
                 pending_job = self.fetch_job(pending_job_id)
                 if pending_job and current_job.id in pending_job._dependency_ids:
                     meta = pending_job.get_meta()
+                    # Only execution jobs carry an "execution" in their meta and can be recreated
                     if "execution" not in meta:
                         continue
                     dependencies = pending_job._dependency_ids

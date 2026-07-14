@@ -176,6 +176,8 @@ class BaseIntegration(BasePlatform):
         """Process multiple findings from an execution.
 
         Skips processing entirely when the integration is disabled or unavailable.
+        A failure while processing one finding is logged and does not stop the
+        remaining findings from being processed.
 
         Args:
             execution (Execution): The execution that generated the findings.
@@ -509,6 +511,10 @@ class BaseNotification(BasePlatform):
 
     def process_findings(self, execution: Execution, findings: list[Finding]) -> None:
         """Process findings by sending execution notifications.
+
+        Skips notifying when the integration is unavailable. Any failure while
+        building or sending the notification is logged rather than propagated, so
+        a broken notification channel never interrupts execution processing.
 
         Args:
             execution (Execution): The execution that generated the findings.

@@ -4,7 +4,6 @@ Executes CMSeek tool for Content Management System detection, version
 fingerprinting, and vulnerability assessment with result file management.
 """
 
-from genericpath import isfile
 import pathlib
 import shutil
 from pathlib import Path
@@ -29,7 +28,9 @@ class Cmseek(BaseExecutor):
         """Handle post-execution cleanup and result file management.
 
         Moves CMSeek result files from the default output directory to the
-        configured report location and cleans up temporary directories.
+        configured report location and cleans up temporary directories. Also
+        removes the ``reports.json`` index CMSeek writes into the current working
+        directory, which would otherwise accumulate across executions.
         """
         result_path = (
             Path("Result")

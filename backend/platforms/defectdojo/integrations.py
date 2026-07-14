@@ -334,6 +334,17 @@ class DefectDojo(BaseIntegration):
                 report.unlink()
 
     def process_findings(self, execution: Execution, findings: list[Finding]) -> None:
+        """Synchronize findings to DefectDojo, guarding availability and errors.
+
+        Public entry point that skips processing when the integration is disabled
+        or unavailable and delegates the actual scan import to _process_findings.
+        Any failure during the import is logged rather than propagated, so a
+        DefectDojo outage never interrupts the rest of the execution pipeline.
+
+        Args:
+            execution (Execution): Completed security tool execution.
+            findings (list[Finding]): Security findings to synchronize.
+        """
         if not self.is_enabled() or not self.is_available():
             return
         try:

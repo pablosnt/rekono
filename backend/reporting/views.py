@@ -326,6 +326,12 @@ class ReportingViewSet(BaseViewSet):
     def _create_report_file(self, report: Report, *findings: Any) -> None:
         """Generate report file in background thread with status updates.
 
+        Dispatches to the format-specific generator by report format. If that
+        generator raises or reports failure, the report is marked as ERROR. On
+        success the file path is stored and the created report is announced over
+        Telegram and email. Marking the status explicitly is required because
+        this runs in a raw thread with no queue to surface a crash.
+
         Args:
             report (Report): Report instance to generate file for
             *findings (Any): Findings data for report content

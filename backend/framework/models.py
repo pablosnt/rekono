@@ -248,7 +248,8 @@ class BaseInput(BaseModel):
             """Apply the filter to validate an input value.
 
             Performs validation based on the filter configuration, supporting
-            type conversion, negation, and custom processing.
+            type conversion, negation, and custom processing. A missing value
+            (None) never passes the filter, even when the filter is negated.
 
             Args:
                 expected (str): The expected value to match against.
