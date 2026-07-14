@@ -54,7 +54,11 @@ class InputTechnology(InputParameter):
     )
 
     _filters = [BaseInput.Filter(type=str, field="name", contains=True)]
-    _parse_mapping = {InputKeyword.TECHNOLOGY: "name", InputKeyword.VERSION: "version"}
+    # Version is parsed as empty string when None, as most of the tools working from technologies only require the technology name
+    _parse_mapping = {
+        InputKeyword.TECHNOLOGY: "name",
+        InputKeyword.VERSION: lambda instance, task: instance.version or "",
+    }
 
     def __str__(self) -> str:
         """Return string representation of the technology parameter.

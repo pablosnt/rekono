@@ -419,7 +419,11 @@ class Technology(HacktricksFinding):
     ]
     _root_findings = ("port",)
     _filters = [Finding.Filter(str, "name", contains=True, processor=lambda n: n.lower())]
-    _parse_mapping = {InputKeyword.TECHNOLOGY: "name", InputKeyword.VERSION: "version"}
+    # Version is parsed as empty string when None, as most of the tools working from technologies only require the technology name
+    _parse_mapping = {
+        InputKeyword.TECHNOLOGY: "name",
+        InputKeyword.VERSION: lambda instance, task: instance.version or "",
+    }
     _parse_dependencies = ["port"]
     _defectdojo_finding_mapping = {
         "title": lambda instance: f"Technology {instance.name} detected",
