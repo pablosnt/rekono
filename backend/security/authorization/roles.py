@@ -138,7 +138,7 @@ ROLES = {
         "change": [Role.ADMIN, Role.AUDITOR],
         "delete": [Role.ADMIN, Role.AUDITOR],
     },
-    "tool": {"view": [Role.ADMIN, Role.AUDITOR], "add": [], "change": [], "delete": []},
+    "tool": {"view": [Role.ADMIN, Role.AUDITOR, Role.READER], "add": [], "change": [], "delete": []},
     "intensity": {"view": [Role.ADMIN, Role.AUDITOR], "add": [], "change": [], "delete": []},
     "configuration": {"view": [Role.ADMIN, Role.AUDITOR], "add": [], "change": [], "delete": []},
     "input": {"view": [Role.ADMIN, Role.AUDITOR], "add": [], "change": [], "delete": []},
