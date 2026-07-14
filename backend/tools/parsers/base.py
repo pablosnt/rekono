@@ -234,11 +234,15 @@ class BaseParser:
         """Load and parse JSON report file.
 
         Returns:
-            dict[str, Any] | list[dict[str, Any]] | None: Parsed JSON data or None if no report
+            dict[str, Any] | list[dict[str, Any]] | None: Parsed JSON data, or None if no
+            report exists or the report content is not valid JSON
         """
         if self.report:
             with self.report.open("r", encoding="utf-8") as report:
-                return json.load(report)
+                try:
+                    return json.load(report)
+                except json.JSONDecodeError:
+                    return None
 
     def load_xml_report(self) -> Any | None:
         """Load and parse XML report file using secure XML parser.

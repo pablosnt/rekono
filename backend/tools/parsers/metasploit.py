@@ -26,7 +26,7 @@ class Metasploit(BaseParser):
         available Metasploit modules.
         """
         entry = 0
-        for line in self.output.split("\n"):
+        for line in (self.output or "").split("\n"):
             line = line.strip()
             if line and line.startswith(str(entry)):
                 entry += 1

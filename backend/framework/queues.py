@@ -294,8 +294,14 @@ class BaseScanQueue(BaseQueue):
                 filtered_base_inputs = [bi for bi in source if bi.filter(tool_input)]
                 if not filtered_base_inputs:
                     continue
-                # Find related input types (dependencies) for this input type
-                parent_input_types = [i for i in input_type.parent_input_types if i in findings_by_type]
+                # Find parent input types, but only those that this configuration actually consumes as inputs
+                # Otherwise the parent findings are never added to any execution batch, and grouping the children by them would discard every child
+                parent_input_types = [
+                    i
+                    for i in input_type.parent_input_types
+                    if i in findings_by_type
+                    and Input.objects.filter(argument__configuration=configuration, type=i).exists()
+                ]
                 for execution_index, execution in enumerate(copy.deepcopy(executions)):
                     # If this is a finding and has related input types, only include those related to the current execution
                     if field == "findings" and parent_input_types:
