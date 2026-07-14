@@ -75,6 +75,9 @@ importers:
         specifier: ^1.2.0
         version: 1.2.0(@tiptap/core@3.27.3(@tiptap/pm@3.27.3))(@tiptap/pm@3.27.3)(shiki@4.3.1)
     devDependencies:
+      '@iconify-json/lineicons':
+        specifier: ^1.2.6
+        version: 1.2.6
       '@iconify-json/material-symbols':
         specifier: ^1.2.83
         version: 1.2.83
@@ -754,6 +757,9 @@ packages:
 
   '@iconify-json/codicon@1.2.63':
     resolution: {integrity: sha512-B6zc4p4W07FS/3c4EDOFL2WfmExX7qTGe41vpmxb+N2pG6tWsuIeW2/KNQ6kAPJ3zN9Q1jgRGs+LGD/NtovOOw==}
+
+  '@iconify-json/lineicons@1.2.6':
+    resolution: {integrity: sha512-XDOzb5xUNxpOj0j2JPadPq4udrhYb92d6jT7jey9CAJfGhSyYMzk5vmNqWormZy0ETxiHojs2ERpY9KjLjt7rA==}
 
   '@iconify-json/lucide@1.2.116':
     resolution: {integrity: sha512-mbwPmiUXaZyLMSeQOxiTqz2fmZikD9qiGnMBiev47UUNY9uGCEgMg9iUYwaJzCtJTDtAIyK4vokfIpqsVorgSw==}
@@ -6801,6 +6807,10 @@ snapshots:
   '@humanwhocodes/retry@0.4.3': {}
 
   '@iconify-json/codicon@1.2.63':
+    dependencies:
+      '@iconify/types': 2.0.0
+
+  '@iconify-json/lineicons@1.2.6':
     dependencies:
       '@iconify/types': 2.0.0
 
