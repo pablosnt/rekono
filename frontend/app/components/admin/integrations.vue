@@ -37,6 +37,7 @@
                 :to="item.reference"
                 target="_blank"
                 external
+                @click.stop
               />
             </div>
           </div>
