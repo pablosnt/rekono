@@ -56,7 +56,7 @@ const form = ref();
 const profile = ref(userStore.profile);
 const loading = ref(false);
 const valid = ref(false);
-const notificationScopes = ["Disabled", "Only my executions", "All executions"];
+const notificationScopes = ["Only alerts", "Only my executions", "All executions"];
 const config = computed(() => ({
   entityName: "Profile",
   editFormFields: [

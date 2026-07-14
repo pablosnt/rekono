@@ -487,7 +487,7 @@ class BaseNotification(BasePlatform):
             }
         )
         if execution.task.executor:
-            if execution.task.executor.notification_scope != Notification.DISABLED and getattr(
+            if execution.task.executor.notification_scope != Notification.ONLY_ALERTS and getattr(
                 execution.task.executor, self.enable_field
             ):
                 users.add(execution.task.executor)

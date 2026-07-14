@@ -15,12 +15,12 @@ class Notification(models.TextChoices):
     Controls which execution events trigger notifications to the user.
 
     Choices:
-        DISABLED: All notifications disabled except security-critical ones
+        ONLY_ALERTS: Only alert notifications, execution notifications disabled
         MY_EXECUTIONS: Only notifications for executions started by the user
         ALL_EXECUTIONS: Notifications for all executions in accessible projects
     """
 
-    DISABLED = "Disabled"
+    ONLY_ALERTS = "Only alerts"
     MY_EXECUTIONS = "Only my executions"
     ALL_EXECUTIONS = "All executions"
 
