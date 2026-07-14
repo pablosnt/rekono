@@ -122,6 +122,7 @@ const config: CrudConfig<TargetPort> = reactive({
     path: validation.path("path", false, 100),
   }),
   createForm: resolveComponent("TargetPortsForm"),
+  updateOnCreateModalOpen: true,
   canRead: true,
   canEdit: false,
   canCreate: userStore.is_auditor,
