@@ -56,7 +56,7 @@
                 : '',
               class: 'bg-primary-500',
               ui: { fallback: 'text-white' },
-              size: 'sm',
+              size: 'md',
             }"
             :label="open ? userStore.name || undefined : undefined"
             :aria-label="
