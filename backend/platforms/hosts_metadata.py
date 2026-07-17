@@ -6,14 +6,17 @@ host findings during security assessments.
 """
 
 import socket
-
-import geocoder
+import warnings
 
 from executions.models import Execution
 from findings.models import Finding, Host
 from framework.platforms import BaseIntegration
 from targets.enums import TargetType
 from targets.models import Target
+
+warnings.filterwarnings("ignore", category=SyntaxWarning, module=r".*geocoder.*")
+
+import geocoder  # noqa: E402
 
 
 class HostsMetadata(BaseIntegration):
