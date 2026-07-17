@@ -26,6 +26,7 @@ const route = useRoute();
 const table = useTable();
 const userStore = useUserStore();
 const userOptions = ref<FilterOption[]>([]);
+const { projectHasActiveFindings } = usePanel();
 
 onMounted(() => {
   options.users(userOptions, {
@@ -167,7 +168,7 @@ const config: CrudConfig<Report> = reactive({
       `${report.format.toUpperCase()} report with findings from ${report.task ? getTaskName(report.task, true) : report.target ? report.target.target : "full project"}`,
     ),
   canRead: true,
-  canCreate: true,
+  canCreate: projectHasActiveFindings.value,
   canEdit: false,
   canDelete: (report: Report) =>
     userStore.is_admin || userStore.isOwner(report, "user"),
