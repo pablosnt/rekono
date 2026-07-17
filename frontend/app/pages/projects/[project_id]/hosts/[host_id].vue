@@ -55,24 +55,6 @@
     </template>
     <template #custom-skeleton>
       <SkeletonCards
-        v-if="integrations.virustotal.integration?.enabled"
-        class="sm:grid-cols-1 lg:grid-cols-1"
-        :count="1"
-        :lines="0"
-        variant="outline"
-        :leading="false"
-      >
-        <div class="flex flex-wrap items-center gap-8 w-full">
-          <UCard class="flex-1 min-w-48 bg-neutral/10">
-            <div class="flex flex-col items-center">
-              <USkeleton class="h-15 w-28" />
-              <USkeleton class="h-5 w-32 mt-2" />
-            </div>
-          </UCard>
-          <SkeletonMetrics :height="200" class="flex-2 min-w-80" />
-        </div>
-      </SkeletonCards>
-      <SkeletonCards
         class="lg:grid-cols-2"
         :count="2"
         :lines="10"
@@ -90,8 +72,61 @@
           />
         </template>
       </SkeletonCards>
+      <SkeletonCards
+        v-if="integrations.virustotal.integration?.enabled"
+        class="sm:grid-cols-1 lg:grid-cols-1"
+        :count="1"
+        :lines="0"
+        variant="outline"
+        :leading="false"
+      >
+        <div class="flex flex-wrap items-center gap-8 w-full">
+          <UCard class="flex-1 min-w-48 bg-neutral/10">
+            <div class="flex flex-col items-center">
+              <USkeleton class="h-15 w-28" />
+              <USkeleton class="h-5 w-32 mt-2" />
+            </div>
+          </UCard>
+          <SkeletonMetrics :height="200" class="flex-2 min-w-80" />
+        </div>
+      </SkeletonCards>
     </template>
     <template #custom>
+      <div
+        v-if="host?.whois || (host?.latitude && host?.longitude)"
+        class="flex flex-wrap items-start gap-8 w-full"
+      >
+        <UPageCard
+          v-if="host?.whois"
+          title="WHOIS"
+          variant="outline"
+          class="w-full sm:flex-1"
+          :ui="{ root: 'overflow-x-auto' }"
+        >
+          <span class="whitespace-pre-wrap font-mono">{{ host.whois }}</span>
+        </UPageCard>
+        <UPageCard
+          v-if="host?.latitude && host?.longitude"
+          title="Geolocation"
+          :description="host?.city ? host?.city : host?.country"
+          variant="outline"
+          class="w-full sm:flex-1"
+        >
+          <template v-if="host?.country && host?.city" #description>
+            <div class="flex items-center gap-2">
+              <UIcon
+                :name="
+                  host?.country
+                    ? `cif:${host.country.toLowerCase()}`
+                    : undefined
+                "
+              />
+              <span class="text-base">{{ host.city }}</span>
+            </div>
+          </template>
+          <FindingsHostsLocations :hosts="[host]" />
+        </UPageCard>
+      </div>
       <UPageCard
         v-if="
           (host?.total_analysis > 0 || host?.reputation !== 0) &&
@@ -129,41 +164,6 @@
           <FindingsHostsMalware :host="host" />
         </div>
       </UPageCard>
-      <div
-        v-if="host?.whois || (host?.latitude && host?.longitude)"
-        class="flex flex-wrap items-start gap-8 w-full"
-      >
-        <UPageCard
-          v-if="host?.whois"
-          title="WHOIS"
-          variant="outline"
-          class="w-full sm:flex-1"
-          :ui="{ root: 'overflow-x-auto' }"
-        >
-          <span class="whitespace-pre-wrap font-mono">{{ host.whois }}</span>
-        </UPageCard>
-        <UPageCard
-          v-if="host?.latitude && host?.longitude"
-          title="Geolocation"
-          :description="host?.city ? host?.city : host?.country"
-          variant="outline"
-          class="w-full sm:flex-1"
-        >
-          <template v-if="host?.country && host?.city" #description>
-            <div class="flex items-center gap-2">
-              <UIcon
-                :name="
-                  host?.country
-                    ? `cif:${host.country.toLowerCase()}`
-                    : undefined
-                "
-              />
-              <span class="text-base">{{ host.city }}</span>
-            </div>
-          </template>
-          <FindingsHostsLocations :hosts="[host]" />
-        </UPageCard>
-      </div>
       <UPageCard
         v-if="host?.port.length > 0"
         variant="outline"
