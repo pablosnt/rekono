@@ -172,7 +172,9 @@ class Tool(BaseLike):
         """Parse version information from the tool's version output.
 
         Executes the tool with version argument and extracts version string using
-        regex pattern matching.
+        regex pattern matching. The tool is executed with the same clean environment
+        used during tool execution, so tools that shell out to a bare `python3` don't
+        inherit Rekono's virtualenv and can resolve their own dependencies.
 
         Returns:
             str | None: Parsed version string or None if version cannot be determined
@@ -184,6 +186,7 @@ class Tool(BaseLike):
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
                 text=True,
+                env=self.executor_class.get_clean_default_environment(),
                 cwd=Path(getattr(CONFIG, self.script_directory_property.lower()))
                 if self.script_directory_property
                 else None,

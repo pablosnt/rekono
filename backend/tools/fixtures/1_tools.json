@@ -372,7 +372,7 @@
             "ignore_exit_code": false,
             "is_installed": false,
             "version": null,
-            "version_argument": "version",
+            "version_argument": "--version",
             "output_format": "txt",
             "reference": "https://github.com/OJ/gobuster",
             "icon": "https://www.kali.org/tools/gobuster/images/gobuster-logo.svg",

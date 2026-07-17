@@ -299,22 +299,18 @@ class BaseExecutor(LoggingEntity):
         except RuntimeError:
             return False
 
-    def get_environment(self) -> dict[str, Any]:
-        """Prepare environment variables for tool execution.
+    @classmethod
+    def get_clean_default_environment(cls) -> dict[str, Any]:
+        """Prepare base environment variables to run tools out of Rekono's virtualenv.
 
-        Sets up the execution environment by copying system environment variables,
-        processing tool-specific environment definitions, and configuring proxy
-        settings from global configuration. Environment definitions parsed from the
-        pre-command arguments are filtered so user-controlled values cannot set
-        sensitive variables (PATH, LD_PRELOAD, etc.) that could hijack the subprocess.
-        Rekono's own virtualenv bin directory is removed from PATH so external tools
-        that shell out to a bare `python3` (e.g. EmailHarvester, Log4j Scan,
-        Spring4Shell Scan) resolve the system interpreter, which has their required
-        dependencies installed, instead of Rekono's isolated venv, which only has
-        Rekono's own dependencies.
+        Copies the system environment variables, removing Rekono's own virtualenv bin
+        directory from PATH, so external tools that shell out to a bare `python3`
+        (e.g. Dirsearch, EmailHarvester, Log4j Scan, Spring4Shell Scan) resolve the
+        system interpreter, which has their required dependencies installed, instead
+        of Rekono's isolated venv, which only has Rekono's own dependencies.
 
         Returns:
-            dict[str, Any]: Environment variables for tool execution
+            dict[str, Any]: Environment variables without Rekono's virtualenv in PATH
         """
         environment = os.environ.copy()
         venv_bin = str(Path(sys.executable).parent)
@@ -322,6 +318,21 @@ class BaseExecutor(LoggingEntity):
             environment["PATH"] = os.pathsep.join(
                 path for path in environment["PATH"].split(os.pathsep) if path != venv_bin
             )
+        return environment
+
+    def get_environment(self) -> dict[str, Any]:
+        """Prepare environment variables for tool execution.
+
+        Sets up the execution environment from the clean environment, processing
+        tool-specific environment definitions, and configuring proxy settings from
+        global configuration. Environment definitions parsed from the pre-command
+        arguments are filtered so user-controlled values cannot set sensitive
+        variables (PATH, LD_PRELOAD, etc.) that could hijack the subprocess.
+
+        Returns:
+            dict[str, Any]: Environment variables for tool execution
+        """
+        environment = self.get_clean_default_environment()
         # Ensure tool command is at the beginning of arguments list
         if self.execution.configuration.tool.command not in self.arguments:
             self.arguments.insert(0, self.execution.configuration.tool.command)
