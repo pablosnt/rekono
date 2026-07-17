@@ -88,14 +88,6 @@
       <slot name="before" :state="state" />
 
       <slot name="content">
-        <UProgress
-          :class="[
-            state.loading && (config.useGrid || state.items.length === 0)
-              ? 'visible'
-              : 'invisible',
-            'mb-2',
-          ]"
-        />
         <template v-if="config.tableColumns">
           <CrudTable
             v-if="state.items.length > 0"
@@ -126,11 +118,17 @@
             class="py-12"
             :on-create="onCreateClick"
           />
+          <SkeletonTable v-else :config="config" />
         </template>
 
         <template v-else-if="config.useGrid">
+          <SkeletonCards
+            v-if="state.items.length === 0 && state.loading"
+            :config="config"
+            :count="9"
+          />
           <CrudEmptyState
-            v-if="state.items.length === 0 && !state.loading"
+            v-else-if="state.items.length === 0 && !state.loading"
             :config="config"
             :state="state"
             class="mt-10"

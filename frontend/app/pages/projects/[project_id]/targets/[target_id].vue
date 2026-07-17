@@ -7,10 +7,15 @@
         headerIcon: target
           ? targetTypes.find((t) => t.value === target.type)?.icon
           : undefined,
+        headerHideTitle: !target,
       }"
       title-size-class="text-3xl"
       disable-url-sync
     >
+      <template v-if="!target" #header-leading>
+        <USkeleton class="size-[30px]" />
+        <USkeleton class="h-9 w-64 max-w-full" />
+      </template>
       <template #header-actions>
         <TasksButton
           v-if="userStore.is_auditor"
@@ -89,7 +94,9 @@
               ? [
                   {
                     label: 'DefectDojo',
-                    avatar: { src: integrations.defectdojo.integration?.icon },
+                    avatar: {
+                      src: integrations.defectdojo.integration?.icon,
+                    },
                     to: `${integrations.defectdojo.settings.server}/engagement/${target.defectdojo_sync?.engagement_id}`,
                     target: '_blank',
                   },
@@ -188,9 +195,9 @@ const deleteConfig = {
 };
 
 onMounted(() => {
-  api.getOrError(`${route.params.target_id}/`).then((response) => {
-    target.value = response;
-  });
+  api
+    .getOrError(`${route.params.target_id}/`)
+    .then((response) => (target.value = response));
   integrations.fetchDefectDojo();
 });
 </script>

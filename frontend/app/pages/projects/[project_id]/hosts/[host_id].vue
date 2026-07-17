@@ -53,6 +53,44 @@
         <span class="text-base">{{ host.city }}</span>
       </div>
     </template>
+    <template #custom-skeleton>
+      <SkeletonCards
+        v-if="integrations.virustotal.integration?.enabled"
+        class="sm:grid-cols-1 lg:grid-cols-1"
+        :count="1"
+        :lines="0"
+        variant="outline"
+        :leading="false"
+      >
+        <div class="flex flex-wrap items-center gap-8 w-full">
+          <UCard class="flex-1 min-w-48 bg-neutral/10">
+            <div class="flex flex-col items-center">
+              <USkeleton class="h-15 w-28" />
+              <USkeleton class="h-5 w-32 mt-2" />
+            </div>
+          </UCard>
+          <SkeletonMetrics :height="200" class="flex-2 min-w-80" />
+        </div>
+      </SkeletonCards>
+      <SkeletonCards
+        class="lg:grid-cols-2"
+        :count="2"
+        :lines="10"
+        variant="outline"
+        :leading="false"
+      >
+        <template #description="{ card }">
+          <span v-if="card === 2" />
+        </template>
+        <template #default="{ card }">
+          <SkeletonMetrics
+            v-if="card === 2"
+            :height="200"
+            class="flex-2 min-w-80"
+          />
+        </template>
+      </SkeletonCards>
+    </template>
     <template #custom>
       <UPageCard
         v-if="

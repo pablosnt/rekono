@@ -1,46 +1,48 @@
 <template>
-  <UPageCard :title="title" :ui="{ container: 'min-w-0' }">
-    <USkeleton v-if="loading" class="h-64 w-full rounded-lg" />
-    <template v-else-if="data.length">
-      <VisBulletLegend
-        v-if="series.length > 1"
-        :items="legendItems"
-        :on-legend-item-click="onLegendItemClick"
-      />
-      <div :class="isVertical ? 'overflow-x-auto' : 'overflow-y-auto'">
-        <VisXYContainer
-          :data="data"
-          :height="
-            isVertical
-              ? barHeight
-              : Math.min(500, Math.max(200, data.length * barHeight))
-          "
-        >
-          <VisStackedBar
-            :x="x"
-            :y="activeY"
-            :bar-padding="barPadding"
-            :color="colors"
-            :cursor="onBarClick ? 'pointer' : undefined"
-            :events="barEvents"
-            :orientation="orientation"
-          />
-          <VisAxis
-            :type="isVertical ? 'x' : 'y'"
-            :tick-format="categoryTickFormat"
-            :tick-values="categoryTickValues"
-          />
-          <VisAxis
-            :type="isVertical ? 'y' : 'x'"
-            :tick-format="formatCount"
-            :tick-values="countTickValues"
-          />
-          <VisTooltip v-if="tooltip" :triggers="tooltipTriggers" />
-        </VisXYContainer>
-      </div>
-    </template>
-    <MetricsChartsEmpty v-else />
-  </UPageCard>
+  <MetricsCard
+    :title="title"
+    :loading="loading"
+    :has-data="data.length > 0"
+    :skeleton-height="isVertical ? barHeight : 256"
+    :skeleton-legend="series.length > 1 ? series.length : 0"
+  >
+    <VisBulletLegend
+      v-if="series.length > 1"
+      :items="legendItems"
+      :on-legend-item-click="onLegendItemClick"
+    />
+    <div :class="isVertical ? 'overflow-x-auto' : 'overflow-y-auto'">
+      <VisXYContainer
+        :data="data"
+        :height="
+          isVertical
+            ? barHeight
+            : Math.min(500, Math.max(200, data.length * barHeight))
+        "
+      >
+        <VisStackedBar
+          :x="x"
+          :y="activeY"
+          :bar-padding="barPadding"
+          :color="colors"
+          :cursor="onBarClick ? 'pointer' : undefined"
+          :events="barEvents"
+          :orientation="orientation"
+        />
+        <VisAxis
+          :type="isVertical ? 'x' : 'y'"
+          :tick-format="categoryTickFormat"
+          :tick-values="categoryTickValues"
+        />
+        <VisAxis
+          :type="isVertical ? 'y' : 'x'"
+          :tick-format="formatCount"
+          :tick-values="countTickValues"
+        />
+        <VisTooltip v-if="tooltip" :triggers="tooltipTriggers" />
+      </VisXYContainer>
+    </div>
+  </MetricsCard>
 </template>
 
 <script setup lang="ts">

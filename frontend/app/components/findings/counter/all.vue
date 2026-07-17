@@ -1,6 +1,6 @@
 <template>
   <div
-    v-if="total > 0"
+    v-if="loading || total > 0"
     class="grid grid-cols-2 sm:grid-cols-4 xl:grid-cols-8 gap-3"
   >
     <template v-for="item in counters" :key="item.plural">
@@ -28,7 +28,7 @@ const api = useApi("/api/");
 const total = ref(0);
 const loading = ref(false);
 const counters = ref(
-  findingTypes.map((ft) => Object.assign({ count: 0, loading: false }, ft)),
+  findingTypes.map((ft) => Object.assign({ count: 0, loading: true }, ft)),
 );
 
 function getFilters(isTriageable: boolean) {

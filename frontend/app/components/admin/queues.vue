@@ -10,11 +10,18 @@
     }"
   >
     <template #content>
-      <UProgress :class="[loading ? 'visible' : 'invisible', 'mb-1']" />
-      <UPageGrid
-        v-if="queueStats && Object.keys(queueStats).length > 0"
+      <SkeletonCards
+        v-if="queueStats.length === 0"
         class="grid-cols-1 md:grid-cols-2 xl:grid-cols-4"
+        :count="4"
+        :lines="1"
       >
+        <div class="flex flex-wrap gap-2">
+          <USkeleton class="h-5 flex-1 min-w-fit" />
+          <USkeleton class="h-5 flex-1 min-w-fit" />
+        </div>
+      </SkeletonCards>
+      <UPageGrid v-else class="grid-cols-1 md:grid-cols-2 xl:grid-cols-4">
         <UPageCard
           v-for="queue in queueStats"
           :key="queue.name"
@@ -124,7 +131,6 @@ import { useTimeAgo } from "@vueuse/core";
 
 const api = useApi("/api/");
 const userStore = useUserStore();
-const loading = ref(false);
 const queueStats = ref<Array<Record<string, string | number>>>([]);
 const monitor = ref();
 const icons = {
@@ -147,28 +153,22 @@ const icons = {
 };
 
 function fetch() {
-  loading.value = true;
-  api
-    .get("stats/rq/")
-    .then((response) => {
-      queueStats.value = Object.keys(response).map((queue) => {
-        return {
-          name: queue,
-          icon: icons[queue]["icon"],
-          icon_class: icons[queue]["icon_class"],
-          jobs: response[queue].jobs,
-          workers: response[queue].workers,
-          finished_jobs: response[queue].finished_jobs,
-          started_jobs: response[queue].started_jobs,
-          deferred_jobs: response[queue].deferred_jobs,
-          failed_jobs: response[queue].failed_jobs,
-          scheduled_jobs: response[queue].scheduled_jobs,
-        };
-      });
-    })
-    .finally(() => {
-      loading.value = false;
+  api.get("stats/rq/").then((response) => {
+    queueStats.value = Object.keys(response).map((queue) => {
+      return {
+        name: queue,
+        icon: icons[queue]["icon"],
+        icon_class: icons[queue]["icon_class"],
+        jobs: response[queue].jobs,
+        workers: response[queue].workers,
+        finished_jobs: response[queue].finished_jobs,
+        started_jobs: response[queue].started_jobs,
+        deferred_jobs: response[queue].deferred_jobs,
+        failed_jobs: response[queue].failed_jobs,
+        scheduled_jobs: response[queue].scheduled_jobs,
+      };
     });
+  });
 }
 
 function fetchMonitor() {

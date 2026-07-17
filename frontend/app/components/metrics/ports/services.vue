@@ -1,11 +1,11 @@
 <template>
-  <UPageCard
+  <MetricsCard
     title="Top Ports & Services"
     class="w-full"
-    :ui="{ container: 'min-w-0' }"
+    :loading="loading"
+    :has-data="data.length > 0"
   >
-    <USkeleton v-if="loading" class="h-[400px] w-full rounded-lg" />
-    <VisSingleContainer v-else-if="data.length" :data="data" :height="400">
+    <VisSingleContainer :data="data" :height="400">
       <VisTreemap
         :value="(d) => d.count"
         :layers="layers"
@@ -19,8 +19,7 @@
       />
       <VisTooltip :triggers="tooltipTriggers" />
     </VisSingleContainer>
-    <MetricsChartsEmpty v-else />
-  </UPageCard>
+  </MetricsCard>
 </template>
 
 <script setup lang="ts">

@@ -46,6 +46,7 @@
             :radius="1"
             :value="url"
           />
+          <USkeleton v-else class="size-64" />
         </div>
       </template>
       <template v-if="method === 'app'">

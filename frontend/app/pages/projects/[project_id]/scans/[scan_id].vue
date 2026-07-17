@@ -1,6 +1,29 @@
 <template>
   <div class="w-full">
-    <UPageCard v-if="task" variant="outline" class="mb-10">
+    <UPageCard v-if="!task" variant="outline" class="mb-10">
+      <div class="flex flex-wrap items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <USkeleton class="size-10 rounded-lg" />
+          <div class="min-w-0 space-y-1.5">
+            <USkeleton class="h-7 w-40" />
+            <USkeleton class="h-5 w-28" />
+          </div>
+        </div>
+        <div class="flex items-center gap-2 flex-wrap">
+          <USkeleton class="h-8 w-24" />
+          <USkeleton class="size-8" />
+          <USkeleton class="size-8" />
+        </div>
+      </div>
+      <USeparator />
+      <div class="flex flex-wrap justify-around items-center gap-4">
+        <div v-for="i in 5" :key="i" class="space-y-1.5">
+          <USkeleton class="h-3 w-16" />
+          <USkeleton class="h-5 w-24" />
+        </div>
+      </div>
+    </UPageCard>
+    <UPageCard v-else variant="outline" class="mb-10">
       <div class="flex flex-wrap items-center justify-between gap-4">
         <div class="flex items-center gap-3">
           <div

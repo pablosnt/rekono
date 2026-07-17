@@ -12,13 +12,12 @@
     }"
   >
     <template #content>
-      <UProgress
-        :class="[
-          loadingSmtp || loadingTelegram ? 'visible' : 'invisible',
-          'mb-1',
-        ]"
+      <SkeletonCards
+        v-if="!smtpSettings || !telegramSettings"
+        :count="2"
+        :actions="1"
       />
-      <UPageGrid v-if="smtpSettings && telegramSettings">
+      <UPageGrid v-else>
         <UPageCard
           title="SMTP"
           :description="
@@ -138,8 +137,6 @@ const telegramApi = useApi("/api/telegram/settings/");
 const validation = useValidation();
 const userStore = useUserStore();
 const integrations = useIntegrationsStore();
-const loadingSmtp = ref(false);
-const loadingTelegram = ref(false);
 const openModal = ref(false);
 const smtpSettings = ref(integrations.smtp);
 const smtpConfig = ref({
@@ -218,22 +215,14 @@ const selectedTitle = ref();
 const selectedConfig = ref();
 
 function fetch() {
-  loadingSmtp.value = true;
-  smtpApi
-    .get("1/")
-    .then((response) => {
-      smtpSettings.value = response;
-      integrations.updateSmtpSettings(response);
-    })
-    .finally(() => (loadingSmtp.value = false));
-  loadingTelegram.value = true;
-  telegramApi
-    .get("1/")
-    .then((response) => {
-      telegramSettings.value = response;
-      integrations.updateTelegramSettings(response);
-    })
-    .finally(() => (loadingTelegram.value = false));
+  smtpApi.get("1/").then((response) => {
+    smtpSettings.value = response;
+    integrations.updateSmtpSettings(response);
+  });
+  telegramApi.get("1/").then((response) => {
+    telegramSettings.value = response;
+    integrations.updateTelegramSettings(response);
+  });
 }
 
 onMounted(() => {
