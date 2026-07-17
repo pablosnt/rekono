@@ -49,7 +49,7 @@ class ProjectViewSet(BaseViewSet):
     search_fields = ["name", "description", "targets__target"]
     ordering_fields = ["id", "name", "owner"]
 
-    @action(detail=True, methods=["POST", "DELETE"], url_path="members/(?P<member_id>[0-9])")
+    @action(detail=True, methods=["POST", "DELETE"], url_path="members/(?P<member_id>[0-9]+)")
     def members(self, request: Request, member_id: str, pk: str) -> Response:
         """Manage project team member membership with automated alert subscriptions.
 

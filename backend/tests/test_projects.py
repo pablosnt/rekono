@@ -1,6 +1,7 @@
 from functools import cached_property
 
 from django.test import TestCase
+from rest_framework.test import APIClient
 
 from findings.enums import TriageStatus
 from projects.models import Project
@@ -8,6 +9,7 @@ from security.authorization.roles import Role
 from tests.framework import ApiTest, ApiTestNoData
 from tests.framework.cases import ApiTestCase, DeleteApiTestCase, PostApiTestCase, PutApiTestCase
 from tests.framework.data import SetupProject
+from users.models import User
 
 # pytype: disable=wrong-arg-types
 
@@ -55,6 +57,18 @@ class ProjectTest(ApiTestNoData, TestCase):
     @cached_property
     def object(self) -> Project:
         return Project.objects.create(**project1)
+
+    def test_members_with_multi_digit_id(self) -> None:
+        project = Project.objects.create(**project1, owner=self.admin1)
+        project.members.add(self.admin1)
+        for value in range(40):
+            User.objects.create(username=f"member{value}", email=f"member{value}@rekono.com", is_active=True)
+        member = User.objects.create(username="member", email="member@rekono.com", is_active=True)
+        client = APIClient()
+        client.force_authenticate(self.admin1)
+        response = client.post(f"/api/projects/{project.id}/members/{member.pk}/")
+        self.assertEqual(204, response.status_code)
+        self.assertTrue(project.members.filter(pk=member.pk).exists())
 
 
 class TopProjectsTest(ApiTest, TestCase):

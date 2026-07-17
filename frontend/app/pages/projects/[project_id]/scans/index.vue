@@ -83,8 +83,8 @@ function onFetched(items: Task[]) {
 
 onMounted(() => {
   options.targets(targetOptions, { project: route.params.project_id });
-  options.users(executorOptions, { is_active: true, role: "Admin" });
-  options.users(executorOptions, { is_active: true, role: "Auditor" });
+  options.users(executorOptions, { is_active: true, role: "Admin", project: route.params.project_id });
+  options.users(executorOptions, { is_active: true, role: "Auditor", project: route.params.project_id });
   options.tools(toolOptions);
   options.configurations(configurationOptions, { ordering: "-tool" });
   options.processes(processOptions);

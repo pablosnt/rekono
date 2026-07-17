@@ -306,5 +306,5 @@ const config: CrudConfig<Note> = reactive({
   canDelete: (note: Note) => userStore.isOwner(note),
 });
 
-onMounted(() => options.users(userOptions, { is_active: true }));
+onMounted(() => options.users(userOptions, { is_active: true, project: route.params.project_id }));
 </script>

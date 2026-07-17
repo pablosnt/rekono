@@ -107,7 +107,7 @@ const config: CrudConfig<Alert> = reactive({
 });
 
 onMounted(() => {
-  options.users(userOptions, { is_active: true });
+  options.users(userOptions, { is_active: true, project: route.params.project_id });
 });
 
 function canEdit(alert: Alert): boolean {
