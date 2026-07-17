@@ -1,5 +1,5 @@
 <template>
-  <CrudPage :config="config">
+  <CrudPage ref="page" :config="config" @fetched="onFetched">
     <template #actions="{ item }">
       <UTooltip v-if="item.status === 'Ready'" text="Download">
         <UButton
@@ -27,12 +27,30 @@ const table = useTable();
 const userStore = useUserStore();
 const userOptions = ref<FilterOption[]>([]);
 const { projectHasActiveFindings } = usePanel();
+const page = ref();
+const refresh = ref<ReturnType<typeof setTimeout> | null>(null);
+
+function onFetched(items: Report[]) {
+  if (items.filter((report) => report.status === "Pending").length > 0) {
+    if (refresh.value) clearTimeout(refresh.value);
+    refresh.value = setTimeout(() => {
+      page.value?.fetch();
+    }, 5000);
+  } else if (refresh.value) {
+    clearTimeout(refresh.value);
+    refresh.value = null;
+  }
+}
 
 onMounted(() => {
   options.users(userOptions, {
     is_active: true,
     project: route.params.project_id,
   });
+});
+
+onUnmounted(() => {
+  if (refresh.value) clearTimeout(refresh.value);
 });
 
 const config: CrudConfig<Report> = reactive({
