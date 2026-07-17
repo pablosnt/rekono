@@ -128,12 +128,7 @@ const config: CrudConfig<TargetPort> = reactive({
   canCreate: userStore.is_auditor,
   canDelete: userStore.is_auditor,
   deleteMessage: (targetPort: TargetPort) =>
-    buildDeleteMessage(
-      "target port",
-      `Port ${targetPort.port}`,
-      "Permanent deletion",
-      "All associated data including assets, findings, and scans will be permanently deleted. This action cannot be undone.",
-    ),
+    buildDeleteMessage("target port", `Port ${targetPort.port}`),
   customDropdownActions: (TargetPort: TargetPort) => {
     if (!userStore.is_auditor) return [];
     return [
