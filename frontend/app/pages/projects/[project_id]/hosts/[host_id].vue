@@ -172,6 +172,7 @@
         <FindingsPorts
           :host="host.id"
           :link-to-original-page="`/projects/${route.params.project_id}/ports?host=${host.id}`"
+          disable-url-sync
         />
       </UPageCard>
     </template>

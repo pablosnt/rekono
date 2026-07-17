@@ -88,6 +88,8 @@ const config: CrudConfig = reactive({
   filters: [],
   ordering: ["id", "key", "value"],
   defaultOrdering: "-id",
+  pageSize: 10,
+  pageSizeOptions: [10, 25, 50, 100],
   defaultBody,
   defaultFilters,
   formFields: [

@@ -100,6 +100,8 @@ const config: CrudConfig<TargetPort> = reactive({
   defaultFilters: { target: route.params.target_id },
   ordering: ["id", "port", "path"],
   defaultOrdering: "-id",
+  pageSize: 10,
+  pageSizeOptions: [10, 25, 50, 100],
   defaultBody: { target: route.params.target_id },
   formFields: [
     {

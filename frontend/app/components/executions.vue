@@ -222,7 +222,8 @@ const config: CrudConfig<Execution> = reactive({
     skipped: false,
     id: false,
   },
-  pageSizeOptions: [24, 50, 100],
+  pageSize: props.disableUrlSync ? 10 : 24,
+  pageSizeOptions: props.disableUrlSync ? [10, 24, 50, 100] : [24, 50, 100],
   onItemClick: (item: Execution) => {
     selectedExecution.value = item;
     outputOpen.value = true;
