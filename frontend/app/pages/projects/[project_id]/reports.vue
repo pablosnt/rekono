@@ -28,7 +28,10 @@ const userStore = useUserStore();
 const userOptions = ref<FilterOption[]>([]);
 
 onMounted(() => {
-  options.users(userOptions, { is_active: true, project: route.params.project_id });
+  options.users(userOptions, {
+    is_active: true,
+    project: route.params.project_id,
+  });
 });
 
 const config: CrudConfig<Report> = reactive({
