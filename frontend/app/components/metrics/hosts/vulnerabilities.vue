@@ -18,12 +18,11 @@ const props = defineProps<{ project?: number }>();
 const api = useApi("/api/stats/");
 const loading = ref(true);
 const data = ref([]);
-const reversedSeverities = severities.toReversed();
 const series = [
-  ...reversedSeverities.map((s) => ({
-    label: s.value,
+  ...severities.map((s) => ({
+    label: s.label,
     color: `var(--ui-${s.color})`,
-    y: (d) => d[s.value.toLowerCase()] || 0,
+    y: (d) => d[s.label.toLowerCase()] || 0,
   })),
   {
     label: "Fixed",
@@ -65,8 +64,8 @@ function fetch() {
     .then((response) => {
       data.value = response.items.map((item) => ({
         ...item,
-        totalOpen: reversedSeverities.reduce(
-          (sum, s) => sum + (item[s.value.toLowerCase()] || 0),
+        totalOpen: severities.reduce(
+          (sum, s) => sum + (item[s.label.toLowerCase()] || 0),
           0,
         ),
       }));

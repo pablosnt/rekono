@@ -52,7 +52,7 @@ const columns = [
     header: table.iconAndValueHeader("Severity", "i-lucide-shield-alert"),
     cell: ({ row }: { row: { getValue: (key: string) => unknown } }) => {
       const value = row.getValue("severity") as string | undefined;
-      const severity = severities.find((s) => s.value === value);
+      const severity = severities.find((s) => s.label === value);
       return table.badgeCell(value, severity?.icon, severity?.color);
     },
   },

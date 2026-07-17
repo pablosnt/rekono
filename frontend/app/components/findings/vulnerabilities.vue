@@ -90,7 +90,6 @@ const filters = computed(() => [
     icon: "i-lucide-shield",
     type: "select",
     options: severities,
-    labelKey: "value",
   },
   {
     key: "cwe",
@@ -156,7 +155,7 @@ const columns: CrudTableColumn<Vulnerability>[] = [
     icon: "i-lucide-shield-alert",
     cell: ({ row }) => {
       const value = row.getValue("severity") as string | undefined;
-      const severity = severities.find((s) => s.value === value);
+      const severity = severities.find((s) => s.label === value);
       return table.badgeCell(value, severity?.icon, severity?.color);
     },
   },

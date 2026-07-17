@@ -129,9 +129,9 @@ export const portStatuses = [
 export const portProtocols = ["TCP", "UDP"];
 
 export const severities = [
-  { value: "Info", color: "neutral", icon: "i-lucide-chevrons-down" },
-  { value: "Low", color: "info", icon: "i-lucide-chevron-down" },
-  { value: "Medium", color: "warning", icon: "i-lucide-minus" },
-  { value: "High", color: "orange", icon: "i-lucide-chevron-up" },
-  { value: "Critical", color: "error", icon: "i-lucide-chevrons-up" },
+  { value: 5, label: "Critical", color: "error", icon: "i-lucide-chevrons-up" },
+  { value: 4, label: "High", color: "orange", icon: "i-lucide-chevron-up" },
+  { value: 3, label: "Medium", color: "warning", icon: "i-lucide-minus" },
+  { value: 2, label: "Low", color: "info", icon: "i-lucide-chevron-down" },
+  { value: 1, label: "Info", color: "neutral", icon: "i-lucide-chevrons-down" },
 ];
