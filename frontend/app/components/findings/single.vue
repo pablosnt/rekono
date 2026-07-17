@@ -39,28 +39,22 @@
           <div
             class="flex flex-col gap-3 sm:flex-row sm:justify-between w-full"
           >
-            <div class="flex items-center gap-2">
+            <div class="flex items-start gap-2 min-w-0">
               <slot name="icon">
                 <UIcon
                   v-if="icon"
                   :name="icon"
-                  :class="`text-${iconColor || 'neutral'} text-xl`"
+                  :class="`text-${iconColor || 'neutral'} text-xl shrink-0 mt-1`"
                 />
               </slot>
-              <h1
-                class="font-bold text-default truncate max-w-[300px] sm:max-w-none text-2xl"
-              >
-                {{ title }}
-              </h1>
-              <UButton
-                v-if="!disableTitleCopy"
-                icon="i-lucide-copy"
-                color="neutral"
-                variant="ghost"
-                size="xs"
-                aria-label="Copy title"
-                @click="copyText(title)"
-              />
+              <UTooltip :text="title" :disabled="!titleTruncated">
+                <h1
+                  ref="titleElement"
+                  class="font-bold text-default text-2xl min-w-0 wrap-anywhere line-clamp-3"
+                >
+                  {{ title }}
+                </h1>
+              </UTooltip>
             </div>
             <div class="flex items-center gap-2">
               <FindingsStatus
@@ -77,7 +71,7 @@
                 v-if="
                   (integrations.hacktricks?.enabled &&
                     finding.hacktricks_link) ||
-                  finding.reference
+                  (!ignoreReference && finding.reference)
                 "
                 :items="[
                   ...(finding.hacktricks_link &&
@@ -147,7 +141,7 @@
             : 'Executions where the finding was detected'
         "
         variant="outline"
-        :ui="{ header: 'w-full', container: 'min-w-0' }"
+        :ui="{ header: 'w-full', container: 'min-w-0 *:min-w-0' }"
       >
         <template #title>
           <h2
@@ -223,6 +217,12 @@ const fixModalOpen = ref(false);
 const executions = ref();
 const executionsTotal = ref();
 const refresh = ref();
+const titleElement = useTemplateRef<HTMLElement>("titleElement");
+const titleTruncated = computed(() =>
+  titleElement.value
+    ? titleElement.value.scrollHeight > titleElement.value.clientHeight + 1
+    : false,
+);
 const dropdownActions = computed(() =>
   props.finding
     ? [
