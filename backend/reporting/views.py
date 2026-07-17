@@ -221,6 +221,10 @@ class ReportingViewSet(BaseViewSet):
             query = model.objects.filter(**query_filter).distinct()
             if model == Vulnerability:
                 query = query.order_by("-severity")
+            elif model == Port:
+                query = query.order_by("port")
+            elif model == OSINT:
+                query = query.order_by("data")
             findings[model.__name__.lower()] = [
                 {k: v for k, v in model_to_dict(f).items() if k != "executions"} for f in query
             ]
@@ -253,13 +257,21 @@ class ReportingViewSet(BaseViewSet):
                 else {"executions__task__target": target}
             )
             results["stats_by_target"][target.id] = {severity.name.lower(): 0 for severity in Severity}
-            _osint = OSINT.objects.filter(
-                **{**scope_filter, **serializer.validated_filter, **serializer.validated_triage_filter}
-            ).distinct()
+            _osint = (
+                OSINT.objects.filter(
+                    **{**scope_filter, **serializer.validated_filter, **serializer.validated_triage_filter}
+                )
+                .order_by("data")
+                .distinct()
+            )
             _target_count = _osint.count()
             _findings = {FindingName.OSINT.value: _osint.all(), FindingName.HOST.value: []}
             for host in Host.objects.filter(**{**scope_filter, **serializer.validated_filter}).distinct():
-                _ports = Port.objects.filter(**{**scope_filter, "host": host, **serializer.validated_filter}).distinct()
+                _ports = (
+                    Port.objects.filter(**{**scope_filter, "host": host, **serializer.validated_filter})
+                    .order_by("port")
+                    .distinct()
+                )
                 _technologies = Technology.objects.filter(
                     **{**scope_filter, "port__host": host, **serializer.validated_filter}
                 ).distinct()
