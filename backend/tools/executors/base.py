@@ -433,7 +433,7 @@ class BaseExecutor(LoggingEntity):
         """
         pass
 
-    def save_executed_command(self, wordlists: list[Wordlist]) -> str:
+    def save_executed_command(self, wordlists: list[Wordlist]) -> None:
         """Build an anonymized string of the command that was executed.
 
         Reconstructs the command line from the finalized arguments and removes
@@ -452,9 +452,6 @@ class BaseExecutor(LoggingEntity):
 
         Args:
             wordlists (list[Wordlist]): Wordlists used to generate the command
-
-        Returns:
-            str: The anonymized command line that was executed
         """
         command = " ".join(self.arguments)
         # Hide the internal reports directory
