@@ -379,7 +379,7 @@ class ReportingViewSet(BaseViewSet):
         """
         try:
             with (CONFIG.generated_reports / filename).open("w") as report:
-                json.dump(findings, report, ensure_ascii=True, indent=4)
+                json.dump(findings, report, ensure_ascii=True, indent=4, default=str)
             return True
         except Exception:
             return False
