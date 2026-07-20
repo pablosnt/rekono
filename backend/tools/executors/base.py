@@ -379,7 +379,7 @@ class BaseExecutor(LoggingEntity):
         Args:
             environment (dict[str, Any]): Environment variables for execution
         """
-        self.logger.info(f"[Tool] Running: {' '.join(self.arguments)}")
+        self.logger.info(f"[Tool] Running: {self.mask_sensitive_data(' '.join(self.arguments))}")
         # Determine output capture strategy based on tool configuration
         # Use file-based output if tool has a specific format and report path isn't already in arguments
         stdout = (
@@ -475,12 +475,34 @@ class BaseExecutor(LoggingEntity):
                 self.execution.configuration.tool.script,
             )
         # Hide every target's authentication secret
+        self.execution.executed_command = self.mask_sensitive_data(command)
+        self.execution.save(update_fields=["executed_command"])
+
+    def mask_sensitive_data(self, command: str) -> str:
+        """Mask every authentication secret reachable from the target in a command line.
+
+        Both the stored secret and its derived token, for all authentications
+        configured on the target's ports, are replaced with a same-length mask of
+        asterisks. Replacements are applied as substring substitutions, so a value
+        that is not present in the command is simply a no-op, and credentials are
+        hidden even when they appear embedded inside other values (e.g. header
+        values or Basic auth tokens).
+
+        This is kept as an independent method so it can be reused anywhere the
+        command line is exposed (persisted, logged, or displayed) to avoid leaking
+        credentials into Rekono logs or the database.
+
+        Args:
+            command (str): The command line that may contain sensitive credentials
+
+        Returns:
+            str: The command line with every authentication secret and token masked
+        """
         for authentication in Authentication.objects.filter(target_port__target=self.execution.task.target).all():
             for value in (authentication.secret, authentication.token):
                 if value:
                     command = command.replace(value, "*" * len(value))
-        self.execution.executed_command = command
-        self.execution.save(update_fields=["executed_command"])
+        return command
 
     def on_start(self) -> None:
         """Handle execution start event.
