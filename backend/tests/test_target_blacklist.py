@@ -54,8 +54,6 @@ class TargetDenylistTest(ApiTest, TestCase):
             ["admin1", "auditor1"], 400, {"project": 1, "target": "subdomain.rekono.com"}, endpoint="/api/targets/"
         ),
         PostApiTestCase(["admin1", "auditor1"], 400, {"project": 1, "target": "10.10.10.1"}, endpoint="/api/targets/"),
-        # Each denied target creation above (admin1 + auditor1) increments the blocked counter of the matching entry:
-        # entry 14 matched 3 exact-match attempts, entries 15 and 16 matched 1 regex/network attempt each.
         ApiTestCase(
             [Role.ADMIN], expected={"id": 14, "default": False, "blocked": 6, **target_denylist1}, endpoint="14"
         ),
@@ -66,7 +64,6 @@ class TargetDenylistTest(ApiTest, TestCase):
             [Role.ADMIN], expected={"id": 16, "default": False, "blocked": 2, **target_denylist3}, endpoint="16"
         ),
         PutApiTestCase([Role.ADMIN], 404, new_target_denylist, endpoint="1"),
-        # blocked is read-only, so updating the entry must preserve the accumulated count
         PutApiTestCase(
             [Role.ADMIN],
             data=new_target_denylist,
