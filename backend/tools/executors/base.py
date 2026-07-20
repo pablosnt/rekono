@@ -433,6 +433,49 @@ class BaseExecutor(LoggingEntity):
         """
         pass
 
+    def save_executed_command(self, wordlists: list[Wordlist]) -> str:
+        """Build an anonymized string of the command that was executed.
+
+        Reconstructs the command line from the finalized arguments and removes
+        sensitive information so it can be safely persisted and shown to users.
+        Replacements are applied as substring substitutions on the joined command,
+        so a value that is not present in the command is simply a no-op:
+
+        - Output path is replaced with ``output.<output_format>`` to avoid
+          disclosing the internal reports directory structure.
+        - Each wordlist path is replaced with its name, hiding the filesystem path.
+        - The script path is replaced with its filename, hiding the scripts directory.
+        - Every authentication secret reachable from the target (both the stored
+          secret and its derived token) is replaced with a same-length mask of
+          asterisks, so credentials are never persisted, even when they also
+          appear inside header values.
+
+        Args:
+            wordlists (list[Wordlist]): Wordlists used to generate the command
+
+        Returns:
+            str: The anonymized command line that was executed
+        """
+        command = " ".join(self.arguments)
+        # Hide the internal reports directory
+        if self.report:
+            command = command.replace(str(self.report), f"output.{self.execution.configuration.tool.output_format or "txt"}") 
+        # Hide wordlist absolute paths
+        for wordlist in wordlists:
+            command = command.replace(wordlist.path, Path(wordlist.path).name)
+        # Hide scripts absolute path
+        if self.execution.configuration.tool.script and self.execution.configuration.tool.script_directory_property:
+            command = command.replace(str(Path(getattr(CONFIG, self.execution.configuration.tool.script_directory_property.lower())) / self.execution.configuration.tool.script), self.execution.configuration.tool.script)
+        # Hide every target's authentication secret
+        for authentication in Authentication.objects.filter(
+            target_port__target=self.execution.task.target
+        ).all():
+            for value in (authentication.secret, authentication.token):
+                if value:
+                    command = command.replace(value, "*" * len(value))
+        self.execution.executed_command = command
+        self.execution.save(update_fields=["executed_command"])
+
     def on_start(self) -> None:
         """Handle execution start event.
 
@@ -552,6 +595,7 @@ class BaseExecutor(LoggingEntity):
             self.on_skip(str(error))
             return
         self.environment = self.get_environment()
+        self.save_executed_command(wordlists)
         self.before_running()
         try:
             if not CONFIG.testing:

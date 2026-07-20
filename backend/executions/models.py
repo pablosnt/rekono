@@ -29,6 +29,7 @@ class Execution(BaseModel):
         configuration (ForeignKey): The tool configuration used for execution
         output_file (TextField): Path to the execution output file (max 50 chars)
         output_plain (TextField): Plain text output from the tool execution
+        executed_command (TextField): Anonymized command line that was executed
         skipped_reason (TextField): Reason why execution was skipped
         status (TextField): Current execution status (from Status enum)
         enqueued_at (DateTimeField): When the execution was queued
@@ -54,6 +55,7 @@ class Execution(BaseModel):
     configuration = models.ForeignKey(Configuration, on_delete=models.SET_NULL, blank=True, null=True)
     output_file = models.TextField(max_length=50, blank=True, null=True)
     output_plain = models.TextField(blank=True, null=True)
+    executed_command = models.TextField(blank=True, null=True)
     skipped_reason = models.TextField(blank=True, null=True)
     status = models.TextField(max_length=10, choices=Status.choices, default=Status.REQUESTED)
     enqueued_at = models.DateTimeField(blank=True, null=True)
