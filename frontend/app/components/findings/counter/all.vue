@@ -30,7 +30,7 @@ const counters = ref(
   findingTypes.map((ft) => Object.assign({ count: 0, loading: true }, ft)),
 );
 const total = computed(() =>
-  counters.value.reduce((sum, c) => sum + (c.count as number), 0)
+  counters.value.reduce((sum, c) => sum + (c.count as number), 0),
 );
 
 function getFilters(isTriageable: boolean) {
@@ -62,8 +62,8 @@ function fetch() {
         1,
         1,
       )
-      .then((response) => counters.value[index].count = response.total)
-      .catch(() => counters.value[index].count = 0)
+      .then((response) => (counters.value[index].count = response.total))
+      .catch(() => (counters.value[index].count = 0))
       .finally(() => {
         counters.value[index].loading = false;
         loading.value = counters.value.some((c) => c.loading);

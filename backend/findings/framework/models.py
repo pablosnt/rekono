@@ -9,6 +9,7 @@ from dataclasses import dataclass
 from functools import cached_property
 from typing import Any, Callable
 
+from django.db import transaction
 from django.db.models import (
     SET_NULL,
     BooleanField,
@@ -28,6 +29,7 @@ from framework.models import BaseInput
 from projects.models import Project
 from rekono.settings import AUTH_USER_MODEL
 from security.validators.input_validator import Regex, Validator
+from targets.models import Target
 
 
 class FindingManager(Manager):
@@ -132,6 +134,7 @@ class FindingManager(Manager):
         finding.save(update_fields=["is_fixed", "auto_fixed", "fixed_date", "fixed_by"])
         return finding
 
+    @transaction.atomic()
     def create_finding(self, execution: Execution, **fields: Any) -> Any:
         """Create or update a finding with duplicate prevention.
 
@@ -147,6 +150,10 @@ class FindingManager(Manager):
             Any: The created or updated finding instance.
         """
         is_user_input = bool(fields.get("created_from_user_input"))
+        # Lock the task's target row during the findings creation
+        # This avoids duplication errors if two concurrent executions
+        # try to create the same findings at the same time
+        Target.objects.select_for_update().get(pk=execution.task.target_id)
         finding = self.model._find_duplicate(execution, fields)
         if finding:
             if not is_user_input:

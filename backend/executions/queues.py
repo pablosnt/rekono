@@ -43,6 +43,7 @@ class ExecutionsQueue(BaseScanQueue):
         wordlists: list[Wordlist],
         dependencies: list[Job] = [],
         at_front: bool = False,
+        job_id: str | None = None,
     ) -> Job:
         """Enqueue an execution job for background processing.
 
@@ -62,6 +63,9 @@ class ExecutionsQueue(BaseScanQueue):
             wordlists (list[Wordlist]): Wordlists to use
             dependencies (list[Job]): Job dependencies for execution order
             at_front (bool): Whether to prioritize this job in the queue
+            job_id (str | None): Reuse this RQ job id instead of generating a new one.
+                Used when recreating a pending job to add dependencies, so jobs that
+                already depend on it keep pointing at a valid id.
 
         Returns:
             Job: The queued RQ job instance
@@ -77,6 +81,7 @@ class ExecutionsQueue(BaseScanQueue):
             result_ttl=7200,
             depends_on=Dependency(jobs=dependencies, allow_failure=True) if dependencies else [],
             at_front=at_front,
+            job_id=job_id,
         )
         self.logger.info(
             f"[Execution] Execution {execution.id} ({execution.configuration.tool.name} - "
@@ -230,48 +235,50 @@ class ExecutionsQueue(BaseScanQueue):
                     f"[Execution] Execution {executor.execution.id} discarded a parameter batch ({len(e.findings)} findings of type {', '.join(sorted({f.__class__.__name__ for f in e.findings}))}, {len(e.target_ports)} target ports, {len(e.input_vulnerabilities)} input vulnerabilities, {len(e.input_technologies)} input technologies, and {len(e.wordlists)} wordlists) that can't satisfy the required arguments"
                 )
         BaseScanQueue.logger.info(f"[Execution] New {len(executions) - 1} executions from previous findings")
-        # Create new execution records and queue jobs for additional executions
-        # executions[0] is the current execution, executions[1:] are new ones
-        new_jobs = []
-        for execution in executions[1:]:
-            new_execution = Execution.objects.create(
-                task=executor.execution.task,
-                configuration=executor.execution.configuration,
-            )
-            job = self.enqueue(
-                new_execution,
-                execution.findings,
-                execution.target_ports,
-                execution.input_vulnerabilities,
-                execution.input_technologies,
-                execution.wordlists,
-                # At queue start, because it could be a dependency of next jobs
-                at_front=True,
-            )
-            new_jobs.append(job.id)
-        # Update pending jobs that depend on current_job to include new dependencies
-        # This ensures proper dependency chain for tool chaining workflows
-        if new_jobs:
-            registry = DeferredJobRegistry(queue=self.queue)
-            for pending_job_id in registry.get_job_ids():
-                pending_job = self.fetch_job(pending_job_id)
-                if pending_job and current_job.id in pending_job._dependency_ids:
-                    meta = pending_job.get_meta()
-                    # Only execution jobs carry an "execution" in their meta and can be recreated
-                    if "execution" not in meta:
-                        continue
-                    dependencies = pending_job._dependency_ids
-                    # Recreate the pending job with updated dependencies
-                    self.delete_job(pending_job_id)
-                    self.enqueue(
-                        meta["execution"],
-                        [],
-                        meta["target_ports"],
-                        meta["input_vulnerabilities"],
-                        meta["input_technologies"],
-                        meta["wordlists"],
-                        dependencies=dependencies + new_jobs,
-                    )
+        # Lock RQ to recalculate the execution graph based on the latest results and the dependencies between jobs
+        with self.queue.connection.lock(f"execution-graph:{executor.execution.task.id}"):
+            new_jobs = []
+            for execution in executions[1:]:
+                new_execution = Execution.objects.create(
+                    task=executor.execution.task,
+                    configuration=executor.execution.configuration,
+                )
+                job = self.enqueue(
+                    new_execution,
+                    execution.findings,
+                    execution.target_ports,
+                    execution.input_vulnerabilities,
+                    execution.input_technologies,
+                    execution.wordlists,
+                    # At queue start, because it could be a dependency of next jobs
+                    at_front=True,
+                )
+                new_jobs.append(job.id)
+            # Update pending jobs that depend on current_job to include new dependencies
+            # This ensures proper dependency chain for tool chaining workflows
+            if new_jobs:
+                registry = DeferredJobRegistry(queue=self.queue)
+                for pending_job_id in registry.get_job_ids():
+                    pending_job = self.fetch_job(pending_job_id)
+                    if pending_job and current_job.id in pending_job._dependency_ids:
+                        meta = pending_job.get_meta()
+                        # Only execution jobs carry an "execution" in their meta and can be recreated
+                        if "execution" not in meta:
+                            continue
+                        dependencies = pending_job._dependency_ids
+                        # Recreate the pending job with updated dependencies
+                        self.delete_job(pending_job_id)
+                        self.enqueue(
+                            meta["execution"],
+                            [],
+                            meta["target_ports"],
+                            meta["input_vulnerabilities"],
+                            meta["input_technologies"],
+                            meta["wordlists"],
+                            dependencies=dependencies + new_jobs,
+                            # Preserve previous job ID to avoid disruptions on dependencies
+                            job_id=pending_job_id,
+                        )
         # Return the first execution (current one) if available, otherwise fallback
         # to original parameters
         return (

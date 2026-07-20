@@ -16,7 +16,6 @@ from typing import Any
 from urllib.parse import urlparse
 
 from django.core.exceptions import ValidationError
-from django.db.models import Max, Min
 from django.forms.models import model_to_dict
 from django.utils import timezone
 

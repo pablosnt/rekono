@@ -285,8 +285,8 @@ function processTask(data?: Task) {
   ) {
     if (refresh.value) clearTimeout(refresh.value);
     refresh.value = setTimeout(() => {
-      fetchTask();
       executions.value?.page?.fetch();
+      fetchTask();
     }, 5000);
   } else if (refresh.value) {
     clearTimeout(refresh.value);
