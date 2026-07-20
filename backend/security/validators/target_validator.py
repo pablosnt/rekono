@@ -103,7 +103,6 @@ class TargetValidator(RegexValidator, LoggingEntity):
         super().__call__(value)
         if not value:
             raise ValidationError("Target is required", code=self.code, params={"value": value})
-        denylist = list(TargetDenylist.objects.all().values_list("target", flat=True))
         candidates = set([value])
         if not CONFIG.testing:  # pragma: no cover
             from targets.models import Target
@@ -126,17 +125,22 @@ class TargetValidator(RegexValidator, LoggingEntity):
             # Strip a trailing dot so the FQDN form (example.com.) cannot bypass an
             # entry stored without it, since DNS treats both as equivalent
             candidate = _candidate.strip().rstrip(".").lower()
-            if candidate in denylist:
-                self.logger.warning(f"[Security] Target '{value}' is denied by policy")
-                raise ValidationError(self.message, code=self.code, params={"value": value})
-            for denied_value in denylist:
+            for denied_value in TargetDenylist.objects.all():
+                denied_target = denied_value.target.lower()
                 # A malformed deny list entry must be ignored
+                if candidate == denied_target:
+                    denied_value.blocked += 1
+                    denied_value.save(update_fields=["blocked"])
+                    self.logger.warning(f"[Security] Target '{value}' is denied by policy")
+                    raise ValidationError(self.message, code=self.code, params={"value": value})
                 try:
-                    regex_match = bool(re.fullmatch(denied_value, candidate))
+                    regex_match = bool(re.fullmatch(denied_target, candidate))
                 except Exception:
                     regex_match = False
                 if regex_match:
-                    self.logger.warning(f"[Security] Target '{value}' match the denied value {denied_value}")
+                    denied_value.blocked += 1
+                    denied_value.save(update_fields=["blocked"])
+                    self.logger.warning(f"[Security] Target '{value}' match the denied value {denied_value.target}")
                     raise ValidationError(self.message, code=self.code, params={"value": value})
                 for address_class, network_class in [
                     (ipaddress.IPv4Address, ipaddress.IPv4Network),
@@ -145,9 +149,13 @@ class TargetValidator(RegexValidator, LoggingEntity):
                     # ValueError covers AddressValueError and NetmaskValueError so a
                     # malformed deny list network entry is ignored instead of crashing
                     try:
-                        network_match = address_class(candidate) in network_class(denied_value)
+                        network_match = address_class(candidate) in network_class(denied_target)
                     except Exception:
                         network_match = False
                     if network_match:
-                        self.logger.warning(f"[Security] Target '{value}' belongs to the denied network {denied_value}")
+                        denied_value.blocked += 1
+                        denied_value.save(update_fields=["blocked"])
+                        self.logger.warning(
+                            f"[Security] Target '{value}' belongs to the denied network {denied_value.target}"
+                        )
                         raise ValidationError(self.message, code=self.code, params={"value": value})

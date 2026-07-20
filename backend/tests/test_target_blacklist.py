@@ -10,7 +10,7 @@ from tests.framework.data import SetupProject
 
 # pytype: disable=wrong-arg-types
 
-default_denylist_1 = {"id": 1, "default": True, "target": "127.0.0.1"}
+default_denylist_1 = {"id": 1, "default": True, "target": "127.0.0.1", "blocked": 0}
 target_denylist1 = {"target": "rekono.com"}
 target_denylist2 = {"target": ".*\.rekono\.com"}
 invalid_regex_denylist = {"target": "*.rekono.com"}
@@ -29,13 +29,23 @@ class TargetDenylistTest(ApiTest, TestCase):
         ApiTestCase([Role.ADMIN], 200, expected=default_denylist_1, endpoint="1"),
         PostApiTestCase([Role.ADMIN], 400, invalid_denylist),
         PostApiTestCase([Role.AUDITOR, Role.READER], 403, target_denylist1),
-        PostApiTestCase(["admin1"], data=target_denylist1, expected={"id": 14, "default": False, **target_denylist1}),
-        PostApiTestCase(["admin2"], 400, target_denylist1),
-        ApiTestCase([Role.ADMIN], expected={"id": 14, "default": False, **target_denylist1}, endpoint="14"),
-        PostApiTestCase(["admin2"], data=target_denylist2, expected={"id": 15, "default": False, **target_denylist2}),
-        PostApiTestCase(["admin1"], data=target_denylist3, expected={"id": 16, "default": False, **target_denylist3}),
         PostApiTestCase(
-            ["admin1"], data=invalid_regex_denylist, expected={"id": 17, "default": False, **invalid_regex_denylist}
+            ["admin1"], data=target_denylist1, expected={"id": 14, "default": False, "blocked": 0, **target_denylist1}
+        ),
+        PostApiTestCase(["admin2"], 400, target_denylist1),
+        ApiTestCase(
+            [Role.ADMIN], expected={"id": 14, "default": False, "blocked": 0, **target_denylist1}, endpoint="14"
+        ),
+        PostApiTestCase(
+            ["admin2"], data=target_denylist2, expected={"id": 15, "default": False, "blocked": 0, **target_denylist2}
+        ),
+        PostApiTestCase(
+            ["admin1"], data=target_denylist3, expected={"id": 16, "default": False, "blocked": 0, **target_denylist3}
+        ),
+        PostApiTestCase(
+            ["admin1"],
+            data=invalid_regex_denylist,
+            expected={"id": 17, "default": False, "blocked": 0, **invalid_regex_denylist},
         ),
         PostApiTestCase(["admin1", "auditor1"], 400, {"project": 1, "target": "rekono.com"}, endpoint="/api/targets/"),
         PostApiTestCase(["admin1", "auditor1"], 400, {"project": 1, "target": "REKONO.COM"}, endpoint="/api/targets/"),
@@ -44,14 +54,28 @@ class TargetDenylistTest(ApiTest, TestCase):
             ["admin1", "auditor1"], 400, {"project": 1, "target": "subdomain.rekono.com"}, endpoint="/api/targets/"
         ),
         PostApiTestCase(["admin1", "auditor1"], 400, {"project": 1, "target": "10.10.10.1"}, endpoint="/api/targets/"),
+        # Each denied target creation above (admin1 + auditor1) increments the blocked counter of the matching entry:
+        # entry 14 matched 3 exact-match attempts, entries 15 and 16 matched 1 regex/network attempt each.
+        ApiTestCase(
+            [Role.ADMIN], expected={"id": 14, "default": False, "blocked": 6, **target_denylist1}, endpoint="14"
+        ),
+        ApiTestCase(
+            [Role.ADMIN], expected={"id": 15, "default": False, "blocked": 2, **target_denylist2}, endpoint="15"
+        ),
+        ApiTestCase(
+            [Role.ADMIN], expected={"id": 16, "default": False, "blocked": 2, **target_denylist3}, endpoint="16"
+        ),
         PutApiTestCase([Role.ADMIN], 404, new_target_denylist, endpoint="1"),
+        # blocked is read-only, so updating the entry must preserve the accumulated count
         PutApiTestCase(
             [Role.ADMIN],
             data=new_target_denylist,
-            expected={"id": 14, "default": False, **new_target_denylist},
+            expected={"id": 14, "default": False, "blocked": 6, **new_target_denylist},
             endpoint="14",
         ),
-        ApiTestCase([Role.ADMIN], expected={"id": 14, "default": False, **new_target_denylist}, endpoint="14"),
+        ApiTestCase(
+            [Role.ADMIN], expected={"id": 14, "default": False, "blocked": 6, **new_target_denylist}, endpoint="14"
+        ),
         DeleteApiTestCase([Role.AUDITOR, Role.READER], 403, endpoint="1"),
         DeleteApiTestCase([Role.ADMIN], 404, endpoint="1"),
         DeleteApiTestCase([Role.AUDITOR, Role.READER], 403, endpoint="14"),

@@ -4,7 +4,8 @@
         "pk": 1,
         "fields": {
             "target": "127.0.0.1",
-            "default": true
+            "default": true,
+            "blocked": 0
         }
     },
     {
@@ -12,7 +13,8 @@
         "pk": 2,
         "fields": {
             "target": "::1",
-            "default": true
+            "default": true,
+            "blocked": 0
         }
     },
     {
@@ -20,7 +22,8 @@
         "pk": 3,
         "fields": {
             "target": "localhost",
-            "default": true
+            "default": true,
+            "blocked": 0
         }
     },
     {
@@ -28,7 +31,8 @@
         "pk": 4,
         "fields": {
             "target": "frontend",
-            "default": true
+            "default": true,
+            "blocked": 0
         }
     },
     {
@@ -36,7 +40,8 @@
         "pk": 5,
         "fields": {
             "target": "backend",
-            "default": true
+            "default": true,
+            "blocked": 0
         }
     },
     {
@@ -44,7 +49,8 @@
         "pk": 6,
         "fields": {
             "target": "postgres",
-            "default": true
+            "default": true,
+            "blocked": 0
         }
     },
     {
@@ -52,7 +58,8 @@
         "pk": 7,
         "fields": {
             "target": "valkey",
-            "default": true
+            "default": true,
+            "blocked": 0
         }
     },
     {
@@ -60,7 +67,8 @@
         "pk": 8,
         "fields": {
             "target": "initialize",
-            "default": true
+            "default": true,
+            "blocked": 0
         }
     },
     {
@@ -68,7 +76,8 @@
         "pk": 9,
         "fields": {
             "target": "tasks-worker",
-            "default": true
+            "default": true,
+            "blocked": 0
         }
     },
     {
@@ -76,7 +85,8 @@
         "pk": 10,
         "fields": {
             "target": "executions-worker",
-            "default": true
+            "default": true,
+            "blocked": 0
         }
     },
     {
@@ -84,7 +94,8 @@
         "pk": 11,
         "fields": {
             "target": "findings-worker",
-            "default": true
+            "default": true,
+            "blocked": 0
         }
     },
     {
@@ -92,7 +103,8 @@
         "pk": 12,
         "fields": {
             "target": "telegram-bot",
-            "default": true
+            "default": true,
+            "blocked": 0
         }
     },
     {
@@ -100,7 +112,8 @@
         "pk": 13,
         "fields": {
             "target": "nginx",
-            "default": true
+            "default": true,
+            "blocked": 0
         }
     }
 ]

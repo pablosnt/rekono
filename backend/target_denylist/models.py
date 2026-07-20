@@ -35,6 +35,8 @@ class TargetDenylist(BaseModel):
 
     target = models.TextField(unique=True, max_length=100, validators=[Validator(Regex.TARGET_REGEX)])
     default = models.BooleanField(default=False)
+    # TODO: Manage this information well on migration time, otherwise, they will be resetted to 0 on each migrate execution
+    blocked = models.IntegerField(default=0)
 
     def __str__(self) -> str:
         """Return string representation of the denylist entry.

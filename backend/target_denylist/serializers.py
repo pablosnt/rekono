@@ -26,5 +26,5 @@ class TargetDenylistSerializer(ModelSerializer):
         """
 
         model = TargetDenylist
-        fields = ("id", "target", "default")
-        read_only_fields = ("default",)
+        fields = ("id", "target", "default", "blocked")
+        read_only_fields = ("default", "blocked")

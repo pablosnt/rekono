@@ -32,6 +32,12 @@ const config: CrudConfig<TargetDenylist> = reactive({
       cell: ({ row }) => table.valueCell(row.getValue("target"), "font-mono"),
     },
     {
+      accessorKey: "blocked",
+      header: "Blocked",
+      icon: "i-lucide-ban",
+      cell: ({ row }) => table.valueCell(row.getValue("blocked")),
+    },
+    {
       accessorKey: "default",
       header: "Default",
       cell: ({ row }) => {
@@ -51,8 +57,8 @@ const config: CrudConfig<TargetDenylist> = reactive({
   searchable: true,
   searchPlaceholder: "Search denied targets...",
   filters: [],
-  ordering: ["id", "target", "default"],
-  defaultOrdering: "-id",
+  ordering: ["id", "target", "default", "blocked"],
+  defaultOrdering: "-blocked,-id",
   pageSize: 5,
   pageSizeOptions: [5, 25, 50, 100],
   formFields: [
