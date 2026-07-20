@@ -142,6 +142,7 @@ class TaskViewSet(BaseViewSet):
             )
         new_task = Task.objects.create(
             target=task.target,
+            target_port=task.target_port,
             process=task.process,
             configuration=task.configuration,
             intensity=task.intensity,
