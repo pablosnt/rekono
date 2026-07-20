@@ -104,8 +104,8 @@
             size="lg"
             :item-id="note.id"
             endpoint="/api/notes/"
-            :liked="note.liked"
-            :count="note.likes"
+            :liked="note.liked === undefined ? false : note.liked"
+            :count="note.likes === undefined ? 0 : note.likes"
             @update="
               (liked: boolean, count: number) => {
                 note.liked = liked;
