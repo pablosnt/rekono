@@ -10,14 +10,16 @@
       text="Configure DefectDojo sync"
       :content="{ side: 'left', sideOffset: 8, collisionPadding: 8 }"
     >
-      <UButton
-        :avatar="{
-          src: integrations.defectdojo.integration.icon,
-          size: 'lg',
-        }"
-        variant="ghost"
-        aria-label="Configure DefectDojo sync"
-      />
+      <UButton variant="ghost" aria-label="Configure DefectDojo sync">
+        <UChip
+          inset
+          size="xl"
+          position="bottom-right"
+          :color="sync ? 'success' : 'error'"
+        >
+          <UAvatar :src="integrations.defectdojo.integration.icon" size="lg" />
+        </UChip>
+      </UButton>
     </UTooltip>
     <template #header="{ close }">
       <div class="flex items-center justify-between w-full">
