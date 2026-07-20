@@ -45,7 +45,7 @@ export function Layout({ children }: LayoutProps) {
             <Section className="py-8">
               <Row>
                 <Column className="text-center">
-                {/* TODO: Take the image from a specific commit not to break the link on future main changes */}
+                  {/* TODO: Take the image from a specific commit not to break the link on future main changes */}
                   <Img
                     src="https://raw.githubusercontent.com/pablosnt/rekono/main/frontend/public/logo-light.png"
                     alt="Rekono"
