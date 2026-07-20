@@ -15,14 +15,14 @@ export function getFindingDropdownActions(
     actions.push({
       label: fixVerb,
       icon: fixVerb === "Fix" ? "i-lucide-check-circle" : "i-lucide-eye-off",
-      color: fixVerb === "Fix" ? "success" : "neutral",
+      color: fixVerb === "Fix" ? "success" : undefined,
       onSelect: () => onFix(finding),
     });
   } else if (!finding.auto_fixed) {
     actions.push({
       label: unfixVerb,
       icon: fixVerb === "Fix" ? "i-lucide-rotate-ccw" : "i-lucide-eye",
-      color: fixVerb === "Fix" ? "neutral" : "success",
+      color: fixVerb === "Fix" ? undefined : "success",
       onSelect: () => onRestore(finding),
     });
   }

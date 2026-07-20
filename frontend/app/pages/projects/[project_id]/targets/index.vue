@@ -178,7 +178,6 @@ const config: CrudConfig<Target> = reactive({
           {
             label: "Generate a report",
             icon: "i-lucide-file-text",
-            color: "neutral",
             onSelect: (t: Target) => {
               selectedTarget.value = t;
               showReportModal.value = true;
@@ -189,7 +188,6 @@ const config: CrudConfig<Target> = reactive({
     {
       label: "Take note",
       icon: "i-lucide-notebook",
-      color: "neutral",
       onSelect: () => {
         selectedTarget.value = target;
         return nextTick(() => notesButton.value?.createNote());

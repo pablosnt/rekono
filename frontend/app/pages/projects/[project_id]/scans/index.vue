@@ -347,7 +347,6 @@ const config: CrudConfig<Task> = reactive({
                 {
                   label: "Generate a report",
                   icon: "i-lucide-file-text",
-                  color: "neutral",
                   onSelect: (t: Task) => {
                     selectedTask.value = t;
                     showReportModal.value = true;
@@ -360,7 +359,6 @@ const config: CrudConfig<Task> = reactive({
     {
       label: "Take note",
       icon: "i-lucide-notebook",
-      color: "neutral",
       onSelect: () => {
         selectedTask.value = task;
         return nextTick(() => notesButton.value?.createNote());

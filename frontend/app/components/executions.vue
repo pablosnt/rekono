@@ -106,7 +106,7 @@
             class="flex-1 min-h-0 flex items-center justify-center bg-neutral-950 rounded-lg"
           >
             <UIcon
-              v-if="isExecutionPending"
+              v-if="['Running', 'Requested'].includes(selectedExecution.status)"
               name="i-lucide-loader"
               class="text-4xl text-muted animate-spin"
               aria-label="Execution running"
@@ -148,10 +148,6 @@ const selectedExecution = ref();
 const runningExecutions = ref(0);
 const outputOpen = ref(false);
 const toolOptions = ref<FilterOption[]>([]);
-const isExecutionPending = computed(() =>
-  ["Running", "Requested"].includes(selectedExecution.value?.status),
-);
-
 const config: CrudConfig<Execution> = reactive({
   endpoint: "/api/executions/",
   entityName: "Execution",
