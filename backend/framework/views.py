@@ -7,8 +7,9 @@ access control, and standardized CRUD operations for all Rekono API endpoints.
 from functools import cached_property
 from typing import Any
 
+from django.contrib.auth import get_user_model
 from django.core.exceptions import PermissionDenied
-from django.db.models import Count, QuerySet
+from django.db.models import Count, Exists, OuterRef, QuerySet
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.decorators import action
@@ -172,12 +173,28 @@ class LikeViewSet(BaseViewSet):
     """
 
     def get_queryset(self) -> QuerySet:
-        """Get queryset annotated with like counts.
+        """Get queryset annotated with like count and current user's like status.
+
+        The ``likes`` count is annotated with ``distinct=True`` and ``liked`` is
+        resolved through an ``Exists`` subquery instead of a second join on the
+        same many-to-many relation, so the two annotations don't inflate each
+        other's row counts.
 
         Returns:
-            QuerySet: Base queryset with likes_count annotation.
+            QuerySet: Base queryset with ``likes`` and ``liked`` annotations.
         """
-        return super().get_queryset().annotate(likes_count=Count("liked_by"))
+        return (
+            super()
+            .get_queryset()
+            .annotate(
+                likes=Count("liked_by", distinct=True),
+                liked=Exists(
+                    get_user_model().objects.filter(
+                        pk=self.request.user.pk, **{f"liked_{self.queryset.model.__name__.lower()}": OuterRef("pk")}
+                    )
+                ),
+            )
+        )
 
     @extend_schema(request=None, responses={204: None})
     # Permission classes are overwritten to IsAuthenticated and IsAuditor, because only Tools, Processes and Wordlists

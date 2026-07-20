@@ -19,7 +19,7 @@ from platforms.telegram_app.notifications import Telegram
 from security.cryptography import Crypto
 
 
-class TelegramSettingsSerializer(ModelSerializer, LoggingEntity):
+class TelegramSettingsSerializer(ModelSerializer):
     """Serializer for Telegram Bot settings with encrypted token handling.
 
     Handles serialization and validation of Telegram Bot configuration including

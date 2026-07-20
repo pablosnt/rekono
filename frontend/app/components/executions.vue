@@ -280,7 +280,7 @@ function onExecutions(items: Execution[], total: number) {
 }
 
 onMounted(() => {
-  options.tools(toolOptions);
+  options.tools(toolOptions, { ordering: "-liked,-id" });
   integrations.fetchDefectDojo();
 });
 

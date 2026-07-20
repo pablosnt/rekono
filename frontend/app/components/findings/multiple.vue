@@ -123,7 +123,7 @@ onMounted(() => {
     targetOptions,
     route.params.project_id ? { project: route.params.project_id } : undefined,
   );
-  options.tools(toolOptions);
+  options.tools(toolOptions, { ordering: "-liked,-id" });
   if (props.hasHacktricks) integrations.fetchHackTricks();
 });
 

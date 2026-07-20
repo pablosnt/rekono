@@ -157,9 +157,10 @@ const config: CrudConfig<Wordlist> = reactive({
     "size",
     "type",
     "owner",
-    { id: "likes_count", label: "Likes" },
+    { id: "likes", label: "Likes" },
+    { id: "liked", label: "Favourites" },
   ],
-  defaultOrdering: "-id",
+  defaultOrdering: "-liked,-id",
   pageSize: 25,
   pageSizeOptions: [25, 50, 100],
   get createFormFields() {

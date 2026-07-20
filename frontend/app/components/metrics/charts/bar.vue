@@ -88,14 +88,6 @@ const inactive = ref(props.series.map(() => false));
 const activeY = computed(() =>
   props.series.map((s, i) => (inactive.value[i] ? null : s.y)),
 );
-const maxTotal = computed(() =>
-  Math.max(
-    0,
-    ...props.data.map((d) =>
-      props.series.reduce((sum, s) => sum + (s.y(d) || 0), 0),
-    ),
-  ),
-);
 const categoryTickValues = computed(() => props.data.map((_, i) => i));
 const categoryTickFormat = (pos: number) =>
   isVertical.value

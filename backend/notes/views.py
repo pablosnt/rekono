@@ -61,7 +61,8 @@ class NoteViewSet(LikeViewSet):
             "owner",
             "created_at",
             "updated_at",
-            "likes_count",
+            "liked",
+            "likes",
         ]
     )
 

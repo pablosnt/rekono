@@ -301,7 +301,7 @@ function fetchTask(initial: boolean = false) {
 
 onMounted(() => {
   fetchTask(true);
-  options.tools(toolOptions);
+  options.tools(toolOptions, { ordering: "-liked,-id" });
 });
 
 onUnmounted(() => {

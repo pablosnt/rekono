@@ -7,51 +7,26 @@ for user-interactive content across the platform.
 from typing import Any
 
 from django.db.models import Q
-from rest_framework.serializers import ModelSerializer, SerializerMethodField
+from rest_framework.serializers import BooleanField, IntegerField, ModelSerializer, SerializerMethodField
 
 from framework.logging import LoggingEntity
-from users.models import User
 
 
 class LikeSerializer(ModelSerializer, LoggingEntity):
-    """Serializer for models with like/favorite functionality.
+    """Base serializer for models with like/favorite functionality.
 
-    Extends ModelSerializer with computed fields for like status and counts.
-    Used for content that users can like such as tools, processes, and wordlists.
+    Exposes like status and counts for user-interactive content such as tools,
+    processes, and wordlists. Both fields are read-only and their values come
+    directly from the queryset annotations applied in LikeViewSet.get_queryset(),
+    so the calculation lives in a single place and stays usable for ordering.
 
     Attributes:
-        liked (SerializerMethodField): Whether current user has liked the object.
-        likes (SerializerMethodField): Total number of likes for the object.
+        liked (BooleanField): Whether the current user has liked the object.
+        likes (IntegerField): Total number of likes for the object.
     """
 
-    liked = SerializerMethodField(read_only=True)
-    likes = SerializerMethodField(read_only=True)
-
-    def get_liked(self, instance: Any) -> bool:
-        """Check if the current user has liked this object.
-
-        Args:
-            instance (Any): The model instance being serialized.
-
-        Returns:
-            bool: True if the current user has liked this object, False otherwise.
-        """
-        check_likes = {
-            "pk": self.context.get("request").user.id,
-            f"liked_{instance.__class__.__name__.lower()}": instance,
-        }
-        return User.objects.filter(**check_likes).exists()
-
-    def get_likes(self, instance: Any) -> int:
-        """Get the total number of likes for this object.
-
-        Args:
-            instance (Any): The model instance being serialized.
-
-        Returns:
-            int: Total number of users who have liked this object.
-        """
-        return instance.liked_by.count()
+    liked = BooleanField(read_only=True)
+    likes = IntegerField(read_only=True)
 
 
 class RelatedNotesSerializer(ModelSerializer, LoggingEntity):

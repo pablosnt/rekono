@@ -93,9 +93,9 @@ onMounted(() => {
     role: "Auditor",
     project: route.params.project_id,
   });
-  options.tools(toolOptions);
+  options.tools(toolOptions, { ordering: "-liked,-id" });
   options.configurations(configurationOptions, { ordering: "-tool" });
-  options.processes(processOptions);
+  options.processes(processOptions, { ordering: "-liked,-id" });
 });
 
 onUnmounted(() => {
