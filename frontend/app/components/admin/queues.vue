@@ -133,6 +133,7 @@ const api = useApi("/api/");
 const userStore = useUserStore();
 const queueStats = ref<Array<Record<string, string | number>>>([]);
 const monitor = ref();
+const refresh = ref<ReturnType<typeof setTimeout> | null>(null);
 const icons = {
   tasks: {
     icon: "i-lucide-scan-search",
@@ -168,6 +169,15 @@ function fetch() {
         scheduled_jobs: response[queue].scheduled_jobs,
       };
     });
+    if (queueStats.value.some((queue) => Number(queue.started_jobs) > 0)) {
+      if (refresh.value) clearTimeout(refresh.value);
+      refresh.value = setTimeout(() => {
+        fetch();
+      }, 5000);
+    } else if (refresh.value) {
+      clearTimeout(refresh.value);
+      refresh.value = null;
+    }
   });
 }
 
@@ -186,5 +196,9 @@ function updateMonitor() {
 onMounted(() => {
   fetch();
   fetchMonitor();
+});
+
+onUnmounted(() => {
+  if (refresh.value) clearTimeout(refresh.value);
 });
 </script>
