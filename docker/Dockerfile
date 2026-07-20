@@ -177,29 +177,31 @@ RUN apt update && \
     apt autoclean -y && \
     rm -rf /var/lib/apt/lists /var/cache/apt/ && \
     # Unsatisfied emailharvester dependencies
-    uv pip install validators && \
+    uv pip install --system --break-system-packages --python /opt/python/bin/python validators && \
+    # Unsatisfied dirsearch dependencies (pin setuptools to a version that still ships pkg_resources)
+    uv pip install --system --break-system-packages 'setuptools<82' && \
     # Install hacking tools via pip
     uv pip install --system --break-system-packages emailfinder ssh-audit dirsearch && \
-    # Unsatisfied dirsearch dependencies
-    uv pip install --system --break-system-packages setuptools && \
     # Install hacking tools from source
     mkdir -p /opt && \
     git clone https://github.com/fullhunt/log4j-scan.git /opt/log4j-scan && \
     git clone https://github.com/fullhunt/spring4shell-scan.git /opt/spring4shell-scan && \
     git clone https://github.com/internetwache/GitTools.git /opt/GitTools && \
-    uv pip install -r /opt/log4j-scan/requirements.txt && \
-    uv pip install -r /opt/spring4shell-scan/requirements.txt && \
+    uv pip install --system --break-system-packages --python /opt/python/bin/python -r /opt/log4j-scan/requirements.txt && \
+    uv pip install --system --break-system-packages --python /opt/python/bin/python -r /opt/spring4shell-scan/requirements.txt && \
     # Initializer script
     mkdir -p /entrypoints && \
     echo "uv run --no-dev manage.py migrate" > /entrypoints/initializer.sh && \
     echo "uv run --no-dev manage.py createsuperuser --no-input  || true" >> /entrypoints/initializer.sh && \
+    echo "uv run --no-dev manage.py monitor" >> /entrypoints/initializer.sh && \
     chmod +x /entrypoints/initializer.sh && \
-    # Tooling update script
-    echo "nuclei -update-templates" > /entrypoints/update-tooling.sh && \
-    echo "searchsploit --update || true" >> /entrypoints/update-tooling.sh && \
+    # Update tooling resources
+    searchsploit --update || true && \
+    echo "searchsploit --update || true" > /entrypoints/update-tooling.sh && \
     chmod +x /entrypoints/update-tooling.sh && \
     # Executions worker script
-    echo "sudo /entrypoints/update-tooling.sh &" > /entrypoints/executions-worker.sh && \
+    echo "nuclei -update-templates" > /entrypoints/executions-worker.sh && \
+    echo "sudo /entrypoints/update-tooling.sh &" >> /entrypoints/executions-worker.sh && \
     echo "uv run --no-dev manage.py rqworker executions" >> /entrypoints/executions-worker.sh && \
     chmod +x /entrypoints/executions-worker.sh && \
     # Rootless user
@@ -217,3 +219,6 @@ RUN apt update && \
 
 COPY --from=build-backend --chown=rekono:rekono /rekono /rekono
 USER rekono
+
+# Pre-install nuclei templates in the rekono user's home
+RUN nuclei -update-templates
