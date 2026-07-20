@@ -110,7 +110,7 @@
             variant="subtle"
           />
           <ReportsDropdown
-            v-if="task.progress === 100"
+            v-if="task.progress === 100 && projectHasActiveFindings"
             :related-entity="task"
             entity-name="Task"
             :project="parseInt($route.params.project_id)"
@@ -250,6 +250,7 @@ const route = useRoute();
 const tasksApi = useApi("/api/tasks/");
 const userStore = useUserStore();
 const options = useOptions();
+const { projectHasActiveFindings } = usePanel();
 const cancelOpen = ref(false);
 const repeating = ref(false);
 const task = ref<Task | null>();

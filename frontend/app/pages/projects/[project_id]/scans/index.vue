@@ -43,7 +43,7 @@ const route = useRoute();
 const options = useOptions();
 const api = useApi("/api/tasks/");
 const table = useTable();
-const { refreshPanelCounts } = usePanel();
+const { refreshPanelCounts, projectHasActiveFindings } = usePanel();
 const page = ref();
 const tasksButton = ref();
 const notesButton = ref();
@@ -342,15 +342,19 @@ const config: CrudConfig<Task> = reactive({
                 },
               ]
             : []),
-          {
-            label: "Generate a report",
-            icon: "i-lucide-file-text",
-            color: "neutral",
-            onSelect: (t: Task) => {
-              selectedTask.value = t;
-              showReportModal.value = true;
-            },
-          },
+          ...(projectHasActiveFindings.value
+            ? [
+                {
+                  label: "Generate a report",
+                  icon: "i-lucide-file-text",
+                  color: "neutral",
+                  onSelect: (t: Task) => {
+                    selectedTask.value = t;
+                    showReportModal.value = true;
+                  },
+                },
+              ]
+            : []),
         ]
       : []),
     {

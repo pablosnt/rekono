@@ -33,7 +33,7 @@ const route = useRoute();
 const table = useTable();
 const integrations = useIntegrationsStore();
 const { showDefectDojo } = useCurrentProject();
-const { refreshPanelCounts } = usePanel();
+const { refreshPanelCounts, projectHasActiveFindings } = usePanel();
 const selectedTarget = ref<Target | null>(null);
 const showReportModal = ref(false);
 const notesButton = ref();
@@ -173,7 +173,7 @@ const config: CrudConfig<Target> = reactive({
   canCreate: userStore.is_auditor,
   canDelete: userStore.is_auditor,
   customDropdownActions: (target: Target) => [
-    ...(target?.tasks.length > 0
+    ...(target?.tasks.length > 0 && projectHasActiveFindings.value
       ? [
           {
             label: "Generate a report",

@@ -24,7 +24,7 @@
         />
         <UDropdownMenu
           :items="[
-            ...(target?.tasks.length > 0
+            ...(target?.tasks.length > 0 && projectHasActiveFindings
               ? [
                   {
                     label: 'Generate a report',
@@ -177,6 +177,7 @@ import { useIntegrationsStore } from "~/store/integrations";
 const userStore = useUserStore();
 const integrations = useIntegrationsStore();
 const { showDefectDojo } = useCurrentProject();
+const { projectHasActiveFindings } = usePanel();
 const route = useRoute();
 const targetId = route.params.target_id
   ? parseInt(route.params.target_id)
