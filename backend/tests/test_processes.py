@@ -35,7 +35,7 @@ class ProcessTest(ApiTestNoData, TestCase):
         PostApiTestCase(
             ["admin1"],
             data=process1,
-            expected={"id": 8, **process1, "owner": {"id": 1, "username": "admin1"}, "liked": False, "likes": 0},
+            expected={"id": 8, **process1, "owner": {"id": 1, "username": "admin1"}},
         ),
         PostApiTestCase([Role.ADMIN, Role.AUDITOR], 400, process1),
         ApiTestCase(
@@ -47,7 +47,7 @@ class ProcessTest(ApiTestNoData, TestCase):
         PostApiTestCase(
             ["auditor1"],
             data=process2,
-            expected={"id": 9, **process2, "owner": {"id": 3, "username": "auditor1"}, "liked": False, "likes": 0},
+            expected={"id": 9, **process2, "owner": {"id": 3, "username": "auditor1"}},
         ),
         PostApiTestCase([Role.ADMIN, Role.AUDITOR], 400, process2),
         ApiTestCase(
