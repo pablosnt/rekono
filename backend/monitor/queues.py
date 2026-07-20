@@ -9,7 +9,7 @@ from typing import Any
 
 from django.utils import timezone
 from django_rq import job
-from rq.job import Job
+from rq.job import Job, JobStatus
 
 from framework.queues import BaseQueue
 from monitor.models import MonitorSettings
@@ -35,15 +35,25 @@ class MonitorQueue(BaseQueue):
         """Enqueue a monitoring job.
 
         Creates and schedules a monitoring job, updating the settings with
-        the new job ID for tracking.
+        the new job ID for tracking. If a scheduled monitoring job already
+        exists, no new job is enqueued to avoid running duplicated monitoring
+        loops at the same time.
 
         Args:
             **kwargs (Any): Additional keyword arguments for job configuration
 
         Returns:
-            Job: The created RQ job instance
+            Job: The created RQ job instance, or the existing scheduled one
         """
         settings = MonitorSettings.objects.first()
+        if settings.rq_job_id:
+            existing = self.fetch_job(settings.rq_job_id)
+            if existing and existing.get_status() in [JobStatus.QUEUED, JobStatus.SCHEDULED, JobStatus.STARTED]:
+                self.logger.info(f"[Monitor] A monitor job with ID {existing.id} already exists")
+                return existing
+            # The tracked job ID is no longer available
+            settings.rq_job_id = None
+            settings.save(update_fields=["rq_job_id"])
         job = self.queue.enqueue(self.consume, on_success=self._scheduled_callback)
         self.logger.info("[Monitor] Monitor job has been enqueued")
         settings.rq_job_id = job.id
