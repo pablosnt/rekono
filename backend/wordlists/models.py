@@ -59,7 +59,7 @@ class Wordlist(BaseInput, BaseLike):
     _filters = [BaseInput.Filter(type=WordlistType, field="type")]
     _parse_mapping = {InputKeyword.WORDLIST: "path"}
 
-    def filter(self, input: Any, target: Target | None = None) -> bool:
+    def filter(self, argument_input: Any, target: Target | None = None) -> bool:
         """Filter wordlist availability based on file existence and integrity.
 
         Validates that the wordlist file exists on the file system and, if a checksum
@@ -67,7 +67,7 @@ class Wordlist(BaseInput, BaseLike):
         are used by security tools during execution.
 
         Args:
-            input (Any): Input configuration for filtering
+            argument_input (Any): Input configuration for filtering
             target (Target | None): Target object for context-specific filtering
 
         Returns:
@@ -76,8 +76,8 @@ class Wordlist(BaseInput, BaseLike):
         check = Path(self.path).is_file()  # Check if wordlist file exists
         if check and self.checksum:  # If checksum exists, verifies it
             check = check and FileHandler().validate_filepath_checksum(self.path, self.checksum)
-        if input.filter:
-            return super().filter(input, target) and check
+        if argument_input.filter:
+            return super().filter(argument_input, target) and check
         return check
 
     def __str__(self) -> str:

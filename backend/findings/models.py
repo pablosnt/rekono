@@ -347,20 +347,20 @@ class Path(Finding):
                 value += "/"
         return value
 
-    def filter(self, input: Any, target: Target | None = None) -> bool:
+    def filter(self, argument_input: Any, target: Target | None = None) -> bool:
         """Filter paths against target port path restrictions.
 
         Applies additional filtering for paths within target port scope
         when target port paths are configured.
 
         Args:
-            input (Any): Filter criteria to match against.
+            argument_input (Any): Filter criteria to match against.
             target (Target | None): Target context for scope validation.
 
         Returns:
             bool: True if path matches criteria and scope restrictions.
         """
-        filter = super().filter(input, target)
+        filter = super().filter(argument_input, target)
         if self.port:
             target_port = TargetPort.objects.filter(target=target, port=self.port.port).first()
             if target_port and target_port.path:
