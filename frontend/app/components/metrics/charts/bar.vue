@@ -33,11 +33,13 @@
           :type="isVertical ? 'x' : 'y'"
           :tick-format="categoryTickFormat"
           :tick-values="categoryTickValues"
+          :grid-line="false"
         />
         <VisAxis
           :type="isVertical ? 'y' : 'x'"
           :tick-format="formatCount"
-          :tick-values="countTickValues"
+          :grid-line="false"
+          tick-text-hide-overlapping
         />
         <VisTooltip v-if="tooltip" :triggers="tooltipTriggers" />
       </VisXYContainer>
@@ -93,9 +95,6 @@ const maxTotal = computed(() =>
       props.series.reduce((sum, s) => sum + (s.y(d) || 0), 0),
     ),
   ),
-);
-const countTickValues = computed(() =>
-  Array.from({ length: maxTotal.value + 1 }, (_, i) => i),
 );
 const categoryTickValues = computed(() => props.data.map((_, i) => i));
 const categoryTickFormat = (pos: number) =>

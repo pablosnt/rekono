@@ -30,9 +30,9 @@
       <VisAxis type="x" :tick-format="formatMonth" :tick-values="tickValues" />
       <VisAxis
         type="y"
-        :num-ticks="4"
         :tick-format="formatCount"
         :grid-line="false"
+        tick-text-hide-overlapping
       />
       <VisCrosshair :color="colors" :template="tooltip" />
       <VisTooltip />
