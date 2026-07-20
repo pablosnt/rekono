@@ -50,7 +50,7 @@ class BaseCommand(CommandHandler, BaseTelegramBot, LoggingEntity):
             None | int: Command result or conversation state.
         """
         try:
-            # Propagate the return value not to break conversations flow 
+            # Propagate the return value not to break conversations flow
             return await self._execute_command(update, context)
         except Exception:
             pass

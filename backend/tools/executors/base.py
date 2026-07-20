@@ -459,17 +459,23 @@ class BaseExecutor(LoggingEntity):
         command = " ".join(self.arguments)
         # Hide the internal reports directory
         if self.report:
-            command = command.replace(str(self.report), f"output.{self.execution.configuration.tool.output_format or "txt"}") 
+            command = command.replace(
+                str(self.report), f"output.{self.execution.configuration.tool.output_format or 'txt'}"
+            )
         # Hide wordlist absolute paths
         for wordlist in wordlists:
             command = command.replace(wordlist.path, Path(wordlist.path).name)
         # Hide scripts absolute path
         if self.execution.configuration.tool.script and self.execution.configuration.tool.script_directory_property:
-            command = command.replace(str(Path(getattr(CONFIG, self.execution.configuration.tool.script_directory_property.lower())) / self.execution.configuration.tool.script), self.execution.configuration.tool.script)
+            command = command.replace(
+                str(
+                    Path(getattr(CONFIG, self.execution.configuration.tool.script_directory_property.lower()))
+                    / self.execution.configuration.tool.script
+                ),
+                self.execution.configuration.tool.script,
+            )
         # Hide every target's authentication secret
-        for authentication in Authentication.objects.filter(
-            target_port__target=self.execution.task.target
-        ).all():
+        for authentication in Authentication.objects.filter(target_port__target=self.execution.task.target).all():
             for value in (authentication.secret, authentication.token):
                 if value:
                     command = command.replace(value, "*" * len(value))

@@ -43,6 +43,7 @@ class TaskMixin(BaseMixin):
         self.validate_update(update)
         project = self.get_context_value(context, Context.PROJECT)
         target = self.get_context_value(context, Context.TARGET)
+        target_port = self.get_context_value(context, Context.TARGET_PORT)
         process = self.get_context_value(context, Context.PROCESS)
         tool = self.get_context_value(context, Context.TOOL)
         configuration = self.get_context_value(context, Context.CONFIGURATION)
@@ -68,6 +69,15 @@ The following task will be executed:
 
 💼 _Project_   *{self.escape(project.name)}*
 🎯 _Target_    *{self.escape(target.target)}*
+🔌 _Port_      *{
+                    (
+                        self.escape(
+                            f"{target_port.port} - {target_port.path}" if target_port.path else str(target_port.port)
+                        )
+                    )
+                    if target_port
+                    else "All ports"
+                }*
 {
                     f"🔄 _Process_   *{self.escape(process.name)}*"
                     if process
@@ -102,6 +112,7 @@ Are you sure?
         if chat and update.callback_query and update.callback_query.data:
             if update.callback_query.data == self.yes:
                 target = self.get_context_value(context, Context.TARGET)
+                target_port = self.get_context_value(context, Context.TARGET_PORT)
                 process = self.get_context_value(context, Context.PROCESS)
                 configuration = self.get_context_value(context, Context.CONFIGURATION)
                 wordlist = self.get_context_value(context, Context.WORDLIST)
@@ -115,6 +126,8 @@ Are you sure?
                     "input_technologies": [input_technology.id] if input_technology else [],
                     "input_vulnerabilities": [input_vulnerability.id] if input_vulnerability else [],
                 }
+                if target_port:
+                    data["target_port_id"] = target_port.id
                 if process:
                     data["process_id"] = process.id
                 elif configuration:

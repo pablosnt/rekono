@@ -115,9 +115,8 @@ class WordlistMixin(BaseMixin):
         if update.callback_query and update.callback_query.data and update.callback_query.data == self.default_wordlist:
             await update.callback_query.answer()
             return await self.go_to_next_state(update, context, self.get_next_state(self.save_wordlist))
-        else:
-            return await self.go_to_next_state(
-                update,
-                context,
-                await self.save(update, context, Context.WORDLIST, Wordlist, self.get_next_state(self.save_wordlist)),
-            )
+        return await self.go_to_next_state(
+            update,
+            context,
+            await self.save(update, context, Context.WORDLIST, Wordlist, self.get_next_state(self.save_wordlist)),
+        )

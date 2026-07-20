@@ -77,18 +77,17 @@ class AuthenticationMixin(BaseMixin):
             and update.callback_query.data == self.no_authentication
         ):
             return await self.go_to_next_state(update, context, self.get_next_state(self.create_authentication))
-        else:
-            return await self.go_to_next_state(
+        return await self.go_to_next_state(
+            update,
+            context,
+            await self.save_value(
                 update,
                 context,
-                await self.save_value(
-                    update,
-                    context,
-                    Context.AUTHENTICATION_TYPE,
-                    "AuthenticationType",
-                    self.get_next_state(self.save_authentication_type),
-                ),
-            )
+                Context.AUTHENTICATION_TYPE,
+                "AuthenticationType",
+                self.get_next_state(self.save_authentication_type),
+            ),
+        )
 
     async def ask_for_new_authentication(self, update: Update, context: CallbackContext) -> int:
         """Prompt user to input authentication credentials.
