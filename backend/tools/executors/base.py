@@ -16,6 +16,7 @@ from typing import Any
 from urllib.parse import urlparse
 
 from django.core.exceptions import ValidationError
+from django.db.models import Max, Min
 from django.forms.models import model_to_dict
 from django.utils import timezone
 
@@ -437,13 +438,21 @@ class BaseExecutor(LoggingEntity):
         """Handle execution start event.
 
         Updates execution status to RUNNING and sets start timestamp.
-        Also sets task start time if this is the first execution in the task.
+        Also refreshes the task start time to match the earliest execution start.
+
+        The task start is recomputed from an aggregate rather than a
+        "first writer sets it" check. Executions run as independent, possibly
+        parallel jobs, so that check races: a later-starting execution could
+        overwrite (or win over) an earlier one, leaving task.start later than
+        the earliest execution start and making the task duration appear shorter
+        than one of its own executions. The minimum is race-free by construction.
         """
         self.execution.status = Status.RUNNING
         self.execution.start = timezone.now()
         self.execution.save(update_fields=["start", "status"])
-        if not self.execution.task.start:
-            self.execution.task.start = timezone.now()
+        earliest = Execution.objects.filter(task=self.execution.task, start__isnull=False).order_by("start").first()
+        if earliest and earliest.id == self.execution.id:
+            self.execution.task.start = earliest.start
             self.execution.task.save(update_fields=["start"])
 
     def on_skip(self, reason: str) -> None:
@@ -501,7 +510,11 @@ class BaseExecutor(LoggingEntity):
         if not Execution.objects.filter(
             task=self.execution.task, status__in=[Status.REQUESTED, Status.RUNNING]
         ).exists():
-            self.execution.task.end = timezone.now()
+            end = timezone.now()
+            latest = Execution.objects.filter(task=self.execution.task, end__isnull=False).order_by("-end").first()
+            if latest and latest.id == self.execution.id:
+                end = latest.end
+            self.execution.task.end = end
             self.execution.task.save(update_fields=["end"])
             self.logger.info(f"[Task] Task {self.execution.task.id} has finished")
 
