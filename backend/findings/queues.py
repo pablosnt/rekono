@@ -183,7 +183,7 @@ class FindingsQueue(BaseQueue):
         # Lock RQ per target to avoid getting multiple workers processing the same findings at the same time
         with self.queue.connection.lock(f"findings:{execution.task.target.id}"):
             try:
-                FindingsQueue.consume(execution, findings)
+                FindingsQueue._consume(execution, findings)
             except Exception as ex:
                 self.logger.error(
                     f"[{self.__class__.__name__}] Error processing {len(findings)} findings from execution {execution.id}: {str(ex)}"
