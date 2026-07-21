@@ -41,6 +41,7 @@ dev = [
 ]
 
 [tool.uv]
+exclude-newer = "1 week"
 constraint-dependencies = [
     # Force a non-vulnerable version of a transitive dependency pulled by xhtml2pdf
     "pillow>=12.3.0",
