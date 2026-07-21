@@ -5,3 +5,6 @@ vulnerabilities:
   - id: CVE-2026-6357
     purls:
       - "pkg:pypi/pip@26.0"
+  - id: CVE-2026-8643
+    purls:
+      - "pkg:pypi/pip@26.0"

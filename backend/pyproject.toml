@@ -40,6 +40,12 @@ dev = [
     "tblib>=3.1.0",
 ]
 
+[tool.uv]
+constraint-dependencies = [
+    # Force a non-vulnerable version of a transitive dependency pulled by xhtml2pdf
+    "pillow>=12.3.0",
+]
+
 [tool.ruff]
 line-length = 120
 indent-width = 4
