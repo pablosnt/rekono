@@ -24,7 +24,8 @@
     "eslint-config-prettier": "^10.1.8",
     "globals": "^17.7.0",
     "prettier": "^3.9.5",
-    "typescript": "^7.0.2",
+    "rekono-email-templates": "link:",
+    "typescript": "^6.0.3",
     "typescript-eslint": "^8.64.0"
   }
 }
