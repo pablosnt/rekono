@@ -11,6 +11,7 @@ import re
 import socket
 from re import RegexFlag
 from typing import Any
+from django.db.models import F
 
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
@@ -131,7 +132,7 @@ class TargetValidator(RegexValidator, LoggingEntity):
                 denied_target = denied_value.target.lower()
                 # A malformed deny list entry must be ignored
                 if candidate == denied_target:
-                    denied_value.blocked += 1
+                    denied_value.blocked = F("blocked") + 1
                     denied_value.save(update_fields=["blocked"])
                     self.logger.warning(f"[Security] Target '{value}' is denied by policy")
                     raise ValidationError(self.message, code=self.code, params={"value": value})
@@ -140,7 +141,7 @@ class TargetValidator(RegexValidator, LoggingEntity):
                 except Exception:
                     regex_match = False
                 if regex_match:
-                    denied_value.blocked += 1
+                    denied_value.blocked = F("blocked") + 1
                     denied_value.save(update_fields=["blocked"])
                     self.logger.warning(f"[Security] Target '{value}' match the denied value {denied_value.target}")
                     raise ValidationError(self.message, code=self.code, params={"value": value})
@@ -155,7 +156,7 @@ class TargetValidator(RegexValidator, LoggingEntity):
                     except Exception:
                         network_match = False
                     if network_match:
-                        denied_value.blocked += 1
+                        denied_value.blocked = F("blocked") + 1
                         denied_value.save(update_fields=["blocked"])
                         self.logger.warning(
                             f"[Security] Target '{value}' belongs to the denied network {denied_value.target}"
