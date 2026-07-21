@@ -114,10 +114,7 @@ class InputVulnerability(InputParameter):
 
     cve = models.TextField(max_length=20, validators=[Validator(Regex.CVE, code="cve", deny_injections=True)])
 
-    _filters = [
-        BaseInput.Filter(type=str, field="cve", processor=lambda v: "cve"),
-        BaseInput.Filter(type=str, field="cve", processor=lambda v: v.lower()),
-    ]
+    _filters = [BaseInput.Filter(type=str, field="cve", contains=True, processor=lambda v: v.lower())]
     _parse_mapping = {InputKeyword.CVE: "cve"}
 
     def __str__(self) -> str:

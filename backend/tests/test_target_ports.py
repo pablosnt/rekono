@@ -8,6 +8,7 @@ from target_ports.models import TargetPort
 from tests.framework import ApiTest
 from tests.framework.cases import ApiTestCase, DeleteApiTestCase, PostApiTestCase
 from tests.framework.data import SetupProject
+from tools.models import Input
 
 # pytype: disable=wrong-arg-types
 
@@ -82,3 +83,19 @@ class TargetPortTest(ApiTest, TestCase):
     @cached_property
     def object(self) -> TargetPort:
         return TargetPort(target=self.target, port=80)
+
+    def test_base_input_filter(self) -> None:
+        port = TargetPort(port=80)
+        self.assertTrue(port.filter(Input(filter="80")))
+        self.assertFalse(port.filter(Input(filter="8080")))
+        # OR
+        self.assertTrue(port.filter(Input(filter="80 or 8080")))
+        # AND + Not applicable
+        self.assertTrue(port.filter(Input(filter="80 and http")))
+        # Negative
+        self.assertFalse(port.filter(Input(filter="!80")))
+        self.assertTrue(port.filter(Input(filter="!8080")))
+        # Not applicable
+        self.assertTrue(port.filter(Input(filter="http")))
+        self.assertTrue(port.filter(Input(filter="!http")))
+        self.assertTrue(port.filter(Input(filter="microsoft-ds or netbios-ssn")))

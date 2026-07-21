@@ -6,6 +6,7 @@ from tests.findings.base import FindingTest
 from tests.framework import ApiTest
 from tests.framework.cases import ApiTestCase
 from tests.framework.data import SetupProject
+from tools.models import Input
 
 # pytype: disable=wrong-arg-types,attribute-error
 
@@ -25,6 +26,22 @@ class VulnerabilityTest(FindingTest, TestCase):
     )
     sample_cve = "CVE-2025-9999"
     sample_name = "Already enriched finding"
+
+    def test_base_input_filter(self) -> None:
+        vulnerability = Vulnerability(cve="CVE-2021-44228")
+        self.assertTrue(vulnerability.filter(Input(filter="cve")))
+        self.assertTrue(vulnerability.filter(Input(filter="cve-2021-44228")))
+        self.assertFalse(vulnerability.filter(Input(filter="cve-1111-22222")))
+        # OR
+        self.assertTrue(vulnerability.filter(Input(filter="cve-1111-22222 or cve-2021-44228")))
+        # Negation
+        self.assertTrue(vulnerability.filter(Input(filter="!cve-1111-22222")))
+        self.assertFalse(vulnerability.filter(Input(filter="!cve-2021-44228")))
+        # Missing CVE
+        self.assertFalse(Vulnerability(cve=None).filter(Input(filter="cve")))
+        self.assertTrue(Vulnerability(cve=None).filter(Input(filter="!cve")))
+        # Empty filter
+        self.assertTrue(vulnerability.filter(Input(filter="")))
 
     def test_deduplication_by_name(self):
         first = Vulnerability.objects.create_finding(self.execution, technology=self.technology, name=self.sample_name)

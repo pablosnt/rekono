@@ -249,7 +249,9 @@ class BaseInput(BaseModel):
 
             Performs validation based on the filter configuration, supporting
             type conversion, negation, and custom processing. A missing value
-            (None) never passes the filter, even when the filter is negated.
+            (None) cannot positively match, but it satisfies a negated filter:
+            a value that is absent is "not" anything, so "!cve" matches a
+            finding that has no CVE.
 
             Args:
                 expected (str): The expected value to match against.
@@ -260,7 +262,8 @@ class BaseInput(BaseModel):
                 bool: True if the value passes the filter, False otherwise.
             """
             if value is None:
-                return False
+                # Negated filter is satisfied because an absent value is "not" anything
+                return is_negative
             # If a processor is defined, preprocess the value before filtering
             if self.processor:
                 value = self.processor(value)
@@ -294,6 +297,27 @@ class BaseInput(BaseModel):
             """
             conclusion = expected == value if not contains else expected in value
             return conclusion if not negative else not conclusion
+
+        def is_applicable(self, condition: str) -> bool:
+            """Whether this filter can evaluate the given condition token.
+
+            Applicability is derived from the filter's declared type so a condition
+            the filter cannot judge does not constrain the input, numeric tokens are
+            evaluated only by int filters, name-like tokens only by str filters, and
+            enum names only by the matching TextChoices filter. BaseInput.filter
+            skips filters that do not apply and trusts a condition no filter applies
+            to.
+
+            Args:
+                condition (str): A single filter condition, already stripped of "!".
+
+            Returns:
+                bool: True if this filter's type can evaluate the condition.
+            """
+            if issubclass(self.type, TextChoices):
+                return condition.strip().upper() in self.type.names
+            is_digit = condition.strip().isdigit()
+            return is_digit if self.type is int else not is_digit
 
     _filters: list[Filter] = []
     _parse_mapping: dict[InputKeyword, str | Callable | dict[str, str]] = {}
@@ -424,54 +448,42 @@ class BaseInput(BaseModel):
     def filter(self, argument_input: Any, target: Any = None) -> bool:
         """Apply complex filtering logic based on tool argument requirements.
 
-        Processes filter strings with AND/OR logic and negation support.
-        Supports complex conditions like "condition1 and condition2" or
-        "condition1 or condition2", and negative conditions prefixed with "!".
+        Processes filter strings with AND/OR logic and negation support, such as
+        "condition1 and condition2", "condition1 or condition2", and negative
+        conditions prefixed with "!". Each condition is evaluated only by the
+        filters that apply to it (see Filter.is_applicable). A condition that no filter
+        can evaluate does not constrain the input, so a model is never dropped by
+        a condition outside the types it tracks (for example a service name
+        against a target port that only knows its port number).
 
         Args:
             argument_input (Any): The tool argument input with filter configuration.
             target (Any): Optional target context for filtering (used in subclasses implementation).
 
         Returns:
-            bool: True if the input passes all filter conditions, False otherwise.
+            bool: True if the input passes the filter conditions, False otherwise.
         """
         if not argument_input.filter:
             return True
         # Determine the logical operator (AND/OR) and set processing mode
-        # This allows for complex conditions like "condition1 and condition2 or condition3"
-        if " or " in argument_input.filter:
-            operator = " or "
-            is_or = True
-        else:
-            operator = " and "
-            is_or = False
-        # Track overall conclusion - starts as True for AND operations
-        conclusion = True
+        # This allows for complex conditions like "condition1 and condition2" or "condition3 or condition4"
+        operator, is_or = (" or ", True) if " or " in argument_input.filter else (" and ", False)
+        conclusions = []
         # Process each condition in the filter string
-        for condition in argument_input.filter.split(operator):
+        for raw_condition in argument_input.filter.split(operator):
             # Handle negative conditions (prefixed with "!")
             # Example: "!admin" means "not admin"
-            is_negative = condition.startswith("!")
-            if is_negative:
-                condition = condition[1:]  # Remove the "!" prefix
-            # Track if any filter matches this condition
-            filter_conclusion = False
-            # Try each configured filter against this condition
-            for filter in self._filters:
-                # Each filter is responsible for checking if the condition matches
-                _conclusion = filter.filter(condition, getattr(self, filter.field), is_negative)
-                if _conclusion:
-                    # For OR operations: return immediately on first match
-                    # For AND operations: continue checking other filters
-                    if is_or:
-                        return True
-                    else:
-                        filter_conclusion = True
-                        break  # Found a match for this condition, move to next
-            # For AND operations: all conditions must be true
-            # For OR operations: at least one condition must be true (handled above)
-            conclusion = conclusion and filter_conclusion
-        return conclusion
+            is_negative = raw_condition.startswith("!")
+            condition = raw_condition[1:] if is_negative else raw_condition
+            applicable = [f for f in self._filters if f.is_applicable(condition)]
+            if not applicable:
+                # No filter can evaluate this condition, so it does not constrain the input
+                conclusions.append(True)
+            else:
+                # Check if any filter matches the condition
+                conclusions.append(any(f.filter(condition, getattr(self, f.field), is_negative) for f in applicable))
+        # Apply the boolean operator
+        return any(conclusions) if is_or else all(conclusions)
 
     def parse(self, task: Any, accumulated: dict[str, Any] = {}) -> dict[str, Any]:
         """Parse input data into a format suitable for tool execution.

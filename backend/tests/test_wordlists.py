@@ -6,6 +6,7 @@ from security.authorization.roles import Role
 from settings.models import Settings
 from tests.framework import ApiTestNoData
 from tests.framework.cases import ApiTestCase, DeleteApiTestCase, PostApiTestCase, PutApiTestCase
+from tools.models import Input
 from wordlists.enums import WordlistType
 from wordlists.models import Wordlist
 
@@ -156,6 +157,20 @@ class WordlistTest(ApiTestNoData, TestCase):
         super().tearDown()
         invalid_extension_path.unlink()
         invalid_size_path.unlink()
+
+    def test_base_input_filter(self) -> None:
+        wordlist = Wordlist(type=WordlistType.ENDPOINT, path=str(endpoints_path))
+        self.assertTrue(wordlist.filter(Input(filter="endpoint")))
+        self.assertFalse(wordlist.filter(Input(filter="subdomain")))
+        # OR
+        self.assertTrue(wordlist.filter(Input(filter="endpoint or subdomain")))
+        # Negation
+        self.assertTrue(wordlist.filter(Input(filter="!subdomain")))
+        self.assertFalse(wordlist.filter(Input(filter="!endpoint")))
+        # Empty filter
+        self.assertTrue(wordlist.filter(Input(filter="")))
+        # Not existing path
+        self.assertFalse(Wordlist(type=WordlistType.ENDPOINT, path="/does/not/exist").filter(Input(filter="endpoint")))
 
     @cached_property
     def object(self) -> Wordlist:

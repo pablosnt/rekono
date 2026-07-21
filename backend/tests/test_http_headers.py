@@ -7,6 +7,7 @@ from security.authorization.roles import Role
 from tests.framework import ApiTest
 from tests.framework.cases import ApiTestCase, DeleteApiTestCase, PostApiTestCase, PutApiTestCase
 from tests.framework.data import SetupProject
+from tools.models import Input
 
 # pytype: disable=wrong-arg-types
 
@@ -43,6 +44,19 @@ class HttpHeaderTest(ApiTest, TestCase):
         DeleteApiTestCase(["auditor1"], endpoint="1"),
         ApiTestCase(["admin1", "auditor1"], 404, endpoint="1"),
     ]
+
+    def test_base_input_filter(self) -> None:
+        header = HttpHeader(key="Authorization")
+        self.assertTrue(header.filter(Input(filter="authorization")))
+        self.assertFalse(header.filter(Input(filter="auth")))
+        self.assertFalse(header.filter(Input(filter="cookie")))
+        # OR
+        self.assertTrue(header.filter(Input(filter="cookie or authorization")))
+        # Negation
+        self.assertTrue(header.filter(Input(filter="!cookie")))
+        self.assertFalse(header.filter(Input(filter="!authorization")))
+        # Empty filter
+        self.assertTrue(header.filter(Input(filter="")))
 
     @cached_property
     def object(self) -> HttpHeader:

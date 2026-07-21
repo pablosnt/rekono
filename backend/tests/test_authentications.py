@@ -8,6 +8,7 @@ from authentications.models import Authentication
 from security.authorization.roles import Role
 from tests.framework import ApiTest
 from tests.framework.cases import ApiTestCase, DeleteApiTestCase, PostApiTestCase
+from tools.models import Input
 
 # pytype: disable=wrong-arg-types
 
@@ -55,6 +56,20 @@ class AuthenticationTest(ApiTest, TestCase):
         ApiTestCase([Role.ADMIN, Role.AUDITOR, Role.READER]),
         ApiTestCase([Role.ADMIN, Role.AUDITOR, Role.READER], 404, endpoint="2"),
     ]
+
+    def test_base_input_filter(self) -> None:
+        auth = Authentication(type=AuthenticationType.BASIC)
+        self.assertTrue(auth.filter(Input(filter="basic")))
+        self.assertFalse(auth.filter(Input(filter="bearer")))
+        # OR
+        self.assertTrue(auth.filter(Input(filter="basic or bearer")))
+        # Negation
+        self.assertTrue(auth.filter(Input(filter="!bearer")))
+        self.assertFalse(auth.filter(Input(filter="!basic")))
+        # Not applicable
+        self.assertTrue(auth.filter(Input(filter="whatever")))
+        # Empty filter
+        self.assertTrue(auth.filter(Input(filter="")))
 
     @cached_property
     def object(self) -> Authentication:

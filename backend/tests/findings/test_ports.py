@@ -3,6 +3,7 @@ from django.test import TestCase
 from findings.enums import PortStatus, Severity, TransportProtocol
 from findings.models import Port
 from tests.findings.base import FindingTest
+from tools.models import Input
 
 # pytype: disable=wrong-arg-types,attribute-error
 
@@ -16,6 +17,28 @@ class PortTest(FindingTest, TestCase):
         "severity": str(Severity.INFO),
     }
     expected_string = f"10.10.10.10 - 80 - {TransportProtocol.TCP.value}"
+
+    def test_base_input_filter(self) -> None:
+        port = Port(port=80, service="http")
+        # By port
+        self.assertTrue(port.filter(Input(filter="80")))
+        self.assertFalse(port.filter(Input(filter="443")))
+        # By service
+        self.assertTrue(port.filter(Input(filter="HTTP")))
+        self.assertTrue(port.filter(Input(filter="ttp")))
+        self.assertFalse(port.filter(Input(filter="ssh")))
+        # AND
+        self.assertTrue(port.filter(Input(filter="80 and http")))
+        self.assertFalse(port.filter(Input(filter="80 and ssh")))
+        # OR
+        self.assertTrue(port.filter(Input(filter="443 or http")))
+        self.assertFalse(port.filter(Input(filter="443 or ssh")))
+        # Negation
+        self.assertTrue(port.filter(Input(filter="!ssh")))
+        self.assertFalse(port.filter(Input(filter="!http")))
+        self.assertFalse(port.filter(Input(filter="!80")))
+        # Empty filter
+        self.assertTrue(port.filter(Input(filter="")))
 
     def test_deduplication(self):
         first = Port.objects.create_finding(

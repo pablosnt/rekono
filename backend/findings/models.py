@@ -593,11 +593,7 @@ class Vulnerability(TriageFinding):
     ]
     # Ordered by priority for deduplication: technology is a deeper root than port
     _root_findings = ("technology", "port")
-    _filters = [
-        Finding.Filter(Severity, "severity"),
-        Finding.Filter(str, "cve", contains=True, processor=lambda c: c.lower()),
-        Finding.Filter(str, "cwes", contains=True, processor=lambda cwes: " ".join(c.lower() for c in (cwes or []))),
-    ]
+    _filters = [Finding.Filter(str, "cve", contains=True, processor=lambda c: c.lower())]
     _parse_mapping = {InputKeyword.CVE: "cve"}
     _parse_dependencies = ["technology", "port"]
     _defectdojo_finding_mapping = {

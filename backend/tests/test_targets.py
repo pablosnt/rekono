@@ -8,6 +8,7 @@ from targets.models import Target
 from tests.framework import ApiTest
 from tests.framework.cases import ApiTestCase, DeleteApiTestCase, PostApiTestCase
 from tests.framework.data import SetupProject
+from tools.models import Input
 
 # pytype: disable=wrong-arg-types
 
@@ -57,6 +58,20 @@ class TargetTest(ApiTest, TestCase):
         ApiTestCase([Role.ADMIN, Role.AUDITOR, Role.READER]),
         ApiTestCase([Role.ADMIN, Role.AUDITOR, Role.READER], 404, endpoint="1"),
     ]
+
+    def test_base_input_filter(self) -> None:
+        target = Target(type=TargetType.DOMAIN)
+        self.assertTrue(target.filter(Input(filter="domain")))
+        self.assertFalse(target.filter(Input(filter="private_ip")))
+        # OR
+        self.assertTrue(target.filter(Input(filter="domain or private_ip")))
+        # Negation
+        self.assertTrue(target.filter(Input(filter="!private_ip")))
+        self.assertFalse(target.filter(Input(filter="!domain")))
+        # Not applicable
+        self.assertTrue(target.filter(Input(filter="anything")))
+        # Empty filter
+        self.assertTrue(target.filter(Input(filter="")))
 
     @cached_property
     def object(self) -> Target:

@@ -6,6 +6,7 @@ from tests.findings.base import FindingTest
 from tests.framework import ApiTest
 from tests.framework.cases import ApiTestCase
 from tests.framework.data import SetupProject
+from tools.models import Input
 
 # pytype: disable=wrong-arg-types,attribute-error
 
@@ -19,6 +20,21 @@ class HostTest(FindingTest, TestCase):
         "severity": str(Severity.INFO),
     }
     expected_string = "10.10.10.10"
+
+    def test_base_input_filter(self) -> None:
+        self.assertTrue(Host(ip="10.10.10.10").filter(Input(filter="private_ip")))
+        self.assertTrue(Host(ip="8.8.8.8").filter(Input(filter="public_ip")))
+        self.assertFalse(Host(ip="10.10.10.10").filter(Input(filter="public_ip")))
+        # OR
+        self.assertTrue(Host(ip="10.10.10.10").filter(Input(filter="private_ip or public_ip")))
+        # Negation
+        self.assertTrue(Host(ip="10.10.10.10").filter(Input(filter="!public_ip")))
+        self.assertFalse(Host(ip="10.10.10.10").filter(Input(filter="!private_ip")))
+        self.assertTrue(Host(ip="10.10.10.10").filter(Input(filter="!public_ip and !domain")))
+        # Not applicable
+        self.assertTrue(Host(ip="10.10.10.10").filter(Input(filter="whatever")))
+        # Empty filter
+        self.assertTrue(Host(ip="10.10.10.10").filter(Input(filter="")))
 
     def test_deduplication(self):
         first = Host.objects.create_finding(self.execution, ip="10.10.10.60", os="Windows Server 2022")
