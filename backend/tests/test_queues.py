@@ -2,8 +2,10 @@ import copy
 from datetime import timedelta
 from unittest import mock
 
+from django.core.exceptions import ValidationError
 from django.test import TestCase
 from django.utils import timezone
+from rq.registry import ScheduledJobRegistry
 
 from executions.enums import Status
 from executions.models import Execution
@@ -17,6 +19,7 @@ from targets.enums import TargetType
 from targets.models import Target
 from tasks.enums import TimeUnit
 from tasks.models import Task
+from tasks.queues import PlanJob, TasksQueue
 from tests.framework import QueueTest
 from tests.framework.data import SetupProject
 from tools.enums import Intensity as IntensityEnum
@@ -175,6 +178,30 @@ class TasksQueueTest(QueueTest, TestCase):
         new_task = Task.objects.exclude(pk__in=existing_ids | {task.pk}).get()
         self.assertEqual(enqueued_at + timedelta(hours=2), new_task.scheduled_at)
         self.assertIsNotNone(new_task.rq_job_id)
+        # Clear enqueued task
+        ScheduledJobRegistry(queue=self.queue.queue).remove(new_task.rq_job_id, delete_job=True)
+
+    @mock.patch("tasks.queues.ExecutionsQueue.enqueue")
+    def test_consume_tool_task(self, enqueue_mock: mock.MagicMock) -> None:
+        task = Task.objects.create(target=self.target, configuration=Configuration.objects.get(tool__id=1, default=True), intensity=IntensityEnum.INSANE)
+        task.wordlists.add(self.wordlist)
+        self.assertEqual(task.id, TasksQueue.consume(task).id)
+        self.assertTrue(Execution.objects.filter(task=task).exists())
+
+    @mock.patch("tasks.queues.ExecutionsQueue.enqueue")
+    def test_consume_process_task(self, enqueue_mock: mock.MagicMock) -> None:
+        task = Task.objects.create(
+            target=self.target, process=Process.objects.get(pk=1), intensity=IntensityEnum.INSANE
+        )
+        task.wordlists.add(self.wordlist)
+        self.assertEqual(task.id, TasksQueue.consume(task).id)
+        self.assertTrue(Execution.objects.filter(task=task).exists())
+
+    def test_consume_task_for_denied_target(self) -> None:
+        task = Task.objects.create(target=self.target, configuration=self.configuration)
+        with mock.patch("tasks.queues.TargetValidator.__call__", side_effect=ValidationError("denied")):
+            self.assertIsNone(TasksQueue.consume(task))
+        self.assertFalse(Task.objects.filter(pk=task.id).exists())
 
     def test_get_scoped_target_ports_without_task_target_port(self) -> None:
         TargetPort.objects.create(target=self.target, port=8080, path=None)

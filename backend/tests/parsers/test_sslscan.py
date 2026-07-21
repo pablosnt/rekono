@@ -9,6 +9,7 @@ from tests.framework.cases import ParserTestCase
 class SslscanTest(ParserTest, TestCase):
     tool_name = "Sslscan"
     cases = [
+        ParserTestCase("empty.xml", []),
         ParserTestCase(
             "protocols.xml",
             [

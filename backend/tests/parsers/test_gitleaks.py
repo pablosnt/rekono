@@ -8,6 +8,7 @@ from tests.framework.cases import ParserTestCase
 class GitleaksTest(ParserTest, TestCase):
     tool_name = "GitLeaks"
     cases = [
+        ParserTestCase("empty.json", []),
         ParserTestCase(
             "leaky-repo.json",
             [
@@ -48,5 +49,5 @@ class GitleaksTest(ParserTest, TestCase):
                     "context": "/.git/ : misc-keys/cert-key.pem -> Line 1",
                 },
             ],
-        )
+        ),
     ]

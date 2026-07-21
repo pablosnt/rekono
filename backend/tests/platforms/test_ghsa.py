@@ -105,3 +105,23 @@ class GhsaTest(BaseTest, TestCase):
     def test_is_not_available(self) -> None:
         self.assertFalse(self.ghsa.is_available())
         self.assertIsNone(self.ghsa.get_cve(self.vulnerability.cve))
+
+    def test_no_data(self) -> None:
+        self.assertIsNone(self.ghsa._parse_cve("CVE-2021-44228", {}))
+
+    def test_parse_cve_skips_zero_cvss_score(self) -> None:
+        enrichment = self.ghsa._parse_cve(
+            "CVE-2021-44228",
+            [
+                {
+                    **data,
+                    "cvss_severities": {
+                        # Version 4 has no score, so it must be skipped in favor of version 3
+                        "cvss_v4": {"score": 0, "vector_string": ""},
+                        "cvss_v3": {"score": 10.0, "vector_string": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H"},
+                    },
+                }
+            ],
+        )
+        self.assertEqual(10.0, enrichment.cvss_base_score)
+        self.assertEqual("3.1", enrichment.cvss_version)

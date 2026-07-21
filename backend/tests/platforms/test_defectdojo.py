@@ -20,6 +20,10 @@ def return_true(*args: Any, **kwargs: Any) -> bool:
     return True
 
 
+def return_false(*args: Any, **kwargs: Any) -> bool:
+    return False
+
+
 def return_id(*args: Any, **kwargs: Any) -> dict[str, int]:
     return {"id": 1}
 
@@ -52,6 +56,14 @@ def get_engagement_other_product(*args: Any, **kwargs: Any) -> tuple[dict[str, A
 
 def exception(*args: Any, **kwargs: Any) -> Any:
     raise Exception("Test")
+
+
+def missing(*args: Any, **kwargs: Any) -> tuple[None, bool]:
+    return None, False
+
+
+def product_exists_but_engagement_missing(*args: Any, **kwargs: Any) -> tuple[dict[str, Any] | None, bool]:
+    return ({"id": args[-1]}, True) if args[1] == "products" else missing()
 
 
 sync = {"project": 1, "product_id": 1, "engagement_id": 1}
@@ -173,6 +185,20 @@ class DefectDojoSyncTest(ApiTest, TestCase):
     @mock.patch("platforms.defectdojo.integrations.DefectDojo.is_available", return_true)
     @mock.patch("platforms.defectdojo.integrations.DefectDojo.exists", get_engagement_other_product)
     def test_engagement_from_another_product_is_rejected(self) -> None:
+        PostApiTestCase(["admin1"], 400, data=sync).test_case(0, self, self.endpoint)
+
+    @mock.patch("platforms.defectdojo.integrations.DefectDojo.is_available", return_false)
+    def test_not_available_is_rejected(self) -> None:
+        PostApiTestCase(["admin1"], 400, data=sync).test_case(0, self, self.endpoint)
+
+    @mock.patch("platforms.defectdojo.integrations.DefectDojo.is_available", return_true)
+    @mock.patch("platforms.defectdojo.integrations.DefectDojo.exists", missing)
+    def test_missing_product_is_rejected(self) -> None:
+        PostApiTestCase(["admin1"], 400, data=sync).test_case(0, self, self.endpoint)
+
+    @mock.patch("platforms.defectdojo.integrations.DefectDojo.is_available", return_true)
+    @mock.patch("platforms.defectdojo.integrations.DefectDojo.exists", product_exists_but_engagement_missing)
+    def test_missing_engagement_is_rejected(self) -> None:
         PostApiTestCase(["admin1"], 400, data=sync).test_case(0, self, self.endpoint)
 
     @cached_property

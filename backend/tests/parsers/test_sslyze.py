@@ -9,6 +9,7 @@ from tests.framework.cases import ParserTestCase
 class SslyzeTest(ParserTest, TestCase):
     tool_name = "SSLyze"
     cases = [
+        ParserTestCase("empty.json", []),
         ParserTestCase(
             "protocols.json",
             [

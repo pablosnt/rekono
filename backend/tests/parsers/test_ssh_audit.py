@@ -9,6 +9,7 @@ from tests.framework.cases import ParserTestCase
 class SshauditTest(ParserTest, TestCase):
     tool_name = "SSH Audit"
     cases = [
+        ParserTestCase("empty.json", []),
         ParserTestCase(
             "libssh.json",
             [
@@ -120,5 +121,5 @@ class SshauditTest(ParserTest, TestCase):
                 },
                 {"model": Vulnerability, "name": "CVE-2023-48795", "cve": "CVE-2023-48795"},
             ],
-        )
+        ),
     ]

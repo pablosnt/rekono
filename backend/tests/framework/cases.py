@@ -136,12 +136,11 @@ class ParserTestCase(RekonoTestCase):
         executor = test_case.execution.configuration.tool.executor_class(test_case.execution)
         executor.authentication = test_case.authentication
         executor.arguments = test_case.arguments
-        report = (
-            test_case.data_dir
-            / "reports"
-            / test_case.execution.configuration.tool.name.lower().replace(" ", "_")
-            / self.report
-        )
+        report = test_case.data_dir / "reports"
+        if self.report.startswith("empty."):
+            report = report / self.report
+        else:
+            report = report / test_case.execution.configuration.tool.name.lower().replace(" ", "_") / self.report
         if test_case.execution.configuration.tool.output_format:
             executor.report = report
             output = None

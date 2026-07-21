@@ -96,3 +96,6 @@ class EuvdTest(BaseTest, TestCase):
     def test_is_not_available(self) -> None:
         self.assertFalse(self.euvd.is_available())
         self.assertIsNone(self.euvd.get_cve(_CVE))
+
+    def test_no_data(self) -> None:
+        self.assertIsNone(self.euvd._parse_cve(_CVE, []))

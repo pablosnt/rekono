@@ -96,3 +96,21 @@ class OsvTest(BaseTest, TestCase):
     def test_is_not_available(self) -> None:
         self.assertFalse(self.osv.is_available())
         self.assertIsNone(self.osv.get_cve(self.vulnerability.cve))
+
+    def test_no_data(self) -> None:
+        self.assertIsNone(self.osv._parse_cve(data["id"], []))
+
+    def test_parse_cve_edge_cases(self) -> None:
+        enrichment = self.osv._parse_cve(
+            data["id"],
+            {
+                "id": data["id"],
+                "summary": "test",
+                "details": "test",
+                "severity": [{"type": "CVSS_V3", "score": "invalid-vector"}],
+                # Affected package without purl/name but with versions
+                "affected": [{"versions": ["1.0", "2.0"]}],
+            },
+        )
+        self.assertIsNone(enrichment.cvss_base_score)
+        self.assertEqual(["1.0", "2.0"], enrichment.technologies)

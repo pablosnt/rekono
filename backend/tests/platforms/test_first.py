@@ -22,6 +22,10 @@ def _mock_not_found(*args: Any, **kwargs: Any) -> dict[str, Any]:
     return {"status": "OK", "data": []}
 
 
+def _mock_exception(*args: Any, **kwargs: Any) -> dict[str, Any]:
+    raise Exception("Test")
+
+
 class FirstTest(BaseTest, TestCase):
     data = [SetupProject()]
 
@@ -64,3 +68,21 @@ class FirstTest(BaseTest, TestCase):
     @mock.patch("platforms.first.First._request", _mock_success)
     def test_is_available(self) -> None:
         self.assertTrue(self.first.is_available())
+
+    @mock.patch("platforms.first.First._request", _mock_exception)
+    def test_is_not_available(self) -> None:
+        self.assertFalse(self.first.is_available())
+
+    @mock.patch("platforms.first.First.is_enabled", lambda self: False)
+    def test_monitor_disabled(self) -> None:
+        self.first.monitor()
+        vuln = Vulnerability.objects.get(pk=self.vulnerability.pk)
+        self.assertIsNone(vuln.epss_score)
+        self.assertIsNone(vuln.epss_percentile)
+
+    @mock.patch("platforms.first.First._request", _mock_exception)
+    def test_monitor_exception_handling(self) -> None:
+        self.first.monitor()
+        vuln = Vulnerability.objects.get(pk=self.vulnerability.pk)
+        self.assertIsNone(vuln.epss_score)
+        self.assertIsNone(vuln.epss_percentile)
