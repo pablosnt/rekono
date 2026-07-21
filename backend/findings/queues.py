@@ -73,7 +73,9 @@ class FindingsQueue(BaseQueue):
 
         Executes complete findings processing pipeline including external
         platform integrations, alert notifications, and automatic fixing
-        based on system settings and project configuration.
+        based on system settings and project configuration. Processing is
+        serialized per target so multiple workers never process findings for
+        the same target at the same time.
 
         Processing Steps:
             - CVE enrichment via multiple providers with quality-score selection

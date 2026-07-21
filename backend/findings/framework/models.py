@@ -140,7 +140,9 @@ class FindingManager(Manager):
 
         Reuses the existing finding returned by ``self.model._find_duplicate`` or creates a new one.
         A detected finding completes the one it matched (``_merge``); a user-provided finding attaches
-        without modifying it. The finding is always associated with the current execution.
+        without modifying it. The finding is always associated with the current execution. Runs inside
+        a transaction that locks the task's target row, so two concurrent executions on the same target
+        cannot create the same finding at once.
 
         Args:
             execution (Execution): The execution context for this finding.
@@ -237,6 +239,15 @@ class Finding(BaseInput):
     _defectdojo_endpoint_mapping: dict[str, Any | Callable] = {}
 
     class Meta:
+        """Django Meta class configuration for Finding.
+
+        Configures Finding as an abstract base class shared by all finding types
+        without creating its own database table.
+
+        Attributes:
+            abstract (bool): Marks this model as abstract (no database table).
+        """
+
         abstract = True
 
     @dataclass
@@ -407,6 +418,15 @@ class HacktricksFinding(Finding):
     hacktricks_link = TextField(max_length=300, blank=True, null=True)
 
     class Meta:
+        """Django Meta class configuration for HacktricksFinding.
+
+        Configures HacktricksFinding as an abstract base class for findings that
+        carry a HackTricks documentation link, without creating its own database table.
+
+        Attributes:
+            abstract (bool): Marks this model as abstract (no database table).
+        """
+
         abstract = True
 
 
@@ -432,4 +452,13 @@ class TriageFinding(Finding):
     triage_by = ForeignKey(AUTH_USER_MODEL, related_name="triaged_%(class)s", on_delete=SET_NULL, blank=True, null=True)
 
     class Meta:
+        """Django Meta class configuration for TriageFinding.
+
+        Configures TriageFinding as an abstract base class for findings that
+        support the triage workflow, without creating its own database table.
+
+        Attributes:
+            abstract (bool): Marks this model as abstract (no database table).
+        """
+
         abstract = True

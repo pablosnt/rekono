@@ -437,18 +437,8 @@ class BaseExecutor(LoggingEntity):
         """Build an anonymized string of the command that was executed.
 
         Reconstructs the command line from the finalized arguments and removes
-        sensitive information so it can be safely persisted and shown to users.
-        Replacements are applied as substring substitutions on the joined command,
-        so a value that is not present in the command is simply a no-op:
-
-        - Output path is replaced with ``output.<output_format>`` to avoid
-          disclosing the internal reports directory structure.
-        - Each wordlist path is replaced with its name, hiding the filesystem path.
-        - The script path is replaced with its filename, hiding the scripts directory.
-        - Every authentication secret reachable from the target (both the stored
-          secret and its derived token) is replaced with a same-length mask of
-          asterisks, so credentials are never persisted, even when they also
-          appear inside header values.
+        sensitive information (the internal report path, wordlist and script paths,
+        and authentication secrets) so it can be safely persisted and shown to users.
 
         Args:
             wordlists (list[Wordlist]): Wordlists used to generate the command
@@ -478,16 +468,10 @@ class BaseExecutor(LoggingEntity):
     def mask_sensitive_data(self, command: str) -> str:
         """Mask every authentication secret reachable from the target in a command line.
 
-        Both the stored secret and its derived token, for all authentications
-        configured on the target's ports, are replaced with a same-length mask of
-        asterisks. Replacements are applied as substring substitutions, so a value
-        that is not present in the command is simply a no-op, and credentials are
-        hidden even when they appear embedded inside other values (e.g. header
-        values or Basic auth tokens).
-
-        This is kept as an independent method so it can be reused anywhere the
-        command line is exposed (persisted, logged, or displayed) to avoid leaking
-        credentials into Rekono logs or the database.
+        Replaces both the stored secret and its derived token, for all authentications
+        configured on the target's ports, with a same-length mask of asterisks. Secrets
+        are masked even when embedded inside other values, such as header values or Basic
+        auth tokens.
 
         Args:
             command (str): The command line that may contain sensitive credentials
@@ -504,15 +488,9 @@ class BaseExecutor(LoggingEntity):
     def on_start(self) -> None:
         """Handle execution start event.
 
-        Updates execution status to RUNNING and sets start timestamp.
-        Also refreshes the task start time to match the earliest execution start.
-
-        The task start is recomputed from an aggregate rather than a
-        "first writer sets it" check. Executions run as independent, possibly
-        parallel jobs, so that check races: a later-starting execution could
-        overwrite (or win over) an earlier one, leaving task.start later than
-        the earliest execution start and making the task duration appear shorter
-        than one of its own executions. The minimum is race-free by construction.
+        Updates execution status to RUNNING and sets the start timestamp. Sets the
+        task start to the earliest start among its executions, so parallel executions
+        can't leave the task starting later than one of its own executions.
         """
         self.execution.status = Status.RUNNING
         self.execution.start = timezone.now()
@@ -572,7 +550,9 @@ class BaseExecutor(LoggingEntity):
         """Check and handle task completion.
 
         Determines if the task is complete by checking if any executions
-        are still running or requested. Sets task end timestamp when complete.
+        are still running or requested. When complete, the task end is anchored
+        to the latest execution end rather than the current time, so the task
+        duration never ends before its last execution finished.
         """
         if not Execution.objects.filter(
             task=self.execution.task, status__in=[Status.REQUESTED, Status.RUNNING]

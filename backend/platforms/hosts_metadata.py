@@ -14,6 +14,7 @@ from framework.platforms import BaseIntegration
 from targets.enums import TargetType
 from targets.models import Target
 
+# geocoder emits SyntaxWarnings on import, so they are silenced before importing it
 warnings.filterwarnings("ignore", category=SyntaxWarning, module=r".*geocoder.*")
 
 import geocoder  # noqa: E402

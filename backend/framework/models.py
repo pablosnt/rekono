@@ -299,14 +299,12 @@ class BaseInput(BaseModel):
             return conclusion if not negative else not conclusion
 
         def is_applicable(self, condition: str) -> bool:
-            """Whether this filter can evaluate the given condition token.
+            """Whether this filter's type can evaluate the given condition token.
 
-            Applicability is derived from the filter's declared type so a condition
-            the filter cannot judge does not constrain the input, numeric tokens are
-            evaluated only by int filters, name-like tokens only by str filters, and
-            enum names only by the matching TextChoices filter. BaseInput.filter
-            skips filters that do not apply and trusts a condition no filter applies
-            to.
+            An int filter evaluates only numeric tokens, a str filter only
+            non-numeric tokens, and a TextChoices filter only its own enum names.
+            BaseInput.filter uses this to skip filters that can't judge a condition,
+            so a condition outside the types a model tracks never drops it.
 
             Args:
                 condition (str): A single filter condition, already stripped of "!".
@@ -379,21 +377,20 @@ class BaseInput(BaseModel):
 
         Attempts to construct a valid URL by testing different protocols and
         validating connectivity. When no specific port is given, the ports to
-        probe are taken from the task's scope if a task is provided, otherwise
-        from the target's ports, otherwise from common web ports. Each
-        protocol/port combination's reachability is looked up in _url_cache
-        before issuing a request, and the result is cached afterwards, so
-        repeated calls for the same URL (e.g. across multiple tool arguments)
-        don't repeat the same HTTP request.
+        probe come from the task's scoped target ports if a task is provided,
+        otherwise from common web ports. Each protocol/port combination's
+        reachability is looked up in _url_cache before issuing a request, and
+        the result is cached afterwards, so repeated calls for the same URL
+        (e.g. across multiple tool arguments) don't repeat the same HTTP request.
 
         Args:
             host (str): The hostname or IP address.
             port (int | None): The port number (optional). When set, only this
-                               port is probed and task/target are ignored.
+                               port is probed and the task scope is ignored.
             endpoint (str | None): The endpoint path (optional).
             protocols (list[str]): List of protocols to test (default: ["http", "https"]).
-            task (Any): Task whose scoped target ports restrict probing when no
-                        explicit port is given (preferred over target).
+            task (Any): Task whose scoped target ports are probed when no explicit
+                        port is given.
 
         Returns:
             str | None: A valid URL string or None if no working URL found.

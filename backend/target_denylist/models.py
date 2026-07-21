@@ -21,6 +21,7 @@ class TargetDenylist(BaseModel):
     Attributes:
         target (TextField): The target pattern to exclude (max 100 characters)
         default (BooleanField): Whether this is a default system entry (read-only)
+        blocked (IntegerField): Number of times this entry has denied a target (read-only)
 
     Example:
         Create a custom denylist entry:

@@ -174,7 +174,9 @@ class ExecutionsQueue(BaseScanQueue):
         """Get findings from job dependencies and create new executions.
 
         Processes job dependencies to extract findings and create new executions
-        for tool chaining workflows based on dependency results.
+        for tool chaining workflows based on dependency results. The execution
+        graph is recreated under a per-task lock so concurrent dependency jobs
+        don't race while rewiring pending jobs with the new dependencies.
 
         Args:
             executor (BaseExecutor): The executor instance

@@ -222,8 +222,8 @@ class Tool(
     """Conversation for executing individual security tools.
 
     Provides a comprehensive workflow for configuring and executing security
-    tools including target selection, tool configuration, intensity settings,
-    wordlist selection, and input parameter configuration.
+    tools including target selection, target port selection, tool configuration,
+    intensity settings, wordlist selection, and input parameter configuration.
 
     Attributes:
         help (str): Command help text displayed in command list.
@@ -272,8 +272,9 @@ class Process(
     """Conversation for executing security testing processes.
 
     Provides a workflow for configuring and executing predefined security
-    testing processes including process selection, intensity configuration,
-    and wordlist selection for automated security assessments.
+    testing processes including target port selection, process selection,
+    intensity configuration, and wordlist selection for automated security
+    assessments.
 
     Attributes:
         help (str): Command help text displayed in command list.

@@ -51,6 +51,15 @@ class ApiToken(Token, BaseModel):
     expiration = models.DateTimeField(blank=True, null=True, validators=[FutureDatetimeValidator(code="expiration")])
 
     class Meta:
+        """Meta configuration for the ApiToken model.
+
+        Defines database constraints and table-level configuration for API token instances.
+
+        Attributes:
+            constraints (list): Database constraints including unique constraint
+                              for name-user combinations
+        """
+
         constraints = [models.UniqueConstraint(fields=["name", "user"], name="unique_api_token")]
 
     @classmethod

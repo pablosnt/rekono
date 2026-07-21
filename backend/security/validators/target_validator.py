@@ -93,6 +93,8 @@ class TargetValidator(RegexValidator, LoggingEntity):
         forward-resolved while a single IP is reverse-resolved so the resolved
         values are checked against the deny list too. Resolution is skipped while
         testing to keep validation deterministic and free of network dependencies.
+        When an entry denies the target, its blocked counter is incremented to track
+        how often each deny list entry is enforced.
 
         Args:
             value (str | None): The target to validate (IP, domain, URL, etc.).

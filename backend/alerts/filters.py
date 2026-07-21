@@ -17,6 +17,13 @@ class AlertFilter(FilterSet):
     """
 
     class Meta:
+        """Meta configuration for the AlertFilter.
+
+        Attributes:
+            model (Model): The Alert model to filter
+            fields (dict): Field names and their supported filter operations
+        """
+
         model = Alert
         fields = {
             "project": ["exact"],

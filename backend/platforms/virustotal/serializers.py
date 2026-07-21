@@ -27,6 +27,14 @@ class VirusTotalSettingsSerializer(ModelSerializer):
     api_token = ProtectedSecretField(required=False, allow_null=True, source="secret")
 
     class Meta:
+        """Meta configuration for VirusTotalSettingsSerializer.
+
+        Attributes:
+            model (Model): The VirusTotalSettings model to serialize
+            fields (tuple): Field names to include in serialization
+            read_only_fields (tuple): Fields that cannot be modified via API
+        """
+
         model = VirusTotalSettings
         fields = ("id", "api_token", "is_available")
         read_only_fields = ("is_available",)

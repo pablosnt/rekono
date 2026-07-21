@@ -1,3 +1,9 @@
+"""Django application configuration for the reporting module.
+
+Registers the reporting application with Rekono's framework, wiring up report
+generation and delivery of security assessment results.
+"""
+
 from django.apps import AppConfig
 
 from framework.apps import BaseApp

@@ -79,6 +79,15 @@ class Alert(BaseModel):
     _project_field = "project"
 
     class Meta:
+        """Meta configuration for the Alert model.
+
+        Defines database constraints ensuring alert uniqueness per project, both
+        for value-specific alerts and for value-less ones.
+
+        Attributes:
+            constraints (list): Uniqueness constraints for project/item/value combinations
+        """
+
         constraints = [
             models.UniqueConstraint(
                 fields=["project", "item", "value"],
