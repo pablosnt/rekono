@@ -182,7 +182,7 @@
           <UIcon name="i-lucide-user" class="size-3 shrink-0" />
           {{ note.owner.username }}
         </span>
-        <span v-if="note.body.length > 0" class="flex items-center gap-1.5">
+        <span v-if="note.body?.length > 0" class="flex items-center gap-1.5">
           <UIcon name="i-lucide-file-text" class="size-3 shrink-0" />
           {{ note.body?.match(/[a-zA-Z0-9\u00C0-\u024F]+/g)?.length ?? 0 }}
           words

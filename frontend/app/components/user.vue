@@ -52,6 +52,6 @@ import { useTimeAgo } from "@vueuse/core";
 
 const props = defineProps<{ user: User }>();
 const userStore = useUserStore();
-const displayName = ref(getUserDisplayName(props.user));
-const truncatedName = ref(truncateText(displayName.value, 15));
+const displayName = computed(() => getUserDisplayName(props.user));
+const truncatedName = computed(() => truncateText(displayName.value, 15));
 </script>

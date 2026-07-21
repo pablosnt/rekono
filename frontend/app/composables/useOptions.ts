@@ -53,9 +53,6 @@ export default function () {
             })),
         ];
       })
-      .catch(() => {
-        optionsRef.value = [];
-      });
   }
 
   function tools(
