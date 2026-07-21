@@ -11,10 +11,10 @@ import re
 import socket
 from re import RegexFlag
 from typing import Any
-from django.db.models import F
 
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
+from django.db.models import F
 
 from framework.logging import LoggingEntity
 from rekono.settings import CONFIG

@@ -28,31 +28,29 @@ export default function () {
     optionsRef: Ref<FilterOption[]>,
     queryParams: Record<string, string> = {},
   ) {
-    api
-      .list("users/", queryParams, true)
-      .then((response) => {
-        if (optionsRef.value.length === 0) {
-          optionsRef.value = [
-            {
-              label: "Current user",
-              value: userStore.user,
-            },
-          ];
-        }
+    api.list("users/", queryParams, true).then((response) => {
+      if (optionsRef.value.length === 0) {
         optionsRef.value = [
-          ...optionsRef.value,
-          ...(response.items as User[])
-            .filter((user) => user.id !== userStore.user)
-            .map((user) => ({
-              label: user.username,
-              value: user.id,
-              avatar: {
-                text: user.username.charAt(0).toUpperCase(),
-                class: "bg-muted text-foreground",
-              },
-            })),
+          {
+            label: "Current user",
+            value: userStore.user,
+          },
         ];
-      })
+      }
+      optionsRef.value = [
+        ...optionsRef.value,
+        ...(response.items as User[])
+          .filter((user) => user.id !== userStore.user)
+          .map((user) => ({
+            label: user.username,
+            value: user.id,
+            avatar: {
+              text: user.username.charAt(0).toUpperCase(),
+              class: "bg-muted text-foreground",
+            },
+          })),
+      ];
+    });
   }
 
   function tools(
