@@ -52,8 +52,10 @@ class BaseCommand(CommandHandler, BaseTelegramBot, LoggingEntity):
         try:
             # Propagate the return value not to break conversations flow
             return await self._execute_command(update, context)
-        except Exception:
-            pass
+        except Exception as ex:
+            self.logger.error(
+                f"[{self.__class__.__name__}] Error executing Telegram Bot command /{self.command_name}: {str(ex)}"
+            )
 
 
 class Help(BaseCommand):

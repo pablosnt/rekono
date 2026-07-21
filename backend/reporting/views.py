@@ -351,8 +351,8 @@ class ReportingViewSet(BaseViewSet):
         filename = f"{str(uuid.uuid4())}.{report.format.lower()}"
         try:
             success = getattr(self, f"_create_{report.format.lower()}_report")(filename, report, *findings)
-        except Exception:
-            self.logger.error(f"Error while generating the {report.format} report {report.id}")
+        except Exception as ex:
+            self.logger.error(f"Error while generating the {report.format} report {report.id}: {str(ex)}")
             success = False
         if success:
             report.path = filename

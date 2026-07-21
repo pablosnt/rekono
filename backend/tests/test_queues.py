@@ -19,7 +19,7 @@ from targets.enums import TargetType
 from targets.models import Target
 from tasks.enums import TimeUnit
 from tasks.models import Task
-from tasks.queues import PlanJob, TasksQueue
+from tasks.queues import TasksQueue
 from tests.framework import QueueTest
 from tests.framework.data import SetupProject
 from tools.enums import Intensity as IntensityEnum
@@ -183,7 +183,11 @@ class TasksQueueTest(QueueTest, TestCase):
 
     @mock.patch("tasks.queues.ExecutionsQueue.enqueue")
     def test_consume_tool_task(self, enqueue_mock: mock.MagicMock) -> None:
-        task = Task.objects.create(target=self.target, configuration=Configuration.objects.get(tool__id=1, default=True), intensity=IntensityEnum.INSANE)
+        task = Task.objects.create(
+            target=self.target,
+            configuration=Configuration.objects.get(tool__id=1, default=True),
+            intensity=IntensityEnum.INSANE,
+        )
         task.wordlists.add(self.wordlist)
         self.assertEqual(task.id, TasksQueue.consume(task).id)
         self.assertTrue(Execution.objects.filter(task=task).exists())

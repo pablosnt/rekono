@@ -128,5 +128,7 @@ class First(BaseIntegration):
                     }
                     if data_to_update:
                         Vulnerability.objects.filter(cve=item["cve"], is_fixed=False).update(**data_to_update)
-            except Exception:
-                pass
+            except Exception as ex:
+                self.logger.error(
+                    f"[{self.__class__.__name__}] Error getting EPSS score and percentile for CVEs: {str(ex)}"
+                )

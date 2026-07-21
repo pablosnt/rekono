@@ -151,5 +151,5 @@ class VirusTotal(BaseIntegration):
             finding.save(
                 update_fields=["reputation", "malicious_analysis", "suspicious_analysis", "total_analysis", "whois"]
             )
-        except Exception:
-            pass
+        except Exception as ex:
+            self.logger.error(f"[{self.__class__.__name__}] Error processing host with ID {finding.id}: {str(ex)}")
