@@ -67,6 +67,97 @@ class FindingsQueue(BaseQueue):
         return job
 
     @staticmethod
+    def _consume(execution: Execution, findings: list[Finding]) -> None:
+        """Run the findings processing pipeline for an execution.
+
+        Enriches each finding's CVE data by querying every enabled provider and
+        keeping the enrichment with the highest quality score, then runs the
+        per-finding and per-execution integrations and dispatches alert
+        notifications. When auto-fix is enabled, previously fixed findings that
+        reappear are reactivated, and findings missing from executions sharing
+        the same hash are marked as fixed.
+
+        Args:
+            execution (Execution): Execution that produced the findings.
+            findings (list[Finding]): List of findings to process.
+        """
+        BaseQueue.logger.info(
+            f"[Findings] Processing of {len(findings)} findings from execution {execution.id} has started"
+        )
+        settings = Settings.objects.first()
+        if findings:
+            cve_providers: list[BaseCveProvider] = [
+                provider
+                for provider in [VulnCheck(), NvdNist(), GHSA(), EUVD(), OSV()]
+                if provider.is_enabled() and provider.is_available()
+            ]
+            integrations_per_finding: list[BaseIntegration] = [
+                integration
+                for integration in [HackTricks(), CveCrowd(), HostsMetadata(), VirusTotal(), First()]
+                if integration.is_enabled() and integration.is_available()
+            ]
+            integrations_per_execution: list[BaseIntegration] = [DefectDojo()]
+            notifications: list[BaseNotification] = [SMTP(), Telegram()]
+            # Process each finding individually
+            for finding in findings:
+                # Reactivate previously fixed findings if auto-fix is enabled
+                # This ensures findings that reappear are marked as active again
+                if settings.auto_fix_findings and finding.is_fixed:
+                    finding.__class__.objects.remove_fix(finding)
+                # Enrich CVEs information before processing the other integrations
+                cve_enrichments: list[tuple[BaseCveProvider, int, BaseCveProvider.CveEnrichment]] = []
+                for cve_provider in cve_providers:
+                    if cve_provider.is_finding_processable(finding):
+                        # Get CVE information from the provider
+                        enrichment = cve_provider.get_cve(finding.cve)
+                        if enrichment:
+                            # Save the provider, its data quality score, and its data
+                            cve_enrichments.append(
+                                (cve_provider, cve_provider.cve_quality_score(enrichment), enrichment)
+                            )
+                if len(cve_enrichments) > 0:
+                    # Get the CVE data with the highest data quality score
+                    cve_enrichments.sort(key=lambda x: x[1], reverse=True)
+                    cve_provider, _, enrichment = cve_enrichments[0]
+                    if cve_provider and enrichment:
+                        # Save the CVE enriched information in the finding
+                        cve_provider.save(finding, enrichment)
+                # Process findings through integrations that work on individual findings
+                for integration in integrations_per_finding:
+                    integration.process_finding(execution, finding)
+                # Check and trigger project alerts for this specific finding
+                for alert in execution.task.target.project.alerts.filter(enabled=True).order_by("-item").all():
+                    if alert.must_be_triggered(execution, finding):
+                        # Send notifications through all configured notification platforms
+                        for platform in notifications:
+                            platform.process_alert(alert, finding)
+            # Process findings through platforms that run per execution
+            for platform in integrations_per_execution + notifications:
+                platform.process_findings(execution, findings)
+        # Automatic fixing: mark findings as fixed if they're no longer detected in identical execution contexts
+        if settings.auto_fix_findings:
+            # For each finding type, mark findings as fixed if they don't appear in the current execution
+            # but were found in previous executions with the same parameters
+            for finding_type in [
+                OSINT,
+                Host,
+                Port,
+                Path,
+                Technology,
+                Credential,
+                Vulnerability,
+                Exploit,
+            ]:
+                finding_type.objects.fix(
+                    finding_type.objects.filter(
+                        executions__hash=execution.hash,
+                        executions__status=Status.COMPLETED,
+                    )
+                    .exclude(executions__id=execution.id)
+                    .distinct()
+                )
+
+    @staticmethod
     @job("findings")
     def consume(execution: Execution, findings: list[Finding]) -> None:
         """Process findings through background job workflow.
@@ -88,80 +179,12 @@ class FindingsQueue(BaseQueue):
             execution (Execution): Source execution for the findings.
             findings (list[Finding]): List of findings to process.
         """
+        self = FindingsQueue()
         # Lock RQ per target to avoid getting multiple workers processing the same findings at the same time
-        with FindingsQueue().queue.connection.lock(f"findings:{execution.task.target.id}"):
-            BaseQueue.logger.info(
-                f"[Findings] Processing of {len(findings)} findings from execution {execution.id} has started"
-            )
-            settings = Settings.objects.first()
-            if findings:
-                cve_providers: list[BaseCveProvider] = [
-                    provider
-                    for provider in [VulnCheck(), NvdNist(), GHSA(), EUVD(), OSV()]
-                    if provider.is_enabled() and provider.is_available()
-                ]
-                integrations_per_finding: list[BaseIntegration] = [
-                    integration
-                    for integration in [HackTricks(), CveCrowd(), HostsMetadata(), VirusTotal(), First()]
-                    if integration.is_enabled() and integration.is_available()
-                ]
-                integrations_per_execution: list[BaseIntegration] = [DefectDojo()]
-                notifications: list[BaseNotification] = [SMTP(), Telegram()]
-                # Process each finding individually
-                for finding in findings:
-                    # Reactivate previously fixed findings if auto-fix is enabled
-                    # This ensures findings that reappear are marked as active again
-                    if settings.auto_fix_findings and finding.is_fixed:
-                        finding.__class__.objects.remove_fix(finding)
-                    # Enrich CVEs information before processing the other integrations
-                    cve_enrichments: list[tuple[BaseCveProvider, int, BaseCveProvider.CveEnrichment]] = []
-                    for cve_provider in cve_providers:
-                        if cve_provider.is_finding_processable(finding):
-                            # Get CVE information from the provider
-                            enrichment = cve_provider.get_cve(finding.cve)
-                            if enrichment:
-                                # Save the provider, its data quality score, and its data
-                                cve_enrichments.append(
-                                    (cve_provider, cve_provider.cve_quality_score(enrichment), enrichment)
-                                )
-                    if len(cve_enrichments) > 0:
-                        # Get the CVE data with the highest data quality score
-                        cve_enrichments.sort(key=lambda x: x[1], reverse=True)
-                        cve_provider, _, enrichment = cve_enrichments[0]
-                        if cve_provider and enrichment:
-                            # Save the CVE enriched information in the finding
-                            cve_provider.save(finding, enrichment)
-                    # Process findings through integrations that work on individual findings
-                    for integration in integrations_per_finding:
-                        integration.process_finding(execution, finding)
-                    # Check and trigger project alerts for this specific finding
-                    for alert in execution.task.target.project.alerts.filter(enabled=True).order_by("-item").all():
-                        if alert.must_be_triggered(execution, finding):
-                            # Send notifications through all configured notification platforms
-                            for platform in notifications:
-                                platform.process_alert(alert, finding)
-                # Process findings through platforms that run per execution
-                for platform in integrations_per_execution + notifications:
-                    platform.process_findings(execution, findings)
-            # Automatic fixing: mark findings as fixed if they're no longer detected in identical execution contexts
-            if settings.auto_fix_findings:
-                # For each finding type, mark findings as fixed if they don't appear in the current execution
-                # but were found in previous executions with the same parameters
-                for finding_type in [
-                    OSINT,
-                    Host,
-                    Port,
-                    Path,
-                    Technology,
-                    Credential,
-                    Vulnerability,
-                    Exploit,
-                ]:
-                    finding_type.objects.fix(
-                        finding_type.objects.filter(
-                            executions__hash=execution.hash,
-                            executions__status=Status.COMPLETED,
-                        )
-                        .exclude(executions__id=execution.id)
-                        .distinct()
-                    )
+        with self.queue.connection.lock(f"findings:{execution.task.target.id}"):
+            try:
+                FindingsQueue.consume(execution, findings)
+            except Exception as ex:
+                self.logger.error(
+                    f"[{self.__class__.__name__}] Error processing {len(findings)} findings from execution {execution.id}: {str(ex)}"
+                )
