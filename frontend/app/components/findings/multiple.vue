@@ -211,9 +211,11 @@ const config: CrudConfig<Finding> = reactive({
                       (e) => e.configuration?.tool.name === s.name,
                     ).length,
                   ),
-                  size: "3xl",
                   color: "neutral",
                   variant: "ghost",
+                  ui: {
+                    base: "h-4 min-w-4 px-1 text-[10px] leading-none",
+                  },
                 },
                 {
                   default: () =>

@@ -18,9 +18,9 @@
       >
         <UChip
           :text="formatCount(relatedEntity.reports.length)"
-          size="3xl"
           color="neutral"
           position="top-right"
+          :ui="{ base: 'h-4 min-w-4 px-1 text-[10px] leading-none' }"
         >
           <UButton
             icon="i-lucide-file-text"
