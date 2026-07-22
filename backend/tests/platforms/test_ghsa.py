@@ -123,5 +123,6 @@ class GhsaTest(BaseTest, TestCase):
                 }
             ],
         )
+        self.assertIsNotNone(enrichment)
         self.assertEqual(10.0, enrichment.cvss_base_score)
         self.assertEqual("3.1", enrichment.cvss_version)

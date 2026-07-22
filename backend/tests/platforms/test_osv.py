@@ -112,5 +112,6 @@ class OsvTest(BaseTest, TestCase):
                 "affected": [{"versions": ["1.0", "2.0"]}],
             },
         )
+        self.assertIsNotNone(enrichment)
         self.assertIsNone(enrichment.cvss_base_score)
         self.assertEqual(["1.0", "2.0"], enrichment.technologies)
