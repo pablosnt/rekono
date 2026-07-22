@@ -164,11 +164,12 @@
         </span>
         <UButton
           v-if="canEdit"
+          class="mt-3"
           :label="note.public ? 'Public' : 'Private'"
           :color="note.public ? 'warning' : 'neutral'"
           :icon="note.public ? 'i-lucide-globe' : 'i-lucide-lock'"
           variant="subtle"
-          size="xs"
+          size="sm"
           :disabled="note.forked_from"
           @click="
             note.public = !note.public;

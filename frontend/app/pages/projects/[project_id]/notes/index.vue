@@ -115,7 +115,6 @@
                   ? {
                       label: `Forked from #${item.forked_from}`,
                       icon: 'i-lucide-link',
-                      color: 'neutral',
                       to: `/projects/${$route.params.project_id}/notes/${item.forked_from}`,
                     }
                   : {
@@ -123,7 +122,7 @@
                       icon: item.public
                         ? 'i-lucide-globe-lock'
                         : 'i-lucide-globe',
-                      color: item.public ? 'neutral' : 'warning',
+                      color: item.public ? undefined : 'warning',
                       onSelect: () => switchVisibility(item),
                     },
                 {

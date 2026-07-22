@@ -6,13 +6,11 @@
           {
             label: `${relatedEntity.notes.length} Notes`,
             icon: 'i-lucide-notebook',
-            color: 'neutral',
             to: `/projects/${project}/notes?${entityNameLower}=${relatedEntity.id}`,
           },
           {
             label: 'Take note',
             icon: 'i-lucide-plus',
-            color: 'neutral',
             onSelect: () => nextTick(() => notesButton?.createNote()),
           },
         ]"

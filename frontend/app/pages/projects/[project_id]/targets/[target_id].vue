@@ -29,7 +29,6 @@
                   {
                     label: 'Generate a report',
                     icon: 'i-lucide-file-text',
-                    color: 'neutral',
                     onSelect: () => {
                       showReportModal = true;
                     },
@@ -39,7 +38,6 @@
             {
               label: 'Take note',
               icon: 'i-lucide-notebook',
-              color: 'neutral',
               onSelect: () => notesButton.createNote(),
             },
           ]"
@@ -65,7 +63,6 @@
                   {
                     label: `${target?.tasks.length} Scans`,
                     icon: 'i-lucide-play',
-                    color: 'neutral',
                     to: `/projects/${$route.params.project_id}/scans?target=${route.params.target_id}`,
                   },
                 ]
@@ -75,7 +72,6 @@
                   {
                     label: `${target?.reports.length} Reports`,
                     icon: 'i-lucide-file-text',
-                    color: 'neutral',
                     to: `/projects/${$route.params.project_id}/reports?target=${route.params.target_id}`,
                   },
                 ]
@@ -85,7 +81,6 @@
                   {
                     label: `${target?.notes.length} Notes`,
                     icon: 'i-lucide-notebook',
-                    color: 'neutral',
                     to: `/projects/${$route.params.project_id}/notes?target=${route.params.target_id}`,
                   },
                 ]

@@ -6,13 +6,11 @@
           {
             label: `${relatedEntity.reports.length} Reports`,
             icon: 'i-lucide-file-text',
-            color: 'neutral',
             to: `/projects/${project}/reports${entityNameLowerCase && entityNameLowerCase !== 'project' ? `?${entityNameLowerCase}=${relatedEntity?.id}` : ''}`,
           },
           {
             label: 'Generate a report',
             icon: 'i-lucide-plus',
-            color: 'neutral',
             onSelect: () => (reportModalOpen = true),
           },
         ]"
