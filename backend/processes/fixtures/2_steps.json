@@ -566,5 +566,13 @@
             "process": 7,
             "configuration": 42
         }
+    },
+    {
+        "model": "processes.step",
+        "pk": 76,
+        "fields": {
+            "process": 5,
+            "configuration": 35
+        }
     }
 ]
