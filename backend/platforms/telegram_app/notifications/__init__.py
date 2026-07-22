@@ -17,6 +17,7 @@ from framework.platforms import BaseNotification
 from platforms.telegram_app.framework import BaseTelegram
 from platforms.telegram_app.notifications.templates import ALERT, ALERT_TRENDING_CVE, EXECUTION, FINDINGS, MESSAGE
 from rekono.settings import CONFIG
+from targets.models import Target
 from users.models import User
 
 
@@ -118,7 +119,7 @@ class Telegram(BaseNotification, BaseTelegram):
         """
         return EXECUTION.format(
             project=self.escape(execution.task.target.project.name),
-            target=self.escape(execution.task.target.target),
+            target=self.escape(Target.get_target(execution.task.target, execution.task.target_port)),
             tool=self.escape(execution.configuration.tool.name),
             configuration=self.escape(execution.configuration.name),
             status=self.escape(execution.status),

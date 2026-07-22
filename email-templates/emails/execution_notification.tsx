@@ -12,7 +12,7 @@ import {
 
 const summaryRows: [string, string, boolean][] = [
   ["Project", "{{ execution.task.target.project.name }}", false],
-  ["Target", "{{ execution.task.target.target }}", true],
+  ["Target", "{{ target }}", true],
   ["Tool", "{{ execution.configuration.tool.name }}", false],
   ["Configuration", "{{ execution.configuration.name }}", false],
   ["Status", "{{ execution.status }}", false],

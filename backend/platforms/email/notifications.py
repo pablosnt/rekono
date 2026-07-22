@@ -23,6 +23,7 @@ from findings.framework.models import Finding
 from framework.platforms import BaseNotification
 from platforms.email.models import SMTPSettings
 from rekono.settings import CONFIG
+from targets.models import Target
 
 
 class SMTP(BaseNotification):
@@ -195,7 +196,11 @@ class SMTP(BaseNotification):
             users,
             f"{execution.configuration.tool.name} scan completed",
             "execution_notification.html",
-            {"execution": execution, **findings_by_class},
+            {
+                "execution": execution,
+                "target": Target.get_target(execution.task.target, execution.task.target_port),
+                **findings_by_class,
+            },
             background=False,
         )
 
