@@ -259,10 +259,15 @@ class Finding(BaseInput):
             match_null_and_empty (bool): Whether a blank value (null or, for char/text fields, empty)
                 is treated as compatible with anything on this field: an existing finding blank on it
                 matches an incoming real value, and an incoming blank value drops it from the match.
+            ignore_case (bool): Whether a string value is matched case-insensitively, so findings that
+                differ only in the casing of this field are treated as the same. Only meaningful for
+                char/text fields whose casing is cosmetic (e.g. a technology name); it must stay off for
+                fields where case is significant (paths, usernames, secrets).
         """
 
         field: str
         match_null_and_empty: bool = False
+        ignore_case: bool = False
 
     @classmethod
     def _find_duplicate(cls, execution: Execution, fields: dict[str, Any]) -> "Finding | None":
@@ -293,7 +298,8 @@ class Finding(BaseInput):
         Returns None when the field should not constrain the match: a ``match_null_and_empty`` field
         is dropped entirely when the incoming value is blank. Otherwise it matches the value, and for
         a ``match_null_and_empty`` field it also matches existing blanks (null, and empty string for
-        char/text fields) so a partial finding can still be completed by a more detailed one.
+        char/text fields) so a partial finding can still be completed by a more detailed one. An
+        ``ignore_case`` field matches string values case-insensitively.
 
         Args:
             unique_field (UniqueField): The unique field configuration to build the fragment for.
@@ -304,7 +310,7 @@ class Finding(BaseInput):
         """
         if unique_field.match_null_and_empty and new_value in (None, ""):
             return
-        field_query = Q(**{unique_field.field: new_value})
+        field_query = Q(**{f"{unique_field.field}__iexact" if unique_field.ignore_case and isinstance(new_value, str) else unique_field.field: new_value})
         if unique_field.match_null_and_empty:
             field_query |= Q(**{f"{unique_field.field}__isnull": True})
             if cls._meta.get_field(unique_field.field).get_internal_type() in ["CharField", "TextField"]:

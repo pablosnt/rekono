@@ -55,7 +55,7 @@ class OSINT(TriageFinding):
     data_type = models.TextField(max_length=10, choices=OSINTDataType.choices)
     source = models.TextField(max_length=50, blank=True, null=True)
 
-    _unique_fields = [Finding.UniqueField("data"), Finding.UniqueField("data_type")]
+    _unique_fields = [Finding.UniqueField("data", ignore_case=True), Finding.UniqueField("data_type")]
     _parse_mapping = {
         InputKeyword.TARGET: "data",
         InputKeyword.HOST: "data",
@@ -414,8 +414,8 @@ class Technology(HacktricksFinding):
 
     _unique_fields = [
         Finding.UniqueField("port"),
-        Finding.UniqueField("name"),
-        Finding.UniqueField("version", match_null_and_empty=True),
+        Finding.UniqueField("name", ignore_case=True),
+        Finding.UniqueField("version", match_null_and_empty=True, ignore_case=True),
     ]
     _root_findings = ("port",)
     _filters = [Finding.Filter(str, "name", contains=True, processor=lambda n: n.lower())]
@@ -480,7 +480,7 @@ class Credential(TriageFinding):
 
     _unique_fields = [
         Finding.UniqueField("technology"),
-        Finding.UniqueField("email"),
+        Finding.UniqueField("email", ignore_case=True),
         Finding.UniqueField("username"),
         Finding.UniqueField("secret"),
     ]
@@ -588,8 +588,8 @@ class Vulnerability(TriageFinding):
     _unique_fields = [
         Finding.UniqueField("technology"),
         Finding.UniqueField("port"),
-        Finding.UniqueField("name"),
-        Finding.UniqueField("cve"),
+        Finding.UniqueField("name", ignore_case=True),
+        Finding.UniqueField("cve", ignore_case=True),
     ]
     # Ordered by priority for deduplication: technology is a deeper root than port
     _root_findings = ("technology", "port")
@@ -635,7 +635,9 @@ class Vulnerability(TriageFinding):
             Vulnerability | None: The matched vulnerability, or None if there is no duplicate.
         """
         technology = fields.get("technology")
-        identity = models.Q(cve=fields["cve"]) if fields.get("cve") else models.Q(name=fields.get("name"))
+        identity = (
+            models.Q(cve__iexact=fields["cve"]) if fields.get("cve") else models.Q(name__iexact=fields.get("name"))
+        )
         if technology:
             search = cls.objects.filter(
                 identity, executions__task__target=execution.task.target, technology=technology

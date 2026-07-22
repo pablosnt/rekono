@@ -46,3 +46,18 @@ class CredentialTest(FindingTest, TestCase):
                 self.execution, technology=self.technology, email="root@rekono.com", username="root", secret="different"
             ).id,
         )
+
+    def test_deduplication_ignores_email_case(self):
+        first = Credential.objects.create_finding(
+            self.execution, technology=self.technology, email="Admin@Rekono.com", username="operator", secret="s3cret"
+        )
+        second = Credential.objects.create_finding(
+            self.execution, technology=self.technology, email="admin@rekono.com", username="operator", secret="s3cret"
+        )
+        self.assertEqual(first.id, second.id)
+        self.assertEqual(
+            1,
+            Credential.objects.filter(
+                technology=self.technology, email__iexact="admin@rekono.com", username="operator", secret="s3cret"
+            ).count(),
+        )

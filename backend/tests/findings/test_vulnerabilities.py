@@ -51,6 +51,30 @@ class VulnerabilityTest(FindingTest, TestCase):
         self.assertIsNone(second.port)
         self.assertEqual(self.technology, second.technology)
 
+    def test_deduplication_ignores_name_case(self):
+        first = Vulnerability.objects.create_finding(
+            self.execution, technology=self.technology, name="SQL Injection"
+        )
+        second = Vulnerability.objects.create_finding(
+            self.execution, technology=self.technology, name="sql injection"
+        )
+        self.assertEqual(first.id, second.id)
+        self.assertEqual(
+            1, Vulnerability.objects.filter(technology=self.technology, name__iexact="sql injection").count()
+        )
+
+    def test_deduplication_ignores_cve_case(self):
+        first = Vulnerability.objects.create_finding(
+            self.execution, technology=self.technology, name="Log4Shell", cve="CVE-2021-44228"
+        )
+        second = Vulnerability.objects.create_finding(
+            self.execution, technology=self.technology, name="Log4Shell", cve="cve-2021-44228"
+        )
+        self.assertEqual(first.id, second.id)
+        self.assertEqual(
+            1, Vulnerability.objects.filter(technology=self.technology, cve__iexact="CVE-2021-44228").count()
+        )
+
     def test_deduplication_with_same_technology(self):
         first = Vulnerability.objects.create_finding(
             self.execution, technology=self.technology, name=self.sample_cve, cve=self.sample_cve
