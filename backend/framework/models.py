@@ -370,7 +370,7 @@ class BaseInput(BaseModel):
         host: str,
         port: int | None = None,
         endpoint: str | None = None,
-        protocols: list[str] = ["http", "https"],
+        protocols: list[str] = ["https", "http"],
         task: Any = None,
     ) -> str | None:
         """Construct and validate a URL with automatic protocol detection.
@@ -388,7 +388,7 @@ class BaseInput(BaseModel):
             port (int | None): The port number (optional). When set, only this
                                port is probed and the task scope is ignored.
             endpoint (str | None): The endpoint path (optional).
-            protocols (list[str]): List of protocols to test (default: ["http", "https"]).
+            protocols (list[str]): List of protocols to test (default: ["https", "http"]).
             task (Any): Task whose scoped target ports are probed when no explicit
                         port is given.
 
@@ -407,7 +407,7 @@ class BaseInput(BaseModel):
         # Define URL schema template with placeholders for dynamic components
         schema = "{protocol}://{host}:{port}/{endpoint}"
         # Determine which ports to test based on input parameters
-        default_ports = [80, 443]
+        default_ports = [443, 80]
         if port:
             ports = [port]
         elif task is not None:
