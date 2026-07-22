@@ -80,9 +80,10 @@
             class="font-mono text-sm text-terminal bg-black p-4 rounded-lg shrink-0 leading-relaxed flex items-start gap-3"
           >
             <span class="select-none shrink-0">$</span>
-            <span class="whitespace-pre-wrap break-all flex-1">{{
-              selectedExecution.executed_command
-            }}</span>
+            <span
+              class="whitespace-pre-wrap break-all flex-1 max-h-[4.5rem] overflow-y-auto"
+              >{{ selectedExecution.executed_command }}</span
+            >
             <UButton
               icon="i-lucide-copy"
               variant="ghost"
