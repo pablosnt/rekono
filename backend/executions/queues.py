@@ -10,6 +10,7 @@ from django_rq import job
 from rq.job import Dependency, Job
 from rq.registry import DeferredJobRegistry
 
+from executions.enums import Status
 from executions.models import Execution
 from findings.framework.models import Finding
 from findings.queues import FindingsQueue
@@ -155,6 +156,12 @@ class ExecutionsQueue(BaseScanQueue):
         else:
             # Execute the tool with provided findings (standard execution path)
             executor.execute(findings, target_ports, input_vulnerabilities, input_technologies, wordlists)
+        # A skipped or cancelled execution has no output and no built arguments to parse, so parsing
+        # would fail. The status is refreshed because cancellations are applied to the execution
+        # directly in the database from the task cancellation endpoint, and would otherwise be missed.
+        execution.refresh_from_db(fields=["status"])
+        if execution.status in [Status.SKIPPED, Status.CANCELLED]:
+            return execution, []
         # Parse the tool output to extract security findings
         parser: BaseParser = execution.configuration.tool.parser_class(executor, execution.output_plain)
         parser.parse()
