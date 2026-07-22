@@ -100,7 +100,11 @@ export default function () {
     return findingCell(
       port,
       "ports",
-      port?.port ? port?.port.toString() : undefined,
+      port?.port
+        ? port.protocol
+          ? `${port.port}/${port.protocol}`
+          : port.port.toString()
+        : undefined,
       project,
       port ? getPortIcon(port.port, port.service) : undefined,
     );
