@@ -69,7 +69,7 @@ class Zap(BaseParser):
                         name=name,
                         description=self._clean(description) if description else name,
                         severity=self.severity_mapping[int(severity)] if severity else Severity.MEDIUM,
-                        cwes=[f"CWE-{cwe}"] if cwe else [],
+                        cwes=[f"CWE-{cwe}"] if cwe and cwe != "-1" else [],
                         remediation=self._clean(remediation) if remediation else None,
                         reference=self._clean(reference.split("</p><p>", 1)[0]) if reference else None,
                     )
