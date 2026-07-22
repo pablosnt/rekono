@@ -30,7 +30,7 @@ class Emailfinder(BaseParser):
         for discovered email addresses.
         """
         checker = EmailField()
-        for line in self.output.split("\n"):
+        for line in (self.output or "").split("\n"):
             line = line.strip()
             if line:
                 try:

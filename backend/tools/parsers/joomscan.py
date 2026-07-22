@@ -35,7 +35,7 @@ class Joomscan(BaseParser):
         path_disclosure = set()
         directory_listing = set()
         host = urlparse(self.executor.arguments[self.executor.arguments.index("-u") + 1]).hostname
-        lines = self.output.split("\n")
+        lines = (self.output or "").split("\n")
         for index, line in enumerate(lines):
             data = line.strip()
             if not data:
