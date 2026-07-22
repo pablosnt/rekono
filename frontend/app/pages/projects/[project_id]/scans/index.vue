@@ -317,7 +317,7 @@ const config: CrudConfig<Task> = reactive({
     "start",
     "end",
   ],
-  defaultOrdering: "-id",
+  defaultOrdering: "-end",
   pageSize: 25,
   pageSizeOptions: [25, 50, 100],
   tableCopyId: true,
