@@ -23,7 +23,7 @@ from findings.framework.models import Finding
 from framework.platforms import BaseNotification
 from platforms.email.models import SMTPSettings
 from rekono.settings import CONFIG
-from targets.models import Target
+from tasks.models import Task
 
 
 class SMTP(BaseNotification):
@@ -198,7 +198,7 @@ class SMTP(BaseNotification):
             "execution_notification.html",
             {
                 "execution": execution,
-                "target": Target.get_target(execution.task.target, execution.task.target_port),
+                "target": Task.get_target(execution.task.target, execution.task.target_port),
                 **findings_by_class,
             },
             background=False,

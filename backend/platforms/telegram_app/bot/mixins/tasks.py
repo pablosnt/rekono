@@ -9,7 +9,7 @@ from telegram.ext import CallbackContext, ConversationHandler
 
 from platforms.telegram_app.bot.enums import Context
 from platforms.telegram_app.bot.mixins.framework import BaseMixin
-from targets.models import Target
+from tasks.models import Task
 from tasks.serializers import TaskSerializer
 
 
@@ -69,7 +69,7 @@ class TaskMixin(BaseMixin):
 The following task will be executed:
 
 💼 _Project_   *{self.escape(project.name)}*
-🎯 _Target_    *{self.escape(Target.get_target(target, target_port))}*
+🎯 _Target_    *{self.escape(Task.get_target(target, target_port))}*
 {
                     f"🔄 _Process_   *{self.escape(process.name)}*"
                     if process

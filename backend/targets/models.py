@@ -124,25 +124,6 @@ class Target(BaseInput):
             params={"value": target},
         )
 
-    @staticmethod
-    def get_target(target: "Target", target_port: Any = None) -> str:
-        """Build a display label for a target, optionally scoped to a target port.
-
-        Combines the target with a specific port and path when a target port is
-        given, so notifications and Telegram prompts can show the exact scan
-        scope in a single line. When no target port is provided, the bare target
-        is returned to indicate that all of the target's ports are in scope.
-
-        Args:
-            target (Target): The target being scanned.
-            target_port (Any): The target port scoping the scan, if any.
-
-        Returns:
-            str: "<target>:<port><path>" when a target port is given, otherwise
-                 the bare target address.
-        """
-        return f"{target.target}:{target_port.port}{target.clean_path(target_port.path) if target_port.path else ""}" if target_port else target.target
-
     def __str__(self) -> str:
         """String representation of the target.
 
