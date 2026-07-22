@@ -47,7 +47,9 @@ class BaseTelegram(LoggingEntity):
         """Initialize the Telegram Bot application.
 
         Runs the bot's async initialization once; the _initialized guard makes
-        repeated calls no-ops. Clears the stored token if authentication fails.
+        repeated calls no-ops. Clears the stored token if authentication fails,
+        and leaves the bot uninitialized without clearing the token if the
+        Telegram API is temporarily unreachable, so a later request can retry.
         """
         if not self._initialized and self.app and self.app.bot:  # pytype: disable=attribute-error
             try:
@@ -55,6 +57,10 @@ class BaseTelegram(LoggingEntity):
                 self._initialized = True
             except (InvalidToken, Forbidden):
                 self.handle_invalid_token()
+            except Exception as ex:
+                # The Telegram API is temporarily unreachable
+                # Keep the token and leave the bot uninitialized so the next request can retry
+                self.logger.error(f"[Telegram] {ex.__class__.__name__} error when trying to initialize the Telegram Bot: {str(ex)}")
 
     @property
     def app(self) -> Application | None:
@@ -77,10 +83,14 @@ class BaseTelegram(LoggingEntity):
     def bot_name(self) -> str | None:
         """Get the Telegram Bot username.
 
+        The username comes from the get_me call performed during initialization, so it
+        is only available once the bot has been initialized. Accessing it beforehand
+        would raise a RuntimeError, hence the _initialized guard.
+
         Returns:
-            str | None: The bot username if available, None otherwise.
+            str | None: The bot username if the bot has been initialized, None otherwise.
         """
-        return self.app.bot.username if self.app and self.app.bot else None
+        return self.app.bot.username if self._initialized and self.app and self.app.bot else None
 
     async def post_init(self, application: Application) -> None:
         """Post-initialization hook for the Telegram application.
