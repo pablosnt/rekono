@@ -210,6 +210,7 @@
       ref="findings"
       :task-id="task.id"
       :project-id="task.target.project"
+      show-empty
       class="mb-8"
     />
 

@@ -150,6 +150,7 @@
         :target-id="targetId"
         :project-id="projectId"
         only-active
+        show-empty
       />
       <TargetPorts />
       <HttpHeaders
