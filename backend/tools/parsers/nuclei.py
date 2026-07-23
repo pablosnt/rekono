@@ -7,6 +7,7 @@ Nuclei reports one.
 """
 
 import json
+import re
 from typing import cast
 from urllib.parse import urlparse
 
@@ -84,10 +85,17 @@ class Nuclei(BaseParser):
             # Different tags indicate different types of security findings
             if "tech" in tags:
                 # Technology detection templates - create Technology findings
+                tech_name = matcher or name
+                version = None
+                if matcher and item.get("extractor-name") == "version":
+                    version = matcher
+                    tech_name = name
                 self.create_finding(
                     Technology,
                     **({"port": port, "linked_finding": True} if port else {}),
-                    name=matcher or name,
+                    # Drop trailing detection descriptors so the technology name stays clean
+                    name=re.split(r"\s+(?:End-of-Life|Detection|Detect|Version)\b", tech_name)[0].strip() or tech_name,
+                    version=version,
                     description=description.strip() if description else (name if matcher else None),
                     reference=reference[0] if reference else None,
                 )
