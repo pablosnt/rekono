@@ -151,25 +151,44 @@ class TasksQueue(BaseScanQueue):
         The task target is re-validated against the deny list before any
         execution is created, because targets are only validated when created
         and a deny list change or DNS rebinding afterwards could otherwise let a
-        previously-saved target be scanned. A denied target finishes the task
-        without producing executions.
+        previously-saved target be scanned. A rejected target does not run: the
+        task is kept and the rejection is recorded as skipped executions so its
+        history survives and the reason is visible.
 
         Args:
             task (Task): The task to process
 
         Returns:
-            Task | None: The processed task
+            Task | None: The processed task, or None when the target was rejected
         """
         BaseScanQueue.logger.info(f"[Task] Task {task.id} has started")
         # Re-validate the task target before creating any execution
         try:
             TargetValidator(Regex.TARGET)(task.target.target)
-        except ValidationError:
+        except ValidationError as error:
+            skipped_reason = " ".join(error.messages)
             TasksQueue.logger.warning(
-                f"[Security] Task {task.id} target '{task.target.target}' is denied by policy at execution time"
+                f"[Security] Task {task.id} target '{task.target.target}' was rejected at execution time: "
+                f"{skipped_reason}"
             )
-            task.delete()
-            return
+            dt = timezone.now()
+            for configuration in (
+                [task.configuration]
+                if task.configuration
+                else [step.configuration for step in task.process.steps.filter(configuration__deprecated=False)]
+            ):
+                Execution.objects.create(
+                    task=task,
+                    configuration=configuration,
+                    status=Status.SKIPPED,
+                    skipped_reason=skipped_reason,
+                    start=dt,
+                    end=dt,
+                )
+            task.start = dt
+            task.end = dt
+            task.save(update_fields=["start", "end"])
+            return task
         if task.configuration:
             TasksQueue._consume_tool_task(task)
         elif task.process:

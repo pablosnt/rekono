@@ -205,7 +205,25 @@ class TasksQueueTest(QueueTest, TestCase):
         task = Task.objects.create(target=self.target, configuration=self.configuration)
         with mock.patch("tasks.queues.TargetValidator.__call__", side_effect=ValidationError("denied")):
             self.assertIsNone(TasksQueue.consume(task))
-        self.assertFalse(Task.objects.filter(pk=task.id).exists())
+        # The task is kept and its rejection is recorded as a single skipped execution
+        self.assertTrue(Task.objects.filter(pk=task.id).exists())
+        execution = Execution.objects.get(task=task)
+        self.assertEqual(self.configuration.id, execution.configuration.id)
+        self.assertEqual(Status.SKIPPED, execution.status)
+        self.assertEqual("denied", execution.skipped_reason)
+
+    def test_consume_process_task_for_denied_target(self) -> None:
+        process = Process.objects.get(pk=1)
+        task = Task.objects.create(target=self.target, process=process, intensity=IntensityEnum.INSANE)
+        with mock.patch("tasks.queues.TargetValidator.__call__", side_effect=ValidationError("denied")):
+            self.assertIsNone(TasksQueue.consume(task))
+        # The task is kept and every process step is recorded as a skipped execution
+        self.assertTrue(Task.objects.filter(pk=task.id).exists())
+        executions = Execution.objects.filter(task=task)
+        self.assertEqual(process.steps.filter(configuration__deprecated=False).count(), executions.count())
+        for execution in executions:
+            self.assertEqual(Status.SKIPPED, execution.status)
+            self.assertEqual("denied", execution.skipped_reason)
 
     def test_get_scoped_target_ports_without_task_target_port(self) -> None:
         TargetPort.objects.create(target=self.target, port=8080, path=None)

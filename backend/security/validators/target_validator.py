@@ -110,9 +110,9 @@ class TargetValidator(RegexValidator, LoggingEntity):
         if not CONFIG.testing:  # pragma: no cover
             from targets.models import Target
 
-            target_type = Target.get_type(value)
             # Resolution errors must not block validation
             try:
+                target_type = Target.get_type(value)
                 if target_type in [TargetType.PRIVATE_IP, TargetType.PUBLIC_IP]:
                     resolved_domain, _, _ = socket.gethostbyaddr(value)
                     if resolved_domain:
