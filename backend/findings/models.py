@@ -547,7 +547,7 @@ class Vulnerability(TriageFinding):
             cvss_vector="CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
             cvss_base_score=9.8,
             cve="CVE-2021-12345",
-            cwe="CWE-120",
+            cwes=["CWE-120"],
             remediation="Update to the latest version or apply security patches",
             trending=True
         )

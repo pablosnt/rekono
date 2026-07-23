@@ -346,5 +346,9 @@ class BaseParser:
         """
         try:
             self._parse()
+        except Exception as ex:
+            self.executor.logger.exception(
+                f"[{self.executor.execution.configuration.tool.name}] {ex.__class__.__name__} error while parsing the output of execution {self.executor.execution.id}: {str(ex)}"
+            )
         finally:
             self._protect_execution()
