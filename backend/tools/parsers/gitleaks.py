@@ -29,7 +29,9 @@ class Gitleaks(BaseParser):
     executor: GitleaksExecutor
     git_technology: Technology | None = None
 
-    def create_finding(self, finding_type: type[Finding], linked_finding: bool = False, **fields: Any) -> Finding | None:
+    def create_finding(
+        self, finding_type: type[Finding], linked_finding: bool = False, **fields: Any
+    ) -> Finding | None:
         """Create a finding, falling back to a generic Git technology for orphan credentials.
 
         A Credential can only be linked to a Technology, so the base parser normally links
@@ -50,7 +52,9 @@ class Gitleaks(BaseParser):
         if finding is None and finding_type == Credential and not fields.get("technology"):
             if not self.git_technology:
                 self.git_technology = super().create_finding(Technology, name="Git")
-            finding = super().create_finding(finding_type, self.git_technology is not None, technology=self.git_technology, **fields)
+            finding = super().create_finding(
+                finding_type, self.git_technology is not None, technology=self.git_technology, **fields
+            )
         return finding
 
     def _parse(self) -> None:

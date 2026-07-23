@@ -45,7 +45,7 @@ class Gitleaks(BaseExecutor):
             **super().get_environment(),
             "GIT_CONFIG_COUNT": "1",
             "GIT_CONFIG_KEY_0": "safe.directory",
-            "GIT_CONFIG_VALUE_0": "*"
+            "GIT_CONFIG_VALUE_0": "*",
         }
 
     def run_tool(self, environment: dict[str, Any] = os.environ.copy()) -> None:  # pragma: no cover
