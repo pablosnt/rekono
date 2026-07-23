@@ -7,8 +7,8 @@ from the commit history of dumped Git repositories.
 from dataclasses import dataclass
 from typing import Any
 
-from findings.enums import Severity
-from findings.models import Credential, Finding, Technology, Vulnerability
+from findings.enums import PathType, Severity
+from findings.models import Credential, Finding, Path, Technology, Vulnerability
 from tools.executors.gitleaks import Gitleaks as GitleaksExecutor
 from tools.parsers.base import BaseParser
 
@@ -60,10 +60,11 @@ class Gitleaks(BaseParser):
     def _parse(self) -> None:
         """Parse GitLeaks JSON output and extract secret findings.
 
-        Processes JSON scan results to create Vulnerability and Credential findings
+        Processes JSON scan results to create Path, Vulnerability and Credential findings
         for Git repository exposure and discovered secrets.
         """
         if self.executor.git_directory_dumped:
+            self.create_finding(Path, path=Path.clean_path("/.git"), type=PathType.ENDPOINT)
             self.create_finding(
                 Vulnerability,
                 name="Git source code exposure",

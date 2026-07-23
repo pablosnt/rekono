@@ -774,5 +774,21 @@
             "configuration": 41,
             "type": 3
         }
+    },
+    {
+        "model": "tools.output",
+        "pk": 98,
+        "fields": {
+            "configuration": 33,
+            "type": 4
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 99,
+        "fields": {
+            "configuration": 33,
+            "type": 5
+        }
     }
 ]
