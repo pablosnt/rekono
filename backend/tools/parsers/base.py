@@ -20,6 +20,7 @@ from findings.models import OSINT, Host
 from parameters.models import InputTechnology, InputVulnerability
 from rekono.settings import CONFIG
 from target_ports.models import TargetPort
+from security.cryptography import Crypto
 from targets.models import Target
 from tools.executors.base import BaseExecutor
 
@@ -57,6 +58,8 @@ class BaseParser:
     executor: BaseExecutor
     output: str | None
     findings: list = field(default_factory=list)
+    # Cache of parent findings derived from user-input targets during parsing
+    user_input_findings = field(default_factory=dict)
 
     @cached_property
     def report(self) -> Path | None:
@@ -76,6 +79,31 @@ class BaseParser:
             and self.executor.report.stat().st_size > 0
             else None
         )
+
+    def create_user_input_finding(self, related_target: Any) -> Any | None:
+        """Create, or reuse, the parent finding derived from a user-input target.
+
+        Parsers that emit many findings (e.g. every path Dirsearch discovers) link each one to
+        the same parent Host/Port derived from the execution's target. This memoizes that parent
+        per execution keyed by the target identity, so the underlying deduplication query,
+        target-row lock and (for domain targets) DNS resolution run once instead of once per
+        finding. Failed derivations (None) are not memoized, so a transient failure on one
+        finding does not suppress the parent for the rest.
+
+        Args:
+            related_target (Any): The user-input target (Target or TargetPort) to derive from.
+
+        Returns:
+            Any | None: The parent finding, or None when it could not be derived.
+        """
+        key = Crypto.hash("-".join([related_target.__class__.__name__,
+                    str(related_target.pk)]))
+        if key not in self.user_input_findings:
+            finding = related_target.create_finding_from_user_input(self.execution)
+            if finding is None:
+                return None
+            self.user_input_findings[key] = finding
+        return self.user_input_findings[key]
 
     def is_finding_link_field(self, finding_type: type[Finding], field: str) -> bool:
         """Check if a field represents a valid finding relationship link.
@@ -172,7 +200,7 @@ class BaseParser:
                         or (is_port_for_input_parameter and field == "port")
                     ):
                         # Create a finding from the user input
-                        related_finding = related_target.create_finding_from_user_input(self.executor.execution)
+                        related_finding = self.create_user_input_finding(related_target)
                         if not related_finding:
                             continue
                         # We avoid including the new user-input findings in the findings list
