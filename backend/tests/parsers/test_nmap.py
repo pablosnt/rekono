@@ -233,4 +233,25 @@ class NmapTest(ParserTest, TestCase):
                 },
             ],
         ),
+        ParserTestCase(
+            "multiple-hosts-udp.xml",
+            [
+                {"model": Host, "ip": "10.10.10.10"},
+                {
+                    "model": Port,
+                    "port": 67,
+                    "status": PortStatus.OPEN_FILTERED,
+                    "protocol": TransportProtocol.UDP,
+                    "service": "dhcps",
+                },
+                {"model": Host, "ip": "10.10.10.11"},
+                {
+                    "model": Port,
+                    "port": 80,
+                    "status": PortStatus.OPEN,
+                    "protocol": TransportProtocol.TCP,
+                    "service": "http",
+                },
+            ],
+        ),
     ]

@@ -14,6 +14,14 @@ from findings.models import Credential, Host, Path, Port, Technology, Vulnerabil
 from security.validators.input_validator import Regex
 from tools.parsers.base import BaseParser
 
+# Nmap can report combined states such as "open|filtered" that can't be directly resolved to PortStatus values
+PORT_STATUSES = {
+    "open": PortStatus.OPEN,
+    "closed": PortStatus.CLOSED,
+    "filtered": PortStatus.FILTERED,
+    "open|filtered": PortStatus.OPEN_FILTERED,
+}
+
 
 class Nmap(BaseParser):
     """Parser for Nmap XML output files.
@@ -59,7 +67,7 @@ class Nmap(BaseParser):
                     linked_finding=True,
                     host=host,
                     port=service.port,
-                    status=PortStatus[service.state.upper()],
+                    status=PORT_STATUSES.get(service.state.lower(), PortStatus.OPEN_FILTERED),
                     protocol=TransportProtocol[service.protocol.upper()],
                     service=service.service,
                 )
