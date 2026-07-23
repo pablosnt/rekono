@@ -165,7 +165,7 @@ WORKDIR /code
 
 # Install hacking tools supported via apt
 RUN apt update && \
-    TOOLS="nmap theharvester nikto sslscan sslyze cmseek zaproxy exploitdb metasploit-framework emailharvester joomscan gitleaks smbmap nuclei gobuster seclists dirb" && \
+    TOOLS="nmap theharvester nikto sslscan sslyze cmseek zaproxy exploitdb metasploit-framework joomscan gitleaks smbmap nuclei gobuster seclists dirb" && \
     apt install --yes --no-install-recommends $TOOLS $BACKEND_DEBIAN_DEPENDENCIES libcap2-bin git ca-certificates sudo && \
     # Finish any pending package configuration so dpkg is left in a clean state
     dpkg --configure -a && \
@@ -176,8 +176,6 @@ RUN apt update && \
     apt clean -y && \
     apt autoclean -y && \
     rm -rf /var/lib/apt/lists /var/cache/apt/ && \
-    # Unsatisfied emailharvester dependencies
-    uv pip install --system --break-system-packages --python /opt/python/bin/python validators && \
     # Unsatisfied dirsearch dependencies (pin setuptools to a version that still ships pkg_resources)
     uv pip install --system --break-system-packages 'setuptools<82' && \
     # Install hacking tools via pip
@@ -186,9 +184,11 @@ RUN apt update && \
     mkdir -p /opt && \
     git clone https://github.com/fullhunt/log4j-scan.git /opt/log4j-scan && \
     git clone https://github.com/fullhunt/spring4shell-scan.git /opt/spring4shell-scan && \
+    git clone https://github.com/maldevel/EmailHarvester.git /opt/EmailHarvester && \
     git clone https://github.com/internetwache/GitTools.git /opt/GitTools && \
     uv pip install --system --break-system-packages --python /opt/python/bin/python -r /opt/log4j-scan/requirements.txt && \
     uv pip install --system --break-system-packages --python /opt/python/bin/python -r /opt/spring4shell-scan/requirements.txt && \
+    uv pip install --system --break-system-packages --python /opt/python/bin/python -r /opt/EmailHarvester/requirements.txt && \
     # Initializer script
     mkdir -p /entrypoints && \
     echo "uv run --no-dev manage.py migrate" > /entrypoints/initializer.sh && \

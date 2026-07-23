@@ -162,6 +162,7 @@ class RekonoConfig:
         _cmseek_dir (Property): CMSeek tool directory configuration property.
         _log4j_scan_dir (Property): Log4j scanner directory configuration property.
         _spring4shell_scan_dir (Property): Spring4Shell scanner directory configuration property.
+        _emailharvester_dir (Property): EmailHarvester tool directory configuration property.
         _gittools_dir (Property): GitTools directory configuration property.
 
     Example:
@@ -209,6 +210,7 @@ class RekonoConfig:
         "tools.spring4shell-scan.directory",
         "/opt/spring4shell-scan",
     )
+    _emailharvester_dir = Property("RKN_EMAILHARVESTER_DIR", "tools.emailharvester.directory", "/opt/EmailHarvester")
     _gittools_dir = Property("RKN_GITTOOLS_DIR", "tools.gittools.directory", "/opt/GitTools")
 
     @cached_property
@@ -532,6 +534,15 @@ class RekonoConfig:
             str: Path to Spring4Shell vulnerability scanner installation directory.
         """
         return self._spring4shell_scan_dir.read(self.config_from_file)
+
+    @property
+    def emailharvester_dir(self) -> str:
+        """Get EmailHarvester tool directory.
+
+        Returns:
+            str: Path to EmailHarvester tool installation directory.
+        """
+        return self._emailharvester_dir.read(self.config_from_file)
 
     @property
     def gittools_dir(self) -> str:

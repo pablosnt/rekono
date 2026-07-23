@@ -59,7 +59,7 @@ class BaseParser:
     output: str | None
     findings: list = field(default_factory=list)
     # Cache of parent findings derived from user-input targets during parsing
-    user_input_findings = field(default_factory=dict)
+    user_input_findings: dict = field(default_factory=dict)
 
     @cached_property
     def report(self) -> Path | None:
@@ -98,7 +98,7 @@ class BaseParser:
         """
         key = Crypto.hash("-".join([related_target.__class__.__name__, str(related_target.pk)]))
         if key not in self.user_input_findings:
-            finding = related_target.create_finding_from_user_input(self.execution)
+            finding = related_target.create_finding_from_user_input(self.executor.execution)
             if finding is None:
                 return None
             self.user_input_findings[key] = finding
