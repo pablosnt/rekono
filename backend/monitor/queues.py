@@ -11,6 +11,9 @@ from django.utils import timezone
 from django_rq import job
 from rq.job import Job, JobStatus
 
+from executions.enums import Status
+from executions.models import Execution
+from executions.queues import ExecutionsQueue
 from framework.queues import BaseQueue
 from monitor.models import MonitorSettings
 from platforms.cvecrowd.integrations import CveCrowd
@@ -67,7 +70,9 @@ class MonitorQueue(BaseQueue):
 
         Runs the monitoring process by updating the last monitor timestamp
         and invoking each configured monitoring platform to refresh their
-        security intelligence data (trending CVEs, EPSS scores, etc.).
+        security intelligence data (trending CVEs, EPSS scores, etc.). Finally,
+        reconciles executions whose RQ job has disappeared so they are not left
+        stuck in a non-terminal status forever.
         """
         BaseQueue.logger.info("[Monitor] Monitor job has started")
         settings = MonitorSettings.objects.first()
@@ -75,6 +80,14 @@ class MonitorQueue(BaseQueue):
         settings.save(update_fields=["last_monitor"])
         for platform in [CveCrowd(), First()]:
             platform.monitor()
+        # An execution that started and has a job ID but whose job can no longer be
+        # fetched was orphaned (e.g. the worker died), so mark it as errored
+        for execution in Execution.objects.filter(
+            start__isnull=False, rq_job_id__isnull=False, status=Status.in_progress()
+        ):
+            job = ExecutionsQueue().fetch_job(execution.rq_job_id)
+            if not job:
+                execution.error()
 
     @staticmethod
     def _scheduled_callback(job: Any, connection: Any, *args: Any, **kwargs: Any) -> None:

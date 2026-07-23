@@ -4,7 +4,11 @@ Defines the Execution model for tracking security tool execution lifecycle
 including status tracking, timing information, and result management.
 """
 
+import logging
+from typing import Any
+
 from django.db import models
+from django.utils import timezone
 
 from executions.enums import Status
 from framework.models import BaseModel
@@ -73,3 +77,75 @@ class Execution(BaseModel):
             str: String in format "task - configuration" or just "task"
         """
         return f"{self.task.__str__()}{f' - {self.configuration.__str__()}' if self.task.process else ''}"
+
+    def started(self) -> None:
+        """Mark the execution as RUNNING and anchor the parent task start.
+
+        Sets the status and the start timestamp, then pulls the parent task start
+        back to the earliest start among its executions, so parallel executions
+        can never leave the task starting later than one of its own executions.
+        """
+        self.status = Status.RUNNING
+        self.start = timezone.now()
+        self.save(update_fields=["start", "status"])
+        earliest = Execution.objects.filter(task=self.task, start__isnull=False).order_by("start").first()
+        if earliest and earliest.id == self.id:
+            self.task.start = earliest.start
+            self.task.save(update_fields=["start"])
+
+    def skipped(self, skipped_reason: str) -> None:
+        """Mark the execution as SKIPPED with the reason it was not run.
+
+        Used when the tool is missing or its arguments cannot be built, so the
+        execution never actually starts.
+
+        Args:
+            skipped_reason (str): Human-readable reason the execution was skipped.
+        """
+        self.logger.error(f"[Tool] {self.configuration.tool.name} execution was skipped due to '{skipped_reason}'")
+        self.finish(Status.SKIPPED, skipped_reason=skipped_reason)
+
+    def error(self) -> None:
+        """Mark the execution as ERROR after the tool failed or crashed."""
+        self.logger.error(f"[Tool] {self.configuration.tool.name} execution finished with errors")
+        self.finish(Status.ERROR)
+
+    def completed(self, hash: str) -> None:
+        """Mark the execution as COMPLETED and store its deduplication hash.
+
+        Args:
+            hash (str): Hash computed by the executor from the run environment and
+                arguments, used later to deduplicate findings across executions.
+        """
+        self.logger.info(f"[Tool] {self.configuration.tool.name} execution has been completed")
+        self.finish(Status.COMPLETED, hash=hash)
+
+    def finish(self, status: Status, **fields: Any) -> None:
+        """Apply a terminal status to the execution and settle the parent task end.
+
+        Sets the terminal status and the end timestamp, together with any extra model
+        fields, persists them, and then anchors the parent task end once none of its
+        executions remain pending. Shared by the executor lifecycle, the orphaned
+        execution reconciliation and the job failure callback so every terminal
+        transition behaves the same way.
+
+        Args:
+            status (Status): Terminal status to apply to the execution.
+            **fields (Any): Extra model fields to persist alongside status and end
+                (e.g. ``skipped_reason`` or ``hash``).
+        """
+        self.status = status
+        self.end = timezone.now()
+        for field, value in fields.items():
+            setattr(self, field, value)
+        self.save(update_fields=["status", "end", *fields.keys()])
+        if self.task and not Execution.objects.filter(task=self.task, status__in=Status.in_progress()).exists():
+            latest = (
+                Execution.objects.filter(task=self.task, end__isnull=False, status__in=Status.finished())
+                .order_by("-end")
+                .first()
+            )
+            if latest and latest.id == self.id:
+                self.task.end = self.end
+                self.task.save(update_fields=["end"])
+                logging.getLogger().info(f"[Task] Task {self.task.id} has finished")

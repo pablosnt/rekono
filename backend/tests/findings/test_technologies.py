@@ -51,7 +51,9 @@ class TechnologyTest(FindingTest, TestCase):
         first = Technology.objects.create_finding(self.execution, port=self.port, name="joomla", version="5.4.7-DEV")
         second = Technology.objects.create_finding(self.execution, port=self.port, name="Joomla", version="5.4.7-dev")
         self.assertEqual(first.id, second.id)
-        self.assertEqual(1, Technology.objects.filter(port=self.port, name__iexact="joomla", version__iexact="5.4.7-dev").count())
+        self.assertEqual(
+            1, Technology.objects.filter(port=self.port, name__iexact="joomla", version__iexact="5.4.7-dev").count()
+        )
 
     def test_deduplication_with_user_input(self):
         user_finding = Technology.objects.create_finding(

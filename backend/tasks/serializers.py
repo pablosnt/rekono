@@ -163,15 +163,7 @@ class TaskSerializer(RelatedNotesSerializer):
         """
         total = instance.executions.count()
         return (
-            math.ceil(
-                (
-                    instance.executions.filter(
-                        status__in=[Status.ERROR, Status.COMPLETED, Status.SKIPPED, Status.CANCELLED]
-                    ).count()
-                    / total
-                )
-                * 100
-            )
+            math.ceil((instance.executions.filter(status__in=Status.finished).count() / total) * 100)
             if total > 0
             else (100 if instance.end else 0)
         )

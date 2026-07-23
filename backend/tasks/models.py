@@ -124,7 +124,6 @@ class Task(BaseModel):
         """
         return [self.target_port] if self.target_port else list(self.target.target_ports.all())
 
-
     @staticmethod
     def get_target(target: Target, target_port: TargetPort | None = None) -> str:
         """Build a display label for a target, optionally scoped to a target port.
@@ -142,4 +141,8 @@ class Task(BaseModel):
             str: "<target>:<port><path>" when a target port is given, otherwise
                  the bare target address.
         """
-        return f"{target.target}:{target_port.port}{target.clean_path(target_port.path) if target_port.path else ""}" if target_port else target.target
+        return (
+            f"{target.target}:{target_port.port}{target.clean_path(target_port.path) if target_port.path else ''}"
+            if target_port
+            else target.target
+        )

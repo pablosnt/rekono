@@ -310,7 +310,13 @@ class Finding(BaseInput):
         """
         if unique_field.match_null_and_empty and new_value in (None, ""):
             return
-        field_query = Q(**{f"{unique_field.field}__iexact" if unique_field.ignore_case and isinstance(new_value, str) else unique_field.field: new_value})
+        field_query = Q(
+            **{
+                f"{unique_field.field}__iexact"
+                if unique_field.ignore_case and isinstance(new_value, str)
+                else unique_field.field: new_value
+            }
+        )
         if unique_field.match_null_and_empty:
             field_query |= Q(**{f"{unique_field.field}__isnull": True})
             if cls._meta.get_field(unique_field.field).get_internal_type() in ["CharField", "TextField"]:

@@ -52,12 +52,8 @@ class VulnerabilityTest(FindingTest, TestCase):
         self.assertEqual(self.technology, second.technology)
 
     def test_deduplication_ignores_name_case(self):
-        first = Vulnerability.objects.create_finding(
-            self.execution, technology=self.technology, name="SQL Injection"
-        )
-        second = Vulnerability.objects.create_finding(
-            self.execution, technology=self.technology, name="sql injection"
-        )
+        first = Vulnerability.objects.create_finding(self.execution, technology=self.technology, name="SQL Injection")
+        second = Vulnerability.objects.create_finding(self.execution, technology=self.technology, name="sql injection")
         self.assertEqual(first.id, second.id)
         self.assertEqual(
             1, Vulnerability.objects.filter(technology=self.technology, name__iexact="sql injection").count()

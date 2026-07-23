@@ -4,6 +4,8 @@ Provides queue management for security tool executions including job queuing,
 dependency management, and result processing for background execution workflows.
 """
 
+from typing import Any
+
 import rq
 from django.utils import timezone
 from django_rq import job
@@ -83,6 +85,7 @@ class ExecutionsQueue(BaseScanQueue):
             depends_on=Dependency(jobs=dependencies, allow_failure=True) if dependencies else [],
             at_front=at_front,
             job_id=job_id,
+            on_failure=ExecutionsQueue.on_execution_failure,
         )
         self.logger.info(
             f"[Execution] Execution {execution.id} ({execution.configuration.tool.name} - "
@@ -168,6 +171,31 @@ class ExecutionsQueue(BaseScanQueue):
         # Queue the extracted findings for background processing (alerts, integrations, etc.)
         FindingsQueue().enqueue(execution, parser.findings)
         return execution, parser.findings
+
+    @staticmethod
+    def on_execution_failure(job: Job, connection: Any, exc_type: Any, exc_value: Any, traceback: Any) -> None:
+        """Mark the execution as ERROR when its RQ job fails or is abandoned.
+
+        RQ invokes this callback when the execution job raises an unhandled exception or is moved
+        to the failed registry after being abandoned, so the execution is not left stuck in a
+        pending status. Executions that already reached a terminal status are left untouched.
+
+        Args:
+            job (Job): The failed RQ job.
+            connection (Any): The Redis connection (unused).
+            exc_type (Any): The exception type (unused).
+            exc_value (Any): The exception value (unused).
+            traceback (Any): The exception traceback (unused).
+        """
+        execution = job.kwargs.get("execution")
+        if not execution:
+            return
+        try:
+            execution.refresh_from_db()
+        except Execution.DoesNotExist:
+            return
+        if execution.status in Status.in_progress():
+            execution.error()
 
     @staticmethod
     def _get_findings_from_dependencies(

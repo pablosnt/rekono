@@ -151,7 +151,7 @@ class FindingsQueue(BaseQueue):
                 finding_type.objects.fix(
                     finding_type.objects.filter(
                         executions__hash=execution.hash,
-                        executions__status=Status.COMPLETED,
+                        executions__status=Status.finished(),
                     )
                     .exclude(executions__id=execution.id)
                     .distinct()

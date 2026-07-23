@@ -17,10 +17,8 @@ from urllib.parse import urlparse
 
 from django.core.exceptions import ValidationError
 from django.forms.models import model_to_dict
-from django.utils import timezone
 
 from authentications.models import Authentication
-from executions.enums import Status
 from executions.models import Execution
 from findings.framework.models import Finding
 from findings.models import Port
@@ -104,6 +102,25 @@ class BaseExecutor(LoggingEntity):
             self.port_from_arguments
             if self.port_from_arguments is not None
             else self.execution.configuration.default_scanned_port
+        )
+
+    @property
+    def hash(self) -> str:
+        """Build a stable fingerprint of the execution for finding deduplication.
+
+        Combines the run environment and the command arguments into a single
+        lowercased string and hashes it. Arguments that reference the report path
+        are dropped because that path changes on every run, so identical scans of
+        the same target produce the same hash.
+
+        Returns:
+            str: Hash identifying equivalent executions.
+        """
+        return Crypto.hash(
+            " ".join(
+                [f"{k}={v}" for k, v in self.environment.items()]
+                + [a for a in self.arguments if str(self.report).lower() not in a.lower()]
+            ).lower()
         )
 
     def get_arguments(
@@ -421,9 +438,9 @@ class BaseExecutor(LoggingEntity):
         # Handle execution completion based on tool exit code and configuration
         # Some tools use non-zero exit codes for normal operation (e.g., findings detected)
         if not self.execution.configuration.tool.ignore_exit_code and process.returncode > 0:
-            self.on_error()
+            self.execution.error()
         else:
-            self.on_completed()
+            self.execution.completed(self.hash)
 
     def after_running(self) -> None:  # pragma: no cover
         """Hook method called after tool execution.
@@ -485,86 +502,6 @@ class BaseExecutor(LoggingEntity):
                     command = command.replace(value, "*" * len(value))
         return command
 
-    def on_start(self) -> None:
-        """Handle execution start event.
-
-        Updates execution status to RUNNING and sets the start timestamp. Sets the
-        task start to the earliest start among its executions, so parallel executions
-        can't leave the task starting later than one of its own executions.
-        """
-        self.execution.status = Status.RUNNING
-        self.execution.start = timezone.now()
-        self.execution.save(update_fields=["start", "status"])
-        earliest = Execution.objects.filter(task=self.execution.task, start__isnull=False).order_by("start").first()
-        if earliest and earliest.id == self.execution.id:
-            self.execution.task.start = earliest.start
-            self.execution.task.save(update_fields=["start"])
-
-    def on_skip(self, reason: str) -> None:
-        """Handle execution skip event.
-
-        Updates execution status to SKIPPED with reason and end timestamp.
-        Triggers task end check.
-
-        Args:
-            reason (str): The reason why the execution was skipped
-        """
-        self.logger.error(f"[Tool] {self.execution.configuration.tool.name} execution was skipped due to '{reason}'")
-        self.execution.status = Status.SKIPPED
-        self.execution.skipped_reason = reason
-        self.execution.end = timezone.now()
-        self.execution.save(update_fields=["status", "end", "skipped_reason"])
-        self.on_task_end()
-
-    def on_error(self) -> None:
-        """Handle execution error event.
-
-        Updates execution status to ERROR and sets end timestamp.
-        Triggers task end check.
-        """
-        self.logger.error(f"[Tool] {self.execution.configuration.tool.name} execution finished with errors")
-        self.execution.status = Status.ERROR
-        self.execution.end = timezone.now()
-        self.execution.save(update_fields=["status", "end"])
-        self.on_task_end()
-
-    def on_completed(self) -> None:
-        """Handle execution completion event.
-
-        Updates execution status to COMPLETED, sets end timestamp, and generates
-        execution hash for deduplication. Triggers task end check.
-        """
-        self.logger.info(f"[Tool] {self.execution.configuration.tool.name} execution has been completed")
-        self.execution.status = Status.COMPLETED
-        self.execution.end = timezone.now()
-        self.execution.hash = Crypto.hash(
-            " ".join(
-                [f"{k}={v}" for k, v in self.environment.items()]
-                + [a for a in self.arguments if str(self.report).lower() not in a.lower()]
-            ).lower()
-        )
-        self.execution.save(update_fields=["status", "end", "hash"])
-        self.on_task_end()
-
-    def on_task_end(self) -> None:
-        """Check and handle task completion.
-
-        Determines if the task is complete by checking if any executions
-        are still running or requested. When complete, the task end is anchored
-        to the latest execution end rather than the current time, so the task
-        duration never ends before its last execution finished.
-        """
-        if not Execution.objects.filter(
-            task=self.execution.task, status__in=[Status.REQUESTED, Status.RUNNING]
-        ).exists():
-            end = timezone.now()
-            latest = Execution.objects.filter(task=self.execution.task, end__isnull=False).order_by("-end").first()
-            if latest and latest.id == self.execution.id:
-                end = latest.end
-            self.execution.task.end = end
-            self.execution.task.save(update_fields=["end"])
-            self.logger.info(f"[Task] Task {self.execution.task.id} has finished")
-
     def execute(
         self,
         findings: list[Finding],
@@ -586,10 +523,10 @@ class BaseExecutor(LoggingEntity):
             input_technologies (list[InputTechnology]): Technology parameters
             wordlists (list[Wordlist]): Wordlists to use as inputs
         """
-        self.on_start()
+        self.execution.started()
         self.execution.configuration.tool.update_status()
         if not self.execution.configuration.tool.is_installed:
-            self.on_skip(f"Tool {self.execution.configuration.tool.name} is not installed in the system")
+            self.execution.skipped(f"Tool {self.execution.configuration.tool.name} is not installed in the system")
             return
         try:
             self.arguments = self.get_arguments(
@@ -597,7 +534,7 @@ class BaseExecutor(LoggingEntity):
             )
         except RuntimeError as error:
             self.logger.error(f"[Tool] {str(error)}")
-            self.on_skip(str(error))
+            self.execution.skipped(str(error))
             return
         self.environment = self.get_environment()
         self.save_executed_command(wordlists)
@@ -606,7 +543,7 @@ class BaseExecutor(LoggingEntity):
             if not CONFIG.testing:
                 self.run_tool(self.environment)
         except (RuntimeError, Exception):
-            self.on_error()
+            self.execution.error()
             self.after_running()
             return
         self.after_running()
