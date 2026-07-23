@@ -67,8 +67,8 @@ class Gitleaks(BaseParser):
             self.create_finding(Path, path=Path.clean_path("/.git"), type=PathType.ENDPOINT)
             self.create_finding(
                 Vulnerability,
-                name="Git source code exposure",
-                description="Source code is exposed in the endpoint /.git/ and it's possible to dump it as a git repository",
+                name="Exposed git repository",
+                description="Git repository is exposed in the endpoint /.git/ and it's possible to dump it and access the git history and source code",
                 severity=Severity.HIGH,
                 # CWE-527: Exposure of Version-Control Repository to an Unauthorized Control Sphere
                 cwes=["CWE-527"],
