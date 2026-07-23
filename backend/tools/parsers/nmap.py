@@ -37,8 +37,9 @@ class Nmap(BaseParser):
     def _parse(self) -> None:
         """Parse Nmap XML output and extract security findings.
 
-        Processes Nmap scan results to create Host, Port, Technology, and Vulnerability
-        findings. Handles OS detection, service fingerprinting, and NSE script results.
+        Processes Nmap scan results to create Host, Port, Technology, Path, and
+        Vulnerability findings. Handles OS detection, service fingerprinting, and NSE
+        script results.
         """
         report = NmapParser.parse_fromfile(self.report)
         for nmap_host in report.hosts:
@@ -260,6 +261,26 @@ class Nmap(BaseParser):
                     if smb_technology:
                         smb_technology.description = f"Protocols: {', '.join([p.split('[dangerous', 1)[0].strip() for p in script.get('elements', {}).get('dialects', {}).get(None)])}"
                         smb_technology.save(update_fields=["description"])
+                case "http-git":
+                    if "Git repository found!" in script.get("output", ""):
+                        self.create_finding(
+                            Path,
+                            linked_finding=is_technology_link,
+                            port=technology.port if technology else port,
+                            path=Path.clean_path("/.git"),
+                            type=PathType.ENDPOINT,
+                        )
+                        self.create_finding(
+                            Vulnerability,
+                            linked_finding=is_technology_link,
+                            **technology_link,
+                            name="Exposed git repository",
+                            description="Git repository is exposed in the endpoint /.git/ and it's possible to dump it and access the git history and source code",
+                            severity=Severity.HIGH,
+                            # CWE-527: Exposure of Version-Control Repository to an Unauthorized Control Sphere
+                            cwes=["CWE-527"],
+                            reference="https://iosentrix.com/blog/git-source-code-disclosure-vulnerability/",
+                        )
                 case _:
                     self._parse_nse_vulners(script, technology, port)
 

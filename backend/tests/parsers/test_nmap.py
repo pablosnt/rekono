@@ -100,6 +100,18 @@ class NmapTest(ParserTest, TestCase):
                 {"model": Vulnerability, "name": "CVE-2019-0197", "cve": "CVE-2019-0197"},
                 {"model": Vulnerability, "name": "CVE-2020-11993", "cve": "CVE-2020-11993"},
                 {"model": Vulnerability, "name": "CVE-2019-10092", "cve": "CVE-2019-10092"},
+                {"model": Path, "path": "/.git", "type": PathType.ENDPOINT},
+                {
+                    "model": Vulnerability,
+                    "name": "Exposed git repository",
+                    "description": (
+                        "Git repository is exposed in the endpoint /.git/ and it's possible to dump it "
+                        "and access the git history and source code"
+                    ),
+                    "severity": Severity.HIGH,
+                    "cwes": ["CWE-527"],
+                    "reference": "https://iosentrix.com/blog/git-source-code-disclosure-vulnerability/",
+                },
             ],
         ),
         ParserTestCase(

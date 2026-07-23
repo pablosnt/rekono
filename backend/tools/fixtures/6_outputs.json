@@ -790,5 +790,117 @@
             "configuration": 33,
             "type": 5
         }
+    },
+    {
+        "model": "tools.output",
+        "pk": 100,
+        "fields": {
+            "configuration": 3,
+            "type": 4
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 101,
+        "fields": {
+            "configuration": 3,
+            "type": 6
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 102,
+        "fields": {
+            "configuration": 4,
+            "type": 4
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 103,
+        "fields": {
+            "configuration": 4,
+            "type": 6
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 104,
+        "fields": {
+            "configuration": 6,
+            "type": 4
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 105,
+        "fields": {
+            "configuration": 6,
+            "type": 6
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 106,
+        "fields": {
+            "configuration": 9,
+            "type": 4
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 107,
+        "fields": {
+            "configuration": 9,
+            "type": 6
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 108,
+        "fields": {
+            "configuration": 10,
+            "type": 4
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 109,
+        "fields": {
+            "configuration": 10,
+            "type": 6
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 110,
+        "fields": {
+            "configuration": 12,
+            "type": 4
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 111,
+        "fields": {
+            "configuration": 12,
+            "type": 6
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 112,
+        "fields": {
+            "configuration": 13,
+            "type": 4
+        }
+    },
+    {
+        "model": "tools.output",
+        "pk": 113,
+        "fields": {
+            "configuration": 14,
+            "type": 4
+        }
     }
 ]

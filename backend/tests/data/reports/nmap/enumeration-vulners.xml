@@ -916,6 +916,10 @@
 <elem key="type">packetstorm</elem>
 </table>
 </table>
+</script><script id="http-git" output="&#xa;  10.10.10.10:443/.git/&#xa;    Git repository found!&#xa;    Repository description: Unnamed repository;&#xa;    Last commit message: new secrets &#xa;"><table key="10.10.10.10:443/.git/">
+<elem key="last-commit-message">new secrets&#xa;</elem>
+<elem key="repository-description">Unnamed repository; edit this file &apos;description&apos; to name the repository.&#xa;</elem>
+</table>
 </script></port>
 </ports>
 <os><portused state="open" proto="tcp" portid="22"/>
