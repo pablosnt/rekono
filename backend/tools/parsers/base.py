@@ -19,8 +19,8 @@ from findings.framework.models import Finding
 from findings.models import OSINT, Host
 from parameters.models import InputTechnology, InputVulnerability
 from rekono.settings import CONFIG
-from target_ports.models import TargetPort
 from security.cryptography import Crypto
+from target_ports.models import TargetPort
 from targets.models import Target
 from tools.executors.base import BaseExecutor
 
@@ -96,8 +96,7 @@ class BaseParser:
         Returns:
             Any | None: The parent finding, or None when it could not be derived.
         """
-        key = Crypto.hash("-".join([related_target.__class__.__name__,
-                    str(related_target.pk)]))
+        key = Crypto.hash("-".join([related_target.__class__.__name__, str(related_target.pk)]))
         if key not in self.user_input_findings:
             finding = related_target.create_finding_from_user_input(self.execution)
             if finding is None:
