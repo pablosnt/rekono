@@ -15,7 +15,15 @@ from executions.models import Execution
 from findings.framework.models import Finding
 from framework.platforms import BaseNotification
 from platforms.telegram_app.framework import BaseTelegram
-from platforms.telegram_app.notifications.templates import ALERT, ALERT_TRENDING_CVE, EXECUTION, FINDINGS, MESSAGE
+from platforms.telegram_app.notifications.templates import (
+    ALERT,
+    ALERT_TRENDING_CVE,
+    EXECUTION,
+    FINDINGS,
+    MESSAGE,
+    SUMMARY_ICON,
+    SUMMARY_LINE,
+)
 from rekono.settings import CONFIG
 from tasks.models import Task
 from users.models import User
@@ -36,6 +44,8 @@ class Telegram(BaseNotification, BaseTelegram):
 
     enable_field = "telegram_notifications"
     initial_findings_per_message = 10
+    # Executions with more than these findings, are notified with a summary
+    findings_summary_threshold = 50
 
     def is_available(self) -> bool:
         """Check if Telegram notifications are available.
@@ -60,11 +70,14 @@ class Telegram(BaseNotification, BaseTelegram):
         """Send execution completion notification with findings summary.
 
         Formats and sends a comprehensive execution report including tool details,
-        execution timing, and organized findings by type. The full report is sent as a
-        single message, but if it exceeds Telegram's message length limit the findings are
-        split into groups of `initial_findings_per_message`, keeping the execution details only in
-        the first message. Any resulting message that is still too long is split in half
-        again until every message fits within the limit.
+        execution timing, and organized findings by type. When an execution reports more than
+        `findings_summary_threshold` findings, a single summary message with the counters per
+        finding type is sent instead of their details, keeping the number of messages under
+        Telegram's limits. Otherwise the full report is sent as a single message, but if it
+        exceeds Telegram's message length limit the findings are split into groups of
+        `initial_findings_per_message`, keeping the execution details only in the first message.
+        Any resulting message that is still too long is split in half again until every message
+        fits within the limit.
 
         Args:
             users (list[User]): Users to notify about the execution.
@@ -72,6 +85,10 @@ class Telegram(BaseNotification, BaseTelegram):
             findings (list[Finding]): List of security findings discovered.
         """
         findings = [finding for finding in findings if not finding.created_from_user_input]
+        if len(findings) > self.findings_summary_threshold:
+            # Too many findings, so send a summary notification
+            self._notify(users, self._execution_message(execution, self._format_findings_summary(findings)))
+            return
         message = self._execution_message(execution, findings)
         if len(message) <= MessageLimit.MAX_TEXT_LENGTH:
             self._notify(users, message)
@@ -96,7 +113,11 @@ class Telegram(BaseNotification, BaseTelegram):
             findings (list[Finding]): Findings included in this group.
             with_execution (bool): Whether to prepend the execution details to the message.
         """
-        message = self._execution_message(execution, findings) if with_execution else self._format_findings(findings)
+        message = (
+            self._execution_message(execution, self._format_findings(findings))
+            if with_execution
+            else self._format_findings(findings)
+        )
         if len(message) <= MessageLimit.MAX_TEXT_LENGTH:
             self._notify(users, message)
         elif len(findings) == 1:
@@ -107,12 +128,12 @@ class Telegram(BaseNotification, BaseTelegram):
             self._notify_execution_group(users, execution, findings[:half], with_execution)
             self._notify_execution_group(users, execution, findings[half:], with_execution=False)
 
-    def _execution_message(self, execution: Execution, findings: list[Finding]) -> str:
-        """Build the execution report message with its findings summary.
+    def _execution_message(self, execution: Execution, findings: str) -> str:
+        """Render the execution report template with an already formatted findings section.
 
         Args:
             execution (Execution): The completed security tool execution.
-            findings (list[Finding]): Findings to include in this message.
+            findings (str): Formatted findings section (details or summary) to embed in the report.
 
         Returns:
             str: Formatted execution report ready to be sent.
@@ -127,7 +148,31 @@ class Telegram(BaseNotification, BaseTelegram):
             end=self.escape(execution.end.strftime(self.date_format)),
             executor=self.escape(execution.task.executor.username if execution.task.executor else "System"),
             frontend_link=f"[Check scan in Rekono]({self.escape(f'{CONFIG.frontend_url}/projects/{execution.task.target.project.id}/scans/{execution.task.id}', entity_type='text_link')})",
-            findings=self._format_findings(findings),
+            findings=findings,
+        )
+
+    def _format_findings_summary(self, findings: list[Finding]) -> str:
+        """Format the counters of findings per type for a Telegram summary message.
+
+        Args:
+            findings (list[Finding]): Findings to summarize.
+
+        Returns:
+            str: Findings summary with one line per finding type showing its icon, title and count.
+        """
+        counts: dict[Any, int] = {}
+        for finding in findings:
+            counts[finding.__class__] = counts.get(finding.__class__, 0) + 1
+        return MESSAGE.format(
+            icon=SUMMARY_ICON,
+            title=f"{len(findings)} findings detected",
+            details="\n".join(
+                SUMMARY_LINE.format(
+                    icon=FINDINGS[finding_type].get("icon", ""), title=finding_type.__name__, count=count
+                )
+                for finding_type, count in counts.items()
+                if count > 0
+            ),
         )
 
     def _format_findings(self, findings: list[Finding]) -> str:

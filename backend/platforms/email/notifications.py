@@ -52,6 +52,8 @@ class SMTP(BaseNotification):
 
     enable_field = "email_notifications"
     datetime_format = "%Y-%m-%d %H:%M %Z"
+    # Executions with more than these findings, are notified with a summary
+    findings_summary_threshold = 200
 
     @property
     def settings(self) -> SMTPSettings:
@@ -188,9 +190,10 @@ class SMTP(BaseNotification):
         for finding in findings:
             if finding.created_from_user_input:
                 continue
-            if finding.__class__.__name__.lower() not in findings_by_class:
-                findings_by_class[finding.__class__.__name__.lower()] = []
-            findings_by_class[finding.__class__.__name__.lower()].append(finding)
+            if finding.__class__.__name__ not in findings_by_class:
+                findings_by_class[finding.__class__.__name__] = []
+            findings_by_class[finding.__class__.__name__].append(finding)
+        total = sum(len(items) for items in findings_by_class.values())
         # This is called from findings queue which is already asynchronous
         self._notify(
             users,
@@ -199,7 +202,17 @@ class SMTP(BaseNotification):
             {
                 "execution": execution,
                 "target": Task.get_target(execution.task.target, execution.task.target_port),
-                **findings_by_class,
+                **(
+                    {
+                        "summary_counts": [
+                            {"title": finding_type, "count": len(findings)}
+                            for finding_type, findings in findings_by_class
+                            if len(findings) > 0
+                        ]
+                    }
+                    if total > self.findings_summary_threshold
+                    else {k.lower(): v for k, v in findings_by_class.items()}
+                ),
             },
             background=False,
         )

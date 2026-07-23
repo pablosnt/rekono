@@ -60,7 +60,9 @@ class BaseTelegram(LoggingEntity):
             except Exception as ex:
                 # The Telegram API is temporarily unreachable
                 # Keep the token and leave the bot uninitialized so the next request can retry
-                self.logger.error(f"[Telegram] {ex.__class__.__name__} error when trying to initialize the Telegram Bot: {str(ex)}")
+                self.logger.error(
+                    f"[Telegram] {ex.__class__.__name__} error when trying to initialize the Telegram Bot: {str(ex)}"
+                )
 
     @property
     def app(self) -> Application | None:

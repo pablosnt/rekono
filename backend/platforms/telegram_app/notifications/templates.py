@@ -27,6 +27,9 @@ MESSAGE = """
 
 {details}"""
 
+SUMMARY_ICON = "📊"
+SUMMARY_LINE = "{icon} _{title}_          *{count}*"
+
 FINDINGS = {
     OSINT: {
         "icon": "📖",
