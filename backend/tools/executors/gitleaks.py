@@ -6,10 +6,10 @@ secrets from exposed Git repositories by scanning their commit history.
 
 import os
 import subprocess
-from urllib.parse import urlparse
 import uuid
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlparse
 
 from rekono.settings import CONFIG
 from tools.executors.base import BaseExecutor
