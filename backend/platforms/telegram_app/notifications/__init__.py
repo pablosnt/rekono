@@ -89,7 +89,7 @@ class Telegram(BaseNotification, BaseTelegram):
             # Too many findings, so send a summary notification
             self._notify(users, self._execution_message(execution, self._format_findings_summary(findings)))
             return
-        message = self._execution_message(execution, findings)
+        message = self._execution_message(execution, self._format_findings(findings))
         if len(message) <= MessageLimit.MAX_TEXT_LENGTH:
             self._notify(users, message)
         else:

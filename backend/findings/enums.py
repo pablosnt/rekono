@@ -109,6 +109,7 @@ class PortStatus(models.TextChoices):
     OPEN_FILTERED = "Open - Filtered"
     FILTERED = "Filtered"
     CLOSED = "Closed"
+    CLOSED_FILTERED = "Closed - Filtered"
 
 
 class TransportProtocol(models.TextChoices):

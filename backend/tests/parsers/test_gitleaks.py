@@ -1,6 +1,9 @@
+from pathlib import Path as PathFile
+
 from django.test import TestCase
 
-from findings.models import Credential
+from findings.enums import PathType, Severity
+from findings.models import Credential, Path, Vulnerability
 from tests.framework import ParserTest
 from tests.framework.cases import ParserTestCase
 
@@ -12,6 +15,8 @@ class GitleaksTest(ParserTest, TestCase):
         ParserTestCase(
             "leaky-repo.json",
             [
+                {"model": Path, "path": "/.git", "type": PathType.ENDPOINT},
+                {"model": Vulnerability, "name": "Exposed git repository", "severity": Severity.HIGH},
                 {
                     "model": Credential,
                     "secret": 'token: "7f9cc25de23d1a255720b0ae4551f4044d600f46"',
@@ -20,7 +25,7 @@ class GitleaksTest(ParserTest, TestCase):
                 {
                     "model": Credential,
                     "email": "git@asdf.com",
-                    "context": "/.git/ : Author of the commit 9f1468c79df2cf13c66041692ca7f044a27a874b whose name is ASDF",
+                    "context": "/.git/ : Git contributor with name ASDF",
                 },
                 {"model": Credential, "secret": "xoxp-858723095049", "context": "/.git/ : .bash_profile -> Line 23"},
                 {
@@ -49,5 +54,11 @@ class GitleaksTest(ParserTest, TestCase):
                     "context": "/.git/ : misc-keys/cert-key.pem -> Line 1",
                 },
             ],
+            # Simulate a dumped repository so the parser processes the report. The execution directory
+            # points to a non-existent path so no real git history is harvested during the test.
+            executor_attributes={
+                "git_directory_dumped": True,
+                "execution_directory": PathFile("/nonexistent-rekono-gitleaks-test"),
+            },
         ),
     ]

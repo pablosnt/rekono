@@ -83,7 +83,7 @@ class MonitorQueue(BaseQueue):
         # An execution that started and has a job ID but whose job can no longer be
         # fetched was orphaned (e.g. the worker died), so mark it as errored
         for execution in Execution.objects.filter(
-            start__isnull=False, rq_job_id__isnull=False, status=Status.in_progress()
+            start__isnull=False, rq_job_id__isnull=False, status__in=Status.in_progress()
         ):
             job = ExecutionsQueue().fetch_job(execution.rq_job_id)
             if not job:

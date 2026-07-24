@@ -185,7 +185,7 @@ class Port(HacktricksFinding):
     Attributes:
         host (ForeignKey): Parent host where port was discovered (optional relationship)
         port (IntegerField): Network port number in range 1-65535
-        status (TextField): Port scan status from PortStatus enum (default: OPEN, max 15 characters)
+        status (TextField): Port scan status from PortStatus enum (default: OPEN, max 17 characters)
         protocol (TextField): Transport protocol from TransportProtocol enum (optional, max 5 characters)
         service (TextField): Identified service name or banner information (optional, max 50 characters)
 
@@ -205,7 +205,7 @@ class Port(HacktricksFinding):
 
     host = models.ForeignKey(Host, related_name="port", on_delete=models.DO_NOTHING, blank=True, null=True)
     port = models.IntegerField()
-    status = models.TextField(max_length=15, choices=PortStatus.choices, default=PortStatus.OPEN)
+    status = models.TextField(max_length=17, choices=PortStatus.choices, default=PortStatus.OPEN)
     protocol = models.TextField(max_length=5, choices=TransportProtocol.choices, blank=True, null=True)
     service = models.TextField(max_length=50, blank=True, null=True)
 

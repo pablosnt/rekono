@@ -86,7 +86,7 @@ class Gitleaks(BaseExecutor):
             super().run_tool(environment)
         else:
             if process.returncode > 0 and process.stderr:
-                self.execution.output_plain = process.stderr
+                self.execution.output_plain = process.stderr.decode()
                 self.execution.error()
             else:
                 self.execution.output_plain = "No git repository exposed"

@@ -17,9 +17,11 @@ from tools.parsers.base import BaseParser
 # Nmap can report combined states such as "open|filtered" that can't be directly resolved to PortStatus values
 PORT_STATUSES = {
     "open": PortStatus.OPEN,
+    "unfiltered": PortStatus.OPEN,
     "closed": PortStatus.CLOSED,
     "filtered": PortStatus.FILTERED,
     "open|filtered": PortStatus.OPEN_FILTERED,
+    "closed|filtered": PortStatus.CLOSED_FILTERED,
 }
 
 

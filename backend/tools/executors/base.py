@@ -68,6 +68,7 @@ class BaseExecutor(LoggingEntity):
         """
         self.arguments = []
         self.environment = {}
+        self.hashable_environment = {}
         self.findings_used_in_execution = {}
         self.targets_used_in_execution = {}
         self.authentication = None
@@ -118,7 +119,7 @@ class BaseExecutor(LoggingEntity):
         """
         return Crypto.hash(
             " ".join(
-                [f"{k}={v}" for k, v in self.environment.items()]
+                [f"{k}={v}" for k, v in self.hashable_environment.items()]
                 + [a for a in self.arguments if str(self.report).lower() not in a.lower()]
             ).lower()
         )
@@ -368,8 +369,11 @@ class BaseExecutor(LoggingEntity):
                             f"[Security] Refused to set sensitive environment variable '{variable}' from execution arguments"
                         )
                         continue
+                    variable = variable.strip()
+                    value = value.strip().replace("'", "").replace('"', "")
                     # Clean variable value by removing quotes that might interfere with execution
-                    environment[variable.strip()] = value.strip().replace("'", "").replace('"', "")
+                    environment[variable] = value
+                    self.hashable_environment[variable] = value
             # Remove environment definitions from arguments, keeping only the tool command and its parameters
             self.arguments = self.arguments[index:]
         settings = Settings.objects.first()

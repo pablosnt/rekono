@@ -123,6 +123,7 @@ export const portStatuses = [
   { value: "Open", color: "success", icon: "i-lucide-square-check" },
   { value: "Open - Filtered", color: "warning", icon: "i-lucide-brick-wall" },
   { value: "Filtered", color: "warning", icon: "i-lucide-brick-wall-shield" },
+  { value: "Closed - Filtered", color: "warning", icon: "i-lucide-brick-wall" },
   { value: "Closed", color: "error", icon: "i-lucide-square-x" },
 ];
 

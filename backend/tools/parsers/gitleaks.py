@@ -85,10 +85,10 @@ class Gitleaks(BaseParser):
                     secret=finding.get("Match"),
                     context=f"/.git/ : {finding.get('File')} -> Line {finding.get('StartLine')}",
                 )
-                email = (finding.get("Email")).strip()
+                email = (finding.get("Email") or "").strip()
                 if email and email not in emails:
                     emails.add(email)
-                    self._create_git_contributor_credential(finding.get("Email"), (finding.get("Author") or "").strip())
+                    self._create_git_contributor_credential(email, (finding.get("Author") or "").strip())
             # GitLeaks only reports the emails of authors that committed a secret. The dumped repository
             # holds the whole commit history, so its author and committer emails are harvested as extra
             # credentials. This runs last so a git failure can't drop the secret findings parsed above.

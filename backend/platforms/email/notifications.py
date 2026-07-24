@@ -206,7 +206,7 @@ class SMTP(BaseNotification):
                     {
                         "summary_counts": [
                             {"title": finding_type, "count": len(findings)}
-                            for finding_type, findings in findings_by_class
+                            for finding_type, findings in findings_by_class.items()
                             if len(findings) > 0
                         ]
                     }
