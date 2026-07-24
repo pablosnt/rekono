@@ -307,6 +307,27 @@ class NucleiTest(ParserTest, TestCase):
             ],
         ),
         ParserTestCase(
+            "edge-cases.json",
+            [
+                # A malformed port value is ignored, so the finding is reported without a Port
+                {
+                    "model": Vulnerability,
+                    "name": "Malformed port finding",
+                    "severity": Severity.INFO,
+                    "cve": None,
+                    "cwes": [],
+                },
+                # A "tech" template with an extracted version keeps the template name and stores the version
+                {
+                    "model": Technology,
+                    "name": "OpenSSH Service",
+                    "version": "7.4",
+                    "description": "OpenSSH Service",
+                    "reference": None,
+                },
+            ],
+        ),
+        ParserTestCase(
             "scheme-less-ports.json",
             [
                 {"model": Port, "port": 80},

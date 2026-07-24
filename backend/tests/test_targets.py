@@ -1,7 +1,9 @@
 from functools import cached_property
+from unittest.mock import patch
 
 from django.test import TestCase
 
+from findings.models import Host
 from security.authorization.roles import Role
 from targets.enums import TargetType
 from targets.models import Target
@@ -76,3 +78,26 @@ class TargetTest(ApiTest, TestCase):
     @cached_property
     def object(self) -> Target:
         return Target(**{**target1, "project": self.project})
+
+    def test_resolve_domain_cache_hit(self) -> None:
+        ip = "9.9.9.9"
+        with patch.object(Target._dns_cache, "get", return_value=ip):
+            self.assertEqual(ip, Target.resolve_domain("cached.example.com"))
+
+    def test_create_finding_from_user_input(self) -> None:
+        ip, domain = "1.2.3.4", "example.com"
+        domain_target = Target.objects.create(project=self.project, target=domain, type=TargetType.DOMAIN)
+        with patch.object(Target, "resolve_domain", return_value=ip):
+            host = domain_target.create_finding_from_user_input(self.execution)
+        self.assertIsInstance(host, Host)
+        self.assertEqual(ip, host.ip)
+        self.assertEqual(domain, host.domain)
+        # Unresolvable domain -> No finding
+        with patch.object(Target, "resolve_domain", return_value=None):
+            self.assertIsNone(domain_target.create_finding_from_user_input(self.execution))
+        # Non-IP and non-domain target -> No finding
+        self.assertIsNone(
+            Target.objects.create(
+                project=self.project, target="10.10.10.0/24", type=TargetType.NETWORK
+            ).create_finding_from_user_input(self.execution)
+        )
