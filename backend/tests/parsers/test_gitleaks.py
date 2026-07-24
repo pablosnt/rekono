@@ -78,7 +78,7 @@ class GitleaksTest(ParserTest, TestCase):
         ),
     ]
 
-    def _run_parser(self, report_name: str, executor_attributes: dict) -> "object":
+    def _run_parser(self, report_name: str, executor_attributes: dict) -> BaseParser:
         executor = self.execution.configuration.tool.executor_class(self.execution)
         for attribute, value in executor_attributes.items():
             setattr(executor, attribute, value)
