@@ -8,3 +8,6 @@ vulnerabilities:
   - id: CVE-2026-8643
     purls:
       - "pkg:pypi/pip@26.0"
+  - id: CVE-2026-59890
+    purls:
+      - "pkg:pypi/setuptools@81.0.0"  # setuptools<82 is required for Dirsearch not to break

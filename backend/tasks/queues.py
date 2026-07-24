@@ -81,7 +81,7 @@ class PlanJob:
         """
         self.jobs.append(job)
 
-    def __eq__(self, other: Any) -> bool:
+    def __eq__(self, other: object) -> bool:
         """Check equality based on step ID.
 
         Args:
@@ -153,13 +153,15 @@ class TasksQueue(BaseScanQueue):
         and a deny list change or DNS rebinding afterwards could otherwise let a
         previously-saved target be scanned. A rejected target does not run: the
         task is kept and the rejection is recorded as skipped executions so its
-        history survives and the reason is visible.
+        history survives and the reason is visible. Its scheduling is cleared so
+        a recurring or scheduled task is not re-run against the denied target
+        over and over.
 
         Args:
             task (Task): The task to process
 
         Returns:
-            Task | None: The processed task, or None when the target was rejected
+            Task | None: The processed task
         """
         BaseScanQueue.logger.info(f"[Task] Task {task.id} has started")
         # Re-validate the task target before creating any execution
@@ -187,7 +189,10 @@ class TasksQueue(BaseScanQueue):
                 )
             task.start = dt
             task.end = dt
-            task.save(update_fields=["start", "end"])
+            # Clear next task iteration
+            task.repeat_in = None
+            task.repeat_time_unit = None
+            task.save(update_fields=["start", "end", "repeat_in", "repeat_time_unit"])
             return task
         if task.configuration:
             TasksQueue._consume_tool_task(task)

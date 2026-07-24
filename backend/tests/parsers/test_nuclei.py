@@ -12,7 +12,7 @@ class NucleiTest(ParserTest, TestCase):
         ParserTestCase(
             "2022-dvwa.json",
             [
-                {"model": Technology, "name": "PHP Detect", "version": None, "description": None, "reference": None},
+                {"model": Technology, "name": "PHP", "version": None, "description": None, "reference": None},
                 {
                     "model": Technology,
                     "name": "Apache/2.4.25 (Debian)",

@@ -31,7 +31,7 @@ class Status(models.TextChoices):
     COMPLETED = "Completed"
 
     @classmethod
-    def in_progress(cls) -> list["Status"]:
+    def in_progress(cls) -> list[str]:
         """Return the statuses of executions that are still queued or running.
 
         Returns:
@@ -40,7 +40,7 @@ class Status(models.TextChoices):
         return [cls.REQUESTED, cls.RUNNING]
 
     @classmethod
-    def finished(cls) -> list["Status"]:
+    def finished(cls) -> list[str]:
         """Return the terminal statuses an execution can end up in.
 
         Returns:

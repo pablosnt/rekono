@@ -4,6 +4,7 @@ Processes GitLeaks JSON output to extract exposed secrets and credentials
 from the commit history of dumped Git repositories.
 """
 
+import subprocess
 from dataclasses import dataclass
 from typing import Any
 
@@ -74,20 +75,71 @@ class Gitleaks(BaseParser):
                 cwes=["CWE-527"],
                 reference="https://iosentrix.com/blog/git-source-code-disclosure-vulnerability/",
             )
-        data = self.load_json_report()
-        if not data or not isinstance(data, list):
-            return
-        emails = set()
-        for finding in data:
-            self.create_finding(
-                Credential,
-                secret=finding.get("Match"),
-                context=f"/.git/ : {finding.get('File')} -> Line {finding.get('StartLine')}",
-            )
-            if finding.get("Email") and finding.get("Email") not in emails:
-                emails.add(finding.get("Email"))
+            data = self.load_json_report()
+            if not data or not isinstance(data, list):
+                return
+            emails = set()
+            for finding in data:
                 self.create_finding(
                     Credential,
-                    email=finding.get("Email"),
-                    context=f"/.git/ : Author of the commit {finding.get('Commit')} whose name is {finding.get('Author')}",
+                    secret=finding.get("Match"),
+                    context=f"/.git/ : {finding.get('File')} -> Line {finding.get('StartLine')}",
                 )
+                email = (finding.get("Email")).strip()
+                if email and email not in emails:
+                    emails.add(email)
+                    self._create_git_contributor_credential(finding.get("Email"), (finding.get("Author") or "").strip())
+            # GitLeaks only reports the emails of authors that committed a secret. The dumped repository
+            # holds the whole commit history, so its author and committer emails are harvested as extra
+            # credentials. This runs last so a git failure can't drop the secret findings parsed above.
+            if self.executor.execution_directory.is_dir():
+                try:
+                    process = subprocess.run(
+                        [
+                            "git",
+                            "-C",
+                            str(self.executor.execution_directory),
+                            "log",
+                            "--all",
+                            # Author and committer email/name per commit, separated by the unit separator
+                            # byte so empty fields can't misalign the parsing
+                            "--pretty=format:%ae%x1f%an%x1f%ce%x1f%cn",
+                        ],
+                        capture_output=True,
+                        text=True,
+                        env=self.executor.environment,
+                    )
+                except Exception as ex:
+                    self.executor.logger.warning(
+                        f"[{self.executor.execution.configuration.tool.name}] {ex.__class__.__name__} error while "
+                        f"harvesting emails from the git history of execution {self.executor.execution.id}: {ex!s}"
+                    )
+                    return
+                for line in process.stdout.splitlines():
+                    fields = line.split("\x1f")
+                    if len(fields) != 4:
+                        continue
+                    author_email, author_name, committer_email, committer_name = fields
+                    for email, name in [(author_email, author_name), (committer_email, committer_name)]:
+                        email = (email or "").strip()
+                        if email and email not in emails:
+                            emails.add(email)
+                            self._create_git_contributor_credential(email, (name or "").strip())
+
+    def _create_git_contributor_credential(self, email: str | None, name: str | None) -> None:
+        """Create a Credential for a Git contributor email, keeping their name in the context.
+
+        Emails are deduplicated against ``emails`` so the same contributor is reported only once,
+        regardless of whether it comes from the GitLeaks report or from the commit history, and both
+        sources share the same context format. The contributor name, when known, is kept in the
+        context to help identify the credential owner.
+
+        Args:
+            email (str | None): The contributor email address
+            name (str | None): The contributor display name, if known
+        """
+        self.create_finding(
+            Credential,
+            email=email,
+            context=f"/.git/ : Git contributor with name {name}" if name else "/.git/ : Git contributor",
+        )
