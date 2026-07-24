@@ -3,10 +3,12 @@ from unittest.mock import patch
 
 from django.test import TestCase
 
+from executions.models import Execution
 from findings.models import Host
 from security.authorization.roles import Role
 from targets.enums import TargetType
 from targets.models import Target
+from tasks.models import Task
 from tests.framework import ApiTest
 from tests.framework.cases import ApiTestCase, DeleteApiTestCase, PostApiTestCase
 from tests.framework.data import SetupProject
@@ -87,17 +89,21 @@ class TargetTest(ApiTest, TestCase):
     def test_create_finding_from_user_input(self) -> None:
         ip, domain = "1.2.3.4", "example.com"
         domain_target = Target.objects.create(project=self.project, target=domain, type=TargetType.DOMAIN)
+        execution = Execution.objects.create(
+            task=Task.objects.create(target=domain_target, configuration=self.configuration),
+            configuration=self.configuration,
+        )
         with patch.object(Target, "resolve_domain", return_value=ip):
-            host = domain_target.create_finding_from_user_input(self.execution)
+            host = domain_target.create_finding_from_user_input(execution)
         self.assertIsInstance(host, Host)
         self.assertEqual(ip, host.ip)
         self.assertEqual(domain, host.domain)
         # Unresolvable domain -> No finding
         with patch.object(Target, "resolve_domain", return_value=None):
-            self.assertIsNone(domain_target.create_finding_from_user_input(self.execution))
+            self.assertIsNone(domain_target.create_finding_from_user_input(execution))
         # Non-IP and non-domain target -> No finding
         self.assertIsNone(
             Target.objects.create(
                 project=self.project, target="10.10.10.0/24", type=TargetType.NETWORK
-            ).create_finding_from_user_input(self.execution)
+            ).create_finding_from_user_input(execution)
         )

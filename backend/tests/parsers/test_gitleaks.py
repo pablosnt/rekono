@@ -115,7 +115,7 @@ class GitleaksTest(ParserTest, TestCase):
             "single-secret.json", {"git_directory_dumped": True, "execution_directory": repository}
         )
         credentials = [finding for finding in parser.findings if isinstance(finding, Credential)]
-        self.assertEqual([alice, bob, carol], [e for e in credentials if e.email])
+        self.assertEqual({alice, bob, carol}, {e.email for e in credentials if e.email})
 
     @patch("tools.parsers.gitleaks.subprocess.run", side_effect=OSError("git is not available"))
     def test_git_history_harvesting_error(self, run_mock: object) -> None:
