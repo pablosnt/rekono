@@ -6,6 +6,7 @@ secrets from exposed Git repositories by scanning their commit history.
 
 import os
 import subprocess
+from urllib.parse import urlparse
 import uuid
 from pathlib import Path
 from typing import Any
@@ -64,6 +65,10 @@ class Gitleaks(BaseExecutor):
         if target_url[-1] != "/":
             target_url += "/"
         target_url += ".git/"
+        try:
+            self.port_from_arguments = urlparse(target_url).port
+        except Exception:
+            pass
         gitdumper_directory = Path(CONFIG.gittools_dir) / "Dumper"
         self.execution_directory = CONFIG.reports / str(uuid.uuid4())
         process = subprocess.run(
