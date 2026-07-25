@@ -104,7 +104,8 @@ const config = computed(() => ({
       icon: "i-lucide-bell-ring",
       hidden:
         integrations.smtp?.is_available !== true &&
-        integrations.telegram?.is_available !== true,
+        (integrations.telegram?.is_available !== true ||
+          !userStore.profile?.telegram_chat),
     },
     {
       key: "email_notifications",
@@ -118,7 +119,9 @@ const config = computed(() => ({
       label: "Telegram notifications",
       type: "checkbox",
       required: true,
-      hidden: integrations.telegram?.is_available !== true,
+      hidden:
+        integrations.telegram?.is_available !== true ||
+        !userStore.profile?.telegram_chat,
     },
   ],
   editFormSchema: z.object({
