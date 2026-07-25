@@ -42,7 +42,8 @@ jobs:
         working-directory: backend
         run: |
           uvx ruff format --check
-          uvx ruff check
+          uvx ruff==0.15.22 check
+          uvx ruff check --select I
 
       - name: Flake8
         if: ${{ (steps.changes.outputs.backend == 'true' || github.event_name != 'pull_request') && !cancelled() }}
