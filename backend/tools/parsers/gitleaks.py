@@ -108,7 +108,7 @@ class Gitleaks(BaseParser):
                         env=self.executor.environment,
                         capture_output=True,
                         text=True,
-                        check=True
+                        check=True,
                     )
                 except Exception as ex:
                     self.executor.logger.warning(

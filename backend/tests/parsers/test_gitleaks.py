@@ -104,7 +104,7 @@ class GitleaksTest(ParserTest, TestCase):
                     "GIT_COMMITTER_EMAIL": committer_email,
                     "GIT_COMMITTER_NAME": committer_name,
                 },
-                check=True
+                check=True,
             )
 
         alice = "alice@example.com"
