@@ -189,8 +189,9 @@ class BaseInput(BaseModel):
         _filters (list[Filter]): List of Filter instances for input validation.
         _parse_mapping (dict): Mapping of InputKeyword to field names or functions.
         _parse_dependencies (list[str]): List of dependent fields to parse first.
-        _url_cache (Cache): Shared cache of probed URL reachability results, used by
-                          get_url to avoid repeating the same HTTP request.
+        _url_cache (Cache): Shared cache of probed URLs, used by get_url to avoid repeating
+                          the same HTTP request. Reachable URLs cache the one obtained after
+                          following the redirects, and unreachable ones cache "0".
 
     Example:
         Create an input model with filtering:
@@ -378,10 +379,10 @@ class BaseInput(BaseModel):
         Attempts to construct a valid URL by testing different protocols and
         validating connectivity. When no specific port is given, the ports to
         probe come from the task's scoped target ports if a task is provided,
-        otherwise from common web ports. Each protocol/port combination's
-        reachability is looked up in _url_cache before issuing a request, and
-        the result is cached afterwards, so repeated calls for the same URL
-        (e.g. across multiple tool arguments) don't repeat the same HTTP request.
+        otherwise from common web ports. Each protocol/port combination is looked
+        up in _url_cache before issuing a request, and the resulting URL is cached
+        afterwards, so repeated calls for the same URL (e.g. across multiple tool
+        arguments) don't repeat the same HTTP request and get the same redirections.
 
         Args:
             host (str): The hostname or IP address.
@@ -393,7 +394,8 @@ class BaseInput(BaseModel):
                         port is given.
 
         Returns:
-            str | None: A valid URL string or None if no working URL found.
+            str | None: A valid URL string, after following the redirects, or None if no
+            working URL found.
         """
         # Disable SSL warnings since we're testing connectivity with disabled certificate verification
         urllib3.disable_warnings(category=urllib3.exceptions.InsecureRequestWarning)
@@ -411,32 +413,35 @@ class BaseInput(BaseModel):
         if port:
             ports = [port]
         elif task is not None:
-            ports = [tp.port for tp in task.get_scoped_target_ports()] or default_ports
+            ports = set([tp.port for tp in task.get_scoped_target_ports()]) or default_ports
         else:
             ports = default_ports
         # Test all combinations of ports and protocols to find a working URL
-        for port in set(ports):
+        for port in ports:
             for protocol in protocols:
                 # Skip invalid protocol/port combinations to avoid unnecessary requests
                 # Don't try HTTPS on port 80 or HTTP on port 443 when both protocols are available
-                if len(protocols) > 1 and (port == 80 and protocol == "https") or (port == 443 and protocol == "http"):
+                if len(protocols) > 1 and (
+                    (port == 80 and protocol == "https") or (port == 443 and protocol == "http")
+                ):
                     continue
                 # Construct the URL using the current protocol/port combination
                 url_to_test = schema.format(protocol=protocol, host=host, port=port, endpoint=endpoint)
                 # Reuse a previous probe of this exact URL instead of issuing another request
                 cached_result = self._url_cache.get(url_to_test)
                 if cached_result is not None:
-                    if cached_result == "1":
-                        return url_to_test
-                    continue
+                    if cached_result == "0":
+                        continue
+                    return cached_result
                 try:
                     # Attempt to connect to the URL to verify it's accessible
                     # Use disabled SSL verification for testing purposes and short timeout for efficiency
                     # nosemgrep: python.requests.security.disabled-cert-validation.disabled-cert-validation
-                    requests.get(url_to_test, timeout=5, verify=False)
-                    # If the request succeeds, return this working URL
-                    self._url_cache.set(url_to_test, "1")
-                    return url_to_test
+                    response = requests.get(url_to_test, timeout=5, verify=False)
+                    # Follow redirection if any
+                    working_url = response.url or url_to_test
+                    self._url_cache.set(url_to_test, working_url)
+                    return working_url
                 except Exception:
                     # If connection fails, try the next protocol/port combination
                     self._url_cache.set(url_to_test, "0")
