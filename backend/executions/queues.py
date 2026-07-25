@@ -168,6 +168,9 @@ class ExecutionsQueue(BaseScanQueue):
         # Parse the tool output to extract security findings
         parser: BaseParser = execution.configuration.tool.parser_class(executor, execution.output_plain)
         parser.parse()
+        # Successful executions must be completed after parsing their findings
+        if execution.status == Status.RUNNING:
+            execution.completed(executor.hash)
         # Queue the extracted findings for background processing (alerts, integrations, etc.)
         FindingsQueue().enqueue(execution, parser.findings)
         return execution, parser.findings

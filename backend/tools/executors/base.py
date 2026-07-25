@@ -443,8 +443,6 @@ class BaseExecutor(LoggingEntity):
         # Some tools use non-zero exit codes for normal operation (e.g., findings detected)
         if not self.execution.configuration.tool.ignore_exit_code and process.returncode > 0:
             self.execution.error()
-        else:
-            self.execution.completed(self.hash)
 
     def after_running(self) -> None:  # pragma: no cover
         """Hook method called after tool execution.
@@ -548,6 +546,5 @@ class BaseExecutor(LoggingEntity):
                 self.run_tool(self.environment)
         except (RuntimeError, Exception):
             self.execution.error()
+        finally:
             self.after_running()
-            return
-        self.after_running()
