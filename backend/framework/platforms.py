@@ -162,20 +162,29 @@ class BaseIntegration(BasePlatform):
         pass
 
     def process_finding(self, execution: Execution, finding: Finding) -> None:
-        """Process a finding with enable, availability and type checks.
+        """Process a finding with enable and type checks.
+
+        Availability is deliberately not checked here, because this method is called once per
+        finding and checking it would perform one live request to the external API for every
+        finding, including the ones that this integration doesn't even process. Callers check
+        it once before processing the findings of an execution, so an unavailable integration
+        is discarded before reaching this point.
 
         Args:
             execution (Execution): The execution that generated the finding.
             finding (Finding): The finding to process.
         """
-        if not self.is_enabled() or not self.is_available() or not self.is_finding_processable(finding):
+        # The finding type is checked first because it's the only check that doesn't query anything
+        if not self.is_finding_processable(finding) or not self.is_enabled():
             return
         self._process_finding(execution, finding)
 
     def process_findings(self, execution: Execution, findings: list[Finding]) -> None:
         """Process multiple findings from an execution.
 
-        Skips processing entirely when the integration is disabled or unavailable.
+        Skips processing entirely when the integration is disabled or unavailable. This is
+        the only place where availability is checked, once per execution, so the findings are
+        processed without performing one live request to the external API per finding.
         A failure while processing one finding is logged and does not stop the
         remaining findings from being processed.
 
