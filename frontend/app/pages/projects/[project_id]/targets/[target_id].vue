@@ -121,6 +121,11 @@
               onSelect: copyLink,
             },
             {
+              label: 'Copy target',
+              icon: 'i-lucide-copy',
+              onSelect: () => copyText(target?.target),
+            },
+            {
               label: 'Delete',
               icon: 'i-lucide-trash',
               color: 'error',
@@ -188,7 +193,13 @@ const showReportModal = ref(false);
 const deleteOpen = ref(false);
 const deleteConfig = {
   entityName: "Target",
-  deleteMessage: () => buildDeleteMessage("target", target.value?.target),
+  deleteMessage: () =>
+    buildDeleteMessage(
+      "target",
+      target.value?.target,
+      "Permanent deletion",
+      "All associated data including assets, findings, and scans will be permanently deleted. This action cannot be undone.",
+    ),
 };
 
 onMounted(() => {
