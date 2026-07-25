@@ -91,7 +91,7 @@ class GitleaksTest(ParserTest, TestCase):
     def test_git_history_harvesting(self) -> None:
         repository = PathFile(tempfile.mkdtemp())
         self.addCleanup(shutil.rmtree, repository, ignore_errors=True)
-        subprocess.run(["git", "init", "-q"], cwd=repository)
+        subprocess.run(["git", "init", "-q"], cwd=repository, check=True)
 
         def commit(author_email: str, author_name: str, committer_email: str, committer_name: str) -> None:
             subprocess.run(
@@ -104,6 +104,7 @@ class GitleaksTest(ParserTest, TestCase):
                     "GIT_COMMITTER_EMAIL": committer_email,
                     "GIT_COMMITTER_NAME": committer_name,
                 },
+                check=True
             )
 
         alice = "alice@example.com"

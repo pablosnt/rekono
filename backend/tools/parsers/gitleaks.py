@@ -105,9 +105,10 @@ class Gitleaks(BaseParser):
                             # byte so empty fields can't misalign the parsing
                             "--pretty=format:%ae%x1f%an%x1f%ce%x1f%cn",
                         ],
+                        env=self.executor.environment,
                         capture_output=True,
                         text=True,
-                        env=self.executor.environment,
+                        check=True
                     )
                 except Exception as ex:
                     self.executor.logger.warning(
