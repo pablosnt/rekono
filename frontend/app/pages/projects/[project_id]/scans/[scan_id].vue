@@ -218,7 +218,7 @@
       v-if="task"
       ref="executions"
       :task="route.params.scan_id"
-      @finished="findings.fetch()"
+      @finished="findings.fetch(); refreshPanelCounts()"
     />
 
     <LazyCrudDeleteModal
@@ -251,7 +251,7 @@ const route = useRoute();
 const tasksApi = useApi("/api/tasks/");
 const userStore = useUserStore();
 const options = useOptions();
-const { projectHasActiveFindings } = usePanel();
+const { projectHasActiveFindings, refreshPanelCounts } = usePanel();
 const cancelOpen = ref(false);
 const repeating = ref(false);
 const task = ref<Task | null>();
