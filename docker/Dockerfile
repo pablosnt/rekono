@@ -166,7 +166,7 @@ WORKDIR /code
 # Install hacking tools supported via apt
 RUN apt update && \
     TOOLS="nmap theharvester nikto sslscan sslyze cmseek zaproxy exploitdb metasploit-framework joomscan gitleaks smbmap nuclei gobuster seclists dirb" && \
-    apt install --yes --no-install-recommends $TOOLS $BACKEND_DEBIAN_DEPENDENCIES libcap2-bin git ca-certificates sudo && \
+    apt install --yes --no-install-recommends $TOOLS $BACKEND_DEBIAN_DEPENDENCIES libcap2-bin git ca-certificates sudo binutils file && \
     # Finish any pending package configuration so dpkg is left in a clean state
     dpkg --configure -a && \
     # Grant capabilities required to nmap in order to get it running in a rootless environment
