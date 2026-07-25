@@ -173,11 +173,10 @@ export default function ExecutionNotification() {
           </tbody>
         </table>
       </div>
-      <Hr className="border-gray-200 m-0 mb-8" />
       {"{% if summary_counts %}"}
-      <Text className="text-gray-700 text-[11px] font-bold uppercase tracking-[0.07em] m-0 mb-2">
+      <Heading as="h3" className="text-gray-700 font-bold uppercase m-0 mb-2">
         Findings summary
-      </Text>
+      </Heading>
       <Text className="text-gray-500 text-sm leading-relaxed m-0 mb-5">
         Here is a breakdown of everything this scan uncovered. Dive into Rekono
         to explore the details behind each finding.
