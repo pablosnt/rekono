@@ -43,7 +43,8 @@ class MonitorQueue(BaseQueue):
         loops at the same time.
 
         Args:
-            **kwargs (Any): Additional keyword arguments for job configuration
+            **kwargs (Any): Accepted for signature compatibility with BaseQueue.enqueue;
+                          unused since monitoring jobs take no parameters
 
         Returns:
             Job: The created RQ job instance, or the existing scheduled one
@@ -86,8 +87,15 @@ class MonitorQueue(BaseQueue):
             start__isnull=False, rq_job_id__isnull=False, status__in=Status.in_progress()
         ):
             job = ExecutionsQueue().fetch_job(execution.rq_job_id)
-            if not job or job.get_status() in [JobStatus.FINISHED, JobStatus.FAILED, JobStatus.STOPPED, JobStatus.CANCELED]:
-                BaseQueue.logger.info(f"[Monitor] Moving execution {execution.id} to Error status due to its orphan RQ job")
+            if not job or job.get_status() in [
+                JobStatus.FINISHED,
+                JobStatus.FAILED,
+                JobStatus.STOPPED,
+                JobStatus.CANCELED,
+            ]:
+                BaseQueue.logger.info(
+                    f"[Monitor] Moving execution {execution.id} to Error status due to its orphan RQ job"
+                )
                 execution.error()
 
     @staticmethod
