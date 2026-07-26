@@ -218,7 +218,10 @@
       v-if="task"
       ref="executions"
       :task="route.params.scan_id"
-      @finished="findings.fetch(); refreshPanelCounts()"
+      @finished="
+        findings.fetch();
+        refreshPanelCounts();
+      "
     />
 
     <LazyCrudDeleteModal

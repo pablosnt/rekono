@@ -90,7 +90,7 @@ class Sslscan(BaseParser):
                                 "description": "Insecure TLS renegotiation supported",
                                 "severity": Severity.MEDIUM,
                                 # CWE CATEGORY: Permissions, Privileges, and Access Controls
-                                "cwes": ["CWE-264"]
+                                "cwes": ["CWE-264"],
                             },
                         ),
                         (
@@ -98,7 +98,7 @@ class Sslscan(BaseParser):
                             {
                                 "name": f"Heartbleed in {protocol_version}",
                                 "cve": "CVE-2014-0160",
-                                "sslversion": sslversion
+                                "sslversion": sslversion,
                             },
                         ),
                         (
@@ -109,7 +109,7 @@ class Sslscan(BaseParser):
                                 "severity": Severity.LOW,
                                 # CWE-326: Inadequate Encryption Strength
                                 "cwes": ["CWE-326"],
-                                "sslversion": sslversion
+                                "sslversion": sslversion,
                             },
                         ),
                     ]:
