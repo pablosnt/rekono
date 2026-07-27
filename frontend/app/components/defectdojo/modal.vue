@@ -124,7 +124,7 @@ defineEmits<{ update: [] }>();
 const integrations = useIntegrationsStore();
 const api = useApi("/api/defectdojo/sync/");
 const route = useRoute();
-const userStore = useUserStore()
+const userStore = useUserStore();
 const form = ref();
 const config = computed(() => ({
   entityName: "DefectDojo sync",
