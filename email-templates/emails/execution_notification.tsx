@@ -1,4 +1,4 @@
-import { Button, Heading, Hr, Img, Preview, Text } from "react-email";
+import { Button, Heading, Img, Preview, Text } from "react-email";
 import { Layout } from "./_layout";
 import {
   cell,
