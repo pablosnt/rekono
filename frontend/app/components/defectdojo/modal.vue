@@ -2,7 +2,8 @@
   <UModal
     v-if="
       integrations.defectdojo.integration?.enabled &&
-      integrations.defectdojo.settings?.is_available
+      integrations.defectdojo.settings?.is_available &&
+      userStore.is_auditor
     "
     :ui="{ content: 'sm:max-w-3xl sm:max-h-xl', footer: 'justify-end' }"
   >
@@ -112,6 +113,7 @@
 </template>
 
 <script setup lang="ts">
+import { useUserStore } from "~/store/user";
 import { useIntegrationsStore } from "~/store/integrations";
 import type { DefectDojoSync } from "~/types/models";
 import * as z from "zod";
@@ -122,6 +124,7 @@ defineEmits<{ update: [] }>();
 const integrations = useIntegrationsStore();
 const api = useApi("/api/defectdojo/sync/");
 const route = useRoute();
+const userStore = useUserStore()
 const form = ref();
 const config = computed(() => ({
   entityName: "DefectDojo sync",
