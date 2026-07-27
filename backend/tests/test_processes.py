@@ -24,9 +24,8 @@ class ProcessTest(ApiTestNoData, TestCase):
     endpoint = "/api/processes/"
     expected_string = first_process_name
     cases = [
-        ApiTestCase([Role.READER], 403),
         ApiTestCase(
-            [Role.ADMIN, Role.AUDITOR],
+            [Role.ADMIN, Role.AUDITOR, Role.READER],
             expected={"id": 1, "name": first_process_name, "owner": None, "liked": False, "likes": 0},
             endpoint="1",
         ),
@@ -39,11 +38,10 @@ class ProcessTest(ApiTestNoData, TestCase):
         ),
         PostApiTestCase([Role.ADMIN, Role.AUDITOR], 400, process1),
         ApiTestCase(
-            [Role.ADMIN, Role.AUDITOR],
+            [Role.ADMIN, Role.AUDITOR, Role.READER],
             expected={"id": 8, **process1, "owner": {"id": 1, "username": "admin1"}, "liked": False, "likes": 0},
             endpoint="8",
         ),
-        ApiTestCase([Role.READER], 403, endpoint="8"),
         PostApiTestCase(
             ["auditor1"],
             data=process2,
@@ -51,11 +49,10 @@ class ProcessTest(ApiTestNoData, TestCase):
         ),
         PostApiTestCase([Role.ADMIN, Role.AUDITOR], 400, process2),
         ApiTestCase(
-            [Role.ADMIN, Role.AUDITOR],
+            [Role.ADMIN, Role.AUDITOR, Role.READER],
             expected={"id": 9, **process2, "owner": {"id": 3, "username": "auditor1"}, "liked": False, "likes": 0},
             endpoint="9",
         ),
-        ApiTestCase([Role.READER], 403, endpoint="9"),
         PutApiTestCase(
             [Role.ADMIN],
             data=new_process1,
@@ -93,11 +90,9 @@ class ProcessTest(ApiTestNoData, TestCase):
         DeleteApiTestCase([Role.AUDITOR, Role.READER], 403, endpoint="8"),
         DeleteApiTestCase(["auditor2", Role.READER], 403, endpoint="9"),
         DeleteApiTestCase(["admin2"], endpoint="8"),
-        ApiTestCase([Role.ADMIN, Role.AUDITOR], 404, endpoint="8"),
-        ApiTestCase([Role.READER], 403, endpoint="9"),
+        ApiTestCase([Role.ADMIN, Role.AUDITOR, Role.READER], 404, endpoint="8"),
         DeleteApiTestCase(["auditor1"], endpoint="9"),
-        ApiTestCase([Role.ADMIN, Role.AUDITOR], 404, endpoint="9"),
-        ApiTestCase([Role.READER], 403, endpoint="9"),
+        ApiTestCase([Role.ADMIN, Role.AUDITOR, Role.READER], 404, endpoint="9"),
     ]
 
     @cached_property

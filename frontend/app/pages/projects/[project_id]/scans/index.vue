@@ -53,7 +53,6 @@ const refresh = ref<ReturnType<typeof setTimeout> | null>(null);
 const targetOptions = ref<FilterOption[]>([]);
 const executorOptions = ref<FilterOption[]>([]);
 const toolOptions = ref<FilterOption[]>([]);
-const configurationOptions = ref<FilterOption[]>([]);
 const processOptions = ref<FilterOption[]>([]);
 const runningTasks = ref(0);
 
@@ -94,7 +93,6 @@ onMounted(() => {
     project: route.params.project_id,
   });
   options.tools(toolOptions, { ordering: "-liked,-id" });
-  options.configurations(configurationOptions, { ordering: "-tool" });
   options.processes(processOptions, { ordering: "-liked,-id" });
 });
 
@@ -277,13 +275,6 @@ const config: CrudConfig<Task> = reactive({
       icon: "i-lucide-square-terminal",
       type: "select" as const,
       options: toolOptions,
-    },
-    {
-      key: "executed_configuration",
-      label: "Configuration",
-      icon: "i-lucide-terminal",
-      type: "select" as const,
-      options: configurationOptions,
     },
     {
       key: "stage",
