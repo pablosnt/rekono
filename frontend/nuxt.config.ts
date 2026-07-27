@@ -3,6 +3,8 @@ import { resolve } from "path";
 import type { NuxtPage } from "nuxt/schema";
 import { isNeutralRoute, isPublicRoute } from "./app/utils/routes";
 
+const baseURL = (process.env.NUXT_APP_BASE_URL || "/").replace(/\/$/, "");
+
 function setMiddleware(nuxtPages: NuxtPage[]) {
   for (const page of nuxtPages) {
     page.meta ||= {};
@@ -25,7 +27,13 @@ export default defineNuxtConfig({
   app: {
     pageTransition: { name: "page", mode: "out-in" },
     head: {
-      link: [{ rel: "icon", href: "/favicon-light.png", type: "image/png" }],
+      link: [
+        {
+          rel: "icon",
+          href: `${baseURL}/favicon-light.png`,
+          type: "image/png",
+        },
+      ],
       script: [
         {
           defer: true,
