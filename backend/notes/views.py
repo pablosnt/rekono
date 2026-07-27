@@ -38,7 +38,7 @@ class NoteViewSet(LikeViewSet):
         fork: Create a copy of a public note owned by another user
 
     Attributes:
-        queryset (QuerySet): All Note objects filtered by access permissions
+        queryset (QuerySet): All Note objects
         serializer_class (Serializer): Default serializer for note operations
         filterset_class (FilterSet): Filter class for querying notes
         permission_classes (list): Required permissions for access
@@ -97,6 +97,29 @@ class NoteViewSet(LikeViewSet):
             .get_queryset()
             .filter(Q(owner=self.request.user) | (Q(public=True) & Q(project__members=self.request.user)))
         )
+
+    # By default, only admin and auditors are able to like entities, as most of the likeable entities are only visible by them
+    # However, notes can be managed by readers as well
+    @extend_schema(request=None, responses={204: None})
+    @action(
+        detail=True,
+        methods=["POST", "DELETE"],
+        permission_classes=[IsAuthenticated, ProjectMemberPermission],
+    )
+    def like(self, request: Request, pk: str) -> Response:
+        """Add or remove like from the current user.
+
+        POST: Add like from current user
+        DELETE: Remove like from current user
+
+        Args:
+            request (Request): The HTTP request object.
+            pk (str): Primary key of the object to like/unlike.
+
+        Returns:
+            Response: HTTP 204 No Content on success.
+        """
+        return super().like(request, pk)
 
     @extend_schema(request=None, responses={201: NoteSerializer})
     @action(
