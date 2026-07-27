@@ -52,10 +52,6 @@ jobs:
             install: apt install metasploit-framework -y
             command: msfconsole --version 2>&1
             expected: 6.4.142 # 6.4.135-dev kali 
-          - name: EmailFinder
-            install: python3 -m pip install emailfinder --break-system-packages
-            command: emailfinder --version
-            expected: 0.3.0b
           - name: JoomScan
             install: apt install joomscan -y
             command: joomscan --version

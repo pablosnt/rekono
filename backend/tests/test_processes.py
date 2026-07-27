@@ -106,7 +106,7 @@ class ProcessTest(ApiTestNoData, TestCase):
 
     def test_steps_exclude_deprecated(self) -> None:
         client = APIClient()
-        client.force_authenticate(self.users[Role.ADMIN][0])
+        client.force_authenticate(self.admin1)
         step = Step.objects.filter(process_id=1, configuration__deprecated=False).first()
         Configuration.objects.filter(pk=step.configuration_id).update(deprecated=True)
         self.assertNotIn(step.pk, [s["id"] for s in client.get("/api/processes/1/").json()["steps"]])
@@ -147,7 +147,7 @@ class StepTest(ApiTestNoData, TestCase):
 
     def test_endpoint_excludes_deprecated(self) -> None:
         client = APIClient()
-        client.force_authenticate(self.users[Role.ADMIN][0])
+        client.force_authenticate(self.admin1)
         self.assertEqual(0, Step.objects.filter(configuration__deprecated=True).count())
         step = Step.objects.filter(process_id=1, configuration__deprecated=False).first()
         Configuration.objects.filter(pk=step.configuration_id).update(deprecated=True)

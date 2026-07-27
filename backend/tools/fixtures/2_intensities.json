@@ -199,15 +199,6 @@
     },
     {
         "model": "tools.intensity",
-        "pk": 23,
-        "fields": {
-            "tool": 12,
-            "argument": "",
-            "value": 1
-        }
-    },
-    {
-        "model": "tools.intensity",
         "pk": 24,
         "fields": {
             "tool": 13,

@@ -96,7 +96,6 @@ Rekono supports the execution of this hacking tools:
 
 - [theHarvester](https://github.com/laramies/theHarvester)
 - [EmailHarvester](https://github.com/maldevel/EmailHarvester)
-- [EmailFinder](https://github.com/Josue87/EmailFinder)
 - [Nmap](https://nmap.org/)
 - [Sslscan](https://github.com/rbsec/sslscan)
 - [SSLyze](https://nabla-c0d3.github.io/sslyze/documentation/)

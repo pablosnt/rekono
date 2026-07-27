@@ -871,16 +871,6 @@
     },
     {
         "model": "tools.input",
-        "pk": 88,
-        "fields": {
-            "argument": 64,
-            "type": 2,
-            "filter": "domain",
-            "order": 1
-        }
-    },
-    {
-        "model": "tools.input",
         "pk": 89,
         "fields": {
             "argument": 65,

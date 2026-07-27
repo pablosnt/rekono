@@ -473,14 +473,6 @@
     },
     {
         "model": "tools.output",
-        "pk": 60,
-        "fields": {
-            "configuration": 30,
-            "type": 1
-        }
-    },
-    {
-        "model": "tools.output",
         "pk": 61,
         "fields": {
             "configuration": 31,

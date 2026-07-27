@@ -386,7 +386,7 @@
             "stage": 1,
             "default": true,
             "default_scanned_port": null,
-            "deprecated": false
+            "deprecated": true
         }
     },
     {

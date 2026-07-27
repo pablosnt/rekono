@@ -75,11 +75,19 @@ class ToolTest(ApiTestNoData, TestCase):
 
     def test_configurations_exclude_deprecated(self) -> None:
         client = APIClient()
-        client.force_authenticate(self.users[Role.ADMIN][0])
+        client.force_authenticate(self.admin1)
         configuration = Configuration.objects.filter(tool__pk=1).first()
         configuration.deprecated = True
         configuration.save(update_fields=["deprecated"])
         self.assertNotIn(configuration.pk, [c["id"] for c in client.get("/api/tools/1/").json()["configurations"]])
+
+    def test_tools_exclude_no_active_configurations(self) -> None:
+        client = APIClient()
+        client.force_authenticate(self.admin1)
+        Configuration.objects.filter(tool__pk=1).update(deprecated=True)
+        self.assertEqual(404, client.get(f"{self.endpoint}1/").status_code)
+        self.assertEqual(0, client.get(f"{self.endpoint}?name={nmap}").json()["count"])
+        self.assertEqual(1, client.get(f"{self.endpoint}?name={gobuster}").json()["count"])
 
 
 first_nmap_configuration = "TCP ports"
@@ -103,7 +111,7 @@ class ConfigurationTest(ApiTestNoData, TestCase):
 
     def test_endpoint_excludes_deprecated(self) -> None:
         client = APIClient()
-        client.force_authenticate(self.users[Role.ADMIN][0])
+        client.force_authenticate(self.admin1)
         configuration = Configuration.objects.filter(deprecated=False).first()
         configuration.deprecated = True
         configuration.save(update_fields=["deprecated"])

@@ -694,17 +694,6 @@
     },
     {
         "model": "tools.argument",
-        "pk": 64,
-        "fields": {
-            "configuration": 30,
-            "name": "target",
-            "argument": "--domain {target}",
-            "required": true,
-            "multiple": false
-        }
-    },
-    {
-        "model": "tools.argument",
         "pk": 65,
         "fields": {
             "configuration": 31,
