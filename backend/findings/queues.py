@@ -73,9 +73,12 @@ class FindingsQueue(BaseQueue):
         Enriches each finding's CVE data by querying every enabled provider and
         keeping the enrichment with the highest quality score, then runs the
         per-finding and per-execution integrations and dispatches alert
-        notifications. When auto-fix is enabled, previously fixed findings that
-        reappear are reactivated, and findings missing from executions sharing
-        the same hash are marked as fixed.
+        notifications. Findings are grouped by type and sorted within each type
+        before reaching the per-execution platforms, so the integrations and the
+        notifications always report them in the same meaningful order. When
+        auto-fix is enabled, previously fixed findings that reappear are
+        reactivated, and findings missing from executions sharing the same hash
+        are marked as fixed.
 
         Args:
             execution (Execution): Execution that produced the findings.
@@ -85,6 +88,17 @@ class FindingsQueue(BaseQueue):
             f"[Findings] Processing of {len(findings)} findings from execution {execution.id} has started"
         )
         settings = Settings.objects.first()
+        # Finding types with the field used to sort them and whether that sorting must be reversed
+        finding_types = [
+            (OSINT, "data", False),
+            (Host, "ip", False),
+            (Port, "port", False),
+            (Path, "path", False),
+            (Technology, "name", False),
+            (Credential, "id", False),
+            (Vulnerability, "severity", True),
+            (Exploit, "id", False),
+        ]
         if findings:
             cve_providers: list[BaseCveProvider] = [
                 provider
@@ -131,23 +145,24 @@ class FindingsQueue(BaseQueue):
                         # Send notifications through all configured notification platforms
                         for platform in notifications:
                             platform.process_alert(alert, finding)
+            # Sort findings by relevant field, so the integrations and notifications report them in a meaningful order
+            findings_per_type = {
+                finding_type: sorted(
+                    [finding for finding in findings if isinstance(finding, finding_type)],
+                    key=lambda finding: getattr(finding, ordering),
+                    reverse=reverse,
+                )
+                for finding_type, ordering, reverse in finding_types
+            }
+            sorted_findings = sum(findings_per_type.values(), [])
             # Process findings through platforms that run per execution
             for platform in integrations_per_execution + notifications:
-                platform.process_findings(execution, findings)
+                platform.process_findings(execution, sorted_findings)
         # Automatic fixing: mark findings as fixed if they're no longer detected in identical execution contexts
         if settings.auto_fix_findings:
             # For each finding type, mark findings as fixed if they don't appear in the current execution
             # but were found in previous executions with the same parameters
-            for finding_type in [
-                OSINT,
-                Host,
-                Port,
-                Path,
-                Technology,
-                Credential,
-                Vulnerability,
-                Exploit,
-            ]:
+            for finding_type, _, _ in finding_types:
                 finding_type.objects.fix(
                     finding_type.objects.filter(
                         executions__hash=execution.hash,
