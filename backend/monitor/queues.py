@@ -81,10 +81,9 @@ class MonitorQueue(BaseQueue):
         settings.save(update_fields=["last_monitor"])
         for platform in [CveCrowd(), First()]:
             platform.monitor()
-        # An execution that started and has a job ID but whose job can no longer be
-        # fetched was orphaned (e.g. the worker died), so mark it as errored
+        # An execution in the queue with a job ID that no longer exists is orphaned
         for execution in Execution.objects.filter(
-            start__isnull=False, rq_job_id__isnull=False, status__in=Status.in_progress()
+            rq_job_id__isnull=False, status__in=Status.in_progress()
         ):
             job = ExecutionsQueue().fetch_job(execution.rq_job_id)
             if not job or job.get_status() in [
