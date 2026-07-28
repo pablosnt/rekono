@@ -83,9 +83,7 @@ class MonitorQueue(BaseQueue):
             platform.monitor()
         # An execution stuck in a non-terminal status is orphaned once its RQ job is missing
         # or has already reached a terminal state, since neither case will ever move it forward
-        for execution in Execution.objects.filter(
-            rq_job_id__isnull=False, status__in=Status.in_progress()
-        ):
+        for execution in Execution.objects.filter(rq_job_id__isnull=False, status__in=Status.in_progress()):
             job = ExecutionsQueue().fetch_job(execution.rq_job_id)
             if not job or job.get_status() in [
                 JobStatus.FINISHED,

@@ -6,7 +6,6 @@ and percentile rankings updated on a per-execution and bulk monitoring basis.
 """
 
 import re
-from datetime import date
 
 from executions.models import Execution
 from findings.framework.models import Finding
