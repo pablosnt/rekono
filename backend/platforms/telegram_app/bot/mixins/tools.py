@@ -134,7 +134,7 @@ class IntensityMixin(BaseMixin):
     """
 
     @sync_to_async
-    def _get_tool_intensities_async(self, tool: Tool) -> QuerySet:
+    def _get_tool_intensities_async(self, tool: Tool) -> list[str]:
         """Get available intensity levels for a security tool (async wrapper).
 
         Args:
