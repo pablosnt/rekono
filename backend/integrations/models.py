@@ -49,7 +49,7 @@ class Integration(BaseModel):
         ```
     """
 
-    key = models.TextField(max_length=100)
+    key = models.TextField(max_length=100, unique=True)
     name = models.TextField(max_length=100)
     description = models.TextField(max_length=500)
     enabled = models.BooleanField(default=True)
