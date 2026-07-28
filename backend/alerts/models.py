@@ -52,6 +52,8 @@ class Alert(BaseModel):
         subscribe_all_members (BooleanField): Auto-subscribe all project members
         owner (ForeignKey): The user who created this alert
         subscribers (ManyToManyField): Users subscribed to receive notifications
+        mapping (dict): Maps each AlertItem to its target model and, optionally,
+                       a filter function and the field used to match the alert value
 
     Example:
         Create an alert for new CVEs in a project:
@@ -142,7 +144,7 @@ class Alert(BaseModel):
         """Return string representation of the alert.
 
         Returns:
-            str: A string in format "project - item - value".
+            str: The project, item type, and filter value (if set), joined by " - ".
         """
         values = [self.project.__str__(), self.item]
         if self.value:
@@ -152,18 +154,24 @@ class Alert(BaseModel):
     def must_be_triggered(self, execution: Execution, finding: Finding) -> bool:
         """Determine if this alert should be triggered for a given finding.
 
-        Evaluates whether a finding should trigger this alert based on:
-        - Finding type matches alert item type
-        - Finding is not fixed or marked as false positive
-        - Finding is not created from user input
-        - Custom filter functions pass (if defined)
+        A finding must match the alert item's model type, must not be fixed,
+        marked as a false positive, or created from user input, and must pass
+        the item's custom filter (if any). If the alert has a filter value,
+        the finding's mapped field must also match it case-insensitively.
+        Trending CVE alerts are evaluated on their own, independently of any
+        single execution, since they track CVE trends across the whole
+        project. Every other alert only fires the first time a finding is
+        seen, so execution is used to check that the finding has not already
+        appeared in an earlier execution.
 
         Args:
-            execution (Execution): The execution that produced the finding
-            finding (Finding): The finding to evaluate against this alert
+            execution (Execution): The execution the finding was reported in.
+                                   Not used for trending CVE alerts, so it may
+                                   be None in that case.
+            finding (Finding): The finding to evaluate against this alert.
 
         Returns:
-            bool: True if the alert should be triggered, False otherwise
+            bool: True if the alert should be triggered, False otherwise.
         """
         data = self.mapping[AlertItem(self.item)]
         # Check if the finding is of the correct model type, is not fixed,

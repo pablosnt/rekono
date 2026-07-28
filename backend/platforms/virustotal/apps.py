@@ -12,11 +12,10 @@ from framework.apps import BaseApp
 
 
 class VirustotalConfig(BaseApp, AppConfig):
-    """Django application configuration for VirusTotal platform integration.
+    """Configuration class for VirusTotal platform application.
 
-    Configures the VirusTotal platform application with proper model loading
-    and initialization settings. Inherits from BaseApp for common platform
-    functionality and AppConfig for Django application management.
+    Extends BaseApp and AppConfig to provide proper Django application
+    setup with model registration and fixture management.
 
     Attributes:
         name (str): Fully qualified application name

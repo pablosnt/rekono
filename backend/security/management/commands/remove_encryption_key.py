@@ -17,11 +17,12 @@ class Command(BaseCommand, BaseEncryptionKeyCommand):
     """Django management command to remove database encryption.
 
     Decrypts all sensitive data in the database and removes the encryption key
-    configuration, reverting to plain text storage. This command should be used
-    with extreme caution and only in specific scenarios.
+    configuration only once every value has been converted, reverting to plain
+    text storage. This command should be used with extreme caution and only in
+    specific scenarios.
 
     Security Process:
-        1. Validates current encryption key is configured and valid
+        1. Validates current encryption key is configured
         2. Decrypts all sensitive data using the current key
         3. Stores decrypted data as plain text in database
         4. Removes encryption key from configuration
@@ -31,6 +32,9 @@ class Command(BaseCommand, BaseEncryptionKeyCommand):
         python manage.py remove_encryption_key
 
     Security Warnings:
+        - Data still encrypted with the key at the time it is removed from
+          configuration can never be decrypted again, so this command converts
+          every encrypted value to plain text first and only then clears the key
         - Results in sensitive data stored as plain text in database
         - Significantly reduces data security posture
         - Should only be used in specific compliance or development scenarios
@@ -59,7 +63,10 @@ class Command(BaseCommand, BaseEncryptionKeyCommand):
         """Execute the encryption removal process.
 
         Decrypts all sensitive data using the current key and removes
-        the encryption key from system configuration.
+        the encryption key from system configuration. The key is cleared from
+        configuration only after every encrypted value in the database has
+        been converted to plain text, so nothing is left encrypted under a
+        key that is no longer configured.
 
         Args:
             *args (Any): Positional arguments from Django command framework.

@@ -1,7 +1,10 @@
 """Telegram Bot mixin for authentication configuration workflows.
 
-Provides authentication type selection and authentication credential creation
-functionality for conversations that require authentication setup for targets.
+Runs after a target port has already been selected or created, since the created
+Authentication is attached to the target port stored in Context.TARGET_PORT. Reads
+Context.COMMAND to offer a "None" choice only for the /newport conversation, letting
+a port be created without authentication. Leaves Context.AUTHENTICATION_TYPE and
+Context.AUTHENTICATION set on completion, or leaves both unset when "None" is chosen.
 """
 
 from telegram import Update
@@ -16,8 +19,8 @@ from platforms.telegram_app.bot.mixins.framework import BaseMixin
 class AuthenticationMixin(BaseMixin):
     """Mixin providing authentication configuration functionality.
 
-    Enables conversations to configure authentication credentials for targets
-    including authentication type selection and credential creation workflows.
+    Enables conversations to configure authentication credentials for a target
+    port, or to skip authentication entirely when running as part of /newport.
 
     Attributes:
         no_authentication (str): Option value for no authentication required.
@@ -60,8 +63,10 @@ class AuthenticationMixin(BaseMixin):
     async def save_authentication_type(self, update: Update, context: CallbackContext) -> int:
         """Save selected authentication type to conversation context.
 
-        Processes authentication type selection and handles special case for
-        "None" authentication, skipping credential creation.
+        When the user picks "None", jumps straight past both ask_for_new_authentication
+        and create_authentication to the state after create_authentication, so no
+        credential is prompted for or created. Otherwise stores the chosen type and
+        proceeds normally to the credential input step.
 
         Args:
             update (Update): The Telegram update containing callback selection.

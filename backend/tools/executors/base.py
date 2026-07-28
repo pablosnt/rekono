@@ -43,6 +43,16 @@ class BaseExecutor(LoggingEntity):
     environment setup, execution control, and status tracking. Provides automatic parameter
     mapping from available inputs and configurations with proper authentication handling.
 
+    Security Features:
+        - Environment variable assignments extracted from the command's pre-command prefix
+          are checked against a sensitive-variable pattern (PATH, LD_PRELOAD, etc.) and
+          dropped, with a warning logged, instead of being applied to the subprocess
+        - Commands run as an argument list via subprocess without invoking a shell, so
+          shell metacharacters in tool arguments are never interpreted
+        - Authentication secrets and tokens are masked with asterisks before the executed
+          command is logged or persisted
+        - Tools that are not installed on the system are skipped instead of executed
+
     Attributes:
         environment_validator (Validator): Rejects sensitive environment variable assignments
 
@@ -278,8 +288,12 @@ class BaseExecutor(LoggingEntity):
                 raise RuntimeError(
                     f"Argument '{argument.name}' is required to execute configuration '{argument.configuration.name}'"
                 )
-        # Parse formatted command arguments into list, handling quoted strings properly
-        # Remove quotes from individual arguments to prevent shell escaping issues
+        # Split the formatted command into individual arguments, keeping quoted segments
+        # (e.g. a quoted header value containing spaces) together as a single token
+        # Strip the double quote characters themselves, since these arguments are passed
+        # directly to subprocess.run rather than through a shell that would otherwise
+        # remove them. Single quotes are left in place, so a single-quoted template reaches
+        # the tool with its quotes intact
         return [
             a.replace('"', "")
             for a in re.findall(
@@ -370,8 +384,8 @@ class BaseExecutor(LoggingEntity):
                         )
                         continue
                     variable = variable.strip()
+                    # Strip quotes from the value so they don't interfere with execution
                     value = value.strip().replace("'", "").replace('"', "")
-                    # Clean variable value by removing quotes that might interfere with execution
                     environment[variable] = value
                     self.hashable_environment[variable] = value
             # Remove environment definitions from arguments, keeping only the tool command and its parameters
@@ -392,13 +406,24 @@ class BaseExecutor(LoggingEntity):
         pass
 
     def run_tool(self, environment: dict[str, Any] = os.environ.copy()) -> None:  # pragma: no cover
-        """Execute the security tool with configured arguments and environment.
+        """Run the tool subprocess and record its output on the execution.
 
-        Runs the tool subprocess with proper output handling, status tracking,
-        and error management. Handles both file-based and stdout-based output capture.
+        Executes self.arguments as a subprocess, without invoking a shell, using the given
+        environment and the tool's configured working directory. When the tool configuration
+        declares an output format, and the report path is not already present in the
+        arguments, stdout is redirected straight to the report file and stderr is discarded,
+        since mixing the two would corrupt the report format. Otherwise stdout and stderr are
+        both captured in memory, which is also what happens when the tool writes the report
+        itself through its own command line flag. ANSI escape sequences are stripped
+        from the captured output before it is saved to execution.output_plain, and
+        execution.output_file is set when a report file was produced. If the process exits
+        with a non-zero code and the tool configuration doesn't ignore exit codes, the
+        execution is marked as failed via execution.error(). Exceptions raised while running
+        the subprocess are not caught here; they propagate to execute(), which marks the
+        execution as failed.
 
         Args:
-            environment (dict[str, Any]): Environment variables for execution
+            environment (dict[str, Any]): Environment variables for the subprocess
         """
         self.logger.info(f"[Tool] Running: {self.mask_sensitive_data(' '.join(self.arguments))}")
         # Determine output capture strategy based on tool configuration
@@ -512,11 +537,19 @@ class BaseExecutor(LoggingEntity):
         input_technologies: list[InputTechnology],
         wordlists: list[Wordlist],
     ) -> None:
-        """Execute the complete tool execution lifecycle.
+        """Run the full execution lifecycle for this tool, from argument generation to cleanup.
 
-        Manages the full execution process including status updates, argument generation,
-        environment setup, tool execution, and cleanup. Handles errors and skipping
-        conditions appropriately.
+        Marks the execution as started and refreshes the tool's installation status, then
+        skips the execution instead of running it when the tool isn't installed or when the
+        available inputs can't satisfy a required argument. Otherwise, builds the environment,
+        records the executed command (with secrets masked) before the tool actually runs, and
+        calls the before_running hook. The subprocess itself is only launched when
+        CONFIG.testing is False, so automated tests exercise the rest of the lifecycle without
+        invoking real tool binaries. Any exception raised while running the tool marks the
+        execution as failed. The after_running hook runs once this point is reached, whether
+        the subprocess actually ran, was skipped because CONFIG.testing is True, or raised an
+        exception. It is not reached on either of the earlier skip paths, since those return
+        before this point.
 
         Args:
             findings (list[Finding]): Security findings to use as inputs

@@ -18,15 +18,21 @@ class Role(models.TextChoices):
     within the security testing platform.
 
     Roles:
-        ADMIN: System administrators with full access to all resources and operations.
-               Can manage users, system settings, and perform all security operations.
-        AUDITOR: Security auditors with read-write access to security data and findings.
-                Can perform security testing, manage findings, and create reports.
-        READER: Read-only users with access to security data and reports for review.
-               Can view findings, reports, and security data but cannot modify them.
+        ADMIN: System administrators with full access to every model and operation,
+               including user management, project management, and all platform settings.
+        AUDITOR: Security auditors who can run security testing and manage findings.
+                 They match Admin across most operational data, but cannot create,
+                 modify or delete users and projects, cannot change any settings model,
+                 and cannot see the Admin-only platform settings or the target denylist
+                 at all.
+        READER: Reviewers whose access is mostly limited to viewing findings, reports,
+                and other security data. They can still manage their own notes, alerts,
+                API tokens, reports, and Telegram chat registration.
 
     Role Hierarchy:
-        Admin > Auditor > Reader (in terms of access privileges)
+        Admin > Auditor > Reader. The nesting is strict, every permission granted to a
+        role is also granted to the roles above it. Reader is nonetheless not a read-only
+        role, since it holds write permissions on the personal resources listed above.
     """
 
     ADMIN = "Admin"
@@ -38,7 +44,12 @@ class Role(models.TextChoices):
 # See: https://github.com/google/pytype/issues/1048
 Role: type[Choices] = Role
 
-# Comprehensive role-based permission mapping for all Rekono models.
+# Role-based permission mapping for all Rekono models, as model name to action to the
+# list of roles allowed to perform it. An empty list means no role can perform that
+# action, which is how actions with no REST endpoint are expressed.
+# These are coarse model-level permissions. Per-object scoping, such as restricting a
+# user to their own notes or to the projects they belong to, is enforced separately by
+# the permission classes in permissions.py and by the querysets in each ViewSet.
 ROLES = {
     "apitoken": {
         "view": [Role.ADMIN, Role.AUDITOR, Role.READER],

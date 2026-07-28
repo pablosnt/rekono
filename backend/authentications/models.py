@@ -64,9 +64,7 @@ class Authentication(BaseInput, BaseEncrypted):
         on_delete=models.CASCADE,
     )
 
-    # Filter configuration for BaseInput
     _filters = [BaseInput.Filter(type=AuthenticationType, field="type")]
-    # Parse mapping for integration with hacking tools
     _parse_mapping = {
         InputKeyword.COOKIE_NAME: lambda instance, task: (
             instance.name if instance.type == AuthenticationType.COOKIE else None
@@ -79,7 +77,6 @@ class Authentication(BaseInput, BaseEncrypted):
             instance.name if instance.type == AuthenticationType.BASIC else None
         ),
     }
-    # Encryption and project field configuration
     _encrypted_field = "_secret"
     _project_field = "target_port__target__project"
 

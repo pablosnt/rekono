@@ -60,8 +60,8 @@ class SimpleHostSerializer(ModelSerializer):
     """Serializer for network host findings.
 
     Handles JSON conversion for network host findings for complete
-    host inventory. Does not include nested port data; use HostSerializer
-    when port relationships are needed.
+    host inventory. Does not include finding base fields or nested
+    port data; use HostSerializer when those are needed.
     """
 
     class Meta:
@@ -119,8 +119,12 @@ class HostSerializer(HacktricksFindingSerializer):
 class SimplePortSerializer(ModelSerializer):
     """Serializer for network port findings.
 
-    Handles JSON conversion for network port findings with nested
-    relationship serialization for comprehensive port data.
+    Handles JSON conversion for network port findings with a nested
+    host relationship for comprehensive port data. Does not include
+    finding base fields; use PortSerializer when those are needed.
+
+    Attributes:
+        host (SimpleHostSerializer): Nested host relationship (read-only)
     """
 
     host = SimpleHostSerializer(many=False, read_only=True)

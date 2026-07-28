@@ -16,7 +16,9 @@ class Sslyze(BaseParser):
 
     Extracts detailed SSL/TLS security findings including supported protocols,
     cipher suites, certificate validation issues, and known vulnerabilities
-    like Heartbleed, ROBOT, and CRIME attacks.
+    like Heartbleed, ROBOT, and CRIME attacks. SSLyze's report doesn't rate
+    cipher suite strength itself, so weak ciphers are flagged by matching
+    insecure_cipher_suites_patterns against the cipher suite names it reports.
 
     Attributes:
         protocol_versions (dict): Mapping of SSL/TLS protocols to versions
@@ -39,7 +41,8 @@ class Sslyze(BaseParser):
             **fields (Any): Field values for the finding
 
         Returns:
-            Finding: Created finding instance with technology association
+            Finding | None: Created finding instance with technology association, or None if
+                           creation fails
         """
         if finding_type == Vulnerability and not fields.get("technology"):
             if not self.generic_tech:
@@ -52,12 +55,15 @@ class Sslyze(BaseParser):
         """Parse SSLyze JSON output and extract SSL/TLS security findings.
 
         Processes JSON scan results to create Technology and Vulnerability findings
-        for comprehensive SSL/TLS security analysis.
+        for comprehensive SSL/TLS security analysis. Scan commands that were not
+        scheduled or that failed report a null result and are treated as passing
+        every check derived from them, since there's no data indicating otherwise.
         """
         data = self.load_json_report()
         if not data or not isinstance(data, dict):
             return
         for item in data.get("server_scan_results", []) or []:
+            # SSLyze names this key differently across report versions, so both are tried
             result = item.get("scan_commands_results") or item.get("scan_result")
             if not result:
                 continue
@@ -105,6 +111,8 @@ class Sslyze(BaseParser):
                     self.create_finding(Vulnerability, **fields)
             for protocol, versions in self.protocol_versions.items():
                 for version in versions:
+                    # SSLyze names each scan command's result key after its protocol and version,
+                    # e.g. "tls_1_2_cipher_suites", which this string mirrors to look it up
                     cipher_suites = result.get(f"{protocol.lower()}_{version.replace('.', '_')}_cipher_suites", {}).get(
                         "accepted_cipher_suites", []
                     )

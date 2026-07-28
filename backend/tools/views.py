@@ -69,7 +69,7 @@ class ToolViewSet(LikeViewSet):
             **kwargs: Arbitrary keyword arguments
 
         Returns:
-            Response: Method not allowed response
+            Response: HTTP 405 Method Not Allowed response
         """
         return self._method_not_allowed("POST")  # pragma: no cover
 
@@ -86,7 +86,7 @@ class ToolViewSet(LikeViewSet):
             **kwargs: Arbitrary keyword arguments
 
         Returns:
-            Response: Method not allowed response
+            Response: HTTP 405 Method Not Allowed response
         """
         return self._method_not_allowed("DELETE")  # pragma: no cover
 

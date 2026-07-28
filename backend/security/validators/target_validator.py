@@ -44,12 +44,13 @@ class TargetValidator(RegexValidator, LoggingEntity):
 
     Validation Process:
         1. Basic regex pattern validation
-        2. Deny list matching of the literal target (exact, regex and IP network)
-        3. DNS resolution of the target and matching of the resolved values
-        4. Comprehensive error handling and reporting
+        2. DNS resolution, collecting the literal target and any resolved values
+           into a single candidate set
+        3. Deny list matching of every candidate (exact, regex and IP network),
+           rejecting the target as soon as any one of them matches
 
     Args:
-        regex (Any): Regex pattern for target format validation.
+        regex (Regex | str): Regex pattern for target format validation.
         message (Any | None): Custom validation error message.
         code (str | None): Error code for validation failures (default: 'target').
         inverse_match (bool | None): Whether to invert regex matching (default: False).
@@ -130,12 +131,14 @@ class TargetValidator(RegexValidator, LoggingEntity):
             candidate = _candidate.strip().rstrip(".").lower()
             for denied_value in TargetDenylist.objects.all():
                 denied_target = denied_value.target.lower()
-                # A malformed deny list entry must be ignored
                 if candidate == denied_target:
+                    # F() increments the counter at the database level, so concurrent
+                    # validations hitting the same entry don't lose updates to a race condition
                     denied_value.blocked = F("blocked") + 1
                     denied_value.save(update_fields=["blocked"])
                     self.logger.warning(f"[Security] Target '{value}' is denied by policy")
                     raise ValidationError(self.message, code=self.code, params={"value": value})
+                # A malformed deny list entry (invalid regex) must be ignored instead of crashing validation
                 try:
                     regex_match = bool(re.fullmatch(denied_target, candidate))
                 except Exception:

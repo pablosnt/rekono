@@ -23,7 +23,7 @@ class ApiToken(Token, BaseModel):
     including named tokens, expiration dates, and unique key generation.
 
     Attributes:
-        key (CharField): Unique 128-character token identifier
+        key (CharField): Unique token identifier (max 128 chars)
         name (TextField): User-defined name for the token (max 100 chars)
         user (ForeignKey): The user who owns this token
         expiration (DateTimeField): Optional token expiration date
@@ -79,6 +79,6 @@ class ApiToken(Token, BaseModel):
         """Return a string representation of the API token.
 
         Returns:
-            str: String in format "username - token_name"
+            str: String in format "user_email - token_name"
         """
         return f"{self.user.__str__()} - {self.name}"

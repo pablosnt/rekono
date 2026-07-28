@@ -1,21 +1,33 @@
 """Input types module for Rekono.
 
-This module provides comprehensive management of input type definitions used
-throughout the Rekono security testing platform. It enables dynamic discovery
-and validation of input data categories for security tools, supporting flexible
-tool argument mapping and relationship analysis between different finding types.
+This module manages the catalog of input type definitions used throughout the
+Rekono security testing platform. Each input type (OSINT, Host, Port, Path,
+Technology, Credential, Vulnerability, Exploit, Wordlist, Authentication,
+Http Header) is mapped to the Django model that stores its data, letting tools,
+executions, and findings resolve input data dynamically and discover
+relationships between the input models used across the platform.
 
 Key Features:
-    - Dynamic input type discovery with Django model integration
-    - Configurable primary and fallback model references for data handling
-    - Relationship calculation between input types for tool chaining
-    - Type-safe input validation and model mapping
-    - REST API endpoints for input type configuration management
-    - Integration with security tool argument systems
+    - Input type catalog seeded from fixtures, with one InputType record per
+      supported input category
+    - Dynamic resolution of primary and fallback model references from
+      'app.Model' string identifiers into the actual Django model classes
+    - Relationship discovery between input types based on ForeignKey and
+      reverse ForeignKey fields on their models, used for tool chaining and
+      dependency ordering
+    - Serializer exposing the input type name and model references in a
+      JSON-friendly format
 
 Architecture:
     The input types system uses a mapping-based approach where each input type
-    (OSINT, Host, Port, etc.) can be associated with specific Django models.
-    This design enables flexible tool integration while maintaining type safety
-    and supporting complex tool workflows with input dependencies.
+    is associated with a primary Django model and an optional fallback model
+    used when the primary one is unavailable. Relationship calculation walks
+    the primary model's fields to find other input types it depends on
+    (parents) or that depend on it (children), enabling tool workflows to be
+    ordered and chained correctly.
+
+Security:
+    - Input type records are managed only through the Django admin site,
+      gated by the standard Django model permissions; there is no REST API
+      surface for creating, updating, or deleting them
 """

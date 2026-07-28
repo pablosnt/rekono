@@ -1,7 +1,9 @@
 """GitLeaks secret detection tool output parser.
 
-Processes GitLeaks JSON output to extract exposed secrets and credentials
-from the commit history of dumped Git repositories.
+Processes the GitLeaks JSON report, a list with one entry per discovered secret, to extract
+exposed Credential findings, together with the Path and Vulnerability findings for the exposed
+/.git/ endpoint itself. Also mines Credential findings for every Git contributor email found in
+the dumped repository's commit history, not just the ones tied to a GitLeaks match.
 """
 
 import subprocess
@@ -80,11 +82,16 @@ class Gitleaks(BaseParser):
                 return
             emails = set()
             for finding in data:
+                # Match is the full matched text, for example token: "...", rather than the tool's
+                # own Secret field, which holds only the isolated token. Match is stored as-is,
+                # so the credential keeps the surrounding syntax and is not redacted.
                 self.create_finding(
                     Credential,
                     secret=finding.get("Match"),
                     context=f"/.git/ : {finding.get('File')} -> Line {finding.get('StartLine')}",
                 )
+                # Email and Author are not present on every GitLeaks match, so both are coerced
+                # to empty strings before being used
                 email = (finding.get("Email") or "").strip()
                 if email and email not in emails:
                     emails.add(email)
@@ -130,10 +137,11 @@ class Gitleaks(BaseParser):
     def _create_git_contributor_credential(self, email: str | None, name: str | None) -> None:
         """Create a Credential for a Git contributor email, keeping their name in the context.
 
-        Emails are deduplicated against ``emails`` so the same contributor is reported only once,
-        regardless of whether it comes from the GitLeaks report or from the commit history, and both
-        sources share the same context format. The contributor name, when known, is kept in the
-        context to help identify the credential owner.
+        Contributors reached through the GitLeaks report and through the commit history share the
+        same context format, so both sources produce comparable credentials. Callers are responsible
+        for skipping emails they have already seen, since this method creates a finding every time it
+        is called. The contributor name, when known, is kept in the context to help identify the
+        credential owner.
 
         Args:
             email (str | None): The contributor email address

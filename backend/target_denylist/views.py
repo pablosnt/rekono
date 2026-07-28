@@ -23,8 +23,8 @@ class TargetDenylistViewSet(BaseViewSet):
 
     Attributes:
         queryset (QuerySet): All TargetDenylist objects
-        serializer_class (Serializer): TargetDenylistSerializer for data conversion
         filterset_class (FilterSet): TargetDenylistFilter for query filtering
+        serializer_class (Serializer): TargetDenylistSerializer for data conversion
         permission_classes (list): Required permissions for access control
         search_fields (list): Fields available for text search
         ordering_fields (list): Fields available for result ordering
@@ -47,7 +47,8 @@ class TargetDenylistViewSet(BaseViewSet):
         All other operations can access the complete queryset.
 
         Returns:
-            QuerySet: Filtered queryset excluding default entries for modifications.
+            QuerySet: Full queryset for read and create operations, or the queryset
+                     excluding default entries for PUT and DELETE.
         """
         default_queryset = super().get_queryset()
         return (

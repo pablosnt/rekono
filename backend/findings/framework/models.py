@@ -78,8 +78,8 @@ class FindingManager(Manager):
         Returns:
             Any | QuerySet: The fixed finding(s) with updated status.
         """
-        # A fix without a user is an automatic one triggered because the finding is no longer
-        # detected; a user-driven fix is manual and keeps the auto-fix reason empty
+        # A fix without a user is automatic, triggered because the finding is no longer detected
+        # A user-driven fix is manual and keeps the auto-fix reason empty
         auto_fixed_reason = AutoFixedReason.NO_LONGER_DETECTED if fixed_by is None else None
         if isinstance(findings, Finding):
             findings.is_fixed = True
@@ -112,13 +112,16 @@ class FindingManager(Manager):
 
         Args:
             finding (Any): Finding to remove fix status from.
-            fixed_by (Any | None): User removing the fix, None for auto-remove.
+            fixed_by (Any | None): User performing a manual removal, which also clears
+                                   the auto-fix from related findings. None for an
+                                   automatic removal, which skips that cascade.
 
         Returns:
             Any: Finding instance with fix status removed.
         """
         if fixed_by:
-            # Remove auto-fix from related findings that were auto-fixed
+            # Related findings were auto-fixed by the same user who originally fixed this one, so
+            # match on finding.fixed_by (the original fixer) rather than the fixed_by argument
             for auto_fixed_and_related_finding in self._get_related_findings(
                 finding, is_fixed=True, auto_fixed__isnull=False, fixed_by=finding.fixed_by
             ):
@@ -370,6 +373,8 @@ class Finding(BaseInput):
             dict[str, Any]: DefectDojo-formatted finding data.
         """
         default_mapping = {"active": lambda instance: not instance.is_fixed, "is_mitigated": "is_fixed"}
+        # TriageFinding subclasses also report verified/false positive/risk accepted status,
+        # and redefine "active" to additionally require an untriaged or true positive status
         if hasattr(self, "triage_status"):
             default_mapping.update(
                 {
@@ -401,11 +406,11 @@ class Finding(BaseInput):
     def __str__(self) -> str:
         """String representation of the finding.
 
-        Generates human-readable string using unique field values
-        for finding identification and display purposes.
+        Joins the string value of each declared unique field with " - ", skipping any
+        that are blank, to build a compact identifier for display and logging.
 
         Returns:
-            str: Formatted string representation of the finding.
+            str: Finding identifier built from its unique field values.
         """
         return " - ".join(
             [

@@ -22,6 +22,11 @@ class First(BaseIntegration):
     from the FIRST API. Supports both per-execution enrichment for individual
     CVEs and bulk monitoring to keep EPSS data current across all active findings.
 
+    Processing Features:
+        - Per-execution EPSS enrichment for a single vulnerability finding
+        - Bulk EPSS monitoring across all non-fixed vulnerabilities, in batches of 100 CVEs
+        - CVE identifier validation before bulk requests to keep malformed values out of a batch
+
     Attributes:
         finding_types (list): Supported finding types (Vulnerability only).
         url (str): FIRST EPSS API endpoint URL.
@@ -92,10 +97,9 @@ class First(BaseIntegration):
     def monitor(self) -> None:
         """Bulk-update EPSS scores for all active vulnerability findings.
 
-        Retrieves latest EPSS data in batches of 100 CVEs from the FIRST API and
+        Retrieves the latest EPSS data in batches of 100 CVEs from the FIRST API and
         updates epss_score and epss_percentile across all non-fixed vulnerabilities
-        with a CVE identifier. Only scores published in the current daily EPSS release
-        are applied. Failures on individual batches are silently skipped.
+        with a CVE identifier. Failures on individual batches are silently skipped.
         """
         if not self.is_enabled():
             return

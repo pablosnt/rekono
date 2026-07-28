@@ -61,6 +61,11 @@ class Property:
         2. Configuration file value
         3. Default value (lowest priority)
 
+        A key that is present in the configuration file but explicitly set to null is
+        treated the same as a missing key: the value falls through to the default
+        instead of resolving to None. Combined with ``update``, this is what lets a
+        property such as the encryption key be cleared by writing null to the file.
+
         Includes intelligent type conversion for boolean values and list
         parsing from environment variables using common separators.
 
@@ -107,9 +112,14 @@ class Property:
         preserving the existing structure and other configuration values.
         Creates nested dictionaries as needed for dot-separated paths.
 
+        Passing None as value writes an explicit null rather than removing the key.
+        Since ``read`` treats a null file value the same as a missing one, this is how
+        the encryption key is cleared: calling ``update`` with None makes the next
+        ``read`` fall back to its default of None instead of returning the old key.
+
         Args:
             rekono_config (RekonoConfig): RekonoConfig instance for file access.
-            value (Any): New value to store in the configuration file.
+            value (Any): New value to store in the configuration file, or None to clear it.
         """
         # Deep copy the config to avoid mutating the original
         config = deepcopy(rekono_config.config_from_file)
@@ -149,8 +159,8 @@ class RekonoConfig:
         _db_port (Property): Database port configuration property.
         _rq_host (Property): Redis Queue host configuration property.
         _rq_port (Property): Redis Queue port configuration property.
-        _frotend_url (Property): Frontend URL configuration property.
-        _frotend_desktop (Property): Frontend Desktop configuration property.
+        _frontend_url (Property): Frontend URL configuration property.
+        _frontend_desktop (Property): Frontend Desktop configuration property.
         _trusted_proxy (Property): Trusted proxy flag configuration property.
         _allowed_hosts (Property): Allowed hosts list configuration property.
         _encryption_key (Property): Encryption key configuration property.
@@ -189,7 +199,7 @@ class RekonoConfig:
     _rq_host = Property("RKN_RQ_HOST", "rq.host", "127.0.0.1")
     _rq_port = Property("RKN_RQ_PORT", "rq.port", 6379)
     # Frontend
-    _frotend_url = Property("RKN_FRONTEND_URL", "frontend.url", "https://127.0.0.1")
+    _frontend_url = Property("RKN_FRONTEND_URL", "frontend.url", "https://127.0.0.1")
     _frontend_desktop = Property("RKN_FRONTEND_DESKTOP", "frontend.desktop", False)
     # Infrastructure context
     _trusted_proxy = Property("RKN_TRUSTED_PROXY", None, False)
@@ -267,6 +277,10 @@ class RekonoConfig:
     def config_from_file(self) -> dict[str, Any]:
         """Load configuration data from YAML file.
 
+        Not cached: the file is re-read and re-parsed on every access, so a value
+        written by ``Property.update`` is visible to the very next ``Property.read``
+        without needing to restart the process.
+
         Returns:
             dict[str, Any]: Dictionary containing all configuration data from the YAML file.
         """
@@ -313,8 +327,12 @@ class RekonoConfig:
     def encryption_key(self) -> str | None:
         """Get encryption key for sensitive data protection.
 
+        A random key is generated on every access in testing mode, rather than read
+        from the configuration file, so tests never depend on a real encryption key
+        being configured.
+
         Returns:
-            str: Encryption key string, generating a new one for testing mode.
+            str | None: Encryption key string, or None if not configured and not testing.
         """
         return Crypto.generate_encryption_key() if self.testing else self._encryption_key.read(self.config_from_file)
 
@@ -348,7 +366,7 @@ class RekonoConfig:
         Returns:
             str: Base URL for the Rekono frontend application.
         """
-        return str(self._frotend_url.read(self.config_from_file)).rstrip("/")
+        return str(self._frontend_url.read(self.config_from_file)).rstrip("/")
 
     @property
     def frontend_origin(self) -> str:

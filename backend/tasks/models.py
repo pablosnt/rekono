@@ -1,8 +1,8 @@
 """Task models for Rekono.
 
-Defines the Task model for managing security testing task execution with scheduling,
-dependency management, and execution coordination. Supports both single tool
-execution and complex multi-step security processes.
+Defines the Task model for managing security testing task execution with scheduling
+and execution coordination. Supports both single tool execution and complex
+multi-step security processes.
 """
 
 from django.core.validators import MaxValueValidator, MinValueValidator
@@ -89,7 +89,7 @@ class Task(BaseModel):
     # Time unit to apply to the 'repeat in' value
     repeat_time_unit = models.TextField(max_length=10, choices=TimeUnit.choices, blank=True, null=True)
     creation = models.DateTimeField(auto_now_add=True)
-    # Date at task got enqueued
+    # Date when the task got enqueued
     enqueued_at = models.DateTimeField(blank=True, null=True)
     start = models.DateTimeField(blank=True, null=True)
     end = models.DateTimeField(blank=True, null=True)

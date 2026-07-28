@@ -232,9 +232,9 @@ class StatsViewSet(BaseViewSet):
     authentication requirements and HTTP method restrictions.
 
     Attributes:
-        ordering_fields: No custom ordering fields defined
-        http_method_names: Restricted to GET requests only
-        permission_classes: Requires authenticated users
+        ordering (list): No default ordering applied.
+        http_method_names (list): Restricted to GET requests only.
+        permission_classes (list): Requires authenticated users.
     """
 
     ordering = []
@@ -249,8 +249,8 @@ class LatestViewSet(StatsViewSet):
     recent items with a configurable limit and no pagination.
 
     Attributes:
-        top_items: Maximum number of items to return (default: 5)
-        pagination_class: Pagination disabled for latest views
+        top_items (int): Maximum number of items to return.
+        pagination_class (type | None): Pagination disabled for latest views.
     """
 
     top_items = 5
@@ -260,10 +260,10 @@ class LatestViewSet(StatsViewSet):
         """Apply filtering and limit results to top items.
 
         Args:
-            queryset: Base queryset to filter
+            queryset (QuerySet): Base queryset to filter.
 
         Returns:
-            Filtered queryset limited to top_items count
+            QuerySet: Filtered queryset limited to top_items count.
         """
         queryset = super().filter_queryset(queryset)
         return queryset[: self.top_items]

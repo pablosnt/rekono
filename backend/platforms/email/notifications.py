@@ -48,6 +48,9 @@ class SMTP(BaseNotification):
     Attributes:
         enable_field (str): User preference field for email notification control
         datetime_format (str): Standard datetime format for email content
+        findings_summary_threshold (int): Finding count above which an execution
+                                          notification switches from detailed
+                                          finding lists to per-type counts
     """
 
     enable_field = "email_notifications"
@@ -66,14 +69,15 @@ class SMTP(BaseNotification):
 
     @cached_property
     def backend(self) -> EmailBackend:
-        """Create and configure SMTP email backend.
+        """Build the SMTP email backend from the stored configuration.
 
-        Initializes Django's EmailBackend with SMTP settings from the database
-        configuration. Creates a secure connection with TLS encryption and
-        timeout handling for reliable email delivery.
+        Configures Django's EmailBackend with the host, port, credentials, TLS flag,
+        and a 5 second connection timeout read from SMTPSettings. The connection itself
+        is only opened later, when a message is sent or when is_available tests it.
 
         Returns:
-            EmailBackend: Configured SMTP backend instance or None if settings unavailable
+            EmailBackend: Configured SMTP backend instance, or None if SMTP is not
+                          configured at all (SMTPSettings.objects.first() is None).
         """
         return (
             EmailBackend(
@@ -101,13 +105,18 @@ class SMTP(BaseNotification):
     def is_available(self) -> bool:
         """Check if SMTP email service is available and properly configured.
 
-        Validates SMTP configuration and tests connection to the mail server
-        by attempting to open and close a connection. Ensures all required
-        settings are present before testing connectivity.
+        Requires a stored SMTPSettings row with both a host and a port before attempting
+        anything else. Availability is always False while CONFIG.testing is set, so unit
+        and integration tests never open a real SMTP connection. Otherwise, it opens and
+        immediately closes a connection to the configured mail server to confirm it is
+        reachable and the credentials are accepted.
 
         Returns:
-            bool: True if SMTP service is available and functional, False otherwise
+            bool: True if SMTP is configured and the mail server accepted the
+                  connection, False otherwise.
         """
+        # Host and port are required for EmailBackend to attempt a connection at all, and
+        # CONFIG.testing keeps tests from reaching out to a real mail server
         if not self.backend or not self.settings or not self.settings.host or not self.settings.port or CONFIG.testing:
             return False
         try:
@@ -120,20 +129,25 @@ class SMTP(BaseNotification):
     def _send_messages(
         self, users: list[Any] | list[str], subject: str, template_path: str, data: dict[str, Any]
     ) -> None:
-        """Send HTML email messages to specified users using configured template.
+        """Render an HTML template and send it as an email to the given recipients.
 
-        Renders HTML email template with provided data and sends formatted emails
-        to all specified users. Includes error handling and logging for failed
-        email delivery attempts.
+        Accepts either user objects or raw email address strings, since some notifications
+        (email address verification) target a pending address with no user lookup of its
+        own. Recipients are placed in BCC when there is more than one, so they can't see
+        each other's addresses; a single recipient is addressed directly instead. Does
+        nothing if SMTP is unavailable or no users were given, and logs rather than raises
+        if rendering or sending the message fails.
 
         Args:
-            users (list[Any]): List of user objects with email addresses
-            subject (str): Email subject line
-            template_path (str): Path to HTML email template
-            data (dict[str, Any]): Template context data for rendering
+            users (list[Any] | list[str]): User objects with an email attribute, or raw
+                                           email address strings.
+            subject (str): Email subject line.
+            template_path (str): Filename of the HTML template to render.
+            data (dict[str, Any]): Template context data for rendering.
         """
         if not self.is_available() or len(users) == 0:
             return
+        # Callers may pass plain email addresses instead of user objects (see verify_email)
         if not isinstance(users[0], str):
             users = [u.email for u in users]
         sender = "Rekono <noreply@rekono.com>"
@@ -175,16 +189,17 @@ class SMTP(BaseNotification):
             self._send_messages(users, subject, template, data)
 
     def _notify_execution(self, users: list[Any], execution: Execution, findings: list[Finding]) -> None:
-        """Send execution completion notification with findings summary.
+        """Send an execution completion notification summarizing its findings.
 
-        Notifies users about completed security tool execution with organized
-        findings grouped by type. Provides comprehensive execution results
-        and discovered security findings in formatted email.
+        Groups findings by class name, skipping any created from user input rather than
+        discovered by the tool itself. When the total exceeds findings_summary_threshold,
+        the template receives a per-type count instead of the full finding lists, keeping
+        the email a reasonable size for executions with very large result sets.
 
         Args:
-            users (list[Any]): List of users to notify about execution completion
-            execution (Execution): The completed execution instance
-            findings (list[Finding]): List of security findings discovered
+            users (list[Any]): Users to notify about the execution.
+            execution (Execution): The completed execution instance.
+            findings (list[Finding]): Findings discovered by the execution.
         """
         findings_by_class: dict[Any, list[Finding]] = {}
         for finding in findings:
@@ -218,16 +233,16 @@ class SMTP(BaseNotification):
         )
 
     def _notify_alert(self, users: list[Any], alert: Alert, finding: Finding) -> None:
-        """Send alert notification for security finding matching alert criteria.
+        """Send an alert notification for a finding that matched an alert rule.
 
-        Notifies users about security findings that match configured alert rules.
-        Provides contextual subject lines based on alert mode (NEW, FILTER, MONITOR)
-        and includes both alert configuration and finding details.
+        The subject reads "<cve> is trending" for trending CVE alerts, or
+        "new <finding type> detected" for every other alert item, with "osint"
+        cased as "OSINT".
 
         Args:
-            users (list[Any]): List of users subscribed to the alert
-            alert (Alert): The triggered alert configuration
-            finding (Finding): The security finding that triggered the alert
+            users (list[Any]): Users subscribed to the alert.
+            alert (Alert): The triggered alert configuration.
+            finding (Finding): The finding that triggered the alert.
         """
         # This is called from findings queue which is already asynchronous
         alert = (
@@ -244,28 +259,22 @@ class SMTP(BaseNotification):
         )
 
     def invite_user(self, user: Any, otp: str) -> None:
-        """Send user invitation email with account setup instructions.
-
-        Sends welcome email to newly invited users with account activation
-        instructions and one-time password for initial account setup.
+        """Send a welcome email with the one-time password needed to claim the account.
 
         Args:
-            user (Any): The invited user object
-            otp (str): One-time password for account activation
+            user (Any): The invited user.
+            otp (str): One-time password for account activation.
         """
         self._notify_if_available(
             [user], "You have been invited to Rekono", "user_invitation.html", {"user": user, "user_otp": otp}
         )
 
     def reset_password(self, user: Any, otp: str) -> None:
-        """Send password reset email with secure reset instructions.
-
-        Sends password reset email containing secure reset link and one-time
-        password for user authentication during password reset process.
+        """Send a password reset email with the one-time password needed to reset it.
 
         Args:
-            user (Any): The user requesting password reset
-            otp (str): One-time password for secure password reset
+            user (Any): The user requesting the password reset.
+            otp (str): One-time password for the reset.
         """
         self._notify_if_available(
             [user], "Reset your password", "user_password_reset.html", {"user": user, "user_otp": otp}
@@ -307,39 +316,30 @@ class SMTP(BaseNotification):
         )
 
     def mfa(self, user: Any, otp: str) -> None:
-        """Send multi-factor authentication email with one-time password.
-
-        Delivers MFA token via email for two-factor authentication during
-        login process, providing secure second factor verification.
+        """Send the one-time password used as the second factor during login.
 
         Args:
-            user (Any): The user requesting MFA token
-            otp (str): One-time password for multi-factor authentication
+            user (Any): The user logging in.
+            otp (str): One-time password for multi-factor authentication.
         """
         self._notify_if_available([user], "Your verification code", "user_mfa.html", {"user": user, "user_otp": otp})
 
     def enable_user_account(self, user: Any, otp: str) -> None:
-        """Send account enablement notification with activation instructions.
-
-        Notifies users that their account has been enabled and provides
-        activation instructions with one-time password for account access.
+        """Send a re-enablement email with the one-time password needed to access the account again.
 
         Args:
-            user (Any): The user whose account was enabled
-            otp (str): One-time password for account activation
+            user (Any): The user whose account was enabled.
+            otp (str): One-time password for account activation.
         """
         self._notify_if_available(
             [user], "Welcome back to Rekono", "user_enable_account.html", {"user": user, "user_otp": otp}
         )
 
     def login_notification(self, user: Any) -> None:
-        """Send security notification for new account login.
-
-        Sends security alert email notifying users about new login activity
-        on their account with timestamp information for security monitoring.
+        """Send a security notice about a new sign-in to the account, with a timestamp.
 
         Args:
-            user (Any): The user who logged into the account
+            user (Any): The user who signed in.
         """
         self._notify_if_available(
             [user],
@@ -349,13 +349,10 @@ class SMTP(BaseNotification):
         )
 
     def telegram_linked_notification(self, user: Any) -> None:
-        """Send confirmation email for Telegram bot integration setup.
-
-        Notifies users about successful Telegram bot account linking with
-        welcome message and timestamp for integration confirmation.
+        """Send a confirmation email that the account was linked to a Telegram chat, with a timestamp.
 
         Args:
-            user (Any): The user who linked their Telegram account
+            user (Any): The user who linked their Telegram account.
         """
         self._notify_if_available(
             [user],
@@ -365,13 +362,14 @@ class SMTP(BaseNotification):
         )
 
     def report_created(self, report: Any) -> None:
-        """Send notification when security report generation is completed.
+        """Send a notification that a requested report has finished generating.
 
-        Notifies users when their requested security reports have been generated
-        and are ready for download, including report format and access information.
+        Uses _notify_if_enabled rather than _notify_if_available, so unlike the account
+        and security emails above, this respects the recipient's email notification
+        preference and is skipped for users who disabled it.
 
         Args:
-            report (Any): The generated report object with format and download details
+            report (Any): The generated report, providing format and owning user.
         """
         self._notify_if_enabled(
             [report.user], f"Your {report.format.upper()} report is ready", "report_created.html", {"report": report}

@@ -73,10 +73,14 @@ class ReportingViewSet(BaseViewSet):
     owner_field = "user"
 
     def _get_project_from_data(self, project_field: str, data: dict[str, Any]) -> Project | None:
-        """Extract project from request data based on scope hierarchy.
+        """Extract project context from the report's scope in request data.
+
+        Resolves the project through whichever scope field was supplied, preferring
+        task over target over project. A request may supply more than one of these
+        fields, and only the highest-priority one, checked in that order, is used.
 
         Args:
-            project_field (str): The project field name (unused in current implementation)
+            project_field (str): The project field name (unused but required by interface)
             data (dict[str, Any]): Request data containing scope information
 
         Returns:
@@ -154,7 +158,7 @@ class ReportingViewSet(BaseViewSet):
             **kwargs (Any): Additional keyword arguments
 
         Returns:
-            Response: Standard deletion response
+            Response: HTTP 400 if the report is still being generated, otherwise the standard deletion response
         """
         report = self.get_object()
         # The file is created in a background thread, deleting now would let that thread finish against a deleted row and orphan the file on disk.
@@ -414,7 +418,7 @@ class ReportingViewSet(BaseViewSet):
             findings (dict[type[Finding], list[dict[str, Any]]]): Findings data to serialize
 
         Returns:
-            bool: True if generation succeeded, False on error
+            bool: True once the XML file has been written
         """
         root = ET.Element("findings")
         for finding_type, finding_list in findings.items():
@@ -438,8 +442,6 @@ class ReportingViewSet(BaseViewSet):
         Returns:
             str: Absolute file path or original URI if not found
         """
-        # Callback function for PDF generation to resolve static file paths
-        # Converts relative URIs to absolute paths so xhtml2pdf can access CSS/images
         if f"/{STATIC_URL}" in uri:
             filepath = uri.split(f"/{STATIC_URL}", 1)[1]
             for parent in [STATICFILES_DIRS[0], CONFIG.home]:
@@ -465,6 +467,10 @@ class ReportingViewSet(BaseViewSet):
                 "project": scope.parent_project,
                 "targets": [scope.target]
                 if isinstance(scope, Task)
+                # This method runs in a background thread, and the test database is an in-memory SQLite
+                # instance scoped per connection, so a fresh query here would see an empty database. The
+                # task/target branches above reuse objects already loaded on the calling thread, avoiding
+                # the issue, but a project-scope report needs a live query, so it is skipped during tests.
                 else ([scope] if isinstance(scope, Target) else (scope.targets.all() if not CONFIG.testing else [])),
                 "findings": findings["findings"],
                 "stats_by_target": findings["stats_by_target"],

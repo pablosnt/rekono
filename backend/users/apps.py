@@ -1,7 +1,8 @@
 """Django app configuration for the users module.
 
-Defines Django app configuration for the user management application
-with BaseApp functionality and standard Django app configuration.
+Configures the users application with automatic creation of authentication
+groups and role-based permission assignments once database migrations
+are complete.
 """
 
 from typing import Any
@@ -16,8 +17,9 @@ from security.authorization.roles import ROLES, Role
 class UsersConfig(BaseApp, AppConfig):
     """Django app configuration for the users module.
 
-    Configures the users Django app with BaseApp functionality
-    and standard Django app configuration for user management.
+    Extends BaseApp and AppConfig to provide user-management-specific
+    initialization, creating Django auth groups and assigning role-based
+    permissions after migrations.
 
     Attributes:
         name (str): The name of the Django app
@@ -44,6 +46,8 @@ class UsersConfig(BaseApp, AppConfig):
             **kwargs (Any): Django post-migrate signal arguments containing app
                            registry and migration information.
         """
+        # Models are fetched from the historical app registry passed by the signal,
+        # not imported directly, so they match the schema at this migration state
         group_model = kwargs["apps"].get_model(app_label="auth", model_name="group")
         permission_model = kwargs["apps"].get_model(app_label="auth", model_name="permission")
         groups = {}

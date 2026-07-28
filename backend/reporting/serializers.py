@@ -23,6 +23,12 @@ class ReportSerializer(ModelSerializer):
 
     Handles serialization of Report instances with detailed nested information
     for project, target, task, and user relationships in API responses.
+
+    Attributes:
+        project (ProjectSerializer): Nested project details for the report
+        target (SimpleTargetSerializer): Nested target details for the report
+        task (TaskSerializer): Nested task details for the report
+        user (SimpleUserSerializer): Nested user details for the report author
     """
 
     project = ProjectSerializer(read_only=True, many=False)
@@ -53,6 +59,7 @@ class CreateReportSerializer(ModelSerializer):
         include_findings_from_user_input (BooleanField): Include findings created from user input (optional, default=False, write-only)
         finding_types (MultipleChoiceField): Specific finding types to include in the report (optional, write-only)
         validated_filter (dict[str, Any]): Internal filter criteria applied during validation
+        validated_triage_filter (dict[str, Any]): Internal triage status filter built during validation, combined with validated_filter by the view when querying findings
         validated_finding_types (list[FindingName]): Internal list of validated finding types for report generation
     """
 
@@ -86,16 +93,20 @@ class CreateReportSerializer(ModelSerializer):
         read_only_fields = ("user",)
 
     def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
-        """Validate report creation data and configure filtering criteria.
+        """Validate report creation data and build the filters used to select findings.
 
-        Processes filtering options and validates that at least one scope
-        (task, target, or project) is provided for the report.
+        Derives validated_filter, validated_triage_filter, and validated_finding_types
+        from the write-only input fields, then removes those fields from attrs since
+        they are not part of the Report model. Requires at least one of task, target,
+        or project to be set; if more than one is given, only the highest-priority
+        field is used, checked in that order. Skips the scope filter for PDF reports
+        since those are generated per target instead of from a single combined queryset.
 
         Args:
             attrs (dict[str, Any]): The attributes to validate
 
         Returns:
-            dict[str, Any]: The validated attributes
+            dict[str, Any]: The validated attributes, with filtering-only fields removed
 
         Raises:
             ValidationError: If no scope is provided for the report
@@ -127,10 +138,9 @@ class CreateReportSerializer(ModelSerializer):
             value = attrs.get(field)
             if value:
                 no_mandatory_field = False
-                # PDF reports are splitting findings per target in order to structure the final document
-                # That means that it doesn't make sense to create a filter valid to get all the findings together,
-                # as if a project is specified, the generator will need to iterate over the project targets,
-                # and then filter the findings by each target.
+                # PDF reports split findings by target to structure the document, so a single
+                # combined filter would not work here. The generator instead iterates over each
+                # target in scope and filters findings per target.
                 if attrs.get("format") != ReportFormat.PDF:
                     self.validated_filter[filter_field] = value
                 break

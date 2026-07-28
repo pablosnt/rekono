@@ -47,7 +47,8 @@ class TargetPort(BaseInput):
     path = models.TextField(max_length=100, validators=[Validator(Regex.PATH, code="path")], blank=True, null=True)
 
     _filters = [BaseInput.Filter(type=int, field="port")]
-    # _parse_dependencies is not used to avoid recalculation of URLs
+    # "target" is left out of _parse_dependencies below so Target.parse() doesn't run its own
+    # get_url() probe, which the port-scoped URL here would immediately overwrite
     _parse_mapping = {
         InputKeyword.TARGET: lambda instance, task: f"{instance.target.target}:{instance.port}",
         InputKeyword.HOST: lambda instance, task: instance.target.target,
@@ -82,10 +83,10 @@ class TargetPort(BaseInput):
 
         Args:
             task (Any): Task context for parsing (e.g., for URL generation)
-            accumulated (dict): Accumulated parsing data from other inputs
+            accumulated (dict[str, Any]): Accumulated parsing data from other inputs
 
         Returns:
-            dict: Parsed data including port information in multiple formats
+            dict[str, Any]: Parsed data including port information in multiple formats
         """
         output = super().parse(task, accumulated)
         output[InputKeyword.PORTS_COMMAS.name.lower()] = ",".join(

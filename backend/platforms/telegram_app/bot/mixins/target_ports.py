@@ -3,6 +3,10 @@
 Provides target port functionality for conversations that require port
 specification, covering creation with validation and summary display, and
 selection of an existing port to focus an execution on a single target port.
+Every state here expects Context.TARGET to already be set by TargetMixin.
+reply_summary is only used by the /newport conversation, which ends there;
+other conversations leave Context.TARGET_PORT set (or unset for "all ports")
+and move on to further mixins instead.
 """
 
 from asgiref.sync import sync_to_async
@@ -136,6 +140,8 @@ class TargetPortMixin(BaseMixin):
         self.validate_update(update)
         if not update.effective_message or not update.effective_message.text:
             return ConversationHandler.END
+        # This state's MessageHandler(filters.TEXT, ...) matches "/cancel" as plain text too, so it
+        # has to be redirected to the Cancel command manually before parsing it as a port number
         if update.effective_message.text.lower() == "/cancel":
             return await Cancel().execute_command(update, context)
         try:

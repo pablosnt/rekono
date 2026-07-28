@@ -301,7 +301,6 @@ class Path(Finding):
 
     port = models.ForeignKey(Port, related_name="path", on_delete=models.DO_NOTHING, blank=True, null=True)
     path = models.TextField(max_length=500)
-    # Status received for that path. Probably HTTP status
     status = models.IntegerField(blank=True, null=True)
     extra_info = models.TextField(max_length=100, blank=True, null=True)
     # Path type depending on the protocol where it's found
@@ -364,7 +363,7 @@ class Path(Finding):
         if self.port:
             target_port = TargetPort.objects.filter(target=target, port=self.port.port).first()
             if target_port and target_port.path:
-                # If there is a target por with path, only paths within it will be considered
+                # If there is a target port with path, only paths within it will be considered
                 filter = filter and self._clean_comparison_path(self.path).startswith(
                     self._clean_comparison_path(target_port.path)
                 )
@@ -419,7 +418,8 @@ class Technology(HacktricksFinding):
     ]
     _root_findings = ("port",)
     _filters = [Finding.Filter(str, "name", contains=True, processor=lambda n: n.lower())]
-    # Version is parsed as empty string when None, as most of the tools working from technologies only require the technology name
+    # Version is parsed as empty string when None, as most of the tools working from
+    # technologies only require the technology name
     _parse_mapping = {
         InputKeyword.TECHNOLOGY: "name",
         InputKeyword.VERSION: lambda instance, task: instance.version or "",
@@ -474,7 +474,6 @@ class Credential(TriageFinding):
     )
     email = models.TextField(max_length=100, blank=True, null=True)
     username = models.TextField(max_length=100, blank=True, null=True)
-    # Secret (password, key, etc.) if found
     secret = models.TextField(max_length=300, blank=True, null=True)
     context = models.TextField(max_length=300, blank=True, null=True)
 
@@ -523,10 +522,11 @@ class Vulnerability(TriageFinding):
         cvss_version (TextField): CVSS framework version identifier (optional, max 3 characters)
         cvss_vector (TextField): CVSS vector string for detailed scoring (optional, max 200 characters)
         cvss_base_score (FloatField): CVSS base score numerical value (optional)
-        cve (TextField): Common Vulnerabilities and Exposures identifier (optional, max 20 characters)
+        cve (TextField): Common Vulnerabilities and Exposures identifier (optional, max 30 characters)
         euvd_id (TextField): ENISA EUVD identifier (optional, max 30 characters)
         ghsa_id (TextField): GitHub Security Advisory identifier (optional, max 30 characters)
-        osv_generic_id (TextField): OSV-native identifier for non-CVE/GHSA/EUVD ecosystems (optional, max 100 characters)
+        osv_generic_id (TextField): OSV-native identifier for non-CVE/GHSA/EUVD ecosystems
+                                    (optional, max 100 characters)
         cwes (JSONField): Sorted list of CWE identifiers (e.g. ["CWE-79", "CWE-200"])
         epss_score (FloatField): EPSS probability of exploitation in 30 days (optional, 0.0–1.0)
         epss_percentile (FloatField): EPSS percentile rank among all scored CVEs (optional, 0.0–1.0)
@@ -668,7 +668,7 @@ class Exploit(TriageFinding):
         vulnerability (ForeignKey): Target vulnerability for this exploit (optional relationship)
         technology (ForeignKey): Affected technology component (optional relationship)
         title (TextField): Exploit name or descriptive title (max 100 characters)
-        edb_id (IntegerField): Exploit Database unique identifier (optional)
+        edb_id (IntegerField): Exploit Database identifier for this exploit (optional)
         reference (TextField): Exploit source URL or documentation link (optional, max 250 characters)
 
     Example:
@@ -699,7 +699,7 @@ class Exploit(TriageFinding):
         null=True,
     )
     title = models.TextField(max_length=100)
-    edb_id = models.IntegerField(blank=True, null=True)  # Id in Exploit-DB
+    edb_id = models.IntegerField(blank=True, null=True)
     reference = models.TextField(max_length=250, blank=True, null=True)
 
     _unique_fields = [

@@ -30,7 +30,7 @@ class Wordlist(BaseInput, BaseLike):
         name (TextField): Unique name for the wordlist (max 100 characters)
         type (TextField): Wordlist type from WordlistType enum (max 10 characters)
         path (TextField): File system path to the wordlist file (unique, max 200 characters)
-        checksum (TextField): SHA-256 checksum for file integrity verification (optional, max 128 characters)
+        checksum (TextField): SHA-512 checksum for file integrity verification (optional, max 128 characters)
         size (IntegerField): Number of entries in the wordlist file (auto-calculated)
         owner (ForeignKey): User who uploaded/owns this wordlist (optional)
 
@@ -51,9 +51,7 @@ class Wordlist(BaseInput, BaseLike):
     type = models.TextField(max_length=10, choices=WordlistType.choices)
     path = models.TextField(max_length=200, unique=True)
     checksum = models.TextField(max_length=128, blank=True, null=True)
-    # Number of entries in the wordlist file
     size = models.IntegerField(blank=True, null=True)
-    # User that created the wordlist
     owner = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, null=True)
 
     _filters = [BaseInput.Filter(type=WordlistType, field="type")]
@@ -73,8 +71,9 @@ class Wordlist(BaseInput, BaseLike):
         Returns:
             bool: True if wordlist is available and valid, False otherwise
         """
-        check = Path(self.path).is_file()  # Check if wordlist file exists
-        if check and self.checksum:  # If checksum exists, verifies it
+        check = Path(self.path).is_file()
+        # Bundled default wordlists have no checksum, so integrity is only verified when one is stored
+        if check and self.checksum:
             check = check and FileHandler().validate_filepath_checksum(self.path, self.checksum)
         if argument_input.filter:
             return super().filter(argument_input, target) and check

@@ -1,7 +1,11 @@
 """Telegram Bot mixin for security task execution confirmation and creation.
 
 Provides task confirmation prompts and task creation functionality for
-security testing workflows including validation and execution setup.
+security testing workflows including validation and execution setup. Runs last in
+every conversation that creates a Task (Tool and Process), after all the other
+mixins have populated the context values it reads. On completion it clears the
+whole conversation context, ending the flow either with a created Task or with
+the user's cancellation.
 """
 
 from telegram import Update
@@ -31,8 +35,11 @@ class TaskMixin(BaseMixin):
         """Display task confirmation prompt with execution summary.
 
         Shows a comprehensive summary of the security task to be executed
-        including project, target, tool/process, and intensity settings.
-        Validates that all required parameters are present.
+        including project, target, tool/process, and intensity settings. The target
+        line uses Task.get_target(target, target_port), the shared label helper that
+        also builds target labels for execution notifications, so it renders as
+        "<target>:<port><path>" when a target port was selected, or the bare target
+        otherwise. Validates that all required parameters are present.
 
         Args:
             update (Update): The Telegram update containing user interaction.

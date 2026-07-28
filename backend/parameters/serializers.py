@@ -1,7 +1,8 @@
 """Django REST framework serializers for input parameters.
 
 Serializer classes for converting input parameter models to/from JSON for API operations.
-Includes deduplication logic to prevent parameter redundancy.
+Both serializers inherit deduplication logic from InputParameterSerializer to prevent
+parameter redundancy.
 """
 
 from parameters.framework.serializers import InputParameterSerializer
@@ -13,9 +14,6 @@ class InputTechnologySerializer(InputParameterSerializer):
 
     Handles serialization and deserialization of technology parameters for API operations
     with automatic deduplication based on name and version fields.
-
-    Attributes:
-        Meta: Configuration class defining model and field settings
     """
 
     class Meta:
@@ -35,9 +33,6 @@ class InputVulnerabilitySerializer(InputParameterSerializer):
 
     Handles serialization and deserialization of vulnerability parameters for API operations
     with automatic deduplication based on CVE identifiers.
-
-    Attributes:
-        Meta: Configuration class defining model and field settings
     """
 
     class Meta:

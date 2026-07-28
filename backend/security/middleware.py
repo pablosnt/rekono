@@ -1,9 +1,9 @@
 """Security middleware for HTTP request/response processing in Rekono.
 
 Provides comprehensive security controls for HTTP traffic including security headers,
-Content Security Policy (CSP) configuration, CORS handling, and request/response
-logging. This middleware implements defense-in-depth security measures to protect
-against common web application attacks.
+Content Security Policy (CSP) configuration, CORS handling, trusted proxy-aware client
+IP resolution, and request/response logging. This middleware implements defense-in-depth
+security measures to protect against common web application attacks.
 """
 
 from dataclasses import dataclass
@@ -18,6 +18,9 @@ from framework.context import RequestContext
 from framework.logging import LoggingEntity
 from rekono.settings import CONFIG
 
+# Maps request path prefixes to the Content-Security-Policy applied to matching responses.
+# Matching is first-prefix-wins in insertion order, so the more specific /api/schema/... entries
+# must stay ahead of the general /api/ entry, which would otherwise shadow them.
 CSP = {
     "/admin": "; ".join(
         [
@@ -38,7 +41,7 @@ CSP = {
             "base-uri 'none'",
             "object-src 'none'",
             "frame-ancestors 'none'",
-            # 'unsafe-inline' required due to a inline script with hardcoded dynamic CSRF token, so its hash changes
+            # 'unsafe-inline' required due to an inline script with hardcoded dynamic CSRF token, so its hash changes
             "script-src cdn.jsdelivr.net 'unsafe-inline'",
             "style-src cdn.jsdelivr.net fonts.googleapis.com 'sha256-MMpT0iDxyjALd9PdfepImGX3DBfJPXZ4IlDWdPAgtn0='",
             "img-src data: cdn.jsdelivr.net",
@@ -62,6 +65,13 @@ CSP = {
     ),
     "/api/": "; ".join(["default-src 'none'", "base-uri 'none'", "object-src 'none'", "frame-ancestors 'none'"]),
 }
+# Fixed header values applied to every response. Access-Control-Allow-Origin is always
+# resolved per request in _add_security_headers from the request's Origin header.
+# Content-Security-Policy is resolved per request by matching the path against CSP,
+# but falls back to this None placeholder, sent as the literal string "None", for any
+# path that matches no CSP prefix. Server has no per-request override, so it is always
+# sent as "None" too, instead of whatever value the underlying server would otherwise
+# set, which keeps the real server implementation from being disclosed to clients.
 SECURITY_HEADERS = {
     "Content-Security-Policy": None,
     "Server": None,
@@ -85,9 +95,10 @@ class SecurityMiddleware(LoggingEntity):
     including security headers, Content Security Policy enforcement, CORS handling,
     and comprehensive request/response logging for security monitoring.
 
-    Security Controls:
+    Security Features:
         - Path-specific Content Security Policy (CSP) enforcement
         - Comprehensive security headers to prevent common attacks
+        - CORS origin validation, echoing back only trusted frontend origins
         - Custom OPTIONS responses
         - Request/response logging with status code-based log levels
         - Trusted proxy support for accurate client IP identification
@@ -133,8 +144,8 @@ class SecurityMiddleware(LoggingEntity):
     def _get_options_response(self, request: HttpRequest) -> Response:
         """Generate HTTP OPTIONS response.
 
-        Creates a proper HTTP response for OPTIONS requests
-        with appropriate Allow headers and JSON content type.
+        Creates a rendered HTTP response for OPTIONS preflight requests, with a
+        JSON content type and an Allow header listing the supported methods.
 
         Args:
             request (HttpRequest): Django HTTP request object.
@@ -151,11 +162,17 @@ class SecurityMiddleware(LoggingEntity):
         return response
 
     def _add_security_headers(self, request: HttpRequest, response: Response) -> Response:
-        """Add comprehensive security headers to HTTP responses.
+        """Add security headers to an HTTP response before it is returned to the client.
 
-        Applies security headers including Content Security Policy (CSP),
-        anti-clickjacking headers, and content type protection. CSP is
-        applied based on request path patterns for granular control.
+        Applies every entry in SECURITY_HEADERS as-is, except for three that are
+        resolved per request. Content-Security-Policy is chosen by matching the
+        request path against the CSP prefixes. Access-Control-Allow-Origin echoes
+        back the request Origin only when it is in the allowed list (the configured
+        frontend origin, plus the Tauri desktop app and local dev server origins when
+        CONFIG.frontend_desktop is enabled), and otherwise falls back to the configured
+        frontend origin. Referrer-Policy relaxes from the default no-referrer to
+        strict-origin for paths under /admin, so requests originating from the Django
+        admin site still carry their origin.
 
         Args:
             request (HttpRequest): Django HTTP request object.
@@ -219,11 +236,11 @@ class SecurityMiddleware(LoggingEntity):
         Processing Flow:
             1. Extract and normalize client IP address
             2. Store request in context-local storage for downstream components
-            3. Handle OPTIONS requests
-            4. Process request through Django middleware chain
-            5. Apply comprehensive security headers
-            6. Log request/response for security monitoring
-            7. Clear request from context-local storage
+            3. Return a custom response for OPTIONS requests, or forward the request
+               through the rest of the Django middleware chain otherwise
+            4. Apply comprehensive security headers to the resulting response
+            5. Log request/response for security monitoring
+            6. Clear request from context-local storage, even if a previous step raised
 
         Args:
             request (HttpRequest): Incoming Django HTTP request.

@@ -16,9 +16,9 @@ from security.authorization.permissions import IsAdmin
 class HttpHeaderSerializer(ModelSerializer):
     """Full serializer for HTTP header management with validation.
 
-    Provides complete serialization for HTTP headers including all fields
-    with comprehensive validation logic to ensure proper access control
-    and data integrity during create and update operations.
+    Provides complete serialization for HTTP headers including all fields,
+    with validation logic that enforces access control when a header is
+    created.
     """
 
     class Meta:
@@ -52,11 +52,11 @@ class HttpHeaderSerializer(ModelSerializer):
             PermissionDenied: If user lacks permission to create the header.
         """
         attrs = super().validate(attrs)
-        # If target is specified, clear user association (target takes precedence)
+        # A target-specific header has no user, so clear any user assignment once a target is set
         if attrs.get("target"):
             attrs["user"] = None
-        # Authorization logic: users can only create headers for themselves
-        # or for targets they have access to, or global headers if they're admin
+        # Users may only assign a header to themselves
+        # A global header, which has neither target nor user, is restricted to Admin users
         if (attrs.get("user") is not None and attrs.get("user") != self.context.get("request").user) or (
             attrs.get("target") is None
             and attrs.get("user") is None
@@ -67,22 +67,20 @@ class HttpHeaderSerializer(ModelSerializer):
 
 
 class UpdateHttpHeaderSerializer(ModelSerializer):
-    """Simplified serializer for HTTP header updates.
+    """Serializer for updating an existing HTTP header.
 
-    Provides lightweight serialization for HTTP header updates with
-    reduced field set for improved performance during PUT operations.
-    Includes comprehensive authorization checks for update operations.
+    A header's scope, its target or user association, is fixed when the
+    header is created and cannot be reassigned through an update, so this
+    serializer only exposes the key and value fields. Includes authorization
+    checks for update operations.
     """
 
     class Meta:
         """Meta configuration for UpdateHttpHeaderSerializer.
 
-        Defines model reference and minimal field set for efficient
-        update operations with reduced API payload size.
-
         Attributes:
             model (type): HttpHeader model class
-            fields (tuple): Minimal fields for update operations
+            fields (tuple): Field names to include in serialization
         """
 
         model = HttpHeader
@@ -102,7 +100,7 @@ class UpdateHttpHeaderSerializer(ModelSerializer):
             HttpHeader: Updated header instance.
 
         Raises:
-            PermissionDenied: If user lacks permission to update the header
+            PermissionDenied: If user lacks permission to update the header.
         """
         if (instance.user is not None and instance.user != self.context.get("request").user) or (
             instance.user is None

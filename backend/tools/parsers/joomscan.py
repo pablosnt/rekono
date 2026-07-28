@@ -26,9 +26,14 @@ class Joomscan(BaseParser):
         """Parse JoomScan output and extract Joomla security findings.
 
         Processes plain text scan results to create Technology, Vulnerability,
-        Exploit, and Path findings from Joomla CMS security analysis.
+        Exploit, and Path findings from Joomla CMS security analysis. JoomScan
+        has no structured report format, so findings are recognized from fixed
+        banner strings and, for some of them, by looking at the previous line.
         """
         technology = vulnerability_name = None
+        # Seeded with "/" so the "Processing <url> ..." banner line at the top of the report,
+        # which also matches the host substring check below, does not produce a redundant
+        # root Path finding
         endpoints = set(["/"])
         backups = set()
         configurations = set()
@@ -41,6 +46,8 @@ class Joomscan(BaseParser):
             if not data:
                 continue
             if "[++] Joomla" in data and lines[index - 1] == "[+] Detecting Joomla Version":
+                # "[++] Joomla" also prefixes vulnerability headers like "[++] Joomla! <name>",
+                # so the preceding banner line confirms this is the version detection line
                 version = data.replace("[++] Joomla ", "").strip()
                 technology = self.create_finding(
                     Technology,
@@ -50,7 +57,11 @@ class Joomscan(BaseParser):
                     reference="https://www.joomla.org/",
                 )
             elif "CVE : " in data:
+                # The vulnerability name is on the line right before its "CVE : " entry. The
+                # first entry in a block is prefixed with "[++] Joomla!", later ones in the same
+                # block are plain "Joomla! <name>" lines, so both prefixes are stripped here
                 vulnerability_name = lines[index - 1].replace("[++]", "").replace("Joomla!", "").strip()
+                # A single line can list several comma-separated CVE ids for the same vulnerability
                 for cve in data.replace("CVE : ", "").strip().split(","):
                     self.create_finding(
                         Vulnerability,
@@ -66,6 +77,8 @@ class Joomscan(BaseParser):
                     linked_finding=True,
                     technology=technology,
                     title=vulnerability_name,
+                    # JoomScan always emits Exploit-DB links in this exact URL form, so the
+                    # numeric id is extracted by splitting on it instead of parsing the URL
                     edb_id=int(link.split("https://www.exploit-db.com/exploits/", 1)[1].replace("/", "")),
                     reference=link,
                 )
@@ -81,6 +94,8 @@ class Joomscan(BaseParser):
                 )
 
             elif host in data:
+                # Any remaining line mentioning the host is treated as reporting an endpoint; the
+                # endpoint itself is the text between the host and the next whitespace
                 endpoint = data.split(host, 1)[1].split(" ", 1)[0]
                 if endpoint and endpoint not in endpoints:
                     endpoints.add(endpoint)
@@ -90,6 +105,8 @@ class Joomscan(BaseParser):
                         ("Full Path Disclosure (FPD) in", path_disclosure),
                         ("directory has directory listing :", directory_listing),
                     ]:
+                        # The same line that reports the endpoint also carries one of these
+                        # markers when it belongs to one of the aggregated categories below
                         if search in data:
                             list.add(endpoint)
                     self.create_finding(Path, path=Path.clean_path(endpoint), type=PathType.ENDPOINT)

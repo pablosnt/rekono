@@ -1,7 +1,7 @@
-"""Django application configuration for the projects module.
+"""Django app configuration for the projects module.
 
-Configures the projects Django application with base functionality and
-proper application registration for project management features.
+Configures the projects Django application with BaseApp integration
+for consistent framework behavior.
 """
 
 from django.apps import AppConfig
@@ -10,13 +10,13 @@ from framework.apps import BaseApp
 
 
 class ProjectsConfig(BaseApp, AppConfig):
-    """Django application configuration for projects module.
+    """Configuration class for the projects Django application.
 
-    Extends BaseApp to provide standardized Rekono application configuration
-    with integrated logging and framework features for project management.
+    Extends BaseApp to provide standard framework integration for the
+    projects module with consistent configuration and behavior.
 
     Attributes:
-        name (str): The application name identifier for Django registration
+        name (str): The name of the Django application
     """
 
     name = "projects"

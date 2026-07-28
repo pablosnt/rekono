@@ -1,5 +1,5 @@
 """Django management commands for Telegram Bot operations.
 
-Management command utilities for starting and controlling the Telegram Bot
-service through Django's command-line interface.
+Provides the telegram_bot command for deploying and starting the Telegram
+Bot service through Django's command-line interface.
 """

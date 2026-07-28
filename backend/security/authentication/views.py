@@ -121,8 +121,8 @@ class SendEmailMfaView(GenericAPIView):
     """Email-based one-time password delivery view.
 
     Sends time-limited OTP codes via email for MFA-enabled users who cannot
-    access their TOTP device or backup codes. Provides secure account recovery
-    mechanism for MFA-protected accounts.
+    access their TOTP device. Provides secure account recovery mechanism for
+    MFA-protected accounts.
 
     Attributes:
         permission_classes (list): No authentication required for account recovery.
@@ -148,7 +148,10 @@ class SendEmailMfaView(GenericAPIView):
             Response: HTTP 204 on successful OTP delivery.
 
         Raises:
-            ValidationError: If MFA is not enabled or user validation fails.
+            AuthenticationFailed: If the MFA token from the request body or the
+                ``rekono_mfa`` cookie is invalid, expired, or blacklisted.
+            ValidationError: If no token is provided for an unauthenticated request,
+                or if MFA is not enabled for the resolved user.
         """
         if not request.data.get("token"):
             cookie = request.COOKIES.get(JWT_MFA_COOKIE)

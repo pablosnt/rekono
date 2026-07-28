@@ -26,7 +26,9 @@ class Integration(BaseModel):
     documentation references for proper setup and usage.
 
     Attributes:
-        key (TextField): Unique identifier key for the integration (max 100 chars)
+        key (TextField): Identifier key matched against a platform class's lowercased
+                        name for integration lookups, e.g. by BaseIntegration.integration
+                        (max 100 chars)
         name (TextField): Display name for the integration (max 100 chars)
         description (TextField): Detailed description of integration functionality (max 500 chars)
         enabled (BooleanField): Whether this integration is currently active (default: True)
@@ -38,8 +40,8 @@ class Integration(BaseModel):
 
         ```python
         integration = Integration.objects.create(
-            key="nvd_api",
-            name="National Vulnerability Database",
+            key="nvdnist",
+            name="NVD NIST",
             description="Integration with NIST NVD for CVE data enrichment",
             reference="https://nvd.nist.gov/developers",
             icon="https://example.com/nvd-icon.png"

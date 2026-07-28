@@ -20,8 +20,12 @@ Architecture:
     tools without specific implementations.
 
 Security:
-    - Secure handling of authentication credentials and sensitive parameters
-    - Command injection prevention through proper argument escaping
-    - Controlled execution environments with appropriate permissions
-    - Integration with encryption systems for credential management
+    - Authentication secrets and tokens are masked with asterisks before the
+      executed command is logged or persisted
+    - Commands run as an argument list via subprocess without invoking a shell,
+      so shell metacharacters in tool arguments are never interpreted
+    - Environment variable assignments parsed from the command line are checked
+      against a sensitive-variable pattern (PATH, LD_PRELOAD, etc.) and dropped,
+      with a warning logged, instead of being applied to the subprocess
+    - Tools that are not installed on the system are skipped instead of executed
 """

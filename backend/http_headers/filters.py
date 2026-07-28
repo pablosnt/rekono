@@ -14,12 +14,11 @@ from projects.models import Project
 class HttpHeaderFilter(FilterSet):
     """FilterSet for HTTP header querying and filtering.
 
-    Provides comprehensive filtering capabilities for HTTP headers
-    including project-based filtering, exact matches, and text searches
-    to enable efficient header management and discovery.
+    Provides filtering and search operations for HTTP headers based on
+    associated project, target, user, key, and value.
 
     Attributes:
-        project (ModelChoiceFilter): Filter headers by associated project
+        project (ModelChoiceFilter): Filter headers by associated project, through the target relationship
     """
 
     project = ModelChoiceFilter(
@@ -29,12 +28,9 @@ class HttpHeaderFilter(FilterSet):
     class Meta:
         """Meta configuration for HttpHeaderFilter.
 
-        Defines the model and available filter fields with their
-        supported lookup types for comprehensive header querying.
-
         Attributes:
-            model (type): HttpHeader model class
-            fields (dict): Field names mapped to supported lookups
+            model (Model): The HttpHeader model to filter
+            fields (dict): Field names mapped to supported lookup types
         """
 
         model = HttpHeader

@@ -174,7 +174,8 @@ class UserViewSet(BaseViewSet):
         """Handle password reset workflow.
 
         POST: Request password reset by sending OTP email
-        PUT: Complete password reset with OTP verification
+        PUT: Complete password reset with OTP verification and clear the
+        authentication cookies so the client must sign in again with the new password
 
         Args:
             request (Request): HTTP request with reset data
@@ -250,7 +251,7 @@ class UserViewSet(BaseViewSet):
         """
         instance = self.get_object_if_not_current_user(request, pk)
         if instance.is_active is None:
-            # User was invited but the accout wasn't created
+            # User was invited but the account wasn't created
             super().destroy(request, *args, **kwargs)
         else:
             User.objects.disable_user(instance)
@@ -290,7 +291,7 @@ class BaseProfileViewSet(GenericViewSet):
 
     serializer_class = ProfileSerializer
     queryset = User.objects.all()
-    # Only IsAuthenticated class is required because all users can manage its profile
+    # Only IsAuthenticated class is required because all users can manage their own profile
     permission_classes = [IsAuthenticated]
 
     def _get(self, request: Request) -> Response:
@@ -358,7 +359,8 @@ class ProfileViewSet(BaseProfileViewSet):
         """Update current user's password.
 
         Validates old password and updates to new password with security
-        cleanup including token invalidation.
+        cleanup including token invalidation. Clears the authentication cookies
+        on the response so the current session must re-authenticate.
 
         Args:
             request (Request): HTTP request with password change data

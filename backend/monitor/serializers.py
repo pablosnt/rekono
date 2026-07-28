@@ -13,8 +13,9 @@ from monitor.models import MonitorSettings
 class MonitorSettingsSerializer(ModelSerializer):
     """Serializer for MonitorSettings model.
 
-    Handles serialization and deserialization of MonitorSettings objects
-    for API operations. Provides read-only access to monitoring state.
+    Handles serialization and deserialization of MonitorSettings objects for
+    API operations. Exposes the monitoring interval as a writable field while
+    keeping the identifier and last execution timestamp read-only.
     """
 
     class Meta:

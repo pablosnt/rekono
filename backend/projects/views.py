@@ -82,7 +82,7 @@ class ProjectViewSet(BaseViewSet):
             if member.id == project.owner.id:
                 return Response({"user": ["The project owner can't be removed"]}, status=status.HTTP_400_BAD_REQUEST)
             project.members.remove(member)
-            # Unsubscribe the new member from the project alerts
+            # Unsubscribe the removed member from the project alerts
             for alert in project.alerts.filter(subscribers=member).all():
                 alert.subscribers.remove(member)
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -95,10 +95,10 @@ class TopProjectsViewSet(LatestViewSet):
     annotated with counts of targets, tasks, hosts, and vulnerabilities.
 
     Attributes:
-        queryset: Projects with comprehensive activity annotations
-        ordering: Prioritizes projects with most vulnerabilities and activity
-        serializer_class: Project serialization
-        filterset_class: Project filtering capabilities
+        queryset (QuerySet): Projects annotated with target, task, host, and vulnerability counts
+        ordering (list): Prioritizes projects with most vulnerabilities and activity
+        serializer_class (Serializer): Serializer for Project model
+        filterset_class (FilterSet): Filter class for query filtering
     """
 
     queryset = (
@@ -108,6 +108,7 @@ class TopProjectsViewSet(LatestViewSet):
             hosts_count=Count(
                 "targets__tasks__executions__host",
                 distinct=True,
+                # Fixed hosts are excluded so remediated findings don't inflate the activity ranking
                 filter=Q(targets__tasks__executions__host__is_fixed=False),
             )
         )
@@ -115,6 +116,8 @@ class TopProjectsViewSet(LatestViewSet):
             vulnerabilities_count=Count(
                 "targets__tasks__executions__vulnerability",
                 distinct=True,
+                # Only vulnerabilities confirmed by a scan execution count towards the ranking:
+                # false positives, fixed vulnerabilities, and user-reported findings are excluded
                 filter=~Q(targets__tasks__executions__vulnerability__triage_status=TriageStatus.FALSE_POSITIVE)
                 & Q(targets__tasks__executions__vulnerability__is_fixed=False)
                 & Q(targets__tasks__executions__vulnerability__created_from_user_input=False),

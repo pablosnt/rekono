@@ -1,8 +1,7 @@
 """Nikto executor for report file relocation.
 
-Nikto treats the -output value as a filename prefix and appends the format
-extension to it. This executor moves the resulting report to the path Rekono
-expects so it can be parsed and served.
+Moves the report Nikto produces to the path Rekono expects once the scan
+finishes, since Nikto does not write its output to that path directly.
 """
 
 from pathlib import Path
@@ -19,9 +18,6 @@ class Nikto(BaseExecutor):
     expected path, finds nothing, leaves the output file unset, and the parser
     has nothing to read. This executor relocates the produced file back to
     ``self.report`` so the report is parsed, stored, and downloadable.
-
-    Attributes:
-        Inherits all attributes from BaseExecutor
     """
 
     def after_running(self) -> None:  # pragma: no cover

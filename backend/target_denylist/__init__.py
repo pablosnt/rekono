@@ -1,19 +1,30 @@
 """Target denylist management module for Rekono.
 
-This module provides comprehensive target denylist functionality for security testing
-operations. It manages a centralized denylist of targets that should be excluded from
-security assessments to prevent accidental testing of unauthorized or sensitive systems.
-The module ensures compliance with security testing boundaries and organizational policies.
+This module provides target denylist functionality for security testing operations.
+It manages a centralized list of targets, expressed as exact values, regex patterns,
+or IP networks, that must be excluded from security assessments.
 
-Security:
-    - Input validation with injection prevention for target patterns
-    - Administrative access controls for default denylist management
-    - Integration with target validation processes to enforce exclusions
-    - Audit logging for denylist modifications and compliance tracking
+Key Features:
+    - TargetDenylist model storing target patterns as system-managed default
+      entries or user-added custom entries
+    - Blocked counter on each entry, incremented whenever it denies a target
+    - Fixture-based provisioning of default entries, with custom entries
+      preserved across data recreation
+    - REST API endpoints for denylist CRUD operations with filtering and
+      search on the target field
 
 Architecture:
-    The denylist system operates at the target validation layer, intercepting
-    target creation and validation requests to ensure excluded targets are
-    never processed by security testing tools. Default entries are managed
-    administratively while custom entries can be added by authorized users.
+    Denylist entries are consulted by the target validator during target
+    validation, before a target is accepted. Each candidate value, together
+    with the addresses or hostname it resolves to over DNS, is checked for an
+    exact match, a regex match, or IP network membership against every entry.
+    Default entries are reloaded from fixtures on migration, while custom
+    entries created through the REST API survive that reload.
+
+Security:
+    - Input validation restricting the characters allowed in target patterns
+    - Role-based permissions restricting denylist creation and modification
+      to administrators
+    - Default entries are excluded from update and delete operations to
+      protect system-wide exclusions from unauthorized changes
 """

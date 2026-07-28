@@ -151,7 +151,7 @@ class InviteUserSerializer(ModelSerializer):
             validated_data (dict[str, Any]): Validated invitation data
 
         Returns:
-            User: Created inactive user instance
+            User: Created user instance pending invitation acceptance
         """
         return User.objects.invite_user(validated_data["email"], Role(validated_data["role"]))
 
@@ -386,7 +386,8 @@ class CreateUserSerializer(OTPSerializer, PasswordSerializer):
             dict[str, Any]: Validated data
 
         Raises:
-            AuthenticationFailed: If user account already active
+            AuthenticationFailed: If the account is no longer pending invitation
+                (already created or disabled)
         """
         attrs = super().validate(attrs)
         if attrs["user"].is_active is not None:
@@ -482,10 +483,10 @@ class ResetPasswordSerializer(PasswordSerializer, OTPSerializer):
         fields = ("otp", "password")
 
     def save(self, **kwargs: Any) -> User:
-        """Save password reset with account activation.
+        """Apply the verified password reset.
 
         Returns:
-            User: Updated user instance with reset password
+            User: Updated user instance with the new password applied
         """
         return User.objects.reset_password(self.validated_data.get("user"), self.validated_data.get("password"))
 
@@ -512,7 +513,7 @@ class RequestPasswordResetSerializer(Serializer, LoggingEntity):
         """
         # Even though the reset-password email is sent in another thread, the
         # database query and the OTP setup is executed in a different one to
-        # prevet user enumerations by analyzing the Rekono execution time
+        # prevent user enumeration by analyzing the Rekono execution time
         # during the password reset request
         user = User.objects.filter(email=email, is_active=True).first()
         if email and user:  # pragma: no cover
@@ -532,10 +533,13 @@ class RequestPasswordResetSerializer(Serializer, LoggingEntity):
 class EnableMfaSerializer(MfaSerializer):
     """Serializer for enabling MFA on user accounts.
 
-    Extends base MFA serializer with MFA verification and enabling logic.
+    Extends the base MFA serializer to activate MFA once the submitted code is
+    verified. Overrides the default validator to require a TOTP code specifically:
+    MFA is not enabled yet at this point, so the base validator would otherwise fall
+    back to email OTP instead of confirming that the authenticator app actually works.
 
     Attributes:
-        validator (callable): MFA verification function
+        validator (callable): TOTP-only verification, overriding the base MFA-or-OTP fallback
     """
 
     validator = User.objects.verify_mfa

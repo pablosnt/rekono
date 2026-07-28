@@ -35,7 +35,7 @@ class JwtAuthentication(LoggingEntity):
     Security Features:
         - Previous tokens invalidation on new login
         - Role-based JWT claims for authorization
-        - Comprehensive authentication logging
+        - Security logging of successful login events
         - Email notifications for login events
         - MFA token generation for multi-factor workflows
 
@@ -49,8 +49,9 @@ class JwtAuthentication(LoggingEntity):
         """Process user login and generate JWT tokens.
 
         Invalidates all existing tokens for security, generates new access
-        and refresh tokens with role-based claims, sends login notification,
-        and logs the authentication event.
+        and refresh tokens with role-based claims, updates the user's last
+        login timestamp, sends a login notification, and logs the
+        authentication event.
 
         Returns:
             dict[str, str]: Dictionary containing 'access' and 'refresh' JWT tokens.
@@ -127,9 +128,11 @@ class LoginSerializer(JwtAuthentication, TokenObtainSerializer):
 class MfaSerializer(Serializer):
     """Base serializer for multi-factor authentication validation.
 
-    Provides common MFA validation functionality for TOTP codes, and email
-    OTP codes. This base class handles the validation logic shared across
-    different MFA completion workflows.
+    Provides common MFA validation functionality for TOTP and email OTP
+    codes. This base class is shared by MfaLoginSerializer, which completes
+    an in-progress login, and by EnableMfaSerializer and DisableMfaSerializer,
+    which verify a code to enable or disable MFA for an already-authenticated
+    user.
 
     Attributes:
         mfa (CharField): The MFA code to validate (max 200 characters).
@@ -143,7 +146,12 @@ class MfaSerializer(Serializer):
         """Validate MFA code against user's configured methods.
 
         Verifies the provided MFA code using the user's configured
-        authentication methods including TOTP or email OTP.
+        authentication methods including TOTP or email OTP. If self.user is
+        already set, as it is for MfaLoginSerializer via MfaRequiredSerializer
+        earlier in the MRO, that user is validated. Otherwise, as for
+        EnableMfaSerializer and DisableMfaSerializer, self.user is not set and
+        the user is instead taken from the authenticated request in the
+        serializer context.
 
         Args:
             attrs (dict[str, Any]): Validation attributes including MFA code.
@@ -179,8 +187,11 @@ class MfaRequiredSerializer(Serializer):
     def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
         """Validate MFA token and verify user MFA status.
 
-        Validates the temporary MFA token, identifies the associated user,
-        and verifies that MFA is enabled for the account.
+        If a token is provided, validates it and identifies the associated
+        user from its claims. If no token is provided, self.user is expected
+        to already be set by the caller, such as an authenticated request in
+        a subclass. Either way, verifies that MFA is enabled for the
+        resulting user.
 
         Args:
             attrs (dict[str, Any]): Validation attributes including MFA token.
@@ -214,7 +225,9 @@ class SendMfaEmailSerializer(MfaRequiredSerializer):
     unauthenticated requests for account recovery scenarios.
 
     Attributes:
-        token (CharField): Optional MFA token for unauthenticated requests.
+        token (CharField): MFA token, not required at the field level.
+            Custom validation requires it for unauthenticated requests and
+            ignores it when the requester is already authenticated.
     """
 
     token = CharField(required=False)
@@ -278,7 +291,7 @@ class MfaLoginSerializer(MfaSerializer, MfaRequiredSerializer, JwtAuthentication
             dict[str, Any]: Complete JWT token pair (access and refresh tokens).
         """
         super().validate(attrs)
-        # Blacklist MFA token not to be reused
+        # Blacklist the MFA token so it cannot be reused
         self.token.blacklist()
         if self.user.otp:
             User.objects.remove_otp(self.user)

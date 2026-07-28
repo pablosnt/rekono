@@ -112,37 +112,32 @@ class FindingsQueue(BaseQueue):
             ]
             integrations_per_execution: list[BaseIntegration] = [DefectDojo()]
             notifications: list[BaseNotification] = [SMTP(), Telegram()]
-            # Process each finding individually
             for finding in findings:
-                # Reactivate previously fixed findings if auto-fix is enabled
-                # This ensures findings that reappear are marked as active again
+                # Auto-fix reactivates a finding that was previously marked as fixed
+                # but has reappeared in this execution
                 if settings.auto_fix_findings and finding.is_fixed:
                     finding.__class__.objects.remove_fix(finding)
-                # Enrich CVEs information before processing the other integrations
+                # CVE enrichment runs first so the other integrations see the enriched finding
                 cve_enrichments: list[tuple[BaseCveProvider, int, BaseCveProvider.CveEnrichment]] = []
                 for cve_provider in cve_providers:
                     if cve_provider.is_finding_processable(finding):
-                        # Get CVE information from the provider
                         enrichment = cve_provider.get_cve(finding.cve)
                         if enrichment:
-                            # Save the provider, its data quality score, and its data
+                            # Track each candidate provider alongside its quality score and data
+                            # so the best one can be picked once every provider has been queried
                             cve_enrichments.append(
                                 (cve_provider, cve_provider.cve_quality_score(enrichment), enrichment)
                             )
                 if len(cve_enrichments) > 0:
-                    # Get the CVE data with the highest data quality score
+                    # Highest quality score wins when multiple providers return data for the same CVE
                     cve_enrichments.sort(key=lambda x: x[1], reverse=True)
                     cve_provider, _, enrichment = cve_enrichments[0]
                     if cve_provider and enrichment:
-                        # Save the CVE enriched information in the finding
                         cve_provider.save(finding, enrichment)
-                # Process findings through integrations that work on individual findings
                 for integration in integrations_per_finding:
                     integration.process_finding(execution, finding)
-                # Check and trigger project alerts for this specific finding
                 for alert in execution.task.target.project.alerts.filter(enabled=True).order_by("-item").all():
                     if alert.must_be_triggered(execution, finding):
-                        # Send notifications through all configured notification platforms
                         for platform in notifications:
                             platform.process_alert(alert, finding)
             # Sort findings by relevant field, so the integrations and notifications report them in a meaningful order
@@ -181,14 +176,17 @@ class FindingsQueue(BaseQueue):
         platform integrations, alert notifications, and automatic fixing
         based on system settings and project configuration. Processing is
         serialized per target so multiple workers never process findings for
-        the same target at the same time.
+        the same target at the same time. Any failure raised by the pipeline
+        is logged rather than propagated, so the RQ job always completes
+        successfully.
 
         Processing Steps:
+            - Reactivation of previously fixed findings that reappear (when auto-fix is enabled)
             - CVE enrichment via multiple providers with quality-score selection
-            - Per-finding integrations
-            - Per-execution integrations
-            - Alert notification dispatch
-            - Automatic finding lifecycle management and cross-execution fix correlation
+            - Per-finding integrations and alert notification dispatch
+            - Per-execution integrations and notification platforms
+            - Cross-execution fix correlation for findings missing from this execution,
+              independent of whether any findings were passed in (when auto-fix is enabled)
 
         Args:
             execution (Execution): Source execution for the findings.

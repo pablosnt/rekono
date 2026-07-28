@@ -30,13 +30,19 @@ class HttpHeader(BaseInput):
     prevent injection attacks and ensure security compliance.
 
     Attributes:
-        target (ForeignKey): Associated target for target-specific headers
-        user (ForeignKey): Associated user for user-specific headers
-        key (TextField): HTTP header name with validation
-        value (TextField): HTTP header value with validation
-        _filters (list): Filter configurations for framework integration
-        _parse_mapping (dict): Parsing configuration for execution framework
-        _project_field (str): Project field reference for access control
+        target (ForeignKey): Target this header applies to (optional, deleted
+                            along with the target)
+        user (ForeignKey): User this header applies to (optional, deleted
+                          along with the user)
+        key (TextField): HTTP header name (required, max 100 chars, validated
+                        against Regex.NAME with injection checks)
+        value (TextField): HTTP header value (required, max 500 chars,
+                          validated against Regex.TEXT with injection checks)
+        _filters (list): Filter configuration allowing headers to be filtered by key
+        _parse_mapping (dict): Maps InputKeyword.HEADERS to a dict pairing this
+                              header's key and value
+        _project_field (str): Path to the project via the target relation, used
+                             for project-level access control
 
     Constraints:
         - Global headers: Unique key when both target and user are null

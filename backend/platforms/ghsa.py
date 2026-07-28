@@ -17,6 +17,14 @@ class GHSA(BaseCveProvider):
     API for CVE details, CVSS scores, CWE identifiers, EPSS probability data,
     and affected package names from the GitHub security advisory platform.
 
+    Processing Features:
+        - CVE lookup via the GitHub Advisory API
+        - CVSS base score, vector, and version extraction, preferring v4 over v3 over v2
+        - CWE identifier extraction
+        - EPSS probability and percentile score extraction
+        - Affected package name extraction from advisory vulnerability entries
+        - Quality downgrade for unreviewed advisories
+
     Attributes:
         url (str): GitHub Advisory API endpoint URL template for CVE queries.
     """

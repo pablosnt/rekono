@@ -32,14 +32,19 @@ from users.models import User
 class Telegram(BaseNotification, BaseTelegram):
     """Telegram notification delivery for security events.
 
-    Delivers execution reports, alerts, and findings to users over Telegram Bot
-    messaging, splitting long reports across multiple messages to stay within
-    Telegram's per-message length limit.
+    Delivers execution reports, alerts, findings, and account events (welcome,
+    logout, report creation) to users over Telegram Bot messaging, splitting
+    long reports across multiple messages to stay within Telegram's per-message
+    length limit. Only users with a linked Telegram chat receive a message.
+    When the bot token is missing or invalid, or a send fails with a network
+    error, the notification is skipped without raising an exception.
 
     Attributes:
         enable_field (str): User field name that toggles Telegram notifications.
         initial_findings_per_message (int): Findings per message when a report is
             split because it exceeds Telegram's length limit.
+        findings_summary_threshold (int): Finding count above which an execution
+            notification switches from a detailed report to a per-type summary.
     """
 
     enable_field = "telegram_notifications"
@@ -84,6 +89,7 @@ class Telegram(BaseNotification, BaseTelegram):
             execution (Execution): The completed security tool execution.
             findings (list[Finding]): List of security findings discovered.
         """
+        # Findings entered manually by a user are not scan results, so they are left out of the notification
         findings = [finding for finding in findings if not finding.created_from_user_input]
         if len(findings) > self.findings_summary_threshold:
             # Too many findings, so send a summary notification

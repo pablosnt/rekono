@@ -34,9 +34,13 @@ class Zap(BaseParser):
     def _parse(self) -> None:
         """Parse OWASP ZAP XML output and extract web security findings.
 
-        Processes XML scan results to create Vulnerability and Path findings
-        from web application security tests.
+        Processes XML scan results to create Vulnerability and Path findings from web
+        application security tests. Every instance location reported for an alert is
+        appended to its Vulnerability description and, when it resolves to a distinct
+        path, also recorded as its own Path finding.
         """
+        # "/" is preseeded here so it never gets its own Path finding, since it's already
+        # implicit for the scanned target
         endpoints = set(["/"])
         root = self.load_xml_report()
         if not root:
@@ -45,6 +49,8 @@ class Zap(BaseParser):
             for alert in site.findall("alerts/alertitem"):
                 name = alert.findtext("alert")
                 description = alert.findtext("desc") or ""
+                # riskcode is a numeric string, not an int, so a literal "0" (Info) is still
+                # truthy below and correctly mapped instead of falling back to MEDIUM
                 severity = alert.findtext("riskcode")
                 cwe = alert.findtext("cweid")
                 remediation = alert.findtext("solution")
@@ -69,8 +75,10 @@ class Zap(BaseParser):
                         name=name,
                         description=self._clean(description) if description else name,
                         severity=self.severity_mapping[int(severity)] if severity else Severity.MEDIUM,
-                        cwes=[f"CWE-{cwe}"] if cwe and cwe != "-1" else [],
+                        cwes=[f"CWE-{cwe}"] if cwe and cwe != "-1" else [],  # ZAP uses -1 for "no CWE mapping"
                         remediation=self._clean(remediation) if remediation else None,
+                        # ZAP concatenates multiple references as consecutive <p> paragraphs,
+                        # so only the first one is kept
                         reference=self._clean(reference.split("</p><p>", 1)[0]) if reference else None,
                     )
 

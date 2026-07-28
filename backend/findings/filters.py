@@ -221,6 +221,7 @@ class VulnerabilityFilter(TriageFindingFilter):
     Attributes:
         port (MultipleNumberFilter): Filter by port through technology or direct
         host (MultipleNumberFilter): Filter by host through tech port or direct
+        cwe (CharFilter): Case-insensitive substring match on CWE identifiers
     """
 
     port = MultipleNumberFilter(fields=["technology__port", "port"])
@@ -231,7 +232,8 @@ class VulnerabilityFilter(TriageFindingFilter):
         """Meta configuration for VulnerabilityFilter.
 
         Defines filterable fields and lookup types for vulnerability findings
-        including CVE/CWE matching, severity levels, and trending indicators.
+        including CVE and other database identifier matching, severity and
+        CVSS/EPSS scoring, and trending indicators.
 
         Attributes:
             model (type): Vulnerability model class.
@@ -272,6 +274,7 @@ class ExploitFilter(TriageFindingFilter):
         technology (MultipleNumberFilter): Filter by tech through direct or vuln
         technology__name (MultipleCharFilter): Filter by tech name through direct/vuln
         technology__version (MultipleCharFilter): Filter by tech version direct/vuln
+        vulnerability__cwe (CharFilter): Case-insensitive substring match on the related vulnerability's CWE identifiers
     """
 
     port = MultipleNumberFilter(fields=["technology__port", "vulnerability__port", "vulnerability__technology__port"])

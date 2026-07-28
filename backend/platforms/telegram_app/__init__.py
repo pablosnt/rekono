@@ -1,20 +1,22 @@
 """Telegram Bot platform integration for Rekono.
 
-This module provides comprehensive Telegram Bot integration for security teams to
-interact with Rekono's security testing platform through conversational interfaces.
-The system supports authenticated bot interactions, user account linking, and
-secure command execution for security testing workflows.
+Provides two-way Telegram integration. Rekono sends outbound notifications about
+executions, alerts, and findings through the Telegram Bot API, and also exposes an
+interactive bot that lets linked users manage targets, tasks, and tools through
+chat commands.
 
 Bot Capabilities:
-    - Target management through chat commands
-    - Security tool configuration and execution
-    - Reporting of found vulnerabilities
-    - Real-time notifications and alerts through Telegram channels
+    - Target, task, tool, and process configuration through chat commands
+    - Role-based command gating that distinguishes Reader accounts from Auditor and Admin accounts
+    - Account linking through a One-Time Password issued by the bot's /start command and
+      redeemed through the telegram/link REST endpoint, not in the chat itself
+
+Notification Capabilities:
+    - Execution, alert, and finding notifications delivered as Telegram messages
+    - Automatic splitting of long reports across multiple messages
 
 Security:
-    - Encrypted API token storage for bot authentication
-    - User isolation with chat-based access control
+    - Encrypted Bot API token storage
     - OTP-based account linking with expiration handling
-    - Role-based command authorization and validation
-    - Secure integration with Rekono's authentication system
+    - User isolation, each Telegram chat can be linked to at most one Rekono account
 """

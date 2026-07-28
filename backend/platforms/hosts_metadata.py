@@ -27,6 +27,11 @@ class HostsMetadata(BaseIntegration):
     DNS reverse resolution for domain names and geolocation information for
     public IP addresses using external geolocation services.
 
+    Processing Features:
+        - DNS reverse resolution to discover the hostname of private and public IPs
+        - Geolocation lookup (country, city, coordinates) for public IPs via geocoder
+        - Always enabled, with no per-integration setting to turn it off
+
     Attributes:
         finding_types (list): List of finding types processed by this integration (Host)
     """
@@ -36,11 +41,12 @@ class HostsMetadata(BaseIntegration):
     def is_enabled(self) -> bool:
         """Check if host metadata enrichment integration is enabled.
 
-        This integration is always enabled as it provides core metadata
-        enrichment functionality without external API dependencies.
+        Always returns True. Unlike the other integrations, HostsMetadata has no
+        Integration configuration record to toggle, since this enrichment is treated
+        as a core part of finding processing rather than an optional connector.
 
         Returns:
-            bool: Always returns True for this integration
+            bool: Always True for this integration.
         """
         return True
 

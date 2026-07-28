@@ -33,6 +33,6 @@ class AuthenticationType(models.TextChoices):
     TOKEN = "Token"
 
 
-# Type annotation fix for pytype compatibility
-# https://github.com/google/pytype/issues/1048
+# Type annotation workaround for pytype compatibility
+# See: https://github.com/google/pytype/issues/1048
 AuthenticationType: type[Choices] = AuthenticationType

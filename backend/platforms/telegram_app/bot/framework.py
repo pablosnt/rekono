@@ -185,16 +185,27 @@ class BaseTelegramBot(BaseTelegram):
         )
 
     async def get_active_telegram_chat(self, update: Update) -> TelegramChat | None:
-        """Get and validate the active Telegram chat for the update.
+        """Look up the Telegram chat bound to a Rekono user and report auth problems.
 
-        Retrieves the chat associated with the update and validates authentication
-        and authorization permissions.
+        A chat is considered authenticated when a TelegramChat row exists for
+        update.effective_chat.id and its linked user is still active; this is how a
+        Telegram chat is bound to a Rekono user, there is no separate login step.
+        If no such chat exists (never linked, or the linked user was deactivated),
+        this replies asking the user to run /start and returns None.
+
+        If the chat is found but the command requires Auditor or Admin (allow_readers
+        is False) and the linked user has neither role, this logs and replies that the
+        user isn't authorized. That rejection is only a message: the chat instance is
+        still returned in this case, so callers only treat the None outcome (chat not
+        found) as a hard stop; the "not authorized" outcome does not by itself prevent
+        the calling command or conversation state from continuing to run.
 
         Args:
             update (Update): The Telegram update containing chat information.
 
         Returns:
-            TelegramChat | None: The authenticated chat or None if validation fails.
+            TelegramChat | None: The chat linked to this Telegram conversation, or None
+                                 if it isn't linked to an active Rekono user.
         """
         self.validate_update(update)
         chat = await self._get_active_telegram_chat_async(update.effective_chat.id)

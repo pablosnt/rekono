@@ -46,6 +46,9 @@ class BasePlatform(LoggingEntity):
         Args:
             execution (Execution): The execution that generated the findings.
             findings (list[Finding]): List of findings to process.
+
+        Note:
+            This method should be overridden by concrete implementations.
         """
         pass
 
@@ -130,6 +133,7 @@ class BaseIntegration(BasePlatform):
         try:
             response = method(url, **kwargs)
         except requests.exceptions.ConnectionError:
+            # Connection errors aren't covered by the status-based Retry adapter, so retry once here
             response = method(url, **kwargs)
         self.logger.info(
             f"[{self.__class__.__name__}] {method.__name__.upper()} {urlparse(url).path} > HTTP {response.status_code}"
@@ -313,9 +317,11 @@ class BaseCveProvider(BaseIntegration):
     def cve_quality_score(self, data: CveEnrichment) -> int:
         """Calculate a data quality score for CVE enrichment data.
 
-        Scores start at 10 and are adjusted based on CVSS version (older versions
-        penalised), presence of CWE and affected technology data, and EPSS availability.
-        Subclasses may override to apply provider-specific adjustments.
+        Scores start at 10 and are reduced most heavily for a missing description,
+        then for missing CWE or affected technology data, and for missing or
+        outdated CVSS data. A small bonus applies when EPSS scores or an alternate
+        identifier (EUVD, GHSA, or OSV) is present. Subclasses may override to
+        apply provider-specific adjustments.
 
         Args:
             data (CveEnrichment): CVE enrichment data to score.
@@ -348,6 +354,8 @@ class BaseCveProvider(BaseIntegration):
             data (CveEnrichment): CVE enrichment data to apply.
         """
         finding.name = data.name
+        # Some providers return the description as Markdown starting with a heading; render it to
+        # HTML and strip the tags to plain text, doubling newlines to keep paragraph breaks
         finding.description = (
             BeautifulSoup(markdown(data.description), features="html.parser").get_text().replace("\n", "\n\n")
             if data.description and data.description.startswith("#")

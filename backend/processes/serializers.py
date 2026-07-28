@@ -171,7 +171,7 @@ class ProcessSerializer(TaggitSerializer, LikeSerializer):
         preparation for process execution.
 
         Args:
-            instance (Process): The Process instance being serialized.
+            instance (Any): The Process instance being serialized.
 
         Returns:
             dict[str, bool]: Dictionary containing:

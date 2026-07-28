@@ -20,9 +20,10 @@ class VirusTotalSettings(BaseEncrypted):
     API credentials and follows singleton pattern for global platform settings.
 
     Attributes:
-        _api_token (TextField): Encrypted VirusTotal API token for authentication.
-            Validated using SECRET regex pattern for security.
-        is_available (BooleanField): Cached platform availability status (default False).
+        _api_token (TextField): Encrypted VirusTotal API token for authentication (max 64 chars)
+        _encrypted_field (str): Field name for encryption configuration
+        is_available (BooleanField): Cached platform availability status (default False),
+            refreshed only when the settings are saved through VirusTotalSettingsSerializer.update
 
     Example:
         Configure VirusTotal API credentials:
@@ -53,6 +54,6 @@ class VirusTotalSettings(BaseEncrypted):
         """Return string representation of VirusTotal settings.
 
         Returns:
-            str: Human-readable name of the VirusTotal platform.
+            str: Platform name identifier for display purposes.
         """
         return "Virus Total"

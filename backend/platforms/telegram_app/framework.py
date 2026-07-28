@@ -1,7 +1,9 @@
 """Base framework for Telegram Bot integration with Rekono.
 
-Provides the foundational classes and utilities for Telegram Bot operations
-including application management, message handling, and token validation.
+Provides the foundational BaseTelegram class shared by outbound notification delivery
+(platforms.telegram_app.notifications) and the interactive bot command layer
+(platforms.telegram_app.bot). Covers application initialization, message sending,
+token validation, and error handling common to both directions.
 """
 
 import asyncio
@@ -23,6 +25,12 @@ class BaseTelegram(LoggingEntity):
 
     Provides core functionality for Telegram Bot operations including application
     initialization, message sending, token validation, and error handling.
+
+    Processing Features:
+        - Bot application creation and async initialization, gated on a configured bot token
+        - Markdown V2 message escaping and delivery to a linked chat
+        - Automatic token clearing when the Telegram API rejects the stored token
+        - Global error handling for uncaught exceptions raised by bot handlers
 
     Attributes:
         date_format (str): Date format used for execution timestamps in messages.

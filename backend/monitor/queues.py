@@ -72,8 +72,8 @@ class MonitorQueue(BaseQueue):
         Runs the monitoring process by updating the last monitor timestamp
         and invoking each configured monitoring platform to refresh their
         security intelligence data (trending CVEs, EPSS scores, etc.). Finally,
-        reconciles executions whose RQ job has disappeared so they are not left
-        stuck in a non-terminal status forever.
+        reconciles executions whose RQ job is missing or has already reached a
+        terminal state, so they are not left stuck in a non-terminal status forever.
         """
         BaseQueue.logger.info("[Monitor] Monitor job has started")
         settings = MonitorSettings.objects.first()
@@ -81,7 +81,8 @@ class MonitorQueue(BaseQueue):
         settings.save(update_fields=["last_monitor"])
         for platform in [CveCrowd(), First()]:
             platform.monitor()
-        # An execution in the queue with a job ID that no longer exists is orphaned
+        # An execution stuck in a non-terminal status is orphaned once its RQ job is missing
+        # or has already reached a terminal state, since neither case will ever move it forward
         for execution in Execution.objects.filter(
             rq_job_id__isnull=False, status__in=Status.in_progress()
         ):

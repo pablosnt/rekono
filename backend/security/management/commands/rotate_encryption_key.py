@@ -21,12 +21,21 @@ class Command(BaseCommand, BaseEncryptionKeyCommand):
     This operation maintains data security while updating encryption keys.
 
     Security Process:
-        1. Validates current encryption key is configured and valid
+        1. Validates current encryption key is configured
         2. Generates a new cryptographically secure encryption key
         3. Decrypts all sensitive data using the current key
         4. Re-encrypts all data using the new key
         5. Updates the configuration with the new key
         6. Logs successful completion for audit trails
+
+    Each value is saved to the database as soon as it has been decrypted with
+    the current key and re-encrypted with the new one, but the configuration
+    file is only updated with the new key after every encrypted value has been
+    processed. If the command is interrupted before it finishes, the values
+    processed so far are already encrypted with the new key while the
+    configuration still holds the old one, leaving the database in a mixed state
+    that the command cannot repair on a later run, because it would then try to
+    decrypt those values with the old key.
 
     Usage:
         python manage.py rotate_encryption_key

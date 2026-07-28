@@ -115,7 +115,9 @@ class ExecutionsQueue(BaseScanQueue):
         """Process an execution job.
 
         Main job consumer that executes security tools and processes results.
-        Handles dependency resolution, tool execution, and result parsing.
+        Handles dependency resolution, tool execution, and result parsing. Skipped
+        or cancelled executions are returned with no findings, since there is no
+        tool output left to parse.
 
         Args:
             execution (Execution): The execution instance to process
@@ -225,7 +227,9 @@ class ExecutionsQueue(BaseScanQueue):
             current_job (Job): The current job being processed
 
         Returns:
-            ExecutionParametersToEnqueue: Parameters for the next execution
+            ExecutionParametersToEnqueue: Parameters for the current job to execute with.
+                Any additional parameter batches are enqueued as separate Execution jobs
+                rather than returned here.
         """
         findings = []
         self = ExecutionsQueue()

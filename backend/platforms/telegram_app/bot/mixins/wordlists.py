@@ -2,6 +2,10 @@
 
 Provides wordlist selection functionality for conversations that require
 wordlist context including conditional wordlist requirements and default options.
+Expects either Context.CONFIGURATION (Tool conversation) or Context.PROCESS
+(Process conversation) to already be set, since that determines whether any of
+the tool's or process's arguments actually take a wordlist, and whether one is
+required. Leaves Context.WORDLIST set, or unset when the default wordlist is kept.
 """
 
 from asgiref.sync import sync_to_async

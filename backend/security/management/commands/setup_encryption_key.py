@@ -1,8 +1,8 @@
 """Django management command for setting up encryption key on fresh deployments.
 
 Initializes encryption for sensitive data in the database by generating a new
-encryption key and encrypting all existing sensitive fields. This command
-should be run on new deployments before sensitive data is stored.
+encryption key and encrypting all existing sensitive fields with it. This
+command is intended for deployments where no encryption key is yet configured.
 """
 
 from typing import Any
@@ -34,13 +34,10 @@ class Command(BaseCommand, BaseEncryptionKeyCommand):
         - Processes all encryptable fields in the database
         - May take considerable time for large datasets
         - Recommended to run during maintenance windows
-        - Database backup recommended before rotation
+        - Database backup recommended before running this command
 
     Attributes:
         help (str): Django management command help text describing the operation.
-
-    Raises:
-        SystemExit: If encryption key is already configured (prevents accidental re-encryption).
     """
 
     help = "Configure an encryption key to keep sensitive data encrypted in the database"

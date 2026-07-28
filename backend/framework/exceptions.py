@@ -1,7 +1,8 @@
 """Exception handling utilities for Django REST framework.
 
-Provides custom exception handlers for database integrity errors
-and other common exceptions in the Rekono platform.
+Provides a custom exception handler that converts database integrity
+errors into user-friendly responses and delegates all other exceptions
+to DRF's default handler.
 """
 
 from typing import Any
@@ -27,8 +28,10 @@ def handler(exc: Exception, context: dict[str, Any]) -> Response:
         Response: HTTP response with appropriate error message and status code.
 
     Note:
-        Converts database integrity errors (unique violations) into
-        user-friendly 400 Bad Request responses.
+        Both Django's wrapped IntegrityError and psycopg's UniqueViolation
+        are checked defensively, so a unique constraint violation is caught
+        whether it arrives wrapped (the normal case for all database access
+        through Django) or as the underlying driver exception.
     """
     if exc.__class__ in [UniqueViolation, IntegrityError]:
         response = Response({"constraint": ["This object already exists"]}, status=HTTP_400_BAD_REQUEST)

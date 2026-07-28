@@ -25,18 +25,19 @@ class SMTPSettings(BaseEncrypted):
         username (TextField): SMTP authentication username (max 100 chars)
         _password (TextField): Encrypted SMTP authentication password (max 200 chars)
         tls (BooleanField): Enable TLS encryption for SMTP connections (default True)
+        _encrypted_field (str): Field name for encryption configuration
 
     Example:
         Configure SMTP settings for Gmail:
 
         ```python
-        smtp_config = SMTPSettings.objects.create(
-            host="smtp.gmail.com",
-            port=587,
-            username="notifications@company.com",
-            secret="app_password_here",
-            tls=True
-        )
+        settings = SMTPSettings.objects.first()
+        settings.host = "smtp.gmail.com"
+        settings.port = 587
+        settings.username = "notifications@company.com"
+        settings.secret = "app_password_here"
+        settings.tls = True
+        settings.save()
         ```
     """
 

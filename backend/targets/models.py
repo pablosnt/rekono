@@ -78,9 +78,9 @@ class Target(BaseInput):
     def get_type(cls, target: str) -> str:
         """Automatically detect and classify the target type.
 
-        Analyzes the target specification to determine its type and performs
-        validation to ensure the target is valid and reachable. Supports
-        multiple target formats with intelligent classification.
+        Analyzes the target specification to determine its type, validating the
+        format for IP addresses, networks and IP ranges, and confirming that a
+        domain name actually resolves before classifying it as such.
 
         Target Type Detection Logic:
             1. IPv4/IPv6 address detection with private vs public classification
@@ -138,8 +138,8 @@ class Target(BaseInput):
         """Forward-resolve a domain name to an IP address, with caching.
 
         Results are cached in Redis keyed by the domain, so a domain is resolved at most once
-        per cache TTL. Shared by resolve() and get_type() (a classmethod), which is why the
-        cache logic lives here rather than on the instance. A single execution can produce
+        per cache TTL. Shared by create_finding_from_user_input() and get_type() (a classmethod),
+        which is why the cache logic lives here rather than on the instance. A single execution can produce
         hundreds of findings sharing the same target (e.g. every path Dirsearch discovers), and
         each would otherwise issue its own ``socket.gethostbyname`` call; caching collapses them
         into a single lookup and keeps that burst from overwhelming the resolver.

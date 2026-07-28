@@ -21,7 +21,6 @@ class LikeFilter(FilterSet):
         like (BooleanFilter): Filter for liked/unliked objects.
     """
 
-    # Indicate if user likes or not the entities
     like = BooleanFilter(method="get_liked_items")
 
     def get_liked_items(self, queryset: QuerySet, name: str, value: bool) -> QuerySet:
@@ -51,7 +50,8 @@ class MultipleFieldFilterSet(FilterSet):
 
         Args:
             queryset (QuerySet): The base queryset to filter.
-            name (str): The filter name containing the field list.
+            name (str): Name of the filter attribute on this FilterSet, used to
+                        look up its `fields` list in self.filters.
             value (Any): The value to search for in all specified fields.
 
         Returns:

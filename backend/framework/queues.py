@@ -224,7 +224,8 @@ class BaseScanQueue(BaseQueue):
 
         Returns:
             dict[InputType, list[Finding]]: Findings grouped by input type,
-                                          sorted by dependency complexity.
+                                          ordered so parent types (e.g. Host)
+                                          come before their children (e.g. Port, Path).
         """
         findings_by_type = {}
         for finding in findings:

@@ -460,7 +460,7 @@ class BaseInput(BaseModel):
 
         Args:
             argument_input (Any): The tool argument input with filter configuration.
-            target (Any): Optional target context for filtering (used in subclasses implementation).
+            target (Any): Optional target context for filtering (used in subclass implementations).
 
         Returns:
             bool: True if the input passes the filter conditions, False otherwise.
@@ -555,11 +555,11 @@ class BaseInput(BaseModel):
         user-provided data and tool execution findings.
 
         Args:
-            execution (Any): The execution context for the finding
-            **fields (Any): Additional fields for the finding
+            execution (Any): The execution context for the finding.
+            **fields (Any): Additional fields for the finding.
 
         Returns:
-            Any | None: Created finding instance or None if not applicable
+            Any | None: Created finding instance or None if not applicable.
         """
         return None  # pragma: no cover
 

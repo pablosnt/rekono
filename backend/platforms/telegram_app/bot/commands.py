@@ -29,10 +29,12 @@ class BaseCommand(CommandHandler, BaseTelegramBot, LoggingEntity):
     """
 
     def __init__(self, **kwargs: Any) -> None:
-        """Initialize the base command with command name and callback.
+        """Initialize the CommandHandler with this command's name and callback.
 
         Args:
-            **kwargs: Additional keyword arguments for the CommandHandler.
+            **kwargs (Any): Accepted and discarded. They are not forwarded to the
+                CommandHandler, which is always built from this command's own name
+                and callback.
         """
         super().__init__(command=self.command_name, callback=self.execute_command)
 
@@ -129,10 +131,14 @@ class Help(BaseCommand):
 
 
 class Start(BaseCommand):
-    """Start command for initializing bot and generating account linking tokens.
+    """Start command for generating the OTP that links a chat to a Rekono account.
 
-    Generates One-Time Passwords (OTP) for linking Telegram chats with Rekono
-    user accounts, enabling secure authentication and authorization.
+    Creates a TelegramChat row with user=None and a fresh One-Time Password, then
+    replies with the OTP for the user to paste into their Rekono profile. The bot
+    itself never sets TelegramChat.user; the actual link to a Rekono account is made
+    by the separate telegram/link REST endpoint, which validates the OTP and its
+    expiration and rejects users that already have a linked chat. Until that step
+    completes, this chat is not yet an active, authenticated chat for the bot.
 
     Attributes:
         help (str): Command help text displayed in command list.
@@ -209,10 +215,11 @@ Then, run /help to start hacking\!
 
 
 class Logout(BaseCommand):
-    """Logout command for unlinking Telegram chat from user account.
+    """Logout command for unlinking a Telegram chat from its Rekono account.
 
-    Removes the association between a Telegram chat and user account,
-    effectively logging the user out from the bot.
+    Deletes the TelegramChat row for this chat outright, unlike Start's linking
+    step which goes through the telegram/link REST endpoint. A later /start from
+    the same chat creates a fresh, unlinked TelegramChat with a new OTP.
 
     Attributes:
         help (str): Command help text displayed in command list.

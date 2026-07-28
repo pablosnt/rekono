@@ -32,7 +32,7 @@ class ProjectSerializer(TaggitSerializer, RelatedNotesSerializer):
     """
 
     owner = SimpleUserSerializer(many=False, read_only=True)
-    tags = TagField()  # Tags
+    tags = TagField()
     defectdojo_sync = DefectDojoSyncSerializer(many=False, read_only=True)
 
     class Meta:
@@ -78,9 +78,7 @@ class ProjectSerializer(TaggitSerializer, RelatedNotesSerializer):
             Project: The created Project instance with automated configuration
         """
         project = super().create(validated_data)
-        # Add project owner also in member list
         project.members.add(validated_data.get("owner"))
-        # Create trending CVE monitor alert by default
         alert = Alert.objects.create(
             project=project,
             item=AlertItem.TRENDING_CVE,

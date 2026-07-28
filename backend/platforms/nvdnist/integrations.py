@@ -68,9 +68,10 @@ class NvdNist(BaseCveProvider):
     def _parse_cve(self, cve: str, data: list[dict[str, Any]] | dict[str, Any]) -> BaseCveProvider.CveEnrichment | None:
         """Parse NVD API response into a standardized CVE enrichment object.
 
-        Extracts English description, CWE (preferring higher-numbered CWE IDs), and
-        CVSS data by iterating primary then secondary weaknesses and CVSS versions
-        from newest to oldest until both CWE and CVSS base score are resolved.
+        Takes the first English description and collects every valid CWE identifier
+        reported across all weaknesses. The CVSS base score is read by iterating
+        primary then secondary metric categories and CVSS versions from newest to
+        oldest, stopping as soon as a base score is found.
 
         Args:
             cve (str): CVE identifier being parsed.
@@ -142,9 +143,11 @@ class NvdNist(BaseCveProvider):
     def cve_quality_score(self, data: BaseCveProvider.CveEnrichment) -> int:
         """Calculate NVD-specific data quality score.
 
-        Applies a penalty for CVEs that are not yet in the "modified" state
-        (e.g. newly received or under analysis) since their data may be incomplete,
-        and returns 0 for statuses that indicate the CVE is invalid or rejected.
+        Returns 0 outright for statuses that have not completed NVD's initial analysis or
+        were rejected ("received", "awaiting analysis", "undergoing analysis", "deferred",
+        "rejected"), since their data is not reliable yet. A CVE still in the "modified"
+        status keeps its base score minus a small penalty, since it is being revised again
+        after already going through analysis.
 
         Args:
             data (BaseCveProvider.CveEnrichment): CVE enrichment data to score.

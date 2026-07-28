@@ -65,15 +65,20 @@ class AlertSerializer(ModelSerializer):
         return instance.subscribers.filter(pk=self.context.get("request").user.id).exists()
 
     def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
-        """Validate the alert data.
+        """Validate and normalize alert data before saving.
 
-        Sets the alert as enabled by default.
+        Clears the filter value when the alert item has no matching field in
+        Alert.mapping, since it would never be used to filter findings. Trending
+        CVE alerts always get their value forced to "True" so the generic
+        value-matching logic in Alert.must_be_triggered only fires for findings
+        marked as trending. Enabled is forced to True on every call, including
+        updates, since EditAlertSerializer reuses this validate() method.
 
         Args:
-            attrs (dict): The attributes to validate
+            attrs (dict[str, Any]): The attributes to validate
 
         Returns:
-            dict: The validated attributes
+            dict[str, Any]: The validated attributes
         """
         attrs = super().validate(attrs)
         if attrs.get("item"):
@@ -93,14 +98,12 @@ class AlertSerializer(ModelSerializer):
         is True, all project members are subscribed; otherwise only the owner.
 
         Args:
-            validated_data (dict): The validated data for creating the alert
+            validated_data (dict[str, Any]): The validated data for creating the alert
 
         Returns:
             Alert: The created Alert instance
         """
         alert = super().create(validated_data)
-        # If subscribe_all_members is set, subscribe all project members to the alert.
-        # Otherwise, only subscribe the alert owner.
         if alert.subscribe_all_members:
             alert.subscribers.set(alert.project.members.all())
         else:

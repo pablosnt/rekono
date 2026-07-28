@@ -35,13 +35,11 @@ class CveCrowdSettings(BaseEncrypted):
         is_available (BooleanField): Cached platform availability status (default False).
 
     Example:
-        Configure CVE Crowd integration with 7-day trending window:
+        Configure CVE Crowd integration with a 7-day trending window:
 
         ```python
-        settings = CveCrowdSettings.objects.create(
-            trending_span_days=7,
-            execute_per_execution=True
-        )
+        settings = CveCrowdSettings.objects.first()
+        settings.trending_span_days = 7
         settings.secret = "your_api_token_here"
         settings.save()
         ```
@@ -73,8 +71,9 @@ class CveCrowdCache(BaseModel):
     """Cache model for trending CVE identifiers retrieved from the CVE Crowd API.
 
     Stores CVE identifiers with their retrieval timestamp to avoid redundant API
-    requests. The cache is considered valid for one day; all entries are replaced
-    atomically when the cache is expired or a forced refresh is triggered.
+    requests. The cache is considered valid for one day; existing entries are
+    deleted and replaced with a fresh set whenever the cache is expired or a
+    forced refresh is triggered.
 
     Attributes:
         cve (TextField): CVE identifier (e.g., CVE-2024-12345), max 20 chars.

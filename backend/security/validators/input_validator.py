@@ -1,9 +1,10 @@
-"""Input validation utilities with regex patterns and security controls.
+"""Validators used across Rekono's Django models to check field values.
 
-Provides comprehensive input validation including regex patterns, injection
-prevention, and custom validators for secure data processing. This module
-implements defense-in-depth validation to prevent common security vulnerabilities
-including injection attacks and malformed input exploitation.
+Provides Validator, which checks a value against one of the shared Regex patterns
+defined in security.validators.enums and can optionally reject values containing
+injection characters or a sensitive environment-variable assignment. Also provides
+FutureDatetimeValidator, for fields that must hold a future date, and
+PasswordValidator, which enforces password complexity rules.
 """
 
 import re
@@ -19,24 +20,29 @@ from security.validators.enums import Regex
 
 
 class Validator(RegexValidator, LoggingEntity):
-    """Enhanced regex validator with injection prevention and security logging.
+    """Regex validator with a required value check and optional injection detection.
 
-    Extends Django's RegexValidator with additional security features including
-    injection attack detection, comprehensive logging, and customizable validation
-    rules. This validator provides defense-in-depth input validation.
+    Extends Django's RegexValidator but overrides its call logic entirely: a
+    missing or empty value is always rejected, the value must fully match (or,
+    depending on inverse_match, must not match) the configured regex, and, when
+    deny_injections is enabled, the value is also rejected if it contains a
+    common injection character or a sensitive environment-variable assignment.
 
     Security Features:
-        - Regex pattern validation with full match requirements
-        - Injection attack detection and prevention
-        - Security event logging for validation failures
-        - Configurable validation rules per field type
-        - Required value enforcement
+        - Missing or empty values are always rejected
+        - Full-string match against the configured regex, not a partial match
+        - Optional rejection of injection characters (;"'&<>$) and sensitive
+          environment-variable assignments (e.g. LD_PRELOAD=...) via deny_injections
+        - Every rejection is logged as a security warning with the offending value
 
     Args:
-        regex (Regex): The regex pattern to use for validation.
+        regex (Regex | str): The Regex pattern to validate against, or a raw
+            pattern string (accepted for values stored by old migrations).
         message (Any | None): Custom validation error message.
         code (str | None): Error code for validation failures.
-        inverse_match (bool | None): Whether to invert the match logic.
+        inverse_match (bool | None): Match direction. Left unset (the default),
+            or given any other truthy value, the value must match the regex; passing
+            False requires the value not to match it.
         flags (RegexFlag | None): Regex compilation flags.
         deny_injections (bool): Enable injection attack detection (default: False).
     """
@@ -50,17 +56,16 @@ class Validator(RegexValidator, LoggingEntity):
         flags: RegexFlag | None = None,
         deny_injections: bool = False,
     ) -> None:
-        """Initialize the enhanced validator with security configuration.
-
-        Sets up the validator with regex pattern matching, injection detection,
-        and comprehensive validation rules. Configures the underlying RegexValidator
-        with the provided parameters while adding security-specific features.
+        """Initialize the validator and configure the underlying RegexValidator.
 
         Args:
-            regex (Regex | str): The regex pattern enum to use for validation.
+            regex (Regex | str): The Regex pattern to validate against, or a raw
+                pattern string (accepted for values stored by old migrations).
             message (Any | None): Custom error message for validation failures.
             code (str | None): Error code for ValidationError exceptions.
-            inverse_match (bool | None): Whether to invert the regex matching logic.
+            inverse_match (bool | None): Match direction. Left unset (the default),
+                or given any other truthy value, the value must match the regex;
+                passing False requires the value not to match it.
             flags (RegexFlag | None): Regex compilation flags for pattern matching.
             deny_injections (bool): Enable injection attack detection (default: False).
         """
@@ -69,17 +74,22 @@ class Validator(RegexValidator, LoggingEntity):
         super().__init__(regex.value if isinstance(regex, Regex) else regex, message, code, inverse_match, flags)
 
     def __call__(self, value: str | None) -> None:
-        """Validate input value against regex pattern and injection rules.
+        """Validate a value against the configured regex and injection rules.
 
-        Performs comprehensive validation including required value checking,
-        regex pattern matching, and optional injection attack detection.
-        Logs security events for all validation failures.
+        Rejects a missing or empty value first. Then checks the value against the
+        configured regex (requiring a match or a non-match depending on
+        inverse_match) and, if deny_injections is enabled, also rejects it when it
+        contains an injection character or a sensitive environment-variable
+        assignment. Every rejection is logged as a warning describing the value as
+        not matching the allowed regex, even when the actual cause was one of the
+        injection checks.
 
         Args:
             value (str | None): The input value to validate.
 
         Raises:
-            ValidationError: If validation fails for any reason.
+            ValidationError: If the value is empty, fails the regex check, or is
+                rejected by the injection checks while deny_injections is enabled.
         """
         if not value:
             raise ValidationError("Value is required", code=self.code, params={"value": value})
@@ -124,27 +134,33 @@ class FutureDatetimeValidator(RegexValidator):
 
 
 class PasswordValidator:
-    """Comprehensive password validation with security requirements.
+    """Enforces password complexity requirements.
 
-    Implements enterprise-grade password validation enforcing complexity
-    requirements to ensure strong password security. This validator checks
-    for minimum length, character diversity, and composition requirements.
+    Requires a minimum length and at least one character from each of the
+    lowercase, uppercase, digit, and non-alphanumeric classes. This validator
+    is compatible with Django's password validation framework, so it can be
+    registered as one of the AUTH_PASSWORD_VALIDATORS.
 
     Security Requirements:
         - Minimum 12 characters length
         - At least one lowercase letter (a-z)
         - At least one uppercase letter (A-Z)
         - At least one digit (0-9)
-        - At least one special character/symbol
+        - At least one non-alphanumeric character, matched via \\W (this also
+          accepts whitespace, and excludes underscore since it counts as a word
+          character)
 
     Attributes:
-        full_match (str): Regex for overall password validation
-        lowercase (str): Regex for lowercase character requirement
-        uppercase (str): Regex for uppercase character requirement
-        digit (str): Regex for digit character requirement
-        symbol (str): Regex for symbol character requirement
+        full_match (str): Combined length and allowed-character-class pattern
+            that the whole password must match
+        lowercase (str): Pattern requiring at least one lowercase letter
+        uppercase (str): Pattern requiring at least one uppercase letter
+        digit (str): Pattern requiring at least one digit
+        symbol (str): Pattern requiring at least one non-word character (\\W)
     """
 
+    # Underscore is a word character, so it isn't covered by \W or by the explicit
+    # ranges below; a password containing one always fails this full match
     full_match = r"[A-Za-z0-9\W]{12,}"  # Full match with all requirements
     lowercase = r"[a-z]"  # At least one lowercase
     uppercase = r"[A-Z]"  # At least one uppercase
@@ -154,9 +170,9 @@ class PasswordValidator:
     def validate(self, password: str, user: Any = None) -> None:
         """Validate password against security requirements.
 
-        Performs comprehensive password validation including length,
-        character diversity, and composition requirements. Compatible
-        with Django's password validation framework.
+        Checks the combined length and character-class pattern first; if it
+        fails, raises the generic help text. Otherwise checks each character
+        class individually and raises a message naming the first one missing.
 
         Args:
             password (str): The password to validate.

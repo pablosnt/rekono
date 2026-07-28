@@ -9,8 +9,8 @@ references with validation and parsing capabilities.
 Architecture:
     Both parameter types extend the InputParameter base model and implement specific
     field configurations, validation rules, and parsing mappings for integration with
-    security testing tools. The models include filtering capabilities and deduplication
-    logic to ensure data consistency and efficient parameter management.
+    security testing tools. Each model defines its own search filters and parsing
+    mapping so tool executions can look up and inject parameter values by keyword.
 """
 
 from typing import Any

@@ -1,8 +1,7 @@
-"""Settings URL configuration for Rekono API.
+"""URL configuration for the settings module.
 
-This module defines URL routing for Settings API endpoints using Django REST
-framework router configuration. Provides secure routing for administrative
-access to global platform configuration management.
+Defines URL patterns for the settings REST API endpoint, exposing global
+platform configuration for viewing and updating.
 """
 
 from rest_framework.routers import SimpleRouter

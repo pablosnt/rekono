@@ -44,6 +44,8 @@ class BaseParser:
         executor (BaseExecutor): The executor instance that ran the tool
         output (str | None): Plain text output from tool execution
         findings (list): List of findings extracted during parsing
+        user_input_findings (dict): Cache of parent findings derived from user-input
+                                    targets, keyed by target identity, populated during parsing
 
     Example:
         Create and use a parser:
@@ -333,16 +335,27 @@ class BaseParser:
     def _parse(self) -> None:
         """Parse tool output and extract findings.
 
-        Override this method in tool-specific parser classes to implement
-        custom parsing logic for extracting findings from tool outputs.
+        Override this method in tool-specific parser classes to implement custom
+        parsing logic for extracting findings from tool outputs.
+
+        parse() only catches exceptions raised by this method as a whole, not per
+        iteration, so raising partway through a loop over multiple hosts or entries
+        abandons the rest of that loop and silently drops the findings it would have
+        produced. Implementations that iterate over multiple items should catch and
+        log per-item errors internally instead of letting them propagate.
         """
         pass
 
     def parse(self) -> None:
-        """Main parsing method that processes output and sanitizes sensitive information.
+        """Parse the tool output and sanitize sensitive information from the execution.
 
-        Calls the tool-specific _parse method to extract findings, then sanitizes
-        the execution output to remove sensitive information.
+        Calls the tool-specific _parse method to extract findings. Any exception
+        raised by _parse is caught here and logged instead of propagating, so a
+        parsing failure never crashes the execution pipeline. The exception still
+        unwinds the whole _parse call, so only the findings created before the
+        failure point are kept, see _parse for what this means for subclass
+        implementations. The execution output and report file are sanitized in the
+        finally block regardless of whether parsing succeeded.
         """
         try:
             self._parse()

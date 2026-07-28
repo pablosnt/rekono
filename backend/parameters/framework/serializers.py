@@ -34,6 +34,8 @@ class InputParameterSerializer(ModelSerializer):
         Returns:
             InputTechnology | InputVulnerability: Existing or newly created parameter instance
         """
+        # The id field is excluded because it is auto-generated and never present in validated_data,
+        # so comparing on it would prevent any duplicate from matching
         search = self.__class__.Meta.model.objects.filter(
             **{f: validated_data.get(f) for f in self.Meta.fields if f.lower() != "id"}
         )

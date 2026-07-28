@@ -54,9 +54,11 @@ class ApiAuthentication(TokenAuthentication):
             tuple[Any, Any]: Tuple of (user, token) objects for successful authentication.
 
         Raises:
-            AuthenticationFailed: If token is expired or invalid.
+            AuthenticationFailed: If no token matches the hashed key, the token's
+                user is inactive, or the token has passed its expiration date.
         """
         user, token = super().authenticate_credentials(Crypto.hash(key))
+        # A token with no expiration date (expiration is None) never expires
         if token.expiration and token.expiration < timezone.now():
             raise AuthenticationFailed(code=status.HTTP_401_UNAUTHORIZED)
         return user, token

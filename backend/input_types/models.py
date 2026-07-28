@@ -36,18 +36,16 @@ class InputType(BaseModel):
         fallback_model (TextField): Reference to a fallback Django model when primary
                                    is unavailable (optional, max 15 chars).
         relationships (BooleanField): Whether this input type should be included in
-                                     relationship calculations between models and executions.
+                                     relationship calculations between models and executions
+                                     (default: True).
 
     Example:
-        Create an input type for host data:
+        Input types are fixture-seeded (see input_types/fixtures/1_input_types.json)
+        rather than created at runtime. Look up a predefined type by name:
 
         ```python
-        input_type = InputType.objects.create(
-            name=InputTypeName.HOST,
-            model="findings.Host",
-            fallback_model="findings.OSINT",
-            relationships=True
-        )
+        input_type = InputType.objects.get(name=InputTypeName.HOST)
+        model_class = input_type.model_class
         ```
     """
 
@@ -147,9 +145,9 @@ class InputType(BaseModel):
         if not self.relationships:
             return relations
         if self.model_class is not None and hasattr(self.model_class, "_meta"):
-            # Iterate through all fields in the model to find foreign key relationships
+            # Iterate through all fields in the model to find fields matching the requested relation type
             for field in self.model_class._meta.get_fields():
-                # Check if field is a ForeignKey to a BaseInput model
+                # Keep only fields of the requested relation type that point to a BaseInput model
                 if field.__class__ == related_field_class and issubclass(field.related_model, BaseInput):
                     # Search InputType by model reference
                     related_type = InputType.objects.filter(

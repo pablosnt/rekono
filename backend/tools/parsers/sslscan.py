@@ -18,8 +18,9 @@ class Sslscan(BaseParser):
     """Parser for SSLScan XML output files.
 
     Extracts SSL/TLS security findings including supported protocols, cipher suites,
-    and known vulnerabilities like Heartbleed. Associates findings with detected
-    SSL/TLS technology versions for comprehensive analysis.
+    and known vulnerabilities like Heartbleed. Unlike SSLyze, SSLScan's report already
+    rates each cipher suite with a strength attribute, so the parser flags on that
+    attribute directly instead of matching cipher suite names.
 
     Attributes:
         technologies (list[Technology]): List of detected SSL/TLS protocol technologies
@@ -30,10 +31,15 @@ class Sslscan(BaseParser):
     def create_finding(
         self, finding_type: type[Finding], linked_finding: bool = False, **fields: Any
     ) -> Finding | None:
-        """Create findings with automatic SSL/TLS technology association.
+        """Create a finding, resolving Vulnerability findings to their SSL/TLS technology.
+
+        Some Vulnerability fields carry an sslversion value (e.g. "TLSv1.2") instead of a
+        technology, because the technology can only be resolved by matching it against the
+        protocols already parsed into self.technologies.
 
         Args:
             finding_type (type[Finding]): Type of finding to create
+            linked_finding (bool): Whether the finding has already been linked to other findings
             **fields (Any): Field values for the finding
 
         Returns:
@@ -51,8 +57,12 @@ class Sslscan(BaseParser):
     def _parse(self) -> None:
         """Parse SSLScan XML output and extract SSL/TLS security findings.
 
-        Processes XML scan results to create Technology and Vulnerability findings
-        for SSL/TLS protocols, cipher suites, and security issues.
+        Each ssltest element in the report corresponds to one scanned host:port and holds a
+        flat sequence of protocol, renegotiation, heartbleed and cipher elements, so this
+        method walks every direct child by its tag name instead of relying on nesting. A
+        Technology finding is created for each enabled protocol, and a Vulnerability is added
+        for any protocol other than TLS 1.2 or 1.3, for insecure renegotiation, for Heartbleed,
+        and for any cipher suite whose strength attribute is not "acceptable" or "strong".
         """
         root = self.load_xml_report()
         if not root:

@@ -52,26 +52,27 @@ class RQStatsView(APIView):
 
     Provides real-time statistics about background job queues including
     job counts, worker status, and queue health for system monitoring.
-    Requires admin permissions for access.
+    Restricted to Admin role users.
 
     Attributes:
-        permission_classes: Restricts access to admin users only
+        permission_classes (list): Restricts access to Admin role users only.
     """
 
     permission_classes = [IsAdmin]
 
     @extend_schema(request=None, responses=RQStatsSerializer)
     def get(self, request: Request) -> Response:
-        """Retrieve current Redis Queue statistics.
+        """Retrieve current statistics for every configured Redis Queue.
 
-        Returns comprehensive queue statistics including job counts,
-        worker information, and queue status across all queue types.
+        Reads the raw queue statistics from django_rq and narrows each queue's
+        entry down to the job and worker count fields exposed by
+        RQStatsSerializer, keyed by queue name.
 
         Args:
-            request: HTTP request object
+            request (Request): The HTTP request object.
 
         Returns:
-            Response containing queue statistics data
+            Response: HTTP 200 with per-queue job and worker statistics.
         """
         return Response(
             RQStatsSerializer(
@@ -105,11 +106,13 @@ class HostStatsViewSet(StatsViewSet):
     operating system family for infrastructure analysis.
 
     Attributes:
-        queryset: Unfixed hosts grouped by OS type with counts
-        ordering: Most common OS types first, then alphabetical
-        serializer_class: Host statistics serialization
-        filterset_class: Host filtering capabilities
-        pagination_class: Pagination disabled for complete statistics
+        queryset (QuerySet): Unfixed hosts grouped by os_type with a distinct count
+            annotation.
+        ordering (list): Most common os_type values first, then alphabetically.
+        serializer_class (Serializer): Serializer for host OS-type statistics.
+        filterset_class (FilterSet): Filter class for host queryset filtering.
+        pagination_class (type | None): Pagination disabled to return the complete
+            statistics set.
     """
 
     queryset = Host.objects.filter(is_fixed=False).values("os_type").annotate(count=Count("id", distinct=True))
@@ -127,10 +130,16 @@ class HostVulnerabilitiesStatsViewSet(StatsViewSet):
     remediation efforts.
 
     Attributes:
-        queryset: Hosts with detailed vulnerability count annotations
-        ordering: Prioritizes hosts with most open vulnerabilities
-        serializer_class: Host vulnerability statistics serialization
-        filterset_class: Host filtering capabilities
+        queryset (QuerySet): Unfixed hosts annotated with open and fixed vulnerability
+            counts, plus one count per severity level restricted to open vulnerabilities.
+            Each count is a correlated subquery matching vulnerabilities associated with
+            the host either directly through a port or through a technology on one of
+            its ports, excluding false positives and findings created from user input.
+        ordering (list): Hosts with the most open vulnerabilities first, then by fixed
+            count, then by each severity count from critical to info, with id as the
+            final tiebreaker.
+        serializer_class (Serializer): Serializer for host vulnerability statistics.
+        filterset_class (FilterSet): Filter class for host queryset filtering.
     """
 
     queryset = (
@@ -180,10 +189,13 @@ class PortStatsViewSet(StatsViewSet):
     port numbers, protocols, and service identification for attack surface analysis.
 
     Attributes:
-        queryset: Unfixed ports grouped by service details with counts
-        ordering: Most common services first, then by service/port/protocol
-        serializer_class: Port statistics serialization
-        filterset_class: Port filtering capabilities
+        queryset (QuerySet): Unfixed ports with a known, non-empty service, protocol,
+            and port number, grouped by that (service, protocol, port) combination with
+            a distinct count annotation.
+        ordering (list): Most common combination first, then alphabetically by service,
+            port, and protocol.
+        serializer_class (Serializer): Serializer for port and service statistics.
+        filterset_class (FilterSet): Filter class for port queryset filtering.
     """
 
     queryset = (
@@ -205,10 +217,11 @@ class TechnologyStatsViewSet(StatsViewSet):
     across discovered assets for technology stack analysis.
 
     Attributes:
-        queryset: Unfixed technologies grouped by name with counts
-        ordering: Most common technologies first, then alphabetical
-        serializer_class: Technology statistics serialization
-        filterset_class: Technology filtering capabilities
+        queryset (QuerySet): Unfixed technologies not created from user input, grouped by
+            name with a distinct count annotation.
+        ordering (list): Most common technology names first, then alphabetically.
+        serializer_class (Serializer): Serializer for technology statistics.
+        filterset_class (FilterSet): Filter class for technology queryset filtering.
     """
 
     queryset = (
@@ -228,10 +241,14 @@ class VulnerabilityCVEStatsViewSet(StatsViewSet):
     and reference links for vulnerability management and tracking.
 
     Attributes:
-        queryset: Active vulnerabilities with CVE data and annotations
-        ordering: Most critical open vulnerabilities first
-        serializer_class: CVE vulnerability statistics serialization
-        filterset_class: Vulnerability filtering capabilities
+        queryset (QuerySet): Non-user-created vulnerabilities with a CVE identifier,
+            excluding false positives, annotated with each vulnerability's own reference
+            (as ``link``) and severity (as ``severity_value``), then grouped by
+            (cve, severity_value, link) with open and fixed counts computed per group.
+        ordering (list): Groups with the most open vulnerabilities first, then by
+            severity_value, then alphabetically by cve.
+        serializer_class (Serializer): Serializer for CVE-grouped vulnerability statistics.
+        filterset_class (FilterSet): Filter class for vulnerability queryset filtering.
     """
 
     queryset = (
@@ -254,21 +271,23 @@ class VulnerabilityCWEStatsViewSet(StatsViewSet):
 
     Provides vulnerability counts categorized by Common Weakness Enumeration
     identifiers for vulnerability pattern analysis and remediation planning.
-    Uses Python-side aggregation because cwes is a JSONField; the primary CWE
-    for grouping is cwes[-1] (the highest-numbered entry, kept sorted on save).
 
     Attributes:
-        queryset: Base filtered vulnerabilities (aggregation done in filter_queryset)
-        serializer_class: CWE vulnerability statistics serialization
-        filterset_class: Vulnerability filtering capabilities
-        pagination_class: Standard pagination for results
+        queryset (QuerySet): Non-user-created vulnerabilities with at least one CWE,
+            excluding false positives, grouped by a single CWE value extracted from the
+            cwes JSON array with open and fixed counts computed per group.
+        ordering (list): Groups with the most open vulnerabilities first, then
+            alphabetically by cwe.
+        serializer_class (Serializer): Serializer for CWE-grouped vulnerability statistics.
+        filterset_class (FilterSet): Filter class for vulnerability queryset filtering.
     """
 
-    # cwes__-1 (last element) is the intended grouping key: CWEs are sorted by
+    # cwes[-1] (last element) is the intended grouping key: CWEs are sorted by
     # numeric value on save, so the last entry has the highest CWE number.
     # PostgreSQL supports negative JSON array indices ($[-1]); SQLite (used in
     # tests) does not. In tests all cwes lists have exactly one element, so
-    # cwes__0 and cwes__-1 are equivalent — CONFIG.testing picks the right index.
+    # cwes[0] and cwes[-1] are equivalent there, which is why CONFIG.testing
+    # picks the index to use.
     queryset = (
         Vulnerability.objects.filter(created_from_user_input=False)
         .exclude(triage_status=TriageStatus.FALSE_POSITIVE)
@@ -292,11 +311,15 @@ class VulnerabilityStatusStatsViewSet(StatsViewSet):
     categorized by severity level for targeted security improvements.
 
     Attributes:
-        queryset: Active vulnerabilities with fix counts by severity
-        ordering: Most severe vulnerabilities first
-        serializer_class: Severity vulnerability statistics serialization
-        filterset_class: Vulnerability filtering capabilities
-        pagination_class: Pagination disabled for complete severity breakdown
+        queryset (QuerySet): Non-user-created vulnerabilities excluding false positives
+            and vulnerabilities marked as won't-fix, grouped by severity with open and
+            fixed counts computed per group.
+        ordering (list): Most severe severity level first.
+        serializer_class (Serializer): Serializer for severity-grouped vulnerability
+            statistics.
+        filterset_class (FilterSet): Filter class for vulnerability queryset filtering.
+        pagination_class (type | None): Pagination disabled to return the complete
+            severity breakdown.
     """
 
     queryset = (
@@ -320,11 +343,15 @@ class VulnerabilityExploitCoverageStatsViewSet(StatsViewSet):
     code is available, enabling prioritization of exploitable vulnerabilities.
 
     Attributes:
-        queryset: Open vulnerabilities annotated with exploit availability
-        serializer_class: Exploit coverage statistics serialization
-        filterset_class: Vulnerability filtering capabilities
-        pagination_class: Pagination disabled for complete coverage overview
-        ordering: False (no exploits) first, then True (has exploits)
+        queryset (QuerySet): Open, non-user-created vulnerabilities excluding false
+            positives, annotated with whether at least one Exploit references them and
+            grouped by that flag with a distinct count.
+        serializer_class (Serializer): Serializer for exploit coverage statistics.
+        filterset_class (FilterSet): Filter class for vulnerability queryset filtering.
+        pagination_class (type | None): Pagination disabled to return the complete
+            coverage overview.
+        ordering (list): Vulnerabilities without exploits first, then vulnerabilities
+            with exploits.
     """
 
     queryset = (
@@ -347,11 +374,14 @@ class TriagingStatsViewSet(StatsViewSet):
     across OSINT, credentials, vulnerabilities, and exploits findings.
 
     Attributes:
-        queryset: Base OSINT findings grouped by triage status
-        ordering: No specific ordering applied
-        serializer_class: Triaging statistics serialization
-        filterset_class: OSINT filtering capabilities (base filter)
-        pagination_class: Pagination disabled for complete triage overview
+        queryset (QuerySet): All OSINT records. Only used to satisfy the ViewSet's model
+            and schema requirements; filter_queryset() ignores it and computes the
+            actual statistics itself.
+        serializer_class (Serializer): Serializer for triage status statistics.
+        filterset_class (FilterSet): OSINTFilter. filter_queryset() temporarily
+            reassigns this to each finding type's filter class in turn.
+        pagination_class (type | None): Pagination disabled to return the complete
+            triage overview.
     """
 
     queryset = OSINT.objects.all()
@@ -360,16 +390,21 @@ class TriagingStatsViewSet(StatsViewSet):
     pagination_class = None
 
     def filter_queryset(self, queryset):
-        """Apply filtering and aggregate triage statistics across all finding types.
+        """Aggregate triage status counts across every triage-tracked finding type.
 
-        Combines triage status counts from OSINT, Credential, Vulnerability,
-        and Exploit models to provide comprehensive triage statistics.
+        For each finding type (OSINT, Credential, Vulnerability, Exploit) this builds a
+        queryset grouped by triage_status with open and fixed counts, applies that
+        type's filterset by temporarily swapping self.filterset_class, and merges the
+        resulting counts into a single dict keyed by triage_status. The ``queryset``
+        argument itself is not used.
 
         Args:
-            queryset: Base OSINT queryset to filter
+            queryset (QuerySet): Unused; present to match the ViewSet.filter_queryset
+                signature.
 
         Returns:
-            List of aggregated triage status statistics across all finding types
+            list: Aggregated open and fixed counts per triage_status, sorted by
+                triage_status.
         """
         # This is needed because it's not possible to union multiple querysets
         # and then get counts grouped by triage_status
@@ -405,10 +440,13 @@ class MonthlyEvolutionViewSet(StatsViewSet):
     TriageFinding models.
 
     Attributes:
-        serializer_class: Monthly evolution statistics serialization
-        pagination_class: Pagination disabled for complete time-series data
-        queryset: Set dynamically in get_queryset from filterset_class.Meta.model
-        max_months: Maximum number of months returned, capped at 10 years
+        serializer_class (Serializer): Serializer for monthly finding evolution
+            statistics.
+        pagination_class (type | None): Pagination disabled to return the complete
+            time series.
+        queryset (QuerySet | None): None on the class; get_queryset() assigns it from
+            filterset_class.Meta.model before returning.
+        max_months (int): Maximum number of months returned by filter_queryset().
     """
 
     serializer_class = FindingsEvolutionStatsSerializer
@@ -424,7 +462,7 @@ class MonthlyEvolutionViewSet(StatsViewSet):
         False positives are excluded when the model extends TriageFinding.
 
         Returns:
-            QuerySet: Project-membership-filtered queryset for the finding model
+            QuerySet: Project-membership-filtered queryset for the finding model.
         """
         model = self.filterset_class.Meta.model
         self.queryset = model.objects.filter(created_from_user_input=False)
@@ -433,17 +471,26 @@ class MonthlyEvolutionViewSet(StatsViewSet):
         return super().get_queryset()
 
     def filter_queryset(self, queryset):
-        """Apply filters and compute monthly evolution statistics.
+        """Apply filters and compute monthly finding evolution statistics.
 
-        Runs two aggregation queries (discoveries by first execution month,
-        fixes by fixed_date month) then computes a running active total.
+        Runs two aggregation queries on the filtered queryset: discoveries grouped by
+        the month of each finding's earliest execution start, and fixes grouped by the
+        month of fixed_date (only for findings that are fixed and have a fixed_date).
+        Findings with no execution start month are excluded from the discovered count.
+        The two month-to-count maps are then walked together, month by month, from the
+        first month with any activity through the current month, filling in a zero
+        count for any month with no activity, and accumulating a running active total
+        as max(0, previous active + discovered - fixed).
 
         Args:
-            queryset: Project-membership-filtered queryset from get_queryset
+            queryset (QuerySet): Project-membership-filtered queryset from
+                get_queryset().
 
         Returns:
-            List of the most recent monthly data points (up to max_months) with
-            discovered, fixed, and active counts
+            list: One entry per month from the first active month through the current
+                month, each with month, discovered, fixed, and active counts, truncated
+                to the most recent max_months entries. Empty if there is no discovered
+                or fixed activity at all.
         """
         queryset = super().filter_queryset(queryset)
         discovered_by_month = {
@@ -481,48 +528,88 @@ class MonthlyEvolutionViewSet(StatsViewSet):
 
 
 class OSINTEvolutionViewSet(MonthlyEvolutionViewSet):
-    """ViewSet for OSINT finding monthly evolution statistics."""
+    """ViewSet for OSINT finding monthly evolution statistics.
+
+    Attributes:
+        filterset_class (FilterSet): OSINTFilter. get_queryset() reads its Meta.model
+            to target the OSINT model for this evolution view.
+    """
 
     filterset_class = OSINTFilter
 
 
 class HostEvolutionViewSet(MonthlyEvolutionViewSet):
-    """ViewSet for host finding monthly evolution statistics."""
+    """ViewSet for host finding monthly evolution statistics.
+
+    Attributes:
+        filterset_class (FilterSet): HostFilter. get_queryset() reads its Meta.model
+            to target the Host model for this evolution view.
+    """
 
     filterset_class = HostFilter
 
 
 class PortEvolutionViewSet(MonthlyEvolutionViewSet):
-    """ViewSet for port finding monthly evolution statistics."""
+    """ViewSet for port finding monthly evolution statistics.
+
+    Attributes:
+        filterset_class (FilterSet): PortFilter. get_queryset() reads its Meta.model
+            to target the Port model for this evolution view.
+    """
 
     filterset_class = PortFilter
 
 
 class PathEvolutionViewSet(MonthlyEvolutionViewSet):
-    """ViewSet for path finding monthly evolution statistics."""
+    """ViewSet for path finding monthly evolution statistics.
+
+    Attributes:
+        filterset_class (FilterSet): PathFilter. get_queryset() reads its Meta.model
+            to target the Path model for this evolution view.
+    """
 
     filterset_class = PathFilter
 
 
 class TechnologyEvolutionViewSet(MonthlyEvolutionViewSet):
-    """ViewSet for technology finding monthly evolution statistics."""
+    """ViewSet for technology finding monthly evolution statistics.
+
+    Attributes:
+        filterset_class (FilterSet): TechnologyFilter. get_queryset() reads its
+            Meta.model to target the Technology model for this evolution view.
+    """
 
     filterset_class = TechnologyFilter
 
 
 class CredentialEvolutionViewSet(MonthlyEvolutionViewSet):
-    """ViewSet for credential finding monthly evolution statistics."""
+    """ViewSet for credential finding monthly evolution statistics.
+
+    Attributes:
+        filterset_class (FilterSet): CredentialFilter. get_queryset() reads its
+            Meta.model to target the Credential model for this evolution view.
+    """
 
     filterset_class = CredentialFilter
 
 
 class VulnerabilityEvolutionViewSet(MonthlyEvolutionViewSet):
-    """ViewSet for vulnerability finding monthly evolution statistics."""
+    """ViewSet for vulnerability finding monthly evolution statistics.
+
+    Attributes:
+        filterset_class (FilterSet): VulnerabilityFilter. get_queryset() reads its
+            Meta.model to target the Vulnerability model for this evolution view.
+    """
 
     filterset_class = VulnerabilityFilter
 
 
 class ExploitEvolutionViewSet(MonthlyEvolutionViewSet):
-    """ViewSet for exploit finding monthly evolution statistics."""
+    """ViewSet for exploit finding monthly evolution statistics.
+
+    Attributes:
+        filterset_class (FilterSet): ExploitFilter. get_queryset() reads its Meta.model
+            to target the Exploit model for this evolution view.
+    """
 
     filterset_class = ExploitFilter

@@ -48,14 +48,11 @@ class DefectDojoSettingsSerializer(DefectDojoClientMixin, ModelSerializer):
     is_available = SerializerMethodField(read_only=True)
 
     class Meta:
-        """Serializer metadata configuration for DefectDojoSettings model.
-
-        Defines the model to serialize and specifies the fields to include
-        in the serialized representation for REST API operations.
+        """Meta configuration for DefectDojoSettingsSerializer.
 
         Attributes:
-            model: DefectDojoSettings model class for serialization
-            fields: Tuple of field names to include in serialization
+            model (Model): The DefectDojoSettings model to serialize
+            fields (tuple): Field names to include in serialization
         """
 
         model = DefectDojoSettings
@@ -105,14 +102,11 @@ class DefectDojoSyncSerializer(DefectDojoClientMixin, ModelSerializer):
     """
 
     class Meta:
-        """Serializer metadata configuration for DefectDojoSync model.
-
-        Defines the model to serialize and specifies the fields to include
-        in the serialized representation for synchronization management.
+        """Meta configuration for DefectDojoSyncSerializer.
 
         Attributes:
-            model: DefectDojoSync model class for serialization
-            fields: Tuple of field names to include in serialization
+            model (Model): The DefectDojoSync model to serialize
+            fields (tuple): Field names to include in serialization
         """
 
         model = DefectDojoSync
@@ -165,14 +159,11 @@ class DefectDojoTargetSyncSerializer(DefectDojoClientMixin, ModelSerializer):
     """
 
     class Meta:
-        """Serializer metadata configuration for DefectDojoTargetSync model.
-
-        Defines the model to serialize and specifies the fields to include
-        in the serialized representation for target synchronization management.
+        """Meta configuration for DefectDojoTargetSyncSerializer.
 
         Attributes:
-            model: DefectDojoTargetSync model class for serialization
-            fields: Tuple of field names to include in serialization
+            model (Model): The DefectDojoTargetSync model to serialize
+            fields (tuple): Field names to include in serialization
         """
 
         model = DefectDojoTargetSync

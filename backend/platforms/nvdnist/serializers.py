@@ -21,6 +21,7 @@ class NvdNistSettingsSerializer(ModelSerializer):
     Attributes:
         api_token (ProtectedSecretField): Secured API token field with validation
         is_available (SerializerMethodField): Computed field for API availability status
+        client (NvdNist): Shared integration client used to check API availability
     """
 
     api_token = ProtectedSecretField(required=False, allow_null=True, source="secret")

@@ -158,6 +158,8 @@ class ProjectMemberPermission(BasePermission):
         """
         project = obj.parent_project
         if project is None:
+            # obj.parent_project is None for models that aren't scoped to a single
+            # project (global objects), so there is no membership to check here
             return True
         else:
             projects = [project] if isinstance(project, Project) else project

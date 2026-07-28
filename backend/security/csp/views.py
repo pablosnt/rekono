@@ -29,8 +29,8 @@ class CspReportView(APIView, LoggingEntity):
     a non-2xx response as a reason to suppress future reports.
 
     Attributes:
-        authentication_classes (list): Empty — browsers send reports without credentials.
-        permission_classes (list): Empty — no authentication required for violation delivery.
+        authentication_classes (list): Empty, since browsers send reports without credentials.
+        permission_classes (list): Empty, since no authentication is required for violation delivery.
     """
 
     authentication_classes = []
@@ -98,7 +98,7 @@ class CspReportView(APIView, LoggingEntity):
             body = json.loads(request.body)
         except Exception as ex:  # pragma: no cover
             self.logger.error(f"[{self.__class__.__name__}] Error parsing a CSP report: {str(ex)}")
-            # Discard unparseable payloads — browsers occasionally send empty or malformed bodies
+            # Discard unparseable payloads, since browsers occasionally send empty or malformed bodies
             return Response(status=status.HTTP_204_NO_CONTENT)
         for violation in body if isinstance(body, list) else [body]:
             self._process_violation(violation)

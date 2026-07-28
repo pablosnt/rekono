@@ -24,8 +24,11 @@ class Execution(BaseModel):
     information, and result management.
 
     Execution Lifecycle:
-        REQUESTED -> RUNNING -> COMPLETED/ERROR/CANCELLED
-        REQUESTED -> SKIPPED (if dependencies not met)
+        REQUESTED -> RUNNING -> COMPLETED/ERROR
+        REQUESTED -> RUNNING -> SKIPPED (tool not installed or arguments unsatisfiable)
+        SKIPPED (created directly with this status, target denylisted or tool
+                 below the required intensity)
+        REQUESTED/RUNNING -> CANCELLED (if manually cancelled)
 
     Attributes:
         task (ForeignKey): The task that triggered this execution
@@ -71,10 +74,13 @@ class Execution(BaseModel):
     _project_field = "task__target__project"
 
     def __str__(self) -> str:
-        """String representation of the execution record.
+        """Return string representation of the execution.
 
         Returns:
-            str: String in format "task - configuration" or just "task"
+            str: String in format "task - configuration" if the task runs a
+                process (which the task's own string already omits), or just
+                "task" when the task's own string already names the
+                configuration it runs.
         """
         return f"{self.task.__str__()}{f' - {self.configuration.__str__()}' if self.task.process else ''}"
 
@@ -96,8 +102,10 @@ class Execution(BaseModel):
     def skipped(self, skipped_reason: str) -> None:
         """Mark the execution as SKIPPED with the reason it was not run.
 
-        Used when the tool is missing or its arguments cannot be built, so the
-        execution never actually starts.
+        Called after started() has already put the execution into RUNNING, when
+        the tool is missing or its arguments cannot be built. The execution
+        keeps the start timestamp it was given even though the tool itself
+        never actually runs.
 
         Args:
             skipped_reason (str): Human-readable reason the execution was skipped.

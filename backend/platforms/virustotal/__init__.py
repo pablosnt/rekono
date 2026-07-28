@@ -1,12 +1,13 @@
-"""VirusTotal platform integration for threat intelligence and reputation analysis.
+"""VirusTotal platform integration for host reputation and threat intelligence.
 
-This module provides comprehensive integration with the VirusTotal threat intelligence
-platform, enabling automated reputation analysis, malware detection, and threat
-assessment for discovered hosts and domains. The integration supports real-time
-enrichment of security findings with VirusTotal's extensive threat intelligence database.
+Provides the VirusTotal integration for Rekono, enriching Host findings on public IP
+addresses or domains with reputation scores, analysis engine detection counts, and
+WHOIS data retrieved from the VirusTotal API.
 
-Usage:
-    The VirusTotal integration automatically processes Host findings discovered during
-    security assessments, enriching them with reputation data, threat intelligence,
-    and WHOIS information for comprehensive security analysis.
+Key Features:
+    - Reputation score and analysis engine detection counts (malicious, suspicious, total)
+    - WHOIS data enrichment for domain investigation
+    - Processing restricted to hosts on a public IP, so private network data is never
+      sent to VirusTotal
+    - Availability gated on the configured API key and cached in the database
 """

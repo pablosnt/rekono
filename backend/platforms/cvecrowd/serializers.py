@@ -16,8 +16,8 @@ class CveCrowdSettingsSerializer(ModelSerializer):
     """Serializer for CVE Crowd platform settings.
 
     Handles serialization and deserialization of CVE Crowd settings with
-    secure API token management and platform availability validation.
-    Provides protected credential handling and real-time availability status.
+    secure API token management. The is_available field is a cached status
+    refreshed with a live API check whenever settings are updated.
 
     Attributes:
         api_token (ProtectedSecretField): Protected API token field with validation

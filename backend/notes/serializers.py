@@ -230,27 +230,26 @@ class NoteSerializer(TaggitSerializer, LikeSerializer):
             instance (Note): The note instance being serialized
 
         Returns:
-            int | None: ID note of the current user's fork, if any
+            int | None: ID of the current user's fork of this note, if any
         """
         forks = instance.forks.filter(owner=self.context.get("request").user)
         return forks.first().id if forks.exists() else None
 
     def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
-        """Validate note data and ensure single entity association.
+        """Validate note data and ensure at most one entity association.
 
-        Ensures that a note is associated with exactly one entity and automatically
-        sets the project context based on the associated entity. Validation uses
-        source names (e.g. "target", not "target_id") since PrimaryKeyRelatedField
-        maps *_id inputs to their source names in attrs.
+        A note may be linked directly to a project or to at most one entity
+        (target, task, finding, etc.). When an entity is present, any other
+        entity relationships are cleared and the project context is derived
+        from that entity. Validation uses source names (e.g. "target", not
+        "target_id") since PrimaryKeyRelatedField maps *_id inputs to their
+        source names in attrs.
 
         Args:
             attrs (dict[str, Any]): Validated field data
 
         Returns:
             dict[str, Any]: Validated and processed field data
-
-        Raises:
-            ValidationError: If no project context can be determined
         """
         attrs = super().validate(attrs)
         # Find the first (most specific) entity relationship in the data.
@@ -286,14 +285,12 @@ class NoteSerializer(TaggitSerializer, LikeSerializer):
         """
         if instance.project != validated_data.get("project"):
             raise ValidationError("You are not allowed to change the project of a note", code="project")
-        # Forked notes cannot be made public - they must remain private
+        # A fork can never be made public, regardless of what the request asks for.
         if instance.forked_from and validated_data.get("public", True):
             validated_data["public"] = False
-        # Track if we need to unlink forks when a note becomes private
+        # Captured before the update so the pre-change visibility is still available afterwards.
         unlink_forks = instance.public and not validated_data.get("public", False)
-        # Perform the update
         new_instance = super().update(instance, validated_data)
-        # If the note became private, unlink all its forks
         if unlink_forks:
             Note.objects.filter(public=False, forked_from=new_instance).update(forked_from=None)
         return new_instance

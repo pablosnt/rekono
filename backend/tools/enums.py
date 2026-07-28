@@ -15,13 +15,20 @@ class Intensity(models.IntegerChoices):
     performance characteristics, and resource usage. Higher intensity
     levels typically result in more comprehensive scanning but increased
     execution time and system resource consumption.
+
+    Attributes:
+        SNEAKY (int): Slowest and most stealthy intensity, minimizing detection risk
+        LOW (int): Cautious intensity, faster than SNEAKY but still conservative
+        NORMAL (int): Default, balanced intensity used by most tool configurations
+        HARD (int): Aggressive intensity, favoring speed and thoroughness over stealth
+        INSANE (int): Fastest and most aggressive intensity, prioritizing speed above all else
     """
 
-    SNEAKY = 1  # Softest
+    SNEAKY = 1
     LOW = 2
     NORMAL = 3
     HARD = 4
-    INSANE = 5  # Hardest
+    INSANE = 5
 
 
 class Stage(models.IntegerChoices):
@@ -30,6 +37,15 @@ class Stage(models.IntegerChoices):
     Defines the sequential stages of security testing workflows, enabling
     proper tool orchestration and dependency management. Stages represent
     the logical progression of security assessment activities.
+
+    Attributes:
+        OSINT (int): Open-source intelligence gathering about the target, including
+                    name resolution and subdomain discovery
+        ENUMERATION (int): Discovery of hosts, ports, and network services
+        VULNERABILITIES (int): Vulnerability scanning against what has been discovered
+        SERVICES (int): In-depth testing of a specific discovered service, such as a
+                       web application, a TLS configuration, or an SSH server
+        EXPLOITATION (int): Exploit research for the findings already identified
     """
 
     OSINT = 1

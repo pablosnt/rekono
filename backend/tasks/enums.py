@@ -27,6 +27,6 @@ class TimeUnit(models.TextChoices):
     WEEKS = "Weeks"
 
 
-# Type annotation fix for pytype compatibility
-# https://github.com/google/pytype/issues/1048
+# Type annotation workaround for pytype compatibility
+# See: https://github.com/google/pytype/issues/1048
 TimeUnit: type[Choices] = TimeUnit

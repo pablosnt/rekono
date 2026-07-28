@@ -11,6 +11,7 @@ from django.core.management.base import BaseCommand
 
 warnings.filterwarnings("ignore", category=SyntaxWarning, module=r".*telegram_app.*")
 
+# Imported after the filter above so the SyntaxWarning it raises on import is already suppressed
 from platforms.telegram_app.bot import TelegramBot  # noqa: E402
 
 
@@ -29,11 +30,15 @@ class Command(BaseCommand):
     bot = TelegramBot()
 
     def handle(self, *args: Any, **options: Any) -> None:
-        """Handle the management command execution.
+        """Deploy the Telegram Bot and keep it polling until interrupted.
+
+        Blocks on TelegramBot.deploy() for as long as the polling loop runs. A
+        KeyboardInterrupt (e.g. Ctrl+C) stops the loop and is caught here so the
+        shutdown is logged instead of raising a traceback.
 
         Args:
-            *args: Positional arguments passed to the command.
-            **options: Keyword arguments passed to the command.
+            *args (Any): Positional arguments passed to the command.
+            **options (Any): Keyword arguments passed to the command.
         """
         try:
             self.bot.logger.info("Deploying telegram bot")

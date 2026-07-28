@@ -16,12 +16,10 @@ from tools.executors.base import BaseExecutor
 class Cmseek(BaseExecutor):
     """Executor for CMSeek CMS detection tool.
 
-    Handles CMSeek execution for CMS fingerprinting and security analysis.
-    Manages result file relocation from CMSeek's default output directory
-    to the configured report location.
-
-    Attributes:
-        Inherits all attributes from BaseExecutor
+    CMSeek writes its JSON result to a path it derives internally from the
+    scanned host and port, rather than to the report path Rekono expects.
+    This executor reconstructs that path from the scanned URL, then locates
+    and moves the resulting file to ``self.report`` once the scan finishes.
     """
 
     def after_running(self) -> None:  # pragma: no cover

@@ -2,6 +2,11 @@
 
 Provides project selection functionality for conversations that require
 project context including project listing, selection, and context storage.
+This is always the first mixin in a conversation's flow, since TargetMixin and
+TaskMixin read Context.PROJECT, and TargetPortMixin and AuthenticationMixin depend
+on the target chosen from it. The tool, process and wordlist mixins list global
+catalogs and do not read it. Leaves Context.PROJECT set for the rest of the
+conversation to use.
 """
 
 from telegram import Update

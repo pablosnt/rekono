@@ -56,6 +56,9 @@ class Gitleaks(BaseExecutor):
         exposed only when actual git objects are downloaded. GitLeaks then scans the
         dumped repository's commit history, so no working tree checkout is needed.
         Handles both scenarios where the Git repository is available and where it's not.
+        Before dumping, the port embedded in the target URL is parsed and stored as
+        port_from_arguments, so findings from this execution are linked to the scanned
+        port even though it never appears as a plain command-line argument.
 
         Args:
             environment (dict[str, Any]): Environment variables for execution
@@ -77,7 +80,8 @@ class Gitleaks(BaseExecutor):
             env=environment,
             cwd=gitdumper_directory,
         )
-        # GitDumper always creates a .git skeleton, so the repository is only exposed when it actually contains git objects
+        # GitDumper always creates a .git skeleton, so the repository is only exposed when it
+        # actually contains git objects
         objects_directory = self.execution_directory / ".git" / "objects"
         self.git_directory_dumped = objects_directory.is_dir() and any(
             path.is_file() for path in objects_directory.rglob("*") if path.parent.name != "info"

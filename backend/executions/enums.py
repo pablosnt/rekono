@@ -49,6 +49,6 @@ class Status(models.TextChoices):
         return [cls.COMPLETED, cls.ERROR, cls.SKIPPED, cls.CANCELLED]
 
 
-# Type annotation fix for pytype compatibility
-# https://github.com/google/pytype/issues/1048
+# Type annotation workaround for pytype compatibility
+# See: https://github.com/google/pytype/issues/1048
 Status: type[Choices] = Status

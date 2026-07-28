@@ -2,6 +2,9 @@
 
 Provides target selection and creation functionality for conversations
 that require target context including target listing, creation, and validation.
+Every state here expects Context.PROJECT to already be set by ProjectMixin, since
+targets are listed and created scoped to that project. Leaves Context.TARGET set
+for the mixins that run afterwards, such as TargetPortMixin.
 """
 
 from telegram import Update

@@ -47,8 +47,11 @@ class TelegramBot(BaseTelegram):
     def __init__(self) -> None:
         """Initialize the Telegram Bot with all available commands and help system.
 
-        Adds the Help command with references to all other commands and initializes
-        the base Telegram application framework.
+        Builds the Help command from the other commands plus a standalone Cancel
+        instance, so /cancel is documented in /help even though it is never added to
+        `commands` or registered as its own top-level handler. Cancel only exists as
+        a fallback of each conversation's own ConversationHandler (see conversations.py),
+        which is enough for it to work as a command while a conversation is active.
         """
         self.commands.append(Help(self.commands + [Cancel()]))
         super().__init__()

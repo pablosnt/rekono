@@ -15,9 +15,6 @@ class LoggingFilter(logging.Filter):
 
     Adds user identification and source IP information to log records
     for comprehensive audit trails and security monitoring.
-
-    Attributes:
-        Inherits all attributes from logging.Filter.
     """
 
     def filter(self, record: Any) -> bool:
@@ -29,6 +26,11 @@ class LoggingFilter(logging.Filter):
         Adds source_ip and user attributes to log records for comprehensive
         audit trails and security monitoring.
 
+        When no request is available, source_ip and user are left untouched
+        if the record already carries them, since background jobs and bot
+        handlers pass a user id via the logger's extra instead of a request.
+        Otherwise they default to an empty source_ip and an "anonymous" user.
+
         Args:
             record (Any): The log record to enrich.
 
@@ -37,14 +39,11 @@ class LoggingFilter(logging.Filter):
         """
         request = getattr(record, "request", None) or RequestContext.get()
         if request:
-            # Record with request data
             record.source_ip = request.META.get("REMOTE_ADDR")
             record.user = "anonymous"
             if hasattr(request, "user") and request.user and request.user.id:
-                # Authenticated request
                 record.user = request.user.id
         else:
-            # Record without request data
             record.source_ip = record.source_ip if hasattr(record, "source_ip") else ""
             record.user = record.user if hasattr(record, "user") else "anonymous"
         return True
@@ -54,10 +53,14 @@ class LoggingEntity:
     """Mixin class providing logging capabilities to other classes.
 
     Provides a standardized logger instance for classes that need
-    logging functionality throughout the Rekono platform.
+    logging functionality throughout the Rekono platform. The logger is
+    the root logger rather than a per-class or per-module one, since
+    Rekono's logging configuration only attaches the LoggingFilter and
+    handlers to the "root" logger; %(module)s in the log format is what
+    identifies the origin of each record.
 
     Attributes:
-        logger (Logger): Python logger instance for this entity.
+        logger (Logger): Shared root logger instance, common to every class using this mixin.
 
     Example:
         ```python

@@ -32,13 +32,10 @@ class DefectDojoSettings(BaseEncrypted):
         Configure DefectDojo integration:
 
         ```python
-        defectdojo_config = DefectDojoSettings.objects.create(
-            server="https://defectdojo.company.com",
-            secret="your_api_token_here",
-            tls_validation=True,
-            tag="rekono",
-            date_format="%Y-%m-%d"
-        )
+        settings = DefectDojoSettings.objects.first()
+        settings.server = "https://defectdojo.company.com"
+        settings.secret = "your_api_token_here"
+        settings.save()
         ```
     """
 

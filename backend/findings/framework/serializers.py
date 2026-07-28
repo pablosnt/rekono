@@ -1,8 +1,9 @@
 """Base serializer classes for findings framework REST API.
 
-Provides foundational serializer classes including FindingSerializer and
-TriageFindingSerializer that all specific finding serializers inherit from
-with standardized functionality for execution history and status tracking.
+Provides foundational serializer classes including FindingSerializer,
+HacktricksFindingSerializer, and TriageFindingSerializer that specific finding
+serializers inherit from for standardized execution history, HackTricks
+documentation links, and triage status tracking.
 """
 
 from typing import Any

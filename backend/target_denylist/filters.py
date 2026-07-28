@@ -13,15 +13,16 @@ class TargetDenylistFilter(FilterSet):
     """Filter class for TargetDenylist model queries.
 
     Provides filtering options for target denylist API endpoints including
-    exact matching for target patterns and default status filtering.
+    exact and partial, case-insensitive text search on target patterns, plus
+    exact matching on the default status flag.
     """
 
     class Meta:
         """Meta configuration for TargetDenylistFilter.
 
         Attributes:
-            model (type): TargetDenylist model class.
-            fields (dict): Available filter fields with their supported operations.
+            model (Model): The TargetDenylist model to filter.
+            fields (dict): Available filter fields and their lookup types.
         """
 
         model = TargetDenylist

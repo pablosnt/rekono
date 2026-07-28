@@ -39,8 +39,11 @@ class CookieJWTAuthentication(JWTAuthentication):
 
         Checks the access-token cookie first. If the cookie is absent, delegates
         to the parent implementation which reads from the Authorization header.
-        If the cookie is present but the token is invalid, simplejwt raises
-        ``InvalidToken`` which Django REST Framework converts to a 401 response.
+        If the cookie is present, the token is validated and the associated user
+        is looked up. simplejwt raises ``InvalidToken`` for a malformed, expired,
+        or otherwise invalid token, and ``AuthenticationFailed`` if the token has
+        no user identifier or the user cannot be found or is inactive; both are
+        converted to a 401 response by Django REST Framework.
 
         Args:
             request: The incoming HTTP request.
@@ -50,7 +53,8 @@ class CookieJWTAuthentication(JWTAuthentication):
                 or None if no credential is present.
 
         Raises:
-            InvalidToken: If the cookie token fails validation.
+            InvalidToken: If the cookie token is malformed, expired, or otherwise invalid.
+            AuthenticationFailed: If the token's user cannot be resolved or is inactive.
         """
         raw_token = request.COOKIES.get(settings.JWT_ACCESS_COOKIE)
         if raw_token is None:

@@ -19,7 +19,7 @@ class TargetDenylist(BaseModel):
     default entries and user-defined custom exclusions with proper validation.
 
     Attributes:
-        target (TextField): The target pattern to exclude (max 100 characters)
+        target (TextField): Unique target pattern to exclude (max 100 characters)
         default (BooleanField): Whether this is a default system entry (read-only)
         blocked (IntegerField): Number of times this entry has denied a target (read-only)
 
@@ -36,7 +36,6 @@ class TargetDenylist(BaseModel):
 
     target = models.TextField(unique=True, max_length=100, validators=[Validator(Regex.TARGET_REGEX)])
     default = models.BooleanField(default=False)
-    # TODO: Manage this information well on migration time, otherwise, they will be resetted to 0 on each migrate execution
     blocked = models.IntegerField(default=0)
 
     def __str__(self) -> str:

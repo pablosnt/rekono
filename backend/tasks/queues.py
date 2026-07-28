@@ -77,7 +77,7 @@ class PlanJob:
         """Add a RQ job to this plan job.
 
         Args:
-            dependency (Job): The RQ Job object to associate with this plan job
+            job (Job): The RQ Job object to associate with this plan job
         """
         self.jobs.append(job)
 
@@ -85,7 +85,7 @@ class PlanJob:
         """Check equality based on step ID.
 
         Args:
-            other (Any): Object to compare with
+            other (object): Object to compare with
 
         Returns:
             bool: True if both have the same step ID
@@ -240,10 +240,9 @@ class TasksQueue(BaseScanQueue):
         Args:
             task (Task): The process task to process
         """
-        # Create execution plan for multi-step process with dependency management
         plan: list[PlanJob] = []
         # Order steps by stage, input complexity, output complexity, and configuration ID
-        # This ensures proper execution order where simpler tools run before complex ones
+        # so that simpler tools are planned before the more complex ones depending on their output
         steps = (
             task.process.steps.filter(configuration__deprecated=False)
             .annotate(
@@ -253,45 +252,37 @@ class TasksQueue(BaseScanQueue):
             .order_by("configuration__stage", "max_input", "max_output", "configuration__id")
         )
         executions_queue = ExecutionsQueue()
-        # Build dependency graph for each step in the process
         for step in steps:
             item = PlanJob(step)
-            # Only include steps that can be executed at the current task intensity level
             if Intensity.objects.filter(tool=step.configuration.tool, value__lte=task.intensity).exists():
-                # Check dependencies against all previously planned jobs
-                # A dependency exists when a previous job's output matches this job's input type
+                # A dependency exists when a previously planned job's output type matches this job's input type
                 for execution_job in plan:
                     for output in execution_job.outputs:
                         if output in item.inputs:
-                            # Add dependency to ensure proper execution order
                             if execution_job not in item.dependencies:
                                 item.add_dependency(execution_job)
-                            break  # One matching output type is sufficient for dependency
+                            break  # One matching output type is enough to establish the dependency
                 plan.append(item)
             else:
-                # Skip tools that cannot run at the specified intensity level
+                # The step is never planned or enqueued, but a SKIPPED execution is still
+                # created for it so the process history shows every step and why it didn't run
                 Execution.objects.create(
                     task=task,
                     configuration=step.configuration,
                     status=Status.SKIPPED,
                     skipped_reason=f"Tool {step.configuration.tool.name} can't be executed with intensity {IntensityValue(task.intensity).name.capitalize()}",
                 )
-        # Execute the planned jobs with proper dependency management
         for execution_job in plan:
-            # Calculate execution parameters for this step's configuration
             executions = TasksQueue.calculate_executions(
                 execution_job.step.configuration,
-                [],  # No findings from previous steps yet (will be resolved by dependencies)
+                [],  # No findings from previous steps yet; those become available once dependencies run
                 task.get_scoped_target_ports(),
                 task.input_vulnerabilities.all(),
                 task.input_technologies.all(),
                 task.wordlists.all(),
             )
-            # Create and enqueue execution jobs for each parameter combination
             for parameters in executions:
                 execution = Execution.objects.create(task=task, configuration=execution_job.step.configuration)
-                # Enqueue execution with dependencies from all prerequisite jobs
-                # Dependencies ensure this execution waits for required inputs to be available
                 execution_job.add_job(
                     executions_queue.enqueue(
                         execution,
@@ -300,7 +291,7 @@ class TasksQueue(BaseScanQueue):
                         parameters.input_vulnerabilities,
                         parameters.input_technologies,
                         parameters.wordlists,
-                        # Flatten all dependency job lists into a single dependency list
+                        # Flatten the dependency jobs of every prerequisite PlanJob into one list
                         dependencies=sum([d.jobs for d in execution_job.dependencies], []),
                     )
                 )

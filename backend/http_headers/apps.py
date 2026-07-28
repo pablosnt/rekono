@@ -1,7 +1,7 @@
-"""Django app configuration for HTTP headers module.
+"""Django app configuration for the http_headers module.
 
-Provides app configuration with fixture loading capabilities
-for HTTP headers management in the Rekono platform.
+Configures the http_headers Django application with BaseApp integration
+for consistent framework behavior.
 """
 
 from django.apps import AppConfig
@@ -10,10 +10,10 @@ from framework.apps import BaseApp
 
 
 class HttpHeadersConfig(BaseApp, AppConfig):
-    """Django app configuration for HTTP headers module.
+    """Configuration class for the http_headers Django application.
 
-    Inherits from BaseApp to provide automatic fixture loading
-    capabilities for initial HTTP header data population.
+    Extends BaseApp to provide standard framework integration for the
+    http_headers module with consistent configuration and behavior.
 
     Attributes:
         name (str): Django app name identifier

@@ -1,6 +1,6 @@
-"""Django admin interface configuration for project models.
+"""Django admin configuration for project models.
 
-Registers project models with Django admin interface for administrative
+Registers the Project model with the Django admin interface for administrative
 management and debugging of project-related data.
 """
 

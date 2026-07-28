@@ -14,8 +14,6 @@ from api_tokens.serializers import ApiTokenSerializer, CreateApiTokenSerializer
 from framework.views import BaseViewSet
 from security.authentication.jwt import CookieJWTAuthentication
 
-# Create your views here.
-
 
 class ApiTokenViewSet(BaseViewSet):
     """ViewSet for managing API tokens for the authenticated user.
@@ -39,7 +37,7 @@ class ApiTokenViewSet(BaseViewSet):
     serializer_class = ApiTokenSerializer
     filterset_class = ApiTokenFilter
     permission_classes = [IsAuthenticated]
-    # Needed to disallow API token management by an user authenticated with an API token
+    # Needed to disallow API token management by a user authenticated with an API token
     authentication_classes = [CookieJWTAuthentication]
     http_method_names = ["get", "post", "delete"]
     search_fields = ["name"]

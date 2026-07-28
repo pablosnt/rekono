@@ -34,13 +34,14 @@ class BaseEncryptionKeyCommand(LoggingEntity):
 
     @property
     def current_encryptor(self) -> Crypto:
-        """Get the current encryption key validator.
+        """Get the Crypto instance for the current encryption key.
 
-        Returns a Crypto instance configured with the current encryption key.
-        Validates that an encryption key is configured before proceeding.
+        Reads the encryption key from the Rekono configuration file and validates
+        that one is configured before constructing the Crypto instance, since
+        Crypto requires a valid key to encrypt or decrypt.
 
         Returns:
-            Crypto: Configured crypto instance for current key.
+            Crypto: Crypto instance configured with the current encryption key.
 
         Raises:
             SystemExit: If no encryption key is configured.
@@ -88,19 +89,21 @@ class BaseEncryptionKeyCommand(LoggingEntity):
             2. Identify models with encrypted fields
             3. Process each encrypted value through the transformation pipeline
             4. Update the database with the new encrypted values
-            5. Update the system encryption key configuration
+            5. Write new_encryption_key to the Rekono configuration file, or clear the
+               configured encryption key entirely when new_encryption_key is None
 
         Args:
             new_value_processor (Callable): Function to process values with new key.
             old_value_processor (Callable): Function to process values with old key.
-            new_encryption_key (str | None): New encryption key to configure.
+            new_encryption_key (str | None): Encryption key to store in the configuration
+                file, or None to remove the configured encryption key.
         """
         for model in apps.get_models():
             if not issubclass(model, BaseEncrypted):
                 continue
             for entity in model.objects.all():
                 encrypted_value = getattr(entity, entity._encrypted_field)
-                if encrypted_value:
+                if encrypted_value:  # Empty values are skipped, since there is nothing to decrypt or re-encrypt
                     setattr(
                         entity,
                         entity._encrypted_field,

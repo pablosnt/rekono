@@ -1,7 +1,7 @@
 """Django REST framework views for integration management.
 
-Provides REST API endpoints for managing third-party integrations.
-Includes ViewSets for read-only operations and enabling/disabling integrations.
+Provides REST API endpoints for managing third-party integrations, including
+read operations and enabling or disabling individual integrations.
 """
 
 from rest_framework.permissions import IsAuthenticated

@@ -1,9 +1,8 @@
 """VirusTotal threat intelligence platform integration for host reputation analysis.
 
-This module provides the core integration class for the VirusTotal threat intelligence
-platform, enabling real-time reputation analysis, malware detection, and threat
-assessment for discovered hosts and domains. The integration automatically processes
-Host findings to enrich them with comprehensive threat intelligence data.
+Provides the VirusTotal integration class, which enriches Host findings on public IP
+addresses or domains with reputation scores, analysis engine detection counts, and
+WHOIS data retrieved from the VirusTotal API.
 """
 
 from typing import Any, Callable
@@ -17,24 +16,22 @@ from targets.models import Target
 
 
 class VirusTotal(BaseIntegration):
-    """VirusTotal threat intelligence platform integration.
+    """Integration class for VirusTotal threat intelligence platform.
 
-    Provides comprehensive integration with the VirusTotal API for real-time
-    threat intelligence gathering, reputation analysis, and malware detection
-    for discovered hosts and domains. Automatically enriches Host findings
-    with reputation scores, voting data, and WHOIS information.
+    Extends BaseIntegration to enrich Host findings with reputation scores, analysis
+    engine detection counts, and WHOIS data retrieved from the VirusTotal API. Only
+    hosts on a public IP are processed, since a host on a private network could carry
+    an internal address or hostname that must not be sent to VirusTotal.
+
+    Processing Features:
+        - Reputation score and analysis engine detection counts (malicious, suspicious, total)
+        - WHOIS data enrichment for domain investigation
+        - Availability gated on the configured API key, cached in the database and
+          refreshed only when the platform settings are saved
 
     Attributes:
         finding_types (list): Supported finding types (Host only)
         url (str): VirusTotal API v3 base endpoint URL
-
-    Features:
-        - Real-time reputation analysis for IP addresses and domains
-        - Malicious/harmless vote data collection for risk assessment
-        - WHOIS data enrichment for domain investigation
-        - Public IP address threat intelligence gathering
-        - Automated finding processing with error handling
-        - Rate limiting compliance with VirusTotal API restrictions
     """
 
     finding_types = [Host]
@@ -52,22 +49,27 @@ class VirusTotal(BaseIntegration):
     def is_available(self) -> bool:
         """Check if the VirusTotal platform is available and accessible.
 
-        Returns the availability status stored in the database, which is updated
-        each time the platform settings are saved.
+        Returns the cached availability flag stored on VirusTotalSettings.is_available.
+        This flag defaults to False and is only refreshed by
+        VirusTotalSettingsSerializer.update, so it reflects the last live check performed
+        when the settings were saved through the API, not necessarily the current live
+        status. When no API key has ever been configured, the flag stays False and
+        process_findings skips this integration without ever calling the VirusTotal API.
 
         Returns:
-            bool: True if the platform is available and accessible, False otherwise.
+            bool: True if the platform was available at the last settings update, False otherwise.
         """
         return self.settings.is_available
 
     def live_is_available(self) -> bool:
-        """Check if the VirusTotal platform is available and accessible.
+        """Check live connectivity to the VirusTotal API.
 
-        Validates platform connectivity by checking for valid API credentials
-        and performing a test API request to the VirusTotal service.
+        Returns False immediately when no API key is configured, without making any
+        request. Otherwise performs a test request for a well-known public IP address
+        (Google's public DNS) and returns whether it succeeds.
 
         Returns:
-            bool: True if the platform is available and accessible, False otherwise.
+            bool: True if an API key is configured and the test request succeeds, False otherwise.
         """
         if self.settings.secret is None:
             return False
@@ -80,14 +82,14 @@ class VirusTotal(BaseIntegration):
     def _request(
         self, method: Callable, url: str, json: bool = True, trigger_exception: bool = True, **kwargs: Any
     ):  # pragma: no cover
-        """Make authenticated HTTP request to VirusTotal API.
+        """Make an HTTP request to the VirusTotal API with the API key attached.
 
-        Constructs and executes authenticated HTTP requests to the VirusTotal API
-        with proper headers, authentication, and error handling.
+        Prefixes the given path with the VirusTotal base URL and delegates to
+        BaseIntegration._request, adding the "x-apikey" header with the configured secret.
 
         Args:
             method (Callable): HTTP method to use (GET, POST, etc.)
-            url (str): API endpoint URL relative to base URL
+            url (str): API endpoint path relative to the VirusTotal base URL
             json (bool): Whether to parse response as JSON. Defaults to True.
             trigger_exception (bool): Whether to raise exceptions on errors. Defaults to True.
             **kwargs: Additional keyword arguments passed to the request method
@@ -123,9 +125,11 @@ class VirusTotal(BaseIntegration):
     def _process_finding(self, execution: Execution, finding: Host) -> None:
         """Process a Host finding by enriching it with VirusTotal threat intelligence.
 
-        Queries the VirusTotal API to gather threat intelligence data for the
-        given Host finding, including reputation scores, voting data, and WHOIS
-        information. Updates the finding with the collected intelligence data.
+        Queries the VirusTotal API by domain when the host has one, otherwise by IP
+        address, and updates the finding with the reputation score, analysis engine
+        detection counts (malicious, suspicious, and total), and WHOIS data from the
+        response. Any failure is caught and logged here so it never interrupts the
+        processing of the other findings from the same execution.
 
         Args:
             execution (Execution): The execution that produced the finding

@@ -1,7 +1,7 @@
 """Django management commands for security operations.
 
-Provides Django management commands for security-related operations including
-encryption key lifecycle management, database security operations, and
-administrative security tasks. These commands enable secure deployment
-and maintenance of the Rekono platform.
+Provides Django management commands for encryption key lifecycle management,
+covering setup, rotation, and removal of the key used to encrypt sensitive
+data in the database. These commands enable secure deployment and
+maintenance of the Rekono platform.
 """

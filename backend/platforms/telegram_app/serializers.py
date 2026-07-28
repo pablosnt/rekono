@@ -27,9 +27,10 @@ class TelegramSettingsSerializer(ModelSerializer):
 
     Attributes:
         token (ProtectedSecretField): Encrypted Bot API token field with validation
-        bot (SerializerMethodField): Read-only bot name information
+        bot (SerializerMethodField): Read-only bot username
         is_available (SerializerMethodField): Bot availability status check
-        client (Telegram): Telegram client instance for status checks
+        client (Telegram): Property that builds and initializes a fresh Telegram client,
+            bound to the current settings, on every access
     """
 
     token = ProtectedSecretField(required=False, allow_null=True, source="secret")
@@ -63,15 +64,15 @@ class TelegramSettingsSerializer(ModelSerializer):
         return client
 
     def get_bot(self, instance: TelegramSettings) -> str | None:
-        """Get the Telegram Bot name from the client.
+        """Get the Telegram Bot username from the client.
 
-        Initializes the client and retrieves the bot name from the Telegram API.
+        Initializes the client and retrieves the bot username from the Telegram API.
 
         Args:
             instance (TelegramSettings): The settings instance being serialized.
 
         Returns:
-            str | None: The Bot name if available, None otherwise.
+            str | None: The Bot username if available, None otherwise.
         """
         return self.client.bot_name
 

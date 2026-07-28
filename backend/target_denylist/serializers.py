@@ -12,8 +12,9 @@ from target_denylist.models import TargetDenylist
 class TargetDenylistSerializer(ModelSerializer):
     """Serializer for TargetDenylist model.
 
-    Handles serialization of target denylist entries with read-only protection
-    for the default field to prevent unauthorized modification of system entries.
+    Handles serialization of target denylist entries. The default and blocked
+    fields are read-only via the API: default marks system-provided entries
+    and blocked is a counter maintained internally by the target validator.
     """
 
     class Meta:

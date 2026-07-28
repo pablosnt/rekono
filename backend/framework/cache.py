@@ -2,7 +2,7 @@
 
 Provides the Cache class, a small key-value wrapper around the Redis
 connection already managed by RQ. Callers instantiate one Cache per purpose
-(e.g. BaseInput.url_cache) rather than sharing a single global instance.
+(e.g. BaseInput._url_cache) rather than sharing a single global instance.
 """
 
 from dataclasses import dataclass
