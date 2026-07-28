@@ -214,7 +214,7 @@ class UserViewSet(BaseViewSet):
         serializer.save()
         return Response(status=status.HTTP_200_OK)
 
-    @extend_schema(request=UpdateRoleSerializer, responses={201: UserSerializer})
+    @extend_schema(request=UpdateRoleSerializer, responses={200: UserSerializer})
     def update(self, request, pk: str, *args, **kwargs):
         """Update user role assignment.
 
