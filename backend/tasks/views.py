@@ -120,7 +120,7 @@ class TaskViewSet(BaseViewSet):
         task.save(update_fields=["end"])
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @extend_schema(request=None, responses={200: TaskSerializer})
+    @extend_schema(request=None, responses={201: TaskSerializer})
     @action(detail=True, methods=["POST"])
     def repeat(self, request: Request, pk: str) -> Response:
         """Create a duplicate task for re-execution.
