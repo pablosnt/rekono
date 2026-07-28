@@ -53,14 +53,14 @@ class UsersConfig(BaseApp, AppConfig):
         group_model = kwargs["apps"].get_model(app_label="auth", model_name="group")
         permission_model = kwargs["apps"].get_model(app_label="auth", model_name="permission")
         groups = {}
-        permissions = {}
+        role_permissions = {}
         for role in Role.values:
             groups[role], _ = group_model.objects.get_or_create(name=role)
-            permissions[role] = []
+            role_permissions[role] = []
         for entity, permissions in ROLES.items():
             for permission, assigned_roles in permissions.items():
                 permission = permission_model.objects.get(codename=f"{permission}_{entity}")
                 for assigned_role in assigned_roles:
-                    permissions[assigned_role].append(permission)
-        for role, permissions in permissions.items():
+                    role_permissions[assigned_role.value].append(permission)
+        for role, permissions in role_permissions.items():
             groups[role].permissions.set(permissions)
