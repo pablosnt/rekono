@@ -217,7 +217,7 @@
     <Executions
       v-if="task"
       ref="executions"
-      :task="route.params.scan_id"
+      :task="task.id"
       @finished="
         findings.fetch();
         refreshPanelCounts();

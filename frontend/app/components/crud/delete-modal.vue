@@ -46,7 +46,7 @@ import type { CrudConfig } from "~/types/crud";
 
 const props = defineProps<{
   open: boolean;
-  item: Record<string, string | number | boolean | null>;
+  item?: Record<string, string | number | boolean | null> | null;
   config: CrudConfig;
   api: typeof useApi;
 }>();
@@ -58,6 +58,7 @@ const emit = defineEmits<{
 const loading = ref(false);
 
 function remove() {
+  if (!props.item) return;
   loading.value = true;
   (props.config.deleteEndpoint
     ? useApi("", true).remove(
