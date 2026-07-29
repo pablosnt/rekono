@@ -58,8 +58,8 @@ const config: CrudConfig<TargetDenylist> = reactive({
   filters: [],
   ordering: ["id", "target", "default", "blocked"],
   defaultOrdering: "-blocked,-id",
-  pageSize: 5,
-  pageSizeOptions: [5, 25, 50, 100],
+  pageSize: 10,
+  pageSizeOptions: [10, 25, 50, 100],
   formFields: [
     {
       key: "target",
