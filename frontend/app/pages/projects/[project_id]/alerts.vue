@@ -103,7 +103,7 @@ const config: CrudConfig<Alert> = reactive({
   canRead: true,
   canCreate: true,
   canEdit: canEdit,
-  canDelete: canDelete,
+  canDelete: canModify,
 });
 
 onMounted(() => {
@@ -120,11 +120,11 @@ function canEdit(alert: Alert): boolean {
   return (
     field &&
     field !== "trending" &&
-    (userStore.is_admin || alert.owner?.id === userStore.user)
+    canModify(alert)
   );
 }
 
-function canDelete(alert: Alert): boolean {
+function canModify(alert: Alert): boolean {
   return userStore.is_admin || alert.owner?.id === userStore.user;
 }
 
@@ -137,22 +137,22 @@ function getActions(item: Alert, onEdit: () => void, onDelete: () => void) {
       onSelect: onEdit,
     });
   }
-  if (item.enabled) {
-    actions.push({
-      label: "Disable",
-      icon: "i-lucide-x-circle",
-      color: "warning",
-      onSelect: () => toggleEnable(item),
-    });
-  } else {
-    actions.push({
-      label: "Enable",
-      icon: "i-lucide-check-circle",
-      color: "success",
-      onSelect: () => toggleEnable(item),
-    });
-  }
-  if (canDelete(item)) {
+  if (canModify(item)) {
+    if (item.enabled) {
+      actions.push({
+        label: "Disable",
+        icon: "i-lucide-x-circle",
+        color: "warning",
+        onSelect: () => toggleEnable(item),
+      });
+    } else {
+      actions.push({
+        label: "Enable",
+        icon: "i-lucide-check-circle",
+        color: "success",
+        onSelect: () => toggleEnable(item),
+      });
+    }
     actions.push({
       label: "Delete",
       icon: "i-lucide-trash",

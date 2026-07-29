@@ -51,7 +51,7 @@
         "
         size="xl"
       >
-        <template v-if="userStore.is_admin" #actions>
+        <template v-if="userStore.is_auditor" #actions>
           <TasksButton
             label="Scan"
             not-rounded
