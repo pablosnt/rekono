@@ -198,11 +198,13 @@ const config: CrudConfig<Execution> = reactive({
           },
           {
             default: () =>
-              h(resolveComponent("UIcon"), {
-                name: status?.icon,
-                class: `text-lg text-${status?.color}${isRunning ? " animate-spin" : ""}`,
-                "aria-label": row.original.status,
-              }),
+              h("span", { class: "inline-flex items-center" }, [
+                h(resolveComponent("UIcon"), {
+                  name: status?.icon,
+                  class: `text-lg text-${status?.color}${isRunning ? " animate-spin" : ""}`,
+                }),
+                h("span", { class: "sr-only" }, row.original.status),
+              ]),
           },
         );
       },

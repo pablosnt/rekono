@@ -235,13 +235,18 @@ const config: CrudConfig<Finding> = reactive({
                                 src: s.icon,
                                 size: "sm",
                                 alt: s.name,
-                                "aria-label": s.name,
                               })
-                            : h(resolveComponent("UIcon"), {
-                                name: "i-lucide-square-terminal",
-                                "aria-label": s.name,
-                                class: "text-xl text-primary",
-                              }),
+                            : h(
+                                "span",
+                                { class: "inline-flex items-center" },
+                                [
+                                  h(resolveComponent("UIcon"), {
+                                    name: "i-lucide-square-terminal",
+                                    class: "text-xl text-primary",
+                                  }),
+                                  h("span", { class: "sr-only" }, s.name),
+                                ],
+                              ),
                       },
                     ),
                 },
