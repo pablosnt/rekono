@@ -36,39 +36,43 @@ class GitleaksTest(ParserTest, TestCase):
                 {"model": Vulnerability, "name": "Exposed git repository", "severity": Severity.HIGH},
                 {
                     "model": Credential,
-                    "secret": 'token: "7f9cc25de23d1a255720b0ae4551f4044d600f46"',
-                    "context": "/.git/ : hub -> Line 4",
+                    "secret": "7f9cc25de23d1a255720b0ae4551f4044d600f46",
+                    "context": "/.git/ : 'token: \"7f9cc25de23d1a255720b0ae4551f4044d600f46\"' detected by rule generic-api-key in hub:4",
                 },
                 {
                     "model": Credential,
                     "email": "git@asdf.com",
                     "context": "/.git/ : Git contributor with name ASDF",
                 },
-                {"model": Credential, "secret": "xoxp-858723095049", "context": "/.git/ : .bash_profile -> Line 23"},
                 {
                     "model": Credential,
-                    "secret": "API_TOKEN='51e61afee2c2667123fc9ed160a0a20b330c8f74'",
-                    "context": "/.git/ : .bash_profile -> Line 22",
+                    "secret": "xoxp-858723095049",
+                    "context": "/.git/ : 'xoxp-858723095049' detected by rule slack-access-token in .bash_profile:23",
                 },
                 {
                     "model": Credential,
-                    "secret": 'API_KEY="38c47f19e349153fa963bb3b3212fe8e-us11"',
-                    "context": "/.git/ : .bashrc -> Line 106",
+                    "secret": "51e61afee2c2667123fc9ed160a0a20b330c8f74",
+                    "context": "/.git/ : 'API_TOKEN='51e61afee2c2667123fc9ed160a0a20b330c8f74'' detected by rule generic-api-key in .bash_profile:22",
                 },
                 {
                     "model": Credential,
-                    "secret": 'TOKEN="c77e01c1e89682e4d4b94a059a7fd2b37ab326ed"',
-                    "context": "/.git/ : .bashrc -> Line 109",
+                    "secret": "38c47f19e349153fa963bb3b3212fe8e-us11",
+                    "context": "/.git/ : 'API_KEY=\"38c47f19e349153fa963bb3b3212fe8e-us11\"' detected by rule generic-api-key in .bashrc:106",
+                },
+                {
+                    "model": Credential,
+                    "secret": "c77e01c1e89682e4d4b94a059a7fd2b37ab326ed",
+                    "context": "/.git/ : 'TOKEN=\"c77e01c1e89682e4d4b94a059a7fd2b37ab326ed\"' detected by rule generic-api-key in .bashrc:109",
                 },
                 {
                     "model": Credential,
                     "secret": "-----BEGIN RSA PRIVATE KEY-----",
-                    "context": "/.git/ : .ssh/id_rsa -> Line 1",
+                    "context": "/.git/ : '-----BEGIN RSA PRIVATE KEY-----' detected by rule RSA-PK in .ssh/id_rsa:1",
                 },
                 {
                     "model": Credential,
                     "secret": "-----BEGIN PRIVATE KEY-----",
-                    "context": "/.git/ : misc-keys/cert-key.pem -> Line 1",
+                    "context": "/.git/ : '-----BEGIN PRIVATE KEY-----' detected by rule PKCS8-PK in misc-keys/cert-key.pem:1",
                 },
             ],
             executor_attributes={
@@ -128,6 +132,11 @@ class GitleaksTest(ParserTest, TestCase):
         )
         credentials = [finding for finding in parser.findings if isinstance(finding, Credential)]
         self.assertEqual(1, len(credentials))
+        self.assertEqual("hunter2", credentials[0].secret)
+        self.assertEqual(
+            "/.git/ : 'password = hunter2' detected by rule generic-api-key in config.env:7",
+            credentials[0].context,
+        )
 
     def test_orphan_credential_falls_back_to_git_technology(self) -> None:
         executor = self.execution.configuration.tool.executor_class(self.execution)

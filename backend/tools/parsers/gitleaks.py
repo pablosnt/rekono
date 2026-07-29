@@ -82,13 +82,13 @@ class Gitleaks(BaseParser):
                 return
             emails = set()
             for finding in data:
-                # Match is the full matched text, for example token: "...", rather than the tool's
-                # own Secret field, which holds only the isolated token. Match is stored as-is,
-                # so the credential keeps the surrounding syntax and is not redacted.
+                # Secret holds only the isolated token, so it is stored as the credential secret.
+                # Match, the full matched text including the surrounding syntax, for example
+                # token: "...", is kept in the context together with the rule that detected it.
                 self.create_finding(
                     Credential,
-                    secret=finding.get("Match"),
-                    context=f"/.git/ : {finding.get('File')} -> Line {finding.get('StartLine')}",
+                    secret=finding.get("Secret"),
+                    context=f"/.git/ : '{finding.get('Match')}' detected by rule {finding.get('RuleID')} in {finding.get('File')}:{finding.get('StartLine')}",
                 )
                 # Email and Author are not present on every GitLeaks match, so both are coerced
                 # to empty strings before being used
