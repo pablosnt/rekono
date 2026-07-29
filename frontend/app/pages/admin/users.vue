@@ -118,6 +118,7 @@ const config: CrudConfig<User> = reactive({
   entityName: "User",
   entityNamePlural: "Users",
   createLabel: "Invite",
+  createVerb: "invited",
   icon: "i-lucide-users",
   useGrid: true,
   searchable: true,

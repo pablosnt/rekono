@@ -116,6 +116,7 @@ export interface CrudConfig<T = unknown> {
   createForm?: object;
   updateOnCreateModalOpen?: boolean;
   createLabel?: string;
+  createVerb?: string;
   onCreation?: (data: Record<string, unknown>) => void;
   editFormFields?: FormField[];
   editFormSchema?: z.ZodType;

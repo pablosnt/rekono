@@ -356,7 +356,7 @@ function save() {
           {},
           entityName,
         )
-    : props.api.create("", data, {}, entityName);
+    : props.api.create("", data, {}, entityName, null, props.config.createVerb);
   request
     .then((response) => {
       emit("submit", response);
