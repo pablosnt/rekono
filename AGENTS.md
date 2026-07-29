@@ -26,7 +26,7 @@ Offensive security platform that automates attack surface discovery and vulnerab
 ### Backend
 
 - `uvx ruff format`: Format the backend code with the `ruff` formatter
-- `uvx ruff check --fix`: Fix `ruff` style issues
+- `uvx ruff==0.15.22 check --fix`: Fix `ruff` style issues
 - `uvx ruff check --select I --fix`: Fix `ruff` style issues on imports. Requires to be executed independently of the previous one
 - `uvx flake8 .`: Runs Flake8 linter to detect code style issues
 - `uvx pytype --disable "import-error,pyi-error,invalid-annotation" --keep-going --jobs 100 .`: Runs PyType to identify Python typing issues. Don't execute this on local as its execution takes long time, and we run it on CI/CD too

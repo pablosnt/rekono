@@ -7,13 +7,11 @@ This command is essential for regular security maintenance and compliance.
 
 from typing import Any
 
-from django.core.management.base import BaseCommand
-
 from rekono.settings import CONFIG
 from security.management.commands.encryption_key import BaseEncryptionKeyCommand
 
 
-class Command(BaseCommand, BaseEncryptionKeyCommand):
+class Command(BaseEncryptionKeyCommand):
     """Django management command to rotate database encryption keys.
 
     Performs secure key rotation by decrypting all sensitive data with the
@@ -22,20 +20,20 @@ class Command(BaseCommand, BaseEncryptionKeyCommand):
 
     Security Process:
         1. Validates current encryption key is configured
-        2. Generates a new cryptographically secure encryption key
-        3. Decrypts all sensitive data using the current key
-        4. Re-encrypts all data using the new key
-        5. Updates the configuration with the new key
-        6. Logs successful completion for audit trails
+        2. Warns about database backups and asks for confirmation
+        3. Generates a new cryptographically secure encryption key
+        4. Shows the new encryption key in the terminal
+        5. Decrypts all sensitive data using the current key
+        6. Re-encrypts all data using the new key
+        7. Updates the configuration with the new key
+        8. Logs successful completion for audit trails
 
-    Each value is saved to the database as soon as it has been decrypted with
-    the current key and re-encrypted with the new one, but the configuration
-    file is only updated with the new key after every encrypted value has been
-    processed. If the command is interrupted before it finishes, the values
-    processed so far are already encrypted with the new key while the
-    configuration still holds the old one, leaving the database in a mixed state
-    that the command cannot repair on a later run, because it would then try to
-    decrypt those values with the old key.
+    All the values are re-encrypted within a single database transaction, so an
+    interrupted rotation leaves every value encrypted with the current key, which
+    is still the one stored in the configuration file. The new key is only written
+    to the configuration file once that transaction has been committed, and it is
+    shown in the terminal beforehand, so the sensitive data can still be recovered
+    by hand if that last write fails.
 
     Usage:
         python manage.py rotate_encryption_key
@@ -44,7 +42,7 @@ class Command(BaseCommand, BaseEncryptionKeyCommand):
         - Processes all encrypted fields in the database
         - May take considerable time for large datasets
         - Recommended to run during maintenance windows
-        - Database backup recommended before rotation
+        - Database backup required before rotation
 
     Attributes:
         help (str): Django management command help text describing the operation.
@@ -58,13 +56,28 @@ class Command(BaseCommand, BaseEncryptionKeyCommand):
         Decrypts all encrypted data with the current key and re-encrypts
         it with a newly generated key, updating the system configuration.
 
+        The new key is written to the standard output, and never to the logs, so
+        it isn't stored in any log file. It is shown before the rotation starts,
+        so it is available to recover the sensitive data by hand if the new key
+        can't be written to the configuration file once the data has been
+        re-encrypted with it.
+
         Args:
             *args (Any): Positional arguments from Django command framework.
             **options (Any): Keyword arguments from Django command framework.
 
         Raises:
-            SystemExit: If no current encryption key is configured.
+            SystemExit: If no current encryption key is configured or the rotation isn't confirmed.
         """
+        # Current key is checked before generating a new one, to avoid showing a key that won't be used
+        current_decryptor = self.current_encryptor.decrypt
+        super().handle(*args, **options)
         new_encryptor, new_encryption_key = self.new_encryptor()
-        self.rotate_encrypted_values(new_encryptor.encrypt, self.current_encryptor.decrypt, new_encryption_key)
-        self.logger.info(f"Encryption key has been rotated in {CONFIG.config_file}")
+        self.stdout.write(f"New encryption key: {new_encryption_key}")
+        self.stdout.write(
+            self.style.NOTICE(
+                "If the rotation fails after this point, use it to recover the data lost during the process\n"
+            )
+        )
+        self.rotate_encrypted_values(new_encryptor.encrypt, current_decryptor, new_encryption_key)
+        self.stdout.write(self.style.SUCCESS(f"Encryption key has been rotated in {CONFIG.config_file}"))
