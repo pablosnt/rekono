@@ -27,7 +27,6 @@
 </template>
 
 <script setup lang="ts">
-import { h } from "vue";
 import type { CrudConfig, CrudTableColumn, FilterOption } from "~/types/crud";
 import type { Task } from "~/types/models";
 import { useUserStore } from "~/store/user";

@@ -179,7 +179,7 @@ const config: CrudConfig<Report> = reactive({
   pageSize: 25,
   pageSizeOptions: [25, 50, 100],
   defaultBody: { project: route.params.project_id },
-  createForm: resolveComponent("ReportsForm"),
+  createForm: markRaw(resolveComponent("ReportsForm")),
   deleteMessage: (report: Report) =>
     buildDeleteMessage(
       "report",

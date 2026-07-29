@@ -43,7 +43,6 @@
 </template>
 
 <script setup lang="ts">
-import { h, resolveComponent } from "vue";
 import { UTooltip, UButton, UIcon } from "#components";
 import type { CrudTableColumn } from "~/types/crud";
 import { severities } from "~/constants";

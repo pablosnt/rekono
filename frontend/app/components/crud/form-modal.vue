@@ -76,7 +76,6 @@
 </template>
 
 <script setup lang="ts">
-import { resolveComponent } from "vue";
 import type { CrudConfig } from "~/types/crud";
 
 const props = defineProps<{

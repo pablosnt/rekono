@@ -3,7 +3,6 @@
 </template>
 
 <script setup lang="ts">
-import { h, resolveComponent } from "vue";
 import type { CrudConfig, FilterOption } from "~/types/crud";
 import * as z from "zod";
 import { useUserStore } from "~/store/user";

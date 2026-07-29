@@ -1,6 +1,5 @@
 import type { Configuration, Finding, Tool, User } from "~/types/models";
 import { hostOS } from "~/constants";
-import { h } from "vue";
 import { UAvatar, UBadge, UIcon, UButton } from "#components";
 
 function valueCell(value?: string | number, extraClasses?: string) {

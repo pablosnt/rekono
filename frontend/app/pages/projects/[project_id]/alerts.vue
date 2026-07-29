@@ -97,8 +97,8 @@ const config: CrudConfig<Alert> = reactive({
   pageSize: 24,
   pageSizeOptions: [24, 50, 100],
   defaultBody: { project: route.params.project_id },
-  createForm: resolveComponent("AlertsForm"),
-  editForm: resolveComponent("AlertsForm"),
+  createForm: markRaw(resolveComponent("AlertsForm")),
+  editForm: markRaw(resolveComponent("AlertsForm")),
   deleteMessage: (alert: Alert) => buildDeleteMessage("alert", alert.item),
   canRead: true,
   canCreate: true,
@@ -117,11 +117,7 @@ function canEdit(alert: Alert): boolean {
   const field = alertItems.find(
     (definition) => definition.item === alert.item,
   )?.field;
-  return (
-    field &&
-    field !== "trending" &&
-    canModify(alert)
-  );
+  return field && field !== "trending" && canModify(alert);
 }
 
 function canModify(alert: Alert): boolean {

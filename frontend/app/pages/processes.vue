@@ -31,7 +31,6 @@
 </template>
 
 <script setup lang="ts">
-import { h, resolveComponent } from "vue";
 import type { CrudConfig, FilterOption } from "~/types/crud";
 import * as z from "zod";
 import { useUserStore } from "~/store/user";
@@ -205,9 +204,9 @@ const config: CrudConfig<Process> = reactive({
     tags: z.array(validation.name("tag", true, 100)).optional(),
   }),
   formFullscreen: true,
-  createForm: resolveComponent("ProcessesForm"),
+  createForm: markRaw(resolveComponent("ProcessesForm")),
   updateOnCreateModalOpen: true,
-  editForm: resolveComponent("ProcessesForm"),
+  editForm: markRaw(resolveComponent("ProcessesForm")),
   updateOnEditModalOpen: true,
   deleteMessage: (process: Process) =>
     buildDeleteMessage("process", process.name),

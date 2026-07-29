@@ -4,7 +4,6 @@
 
 <script setup lang="ts">
 import * as z from "zod";
-import { resolveComponent } from "vue";
 import { today, getLocalTimeZone } from "@internationalized/date";
 import type { CrudTableColumn } from "~/types/crud";
 import type { ApiToken } from "~/types/models";
@@ -71,7 +70,7 @@ const apiTokensConfig = ref({
         message: `Invalid expiration date`,
       }),
   }),
-  createForm: resolveComponent("ApiTokensForm"),
+  createForm: markRaw(resolveComponent("ApiTokensForm")),
   updateOnCreateModalOpen: true,
   deleteMessage: (token: ApiToken) =>
     buildDeleteMessage("API token", token.name),

@@ -202,7 +202,7 @@ const createProjectOpen = ref(false);
 const projectsConfig = reactive({
   endpoint: "/api/projects/",
   entityName: "Project",
-  createForm: resolveComponent("ProjectsForm"),
+  createForm: markRaw(resolveComponent("ProjectsForm")),
   formFields,
   formSchema,
   onCreation: (data: Record<string, unknown>) => {

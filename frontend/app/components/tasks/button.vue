@@ -66,7 +66,7 @@ const api = useApi("/api/tasks/");
 const breakpoints = useBreakpoints(breakpointsTailwind);
 const config = reactive({
   entityName: "Scan",
-  editForm: resolveComponent("TasksForm"),
+  editForm: markRaw(resolveComponent("TasksForm")),
   onCreation: (data: Record<string, unknown>) => {
     return navigateTo(`/projects/${data.target.project}/scans/${data.id}`);
   },

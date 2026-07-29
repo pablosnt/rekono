@@ -81,9 +81,14 @@ const baseItems = [
     icon: "i-simple-icons-telegram",
     value: "telegram-bot",
   },
-  { label: "Security", icon: "i-lucide-lock", value: "security" }
+  { label: "Security", icon: "i-lucide-lock", value: "security" },
 ];
-if (userStore.is_auditor) baseItems.push({ label: "HTTP Headers", icon: "i-lucide-globe", value: "http-headers" },)
+if (userStore.is_auditor)
+  baseItems.push({
+    label: "HTTP Headers",
+    icon: "i-lucide-globe",
+    value: "http-headers",
+  });
 const items = computed(() =>
   baseItems
     .filter((item) => item.value !== "telegram-bot" || isTelegramAvailable)

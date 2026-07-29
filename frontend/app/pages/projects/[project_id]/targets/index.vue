@@ -153,7 +153,7 @@ const config: CrudConfig<Target> = reactive({
   pageSize: 25,
   pageSizeOptions: [25, 50, 100],
   defaultBody: { project: route.params.project_id },
-  createForm: resolveComponent("TargetsForm"),
+  createForm: markRaw(resolveComponent("TargetsForm")),
   onCreation: (data: Record<string, unknown>) => {
     if (Array.isArray(data.targets) && data.targets.length === 1) {
       navigateTo(

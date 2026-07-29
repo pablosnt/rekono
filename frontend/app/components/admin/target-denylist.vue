@@ -3,7 +3,6 @@
 </template>
 
 <script setup lang="ts">
-import { h } from "vue";
 import type { CrudConfig } from "~/types/crud";
 import * as z from "zod";
 import { useUserStore } from "~/store/user";

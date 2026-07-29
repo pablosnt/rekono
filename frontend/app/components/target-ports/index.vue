@@ -48,7 +48,7 @@ const page = ref();
 const deleteAuthenticationOpen = ref(false);
 const addAuthenticationOpen = ref(false);
 const addAuthenticationConfig = ref({
-  editForm: resolveComponent("AuthenticationsForm"),
+  editForm: markRaw(resolveComponent("AuthenticationsForm")),
   entityName: "Authentication",
   endpoint: "/api/authentications/",
 });
@@ -123,7 +123,7 @@ const config: CrudConfig<TargetPort> = reactive({
     port: z.number().min(0).max(65535).optional(),
     path: validation.path("path", false, 100),
   }),
-  createForm: resolveComponent("TargetPortsForm"),
+  createForm: markRaw(resolveComponent("TargetPortsForm")),
   updateOnCreateModalOpen: true,
   canRead: true,
   canEdit: false,

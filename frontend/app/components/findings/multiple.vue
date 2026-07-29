@@ -65,7 +65,6 @@
 </template>
 
 <script setup lang="ts">
-import { h } from "vue";
 import type { CrudConfig, DropdownAction } from "~/types/crud";
 import { useUserStore } from "~/store/user";
 import { useIntegrationsStore } from "~/store/integrations";
