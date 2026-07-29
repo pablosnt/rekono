@@ -183,6 +183,9 @@ class BaseIntegration(BasePlatform):
         it once before processing the findings of an execution, so an unavailable integration
         is discarded before reaching this point.
 
+        Any failure is logged rather than propagated, so a caller processing a batch of
+        findings doesn't lose the remaining ones because this integration failed for one.
+
         Args:
             execution (Execution): The execution that generated the finding.
             finding (Finding): The finding to process.
@@ -190,7 +193,12 @@ class BaseIntegration(BasePlatform):
         # The finding type is checked first because it's the only check that doesn't query anything
         if not self.is_finding_processable(finding) or not self.is_enabled():
             return
-        self._process_finding(execution, finding)
+        try:
+            self._process_finding(execution, finding)
+        except Exception as ex:
+            self.logger.error(
+                f"[{self.__class__.__name__}] Error processing finding {finding.id} from execution {execution.id}: {str(ex)}"
+            )
 
     def process_findings(self, execution: Execution, findings: list[Finding]) -> None:
         """Process multiple findings from an execution.
@@ -198,8 +206,8 @@ class BaseIntegration(BasePlatform):
         Skips processing entirely when the integration is disabled or unavailable. This is
         the only place where availability is checked, once per execution, so the findings are
         processed without performing one live request to the external API per finding.
-        A failure while processing one finding is logged and does not stop the
-        remaining findings from being processed.
+        Failures affecting one finding are contained by process_finding, so they don't
+        stop the remaining findings from being processed.
 
         Args:
             execution (Execution): The execution that generated the findings.
@@ -208,12 +216,7 @@ class BaseIntegration(BasePlatform):
         if not self.is_enabled() or not self.is_available():
             return
         for finding in findings:
-            try:
-                self.process_finding(execution, finding)
-            except Exception as ex:
-                self.logger.error(
-                    f"[{self.__class__.__name__}] Error processing finding {finding.id} from execution {execution.id}: {str(ex)}"
-                )
+            self.process_finding(execution, finding)
 
 
 class BaseCveProvider(BaseIntegration):
@@ -314,14 +317,23 @@ class BaseCveProvider(BaseIntegration):
     def get_cve(self, cve: str) -> CveEnrichment | None:
         """Retrieve and parse CVE enrichment data from the provider.
 
+        A provider that fails for this CVE is logged and treated as having no data, so
+        the callers querying several providers still apply the data returned by the
+        others, and a provider outage never interrupts the findings processing.
+
         Args:
             cve (str): CVE identifier to enrich.
 
         Returns:
-            CveEnrichment | None: Parsed CVE data, or None if the provider returns nothing.
+            CveEnrichment | None: Parsed CVE data, or None if the provider returns
+                                  nothing or fails.
         """
-        data = self._get_cve(cve)
-        return self._parse_cve(cve, data) if data else None
+        try:
+            data = self._get_cve(cve)
+            return self._parse_cve(cve, data) if data else None
+        except Exception as ex:
+            self.logger.error(f"[{self.__class__.__name__}] Error getting {cve} data: {str(ex)}")
+            return None
 
     def cve_quality_score(self, data: CveEnrichment) -> int:
         """Calculate a data quality score for CVE enrichment data.
