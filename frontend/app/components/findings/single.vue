@@ -2,6 +2,7 @@
   <div class="space-y-5">
     <UPageCard
       v-if="!finding"
+      aria-hidden="true"
       variant="subtle"
       :ui="{ header: 'w-full', container: 'overflow-hidden' }"
     >
@@ -129,6 +130,7 @@
     </UPageCard>
     <template v-if="!finding">
       <slot name="custom-skeleton" />
+      <div class="sr-only" role="status">Loading finding</div>
     </template>
     <template v-else>
       <slot name="custom" />

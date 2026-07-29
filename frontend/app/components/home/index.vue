@@ -1,7 +1,11 @@
 <template>
   <div>
     <div v-if="loading">
-      <div class="relative isolate rounded-xl overflow-hidden bg-inverted">
+      <div class="sr-only" role="status">Loading dashboard</div>
+      <div
+        aria-hidden="true"
+        class="relative isolate rounded-xl overflow-hidden bg-inverted"
+      >
         <div
           class="flex flex-col items-center px-6 py-12 sm:px-12 sm:py-24 lg:px-16 lg:py-24"
         >
@@ -22,7 +26,10 @@
           </div>
         </div>
       </div>
-      <div class="mt-10 grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+      <div
+        aria-hidden="true"
+        class="mt-10 grid grid-cols-1 lg:grid-cols-2 gap-6 items-start"
+      >
         <UPageCard
           v-for="card in 2"
           :key="card"

@@ -1,5 +1,9 @@
 <template>
-  <CrudTable :config="skeletonConfig" :state="skeletonState" />
+  <CrudTable
+    aria-hidden="true"
+    :config="skeletonConfig"
+    :state="skeletonState"
+  />
 </template>
 
 <script setup lang="ts">

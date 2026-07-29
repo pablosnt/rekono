@@ -1,5 +1,5 @@
 <template>
-  <UPageGrid>
+  <UPageGrid aria-hidden="true">
     <UPageCard
       v-for="card in count"
       :key="card"

@@ -1,7 +1,9 @@
 <template>
   <div class="space-y-4 p-3">
     <template v-if="!currentProject">
+      <div class="sr-only" role="status">Loading project</div>
       <div
+        aria-hidden="true"
         class="flex flex-row flex-wrap items-center justify-between w-full gap-2"
       >
         <USkeleton class="h-14 flex-1 min-w-0" />
@@ -10,10 +12,10 @@
           <USkeleton class="size-8" />
         </div>
       </div>
-      <div class="mt-5">
+      <div aria-hidden="true" class="mt-5">
         <USkeleton class="h-9 w-full" />
       </div>
-      <div class="mt-8">
+      <div aria-hidden="true" class="mt-8">
         <USkeleton class="h-[212px] w-full" />
       </div>
     </template>

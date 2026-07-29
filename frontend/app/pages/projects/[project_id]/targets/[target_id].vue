@@ -13,8 +13,9 @@
       disable-url-sync
     >
       <template v-if="!target" #header-leading>
-        <USkeleton class="size-[30px]" />
-        <USkeleton class="h-9 w-64 max-w-full" />
+        <div class="sr-only" role="status">Loading target</div>
+        <USkeleton aria-hidden="true" class="size-[30px]" />
+        <USkeleton aria-hidden="true" class="h-9 w-64 max-w-full" />
       </template>
       <template #header-actions>
         <TasksButton

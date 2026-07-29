@@ -6,7 +6,7 @@
       :description="description"
       :fields="fields"
       :validate-on="validateOn"
-      :submit="submit"
+      :submit="{ name: 'submit', ...submit }"
       :loading="loading"
       loading-auto
       :ui="{ otp: 'w-full flex justify-center', description: 'mt-3' }"

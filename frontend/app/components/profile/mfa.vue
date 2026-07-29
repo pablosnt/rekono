@@ -46,7 +46,10 @@
             :radius="1"
             :value="url"
           />
-          <USkeleton v-else class="size-64" />
+          <template v-else>
+            <div class="sr-only" role="status">Loading QR code</div>
+            <USkeleton aria-hidden="true" class="size-64" />
+          </template>
         </div>
       </template>
       <template v-if="method === 'app'">

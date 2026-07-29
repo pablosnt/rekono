@@ -87,6 +87,10 @@
 
       <slot name="before" :state="state" />
 
+      <div v-if="state.loading" class="sr-only" role="status">
+        {{ `Loading ${config.entityNamePlural ?? "data"}` }}
+      </div>
+
       <slot name="content">
         <template v-if="config.tableColumns">
           <CrudTable

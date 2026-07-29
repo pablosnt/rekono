@@ -18,7 +18,7 @@ export default function (
   authentication: boolean = true,
 ) {
   const config = useRuntimeConfig();
-  const toast = useToast();
+  const toast = useNuxtApp().vueApp.runWithContext(() => useToast());
 
   const defaultHeaders = { Accept: "application/json" };
 

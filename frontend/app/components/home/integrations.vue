@@ -1,6 +1,15 @@
 <template>
   <UPageSection title="Integrations">
-    <UMarquee pause-on-hover :ui="{ content: 'will-change-transform' }">
+    <ul class="sr-only">
+      <li v-for="integration in integrations" :key="integration.id">
+        {{ integration.name }}
+      </li>
+    </ul>
+    <UMarquee
+      aria-hidden="true"
+      pause-on-hover
+      :ui="{ content: 'will-change-transform' }"
+    >
       <div
         v-for="integration in integrations"
         :key="integration.id"

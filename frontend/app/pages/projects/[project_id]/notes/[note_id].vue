@@ -1,7 +1,9 @@
 <template>
   <div class="space-y-4 p-3">
     <template v-if="!note">
+      <div class="sr-only" role="status">Loading note</div>
       <div
+        aria-hidden="true"
         class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between w-full"
       >
         <USkeleton class="h-14 flex-1 min-w-0" />
@@ -11,15 +13,15 @@
           <USkeleton class="size-8" />
         </div>
       </div>
-      <div class="flex items-center gap-4 flex-wrap">
+      <div aria-hidden="true" class="flex items-center gap-4 flex-wrap">
         <USkeleton class="h-4 w-44" />
         <USkeleton class="h-4 w-20" />
       </div>
-      <div class="mt-5">
+      <div aria-hidden="true" class="mt-5">
         <USkeleton class="h-9 w-full" />
       </div>
-      <USeparator class="mb-6 mt-6" />
-      <USkeleton class="h-120 w-full" />
+      <USeparator aria-hidden="true" class="mb-6 mt-6" />
+      <USkeleton aria-hidden="true" class="h-120 w-full" />
     </template>
     <UForm
       v-else
