@@ -393,10 +393,10 @@ class TriagingStatsViewSet(StatsViewSet):
         """Aggregate triage status counts across every triage-tracked finding type.
 
         For each finding type (OSINT, Credential, Vulnerability, Exploit) this builds a
-        queryset grouped by triage_status with open and fixed counts, applies that
-        type's filterset by temporarily swapping self.filterset_class, and merges the
-        resulting counts into a single dict keyed by triage_status. The ``queryset``
-        argument itself is not used.
+        queryset restricted to the projects the requesting user belongs to and grouped by
+        triage_status with open and fixed counts, applies that type's filterset by
+        temporarily swapping self.filterset_class, and merges the resulting counts into a
+        single dict keyed by triage_status. The ``queryset`` argument itself is not used.
 
         Args:
             queryset (QuerySet): Unused; present to match the ViewSet.filter_queryset
@@ -417,7 +417,11 @@ class TriagingStatsViewSet(StatsViewSet):
         ]:
             self.filterset_class = filterset_class
             new_queryset = super().filter_queryset(
-                model.objects.filter(created_from_user_input=False)
+                model.objects.filter(
+                    created_from_user_input=False,
+                    # Read authorization based on project membership
+                    **{f"{model._project_field}__members": self.request.user},
+                )
                 .values("triage_status")
                 .annotate(open=Count("id", distinct=True, filter=Q(is_fixed=False)))
                 .annotate(fixed=Count("id", distinct=True, filter=Q(is_fixed=True)))

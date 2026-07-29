@@ -3,6 +3,7 @@ from django.test import TestCase
 from tests.framework import ApiTest
 from tests.framework.cases import ApiTestCase
 from tests.framework.data import SetupProject
+from tests.stats.test_base import BaseStatsAuthorizationTest
 
 # pytype: disable=wrong-arg-types
 
@@ -38,7 +39,7 @@ class TechnologyStatsTest(ApiTest, TestCase):
                 {"name": "React", "count": 1},
             ],
         ),
-        ApiTestCase(["not_members"]),
+        ApiTestCase(["not_members"], expected=[]),
         ApiTestCase(
             ["members"],
             expected=[
@@ -49,6 +50,7 @@ class TechnologyStatsTest(ApiTest, TestCase):
             ],
             endpoint="{endpoint}?project=1",
         ),
+        ApiTestCase(["not_members"], expected=[], endpoint="{endpoint}?project=1"),
         ApiTestCase(
             ["members"],
             expected=[
@@ -59,7 +61,7 @@ class TechnologyStatsTest(ApiTest, TestCase):
             ],
             endpoint="{endpoint}?project=2",
         ),
-        ApiTestCase(["not_members"], endpoint="{endpoint}?project=1"),
+        ApiTestCase(["not_members"], expected=[], endpoint="{endpoint}?project=2"),
         ApiTestCase(
             ["members"],
             expected=[
@@ -70,6 +72,7 @@ class TechnologyStatsTest(ApiTest, TestCase):
             ],
             endpoint="{endpoint}?target=1",
         ),
+        ApiTestCase(["not_members"], expected=[], endpoint="{endpoint}?target=1"),
         ApiTestCase(
             ["members"],
             expected=[
@@ -80,5 +83,11 @@ class TechnologyStatsTest(ApiTest, TestCase):
             ],
             endpoint="{endpoint}?target=2",
         ),
-        ApiTestCase(["not_members"], endpoint="{endpoint}?target=1"),
+        ApiTestCase(["not_members"], expected=[], endpoint="{endpoint}?target=2"),
     ]
+
+
+class TechnologyStatsAuthorizationTest(BaseStatsAuthorizationTest, TestCase):
+    endpoint = "/api/stats/technology/"
+    project_1_members_expected = [{"name": "WordPress", "count": 1}]
+    project_2_members_expected = [{"name": "Nginx", "count": 1}]

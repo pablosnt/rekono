@@ -4,6 +4,7 @@ from findings.enums import TransportProtocol
 from tests.framework import ApiTest
 from tests.framework.cases import ApiTestCase
 from tests.framework.data import SetupProject
+from tests.stats.test_base import BaseStatsAuthorizationTest
 
 # pytype: disable=wrong-arg-types
 
@@ -42,7 +43,7 @@ class PortStatsTest(ApiTest, TestCase):
                 {"service": "ssh", "port": 22, "protocol": TransportProtocol.TCP.value, "count": 1},
             ],
         ),
-        ApiTestCase(["not_members"]),
+        ApiTestCase(["not_members"], expected=[]),
         ApiTestCase(
             ["members"],
             expected=[
@@ -53,6 +54,7 @@ class PortStatsTest(ApiTest, TestCase):
             ],
             endpoint="{endpoint}?project=1",
         ),
+        ApiTestCase(["not_members"], expected=[], endpoint="{endpoint}?project=1"),
         ApiTestCase(
             ["members"],
             expected=[
@@ -62,7 +64,7 @@ class PortStatsTest(ApiTest, TestCase):
             ],
             endpoint="{endpoint}?project=2",
         ),
-        ApiTestCase(["not_members"], endpoint="{endpoint}?project=1"),
+        ApiTestCase(["not_members"], expected=[], endpoint="{endpoint}?project=2"),
         ApiTestCase(
             ["members"],
             expected=[
@@ -73,6 +75,7 @@ class PortStatsTest(ApiTest, TestCase):
             ],
             endpoint="{endpoint}?target=1",
         ),
+        ApiTestCase(["not_members"], expected=[], endpoint="{endpoint}?target=1"),
         ApiTestCase(
             ["members"],
             expected=[
@@ -82,5 +85,13 @@ class PortStatsTest(ApiTest, TestCase):
             ],
             endpoint="{endpoint}?target=2",
         ),
-        ApiTestCase(["not_members"], endpoint="{endpoint}?target=1"),
+        ApiTestCase(["not_members"], expected=[], endpoint="{endpoint}?target=2"),
+    ]
+
+
+class PortStatsAuthorizationTest(BaseStatsAuthorizationTest, TestCase):
+    endpoint = "/api/stats/port/"
+    project_1_members_expected = [{"service": "http", "port": 80, "protocol": TransportProtocol.TCP.value, "count": 1}]
+    project_2_members_expected = [
+        {"service": "https", "port": 443, "protocol": TransportProtocol.TCP.value, "count": 1}
     ]

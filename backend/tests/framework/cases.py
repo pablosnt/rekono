@@ -100,7 +100,8 @@ class ApiTestCase(RekonoTestCase):
                         response.status_code,
                         msg=f"[{location}] Expected status code {self.status_code} doesn't match {response.status_code}{f': {response.content}' if hasattr(response, 'content') else ''}",
                     )
-                    if self.expected:
+                    # Empty expected values are checked as well
+                    if self.expected is not None:
                         self.assertExpected(
                             location, test_case, json.loads((response.content or "{}".encode()).decode()), self.expected
                         )

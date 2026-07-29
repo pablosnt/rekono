@@ -4,6 +4,7 @@ from findings.enums import HostOS, Severity
 from tests.framework import ApiTest
 from tests.framework.cases import ApiTestCase
 from tests.framework.data import SetupProject
+from tests.stats.test_base import BaseStatsAuthorizationTest
 
 # pytype: disable=wrong-arg-types
 
@@ -39,7 +40,7 @@ class HostOSStatsTest(ApiTest, TestCase):
                 {"os_type": HostOS.MACOS.value, "count": 1},
             ],
         ),
-        ApiTestCase(["not_members"]),
+        ApiTestCase(["not_members"], expected=[]),
         ApiTestCase(
             ["members"],
             expected=[
@@ -49,12 +50,13 @@ class HostOSStatsTest(ApiTest, TestCase):
             ],
             endpoint="{endpoint}?project=1",
         ),
+        ApiTestCase(["not_members"], expected=[], endpoint="{endpoint}?project=1"),
         ApiTestCase(
             ["members"],
             expected=[{"os_type": HostOS.MACOS.value, "count": 1}],
             endpoint="{endpoint}?project=2",
         ),
-        ApiTestCase(["not_members"], endpoint="{endpoint}?project=1"),
+        ApiTestCase(["not_members"], expected=[], endpoint="{endpoint}?project=2"),
         ApiTestCase(
             ["members"],
             expected=[
@@ -64,12 +66,13 @@ class HostOSStatsTest(ApiTest, TestCase):
             ],
             endpoint="{endpoint}?target=1",
         ),
+        ApiTestCase(["not_members"], expected=[], endpoint="{endpoint}?target=1"),
         ApiTestCase(
             ["members"],
             expected=[{"os_type": HostOS.MACOS.value, "count": 1}],
             endpoint="{endpoint}?target=2",
         ),
-        ApiTestCase(["not_members"], endpoint="{endpoint}?target=1"),
+        ApiTestCase(["not_members"], expected=[], endpoint="{endpoint}?target=2"),
     ]
 
 
@@ -109,17 +112,53 @@ class HostVulnerabilitiesStatsTest(ApiTest, TestCase):
                 {"id": 3, "open": 1, "fixed": 0, "critical": 0, "high": 0, "medium": 1, "low": 0, "info": 0},
             ],
         ),
-        ApiTestCase(["not_members"]),
+        ApiTestCase(["not_members"], expected=[]),
         ApiTestCase(
             ["members"],
             expected=[{"id": 1, "open": 18, "fixed": 6, "critical": 2, "high": 1, "medium": 5, "low": 10, "info": 0}],
             endpoint="{endpoint}?project=1",
         ),
-        ApiTestCase(["not_members"], endpoint="{endpoint}?project=2"),
+        ApiTestCase(["not_members"], expected=[], endpoint="{endpoint}?project=1"),
         ApiTestCase(
             ["members"],
             expected=[{"id": 2, "open": 24, "fixed": 17, "critical": 1, "high": 3, "medium": 8, "low": 12, "info": 0}],
             endpoint="{endpoint}?target=2",
         ),
-        ApiTestCase(["not_members"], endpoint="{endpoint}?target=1"),
+        ApiTestCase(["not_members"], expected=[], endpoint="{endpoint}?target=2"),
+    ]
+
+
+class HostOSStatsAuthorizationTest(BaseStatsAuthorizationTest, TestCase):
+    endpoint = "/api/stats/host-os/"
+    project_1_members_expected = [{"os_type": HostOS.LINUX.value, "count": 1}]
+    project_2_members_expected = [{"os_type": HostOS.WINDOWS.value, "count": 1}]
+
+
+class HostVulnerabilitiesStatsAuthorizationTest(BaseStatsAuthorizationTest, TestCase):
+    endpoint = "/api/stats/host-vulnerabilities/"
+    project_1_members_expected = [
+        {
+            "id": 1,
+            "ip": "10.10.10.10",
+            "open": 1,
+            "fixed": 0,
+            "critical": 1,
+            "high": 0,
+            "medium": 0,
+            "low": 0,
+            "info": 0,
+        }
+    ]
+    project_2_members_expected = [
+        {
+            "id": 2,
+            "ip": "10.10.10.20",
+            "open": 1,
+            "fixed": 0,
+            "critical": 0,
+            "high": 0,
+            "medium": 0,
+            "low": 1,
+            "info": 0,
+        }
     ]
