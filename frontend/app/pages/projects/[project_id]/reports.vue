@@ -186,7 +186,7 @@ const config: CrudConfig<Report> = reactive({
       `${report.format.toUpperCase()} report with findings from ${report.task ? getTaskName(report.task, true) : report.target ? report.target.target : "full project"}`,
     ),
   canRead: true,
-  canCreate: projectHasActiveFindings.value,
+  canCreate: projectHasActiveFindings,
   canEdit: false,
   canDelete: (report: Report) =>
     userStore.is_admin || userStore.isOwner(report, "user"),

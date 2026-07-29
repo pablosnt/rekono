@@ -17,7 +17,7 @@
         color="warning"
         variant="subtle"
         icon="i-lucide-shield"
-        description="Don't add sensitive information in HTTP headers. Credetials must be configured on each target authentication"
+        description="Don't add sensitive information in HTTP headers. Credentials must be configured on each target authentication"
         class="mb-4"
       />
     </template>

@@ -72,7 +72,7 @@
     <UFormField name="include_findings_from_user_input" class="mt-3">
       <UCheckbox
         v-model="formData.include_findings_from_user_input"
-        label="Include findings derivated from manual inputs like targets, ports, etc."
+        label="Include findings derived from manual inputs like targets, ports, etc."
       />
     </UFormField>
     <UFormField
