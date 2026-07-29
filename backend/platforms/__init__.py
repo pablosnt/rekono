@@ -32,6 +32,8 @@ Integration Architecture:
 Reliability and Security:
     - Secure API credential management through encrypted settings models
     - Automatic retries with backoff for transient HTTP errors and connection failures
+    - Connection and read timeouts on every external request, so an unresponsive platform
+      fails and moves on instead of holding a findings queue worker
     - Every external request is logged, and processing errors are caught and logged
       per finding so one failure doesn't stop the rest of the batch
 """

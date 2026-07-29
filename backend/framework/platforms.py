@@ -68,10 +68,14 @@ class BaseIntegration(BasePlatform):
     Attributes:
         url (str): Base URL for the external service.
         finding_types (list): List of Finding types to process (empty = all).
+        timeout (tuple): Connection and read timeouts in seconds applied to every request.
     """
 
     url = ""
     finding_types = []  # If empty, all findings are processed
+    # The read timeout is the more generous one because some platforms are slow to answer,
+    # but none of them should take more than a few seconds to connect
+    timeout = (5, 30)
 
     @cached_property
     def integration(self) -> Integration:
@@ -120,6 +124,10 @@ class BaseIntegration(BasePlatform):
     ) -> Any:
         """Make HTTP request with logging and error handling.
 
+        The timeout is applied to every request, unless the caller passes its own one,
+        because the Retry policy only covers connection errors and HTTP status codes,
+        not a response that never arrives.
+
         Args:
             method (Callable): HTTP method function (get, post, etc.).
             url (str): Request URL.
@@ -130,6 +138,7 @@ class BaseIntegration(BasePlatform):
         Returns:
             Any: Response data (JSON dict or Response object).
         """
+        kwargs.setdefault("timeout", self.timeout)
         try:
             response = method(url, **kwargs)
         except requests.exceptions.ConnectionError:
