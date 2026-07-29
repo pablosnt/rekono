@@ -9,10 +9,14 @@ secure defaults and extensive customization through environment variables and
 configuration files managed by the RekonoConfig system.
 """
 
+import warnings
 from datetime import timedelta
 from typing import Any
 
 from rekono.config import RekonoConfig
+
+warnings.filterwarnings("ignore", category=SyntaxWarning, module=r".*telegram_app.*")
+
 
 ################################################################################
 # Rekono basic information                                                     #

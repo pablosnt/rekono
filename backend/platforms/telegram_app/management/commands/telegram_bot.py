@@ -4,15 +4,11 @@ Provides a management command to start and deploy the Telegram Bot
 service through Django's command-line interface.
 """
 
-import warnings
 from typing import Any
 
 from django.core.management.base import BaseCommand
 
-warnings.filterwarnings("ignore", category=SyntaxWarning, module=r".*telegram_app.*")
-
-# Imported after the filter above so the SyntaxWarning it raises on import is already suppressed
-from platforms.telegram_app.bot import TelegramBot  # noqa: E402
+from platforms.telegram_app.bot import TelegramBot
 
 
 class Command(BaseCommand):
