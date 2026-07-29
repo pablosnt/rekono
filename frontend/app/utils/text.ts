@@ -8,9 +8,11 @@ export function pluralize(
   count: number,
   singular: string,
   plural: string = `${singular}s`,
-  includeCount: boolean = true
+  includeCount: boolean = true,
 ): string {
-  return count === 0 ? `No ${plural}` : `${includeCount ? `${formatCount(count)} ` : ''}${count === 1 ? singular : plural}`;
+  return count === 0
+    ? `No ${plural}`
+    : `${includeCount ? `${formatCount(count)} ` : ""}${count === 1 ? singular : plural}`;
 }
 
 export function firstUpper(value: string) {

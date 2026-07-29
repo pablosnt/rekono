@@ -233,30 +233,34 @@ function fetch() {
           api
             .get("vulnerabilities/latest/")
             .then((r) => (vulnerabilities.value = r)),
-          api
-            .list("hosts/", {}, false, 1, 1)
-            .then((r) => (findings.hosts = r.total)),
-          api
-            .list("ports/", {}, false, 1, 1)
-            .then((r) => (findings.ports = r.total)),
-          api
-            .list("technologies/", {}, false, 1, 1)
-            .then((r) => (findings.technologies = r.total)),
-          api
-            .list("paths/", {}, false, 1, 1)
-            .then((r) => (findings.paths = r.total)),
-          api
-            .list("osint/", {}, false, 1, 1)
-            .then((r) => (findings.osint = r.total)),
-          api
-            .list("credentials/", {}, false, 1, 1)
-            .then((r) => (findings.credentials = r.total)),
-          api
-            .list("vulnerabilities/", {}, false, 1, 1)
-            .then((r) => (findings.vulnerabilities = r.total)),
-          api
-            .list("exploits/", {}, false, 1, 1)
-            .then((r) => (findings.exploits = r.total)),
+          ...(!userStore.is_auditor
+            ? [
+                api
+                  .list("hosts/", {}, false, 1, 1)
+                  .then((r) => (findings.hosts = r.total)),
+                api
+                  .list("ports/", {}, false, 1, 1)
+                  .then((r) => (findings.ports = r.total)),
+                api
+                  .list("technologies/", {}, false, 1, 1)
+                  .then((r) => (findings.technologies = r.total)),
+                api
+                  .list("paths/", {}, false, 1, 1)
+                  .then((r) => (findings.paths = r.total)),
+                api
+                  .list("osint/", {}, false, 1, 1)
+                  .then((r) => (findings.osint = r.total)),
+                api
+                  .list("credentials/", {}, false, 1, 1)
+                  .then((r) => (findings.credentials = r.total)),
+                api
+                  .list("vulnerabilities/", {}, false, 1, 1)
+                  .then((r) => (findings.vulnerabilities = r.total)),
+                api
+                  .list("exploits/", {}, false, 1, 1)
+                  .then((r) => (findings.exploits = r.total)),
+              ]
+            : []),
         ]);
       } else {
         await Promise.all([

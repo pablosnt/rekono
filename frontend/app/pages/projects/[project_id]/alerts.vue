@@ -121,7 +121,7 @@ function canEdit(alert: Alert): boolean {
 }
 
 function canModify(alert: Alert): boolean {
-  return userStore.is_admin || alert.owner?.id === userStore.user;
+  return userStore.is_admin || userStore.isOwner(alert);
 }
 
 function getActions(item: Alert, onEdit: () => void, onDelete: () => void) {
