@@ -10,7 +10,6 @@ every Intensity value, which is how the Process conversation uses it without a t
 """
 
 from asgiref.sync import sync_to_async
-from django.db.models import QuerySet
 from telegram import Update
 from telegram.ext import CallbackContext, ConversationHandler
 

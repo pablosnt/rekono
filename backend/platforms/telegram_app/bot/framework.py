@@ -220,4 +220,5 @@ class BaseTelegramBot(BaseTelegram):
                 f"[Security] User {chat.user.id} isn't authorized to use Telegram bot", extra={"user": chat.user}
             )
             await self.reply(update, f"You are not authorized to run /{self.command_name}")
+            return None
         return chat
