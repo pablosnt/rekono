@@ -4,6 +4,15 @@ export function formatCount(n: number): string {
   return String(n);
 }
 
+export function pluralize(
+  count: number,
+  singular: string,
+  plural: string = `${singular}s`,
+  includeCount: boolean = true
+): string {
+  return count === 0 ? `No ${plural}` : `${includeCount ? `${formatCount(count)} ` : ''}${count === 1 ? singular : plural}`;
+}
+
 export function firstUpper(value: string) {
   return `${value.charAt(0).toUpperCase()}${value.slice(1)}`;
 }

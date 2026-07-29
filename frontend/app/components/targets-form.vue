@@ -142,20 +142,20 @@ function submit() {
           if (total > errors) {
             toast.add({
               title: "Targets creation",
-              description: `${total - errors} targets were created successfully and ${errors} failed`,
+              description: `Created ${pluralize(total - errors, "target")} successfully and ${errors} failed`,
               color: "warning",
             });
           } else {
             toast.add({
               title: "Targets creation failed",
-              description: `${errors} targets weren't created`,
+              description: `Couldn't create ${pluralize(errors, "target")}`,
               color: "error",
             });
           }
         } else {
           toast.add({
-            title: "Targets created successfully",
-            description: `${total} targets were created successfully`,
+            title: "Targets creation",
+            description: `Created ${pluralize(total, "target")} successfully`,
             color: "success",
           });
         }

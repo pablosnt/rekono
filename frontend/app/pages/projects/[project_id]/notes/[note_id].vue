@@ -61,7 +61,7 @@
             icon="i-lucide-git-fork"
             color="neutral"
             variant="solid"
-            :label="`${note.forks.length} Forks`"
+            :label="pluralize(note.forks.length, 'Fork')"
             :to="`/projects/${$route.params.project_id}/notes/${note.forked}`"
           />
           <UButton
@@ -77,7 +77,7 @@
             icon="i-lucide-git-fork"
             color="neutral"
             variant="subtle"
-            :label="`${note.forks.length} Forks`"
+            :label="pluralize(note.forks.length, 'Fork')"
             @click="
               api.create(`${note.id}/fork/`, {}).then((response) => {
                 toast.add({
@@ -99,7 +99,7 @@
             color="neutral"
             variant="subtle"
             size="lg"
-            :label="`${note.forks.length} Forks`"
+            :label="pluralize(note.forks.length, 'Fork')"
             class="pointer-events-none"
           />
           <Likes

@@ -62,7 +62,7 @@
             ...(target?.tasks.length > 0
               ? [
                   {
-                    label: `${target?.tasks.length} Scans`,
+                    label: pluralize(target?.tasks.length, 'Scan'),
                     icon: 'i-lucide-play',
                     to: `/projects/${$route.params.project_id}/scans?target=${route.params.target_id}`,
                   },
@@ -71,7 +71,7 @@
             ...(target?.reports.length > 0
               ? [
                   {
-                    label: `${target?.reports.length} Reports`,
+                    label: pluralize(target?.reports.length, 'Report'),
                     icon: 'i-lucide-file-text',
                     to: `/projects/${$route.params.project_id}/reports?target=${route.params.target_id}`,
                   },
@@ -80,7 +80,7 @@
             ...(target?.notes.length > 0
               ? [
                   {
-                    label: `${target?.notes.length} Notes`,
+                    label: pluralize(target?.notes.length, 'Note'),
                     icon: 'i-lucide-notebook',
                     to: `/projects/${$route.params.project_id}/notes?target=${route.params.target_id}`,
                   },

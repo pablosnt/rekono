@@ -49,7 +49,7 @@
       title="Exposure Window"
       :description="
         selectedItem.executions.length > 0
-          ? `First detected ${useTimeAgo(new Date(selectedItemExposureWindow[0].date)).value} across ${selectedItem.executions.length} executions${selectedItem.is_fixed ? `. ${firstUpper(fixVerb)}ed ${useTimeAgo(new Date(selectedItem.fixed_date)).value}` : ''}`
+          ? `First detected ${useTimeAgo(new Date(selectedItemExposureWindow[0].date)).value} across ${pluralize(selectedItem.executions.length, 'execution')}${selectedItem.is_fixed ? `. ${firstUpper(fixVerb)}ed ${useTimeAgo(new Date(selectedItem.fixed_date)).value}` : ''}`
           : 'Dates when the finding has been detected'
       "
       :ui="{ content: 'sm:max-w-3xl sm:max-h-xl' }"

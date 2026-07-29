@@ -3,11 +3,7 @@
     :color="liked ? 'primary' : 'neutral'"
     :variant="variant || 'subtle'"
     :size="size || 'md'"
-    :aria-label="
-      liked
-        ? `Unlike (${formatCount(count)} likes)`
-        : `Like (${formatCount(count)} likes)`
-    "
+    :aria-label="`${liked ? 'Unlike' : 'Like'} (${pluralize(count, 'like')})`"
     :aria-pressed="liked"
     class="gap-2"
     @click.stop="toggleLike()"

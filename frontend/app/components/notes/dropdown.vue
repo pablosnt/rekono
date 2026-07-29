@@ -4,7 +4,7 @@
       <UDropdownMenu
         :items="[
           {
-            label: `${relatedEntity.notes.length} Notes`,
+            label: pluralize(relatedEntity.notes.length, 'Note'),
             icon: 'i-lucide-notebook',
             to: `/projects/${project}/notes?${entityNameLower}=${relatedEntity.id}`,
           },

@@ -4,7 +4,7 @@
       <UDropdownMenu
         :items="[
           {
-            label: `${relatedEntity.reports.length} Reports`,
+            label: pluralize(relatedEntity.reports.length, 'Report'),
             icon: 'i-lucide-file-text',
             to: `/projects/${project}/reports${entityNameLowerCase && entityNameLowerCase !== 'project' ? `?${entityNameLowerCase}=${relatedEntity?.id}` : ''}`,
           },

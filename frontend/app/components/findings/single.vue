@@ -139,7 +139,7 @@
         class="mt-5"
         :description="
           (executionsTotal ?? finding.executions.length) > 0
-            ? `First detected ${useTimeAgo(finding.executions.map((e) => new Date(e.start)).sort((a, b) => a - b)[0]).value} across ${executionsTotal ?? finding.executions.length} executions${finding.is_fixed ? `. ${firstUpper(fixVerb)}ed ${useTimeAgo(new Date(finding.fixed_date)).value}` : ''}`
+            ? `First detected ${useTimeAgo(finding.executions.map((e) => new Date(e.start)).sort((a, b) => a - b)[0]).value} across ${pluralize(executionsTotal ?? finding.executions.length, 'execution')}${finding.is_fixed ? `. ${firstUpper(fixVerb)}ed ${useTimeAgo(new Date(finding.fixed_date)).value}` : ''}`
             : 'Executions where the finding was detected'
         "
         variant="outline"

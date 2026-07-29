@@ -26,7 +26,11 @@
           v-for="queue in queueStats"
           :key="queue.name"
           :title="firstUpper(queue.name)"
-          :description="`${queue.workers} workers`"
+          :description="
+            Number(queue.workers) === 0
+              ? 'No workers'
+              : pluralize(Number(queue.workers), 'worker')
+          "
           :icon="queue.icon"
           variant="subtle"
           spotlight
@@ -36,7 +40,7 @@
           </template>
           <div class="absolute top-4 right-4">
             <UTooltip
-              :text="`${queue.started_jobs} jobs running`"
+              :text="`${pluralize(Number(queue.started_jobs), 'job')} running`"
               :content="{
                 side: 'left',
                 sideOffset: 8,
@@ -60,7 +64,7 @@
               variant="ghost"
               class="flex-1 min-w-fit"
             >
-              {{ queue.scheduled_jobs }} scheduled jobs
+              {{ pluralize(Number(queue.scheduled_jobs), "scheduled job") }}
             </UBadge>
             <UBadge
               v-if="queue.deferred_jobs + queue.jobs > 0"
@@ -68,7 +72,13 @@
               variant="ghost"
               class="flex-1 min-w-fit"
             >
-              {{ queue.deferred_jobs + queue.jobs }} jobs on hold
+              {{
+                pluralize(
+                  Number(queue.deferred_jobs) + Number(queue.jobs),
+                  "job",
+                )
+              }}
+              on hold
             </UBadge>
             <UBadge
               v-if="queue.finished_jobs > 0"
@@ -76,7 +86,7 @@
               variant="ghost"
               class="flex-1 min-w-fit text-success"
             >
-              {{ queue.finished_jobs }} successful jobs
+              {{ pluralize(Number(queue.finished_jobs), "successful job") }}
             </UBadge>
             <UBadge
               v-if="queue.failed_jobs > 0"
@@ -84,7 +94,7 @@
               variant="ghost"
               class="flex-1 min-w-fit text-error"
             >
-              {{ queue.failed_jobs }} failed jobs
+              {{ pluralize(Number(queue.failed_jobs), "failed job") }}
             </UBadge>
           </div>
           <div v-if="queue.name === 'monitor' && monitor">

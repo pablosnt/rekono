@@ -79,7 +79,7 @@
               icon="i-lucide-git-fork"
               color="neutral"
               :variant="item.forked ? 'solid' : 'subtle'"
-              :label="`${item.forks.length} Forks`"
+              :label="pluralize(item.forks.length, 'Fork')"
               :to="
                 item.forked
                   ? `/projects/${$route.params.project_id}/notes/${item.forked}`
@@ -105,7 +105,7 @@
               color="neutral"
               variant="subtle"
               size="lg"
-              :label="`${item.forks.length} Forks`"
+              :label="pluralize(item.forks.length, 'Fork')"
               class="pointer-events-none"
             />
             <UDropdownMenu
