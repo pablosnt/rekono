@@ -67,7 +67,7 @@ class HackTricksTest(BaseTest, TestCase):
         self._assert_links()
 
     @mock.patch("platforms.hacktricks.HackTricks._get_all_hacktricks_links", links)
-    @mock.patch("platforms.hacktricks.HackTricks.process_finding", exception)
+    @mock.patch("platforms.hacktricks.HackTricks._process_finding", exception)
     def test_handled_exception(self) -> None:
         HackTricks().process_findings(self.execution, [self.host])
         self.assertTrue(True)

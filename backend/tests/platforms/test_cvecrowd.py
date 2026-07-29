@@ -108,7 +108,7 @@ class CveCrowdTest(BaseTest, TestCase):
     def test_cached_is_available(self) -> None:
         self.assertFalse(self.cvecrowd.is_available())
 
-    @mock.patch("platforms.cvecrowd.integrations.CveCrowd.process_finding", exception)
+    @mock.patch("platforms.cvecrowd.integrations.CveCrowd._process_finding", exception)
     @mock.patch("platforms.cvecrowd.integrations.CveCrowd.is_available", return_true)
     def test_handled_exception(self) -> None:
         self.cvecrowd.process_findings(self.execution, [self.trending, self.not_trending])
