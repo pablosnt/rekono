@@ -19,6 +19,7 @@ from findings.framework.models import Finding
 from findings.models import OSINT, Host
 from parameters.models import InputTechnology, InputVulnerability
 from rekono.settings import CONFIG
+from security.cryptography import Crypto
 from target_ports.models import TargetPort
 from targets.models import Target
 from tools.executors.base import BaseExecutor
@@ -43,6 +44,8 @@ class BaseParser:
         executor (BaseExecutor): The executor instance that ran the tool
         output (str | None): Plain text output from tool execution
         findings (list): List of findings extracted during parsing
+        user_input_findings (dict): Cache of parent findings derived from user-input
+                                    targets, keyed by target identity, populated during parsing
 
     Example:
         Create and use a parser:
@@ -57,6 +60,8 @@ class BaseParser:
     executor: BaseExecutor
     output: str | None
     findings: list = field(default_factory=list)
+    # Cache of parent findings derived from user-input targets during parsing
+    user_input_findings: dict = field(default_factory=dict)
 
     @cached_property
     def report(self) -> Path | None:
@@ -76,6 +81,30 @@ class BaseParser:
             and self.executor.report.stat().st_size > 0
             else None
         )
+
+    def create_user_input_finding(self, related_target: Any) -> Any | None:
+        """Create, or reuse, the parent finding derived from a user-input target.
+
+        Parsers that emit many findings (e.g. every path Dirsearch discovers) link each one to
+        the same parent Host/Port derived from the execution's target. This memoizes that parent
+        per execution keyed by the target identity, so the underlying deduplication query,
+        target-row lock and (for domain targets) DNS resolution run once instead of once per
+        finding. Failed derivations (None) are not memoized, so a transient failure on one
+        finding does not suppress the parent for the rest.
+
+        Args:
+            related_target (Any): The user-input target (Target or TargetPort) to derive from.
+
+        Returns:
+            Any | None: The parent finding, or None when it could not be derived.
+        """
+        key = Crypto.hash("-".join([related_target.__class__.__name__, str(related_target.pk)]))
+        if key not in self.user_input_findings:
+            finding = related_target.create_finding_from_user_input(self.executor.execution)
+            if finding is None:
+                return None
+            self.user_input_findings[key] = finding
+        return self.user_input_findings[key]
 
     def is_finding_link_field(self, finding_type: type[Finding], field: str) -> bool:
         """Check if a field represents a valid finding relationship link.
@@ -172,7 +201,7 @@ class BaseParser:
                         or (is_port_for_input_parameter and field == "port")
                     ):
                         # Create a finding from the user input
-                        related_finding = related_target.create_finding_from_user_input(self.executor.execution)
+                        related_finding = self.create_user_input_finding(related_target)
                         if not related_finding:
                             continue
                         # We avoid including the new user-input findings in the findings list
@@ -217,7 +246,7 @@ class BaseParser:
                             break
             if not linked_finding and not CONFIG.testing:
                 self.executor.logger.warning(
-                    f"[{{self.executor.execution.configuration.tool.name}}] {finding_type.__name__} finding found during execution {self.executor.execution.id} is discarded because it has no parent finding to link to"
+                    f"[{self.executor.execution.configuration.tool.name}] {finding_type.__name__} finding found during execution {self.executor.execution.id} is discarded because it has no parent finding to link to"
                 )
                 return
         # Create the finding if relationships were established or we're in testing mode,
@@ -234,11 +263,15 @@ class BaseParser:
         """Load and parse JSON report file.
 
         Returns:
-            dict[str, Any] | list[dict[str, Any]] | None: Parsed JSON data or None if no report
+            dict[str, Any] | list[dict[str, Any]] | None: Parsed JSON data, or None if no
+            report exists or the report content is not valid JSON
         """
         if self.report:
             with self.report.open("r", encoding="utf-8") as report:
-                return json.load(report)
+                try:
+                    return json.load(report)
+                except json.JSONDecodeError:
+                    return None
 
     def load_xml_report(self) -> Any | None:
         """Load and parse XML report file using secure XML parser.
@@ -302,18 +335,33 @@ class BaseParser:
     def _parse(self) -> None:
         """Parse tool output and extract findings.
 
-        Override this method in tool-specific parser classes to implement
-        custom parsing logic for extracting findings from tool outputs.
+        Override this method in tool-specific parser classes to implement custom
+        parsing logic for extracting findings from tool outputs.
+
+        parse() only catches exceptions raised by this method as a whole, not per
+        iteration, so raising partway through a loop over multiple hosts or entries
+        abandons the rest of that loop and silently drops the findings it would have
+        produced. Implementations that iterate over multiple items should catch and
+        log per-item errors internally instead of letting them propagate.
         """
         pass
 
     def parse(self) -> None:
-        """Main parsing method that processes output and sanitizes sensitive information.
+        """Parse the tool output and sanitize sensitive information from the execution.
 
-        Calls the tool-specific _parse method to extract findings, then sanitizes
-        the execution output to remove sensitive information.
+        Calls the tool-specific _parse method to extract findings. Any exception
+        raised by _parse is caught here and logged instead of propagating, so a
+        parsing failure never crashes the execution pipeline. The exception still
+        unwinds the whole _parse call, so only the findings created before the
+        failure point are kept, see _parse for what this means for subclass
+        implementations. The execution output and report file are sanitized in the
+        finally block regardless of whether parsing succeeded.
         """
         try:
             self._parse()
+        except Exception as ex:
+            self.executor.logger.exception(
+                f"[{self.executor.execution.configuration.tool.name}] {ex.__class__.__name__} error while parsing the output of execution {self.executor.execution.id}: {str(ex)}"
+            )
         finally:
             self._protect_execution()

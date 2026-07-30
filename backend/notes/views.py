@@ -35,10 +35,11 @@ class NoteViewSet(LikeViewSet):
     project-level access control and ownership permissions.
 
     Custom Actions:
+        like: Add or remove a like, open to every role including readers
         fork: Create a copy of a public note owned by another user
 
     Attributes:
-        queryset (QuerySet): All Note objects filtered by access permissions
+        queryset (QuerySet): All Note objects
         serializer_class (Serializer): Default serializer for note operations
         filterset_class (FilterSet): Filter class for querying notes
         permission_classes (list): Required permissions for access
@@ -61,7 +62,8 @@ class NoteViewSet(LikeViewSet):
             "owner",
             "created_at",
             "updated_at",
-            "likes_count",
+            "liked",
+            "likes",
         ]
     )
 
@@ -97,6 +99,31 @@ class NoteViewSet(LikeViewSet):
             .filter(Q(owner=self.request.user) | (Q(public=True) & Q(project__members=self.request.user)))
         )
 
+    # By default, only admin and auditors are able to like entities, since readers have no write access to
+    # Tools, Processes or Wordlists, the other models that use LikeViewSet
+    # Notes are different: readers already have full add, change and delete access on their own notes, so
+    # the role restriction is dropped here and any project member can like a note
+    @extend_schema(request=None, responses={204: None})
+    @action(
+        detail=True,
+        methods=["POST", "DELETE"],
+        permission_classes=[IsAuthenticated, ProjectMemberPermission],
+    )
+    def like(self, request: Request, pk: str) -> Response:
+        """Add or remove like from the current user.
+
+        POST: Add like from current user
+        DELETE: Remove like from current user
+
+        Args:
+            request (Request): The HTTP request object.
+            pk (str): Primary key of the object to like/unlike.
+
+        Returns:
+            Response: HTTP 204 No Content on success.
+        """
+        return super().like(request, pk)
+
     @extend_schema(request=None, responses={201: NoteSerializer})
     @action(
         detail=True,
@@ -122,17 +149,18 @@ class NoteViewSet(LikeViewSet):
             Response: Serialized forked note data or 404 if not allowed
 
         Note:
-            Only public notes owned by other users can be forked. Forked notes
-            are always created as public and belong to the requesting user.
+            Only public notes owned by other users, and not already forked by the
+            requesting user, can be forked. Forked notes are always created as
+            private and belong to the requesting user.
         """
         note = self.get_object()
-        # Only allow forking of public notes that the user doesn't own once
+        # Only fork notes that are public, not owned by the requesting user, and not
+        # already forked by them, so a note can't be forked twice by the same user
         if (
             note.public
             and note.owner.id != self.request.user.id
             and not note.forks.filter(owner=self.request.user).exists()
         ):
-            # Create a new note with all the same content and relationships
             fork = Note.objects.create(
                 project=note.project,
                 target=note.target,
@@ -149,9 +177,8 @@ class NoteViewSet(LikeViewSet):
                 body=note.body,
                 owner=self.request.user,
                 public=False,  # Forked notes are always private
-                forked_from=note,  # Reference to the original note
+                forked_from=note,
             )
-            # Copy all tags from the original note
             fork.tags.set(note.tags.all())
             return Response(self.get_serializer(instance=fork).data, status=HTTP_201_CREATED)
         return Response(status=HTTP_404_NOT_FOUND)

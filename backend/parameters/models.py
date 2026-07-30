@@ -9,8 +9,8 @@ references with validation and parsing capabilities.
 Architecture:
     Both parameter types extend the InputParameter base model and implement specific
     field configurations, validation rules, and parsing mappings for integration with
-    security testing tools. The models include filtering capabilities and deduplication
-    logic to ensure data consistency and efficient parameter management.
+    security testing tools. Each model defines its own search filters and parsing
+    mapping so tool executions can look up and inject parameter values by keyword.
 """
 
 from typing import Any
@@ -54,7 +54,11 @@ class InputTechnology(InputParameter):
     )
 
     _filters = [BaseInput.Filter(type=str, field="name", contains=True)]
-    _parse_mapping = {InputKeyword.TECHNOLOGY: "name", InputKeyword.VERSION: "version"}
+    # Version is parsed as empty string when None, as most of the tools working from technologies only require the technology name
+    _parse_mapping = {
+        InputKeyword.TECHNOLOGY: "name",
+        InputKeyword.VERSION: lambda instance, task: instance.version or "",
+    }
 
     def __str__(self) -> str:
         """Return string representation of the technology parameter.
@@ -110,10 +114,7 @@ class InputVulnerability(InputParameter):
 
     cve = models.TextField(max_length=20, validators=[Validator(Regex.CVE, code="cve", deny_injections=True)])
 
-    _filters = [
-        BaseInput.Filter(type=str, field="cve", processor=lambda v: "cve"),
-        BaseInput.Filter(type=str, field="cve", processor=lambda v: v.lower()),
-    ]
+    _filters = [BaseInput.Filter(type=str, field="cve", contains=True, processor=lambda v: v.lower())]
     _parse_mapping = {InputKeyword.CVE: "cve"}
 
     def __str__(self) -> str:

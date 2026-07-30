@@ -1,6 +1,8 @@
 from functools import cached_property
+from unittest import mock
 
 from django.test import TestCase
+from telegram.error import TimedOut
 
 from platforms.telegram_app.models import TelegramChat
 from security.authorization.roles import Role
@@ -25,6 +27,15 @@ class TelegramSettingsTest(ApiTestNoData, TestCase):
         PutApiTestCase([Role.ADMIN], data=token, expected=expected),
         ApiTestCase(["members", "not_members"], expected=expected),
     ]
+
+    def test_settings_when_telegram_api_is_unreachable(self) -> None:
+        def raise_timeout(coroutine: object) -> None:
+            coroutine.close()  # Avoid "coroutine was never awaited" warnings from the mocked run
+            raise TimedOut()
+
+        with mock.patch("platforms.telegram_app.framework.asyncio.run", side_effect=raise_timeout):
+            PutApiTestCase([Role.ADMIN], data=token, expected={"id": 1, "bot": None}).test_case(1, self, self.endpoint)
+            ApiTestCase(["members"], expected={"id": 1, "bot": None}).test_case(1, self, self.endpoint)
 
 
 class TelegramChatTest(ApiTestNoData, TestCase):

@@ -1,7 +1,7 @@
 """Django application configuration for integrations module.
 
 Configures the integrations application with custom fixture loading logic
-to preserve user-disabled integration states across deployments.
+to preserve user-configured integration enabled states across deployments.
 """
 
 from typing import Any
@@ -16,7 +16,8 @@ class IntegrationsConfig(BaseApp, AppConfig):
     """Configuration class for the integrations Django application.
 
     Extends BaseApp to provide custom fixture loading behavior that preserves
-    user-configured integration enabled/disabled states across deployments.
+    user-configured integration enabled/disabled states, in both directions,
+    across deployments and migrations.
 
     Attributes:
         name (str): The Django application name
@@ -25,31 +26,36 @@ class IntegrationsConfig(BaseApp, AppConfig):
     name = "integrations"
 
     def _select_data_to_recreate(self, model: Any) -> QuerySet:
-        """Select disabled integrations to preserve during fixture recreation.
+        """Snapshot the enabled state of every integration before fixture recreation.
 
-        Identifies integrations that have been disabled by users and should
-        be preserved with their disabled state during fixture reloading.
+        Captures the current enabled/disabled flag of all integrations so that any
+        user change, in either direction, survives the fixture reload. The fixture
+        hardcodes an enabled value per integration and loaddata restores it on every
+        migrate, so the live state must be snapshotted and re-applied afterwards.
 
         Args:
             model (Any): The Integration model class.
 
         Returns:
-            QuerySet: QuerySet of disabled integration IDs to preserve.
+            QuerySet: QuerySet of (id, enabled) tuples for every integration.
         """
-        return model.objects.filter(enabled=False).values_list("id", flat=True)
+        return model.objects.values_list("id", "enabled")
 
     def _recreate(self, data: list[Any]) -> None:
-        """Re-disable integrations that were previously disabled by users.
+        """Re-apply the user-configured enabled state after fixture recreation.
 
-        Takes a list of integration IDs that were disabled before fixture
-        reloading and ensures they remain disabled after the reload process.
+        Takes the (id, enabled) snapshot captured before the fixture reload and
+        restores it, so integrations the user enabled or disabled keep their state
+        even though loaddata reset every record to its fixture default. Integrations
+        added to the fixture after the snapshot are left with their default.
 
         Args:
-            data (list[Any]): List of integration IDs to disable.
+            data (list[Any]): List of (id, enabled) tuples to restore.
         """
         from integrations.models import Integration
 
-        return Integration.objects.filter(id__in=data, enabled=True).update(enabled=False)
+        Integration.objects.filter(id__in=[i for i, enabled in data if enabled], enabled=False).update(enabled=True)
+        Integration.objects.filter(id__in=[i for i, enabled in data if not enabled], enabled=True).update(enabled=False)
 
     def _get_models(self) -> list[Any]:
         """Get model classes for existence checking during fixture loading.

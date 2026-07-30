@@ -1,5 +1,5 @@
 <template>
-  <CrudPage :config="config">
+  <CrudPage ref="page" :config="config" @fetched="onFetched">
     <template #actions="{ item }">
       <UTooltip v-if="item.status === 'Ready'" text="Download">
         <UButton
@@ -26,9 +26,31 @@ const route = useRoute();
 const table = useTable();
 const userStore = useUserStore();
 const userOptions = ref<FilterOption[]>([]);
+const { projectHasActiveFindings } = usePanel();
+const page = ref();
+const refresh = ref<ReturnType<typeof setTimeout> | null>(null);
+
+function onFetched(items: Report[]) {
+  if (items.filter((report) => report.status === "Pending").length > 0) {
+    if (refresh.value) clearTimeout(refresh.value);
+    refresh.value = setTimeout(() => {
+      page.value?.fetch();
+    }, 5000);
+  } else if (refresh.value) {
+    clearTimeout(refresh.value);
+    refresh.value = null;
+  }
+}
 
 onMounted(() => {
-  options.users(userOptions, { is_active: true });
+  options.users(userOptions, {
+    is_active: true,
+    project: route.params.project_id,
+  });
+});
+
+onUnmounted(() => {
+  if (refresh.value) clearTimeout(refresh.value);
 });
 
 const config: CrudConfig<Report> = reactive({
@@ -157,14 +179,14 @@ const config: CrudConfig<Report> = reactive({
   pageSize: 25,
   pageSizeOptions: [25, 50, 100],
   defaultBody: { project: route.params.project_id },
-  createForm: resolveComponent("ReportsForm"),
+  createForm: markRaw(resolveComponent("ReportsForm")),
   deleteMessage: (report: Report) =>
     buildDeleteMessage(
       "report",
       `${report.format.toUpperCase()} report with findings from ${report.task ? getTaskName(report.task, true) : report.target ? report.target.target : "full project"}`,
     ),
   canRead: true,
-  canCreate: true,
+  canCreate: projectHasActiveFindings,
   canEdit: false,
   canDelete: (report: Report) =>
     userStore.is_admin || userStore.isOwner(report, "user"),

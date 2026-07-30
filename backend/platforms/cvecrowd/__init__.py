@@ -23,6 +23,7 @@ Integration Architecture:
 Security:
     - Encrypted API token storage using AES encryption
     - Secure API communication with bearer token authentication
-    - Input validation and sanitization for configuration parameters
-    - Integration with project-level access control and permission enforcement
+    - Input validation for configuration parameters via model field validators
+    - Access restricted to authenticated users holding the required Django
+      model permissions (RekonoModelPermission)
 """

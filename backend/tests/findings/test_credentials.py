@@ -14,7 +14,7 @@ class CredentialTest(FindingTest, TestCase):
         "title": "Credentials exposure",
         "description": "Technology: WordPress\nEmail: admin10@rekono.com\nUsername: admin10\nSecret: admin",
         "cwe": 200,
-        "severity": Severity.HIGH,
+        "severity": str(Severity.HIGH),
     }
     expected_string = (
         f"10.10.10.10 - 80 - {TransportProtocol.TCP.value} - WordPress - 1.0.10 - admin10@rekono.com - admin10 - admin"
@@ -45,4 +45,19 @@ class CredentialTest(FindingTest, TestCase):
             Credential.objects.create_finding(
                 self.execution, technology=self.technology, email="root@rekono.com", username="root", secret="different"
             ).id,
+        )
+
+    def test_deduplication_ignores_email_case(self):
+        first = Credential.objects.create_finding(
+            self.execution, technology=self.technology, email="Admin@Rekono.com", username="operator", secret="s3cret"
+        )
+        second = Credential.objects.create_finding(
+            self.execution, technology=self.technology, email="admin@rekono.com", username="operator", secret="s3cret"
+        )
+        self.assertEqual(first.id, second.id)
+        self.assertEqual(
+            1,
+            Credential.objects.filter(
+                technology=self.technology, email__iexact="admin@rekono.com", username="operator", secret="s3cret"
+            ).count(),
         )

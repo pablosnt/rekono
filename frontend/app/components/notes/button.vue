@@ -47,7 +47,7 @@ function createNote() {
       technology_id: props.technology,
       vulnerability_id: props.vulnerability,
       exploit_id: props.exploit,
-      title: "Title",
+      title: "New note",
       body: "",
       tags: [],
       public: false,

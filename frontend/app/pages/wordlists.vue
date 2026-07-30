@@ -3,7 +3,6 @@
 </template>
 
 <script setup lang="ts">
-import { h, resolveComponent } from "vue";
 import type { CrudConfig, FilterOption } from "~/types/crud";
 import * as z from "zod";
 import { useUserStore } from "~/store/user";
@@ -157,9 +156,10 @@ const config: CrudConfig<Wordlist> = reactive({
     "size",
     "type",
     "owner",
-    { id: "likes_count", label: "Likes" },
+    { id: "likes", label: "Likes" },
+    { id: "liked", label: "Favourites" },
   ],
-  defaultOrdering: "-id",
+  defaultOrdering: "-liked,-id",
   pageSize: 25,
   pageSizeOptions: [25, 50, 100],
   get createFormFields() {

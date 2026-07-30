@@ -54,7 +54,7 @@
             fetchFirstPage();
           }
         "
-        @create="fetch()"
+        @create="fetchFirstPage()"
         @open-create="(open: boolean) => (openCreateModal = open)"
       >
         <template v-if="$slots['header-leading']" #header-leading>
@@ -87,15 +87,11 @@
 
       <slot name="before" :state="state" />
 
+      <div v-if="state.loading" class="sr-only" role="status">
+        {{ `Loading ${config.entityNamePlural ?? "data"}` }}
+      </div>
+
       <slot name="content">
-        <UProgress
-          :class="[
-            state.loading && (config.useGrid || state.items.length === 0)
-              ? 'visible'
-              : 'invisible',
-            'mb-2',
-          ]"
-        />
         <template v-if="config.tableColumns">
           <CrudTable
             v-if="state.items.length > 0"
@@ -126,11 +122,17 @@
             class="py-12"
             :on-create="onCreateClick"
           />
+          <SkeletonTable v-else :config="config" />
         </template>
 
         <template v-else-if="config.useGrid">
+          <SkeletonCards
+            v-if="state.items.length === 0 && state.loading"
+            :config="config"
+            :count="9"
+          />
           <CrudEmptyState
-            v-if="state.items.length === 0 && !state.loading"
+            v-else-if="state.items.length === 0 && !state.loading"
             :config="config"
             :state="state"
             class="mt-10"
@@ -342,9 +344,12 @@ function fetch() {
   if (state.ordering) {
     params = { ...params, ordering: state.ordering };
   }
-  api
+  return api
     .list("", params, false, state.page, state.pageSize)
     .then((response: object) => {
+      if (response.items.length === 0 && state.page > 1) {
+        return fetchFirstPage();
+      }
       state.items = response.items;
       state.total = response.total;
       emit("fetched", response.items, response.total);
@@ -356,7 +361,7 @@ function fetch() {
 
 function fetchFirstPage() {
   state.page = 1;
-  fetch();
+  return fetch();
 }
 
 function onCreateClick() {
@@ -371,5 +376,5 @@ onMounted(() => {
   }
 });
 
-defineExpose({ fetch });
+defineExpose({ fetch, fetchFirstPage });
 </script>

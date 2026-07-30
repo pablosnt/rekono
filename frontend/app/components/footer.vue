@@ -52,6 +52,7 @@
           alt="Rekono logo"
           class="mr-2"
           width="20"
+          height="20"
         />
         <p class="text-sm text-muted text-center">
           Rekono Maintainers © {{ new Date().getFullYear() }}

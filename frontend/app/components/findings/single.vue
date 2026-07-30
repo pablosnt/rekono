@@ -1,121 +1,149 @@
 <template>
   <div class="space-y-5">
-    <UProgress :class="[loading ? 'visible' : 'invisible', 'mb-1']" />
-    <template v-if="finding">
-      <UPageCard
-        variant="subtle"
-        :ui="{ header: 'w-full', container: 'overflow-hidden' }"
-      >
-        <template #header>
-          <div class="mb-4">
-            <div
-              class="flex flex-col gap-3 sm:flex-row sm:justify-between w-full"
-            >
-              <div class="flex items-center gap-2">
-                <slot name="icon">
-                  <UIcon
-                    v-if="icon"
-                    :name="icon"
-                    :class="`text-${iconColor || 'neutral'} text-xl`"
-                  />
-                </slot>
+    <UPageCard
+      v-if="!finding"
+      aria-hidden="true"
+      variant="subtle"
+      :ui="{ header: 'w-full', container: 'overflow-hidden' }"
+    >
+      <template #header>
+        <div class="mb-4">
+          <div
+            class="flex flex-col gap-3 sm:flex-row sm:justify-between w-full"
+          >
+            <div class="flex items-center gap-2">
+              <USkeleton class="size-5" />
+              <USkeleton class="h-8 w-56 max-w-full" />
+            </div>
+            <div class="flex items-center gap-2">
+              <USkeleton class="h-8 w-24" />
+              <USkeleton class="size-8" />
+              <USkeleton class="size-8" />
+            </div>
+          </div>
+        </div>
+      </template>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4 mx-10">
+        <div v-for="i in 4" :key="i" class="space-y-1.5">
+          <USkeleton class="h-3 w-20" />
+          <USkeleton class="h-5 w-32" />
+        </div>
+      </div>
+    </UPageCard>
+    <UPageCard
+      v-else
+      variant="subtle"
+      :ui="{ header: 'w-full', container: 'overflow-hidden' }"
+    >
+      <template #header>
+        <div class="mb-4">
+          <div
+            class="flex flex-col gap-3 sm:flex-row sm:justify-between w-full"
+          >
+            <div class="flex items-start gap-2 min-w-0">
+              <slot name="icon">
+                <UIcon
+                  v-if="icon"
+                  :name="icon"
+                  :class="`text-${iconColor || 'neutral'} text-xl shrink-0 mt-1`"
+                />
+              </slot>
+              <UTooltip :text="title" :disabled="!titleTruncated">
                 <h1
-                  class="font-bold text-default truncate max-w-[300px] sm:max-w-none text-2xl"
+                  ref="titleElement"
+                  class="font-bold text-default text-2xl min-w-0 wrap-anywhere line-clamp-3"
                 >
                   {{ title }}
                 </h1>
+              </UTooltip>
+            </div>
+            <div class="flex items-center gap-2">
+              <FindingsStatus
+                :finding="finding"
+                :is-triageable="isTriageable"
+                :fix-verb="fixVerb"
+              />
+              <NotesDropdown
+                :related-entity="finding"
+                :entity-name="entityName"
+                :project="finding.project"
+              />
+              <UDropdownMenu
+                v-if="
+                  (integrations.hacktricks?.enabled &&
+                    finding.hacktricks_link) ||
+                  (!ignoreReference && finding.reference)
+                "
+                :items="[
+                  ...(finding.hacktricks_link &&
+                  integrations.hacktricks?.enabled
+                    ? [
+                        {
+                          label: 'HackTricks',
+                          avatar: { src: integrations.hacktricks?.icon },
+                          to: finding.hacktricks_link,
+                          target: '_blank',
+                        },
+                      ]
+                    : []),
+                  ...(!ignoreReference && finding.reference
+                    ? [
+                        {
+                          label: 'Reference',
+                          icon: 'i-lucide-external-link',
+                          to: finding.reference,
+                          target: '_blank',
+                        },
+                      ]
+                    : []),
+                ]"
+                :content="{ align: 'end' }"
+              >
                 <UButton
-                  v-if="!disableTitleCopy"
-                  icon="i-lucide-copy"
+                  icon="i-lucide-link"
                   color="neutral"
                   variant="ghost"
-                  size="xs"
-                  aria-label="Copy title"
-                  @click="copyText(title)"
+                  aria-label="View references and links"
                 />
-              </div>
-              <div class="flex items-center gap-2">
-                <FindingsStatus
-                  :finding="finding"
-                  :is-triageable="isTriageable"
-                  :fix-verb="fixVerb"
+              </UDropdownMenu>
+              <UDropdownMenu
+                v-if="userStore.is_auditor && dropdownActions.length > 0"
+                :items="dropdownActions"
+                :content="{ align: 'end' }"
+              >
+                <UButton
+                  icon="i-lucide-ellipsis"
+                  color="neutral"
+                  variant="ghost"
+                  aria-label="More finding actions"
                 />
-                <NotesDropdown
-                  :related-entity="finding"
-                  :entity-name="entityName"
-                  :project="finding.project"
-                />
-                <UDropdownMenu
-                  v-if="
-                    (integrations.hacktricks?.enabled &&
-                      finding.hacktricks_link) ||
-                    finding.reference
-                  "
-                  :items="[
-                    ...(finding.hacktricks_link &&
-                    integrations.hacktricks?.enabled
-                      ? [
-                          {
-                            label: 'HackTricks',
-                            avatar: { src: integrations.hacktricks?.icon },
-                            to: finding.hacktricks_link,
-                            target: '_blank',
-                          },
-                        ]
-                      : []),
-                    ...(!ignoreReference && finding.reference
-                      ? [
-                          {
-                            label: 'Reference',
-                            icon: 'i-lucide-external-link',
-                            to: finding.reference,
-                            target: '_blank',
-                          },
-                        ]
-                      : []),
-                  ]"
-                  :content="{ align: 'end' }"
-                >
-                  <UButton
-                    icon="i-lucide-link"
-                    color="neutral"
-                    variant="ghost"
-                    aria-label="View references and links"
-                  />
-                </UDropdownMenu>
-                <UDropdownMenu
-                  v-if="userStore.is_auditor && dropdownActions.length > 0"
-                  :items="dropdownActions"
-                  :content="{ align: 'end' }"
-                >
-                  <UButton
-                    icon="i-lucide-ellipsis"
-                    color="neutral"
-                    variant="ghost"
-                    aria-label="More finding actions"
-                  />
-                </UDropdownMenu>
-              </div>
+              </UDropdownMenu>
             </div>
-            <slot name="description" />
           </div>
-        </template>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4 mx-10">
-          <slot name="metadata" />
+          <slot name="description" />
         </div>
-        <slot name="post-metadata" />
-      </UPageCard>
+      </template>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4 mx-10">
+        <slot name="metadata" />
+      </div>
+      <slot name="post-metadata" />
+    </UPageCard>
+    <template v-if="!finding">
+      <slot name="custom-skeleton" />
+      <div class="sr-only" role="status">Loading finding</div>
+    </template>
+    <template v-else>
       <slot name="custom" />
       <UPageCard
         v-if="!finding.created_from_user_input"
         class="mt-5"
         :description="
           (executionsTotal ?? finding.executions.length) > 0
-            ? `First detected ${useTimeAgo(finding.executions.map((e) => new Date(e.start)).sort((a, b) => a - b)[0]).value} across ${executionsTotal ?? finding.executions.length} executions${finding.is_fixed ? `. ${firstUpper(fixVerb)}ed ${useTimeAgo(new Date(finding.fixed_date)).value}` : ''}`
+            ? `First detected ${useTimeAgo(finding.executions.map((e) => new Date(e.start)).sort((a, b) => a - b)[0]).value} across ${pluralize(executionsTotal ?? finding.executions.length, 'execution')}${finding.is_fixed ? `. ${firstUpper(fixVerb)}ed ${useTimeAgo(new Date(finding.fixed_date)).value}` : ''}`
             : 'Executions where the finding was detected'
         "
         variant="outline"
-        :ui="{ header: 'w-full', container: 'min-w-0' }"
+        :ui="{ header: 'w-full', container: 'min-w-0 *:min-w-0' }"
       >
         <template #title>
           <h2
@@ -172,7 +200,6 @@ const props = defineProps<{
   title: string;
   finding?: Finding;
   entityName: string;
-  loading?: boolean;
   isTriageable?: boolean;
   isAsset?: boolean;
   fixVerb: string;
@@ -192,6 +219,12 @@ const fixModalOpen = ref(false);
 const executions = ref();
 const executionsTotal = ref();
 const refresh = ref();
+const titleElement = useTemplateRef<HTMLElement>("titleElement");
+const titleTruncated = computed(() =>
+  titleElement.value
+    ? titleElement.value.scrollHeight > titleElement.value.clientHeight + 1
+    : false,
+);
 const dropdownActions = computed(() =>
   props.finding
     ? [

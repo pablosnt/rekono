@@ -28,8 +28,8 @@ class HttpHeaderViewSet(BaseViewSet):
 
     Attributes:
         queryset (QuerySet): Base queryset for all HTTP headers
-        serializer_class (type): Primary serializer for HTTP header data
-        filterset_class (type): Filter class for header querying
+        serializer_class (Serializer): Primary serializer for HTTP header data
+        filterset_class (FilterSet): Filter class for header querying
         permission_classes (list): Required permissions for API access
         search_fields (list): Fields available for text search
         ordering_fields (list): Fields available for result ordering
@@ -51,13 +51,12 @@ class HttpHeaderViewSet(BaseViewSet):
     def get_queryset(self) -> QuerySet:
         """Get filtered queryset with proper access control.
 
-        Filters HTTP headers to ensure users can only access:
-        - Their own user-specific headers
-        - Global headers (user=None, target=None)
-        - Target-specific headers from projects they're members of
-
-        This ensures proper data isolation and prevents unauthorized
-        access to other users' header configurations.
+        Combines two conditions with AND: the header must belong to the
+        current user or have no assigned user, and it must belong to a
+        target from a project the current user is a member of or have no
+        assigned target. This keeps fully global headers visible to
+        everyone while restricting user-specific and target-specific
+        headers to their owners and project members.
 
         Returns:
             QuerySet: Filtered queryset of accessible HTTP headers.
@@ -67,17 +66,9 @@ class HttpHeaderViewSet(BaseViewSet):
         )
 
     def get_serializer_class(self) -> Serializer:
-        """Get appropriate serializer class based on HTTP method.
-
-        Uses different serializers for different operations to optimize
-        API performance and provide appropriate field restrictions.
+        """Get the appropriate serializer class based on the request method.
 
         Returns:
-            Serializer: UpdateHttpHeaderSerializer for PUT operations,
-                       HttpHeaderSerializer for other operations.
-
-        Note:
-            PUT operations use simplified serializer to reduce payload size
-            and improve update performance for header modifications.
+            Serializer: UpdateHttpHeaderSerializer for PUT requests, HttpHeaderSerializer otherwise
         """
         return UpdateHttpHeaderSerializer if self.request.method == "PUT" else super().get_serializer_class()

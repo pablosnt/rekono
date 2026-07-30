@@ -1,7 +1,7 @@
 """Gobuster directory and subdomain enumeration output parser.
 
-Processes Gobuster output to extract discovered paths, subdomains, and virtual hosts
-from brute force enumeration scans.
+Processes Gobuster's line-based plain text output to extract discovered paths,
+subdomains, and virtual hosts from brute force enumeration scans.
 """
 
 from findings.enums import OSINTDataType, PathType
@@ -12,9 +12,11 @@ from tools.parsers.base import BaseParser
 class Gobuster(BaseParser):
     """Parser for Gobuster enumeration output files.
 
-    Extracts discovered endpoints, subdomains, and virtual hosts from Gobuster
-    brute force enumeration results. Supports multiple scan modes including
-    directory, subdomain, and VHOST enumeration.
+    Extracts discovered endpoints, subdomains, and virtual hosts from Gobuster's
+    line-based plain text output. Supports multiple scan modes including directory,
+    subdomain, and VHOST enumeration, telling them apart by matching each line
+    against the literal format each mode is known to produce, since the report
+    carries no explicit marker of which mode generated it.
 
     Attributes:
         Inherits all attributes from BaseParser
@@ -30,16 +32,23 @@ class Gobuster(BaseParser):
         for line in data:
             if " (Status: " in line and ") [Size: " in line:  # Endpoint format
                 aux = line.split(" (Status: ")
+                # A redirect target gobuster appends in brackets for 3xx entries,
+                # e.g. "[--> http://...]", is not captured, only the path and status are
                 self.create_finding(
                     Path,
                     path=Path.clean_path(aux[0].strip()),
                     status=int(aux[1].split(")")[0].strip()),
                     type=PathType.ENDPOINT,
                 )
-            elif " Status: " in line and " [Size: " in line:  # VHOST format
+            # VHOST format: same as the endpoint format above but without parentheses around the status
+            elif " Status: " in line and " [Size: " in line:
                 vhost, status = line.replace("Found: ", "").split(" Status: ")
                 status = status.split(" [")[0].strip()
+                # Wildcard DNS responses make gobuster report a "Found" line for almost every
+                # attempted vhost, so only 2xx/3xx responses are kept as genuine hits
                 if status.startswith("2") or status.startswith("3"):
+                    # Not every entry has a full scheme prefix, e.g. some use a bare "dns:"
+                    # with no slashes, so the prefix is only stripped when "://" is present
                     if "://" in vhost:
                         vhost = vhost.split("://")[1]
                     self.create_finding(

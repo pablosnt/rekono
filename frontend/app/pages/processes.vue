@@ -31,7 +31,6 @@
 </template>
 
 <script setup lang="ts">
-import { h, resolveComponent } from "vue";
 import type { CrudConfig, FilterOption } from "~/types/crud";
 import * as z from "zod";
 import { useUserStore } from "~/store/user";
@@ -48,7 +47,7 @@ const processModalOpen = ref(false);
 const selectedProcess = ref();
 
 onMounted(() => {
-  options.tools(toolOptions);
+  options.tools(toolOptions, { ordering: "-liked,-id" });
   options.users(userOptions, { role: "Admin", is_active: true });
   options.users(userOptions, { role: "Auditor", is_active: true });
 });
@@ -165,8 +164,14 @@ const config: CrudConfig<Process> = reactive({
       type: "checkbox" as const,
     },
   ],
-  ordering: ["id", "name", "owner", { id: "likes_count", label: "Likes" }],
-  defaultOrdering: "-id",
+  ordering: [
+    "id",
+    "name",
+    "owner",
+    { id: "likes", label: "Likes" },
+    { id: "liked", label: "Favourites" },
+  ],
+  defaultOrdering: "-liked,-id",
   pageSize: 25,
   pageSizeOptions: [25, 50, 100],
   formFields: [
@@ -199,9 +204,9 @@ const config: CrudConfig<Process> = reactive({
     tags: z.array(validation.name("tag", true, 100)).optional(),
   }),
   formFullscreen: true,
-  createForm: resolveComponent("ProcessesForm"),
+  createForm: markRaw(resolveComponent("ProcessesForm")),
   updateOnCreateModalOpen: true,
-  editForm: resolveComponent("ProcessesForm"),
+  editForm: markRaw(resolveComponent("ProcessesForm")),
   updateOnEditModalOpen: true,
   deleteMessage: (process: Process) =>
     buildDeleteMessage("process", process.name),

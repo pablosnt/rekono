@@ -1,7 +1,8 @@
 """Django application configuration for the security module.
 
-Configures the security application with Django's application framework,
-providing initialization and configuration for security components.
+Registers the security app with Django's application framework and, once the
+app registry is ready, imports the OpenAPI extension that documents the
+cookie-based JWT authentication scheme for drf-spectacular.
 """
 
 from django.apps import AppConfig
@@ -10,11 +11,11 @@ from framework.apps import BaseApp
 
 
 class SecurityConfig(BaseApp, AppConfig):
-    """Django application configuration for security components.
+    """Configuration class for the security Django application.
 
-    Configures the security application within Django's application framework,
-    enabling security middleware, authentication backends, and security utilities
-    throughout the Rekono platform.
+    Extends BaseApp and AppConfig to provide standard framework integration,
+    plus a custom ready() hook that registers CookieJWTAuthenticationScheme
+    with drf-spectacular's OpenAPI schema generation.
 
     Attributes:
         name (str): The application name identifier for Django's app registry.
@@ -23,7 +24,7 @@ class SecurityConfig(BaseApp, AppConfig):
     name = "security"
 
     def ready(self) -> None:
-        """Initialise the security application after the app registry is loaded.
+        """Initialize the security application after the app registry is loaded.
 
         Calls the base class setup and then imports the OpenAPI extension
         module so that drf-spectacular discovers CookieJWTAuthenticationScheme.

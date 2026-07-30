@@ -46,6 +46,9 @@ class BasePlatform(LoggingEntity):
         Args:
             execution (Execution): The execution that generated the findings.
             findings (list[Finding]): List of findings to process.
+
+        Note:
+            This method should be overridden by concrete implementations.
         """
         pass
 
@@ -65,10 +68,14 @@ class BaseIntegration(BasePlatform):
     Attributes:
         url (str): Base URL for the external service.
         finding_types (list): List of Finding types to process (empty = all).
+        timeout (tuple): Connection and read timeouts in seconds applied to every request.
     """
 
     url = ""
     finding_types = []  # If empty, all findings are processed
+    # The read timeout is the more generous one because some platforms are slow to answer,
+    # but none of them should take more than a few seconds to connect
+    timeout = (5, 30)
 
     @cached_property
     def integration(self) -> Integration:
@@ -117,6 +124,10 @@ class BaseIntegration(BasePlatform):
     ) -> Any:
         """Make HTTP request with logging and error handling.
 
+        The timeout is applied to every request, unless the caller passes its own one,
+        because the Retry policy only covers connection errors and HTTP status codes,
+        not a response that never arrives.
+
         Args:
             method (Callable): HTTP method function (get, post, etc.).
             url (str): Request URL.
@@ -127,9 +138,11 @@ class BaseIntegration(BasePlatform):
         Returns:
             Any: Response data (JSON dict or Response object).
         """
+        kwargs.setdefault("timeout", self.timeout)
         try:
             response = method(url, **kwargs)
         except requests.exceptions.ConnectionError:
+            # Connection errors aren't covered by the status-based Retry adapter, so retry once here
             response = method(url, **kwargs)
         self.logger.info(
             f"[{self.__class__.__name__}] {method.__name__.upper()} {urlparse(url).path} > HTTP {response.status_code}"
@@ -162,20 +175,39 @@ class BaseIntegration(BasePlatform):
         pass
 
     def process_finding(self, execution: Execution, finding: Finding) -> None:
-        """Process a finding with enable, availability and type checks.
+        """Process a finding with enable and type checks.
+
+        Availability is deliberately not checked here, because this method is called once per
+        finding and checking it would perform one live request to the external API for every
+        finding, including the ones that this integration doesn't even process. Callers check
+        it once before processing the findings of an execution, so an unavailable integration
+        is discarded before reaching this point.
+
+        Any failure is logged rather than propagated, so a caller processing a batch of
+        findings doesn't lose the remaining ones because this integration failed for one.
 
         Args:
             execution (Execution): The execution that generated the finding.
             finding (Finding): The finding to process.
         """
-        if not self.is_enabled() or not self.is_available() or not self.is_finding_processable(finding):
+        # The finding type is checked first because it's the only check that doesn't query anything
+        if not self.is_finding_processable(finding) or not self.is_enabled():
             return
-        self._process_finding(execution, finding)
+        try:
+            self._process_finding(execution, finding)
+        except Exception as ex:
+            self.logger.error(
+                f"[{self.__class__.__name__}] Error processing finding {finding.id} from execution {execution.id}: {str(ex)}"
+            )
 
     def process_findings(self, execution: Execution, findings: list[Finding]) -> None:
         """Process multiple findings from an execution.
 
-        Skips processing entirely when the integration is disabled or unavailable.
+        Skips processing entirely when the integration is disabled or unavailable. This is
+        the only place where availability is checked, once per execution, so the findings are
+        processed without performing one live request to the external API per finding.
+        Failures affecting one finding are contained by process_finding, so they don't
+        stop the remaining findings from being processed.
 
         Args:
             execution (Execution): The execution that generated the findings.
@@ -285,21 +317,32 @@ class BaseCveProvider(BaseIntegration):
     def get_cve(self, cve: str) -> CveEnrichment | None:
         """Retrieve and parse CVE enrichment data from the provider.
 
+        A provider that fails for this CVE is logged and treated as having no data, so
+        the callers querying several providers still apply the data returned by the
+        others, and a provider outage never interrupts the findings processing.
+
         Args:
             cve (str): CVE identifier to enrich.
 
         Returns:
-            CveEnrichment | None: Parsed CVE data, or None if the provider returns nothing.
+            CveEnrichment | None: Parsed CVE data, or None if the provider returns
+                                  nothing or fails.
         """
-        data = self._get_cve(cve)
-        return self._parse_cve(cve, data) if data else None
+        try:
+            data = self._get_cve(cve)
+            return self._parse_cve(cve, data) if data else None
+        except Exception as ex:
+            self.logger.error(f"[{self.__class__.__name__}] Error getting {cve} data: {str(ex)}")
+            return None
 
     def cve_quality_score(self, data: CveEnrichment) -> int:
         """Calculate a data quality score for CVE enrichment data.
 
-        Scores start at 10 and are adjusted based on CVSS version (older versions
-        penalised), presence of CWE and affected technology data, and EPSS availability.
-        Subclasses may override to apply provider-specific adjustments.
+        Scores start at 10 and are reduced most heavily for a missing description,
+        then for missing CWE or affected technology data, and for missing or
+        outdated CVSS data. A small bonus applies when EPSS scores or an alternate
+        identifier (EUVD, GHSA, or OSV) is present. Subclasses may override to
+        apply provider-specific adjustments.
 
         Args:
             data (CveEnrichment): CVE enrichment data to score.
@@ -332,6 +375,8 @@ class BaseCveProvider(BaseIntegration):
             data (CveEnrichment): CVE enrichment data to apply.
         """
         finding.name = data.name
+        # Some providers return the description as Markdown starting with a heading; render it to
+        # HTML and strip the tags to plain text, doubling newlines to keep paragraph breaks
         finding.description = (
             BeautifulSoup(markdown(data.description), features="html.parser").get_text().replace("\n", "\n\n")
             if data.description and data.description.startswith("#")
@@ -480,7 +525,7 @@ class BaseNotification(BasePlatform):
             }
         )
         if execution.task.executor:
-            if execution.task.executor.notification_scope != Notification.DISABLED and getattr(
+            if execution.task.executor.notification_scope != Notification.ONLY_ALERTS and getattr(
                 execution.task.executor, self.enable_field
             ):
                 users.add(execution.task.executor)
@@ -505,13 +550,22 @@ class BaseNotification(BasePlatform):
     def process_findings(self, execution: Execution, findings: list[Finding]) -> None:
         """Process findings by sending execution notifications.
 
+        Skips notifying when the integration is unavailable. Any failure while
+        building or sending the notification is logged rather than propagated, so
+        a broken notification channel never interrupts execution processing.
+
         Args:
             execution (Execution): The execution that generated the findings.
             findings (list[Finding]): List of findings from the execution.
         """
         if not self.is_available():
             return
-        self._notify_execution(self._get_users_to_notify_execution(execution), execution, findings)
+        try:
+            self._notify_execution(self._get_users_to_notify_execution(execution), execution, findings)
+        except Exception as ex:
+            self.logger.error(
+                f"[{self.__class__.__name__}] Error processing {len(findings)} findings from execution {execution.id}: {str(ex)}"
+            )
 
     def _get_users_to_notify_alert(self, alert: Alert) -> list[Any]:
         """Get list of users to notify about an alert.

@@ -1,10 +1,7 @@
-"""
-WSGI config for rekono project.
+"""WSGI entry point for the Rekono Django project.
 
-It exposes the WSGI callable as a module-level variable named ``application``.
-
-For more information on this file, see
-https://docs.djangoproject.com/en/4.2/howto/deployment/wsgi/
+Exposes the WSGI callable as the module-level ``application`` variable, used
+by WSGI-compatible servers to serve the platform.
 """
 
 import os

@@ -1,8 +1,8 @@
 """Django REST Framework serializers for VirusTotal platform configuration.
 
 This module provides serialization classes for VirusTotal platform settings
-and configuration management through REST API endpoints. Supports secure
-handling of API credentials and real-time platform availability checking.
+and configuration management through REST API endpoints. Supports protected
+handling of API credentials and refreshes the platform availability flag on update.
 """
 
 from rest_framework.serializers import ModelSerializer
@@ -13,20 +13,27 @@ from platforms.virustotal.models import VirusTotalSettings
 
 
 class VirusTotalSettingsSerializer(ModelSerializer):
-    """Serializer for VirusTotal platform configuration settings.
+    """Serializer for VirusTotal platform settings.
 
-    Provides secure serialization of VirusTotal platform settings including
-    encrypted API token handling and real-time availability checking.
-    Supports configuration management through REST API endpoints.
+    Handles serialization and deserialization of VirusTotalSettings objects. Includes
+    protected API token handling and refreshes the persisted availability flag whenever
+    settings are updated through the API.
 
     Attributes:
-        api_token (ProtectedSecretField): Secure API token field with
-                                          encryption
+        api_token (ProtectedSecretField): Secured API token field with masking
     """
 
     api_token = ProtectedSecretField(required=False, allow_null=True, source="secret")
 
     class Meta:
+        """Meta configuration for VirusTotalSettingsSerializer.
+
+        Attributes:
+            model (Model): The VirusTotalSettings model to serialize
+            fields (tuple): Field names to include in serialization
+            read_only_fields (tuple): Fields that cannot be modified via API
+        """
+
         model = VirusTotalSettings
         fields = ("id", "api_token", "is_available")
         read_only_fields = ("is_available",)

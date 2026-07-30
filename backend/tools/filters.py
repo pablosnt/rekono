@@ -20,10 +20,14 @@ class ToolFilter(LikeFilter):
     Supports complex relationship filtering across tool configurations and arguments.
 
     Attributes:
-        stage (ChoiceFilter): Filter by execution stage through configurations
-        intensity (ChoiceFilter): Filter by intensity level through intensities
-        input (CharFilter): Filter by accepted input type through arguments
-        output (CharFilter): Filter by produced output type through configurations
+        stage (ChoiceFilter): Exact match on Configuration.stage via
+                              configurations__stage, restricted to Stage choices
+        intensity (ChoiceFilter): Exact match on Intensity.value via
+                                  intensities__value, restricted to Intensity choices
+        input (CharFilter): Exact match on InputType.name via
+                            configurations__arguments__inputs__type__name
+        output (CharFilter): Exact match on InputType.name via
+                             configurations__outputs__type__name
     """
 
     stage = ChoiceFilter(field_name="configurations__stage", choices=Stage.choices)
@@ -58,10 +62,11 @@ class ConfigurationFilter(FilterSet):
     process associations, and standard configuration field filtering.
 
     Attributes:
-        input (CharFilter): Filter by accepted input type name
-        output (CharFilter): Filter by produced output type name
-        process (NumberFilter): Filter by associated process ID
-        no_process (NumberFilter): Exclude configurations associated with specific process
+        input (CharFilter): Exact match on InputType.name via arguments__inputs__type__name
+        output (CharFilter): Exact match on InputType.name via outputs__type__name
+        process (NumberFilter): Exact match on Process.id via steps__process__id
+        no_process (NumberFilter): Excludes configurations whose steps__process__id
+                                    equals the given Process id (exclude=True)
     """
 
     input = CharFilter(field_name="arguments__inputs__type__name")

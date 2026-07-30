@@ -60,9 +60,11 @@ const wordlists = ref([]);
 const wordlistOptions = ref([]);
 
 function loadWordlists() {
-  props.api.list("wordlists/", {}, true).then((response) => {
-    wordlistOptions.value = response.items;
-  });
+  props.api
+    .list("wordlists/", { ordering: "-liked,-id" }, true)
+    .then((response) => {
+      wordlistOptions.value = response.items;
+    });
 }
 
 watch(

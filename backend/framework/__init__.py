@@ -9,9 +9,15 @@ Key Features:
     - Standardized Django REST framework ViewSets and serializers with security controls
     - Advanced filtering and pagination capabilities for API endpoints
     - Logging infrastructure with request tracking and user identification
+    - Request context propagation for accessing the active HTTP request from models,
+      serializers, and background logic without passing it explicitly
     - Integration platforms for external security tools and services
     - Background job processing with Redis Queue (RQ) integration
+    - Redis-backed caching for expensive, repeatable lookups such as URL probing
     - Custom field types and validation for security-focused applications
+    - Custom exception handling that turns database integrity errors into
+      user-friendly API responses
+    - App configuration utilities with automatic fixture loading after migrations
 
 Architecture:
     The framework follows a modular design with base classes that provide common

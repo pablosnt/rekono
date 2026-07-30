@@ -8,26 +8,32 @@ context from external security resources and threat intelligence sources.
 Key Features:
     - Automated finding enrichment with external platform data
     - HackTricks integration for penetration testing methodologies and guides
-    - Host metadata enrichment with geolocation and DNS resolution
-    - NVD NIST vulnerability intelligence integration for CVE enrichment
-    - VirusTotal threat intelligence for reputation and malware analysis
+    - Host metadata enrichment with DNS reverse resolution and geolocation
+    - CVE enrichment from multiple providers (NVD NIST, VulnCheck, OSV, EUVD and GHSA),
+      each scored for data quality so the best match wins when more than one provider
+      returns data for the same CVE
+    - EPSS exploitation probability from FIRST, applied directly to the finding rather
+      than competing with the CVE providers
+    - VirusTotal integration for host reputation, detection vote counts, and WHOIS data
     - CVE Crowd trending vulnerability monitoring and alerting
-    - DefectDojo vulnerability management integration
+    - DefectDojo vulnerability management synchronization
     - SMTP and Telegram notification platform support
-    - Extensible integration framework for custom platform connectors
-    - Asynchronous processing for scalable intelligence gathering
+    - Extensible base classes (BaseIntegration, BaseCveProvider, BaseNotification) for
+      adding new platform connectors
 
 Integration Architecture:
     - BaseIntegration provides common functionality for all platform connectors
     - Finding-specific processors enrich data based on discovery type
     - Automatic integration triggering based on finding characteristics
     - Configurable integration settings and authentication management
-    - Error handling and retry mechanisms for reliable data collection
+    - Integrations run inside Rekono's asynchronous findings queue, so a slow or
+      failing platform never blocks the others
 
-Security:
-    - Secure API credential management with encryption
-    - Rate limiting and request throttling for external API compliance
-    - Input validation and sanitization for all external data
-    - Audit logging for all platform integration activities
-    - Network timeout and security controls for external connections
+Reliability and Security:
+    - Secure API credential management through encrypted settings models
+    - Automatic retries with backoff for transient HTTP errors and connection failures
+    - Connection and read timeouts on every external request, so an unresponsive platform
+      fails and moves on instead of holding a findings queue worker
+    - Every external request is logged, and processing errors are caught and logged
+      per finding so one failure doesn't stop the rest of the batch
 """

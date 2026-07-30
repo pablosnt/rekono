@@ -1,8 +1,8 @@
 """Django REST framework serializers for statistics data conversion.
 
 Provides serializer classes for statistics API responses including queue monitoring,
-vulnerability analytics, host statistics, and evolution data with field validation
-and type conversion for consistent API data formats.
+vulnerability analytics, host statistics, and evolution data. Each serializer only
+formats aggregated query results into a consistent JSON shape for read-only endpoints.
 """
 
 from rest_framework.serializers import BooleanField, CharField, DateField, IntegerField, Serializer

@@ -148,4 +148,5 @@ class SearchsploitTest(ParserTest, TestCase):
             ],
         ),
         ParserTestCase("nothing.json"),
+        ParserTestCase("empty.json", []),
     ]

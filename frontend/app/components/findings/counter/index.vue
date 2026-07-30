@@ -7,7 +7,11 @@
           : `/${counter.plural.toLowerCase()}`
         : undefined
     "
-    :aria-label="`${formatCount(counter.count as number)} ${counter.plural}`"
+    :aria-label="
+      counter.loading && counter.count === 0
+        ? `Loading ${counter.plural}`
+        : `${formatCount(counter.count as number)} ${counter.plural}`
+    "
     :class="[
       'group relative flex flex-col items-center justify-center gap-1.5 p-3 rounded-xl border border-default bg-elevated transition-all duration-200 text-center overflow-hidden',
       counter.count > 0
@@ -31,6 +35,7 @@
     <div class="leading-none">
       <USkeleton
         v-if="counter.loading && counter.count === 0"
+        aria-hidden="true"
         class="h-6 w-10 mx-auto mt-0.5"
       />
       <span

@@ -1,11 +1,6 @@
 <template>
   <div ref="containerRef">
-    <USkeleton v-if="loading" class="h-[180px] w-full rounded-lg" />
-    <VisSingleContainer
-      v-else-if="hasValues"
-      :data="data"
-      :height="effectiveHeight"
-    >
+    <VisSingleContainer v-if="hasValues" :data="data" :height="effectiveHeight">
       <VisDonut
         :value="(d) => d.value"
         :color="(d) => d.color"
@@ -30,7 +25,6 @@ import { useElementSize } from "@vueuse/core";
 const props = withDefaults(
   defineProps<{
     data: Array<{ value: number; color: string; [key: string]: unknown }>;
-    loading?: boolean;
     centralLabel?: string;
     radius?: number;
     arcWidth?: number;
@@ -38,7 +32,6 @@ const props = withDefaults(
     tooltip?: (d: unknown) => string;
   }>(),
   {
-    loading: false,
     radius: 160,
     arcWidth: 35,
   },

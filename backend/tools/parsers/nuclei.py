@@ -1,12 +1,13 @@
 """Nuclei vulnerability scanner output parser.
 
-Processes Nuclei JSON output to extract vulnerabilities, technology fingerprints,
-credential findings, exposed ports, and discovered paths from web application
-security scans. Findings are linked to the port they were detected on whenever
-Nuclei reports one.
+Processes Nuclei output, one JSON object per line rather than a single JSON document,
+to extract vulnerabilities, technology fingerprints, credential findings, exposed
+ports, and discovered paths from web application security scans. Findings are linked
+to the port they were detected on whenever Nuclei reports one.
 """
 
 import json
+import re
 from typing import cast
 from urllib.parse import urlparse
 
@@ -28,12 +29,13 @@ class Nuclei(BaseParser):
     """
 
     def _parse(self) -> None:
-        """Parse Nuclei JSON output and extract security findings.
+        """Parse Nuclei line-delimited JSON output and extract security findings.
 
-        Processes line-delimited JSON output to create Vulnerability, Technology,
-        Credential, Port, and Path findings based on template tags and extracted
-        results. Technology and Vulnerability findings are linked to the Port they
-        were detected on when Nuclei reports a port for the matched target.
+        Processes each JSON line to create Vulnerability, Technology, Credential, Port, and Path
+        findings based on template tags and extracted results. Severity, CVE and CWE identifiers
+        come from the matched template's own metadata, so they are only as complete as the
+        template author made them. Technology and Vulnerability findings are linked to the Port
+        they were detected on when Nuclei reports a port for the matched target.
         """
         # Parse each line of the JSON output as a separate finding
         data = [json.loads(line) for line in self.load_report_by_lines()]
@@ -78,16 +80,27 @@ class Nuclei(BaseParser):
             info = item.get("info", {})
             name = info.get("name")
             description = info.get("description")
+            # A template can list several reference URLs; only the first one is kept
             reference = info.get("reference", [])
             tags = info.get("tags", []) or []
             # Classify findings based on Nuclei template tags
             # Different tags indicate different types of security findings
             if "tech" in tags:
                 # Technology detection templates - create Technology findings
+                tech_name = matcher or name
+                version = None
+                if matcher and item.get("extractor-name") == "version":
+                    # The "version" extractor yields the version string itself, so the technology
+                    # name comes from the template instead of the extracted result
+                    version = matcher
+                    tech_name = name
                 self.create_finding(
                     Technology,
                     **({"port": port, "linked_finding": True} if port else {}),
-                    name=matcher or name,
+                    # Drop trailing detection descriptors so the technology name stays clean
+                    name=re.split(r"\s+(?:End-of-Life|Detection|Detect|Version)\b", tech_name)[0].strip() or tech_name,
+                    version=version,
+                    # Reuse the template name as description only when the matcher already replaced it as the name
                     description=description.strip() if description else (name if matcher else None),
                     reference=reference[0] if reference else None,
                 )
@@ -104,6 +117,8 @@ class Nuclei(BaseParser):
                 # Extract security classification data (severity, CVE, CWE)
                 severity = info.get("severity")
                 classification = info.get("classification", {})
+                # CVE and CWE identifiers are optional per template: the classification block
+                # itself, or either key inside it, may be missing or null
                 cve = classification.get("cve-id")
                 cwe = classification.get("cwe-id", [])
                 remediation = info.get("remediation")
@@ -120,6 +135,8 @@ class Nuclei(BaseParser):
                     attributes["port"] = port
                     attributes["linked_finding"] = True
                 if cve and isinstance(cve, list):
+                    # A template can reference more than one CVE, so a separate Vulnerability
+                    # finding is created per CVE, all sharing the same other attributes
                     for cve_value in cve:
                         attributes["cve"] = cve_value.upper()
                         self.create_finding(Vulnerability, **attributes)

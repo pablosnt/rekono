@@ -8,7 +8,7 @@ customizable content filtering and automated delivery through multiple channels.
 Report Types:
     - PDF Reports: Executive-ready documents with visual statistics and detailed findings
     - JSON Reports: Machine-readable exports for integration with external tools
-    - XML Reports: Structured data exports compatible with vulnerability scanners
+    - XML Reports: Structured, hierarchical exports for tooling that consumes XML
 
 Architecture:
     The reporting system uses a multi-threaded approach where report generation occurs

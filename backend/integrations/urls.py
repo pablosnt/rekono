@@ -1,7 +1,7 @@
 """URL configuration for integrations REST API endpoints.
 
-Defines URL patterns for integration management API using Django REST framework
-router to register ViewSet endpoints for integration operations.
+Registers the "integrations" endpoint with Django REST framework's SimpleRouter,
+routing requests to IntegrationViewSet for third-party integration management.
 """
 
 from rest_framework.routers import SimpleRouter

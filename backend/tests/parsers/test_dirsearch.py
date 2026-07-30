@@ -33,4 +33,8 @@ expected = [
 
 class DirsearchTest(ParserTest, TestCase):
     tool_name = "Dirsearch"
-    cases = [ParserTestCase("2022-default.json", expected), ParserTestCase("2025-default.json", expected)]
+    cases = [
+        ParserTestCase("empty.json", []),
+        ParserTestCase("2022-default.json", expected),
+        ParserTestCase("2025-default.json", expected),
+    ]

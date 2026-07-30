@@ -126,8 +126,12 @@ class TaskSerializer(RelatedNotesSerializer):
     def get_status(self, instance: Any) -> str:
         """Get the computed status of the task based on execution states.
 
-        Determines task status by analyzing the status of all associated executions.
-        Follows priority: RUNNING > CANCELLED > ERROR > COMPLETED > REQUESTED
+        Task status is derived from its executions rather than stored directly.
+        Any RUNNING, CANCELLED, or ERROR execution takes priority and becomes the
+        task status. If every execution finished as COMPLETED or SKIPPED, the task
+        is COMPLETED. A task without executions is CANCELLED once it has ended, or
+        REQUESTED while still pending. A mix of finished and still-REQUESTED
+        executions is reported as RUNNING.
 
         Args:
             instance (Task): The task instance being serialized
@@ -152,8 +156,10 @@ class TaskSerializer(RelatedNotesSerializer):
     def get_progress(self, instance: Any) -> int:
         """Get the completion progress percentage for the task.
 
-        Calculates progress based on the ratio of completed executions
-        (including ERROR, COMPLETED, SKIPPED, CANCELLED) to total executions.
+        Calculates progress as the percentage of executions that reached a
+        terminal status (COMPLETED, ERROR, SKIPPED, or CANCELLED). If the task
+        has no executions yet, progress is 100 when the task has already ended,
+        or 0 while it is still pending.
 
         Args:
             instance (Task): The task instance being serialized
@@ -163,15 +169,7 @@ class TaskSerializer(RelatedNotesSerializer):
         """
         total = instance.executions.count()
         return (
-            math.ceil(
-                (
-                    instance.executions.filter(
-                        status__in=[Status.ERROR, Status.COMPLETED, Status.SKIPPED, Status.CANCELLED]
-                    ).count()
-                    / total
-                )
-                * 100
-            )
+            math.ceil((instance.executions.filter(status__in=Status.finished()).count() / total) * 100)
             if total > 0
             else (100 if instance.end else 0)
         )
@@ -180,10 +178,16 @@ class TaskSerializer(RelatedNotesSerializer):
         """Validate task configuration and ensure data consistency.
 
         Performs complex validation including:
-        - Mutually exclusive process/configuration validation
-        - Tool intensity compatibility checks
-        - Input type validation for tool configurations
-        - Repeat scheduling validation
+        - Target port ownership, ensuring it belongs to the task's target
+        - Defaulting a missing intensity to NORMAL
+        - Requiring either a process or a configuration. If both are given, the
+          configuration wins and the process is discarded rather than rejected
+        - Rejecting deprecated tool configurations
+        - Tool intensity compatibility with the selected configuration
+        - Clearing input technology and vulnerability selections that the selected
+          configuration's tool does not support, and clearing them entirely when a
+          process is selected instead
+        - Repeat scheduling, requiring repeat_in and repeat_time_unit together
 
         Args:
             attrs (dict[str, Any]): The attributes to validate
@@ -212,6 +216,7 @@ class TaskSerializer(RelatedNotesSerializer):
                     f"Invalid intensity {attrs['intensity']} for tool {cast(Configuration, attrs.get('configuration')).tool.name}",
                     code="intensity",
                 )
+            # Drop input selections that the configuration's tool doesn't accept as arguments
             for input_type, field in [
                 (InputTypeName.TECHNOLOGY, "input_technologies"),
                 (InputTypeName.VULNERABILITY, "input_vulnerabilities"),
@@ -231,6 +236,7 @@ class TaskSerializer(RelatedNotesSerializer):
                     "process": "Invalid task. Process or configuration is required",
                 }
             )
+        # Both repeat fields are required together, so clear both if either is missing
         if not attrs.get("repeat_in") or not attrs.get("repeat_time_unit"):
             attrs["repeat_in"] = None
             attrs["repeat_time_unit"] = None

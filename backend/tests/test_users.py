@@ -430,7 +430,7 @@ class ProfileTest(ApiTest, TestCase):
         self.assertEqual(self.auditor1, users_to_notify[1])
         self.assertEqual(self.reader1, users_to_notify[2])
 
-        self.auditor1.notification_scope = Notification.DISABLED
+        self.auditor1.notification_scope = Notification.ONLY_ALERTS
         self.auditor1.save(update_fields=["notification_scope"])
         self.execution = Execution.objects.get(pk=self.execution.id)
         users_to_notify = list(notification._get_users_to_notify_execution(self.execution))

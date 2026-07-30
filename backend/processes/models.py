@@ -24,14 +24,14 @@ from tools.models import Configuration
 class Process(BaseLike):
     """Model representing a security testing workflow with multiple tool execution steps.
 
-    Represents a complete security testing process that consists of sequential tool
+    Represents a complete security testing process that consists of multiple tool
     execution steps designed to perform comprehensive vulnerability assessments.
     Processes support community sharing through the like system, tagging for
     categorization, and ownership management for access control.
 
     Attributes:
         name (TextField): Unique process name for identification (max 100 chars)
-        description (TextField): Detailed process description (max 300 chars)
+        description (TextField): Detailed process description (max 500 chars)
         owner (ForeignKey): The user who created this process (optional)
         tags (TaggableManager): Tag system for process categorization
         steps (RelatedManager): Related Step objects defining the workflow
@@ -67,13 +67,15 @@ class Step(BaseModel):
     """Model representing a single tool execution step within a security process.
 
     Represents an individual step in a security testing process that defines
-    which tool configuration to execute. Steps are executed sequentially
-    within their parent process and form the building blocks of complex
-    security testing workflows.
+    which tool configuration to execute. Steps within a process are planned
+    and executed based on dependencies inferred from their configuration's
+    input and output types, so independent steps can run in parallel while
+    dependent ones wait for their prerequisites. Steps form the building
+    blocks of complex security testing workflows.
 
     Attributes:
         process (ForeignKey): The parent process containing this step
-        configuration (ForeignKey): Tool configuration to execute in this step
+        configuration (ForeignKey): Tool configuration to execute in this step (optional)
 
     Example:
         Add a port scanning step to a process:

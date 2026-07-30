@@ -102,6 +102,12 @@ class VirusTotalTest(BaseTest, TestCase):
     def test_cached_is_available(self) -> None:
         self.assertFalse(self.virustotal.is_available())
 
+    @mock.patch("platforms.virustotal.integrations.VirusTotal._process_finding", exception)
+    @mock.patch("platforms.virustotal.integrations.VirusTotal.is_available", return_true)
+    def test_handled_exception(self) -> None:
+        self.virustotal.process_findings(self.execution, [self.host])
+        self.assertTrue(True)
+
 
 new_settings = {"api_token": "cve-crowd-token"}
 invalid_settings = {"api_token": "x" * 70}

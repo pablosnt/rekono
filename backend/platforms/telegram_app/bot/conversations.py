@@ -210,6 +210,7 @@ class NewPort(BaseConversationFromProject, TargetMixin, TargetPortMixin, Authent
 class Tool(
     BaseConversationFromProject,
     TargetMixin,
+    TargetPortMixin,
     ToolMixin,
     ConfigurationMixin,
     IntensityMixin,
@@ -221,8 +222,8 @@ class Tool(
     """Conversation for executing individual security tools.
 
     Provides a comprehensive workflow for configuring and executing security
-    tools including target selection, tool configuration, intensity settings,
-    wordlist selection, and input parameter configuration.
+    tools including target selection, target port selection, tool configuration,
+    intensity settings, wordlist selection, and input parameter configuration.
 
     Attributes:
         help (str): Command help text displayed in command list.
@@ -244,6 +245,8 @@ class Tool(
             self.save_project,
             self.ask_for_target,
             self.save_target,
+            self.ask_for_target_port,
+            self.save_target_port,
             self.ask_for_tool,
             self.save_tool,
             self.ask_for_configuration,
@@ -263,12 +266,15 @@ class Tool(
         ]
 
 
-class Process(BaseConversationFromProject, TargetMixin, ProcessMixin, IntensityMixin, WordlistMixin, TaskMixin):
+class Process(
+    BaseConversationFromProject, TargetMixin, TargetPortMixin, ProcessMixin, IntensityMixin, WordlistMixin, TaskMixin
+):
     """Conversation for executing security testing processes.
 
     Provides a workflow for configuring and executing predefined security
-    testing processes including process selection, intensity configuration,
-    and wordlist selection for automated security assessments.
+    testing processes including target port selection, process selection,
+    intensity configuration, and wordlist selection for automated security
+    assessments.
 
     Attributes:
         help (str): Command help text displayed in command list.
@@ -290,6 +296,8 @@ class Process(BaseConversationFromProject, TargetMixin, ProcessMixin, IntensityM
             self.save_project,
             self.ask_for_target,
             self.save_target,
+            self.ask_for_target_port,
+            self.save_target_port,
             self.ask_for_process,
             self.save_process,
             self.ask_for_intensity,

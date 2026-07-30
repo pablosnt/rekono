@@ -9,6 +9,7 @@ from tests.framework.cases import ParserTestCase
 class ZapTest(ParserTest, TestCase):
     tool_name = "ZAP"
     cases = [
+        ParserTestCase("empty.xml", []),
         ParserTestCase(
             "active-scan.xml",
             [
@@ -131,5 +132,5 @@ class ZapTest(ParserTest, TestCase):
                     "reference": "http://msdn.microsoft.com/en-us/library/ie/gg622941%28v=vs.85%29.aspx",
                 },
             ],
-        )
+        ),
     ]

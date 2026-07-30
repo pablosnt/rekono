@@ -2,7 +2,8 @@
   <UModal
     v-if="
       integrations.defectdojo.integration?.enabled &&
-      integrations.defectdojo.settings?.is_available
+      integrations.defectdojo.settings?.is_available &&
+      userStore.is_auditor
     "
     :ui="{ content: 'sm:max-w-3xl sm:max-h-xl', footer: 'justify-end' }"
   >
@@ -10,14 +11,16 @@
       text="Configure DefectDojo sync"
       :content="{ side: 'left', sideOffset: 8, collisionPadding: 8 }"
     >
-      <UButton
-        :avatar="{
-          src: integrations.defectdojo.integration.icon,
-          size: 'lg',
-        }"
-        variant="ghost"
-        aria-label="Configure DefectDojo sync"
-      />
+      <UButton variant="ghost" aria-label="Configure DefectDojo sync">
+        <UChip
+          inset
+          size="xl"
+          position="bottom-right"
+          :color="sync ? 'success' : 'error'"
+        >
+          <UAvatar :src="integrations.defectdojo.integration.icon" size="lg" />
+        </UChip>
+      </UButton>
     </UTooltip>
     <template #header="{ close }">
       <div class="flex items-center justify-between w-full">
@@ -110,6 +113,7 @@
 </template>
 
 <script setup lang="ts">
+import { useUserStore } from "~/store/user";
 import { useIntegrationsStore } from "~/store/integrations";
 import type { DefectDojoSync } from "~/types/models";
 import * as z from "zod";
@@ -120,6 +124,7 @@ defineEmits<{ update: [] }>();
 const integrations = useIntegrationsStore();
 const api = useApi("/api/defectdojo/sync/");
 const route = useRoute();
+const userStore = useUserStore();
 const form = ref();
 const config = computed(() => ({
   entityName: "DefectDojo sync",

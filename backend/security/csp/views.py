@@ -7,7 +7,6 @@ format through separate concrete view classes that share a common parsing base.
 """
 
 import json
-import logging
 import unicodedata
 from typing import Any
 
@@ -17,10 +16,10 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-logger = logging.getLogger()
+from framework.logging import LoggingEntity
 
 
-class CspReportView(APIView):
+class CspReportView(APIView, LoggingEntity):
     """Base view for receiving and logging Content Security Policy violation reports.
 
     Provides the shared parsing and dispatch logic for CSP violation ingestion.
@@ -30,8 +29,8 @@ class CspReportView(APIView):
     a non-2xx response as a reason to suppress future reports.
 
     Attributes:
-        authentication_classes (list): Empty — browsers send reports without credentials.
-        permission_classes (list): Empty — no authentication required for violation delivery.
+        authentication_classes (list): Empty, since browsers send reports without credentials.
+        permission_classes (list): Empty, since no authentication is required for violation delivery.
     """
 
     authentication_classes = []
@@ -63,7 +62,7 @@ class CspReportView(APIView):
                 (e.g. ``script-src``), or ``None`` if absent from the report.
         """
         if blocked and directive:
-            logger.warning(
+            self.logger.warning(
                 f"[Content-Security-Policy] URI {self._sanitize(blocked)} has been blocked{f' in {self._sanitize(origin)}' if origin else ''} due to {self._sanitize(directive)} directive"
             )
 
@@ -97,8 +96,9 @@ class CspReportView(APIView):
         """
         try:
             body = json.loads(request.body)
-        except Exception:  # pragma: no cover
-            # Discard unparseable payloads — browsers occasionally send empty or malformed bodies
+        except Exception as ex:  # pragma: no cover
+            self.logger.error(f"[{self.__class__.__name__}] Error parsing a CSP report: {str(ex)}")
+            # Discard unparseable payloads, since browsers occasionally send empty or malformed bodies
             return Response(status=status.HTTP_204_NO_CONTENT)
         for violation in body if isinstance(body, list) else [body]:
             self._process_violation(violation)

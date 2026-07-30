@@ -1,6 +1,6 @@
-"""Settings Django admin configuration.
+"""Django admin configuration for settings module.
 
-This module registers the Settings model with Django admin interface for
+Registers the Settings model with the Django admin interface for
 administrative access to global platform configuration parameters.
 """
 

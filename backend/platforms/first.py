@@ -6,7 +6,6 @@ and percentile rankings updated on a per-execution and bulk monitoring basis.
 """
 
 import re
-from datetime import date
 
 from executions.models import Execution
 from findings.framework.models import Finding
@@ -21,6 +20,11 @@ class First(BaseIntegration):
     Enriches vulnerability findings with EPSS scores and percentile rankings
     from the FIRST API. Supports both per-execution enrichment for individual
     CVEs and bulk monitoring to keep EPSS data current across all active findings.
+
+    Processing Features:
+        - Per-execution EPSS enrichment for a single vulnerability finding
+        - Bulk EPSS monitoring across all non-fixed vulnerabilities, in batches of 100 CVEs
+        - CVE identifier validation before bulk requests to keep malformed values out of a batch
 
     Attributes:
         finding_types (list): Supported finding types (Vulnerability only).
@@ -55,22 +59,17 @@ class First(BaseIntegration):
         except Exception:
             return False
 
-    def _get_epss_for_cves(self, cves: list[str], only_today_values: bool = False) -> list[dict[str, str]]:
+    def _get_epss_for_cves(self, cves: list[str]) -> list[dict[str, str]]:
         """Retrieve EPSS scores for a batch of CVEs from the FIRST API.
 
         Args:
             cves (list[str]): CVE identifiers to retrieve EPSS data for.
-            only_today_values (bool): If True, restricts results to today's date so that
-                only scores updated in the current daily release are returned. Defaults to False.
 
         Returns:
             list[dict[str, str]]: List of EPSS records, each containing cve, epss,
                 percentile, and date fields.
         """
-        params: dict = {"cve": ",".join(cves)}
-        if only_today_values:
-            params["date"] = date.today().isoformat()
-        return self._request(self.session.get, self.url, params=params).get("data", [])
+        return self._request(self.session.get, self.url, params={"cve": ",".join(cves)}).get("data", [])
 
     def _process_finding(self, execution: Execution, finding: Vulnerability) -> None:
         """Enrich a single vulnerability finding with its current EPSS score.
@@ -97,10 +96,9 @@ class First(BaseIntegration):
     def monitor(self) -> None:
         """Bulk-update EPSS scores for all active vulnerability findings.
 
-        Retrieves today's EPSS data in batches of 100 CVEs from the FIRST API and
+        Retrieves the latest EPSS data in batches of 100 CVEs from the FIRST API and
         updates epss_score and epss_percentile across all non-fixed vulnerabilities
-        with a CVE identifier. Only scores published in the current daily EPSS release
-        are applied. Failures on individual batches are silently skipped.
+        with a CVE identifier. Failures on individual batches are silently skipped.
         """
         if not self.is_enabled():
             return
@@ -116,7 +114,7 @@ class First(BaseIntegration):
         ]
         for i in range(0, len(cves), 100):
             try:
-                data = self._get_epss_for_cves(cves[i : i + 100], only_today_values=True)
+                data = self._get_epss_for_cves(cves[i : i + 100])
                 for item in data:
                     data_to_update = {
                         k: v
@@ -128,5 +126,7 @@ class First(BaseIntegration):
                     }
                     if data_to_update:
                         Vulnerability.objects.filter(cve=item["cve"], is_fixed=False).update(**data_to_update)
-            except Exception:
-                pass
+            except Exception as ex:
+                self.logger.error(
+                    f"[{self.__class__.__name__}] Error getting EPSS score and percentile for CVEs: {str(ex)}"
+                )

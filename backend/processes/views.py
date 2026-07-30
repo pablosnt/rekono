@@ -36,7 +36,7 @@ class ProcessViewSet(LikeViewSet):
     filterset_class = ProcessFilter
     permission_classes = [IsAuthenticated, RekonoModelPermission, OwnerPermission]
     search_fields = ["name", "description"]
-    ordering_fields = ["id", "name", "owner", "likes_count"]
+    ordering_fields = ["id", "name", "owner", "liked", "likes"]
     http_method_names = ["get", "post", "put", "delete"]
 
 

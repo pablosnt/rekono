@@ -11,7 +11,6 @@
     }"
   >
     <template #content>
-      <UProgress :class="[loading ? 'visible' : 'invisible', 'mb-1']" />
       <CrudForm
         ref="form"
         :api="api"
@@ -136,18 +135,8 @@ const config = ref({
 });
 
 function fetch() {
-  loading.value = true;
-  api
-    .get("1/")
-    .then((response) => {
-      settings.value = response;
-    })
-    .then(() => {
-      loading.value = false;
-    });
+  api.get("1/").then((response) => (settings.value = response));
 }
 
-onMounted(() => {
-  fetch();
-});
+onMounted(fetch);
 </script>

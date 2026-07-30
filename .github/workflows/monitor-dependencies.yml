@@ -15,7 +15,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # Uncheckable: gitleaks, searchsploit, spring4shell-scan, log4j-scan
+          # Uncheckable: gitleaks, searchsploit, spring4shell-scan, log4j-scan, emailharvester
           - name: Nmap
             install: apt install nmap -y
             command: nmap --version
@@ -52,14 +52,6 @@ jobs:
             install: apt install metasploit-framework -y
             command: msfconsole --version 2>&1
             expected: 6.4.142 # 6.4.135-dev kali 
-          - name: EmailFinder
-            install: python3 -m pip install emailfinder --break-system-packages
-            command: emailfinder --version
-            expected: 0.3.0b
-          - name: EmailHarvester
-            install: apt install emailharvester -y
-            command: emailharvester --help
-            expected: 1.3.2
           - name: JoomScan
             install: apt install joomscan -y
             command: joomscan --version
@@ -92,7 +84,7 @@ jobs:
           then
             apt install python3-dev python3-pip -y
             # Needed to avoid dirsearch errors
-            python3 -m pip install setuptools --break-system-packages
+            python3 -m pip install 'setuptools<82' --break-system-packages
           fi
           ${{ matrix.install }}
 

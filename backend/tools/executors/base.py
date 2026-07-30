@@ -17,10 +17,8 @@ from urllib.parse import urlparse
 
 from django.core.exceptions import ValidationError
 from django.forms.models import model_to_dict
-from django.utils import timezone
 
 from authentications.models import Authentication
-from executions.enums import Status
 from executions.models import Execution
 from findings.framework.models import Finding
 from findings.models import Port
@@ -44,6 +42,16 @@ class BaseExecutor(LoggingEntity):
     Handles the complete execution lifecycle of security tools including argument generation,
     environment setup, execution control, and status tracking. Provides automatic parameter
     mapping from available inputs and configurations with proper authentication handling.
+
+    Security Features:
+        - Environment variable assignments extracted from the command's pre-command prefix
+          are checked against a sensitive-variable pattern (PATH, LD_PRELOAD, etc.) and
+          dropped, with a warning logged, instead of being applied to the subprocess
+        - Commands run as an argument list via subprocess without invoking a shell, so
+          shell metacharacters in tool arguments are never interpreted
+        - Authentication secrets and tokens are masked with asterisks before the executed
+          command is logged or persisted
+        - Tools that are not installed on the system are skipped instead of executed
 
     Attributes:
         environment_validator (Validator): Rejects sensitive environment variable assignments
@@ -70,6 +78,7 @@ class BaseExecutor(LoggingEntity):
         """
         self.arguments = []
         self.environment = {}
+        self.hashable_environment = {}
         self.findings_used_in_execution = {}
         self.targets_used_in_execution = {}
         self.authentication = None
@@ -104,6 +113,25 @@ class BaseExecutor(LoggingEntity):
             self.port_from_arguments
             if self.port_from_arguments is not None
             else self.execution.configuration.default_scanned_port
+        )
+
+    @property
+    def hash(self) -> str:
+        """Build a stable fingerprint of the execution for finding deduplication.
+
+        Combines the run environment and the command arguments into a single
+        lowercased string and hashes it. Arguments that reference the report path
+        are dropped because that path changes on every run, so identical scans of
+        the same target produce the same hash.
+
+        Returns:
+            str: Hash identifying equivalent executions.
+        """
+        return Crypto.hash(
+            " ".join(
+                [f"{k}={v}" for k, v in self.hashable_environment.items()]
+                + [a for a in self.arguments if str(self.report).lower() not in a.lower()]
+            ).lower()
         )
 
     def get_arguments(
@@ -157,6 +185,8 @@ class BaseExecutor(LoggingEntity):
         for argument in self.execution.configuration.arguments.all():
             for argument_input in argument.inputs.all().order_by("order"):
                 parsed_data: dict[str, Any] = {}
+                # Track if we already have data from the primary base inputs
+                has_primary_model_data = False
                 # Create a comprehensive list of all available input sources in priority order
                 # This includes findings, wordlists, authentications, targets, HTTP headers and user-provided parameters
                 for base_input in (
@@ -187,7 +217,7 @@ class BaseExecutor(LoggingEntity):
                         base_input, argument_input.type.fallback_model_class
                     )
                     # If we already have data from primary sources, skip fallback inputs
-                    if is_fallback and parsed_data:
+                    if is_fallback and has_primary_model_data:
                         break
                     # Check if this input matches the argument's primary type (preferred)
                     is_model = argument_input.type.model_class and isinstance(
@@ -199,12 +229,13 @@ class BaseExecutor(LoggingEntity):
                     # Apply input-specific filtering to ensure compatibility with tool requirements
                     if base_input.filter(argument_input, self.execution.task.target):
                         # Parse the input data and accumulate results
-                        parsed_data = base_input.parse(self.execution.task.target, parsed_data)
+                        parsed_data = base_input.parse(self.execution.task, parsed_data)
                         # Track which inputs are being used for this execution
                         if is_fallback:
                             self.targets_used_in_execution[base_input.__class__] = base_input
                         else:
                             self.findings_used_in_execution[base_input.__class__] = base_input
+                            has_primary_model_data = True
                         # Store authentication credentials for later use
                         if isinstance(base_input, Authentication):
                             self.authentication = base_input
@@ -257,8 +288,12 @@ class BaseExecutor(LoggingEntity):
                 raise RuntimeError(
                     f"Argument '{argument.name}' is required to execute configuration '{argument.configuration.name}'"
                 )
-        # Parse formatted command arguments into list, handling quoted strings properly
-        # Remove quotes from individual arguments to prevent shell escaping issues
+        # Split the formatted command into individual arguments, keeping quoted segments
+        # (e.g. a quoted header value containing spaces) together as a single token
+        # Strip the double quote characters themselves, since these arguments are passed
+        # directly to subprocess.run rather than through a shell that would otherwise
+        # remove them. Single quotes are left in place, so a single-quoted template reaches
+        # the tool with its quotes intact
         return [
             a.replace('"', "")
             for a in re.findall(
@@ -296,22 +331,18 @@ class BaseExecutor(LoggingEntity):
         except RuntimeError:
             return False
 
-    def get_environment(self) -> dict[str, Any]:
-        """Prepare environment variables for tool execution.
+    @classmethod
+    def get_clean_default_environment(cls) -> dict[str, Any]:
+        """Prepare base environment variables to run tools out of Rekono's virtualenv.
 
-        Sets up the execution environment by copying system environment variables,
-        processing tool-specific environment definitions, and configuring proxy
-        settings from global configuration. Environment definitions parsed from the
-        pre-command arguments are filtered so user-controlled values cannot set
-        sensitive variables (PATH, LD_PRELOAD, etc.) that could hijack the subprocess.
-        Rekono's own virtualenv bin directory is removed from PATH so external tools
-        that shell out to a bare `python3` (e.g. EmailHarvester, Log4j Scan,
-        Spring4Shell Scan) resolve the system interpreter, which has their required
-        dependencies installed, instead of Rekono's isolated venv, which only has
-        Rekono's own dependencies.
+        Copies the system environment variables, removing Rekono's own virtualenv bin
+        directory from PATH, so external tools that shell out to a bare `python3`
+        (e.g. Dirsearch, EmailHarvester, Log4j Scan, Spring4Shell Scan) resolve the
+        system interpreter, which has their required dependencies installed, instead
+        of Rekono's isolated venv, which only has Rekono's own dependencies.
 
         Returns:
-            dict[str, Any]: Environment variables for tool execution
+            dict[str, Any]: Environment variables without Rekono's virtualenv in PATH
         """
         environment = os.environ.copy()
         venv_bin = str(Path(sys.executable).parent)
@@ -319,6 +350,21 @@ class BaseExecutor(LoggingEntity):
             environment["PATH"] = os.pathsep.join(
                 path for path in environment["PATH"].split(os.pathsep) if path != venv_bin
             )
+        return environment
+
+    def get_environment(self) -> dict[str, Any]:
+        """Prepare environment variables for tool execution.
+
+        Sets up the execution environment from the clean environment, processing
+        tool-specific environment definitions, and configuring proxy settings from
+        global configuration. Environment definitions parsed from the pre-command
+        arguments are filtered so user-controlled values cannot set sensitive
+        variables (PATH, LD_PRELOAD, etc.) that could hijack the subprocess.
+
+        Returns:
+            dict[str, Any]: Environment variables for tool execution
+        """
+        environment = self.get_clean_default_environment()
         # Ensure tool command is at the beginning of arguments list
         if self.execution.configuration.tool.command not in self.arguments:
             self.arguments.insert(0, self.execution.configuration.tool.command)
@@ -337,8 +383,11 @@ class BaseExecutor(LoggingEntity):
                             f"[Security] Refused to set sensitive environment variable '{variable}' from execution arguments"
                         )
                         continue
-                    # Clean variable value by removing quotes that might interfere with execution
-                    environment[variable.strip()] = value.strip().replace("'", "").replace('"', "")
+                    variable = variable.strip()
+                    # Strip quotes from the value so they don't interfere with execution
+                    value = value.strip().replace("'", "").replace('"', "")
+                    environment[variable] = value
+                    self.hashable_environment[variable] = value
             # Remove environment definitions from arguments, keeping only the tool command and its parameters
             self.arguments = self.arguments[index:]
         settings = Settings.objects.first()
@@ -357,15 +406,26 @@ class BaseExecutor(LoggingEntity):
         pass
 
     def run_tool(self, environment: dict[str, Any] = os.environ.copy()) -> None:  # pragma: no cover
-        """Execute the security tool with configured arguments and environment.
+        """Run the tool subprocess and record its output on the execution.
 
-        Runs the tool subprocess with proper output handling, status tracking,
-        and error management. Handles both file-based and stdout-based output capture.
+        Executes self.arguments as a subprocess, without invoking a shell, using the given
+        environment and the tool's configured working directory. When the tool configuration
+        declares an output format, and the report path is not already present in the
+        arguments, stdout is redirected straight to the report file and stderr is discarded,
+        since mixing the two would corrupt the report format. Otherwise stdout and stderr are
+        both captured in memory, which is also what happens when the tool writes the report
+        itself through its own command line flag. ANSI escape sequences are stripped
+        from the captured output before it is saved to execution.output_plain, and
+        execution.output_file is set when a report file was produced. If the process exits
+        with a non-zero code and the tool configuration doesn't ignore exit codes, the
+        execution is marked as failed via execution.error(). Exceptions raised while running
+        the subprocess are not caught here; they propagate to execute(), which marks the
+        execution as failed.
 
         Args:
-            environment (dict[str, Any]): Environment variables for execution
+            environment (dict[str, Any]): Environment variables for the subprocess
         """
-        self.logger.info(f"[Tool] Running: {' '.join(self.arguments)}")
+        self.logger.info(f"[Tool] Running: {self.mask_sensitive_data(' '.join(self.arguments))}")
         # Determine output capture strategy based on tool configuration
         # Use file-based output if tool has a specific format and report path isn't already in arguments
         stdout = (
@@ -407,9 +467,7 @@ class BaseExecutor(LoggingEntity):
         # Handle execution completion based on tool exit code and configuration
         # Some tools use non-zero exit codes for normal operation (e.g., findings detected)
         if not self.execution.configuration.tool.ignore_exit_code and process.returncode > 0:
-            self.on_error()
-        else:
-            self.on_completed()
+            self.execution.error()
 
     def after_running(self) -> None:  # pragma: no cover
         """Hook method called after tool execution.
@@ -419,77 +477,57 @@ class BaseExecutor(LoggingEntity):
         """
         pass
 
-    def on_start(self) -> None:
-        """Handle execution start event.
+    def save_executed_command(self, wordlists: list[Wordlist]) -> None:
+        """Build an anonymized string of the command that was executed.
 
-        Updates execution status to RUNNING and sets start timestamp.
-        Also sets task start time if this is the first execution in the task.
-        """
-        self.execution.status = Status.RUNNING
-        self.execution.start = timezone.now()
-        self.execution.save(update_fields=["start", "status"])
-        if not self.execution.task.start:
-            self.execution.task.start = timezone.now()
-            self.execution.task.save(update_fields=["start"])
-
-    def on_skip(self, reason: str) -> None:
-        """Handle execution skip event.
-
-        Updates execution status to SKIPPED with reason and end timestamp.
-        Triggers task end check.
+        Reconstructs the command line from the finalized arguments and removes
+        sensitive information (the internal report path, wordlist and script paths,
+        and authentication secrets) so it can be safely persisted and shown to users.
 
         Args:
-            reason (str): The reason why the execution was skipped
+            wordlists (list[Wordlist]): Wordlists used to generate the command
         """
-        self.logger.error(f"[Tool] {self.execution.configuration.tool.name} execution was skipped due to '{reason}'")
-        self.execution.status = Status.SKIPPED
-        self.execution.skipped_reason = reason
-        self.execution.end = timezone.now()
-        self.execution.save(update_fields=["status", "end", "skipped_reason"])
-        self.on_task_end()
+        command = " ".join(self.arguments)
+        # Hide the internal reports directory
+        if self.report:
+            command = command.replace(
+                str(self.report), f"output.{self.execution.configuration.tool.output_format or 'txt'}"
+            )
+        # Hide wordlist absolute paths
+        for wordlist in wordlists:
+            command = command.replace(wordlist.path, Path(wordlist.path).name)
+        # Hide scripts absolute path
+        if self.execution.configuration.tool.script and self.execution.configuration.tool.script_directory_property:
+            command = command.replace(
+                str(
+                    Path(getattr(CONFIG, self.execution.configuration.tool.script_directory_property.lower()))
+                    / self.execution.configuration.tool.script
+                ),
+                self.execution.configuration.tool.script,
+            )
+        # Hide every target's authentication secret
+        self.execution.executed_command = self.mask_sensitive_data(command)
+        self.execution.save(update_fields=["executed_command"])
 
-    def on_error(self) -> None:
-        """Handle execution error event.
+    def mask_sensitive_data(self, command: str) -> str:
+        """Mask every authentication secret reachable from the target in a command line.
 
-        Updates execution status to ERROR and sets end timestamp.
-        Triggers task end check.
+        Replaces both the stored secret and its derived token, for all authentications
+        configured on the target's ports, with a same-length mask of asterisks. Secrets
+        are masked even when embedded inside other values, such as header values or Basic
+        auth tokens.
+
+        Args:
+            command (str): The command line that may contain sensitive credentials
+
+        Returns:
+            str: The command line with every authentication secret and token masked
         """
-        self.logger.error(f"[Tool] {self.execution.configuration.tool.name} execution finished with errors")
-        self.execution.status = Status.ERROR
-        self.execution.end = timezone.now()
-        self.execution.save(update_fields=["status", "end"])
-        self.on_task_end()
-
-    def on_completed(self) -> None:
-        """Handle execution completion event.
-
-        Updates execution status to COMPLETED, sets end timestamp, and generates
-        execution hash for deduplication. Triggers task end check.
-        """
-        self.logger.info(f"[Tool] {self.execution.configuration.tool.name} execution has been completed")
-        self.execution.status = Status.COMPLETED
-        self.execution.end = timezone.now()
-        self.execution.hash = Crypto.hash(
-            " ".join(
-                [f"{k}={v}" for k, v in self.environment.items()]
-                + [a for a in self.arguments if str(self.report).lower() not in a.lower()]
-            ).lower()
-        )
-        self.execution.save(update_fields=["status", "end", "hash"])
-        self.on_task_end()
-
-    def on_task_end(self) -> None:
-        """Check and handle task completion.
-
-        Determines if the task is complete by checking if any executions
-        are still running or requested. Sets task end timestamp when complete.
-        """
-        if not Execution.objects.filter(
-            task=self.execution.task, status__in=[Status.REQUESTED, Status.RUNNING]
-        ).exists():
-            self.execution.task.end = timezone.now()
-            self.execution.task.save(update_fields=["end"])
-            self.logger.info(f"[Task] Task {self.execution.task.id} has finished")
+        for authentication in Authentication.objects.filter(target_port__target=self.execution.task.target).all():
+            for value in (authentication.secret, authentication.token):
+                if value:
+                    command = command.replace(value, "*" * len(value))
+        return command
 
     def execute(
         self,
@@ -499,11 +537,19 @@ class BaseExecutor(LoggingEntity):
         input_technologies: list[InputTechnology],
         wordlists: list[Wordlist],
     ) -> None:
-        """Execute the complete tool execution lifecycle.
+        """Run the full execution lifecycle for this tool, from argument generation to cleanup.
 
-        Manages the full execution process including status updates, argument generation,
-        environment setup, tool execution, and cleanup. Handles errors and skipping
-        conditions appropriately.
+        Marks the execution as started and refreshes the tool's installation status, then
+        skips the execution instead of running it when the tool isn't installed or when the
+        available inputs can't satisfy a required argument. Otherwise, builds the environment,
+        records the executed command (with secrets masked) before the tool actually runs, and
+        calls the before_running hook. The subprocess itself is only launched when
+        CONFIG.testing is False, so automated tests exercise the rest of the lifecycle without
+        invoking real tool binaries. Any exception raised while running the tool marks the
+        execution as failed. The after_running hook runs once this point is reached, whether
+        the subprocess actually ran, was skipped because CONFIG.testing is True, or raised an
+        exception. It is not reached on either of the earlier skip paths, since those return
+        before this point.
 
         Args:
             findings (list[Finding]): Security findings to use as inputs
@@ -512,10 +558,10 @@ class BaseExecutor(LoggingEntity):
             input_technologies (list[InputTechnology]): Technology parameters
             wordlists (list[Wordlist]): Wordlists to use as inputs
         """
-        self.on_start()
+        self.execution.started()
         self.execution.configuration.tool.update_status()
         if not self.execution.configuration.tool.is_installed:
-            self.on_skip(f"Tool {self.execution.configuration.tool.name} is not installed in the system")
+            self.execution.skipped(f"Tool {self.execution.configuration.tool.name} is not installed in the system")
             return
         try:
             self.arguments = self.get_arguments(
@@ -523,15 +569,15 @@ class BaseExecutor(LoggingEntity):
             )
         except RuntimeError as error:
             self.logger.error(f"[Tool] {str(error)}")
-            self.on_skip(str(error))
+            self.execution.skipped(str(error))
             return
         self.environment = self.get_environment()
+        self.save_executed_command(wordlists)
         self.before_running()
         try:
             if not CONFIG.testing:
                 self.run_tool(self.environment)
         except (RuntimeError, Exception):
-            self.on_error()
+            self.execution.error()
+        finally:
             self.after_running()
-            return
-        self.after_running()

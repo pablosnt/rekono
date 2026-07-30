@@ -55,7 +55,7 @@ class UserFilter(FilterSet):
 
         Args:
             queryset (QuerySet): Base queryset to filter
-            name (str): Filter field name
+            name (str): Filter field name (unused)
             value (int): Project ID to filter by
 
         Returns:
@@ -74,7 +74,7 @@ class UserFilter(FilterSet):
 
         Args:
             queryset (QuerySet): Base queryset to filter
-            name (str): Filter field name
+            name (str): Filter field name (unused)
             value (int): Project ID to filter by
 
         Returns:

@@ -3,7 +3,6 @@
 </template>
 
 <script setup lang="ts">
-import { h } from "vue";
 import type { CrudConfig, CrudTableColumn, FilterOption } from "~/types/crud";
 import { useUserStore } from "~/store/user";
 import type { Project } from "~/types/models";
@@ -122,7 +121,7 @@ const config: CrudConfig<Project> = reactive({
   pageSizeOptions: [25, 50, 100],
   formFields,
   formSchema,
-  createForm: resolveComponent("ProjectsForm"),
+  createForm: markRaw(resolveComponent("ProjectsForm")),
   updateOnCreateModalOpen: true,
   onCreation: (data: Record<string, unknown>) => {
     return navigateTo(

@@ -58,7 +58,7 @@ class Report(BaseModel):
     status = models.TextField(max_length=7, choices=ReportStatus.choices, default=ReportStatus.PENDING)
     format = models.TextField(max_length=4, choices=ReportFormat.choices)
     path = models.TextField(max_length=300, blank=True, null=True)
-    user = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True)
+    user = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, null=True)
     date = models.DateTimeField(auto_now_add=True)
 
     @cached_property

@@ -1,6 +1,8 @@
-"""Base framework for findings system architecture.
+"""Framework components for findings management in Rekono.
 
-Provides foundational classes and utilities for all finding types ensuring
-consistent behavior across the findings system with standardized operations
-for triage, fixing, serialization, and API interactions.
+This submodule provides the foundational framework components for the findings
+system, including base model classes, filters, serializers, and views that all
+specific finding types build on. The framework provides common functionality
+such as deduplication, fixing/unfixing, and DefectDojo integration, while
+enabling specialization for finding types that require a triage workflow.
 """

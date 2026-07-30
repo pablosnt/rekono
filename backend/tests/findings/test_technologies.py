@@ -3,6 +3,7 @@ from django.test import TestCase
 from findings.enums import Severity, TransportProtocol
 from findings.models import Technology
 from tests.findings.base import FindingTest
+from tools.models import Input
 
 # pytype: disable=wrong-arg-types,attribute-error
 
@@ -13,11 +14,27 @@ class TechnologyTest(FindingTest, TestCase):
     expected_defectdojo = {
         "title": "Technology WordPress detected",
         "description": "Typical CMS\n\nTechnology: WordPress\nVersion: 1.0.10",
-        "severity": Severity.LOW,
+        "severity": str(Severity.LOW),
         "cwe": 200,
         "references": "https://wordpress.org",
     }
     expected_string = f"10.10.10.10 - 80 - {TransportProtocol.TCP.value} - WordPress - 1.0.10"
+
+    def test_base_input_filter(self) -> None:
+        technology = Technology(name="Apache")
+        self.assertTrue(technology.filter(Input(filter="apache")))
+        self.assertTrue(technology.filter(Input(filter="pach")))
+        self.assertTrue(technology.filter(Input(filter="APACHE")))
+        self.assertFalse(technology.filter(Input(filter="nginx")))
+        # OR
+        self.assertTrue(technology.filter(Input(filter="nginx or apache")))
+        # AND
+        self.assertTrue(technology.filter(Input(filter="!nginx and !akamai")))
+        # Negation
+        self.assertTrue(technology.filter(Input(filter="!nginx")))
+        self.assertFalse(technology.filter(Input(filter="!apache")))
+        # Empty filter
+        self.assertTrue(technology.filter(Input(filter="")))
 
     def test_deduplication(self):
         first = Technology.objects.create_finding(self.execution, port=self.port, name="Grafana", version="10.1.0")
@@ -28,6 +45,14 @@ class TechnologyTest(FindingTest, TestCase):
         self.assertNotEqual(
             second.id,
             Technology.objects.create_finding(self.execution, port=self.port, name="Grafana", version="10.2.0").id,
+        )
+
+    def test_deduplication_ignores_name_and_version_case(self):
+        first = Technology.objects.create_finding(self.execution, port=self.port, name="joomla", version="5.4.7-DEV")
+        second = Technology.objects.create_finding(self.execution, port=self.port, name="Joomla", version="5.4.7-dev")
+        self.assertEqual(first.id, second.id)
+        self.assertEqual(
+            1, Technology.objects.filter(port=self.port, name__iexact="joomla", version__iexact="5.4.7-dev").count()
         )
 
     def test_deduplication_with_user_input(self):

@@ -1,11 +1,12 @@
 from django.test import TestCase
 
-from findings.enums import Severity, TransportProtocol, TriageStatus
+from findings.enums import TransportProtocol, TriageStatus
 from findings.models import Port, Technology, Vulnerability
 from tests.findings.base import FindingTest
 from tests.framework import ApiTest
 from tests.framework.cases import ApiTestCase
 from tests.framework.data import SetupProject
+from tools.models import Input
 
 # pytype: disable=wrong-arg-types,attribute-error
 
@@ -16,7 +17,7 @@ class VulnerabilityTest(FindingTest, TestCase):
     expected_defectdojo = {
         "title": "Vulnerability 10",
         "description": "Vulnerability 10",
-        "severity": Severity.MEDIUM,
+        "severity": "Medium",
         "cve": "CVE-2025-3010",
         "cwe": 200,
     }
@@ -26,6 +27,22 @@ class VulnerabilityTest(FindingTest, TestCase):
     sample_cve = "CVE-2025-9999"
     sample_name = "Already enriched finding"
 
+    def test_base_input_filter(self) -> None:
+        vulnerability = Vulnerability(cve="CVE-2021-44228")
+        self.assertTrue(vulnerability.filter(Input(filter="cve")))
+        self.assertTrue(vulnerability.filter(Input(filter="cve-2021-44228")))
+        self.assertFalse(vulnerability.filter(Input(filter="cve-1111-22222")))
+        # OR
+        self.assertTrue(vulnerability.filter(Input(filter="cve-1111-22222 or cve-2021-44228")))
+        # Negation
+        self.assertTrue(vulnerability.filter(Input(filter="!cve-1111-22222")))
+        self.assertFalse(vulnerability.filter(Input(filter="!cve-2021-44228")))
+        # Missing CVE
+        self.assertFalse(Vulnerability(cve=None).filter(Input(filter="cve")))
+        self.assertTrue(Vulnerability(cve=None).filter(Input(filter="!cve")))
+        # Empty filter
+        self.assertTrue(vulnerability.filter(Input(filter="")))
+
     def test_deduplication_by_name(self):
         first = Vulnerability.objects.create_finding(self.execution, technology=self.technology, name=self.sample_name)
         second = Vulnerability.objects.create_finding(self.execution, port=self.port, name=self.sample_name)
@@ -33,6 +50,26 @@ class VulnerabilityTest(FindingTest, TestCase):
         self.assertEqual(1, Vulnerability.objects.filter(technology=self.technology, name=self.sample_name).count())
         self.assertIsNone(second.port)
         self.assertEqual(self.technology, second.technology)
+
+    def test_deduplication_ignores_name_case(self):
+        first = Vulnerability.objects.create_finding(self.execution, technology=self.technology, name="SQL Injection")
+        second = Vulnerability.objects.create_finding(self.execution, technology=self.technology, name="sql injection")
+        self.assertEqual(first.id, second.id)
+        self.assertEqual(
+            1, Vulnerability.objects.filter(technology=self.technology, name__iexact="sql injection").count()
+        )
+
+    def test_deduplication_ignores_cve_case(self):
+        first = Vulnerability.objects.create_finding(
+            self.execution, technology=self.technology, name="Log4Shell", cve="CVE-2021-44228"
+        )
+        second = Vulnerability.objects.create_finding(
+            self.execution, technology=self.technology, name="Log4Shell", cve="cve-2021-44228"
+        )
+        self.assertEqual(first.id, second.id)
+        self.assertEqual(
+            1, Vulnerability.objects.filter(technology=self.technology, cve__iexact="CVE-2021-44228").count()
+        )
 
     def test_deduplication_with_same_technology(self):
         first = Vulnerability.objects.create_finding(

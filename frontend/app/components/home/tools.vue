@@ -1,6 +1,13 @@
 <template>
   <UPageSection title="Supported Tools">
-    <UMarquee pause-on-hover :ui="{ content: 'will-change-transform' }">
+    <ul class="sr-only">
+      <li v-for="tool in tools" :key="tool.id">{{ tool.name }}</li>
+    </ul>
+    <UMarquee
+      aria-hidden="true"
+      pause-on-hover
+      :ui="{ content: 'will-change-transform' }"
+    >
       <div
         v-for="tool in tools"
         :key="tool.id"

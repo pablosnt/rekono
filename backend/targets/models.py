@@ -13,6 +13,7 @@ from typing import Any
 from django.core.exceptions import ValidationError
 from django.db import models
 
+from framework.cache import Cache
 from framework.enums import InputKeyword
 from framework.models import BaseInput
 from projects.models import Project
@@ -54,9 +55,11 @@ class Target(BaseInput):
     _parse_mapping = {
         InputKeyword.TARGET: "target",
         InputKeyword.HOST: "target",
-        InputKeyword.URL: lambda instance, target: instance.get_url(target, instance.target),
+        InputKeyword.URL: lambda instance, task: instance.get_url(instance.target, task=task),
     }
     _project_field = "project"
+    # Cache of resolved domain -> IP
+    _dns_cache = Cache(prefix="dns")
 
     class Meta:
         """Meta configuration for the Target model.
@@ -71,13 +74,13 @@ class Target(BaseInput):
 
         constraints = [models.UniqueConstraint(fields=["project", "target"], name="unique_target")]
 
-    @staticmethod
-    def get_type(target: str) -> str:
+    @classmethod
+    def get_type(cls, target: str) -> str:
         """Automatically detect and classify the target type.
 
-        Analyzes the target specification to determine its type and performs
-        validation to ensure the target is valid and reachable. Supports
-        multiple target formats with intelligent classification.
+        Analyzes the target specification to determine its type, validating the
+        format for IP addresses, networks and IP ranges, and confirming that a
+        domain name actually resolves before classifying it as such.
 
         Target Type Detection Logic:
             1. IPv4/IPv6 address detection with private vs public classification
@@ -111,11 +114,9 @@ class Target(BaseInput):
         # Check if target is an IP range
         if bool(re.fullmatch(Regex.IP_RANGE.value, target)):
             return TargetType.IP_RANGE
-        try:
-            socket.gethostbyname(target)  # Check if target is a Domain
+        # Check if target resolves to an IP
+        if cls.resolve_domain(target) is not None:
             return TargetType.DOMAIN
-        except socket.gaierror:
-            pass
         BaseInput.logger.warning(f"[Security] Invalid target {target}")
         # Target is invalid or target type is not supported
         raise ValidationError(
@@ -132,6 +133,35 @@ class Target(BaseInput):
         """
         return self.target
 
+    @classmethod
+    def resolve_domain(cls, domain: str) -> str | None:
+        """Forward-resolve a domain name to an IP address, with caching.
+
+        Results are cached in Redis keyed by the domain, so a domain is resolved at most once
+        per cache TTL. Shared by create_finding_from_user_input() and get_type() (a classmethod),
+        which is why the cache logic lives here rather than on the instance. A single execution can produce
+        hundreds of findings sharing the same target (e.g. every path Dirsearch discovers), and
+        each would otherwise issue its own ``socket.gethostbyname`` call; caching collapses them
+        into a single lookup and keeps that burst from overwhelming the resolver.
+
+        Args:
+            domain (str): The domain name to resolve.
+
+        Returns:
+            str | None: The resolved IP address, or None when resolution fails, so callers can
+                        treat the name as unresolvable instead of propagating the error.
+        """
+        cached = cls._dns_cache.get(domain)
+        if cached:
+            return cached
+        try:
+            ip = socket.gethostbyname(domain)
+        except socket.gaierror:
+            # Do not cache failures not to suppress later resolutions
+            return None
+        cls._dns_cache.set(domain, ip)
+        return ip
+
     def create_finding_from_user_input(self, execution: Any, **fields: Any) -> Any | None:
         """Create a Host finding from this target user input.
 
@@ -144,12 +174,16 @@ class Target(BaseInput):
             **fields (Any): Additional fields for the finding
 
         Returns:
-            Any | None: Created Host finding or None if target type not supported
+            Any | None: Created Host finding, or None if the target type is not supported or a
+                        domain target could not be resolved to an IP address
         """
         from findings.models import Host
 
         if self.type == TargetType.DOMAIN:
-            fields["ip"] = socket.gethostbyname(self.target)
+            ip = self.resolve_domain(self.target)
+            if not ip:
+                return None
+            fields["ip"] = ip
             fields["domain"] = self.target
         elif self.type in [TargetType.PRIVATE_IP, TargetType.PUBLIC_IP]:
             fields["ip"] = self.target

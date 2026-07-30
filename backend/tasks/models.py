@@ -1,8 +1,8 @@
 """Task models for Rekono.
 
-Defines the Task model for managing security testing task execution with scheduling,
-dependency management, and execution coordination. Supports both single tool
-execution and complex multi-step security processes.
+Defines the Task model for managing security testing task execution with scheduling
+and execution coordination. Supports both single tool execution and complex
+multi-step security processes.
 """
 
 from django.core.validators import MaxValueValidator, MinValueValidator
@@ -89,7 +89,7 @@ class Task(BaseModel):
     # Time unit to apply to the 'repeat in' value
     repeat_time_unit = models.TextField(max_length=10, choices=TimeUnit.choices, blank=True, null=True)
     creation = models.DateTimeField(auto_now_add=True)
-    # Date at task got enqueued
+    # Date when the task got enqueued
     enqueued_at = models.DateTimeField(blank=True, null=True)
     start = models.DateTimeField(blank=True, null=True)
     end = models.DateTimeField(blank=True, null=True)
@@ -107,3 +107,42 @@ class Task(BaseModel):
             str: String in format "target - process/configuration"
         """
         return f"{self.target.__str__()} - {(self.process or self.configuration).__str__()}"
+
+    def get_scoped_target_ports(self) -> list[TargetPort]:
+        """Return the target ports that define this task's scan scope.
+
+        A task-specific target port restricts scanning to that single port so a
+        scan does not spread to the whole target. When no task target port is set,
+        all of the target's ports are used. Findings discovered by previous
+        executions still take priority at runtime, since Port findings and
+        TargetPorts share the same Port input type and seeded target ports are
+        skipped once findings of that type exist.
+
+        Returns:
+            list[TargetPort]: The single task target port when set, otherwise all
+                              of the target's ports (empty when it has none).
+        """
+        return [self.target_port] if self.target_port else list(self.target.target_ports.all())
+
+    @staticmethod
+    def get_target(target: Target, target_port: TargetPort | None = None) -> str:
+        """Build a display label for a target, optionally scoped to a target port.
+
+        Combines the target with a specific port and path when a target port is
+        given, so notifications and Telegram prompts can show the exact scan
+        scope in a single line. When no target port is provided, the bare target
+        is returned to indicate that all of the target's ports are in scope.
+
+        Args:
+            target (Target): The target being scanned.
+            target_port (TargetPort | None): The target port scoping the scan, if any.
+
+        Returns:
+            str: "<target>:<port><path>" when a target port is given, otherwise
+                 the bare target address.
+        """
+        return (
+            f"{target.target}:{target_port.port}{target.clean_path(target_port.path) if target_port.path else ''}"
+            if target_port
+            else target.target
+        )

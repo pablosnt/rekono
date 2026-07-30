@@ -23,13 +23,18 @@ class Nikto(BaseParser):
     def _parse(self) -> None:
         """Parse Nikto XML output and extract security findings.
 
-        Processes XML scan results to create Vulnerability and Path findings
-        from web application security tests.
+        Processes XML scan results to create Vulnerability and Path findings from web
+        application security tests. Nikto's report doesn't include a severity rating
+        for its items, so every Vulnerability is created with a fixed MEDIUM severity.
         """
+        # "/" is preseeded here so it never gets its own Path finding, even though most
+        # items reference it, since it's already implicit for the scanned target
         endpoints = set(["/"])
         root = self.load_xml_report()
         if not root:
             return
+        # Old reports wrap the scan in a bare <niktoscan> root, new reports use <niktoscans>;
+        # either way the actual data is under the last matching "niktoscan" child
         for item in root.findall("niktoscan")[-1].findall("scandetails")[0].findall("item"):
             endpoint = item.findtext("uri")
             description = item.findtext("description")
@@ -41,6 +46,8 @@ class Nikto(BaseParser):
                     Vulnerability,
                     name=description,
                     description=(
+                        # Some descriptions already start with the endpoint, e.g.
+                        # "/images/: Directory indexing found.", so it's only prefixed when missing
                         f"[{method} {endpoint}] {description}"
                         if endpoint and not description.startswith(endpoint)
                         else f"[{method}] {description}"

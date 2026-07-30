@@ -17,6 +17,13 @@ class EUVD(BaseCveProvider):
     for CVE details, CVSS scores, EPSS probability scores, and affected
     product identifiers from the ENISA vulnerability intelligence platform.
 
+    Processing Features:
+        - CVE lookup by identifier, matched against each result's aliases field
+        - CVSS base score, vector, and version extraction
+        - EPSS probability score extraction
+        - Affected product identifier extraction from enisaIdProduct entries
+        - EUVD identifier capture for storage as an alternate finding identifier
+
     Attributes:
         url (str): EUVD search API endpoint URL template for CVE queries.
         reference (str): EUVD vulnerability detail page URL template.

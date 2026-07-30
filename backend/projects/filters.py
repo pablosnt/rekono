@@ -23,7 +23,7 @@ class ProjectFilter(FilterSet):
         defectdojo_product (NumberFilter): Filter by DefectDojo product ID
         defectdojo_engagement (NumberFilter): Filter by DefectDojo engagement ID
         owner_username (CharFilter): Filter by owner username
-        target (ModelChoiceFilter): Filter by target
+        target (ModelChoiceFilter): Filter by target through the project's targets relationship
     """
 
     tag = CharFilter(field_name="tags__name")

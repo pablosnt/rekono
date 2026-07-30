@@ -110,10 +110,10 @@ export const osintDataTypes = [
 
 export const hostOS = [
   { value: "Linux", icon: "simple-icons:linux", color: "amber" },
-  { value: "Windows", icon: "lineicons:microsoft", color: "info" },
-  { value: "MacOS", icon: "lineicons:apple-brand", color: "neutral" },
-  { value: "iOS", icon: "lineicons:apple-brand", color: "neutral" },
-  { value: "Android", icon: "lineicons:android-original", color: "success" },
+  { value: "Windows", icon: "mdi:microsoft-windows", color: "info" },
+  { value: "MacOS", icon: "mdi:apple", color: "neutral" },
+  { value: "iOS", icon: "mdi:apple", color: "neutral" },
+  { value: "Android", icon: "mdi:android", color: "success" },
   { value: "Solaris", icon: "simple-icons:oracle", color: "error" },
   { value: "FreeBSD", icon: "simple-icons:freebsd", color: "error" },
   { value: "Other", icon: "i-lucide-server", color: "neutral" },
@@ -123,15 +123,16 @@ export const portStatuses = [
   { value: "Open", color: "success", icon: "i-lucide-square-check" },
   { value: "Open - Filtered", color: "warning", icon: "i-lucide-brick-wall" },
   { value: "Filtered", color: "warning", icon: "i-lucide-brick-wall-shield" },
+  { value: "Closed - Filtered", color: "warning", icon: "i-lucide-brick-wall" },
   { value: "Closed", color: "error", icon: "i-lucide-square-x" },
 ];
 
 export const portProtocols = ["TCP", "UDP"];
 
 export const severities = [
-  { value: "Info", color: "neutral", icon: "i-lucide-chevrons-down" },
-  { value: "Low", color: "info", icon: "i-lucide-chevron-down" },
-  { value: "Medium", color: "warning", icon: "i-lucide-minus" },
-  { value: "High", color: "orange", icon: "i-lucide-chevron-up" },
-  { value: "Critical", color: "error", icon: "i-lucide-chevrons-up" },
+  { value: 5, label: "Critical", color: "error", icon: "i-lucide-chevrons-up" },
+  { value: 4, label: "High", color: "orange", icon: "i-lucide-chevron-up" },
+  { value: 3, label: "Medium", color: "warning", icon: "i-lucide-minus" },
+  { value: 2, label: "Low", color: "info", icon: "i-lucide-chevron-down" },
+  { value: 1, label: "Info", color: "neutral", icon: "i-lucide-chevrons-down" },
 ];

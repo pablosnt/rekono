@@ -97,32 +97,31 @@ const config: CrudConfig<Alert> = reactive({
   pageSize: 24,
   pageSizeOptions: [24, 50, 100],
   defaultBody: { project: route.params.project_id },
-  createForm: resolveComponent("AlertsForm"),
-  editForm: resolveComponent("AlertsForm"),
+  createForm: markRaw(resolveComponent("AlertsForm")),
+  editForm: markRaw(resolveComponent("AlertsForm")),
   deleteMessage: (alert: Alert) => buildDeleteMessage("alert", alert.item),
   canRead: true,
   canCreate: true,
   canEdit: canEdit,
-  canDelete: canDelete,
+  canDelete: canModify,
 });
 
 onMounted(() => {
-  options.users(userOptions, { is_active: true });
+  options.users(userOptions, {
+    is_active: true,
+    project: route.params.project_id,
+  });
 });
 
 function canEdit(alert: Alert): boolean {
   const field = alertItems.find(
     (definition) => definition.item === alert.item,
   )?.field;
-  return (
-    field &&
-    field !== "trending" &&
-    (userStore.is_admin || alert.owner?.id === userStore.user)
-  );
+  return field && field !== "trending" && canModify(alert);
 }
 
-function canDelete(alert: Alert): boolean {
-  return userStore.is_admin || alert.owner?.id === userStore.user;
+function canModify(alert: Alert): boolean {
+  return userStore.is_admin || userStore.isOwner(alert);
 }
 
 function getActions(item: Alert, onEdit: () => void, onDelete: () => void) {
@@ -134,22 +133,22 @@ function getActions(item: Alert, onEdit: () => void, onDelete: () => void) {
       onSelect: onEdit,
     });
   }
-  if (item.enabled) {
-    actions.push({
-      label: "Disable",
-      icon: "i-lucide-x-circle",
-      color: "warning",
-      onSelect: () => toggleEnable(item),
-    });
-  } else {
-    actions.push({
-      label: "Enable",
-      icon: "i-lucide-check-circle",
-      color: "success",
-      onSelect: () => toggleEnable(item),
-    });
-  }
-  if (canDelete(item)) {
+  if (canModify(item)) {
+    if (item.enabled) {
+      actions.push({
+        label: "Disable",
+        icon: "i-lucide-x-circle",
+        color: "warning",
+        onSelect: () => toggleEnable(item),
+      });
+    } else {
+      actions.push({
+        label: "Enable",
+        icon: "i-lucide-check-circle",
+        color: "success",
+        onSelect: () => toggleEnable(item),
+      });
+    }
     actions.push({
       label: "Delete",
       icon: "i-lucide-trash",

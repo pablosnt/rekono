@@ -6,10 +6,11 @@ administrative management of tools, configurations, and related objects.
 
 from django.contrib import admin
 
-from tools.models import Configuration, Input, Intensity, Output, Tool
+from tools.models import Argument, Configuration, Input, Intensity, Output, Tool
 
 admin.site.register(Tool)
 admin.site.register(Configuration)
+admin.site.register(Argument)
 admin.site.register(Input)
 admin.site.register(Output)
 admin.site.register(Intensity)

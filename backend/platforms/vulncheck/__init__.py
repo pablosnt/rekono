@@ -1,10 +1,9 @@
 """VulnCheck NVD++ vulnerability intelligence platform integration for Rekono.
 
 Provides integration with VulnCheck's NVD++ service, which mirrors the National
-Vulnerability Database (NVD) schema and enriches it with additional threat
-intelligence including CISA Known Exploited Vulnerabilities (KEV) data and
-VulnCheck-specific CPE configuration details. Authentication via a Bearer
-API token is required for all requests.
+Vulnerability Database (NVD) schema and additionally supplies pre-resolved,
+VulnCheck-specific CPE configuration details for affected technologies.
+Authentication via a Bearer API token is required for all requests.
 
 Key Features:
     - CVE data enrichment using VulnCheck's enhanced NVD++ index

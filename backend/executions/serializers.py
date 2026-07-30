@@ -38,6 +38,7 @@ class ExecutionSerializer(ModelSerializer):
             "task",
             "configuration",
             "output_plain",
+            "executed_command",
             "skipped_reason",
             "has_report",
             "status",

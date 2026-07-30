@@ -10,7 +10,6 @@
     }"
   >
     <template #content>
-      <UProgress :class="[loading ? 'visible' : 'invisible', 'mb-1']" />
       <CrudForm
         ref="form"
         :api="api"
@@ -18,6 +17,7 @@
         :entity="profile"
         @submit="
           (data) => {
+            notifyEmailChange(data.email);
             profile = data;
             userStore.updateProfile(data);
             valid = false;
@@ -47,6 +47,7 @@ import { useIntegrationsStore } from "~/store/integrations";
 import * as z from "zod";
 
 const api = useApi("/api/profile/");
+const toast = useToast();
 const userStore = useUserStore();
 const integrations = useIntegrationsStore();
 const validation = useValidation();
@@ -54,7 +55,11 @@ const form = ref();
 const profile = ref(userStore.profile);
 const loading = ref(false);
 const valid = ref(false);
-const notificationScopes = ["Disabled", "Only my executions", "All executions"];
+const notificationScopes = [
+  "Only alerts",
+  "Only my executions",
+  "All executions",
+];
 const config = computed(() => ({
   entityName: "Profile",
   editFormFields: [
@@ -99,7 +104,8 @@ const config = computed(() => ({
       icon: "i-lucide-bell-ring",
       hidden:
         integrations.smtp?.is_available !== true &&
-        integrations.telegram?.is_available !== true,
+        (integrations.telegram?.is_available !== true ||
+          !userStore.profile?.telegram_chat),
     },
     {
       key: "email_notifications",
@@ -113,7 +119,9 @@ const config = computed(() => ({
       label: "Telegram notifications",
       type: "checkbox",
       required: true,
-      hidden: integrations.telegram?.is_available !== true,
+      hidden:
+        integrations.telegram?.is_available !== true ||
+        !userStore.profile?.telegram_chat,
     },
   ],
   editFormSchema: z.object({
@@ -127,6 +135,17 @@ const config = computed(() => ({
   }),
   putEndpoint: () => "/api/profile/",
 }));
+
+function notifyEmailChange(savedEmail: string) {
+  const requestedEmail = form.value?.formData?.email;
+  if (!requestedEmail || requestedEmail === savedEmail) return;
+  toast.add({
+    title: "Confirm your new email address",
+    description: `A verification link has been sent to ${requestedEmail}. Confirm it to get your email updated, ${savedEmail} stays active meanwhile`,
+    color: "info",
+    icon: "i-lucide-mail-check",
+  });
+}
 
 onMounted(() => {
   integrations.fetchSmtp();

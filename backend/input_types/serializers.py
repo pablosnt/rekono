@@ -14,11 +14,6 @@ class InputTypeSerializer(ModelSerializer):
 
     Handles serialization and deserialization of InputType objects for API operations.
     Exposes the core fields needed for input type configuration.
-
-    Attributes:
-        name (str): The input type name from InputTypeName enum.
-        model (str): Reference to the primary Django model.
-        fallback_model (str): Reference to the fallback Django model.
     """
 
     class Meta:

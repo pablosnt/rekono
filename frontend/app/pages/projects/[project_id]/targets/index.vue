@@ -33,7 +33,7 @@ const route = useRoute();
 const table = useTable();
 const integrations = useIntegrationsStore();
 const { showDefectDojo } = useCurrentProject();
-const { refreshPanelCounts } = usePanel();
+const { refreshPanelCounts, projectHasActiveFindings } = usePanel();
 const selectedTarget = ref<Target | null>(null);
 const showReportModal = ref(false);
 const notesButton = ref();
@@ -149,11 +149,11 @@ const config: CrudConfig<Target> = reactive({
   ],
   defaultFilters: { project: route.params.project_id },
   ordering: ["id", "target", "type"],
-  defaultOrdering: "id",
+  defaultOrdering: "-id",
   pageSize: 25,
   pageSizeOptions: [25, 50, 100],
   defaultBody: { project: route.params.project_id },
-  createForm: resolveComponent("TargetsForm"),
+  createForm: markRaw(resolveComponent("TargetsForm")),
   onCreation: (data: Record<string, unknown>) => {
     if (Array.isArray(data.targets) && data.targets.length === 1) {
       navigateTo(
@@ -173,12 +173,11 @@ const config: CrudConfig<Target> = reactive({
   canCreate: userStore.is_auditor,
   canDelete: userStore.is_auditor,
   customDropdownActions: (target: Target) => [
-    ...(target?.tasks.length > 0
+    ...(target?.tasks.length > 0 && projectHasActiveFindings.value
       ? [
           {
             label: "Generate a report",
             icon: "i-lucide-file-text",
-            color: "neutral",
             onSelect: (t: Target) => {
               selectedTarget.value = t;
               showReportModal.value = true;
@@ -189,7 +188,6 @@ const config: CrudConfig<Target> = reactive({
     {
       label: "Take note",
       icon: "i-lucide-notebook",
-      color: "neutral",
       onSelect: () => {
         selectedTarget.value = target;
         return nextTick(() => notesButton.value?.createNote());

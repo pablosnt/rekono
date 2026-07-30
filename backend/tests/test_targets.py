@@ -1,13 +1,18 @@
 from functools import cached_property
+from unittest.mock import patch
 
 from django.test import TestCase
 
+from executions.models import Execution
+from findings.models import Host
 from security.authorization.roles import Role
 from targets.enums import TargetType
 from targets.models import Target
+from tasks.models import Task
 from tests.framework import ApiTest
 from tests.framework.cases import ApiTestCase, DeleteApiTestCase, PostApiTestCase
 from tests.framework.data import SetupProject
+from tools.models import Input
 
 # pytype: disable=wrong-arg-types
 
@@ -58,6 +63,47 @@ class TargetTest(ApiTest, TestCase):
         ApiTestCase([Role.ADMIN, Role.AUDITOR, Role.READER], 404, endpoint="1"),
     ]
 
+    def test_base_input_filter(self) -> None:
+        target = Target(type=TargetType.DOMAIN)
+        self.assertTrue(target.filter(Input(filter="domain")))
+        self.assertFalse(target.filter(Input(filter="private_ip")))
+        # OR
+        self.assertTrue(target.filter(Input(filter="domain or private_ip")))
+        # Negation
+        self.assertTrue(target.filter(Input(filter="!private_ip")))
+        self.assertFalse(target.filter(Input(filter="!domain")))
+        # Not applicable
+        self.assertTrue(target.filter(Input(filter="anything")))
+        # Empty filter
+        self.assertTrue(target.filter(Input(filter="")))
+
     @cached_property
     def object(self) -> Target:
         return Target(**{**target1, "project": self.project})
+
+    def test_resolve_domain_cache_hit(self) -> None:
+        ip = "9.9.9.9"
+        with patch.object(Target._dns_cache, "get", return_value=ip):
+            self.assertEqual(ip, Target.resolve_domain("cached.example.com"))
+
+    def test_create_finding_from_user_input(self) -> None:
+        ip, domain = "1.2.3.4", "example.com"
+        domain_target = Target.objects.create(project=self.project, target=domain, type=TargetType.DOMAIN)
+        execution = Execution.objects.create(
+            task=Task.objects.create(target=domain_target, configuration=self.configuration),
+            configuration=self.configuration,
+        )
+        with patch.object(Target, "resolve_domain", return_value=ip):
+            host = domain_target.create_finding_from_user_input(execution)
+        self.assertIsInstance(host, Host)
+        self.assertEqual(ip, host.ip)
+        self.assertEqual(domain, host.domain)
+        # Unresolvable domain -> No finding
+        with patch.object(Target, "resolve_domain", return_value=None):
+            self.assertIsNone(domain_target.create_finding_from_user_input(execution))
+        # Non-IP and non-domain target -> No finding
+        self.assertIsNone(
+            Target.objects.create(
+                project=self.project, target="10.10.10.0/24", type=TargetType.NETWORK
+            ).create_finding_from_user_input(execution)
+        )

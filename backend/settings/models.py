@@ -26,29 +26,31 @@ class Settings(BaseModel):
 
     Attributes:
         max_uploaded_file_mb (IntegerField): Maximum size limit for file uploads in megabytes.
-            Valid range: 128-3072 MB. Prevents resource exhaustion attacks.
-        all_proxy (TextField): Global proxy server configuration for all protocols.
-            Optional field with target format validation.
-        http_proxy (TextField): HTTP protocol specific proxy server configuration.
-            Optional field with target format validation.
-        https_proxy (TextField): HTTPS protocol specific proxy server configuration.
-            Optional field with target format validation.
-        ftp_proxy (TextField): FTP protocol specific proxy server configuration.
-            Optional field with target format validation.
-        no_proxy (TextField): Comma-separated list of hosts to bypass proxy settings.
-            Optional field with target format validation.
-        auto_fix_findings (BooleanField): Enable automatic vulnerability remediation.
-            Controls whether the platform attempts automated finding corrections.
+            Defaults to 512 MB. Valid range: 128-3072 MB, enforced to prevent resource
+            exhaustion attacks.
+        all_proxy (TextField): Proxy server exported as the ALL_PROXY environment
+            variable for tool execution (max 300 chars). Optional, blank and null allowed.
+        http_proxy (TextField): Proxy server exported as the HTTP_PROXY environment
+            variable for tool execution (max 300 chars). Optional, blank and null allowed.
+        https_proxy (TextField): Proxy server exported as the HTTPS_PROXY environment
+            variable for tool execution (max 300 chars). Optional, blank and null allowed.
+        ftp_proxy (TextField): Proxy server exported as the FTP_PROXY environment
+            variable for tool execution (max 300 chars). Optional, blank and null allowed.
+        no_proxy (TextField): Hosts exported as the NO_PROXY environment variable
+            to bypass proxying for tool execution (max 300 chars). Optional, blank
+            and null allowed.
+        auto_fix_findings (BooleanField): Whether findings are automatically reactivated
+            when they reappear in a later execution and marked as fixed when they are
+            no longer detected. Defaults to True.
 
     Example:
-        Create a new security testing project:
+        Update the singleton settings instance created by the app's fixtures:
 
         ```python
-        settings = Settings.objects.create(
-            max_uploaded_file_mb=1024,
-            http_proxy="http://proxy.company.com:8080",
-            auto_fix_findings=True
-        )
+        settings = Settings.objects.first()
+        settings.http_proxy = "http://10.10.10.10:8080"
+        settings.max_uploaded_file_mb = 1024
+        settings.save()
         ```
     """
 

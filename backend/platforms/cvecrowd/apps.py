@@ -28,6 +28,9 @@ class CvecrowdConfig(BaseApp, AppConfig):
     def _get_models(self) -> list[Any]:
         """Get the model classes for this application.
 
+        Returns the CveCrowdSettings model for fixture loading and application
+        initialization processes.
+
         Returns:
             list[Any]: List containing CveCrowdSettings model class.
         """

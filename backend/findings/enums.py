@@ -103,12 +103,14 @@ class PortStatus(models.TextChoices):
         OPEN_FILTERED (str): Port appears open but may be filtered
         FILTERED (str): Port is filtered by firewall or security device
         CLOSED (str): Port is closed and not accepting connections
+        CLOSED_FILTERED (str): Port appears closed but may be filtered
     """
 
     OPEN = "Open"
     OPEN_FILTERED = "Open - Filtered"
     FILTERED = "Filtered"
     CLOSED = "Closed"
+    CLOSED_FILTERED = "Closed - Filtered"
 
 
 class TransportProtocol(models.TextChoices):

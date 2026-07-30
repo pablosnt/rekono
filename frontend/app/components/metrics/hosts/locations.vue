@@ -1,13 +1,12 @@
 <template>
-  <UPageCard
+  <MetricsCard
     title="Geolocation"
     class="w-full"
-    variant="outline"
-    :ui="{ container: 'min-w-0' }"
+    :loading="loading"
+    :has-data="locationHosts.length > 0"
   >
-    <USkeleton v-if="loading" class="h-[400px] w-full rounded-lg" />
-    <FindingsHostsLocations v-else :height="400" :hosts="locationHosts" />
-  </UPageCard>
+    <FindingsHostsLocations :height="400" :hosts="locationHosts" />
+  </MetricsCard>
 </template>
 
 <script setup lang="ts">

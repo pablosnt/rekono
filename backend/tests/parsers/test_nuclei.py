@@ -12,7 +12,7 @@ class NucleiTest(ParserTest, TestCase):
         ParserTestCase(
             "2022-dvwa.json",
             [
-                {"model": Technology, "name": "PHP Detect", "version": None, "description": None, "reference": None},
+                {"model": Technology, "name": "PHP", "version": None, "description": None, "reference": None},
                 {
                     "model": Technology,
                     "name": "Apache/2.4.25 (Debian)",
@@ -302,6 +302,27 @@ class NucleiTest(ParserTest, TestCase):
                     "cvss_vector": None,
                     "cve": None,
                     "cwes": [],
+                    "reference": None,
+                },
+            ],
+        ),
+        ParserTestCase(
+            "edge-cases.json",
+            [
+                # A malformed port value is ignored, so the finding is reported without a Port
+                {
+                    "model": Vulnerability,
+                    "name": "Malformed port finding",
+                    "severity": Severity.INFO,
+                    "cve": None,
+                    "cwes": [],
+                },
+                # A "tech" template with an extracted version keeps the template name and stores the version
+                {
+                    "model": Technology,
+                    "name": "OpenSSH Service",
+                    "version": "7.4",
+                    "description": "OpenSSH Service",
                     "reference": None,
                 },
             ],

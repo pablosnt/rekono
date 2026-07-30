@@ -17,21 +17,21 @@ class TelegramSettings(BaseEncrypted):
     """Model for storing encrypted Telegram Bot configuration settings.
 
     Represents the global Telegram Bot settings including the encrypted API token
-    required for bot authentication with the Telegram Bot API. Only one instance
-    of this model should exist in the system.
+    required for bot authentication with the Telegram Bot API. Fixture-seeded as a
+    single settings row and read via `.first()` throughout the codebase.
 
     Attributes:
-        _token (TextField): Encrypted Telegram Bot API token (max 200 chars).
-                           Stored with database column name 'token'.
+        _token (TextField): Encrypted Telegram Bot API token (max 200 chars), stored under
+            the 'token' database column.
         _encrypted_field (str): Field name that contains encrypted data.
 
     Example:
-        Configure Telegram Bot token:
+        Configure the Telegram Bot token:
 
         ```python
-        settings = TelegramSettings.objects.create(
-            secret="1234567890:ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-        )
+        settings = TelegramSettings.objects.first()
+        settings.secret = "1234567890:ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        settings.save()
         ```
     """
 

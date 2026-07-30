@@ -25,9 +25,9 @@ class ProcessFilter(LikeFilter):
     Attributes:
         configuration (ModelChoiceFilter): Filter by tool configuration used in process steps
         tool (ModelChoiceFilter): Filter by security tool used in process steps
-        stage (ChoiceFilter): Filter by security testing stage (reconnaissance, enumeration, etc.)
+        stage (ChoiceFilter): Filter by security testing stage of the tool configuration used in process steps
         tag (CharFilter): Filter by process tags for categorization
-        owner_username: Filter by owner username
+        owner_username (CharFilter): Filter by owner username using case-insensitive partial matching
     """
 
     configuration = ModelChoiceFilter(queryset=Configuration.objects.all(), field_name="steps__configuration")
@@ -65,7 +65,8 @@ class StepFilter(FilterSet):
         owner (ModelChoiceFilter): Filter by process owner user
         tool (ModelChoiceFilter): Filter by security tool used in the step configuration
         stage (ChoiceFilter): Filter by security testing stage of the tool configuration
-        tag (CharFilter): Filter by tool tags with inclusion matching
+        tag (CharFilter): Filter by tool, matching the configuration's tool against the
+                         given value(s) via the "in" lookup
     """
 
     owner = ModelChoiceFilter(queryset=User.objects.all(), field_name="process__owner")

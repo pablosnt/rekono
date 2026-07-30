@@ -35,7 +35,13 @@
             :disabled="field.disabled === true"
             :inputmode="field.inputMode"
           >
-            <template v-if="field.type === 'password'" #trailing>
+            <template
+              v-if="
+                field.type === 'password' &&
+                !isMaskedSecret(formData[field.key])
+              "
+              #trailing
+            >
               <UButton
                 color="neutral"
                 variant="link"
@@ -64,6 +70,7 @@
             :min="field.min"
             :max="field.max"
             :step="field.step"
+            :format-options="{ useGrouping: false }"
             :required="field.required"
             :size="field.size || 'lg'"
             :disabled="field.disabled === true"
@@ -284,6 +291,10 @@ function validate(data) {
   }
 }
 
+function isMaskedSecret(value: string | undefined) {
+  return Boolean(value) && /^\*+$/u.test(value);
+}
+
 function body() {
   if (isFileUpload.value) {
     const formBody = new FormData();
@@ -297,7 +308,7 @@ function body() {
           field.type === "password" &&
           typeof formData.value[field.key] === "string"
         ) {
-          if (/^\*+$/u.test(formData.value[field.key])) {
+          if (isMaskedSecret(formData.value[field.key])) {
             continue;
           }
         } else if (field.type === "date" && data[field.key]) {
@@ -316,7 +327,7 @@ function body() {
     } else if (
       field.type === "password" &&
       typeof data[field.key] === "string" &&
-      (field.key === "confirmpassword" || /^\*+$/u.test(data[field.key]))
+      (field.key === "confirmpassword" || isMaskedSecret(data[field.key]))
     ) {
       delete data[field.key];
     }
@@ -345,7 +356,7 @@ function save() {
           {},
           entityName,
         )
-    : props.api.create("", data, {}, entityName);
+    : props.api.create("", data, {}, entityName, null, props.config.createVerb);
   request
     .then((response) => {
       emit("submit", response);
@@ -363,5 +374,5 @@ function submit() {
   form.value.submit();
 }
 
-defineExpose({ submit });
+defineExpose({ submit, formData });
 </script>

@@ -85,7 +85,6 @@ COPY --from=build-backend /opt/python /opt/python
 COPY --from=build-backend /usr/local/bin/uv /bin/
 
 WORKDIR /code
-EXPOSE 8000
 
 
 FROM node:26.2.0-bookworm-slim AS build-frontend
@@ -166,8 +165,10 @@ WORKDIR /code
 
 # Install hacking tools supported via apt
 RUN apt update && \
-    TOOLS="nmap theharvester nikto sslscan sslyze cmseek zaproxy exploitdb metasploit-framework emailharvester joomscan gitleaks smbmap nuclei gobuster seclists dirb" && \
-    apt install --yes --no-install-recommends $TOOLS $BACKEND_DEBIAN_DEPENDENCIES libcap2-bin git ca-certificates sudo && \
+    TOOLS="nmap theharvester nikto sslscan sslyze cmseek zaproxy exploitdb metasploit-framework joomscan gitleaks smbmap nuclei gobuster seclists dirb" && \
+    apt install --yes --no-install-recommends $TOOLS $BACKEND_DEBIAN_DEPENDENCIES libcap2-bin git ca-certificates sudo binutils file && \
+    # Finish any pending package configuration so dpkg is left in a clean state
+    dpkg --configure -a && \
     # Grant capabilities required to nmap in order to get it running in a rootless environment
     setcap cap_net_raw,cap_net_admin,cap_net_bind_service+eip $(which nmap) && \
     # Clean apt resources
@@ -175,30 +176,32 @@ RUN apt update && \
     apt clean -y && \
     apt autoclean -y && \
     rm -rf /var/lib/apt/lists /var/cache/apt/ && \
-    # Unsatisfied emailharvester dependencies
-    uv pip install validators && \
+    # Unsatisfied dirsearch dependencies (pin setuptools to a version that still ships pkg_resources)
+    uv pip install --system --break-system-packages 'setuptools<82' && \
     # Install hacking tools via pip
-    uv pip install --system --break-system-packages emailfinder ssh-audit dirsearch && \
-    # Unsatisfied dirsearch dependencies
-    uv pip install --system --break-system-packages setuptools && \
+    uv pip install --system --break-system-packages ssh-audit dirsearch && \
     # Install hacking tools from source
     mkdir -p /opt && \
     git clone https://github.com/fullhunt/log4j-scan.git /opt/log4j-scan && \
     git clone https://github.com/fullhunt/spring4shell-scan.git /opt/spring4shell-scan && \
+    git clone https://github.com/maldevel/EmailHarvester.git /opt/EmailHarvester && \
     git clone https://github.com/internetwache/GitTools.git /opt/GitTools && \
-    uv pip install -r /opt/log4j-scan/requirements.txt && \
-    uv pip install -r /opt/spring4shell-scan/requirements.txt && \
+    uv pip install --system --break-system-packages --python /opt/python/bin/python -r /opt/log4j-scan/requirements.txt && \
+    uv pip install --system --break-system-packages --python /opt/python/bin/python -r /opt/spring4shell-scan/requirements.txt && \
+    uv pip install --system --break-system-packages --python /opt/python/bin/python -r /opt/EmailHarvester/requirements.txt && \
     # Initializer script
     mkdir -p /entrypoints && \
     echo "uv run --no-dev manage.py migrate" > /entrypoints/initializer.sh && \
     echo "uv run --no-dev manage.py createsuperuser --no-input  || true" >> /entrypoints/initializer.sh && \
+    echo "uv run --no-dev manage.py monitor" >> /entrypoints/initializer.sh && \
     chmod +x /entrypoints/initializer.sh && \
-    # Tooling update script
-    echo "nuclei -update-templates" > /entrypoints/update-tooling.sh && \
-    echo "searchsploit --update || true" >> /entrypoints/update-tooling.sh && \
+    # Update tooling resources
+    searchsploit --update || true && \
+    echo "searchsploit --update || true" > /entrypoints/update-tooling.sh && \
     chmod +x /entrypoints/update-tooling.sh && \
     # Executions worker script
-    echo "sudo /entrypoints/update-tooling.sh &" > /entrypoints/executions-worker.sh && \
+    echo "nuclei -update-templates" > /entrypoints/executions-worker.sh && \
+    echo "sudo /entrypoints/update-tooling.sh &" >> /entrypoints/executions-worker.sh && \
     echo "uv run --no-dev manage.py rqworker executions" >> /entrypoints/executions-worker.sh && \
     chmod +x /entrypoints/executions-worker.sh && \
     # Rootless user
@@ -216,3 +219,6 @@ RUN apt update && \
 
 COPY --from=build-backend --chown=rekono:rekono /rekono /rekono
 USER rekono
+
+# Pre-install nuclei templates in the rekono user's home
+RUN nuclei -update-templates

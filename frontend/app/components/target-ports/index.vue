@@ -48,7 +48,7 @@ const page = ref();
 const deleteAuthenticationOpen = ref(false);
 const addAuthenticationOpen = ref(false);
 const addAuthenticationConfig = ref({
-  editForm: resolveComponent("AuthenticationsForm"),
+  editForm: markRaw(resolveComponent("AuthenticationsForm")),
   entityName: "Authentication",
   endpoint: "/api/authentications/",
 });
@@ -100,6 +100,8 @@ const config: CrudConfig<TargetPort> = reactive({
   defaultFilters: { target: route.params.target_id },
   ordering: ["id", "port", "path"],
   defaultOrdering: "-id",
+  pageSize: 10,
+  pageSizeOptions: [10, 25, 50, 100],
   defaultBody: { target: route.params.target_id },
   formFields: [
     {
@@ -121,18 +123,14 @@ const config: CrudConfig<TargetPort> = reactive({
     port: z.number().min(0).max(65535).optional(),
     path: validation.path("path", false, 100),
   }),
-  createForm: resolveComponent("TargetPortsForm"),
+  createForm: markRaw(resolveComponent("TargetPortsForm")),
+  updateOnCreateModalOpen: true,
   canRead: true,
   canEdit: false,
   canCreate: userStore.is_auditor,
   canDelete: userStore.is_auditor,
   deleteMessage: (targetPort: TargetPort) =>
-    buildDeleteMessage(
-      "target port",
-      `Port ${targetPort.port}`,
-      "Permanent deletion",
-      "All associated data including assets, findings, and scans will be permanently deleted. This action cannot be undone.",
-    ),
+    buildDeleteMessage("target port", `Port ${targetPort.port}`),
   customDropdownActions: (TargetPort: TargetPort) => {
     if (!userStore.is_auditor) return [];
     return [

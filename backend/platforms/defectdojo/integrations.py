@@ -26,10 +26,19 @@ from rekono.settings import CONFIG
 class DefectDojo(BaseIntegration):
     """DefectDojo integration client for vulnerability management synchronization.
 
-    Integrates with OWASP DefectDojo through REST API interactions, synchronizing
-    security findings after each tool execution. Supports both native scan file
-    imports (for tools with a registered DefectDojo scan type) and generic JSON
-    finding imports, with optional reimport to update existing tests.
+    Integrates with OWASP DefectDojo through REST API interactions, pushing security
+    findings to DefectDojo after each tool execution. This is an outbound integration,
+    Rekono only creates or updates data in DefectDojo, it never reads findings back.
+    Supports both native scan file imports (for tools with a registered DefectDojo scan
+    type) and generic JSON finding imports, with optional reimport to update existing
+    tests instead of creating new ones.
+
+    Processing Features:
+        - Outbound synchronization of security findings after each tool execution
+        - Native scan file import for tools with a registered DefectDojo scan type
+        - Generic JSON finding import for tools without a native DefectDojo scan type
+        - Automatic engagement creation when no engagement is configured for the target
+        - Optional reimport into an existing test instead of creating a new one
 
     Attributes:
         generic_import (str): DefectDojo scan type name for generic finding imports.
@@ -123,7 +132,8 @@ class DefectDojo(BaseIntegration):
             id (int): DefectDojo entity ID to check
 
         Returns:
-            tuple[dict[str, Any] | None, bool]: Tuple with the response and a flag indicating if the entity exists or not
+            tuple[dict[str, Any] | None, bool]: The response and a flag indicating whether the
+                                                entity exists
         """
         try:
             response = self._request(self.session.get, f"/{entity_name}/{id}/")
@@ -216,6 +226,7 @@ class DefectDojo(BaseIntegration):
         Args:
             scan_type (str): DefectDojo scan type identifier for the report format.
             report (PathFile): Path to the report file to upload.
+            service (str): Service label (target, optionally with port) stored on the test.
             engagement (int): DefectDojo engagement ID.
             test (int | None): Existing DefectDojo test ID for reimport, or None for import.
             tags (list[str]): Tags applied to the created test, findings, and endpoints.
@@ -245,22 +256,25 @@ class DefectDojo(BaseIntegration):
                 files={"file": _report},
             )
 
-    def process_findings(self, execution: Execution, findings: list[Finding]) -> None:
+    def _process_findings(self, execution: Execution, findings: list[Finding]) -> None:
         """Synchronize security findings to DefectDojo after execution completion.
 
-        Resolves the engagement to use (from an existing target sync, the project sync,
-        or a newly created one), then imports all non-Path findings as a scan report.
-        For tools with a registered DefectDojo scan type the raw output file is sent;
-        otherwise a Generic Findings Import JSON is generated from the finding data.
-        When the project sync has reimport enabled, an existing test is located and
-        updated rather than creating a new one.
+        Excludes Path findings, which are only used to build endpoint data for other
+        finding types, and findings the user entered manually rather than ones a tool
+        detected. Resolves the engagement to push to, from an existing target sync, the
+        project sync, or a newly created one, then imports the remaining findings as a
+        scan report. For tools with a registered DefectDojo scan type the raw output file
+        is sent; otherwise a Generic Findings Import JSON is built from the finding data.
+        If neither a target sync nor a project sync exists for the execution's target,
+        the findings are left unsynchronized and the method returns without error. When
+        the project sync has reimport enabled, an existing test is located and updated
+        instead of creating a new one, except right after an engagement was just created
+        for this call, since a brand new engagement cannot already contain a test.
 
         Args:
             execution (Execution): Completed security tool execution.
             findings (list[Finding]): Security findings to synchronize.
         """
-        if not self.is_enabled() or not self.is_available():
-            return
         findings = [
             finding for finding in findings if not isinstance(finding, Path) and not finding.created_from_user_input
         ]
@@ -275,6 +289,7 @@ class DefectDojo(BaseIntegration):
         else:
             project_sync = DefectDojoSync.objects.filter(project=execution.task.target.project).first()
             if not project_sync:
+                # No sync configured at either level for this target, so there is nothing to push to
                 return
             product_id = project_sync.product_id
             if project_sync.engagement_id:
@@ -287,6 +302,8 @@ class DefectDojo(BaseIntegration):
                     f"Rekono assessment for {execution.task.target.target}",
                     [self.settings.tag] if self.settings.tag else [],
                 )
+                # Persisted as a target sync so later executions for this target reuse the same
+                # engagement directly, without creating a new one on every execution
                 new_sync = DefectDojoTargetSync.objects.create(
                     defectdojo_sync=project_sync, target=execution.task.target, engagement_id=new_engagement.get("id")
                 )
@@ -294,6 +311,7 @@ class DefectDojo(BaseIntegration):
         test_id = None
         if execution.configuration.tool.defectdojo_scan_type:
             if execution.output_file is None or not PathFile(execution.output_file).is_file():
+                # The native report file is required for a native import, so skip silently if it is gone
                 return
             scan_type = execution.configuration.tool.defectdojo_scan_type
             test_type_name = scan_type
@@ -332,5 +350,27 @@ class DefectDojo(BaseIntegration):
             ).get("test_id")
             execution.save(update_fields=["defectdojo_test_id"])
         finally:
+            # Only the generic-import path writes a temp file, the native output file must be kept
             if not execution.output_file and report and report.is_file():
                 report.unlink()
+
+    def process_findings(self, execution: Execution, findings: list[Finding]) -> None:
+        """Synchronize findings to DefectDojo, guarding availability and errors.
+
+        Public entry point that skips processing when the integration is disabled
+        or unavailable and delegates the actual scan import to _process_findings.
+        Any failure during the import is logged rather than propagated, so a
+        DefectDojo outage never interrupts the rest of the execution pipeline.
+
+        Args:
+            execution (Execution): Completed security tool execution.
+            findings (list[Finding]): Security findings to synchronize.
+        """
+        if not self.is_enabled() or not self.is_available():
+            return
+        try:
+            return self._process_findings(execution, findings)
+        except Exception as ex:
+            self.logger.error(
+                f"[{self.__class__.__name__}] Error processing {len(findings)} findings from execution {execution.id}: {str(ex)}"
+            )

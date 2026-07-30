@@ -66,10 +66,10 @@ class TargetSerializer(RelatedNotesSerializer):
         based on the target specification using Target.get_type().
 
         Args:
-            attrs (dict): The attributes to validate
+            attrs (dict[str, Any]): The attributes to validate
 
         Returns:
-            dict: The validated attributes with detected target type
+            dict[str, Any]: The validated attributes with detected target type
         """
         attrs = super().validate(attrs)
         attrs["type"] = Target.get_type(attrs["target"])

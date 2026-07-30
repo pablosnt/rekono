@@ -100,7 +100,8 @@ class ApiTestCase(RekonoTestCase):
                         response.status_code,
                         msg=f"[{location}] Expected status code {self.status_code} doesn't match {response.status_code}{f': {response.content}' if hasattr(response, 'content') else ''}",
                     )
-                    if self.expected:
+                    # Empty expected values are checked as well
+                    if self.expected is not None:
                         self.assertExpected(
                             location, test_case, json.loads((response.content or "{}".encode()).decode()), self.expected
                         )
@@ -131,17 +132,21 @@ class DeleteApiTestCase(ApiTestCase):
 class ParserTestCase(RekonoTestCase):
     report: str
     expected: list[dict[str, Any]] | None = None
+    # Executor attributes to set before parsing, for tools whose parser reads executor state
+    # populated during the tool run (e.g. GitLeaks' git_directory_dumped and execution_directory)
+    executor_attributes: dict[str, Any] | None = None
 
     def test_case(self, test_case_number: int, test_case: TestCase) -> None:
         executor = test_case.execution.configuration.tool.executor_class(test_case.execution)
         executor.authentication = test_case.authentication
         executor.arguments = test_case.arguments
-        report = (
-            test_case.data_dir
-            / "reports"
-            / test_case.execution.configuration.tool.name.lower().replace(" ", "_")
-            / self.report
-        )
+        for attribute, value in (self.executor_attributes or {}).items():
+            setattr(executor, attribute, value)
+        report = test_case.data_dir / "reports"
+        if self.report.startswith("empty."):
+            report = report / self.report
+        else:
+            report = report / test_case.execution.configuration.tool.name.lower().replace(" ", "_") / self.report
         if test_case.execution.configuration.tool.output_format:
             executor.report = report
             output = None

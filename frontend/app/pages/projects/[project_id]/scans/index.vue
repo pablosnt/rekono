@@ -27,7 +27,6 @@
 </template>
 
 <script setup lang="ts">
-import { h } from "vue";
 import type { CrudConfig, CrudTableColumn, FilterOption } from "~/types/crud";
 import type { Task } from "~/types/models";
 import { useUserStore } from "~/store/user";
@@ -43,7 +42,7 @@ const route = useRoute();
 const options = useOptions();
 const api = useApi("/api/tasks/");
 const table = useTable();
-const { refreshPanelCounts } = usePanel();
+const { refreshPanelCounts, projectHasActiveFindings } = usePanel();
 const page = ref();
 const tasksButton = ref();
 const notesButton = ref();
@@ -53,7 +52,6 @@ const refresh = ref<ReturnType<typeof setTimeout> | null>(null);
 const targetOptions = ref<FilterOption[]>([]);
 const executorOptions = ref<FilterOption[]>([]);
 const toolOptions = ref<FilterOption[]>([]);
-const configurationOptions = ref<FilterOption[]>([]);
 const processOptions = ref<FilterOption[]>([]);
 const runningTasks = ref(0);
 
@@ -83,11 +81,18 @@ function onFetched(items: Task[]) {
 
 onMounted(() => {
   options.targets(targetOptions, { project: route.params.project_id });
-  options.users(executorOptions, { is_active: true, role: "Admin" });
-  options.users(executorOptions, { is_active: true, role: "Auditor" });
-  options.tools(toolOptions);
-  options.configurations(configurationOptions, { ordering: "-tool" });
-  options.processes(processOptions);
+  options.users(executorOptions, {
+    is_active: true,
+    role: "Admin",
+    project: route.params.project_id,
+  });
+  options.users(executorOptions, {
+    is_active: true,
+    role: "Auditor",
+    project: route.params.project_id,
+  });
+  options.tools(toolOptions, { ordering: "-liked,-id" });
+  options.processes(processOptions, { ordering: "-liked,-id" });
 });
 
 onUnmounted(() => {
@@ -271,13 +276,6 @@ const config: CrudConfig<Task> = reactive({
       options: toolOptions,
     },
     {
-      key: "executed_configuration",
-      label: "Configuration",
-      icon: "i-lucide-terminal",
-      type: "select" as const,
-      options: configurationOptions,
-    },
-    {
       key: "stage",
       label: "Stage",
       icon: "i-lucide-layers",
@@ -309,7 +307,7 @@ const config: CrudConfig<Task> = reactive({
     "start",
     "end",
   ],
-  defaultOrdering: "-id",
+  defaultOrdering: "-end",
   pageSize: 25,
   pageSizeOptions: [25, 50, 100],
   tableCopyId: true,
@@ -334,21 +332,23 @@ const config: CrudConfig<Task> = reactive({
                 },
               ]
             : []),
-          {
-            label: "Generate a report",
-            icon: "i-lucide-file-text",
-            color: "neutral",
-            onSelect: (t: Task) => {
-              selectedTask.value = t;
-              showReportModal.value = true;
-            },
-          },
+          ...(projectHasActiveFindings.value
+            ? [
+                {
+                  label: "Generate a report",
+                  icon: "i-lucide-file-text",
+                  onSelect: (t: Task) => {
+                    selectedTask.value = t;
+                    showReportModal.value = true;
+                  },
+                },
+              ]
+            : []),
         ]
       : []),
     {
       label: "Take note",
       icon: "i-lucide-notebook",
-      color: "neutral",
       onSelect: () => {
         selectedTask.value = task;
         return nextTick(() => notesButton.value?.createNote());

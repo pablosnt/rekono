@@ -7,6 +7,7 @@
       :items="options"
       value-key="id"
       label-key="username"
+      description-key="role"
       required
       multiple
       clear
@@ -73,20 +74,20 @@ function submit() {
         if (total > errors) {
           toast.add({
             title: "Members addition",
-            description: `${total - errors} users were added to the project successfully and ${errors} failed`,
+            description: `Added ${pluralize(total - errors, "user")} to the project successfully and ${errors} failed`,
             color: "warning",
           });
         } else {
           toast.add({
             title: "Members addition",
-            description: `${errors} users weren't added to the project`,
+            description: `Couldn't add ${pluralize(errors, "user")} to the project`,
             color: "error",
           });
         }
       } else {
         toast.add({
           title: "Members addition",
-          description: `${total} users were added to the project successfully`,
+          description: `Added ${pluralize(total, "user")} to the project successfully`,
           color: "success",
         });
       }

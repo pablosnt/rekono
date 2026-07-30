@@ -14,13 +14,14 @@ class Theharvester(BaseParser):
 
     Extracts OSINT findings from passive reconnaissance data including email
     addresses, domains, IP addresses, social media profiles, and ASN information.
-    Maps TheHarvester data types to standardized OSINT finding categories.
+    The report is a flat JSON object keyed by data source (e.g. "ips", "emails");
+    keys not present in data_types, such as "shodan", are silently skipped since
+    they have no equivalent OSINT data type to map to.
 
     Attributes:
         data_types (dict): Mapping between TheHarvester types and OSINT data types
     """
 
-    # Mapping between theHarvester types and OSINT data types
     data_types = {
         "ips": OSINTDataType.IP,
         "hosts": OSINTDataType.DOMAIN,
@@ -38,8 +39,8 @@ class Theharvester(BaseParser):
     def _parse(self) -> None:
         """Parse TheHarvester JSON output and extract OSINT findings.
 
-        Processes JSON reconnaissance data to create OSINT findings for
-        discovered intelligence across multiple data sources.
+        Creates one OSINT finding per string value under each JSON key that has a matching
+        entry in data_types, using that mapping to set the finding's data_type.
         """
         data = self.load_json_report()
         if not data or not isinstance(data, dict):

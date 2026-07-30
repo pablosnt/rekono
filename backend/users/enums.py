@@ -14,17 +14,17 @@ class Notification(models.TextChoices):
     Defines the scope of notifications users receive about security executions.
     Controls which execution events trigger notifications to the user.
 
-    Choices:
-        DISABLED: All notifications disabled except security-critical ones
-        MY_EXECUTIONS: Only notifications for executions started by the user
-        ALL_EXECUTIONS: Notifications for all executions in accessible projects
+    Attributes:
+        ONLY_ALERTS (str): Only alert notifications, execution notifications disabled
+        MY_EXECUTIONS (str): Only notifications for executions started by the user
+        ALL_EXECUTIONS (str): Notifications for all executions in accessible projects
     """
 
-    DISABLED = "Disabled"
+    ONLY_ALERTS = "Only alerts"
     MY_EXECUTIONS = "Only my executions"
     ALL_EXECUTIONS = "All executions"
 
 
-# Type annotation fix for pytype compatibility
-# https://github.com/google/pytype/issues/1048
+# Type annotation workaround for pytype compatibility
+# See: https://github.com/google/pytype/issues/1048
 Notification: type[Choices] = Notification

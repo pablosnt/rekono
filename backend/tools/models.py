@@ -172,7 +172,9 @@ class Tool(BaseLike):
         """Parse version information from the tool's version output.
 
         Executes the tool with version argument and extracts version string using
-        regex pattern matching.
+        regex pattern matching. The tool is executed with the same clean environment
+        used during tool execution, so tools that shell out to a bare `python3` don't
+        inherit Rekono's virtualenv and can resolve their own dependencies.
 
         Returns:
             str | None: Parsed version string or None if version cannot be determined
@@ -184,6 +186,7 @@ class Tool(BaseLike):
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
                 text=True,
+                env=self.executor_class.get_clean_default_environment(),
                 cwd=Path(getattr(CONFIG, self.script_directory_property.lower()))
                 if self.script_directory_property
                 else None,
@@ -217,7 +220,7 @@ class Intensity(BaseModel):
     Attributes:
         tool (ForeignKey): The associated Tool instance
         argument (TextField): Command argument for this intensity level (max 50 chars)
-        value (IntegerField): Intensity level from IntensityEnum (QUIET, NORMAL, AGGRESSIVE)
+        value (IntegerField): Intensity level from IntensityEnum (SNEAKY, LOW, NORMAL, HARD, INSANE)
 
     Example:
         Create intensity configuration:
@@ -258,16 +261,19 @@ class Configuration(BaseModel):
         stage (IntegerField): Execution stage from Stage enum
         default (BooleanField): Whether this is the default configuration for the tool
         default_scanned_port (IntegerField): Default port to scan (0-65535, optional)
+        deprecated (BooleanField): Whether this configuration is excluded from new task and
+                                   process creation while remaining available for existing
+                                   executions that already reference it
 
     Example:
         Create a tool configuration:
 
         ```python
         config = Configuration.objects.create(
-            name="Full Scan",
+            name="TCP ports & service versions",
             tool=nmap_tool,
-            command_template="-sS -O",
-            stage=Stage.RECON,
+            command_template="--privileged {host} {intensity} {ports} -sS -sV -A -oX {output}",
+            stage=Stage.ENUMERATION,
             default=True
         )
         ```
@@ -321,9 +327,9 @@ class Argument(BaseModel):
         ```python
         argument = Argument.objects.create(
             configuration=nmap_config,
-            name="target",
-            argument="",
-            required=True,
+            name="ports",
+            argument="-p {ports_commas}",
+            required=False,
             multiple=True
         )
         ```
@@ -374,9 +380,9 @@ class Input(BaseModel):
 
         ```python
         input_mapping = Input.objects.create(
-            argument=target_argument,
-            type=host_input_type,
-            filter="status=active",
+            argument=url_argument,
+            type=port_input_type,
+            filter="http",
             order=1
         )
         ```

@@ -79,7 +79,7 @@
               icon="i-lucide-git-fork"
               color="neutral"
               :variant="item.forked ? 'solid' : 'subtle'"
-              :label="`${item.forks.length} Forks`"
+              :label="pluralize(item.forks.length, 'Fork')"
               :to="
                 item.forked
                   ? `/projects/${$route.params.project_id}/notes/${item.forked}`
@@ -89,7 +89,7 @@
                 item.forked
                   ? undefined
                   : api.create(`${item.id}/fork/`, {}).then(() => {
-                      page.fetch();
+                      page.fetchFirstPage();
                       toast.add({
                         title: 'Forked',
                         description: `Note '${item.title}' has been forked`,
@@ -105,7 +105,7 @@
               color="neutral"
               variant="subtle"
               size="lg"
-              :label="`${item.forks.length} Forks`"
+              :label="pluralize(item.forks.length, 'Fork')"
               class="pointer-events-none"
             />
             <UDropdownMenu
@@ -115,7 +115,6 @@
                   ? {
                       label: `Forked from #${item.forked_from}`,
                       icon: 'i-lucide-link',
-                      color: 'neutral',
                       to: `/projects/${$route.params.project_id}/notes/${item.forked_from}`,
                     }
                   : {
@@ -123,7 +122,7 @@
                       icon: item.public
                         ? 'i-lucide-globe-lock'
                         : 'i-lucide-globe',
-                      color: item.public ? 'neutral' : 'warning',
+                      color: item.public ? undefined : 'warning',
                       onSelect: () => switchVisibility(item),
                     },
                 {
@@ -294,9 +293,10 @@ const config: CrudConfig<Note> = reactive({
     "owner",
     { id: "created_at", label: "Created" },
     { id: "updated_at", label: "Updated" },
-    { id: "likes_count", label: "Likes" },
+    { id: "likes", label: "Likes" },
+    { id: "liked", label: "Favourites" },
   ],
-  defaultOrdering: "-id",
+  defaultOrdering: "-liked,-id",
   defaultFilters: { project: route.params.project_id },
   defaultBody: { project: route.params.project_id },
   deleteMessage: (note: Note) => buildDeleteMessage("note", note.title),
@@ -306,5 +306,10 @@ const config: CrudConfig<Note> = reactive({
   canDelete: (note: Note) => userStore.isOwner(note),
 });
 
-onMounted(() => options.users(userOptions, { is_active: true }));
+onMounted(() =>
+  options.users(userOptions, {
+    is_active: true,
+    project: route.params.project_id,
+  }),
+);
 </script>

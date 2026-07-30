@@ -76,7 +76,6 @@
 </template>
 
 <script setup lang="ts">
-import { resolveComponent } from "vue";
 import type { CrudConfig } from "~/types/crud";
 
 const props = defineProps<{
@@ -157,7 +156,7 @@ onUnmounted(() => {
 });
 
 const handleSubmit = (data: Record<string, unknown>) => {
-  if (props.config.onCreation) {
+  if (props.config.onCreation && !props.item?.id) {
     props.config.onCreation(data);
   }
   emit("submit", data);

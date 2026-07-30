@@ -1,0 +1,2 @@
+{"template-id": "bad-port", "info": {"name": "Malformed port finding", "severity": "info", "tags": ["misc"]}, "type": "tcp", "host": "10.10.10.10", "port": "notaport", "matched-at": "10.10.10.10", "ip": "10.10.10.10", "matcher-status": true}
+{"template-id": "openssh-version", "info": {"name": "OpenSSH Service", "tags": ["tech"]}, "type": "tcp", "host": "10.10.10.10", "extracted-results": ["7.4"], "extractor-name": "version", "ip": "10.10.10.10", "matcher-status": true}

@@ -104,6 +104,7 @@ expected = [
 class NiktoTest(ParserTest, TestCase):
     tool_name = "Nikto"
     cases = [
+        ParserTestCase("empty.xml", []),
         ParserTestCase("2022-default.xml", [{k: v for k, v in item.items() if k != "reference"} for item in expected]),
         ParserTestCase("2025-default.xml", expected),
     ]

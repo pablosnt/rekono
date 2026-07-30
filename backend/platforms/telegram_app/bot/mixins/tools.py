@@ -1,11 +1,15 @@
 """Telegram Bot mixins for security tool and configuration management.
 
 Provides mixins for tool selection, configuration management, and intensity
-settings in security testing workflows through interactive conversations.
+settings in security testing workflows through interactive conversations. Tools,
+like processes, are a global catalog rather than project-scoped. ConfigurationMixin
+expects Context.TOOL to already be set by ToolMixin, since configurations are listed
+for that tool. IntensityMixin also reads Context.TOOL when present to narrow the
+choices to that tool's supported intensities, but works without it, falling back to
+every Intensity value, which is how the Process conversation uses it without a tool.
 """
 
 from asgiref.sync import sync_to_async
-from django.db.models import QuerySet
 from telegram import Update
 from telegram.ext import CallbackContext, ConversationHandler
 
@@ -129,29 +133,30 @@ class IntensityMixin(BaseMixin):
     """
 
     @sync_to_async
-    def _get_tool_intensities_async(self, tool: Tool) -> QuerySet:
+    def _get_tool_intensities_async(self, tool: Tool) -> list[str]:
         """Get available intensity levels for a security tool (async wrapper).
 
         Args:
             tool (Tool): The security tool to get intensities for.
 
         Returns:
-            QuerySet: List of intensity level names for the tool.
+            list[str]: Intensity level names supported by the tool, ordered by value.
         """
         return [Intensity(i.value).name for i in tool.intensities.order_by("value").all()]
 
     async def ask_for_intensity(self, update: Update, context: CallbackContext) -> int:
         """Display intensity level selection options.
 
-        Shows available intensity levels for the selected security tool,
-        with tool-specific intensities displayed in descending order.
+        Shows the intensity levels supported by the selected tool, in descending order. When
+        no tool is in context, as in the Process conversation, every intensity level is
+        offered instead.
 
         Args:
             update (Update): The Telegram update containing user interaction.
             context (CallbackContext): The callback context for the conversation.
 
         Returns:
-            int: Next conversation state or ConversationHandler.END if no tool selected.
+            int: Next conversation state.
         """
         self.validate_update(update)
         tool = self.get_context_value(context, Context.TOOL)

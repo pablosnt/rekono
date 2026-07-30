@@ -197,7 +197,7 @@ function fetch() {
       .then((response) => (tools.value = [response]));
   } else {
     api
-      .list("tools/", {}, true)
+      .list("tools/", { ordering: "-liked,-id" }, true)
       .then((response) => (tools.value = response.items));
   }
 }

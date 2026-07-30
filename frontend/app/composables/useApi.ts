@@ -18,7 +18,7 @@ export default function (
   authentication: boolean = true,
 ) {
   const config = useRuntimeConfig();
-  const toast = useToast();
+  const toast = useNuxtApp().vueApp.runWithContext(() => useToast());
 
   const defaultHeaders = { Accept: "application/json" };
 
@@ -263,6 +263,7 @@ export default function (
     extraHeaders?: object,
     entity?: string,
     toastOnError: number[] | null = null,
+    verb: string = "created",
   ): Promise {
     return request(
       endpoint,
@@ -273,7 +274,7 @@ export default function (
     ).then((response) => {
       if (entity) {
         toast.add({
-          description: `${entity} has been successfully created`,
+          description: `${entity} has been successfully ${verb}`,
           color: "success",
         });
       }

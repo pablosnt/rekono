@@ -19,14 +19,13 @@ class ToolTest(ApiTestNoData, TestCase):
     endpoint = "/api/tools/"
     expected_string = nmap
     cases = [
-        ApiTestCase([Role.READER], 403, endpoint="1"),
         ApiTestCase(
-            [Role.ADMIN, Role.AUDITOR],
+            [Role.ADMIN, Role.AUDITOR, Role.READER],
             expected={"id": 1, "name": nmap, "command": nmap.lower(), "likes": 0, "liked": False},
             endpoint="1",
         ),
         PostApiTestCase([Role.READER], 403, endpoint="1/like"),
-        ApiTestCase([Role.ADMIN, Role.AUDITOR], endpoint=f"{endpoint}?like=true"),
+        ApiTestCase([Role.ADMIN, Role.AUDITOR, Role.READER], endpoint=f"{endpoint}?like=true"),
         PostApiTestCase([Role.ADMIN, Role.AUDITOR], 204, endpoint="1/like"),
         ApiTestCase(
             [Role.ADMIN, Role.AUDITOR],
@@ -40,19 +39,31 @@ class ToolTest(ApiTestNoData, TestCase):
             endpoint="1",
         ),
         ApiTestCase(
+            [Role.READER],
+            expected={
+                "id": 1,
+                "name": nmap,
+                "command": nmap.lower(),
+                "likes": 4,
+                "liked": False,
+            },
+            endpoint="1",
+        ),
+        ApiTestCase(
             [Role.ADMIN, Role.AUDITOR],
             expected=[{"id": 1, "name": nmap, "command": nmap.lower(), "likes": 4, "liked": True}],
             endpoint=f"{endpoint}?like=true",
         ),
+        ApiTestCase([Role.READER], expected=[], endpoint=f"{endpoint}?like=true"),
         ApiTestCase(
-            [Role.ADMIN, Role.AUDITOR],
+            [Role.ADMIN, Role.AUDITOR, Role.READER],
             expected={"id": 20, "name": gobuster, "command": gobuster.lower(), "likes": 0, "liked": False},
             endpoint="20",
         ),
         DeleteApiTestCase([Role.READER], 403, endpoint="1/like"),
         DeleteApiTestCase([Role.ADMIN, Role.AUDITOR], endpoint="1/like"),
         ApiTestCase(
-            [Role.ADMIN, Role.AUDITOR],
+            [Role.ADMIN, Role.AUDITOR, Role.READER],
             expected={"id": 1, "name": nmap, "command": nmap.lower(), "likes": 0, "liked": False},
             endpoint="1",
         ),
@@ -64,11 +75,19 @@ class ToolTest(ApiTestNoData, TestCase):
 
     def test_configurations_exclude_deprecated(self) -> None:
         client = APIClient()
-        client.force_authenticate(self.users[Role.ADMIN][0])
+        client.force_authenticate(self.admin1)
         configuration = Configuration.objects.filter(tool__pk=1).first()
         configuration.deprecated = True
         configuration.save(update_fields=["deprecated"])
         self.assertNotIn(configuration.pk, [c["id"] for c in client.get("/api/tools/1/").json()["configurations"]])
+
+    def test_tools_exclude_no_active_configurations(self) -> None:
+        client = APIClient()
+        client.force_authenticate(self.admin1)
+        Configuration.objects.filter(tool__pk=1).update(deprecated=True)
+        self.assertEqual(404, client.get(f"{self.endpoint}1/").status_code)
+        self.assertEqual(0, client.get(f"{self.endpoint}?name={nmap}").json()["count"])
+        self.assertEqual(1, client.get(f"{self.endpoint}?name={gobuster}").json()["count"])
 
 
 first_nmap_configuration = "TCP ports"
@@ -92,7 +111,7 @@ class ConfigurationTest(ApiTestNoData, TestCase):
 
     def test_endpoint_excludes_deprecated(self) -> None:
         client = APIClient()
-        client.force_authenticate(self.users[Role.ADMIN][0])
+        client.force_authenticate(self.admin1)
         configuration = Configuration.objects.filter(deprecated=False).first()
         configuration.deprecated = True
         configuration.save(update_fields=["deprecated"])

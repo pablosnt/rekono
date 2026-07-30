@@ -1,7 +1,8 @@
 """Django app configuration for tools module.
 
-Provides app configuration with automatic tool status updates after
-migration completion to ensure tool availability information is current.
+Provides app configuration with fixture management for tools and their
+configurations, plus automatic tool status updates after migration completion
+to ensure tool availability information is current.
 """
 
 from typing import Any
@@ -15,8 +16,9 @@ from framework.apps import BaseApp
 class ToolsConfig(BaseApp, AppConfig):
     """Django app configuration for tools module.
 
-    Extends BaseApp and AppConfig to provide tools-specific initialization
-    including automatic tool status updates after migrations.
+    Extends BaseApp and AppConfig to provide tools-specific initialization,
+    including fixture management for tools and configurations and automatic
+    tool status updates after migrations.
 
     Attributes:
         name (str): The application name
@@ -45,12 +47,11 @@ class ToolsConfig(BaseApp, AppConfig):
         """
         from tools.models import Argument, Input, Intensity, Output
 
-        # Tool and Configurations are not re-created to keep consistency
-        # with other entities like Tasks or Processes.
-        # However, all the "internal" models whose only relationships are
-        # with Tool and  Configuration, and whose only source are fixtures,
-        # we will re-create them to keep the flexibility to order them in
-        # the most convenient way for the maintainers.
+        # Tool and Configuration are not re-created here, to keep consistency
+        # with other entities like Tasks or Processes that reference them.
+        # The "internal" models below only relate to Tool and Configuration,
+        # and are sourced only from fixtures, so they are re-created freely,
+        # letting maintainers reorder them in the most convenient way.
         for model in [Intensity, Argument, Input, Output]:
             model.objects.all().delete()
         super().load_fixtures(**kwargs)

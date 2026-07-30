@@ -127,12 +127,16 @@ const requiredInputTechnology = ref(false);
 const requiredInputVulnerability = ref(false);
 
 function loadScanners() {
-  props.api.list("tools/", {}, true).then((response) => {
-    toolOptions.value = response.items;
-  });
-  props.api.list("processes/", {}, true).then((response) => {
-    processOptions.value = response.items;
-  });
+  props.api
+    .list("tools/", { ordering: "-liked,-id" }, true)
+    .then((response) => {
+      toolOptions.value = response.items;
+    });
+  props.api
+    .list("processes/", { ordering: "-liked,-id" }, true)
+    .then((response) => {
+      processOptions.value = response.items;
+    });
 }
 
 function restoreIntensityRange() {

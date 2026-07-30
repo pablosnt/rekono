@@ -4,6 +4,17 @@ export function formatCount(n: number): string {
   return String(n);
 }
 
+export function pluralize(
+  count: number,
+  singular: string,
+  plural: string = `${singular}s`,
+  includeCount: boolean = true,
+): string {
+  return count === 0
+    ? `No ${plural}`
+    : `${includeCount ? `${formatCount(count)} ` : ""}${count === 1 ? singular : plural}`;
+}
+
 export function firstUpper(value: string) {
   return `${value.charAt(0).toUpperCase()}${value.slice(1)}`;
 }
@@ -64,16 +75,20 @@ export function smartLowerCase(text: string): string {
 
 export function copyLink() {
   const url = useRequestURL();
-  const toast = useToast();
-  navigator.clipboard.writeText(`${url.origin}${url.pathname}`);
-  toast.add({ title: "Link copied to clipboard", color: "success" });
+  navigator.clipboard?.writeText(`${url.origin}${url.pathname}`).then(() => {
+    useNuxtApp()
+      .vueApp.runWithContext(() => useToast())
+      .add({ title: "Link copied to clipboard", color: "success" });
+  });
 }
 
 export function copyText(text: string, message?: string) {
-  const toast = useToast();
-  navigator.clipboard.writeText(text);
-  toast.add({
-    title: message || `${text} copied to clipboard`,
-    color: "success",
+  navigator.clipboard?.writeText(text).then(() => {
+    useNuxtApp()
+      .vueApp.runWithContext(() => useToast())
+      .add({
+        title: message || `${text} copied to clipboard`,
+        color: "success",
+      });
   });
 }

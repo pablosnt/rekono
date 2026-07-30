@@ -385,6 +385,8 @@ class BaseMixin(BaseTelegramBot):
         chat = chat or await self.get_active_telegram_chat(update)
         if not chat:
             return ConversationHandler.END, None
+        # The state's MessageHandler(filters.TEXT, ...) matches "/cancel" as plain text too, so it
+        # never reaches the ConversationHandler's Cancel fallback; it has to be handled here instead
         if (update.effective_message.text or "").lower() == "/cancel":
             return await Cancel().execute_command(update, context), None
         instance, errors = await self._save_serializer_async(serializer_class(data=data))

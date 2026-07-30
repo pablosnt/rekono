@@ -9,10 +9,14 @@ secure defaults and extensive customization through environment variables and
 configuration files managed by the RekonoConfig system.
 """
 
+import warnings
 from datetime import timedelta
 from typing import Any
 
 from rekono.config import RekonoConfig
+
+warnings.filterwarnings("ignore", category=SyntaxWarning, module=r".*telegram_app.*")
+
 
 ################################################################################
 # Rekono basic information                                                     #
@@ -129,6 +133,9 @@ ALLOWED_HOSTS = CONFIG.allowed_hosts
 
 AUTH_USER_MODEL = "users.User"
 
+# The Django built-in validators enforce baseline hygiene (not similar to the user's own data,
+# a minimum length, not a common password, not fully numeric); PasswordValidator on top of them
+# adds the actual complexity rules (mixed case, digit, symbol) required for Rekono accounts
 AUTH_PASSWORD_VALIDATORS = [
     {
         "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
@@ -228,8 +235,8 @@ REST_FRAMEWORK: dict[str, Any] = {
     ],
     "DEFAULT_PAGINATION_CLASS": "framework.pagination.Pagination",
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        "security.authentication.api.ApiAuthentication",
         "security.authentication.jwt.CookieJWTAuthentication",
+        "security.authentication.api.ApiAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
@@ -257,7 +264,8 @@ if not CONFIG.testing:
                 # It is enough for legitimate usage, but attacks will be blocked
                 "user": "1000/min",
                 # Prevent brute force attacks in login and refresh token features
-                # Login is not authenticated, we can receive many requests from different users with same public IP address
+                # Login is not authenticated, so many different users behind the same public IP
+                # address count toward this same bucket
                 "login": "30/min",
                 # Same use case as login, just keeping an independent counter for each
                 "refresh": "30/min",
@@ -320,6 +328,10 @@ default_rq_queue = {
     "DEFAULT_TIMEOUT": 3600,  # 1 hour
 }
 
+# "tasks", "executions", and "findings" are the three stages of the scanning pipeline
+# (a task plans executions, each execution produces findings); "monitor" runs periodic
+# background jobs unrelated to a specific task. All queues share the same connection and
+# default timeout, with "executions" and "findings" overridden below for longer-running jobs
 RQ_QUEUES = {
     "tasks": default_rq_queue,
     "executions": default_rq_queue,
@@ -328,8 +340,8 @@ RQ_QUEUES = {
     "cache": default_rq_queue,  # Not an RQ job queue; used by framework.cache.Cache to reuse this Redis connection
 }
 
-RQ_QUEUES["executions"]["DEFAULT_TIMEOUT"] = 28800  # 8 hours
-RQ_QUEUES["findings"]["DEFAULT_TIMEOUT"] = 10800  # 3 hours
+RQ_QUEUES["executions"]["DEFAULT_TIMEOUT"] = 86400  # 24 hours
+RQ_QUEUES["findings"]["DEFAULT_TIMEOUT"] = 28800  # 8 hours
 
 # Enqueue jobs immediately instead of deferring them until the database transaction commits.
 # django-rq defaults to "on_db_commit", which returns None from enqueue() inside an atomic

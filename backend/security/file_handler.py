@@ -29,7 +29,7 @@ class FileHandler(LoggingEntity):
     common file upload attack vectors. This class serves as the central file
     security service for the Rekono platform.
 
-    Security Architecture:
+    Security Features:
         - Defense-in-depth validation with size, extension, and MIME type checks
         - Content-based MIME type detection to prevent extension spoofing
         - Cryptographic integrity verification using SHA-512 checksums
@@ -91,8 +91,8 @@ class FileHandler(LoggingEntity):
             ValidationError: If file size exceeds the configured maximum limit.
         """
         max_mb_size = Settings.objects.first().max_uploaded_file_mb
-        size = in_memory_file.size / (1024 * 1024)  # Get file size in MB
-        if size > max_mb_size:  # File size greater than size limit
+        size = in_memory_file.size / (1024 * 1024)
+        if size > max_mb_size:
             self.logger.warning(f"[Security] Attempt of upload too large file with {size} MB")
             raise ValidationError(
                 f"File size is greater than the max size allowed ({max_mb_size} MB)",
@@ -113,7 +113,7 @@ class FileHandler(LoggingEntity):
         Raises:
             ValidationError: If file extension is not in the allowed extensions list.
         """
-        extension = Path(in_memory_file.name).suffix[1:].lower()  # Get file extension
+        extension = Path(in_memory_file.name).suffix[1:].lower()
         if extension not in self.allowed_extensions:
             self.logger.warning(f"[Security] Attempt of upload file with invalid extension: {extension}")
             raise ValidationError("Invalid extension", code="file", params={"value": extension})
@@ -131,6 +131,7 @@ class FileHandler(LoggingEntity):
         Raises:
             ValidationError: If detected MIME type is not in the allowed types list.
         """
+        # The first 1024 bytes are enough for libmagic to identify the file type from its content
         mime_type = magic.from_buffer(in_memory_file.read(1024), mime=True)
         if mime_type not in self.mime_types:
             self.logger.warning(f"[Security] Attempt of upload file with invalid MIME type: {mime_type}")

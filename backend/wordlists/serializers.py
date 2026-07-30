@@ -24,11 +24,10 @@ class WordlistSerializer(LikeSerializer):
     and user ownership management.
 
     Attributes:
-        file (FileField): File upload field for wordlist files
+        file (FileField): Wordlist content submitted for upload (write-only)
         owner (SimpleUserSerializer): Serialized user information for wordlist owner
     """
 
-    # Wordlist file, to allow the wordlist files upload to the server
     file = FileField(required=True, allow_empty_file=False, write_only=True)
     owner = SimpleUserSerializer(many=False, read_only=True)
 
@@ -42,7 +41,6 @@ class WordlistSerializer(LikeSerializer):
         """
 
         model = Wordlist
-        # Wordlist fields exposed via API
         fields = ("id", "name", "type", "file", "size", "owner", "liked", "likes")
         read_only_fields = ("size", "owner", "liked", "likes")
 
@@ -61,7 +59,7 @@ class WordlistSerializer(LikeSerializer):
         Raises:
             ValidationError: If file validation fails
         """
-        attrs = super().validate(attrs)  # Original data validation
+        attrs = super().validate(attrs)  # Run standard attribute validation before the file-specific security checks
         FileHandler().validate_file(attrs["file"])
         return attrs
 

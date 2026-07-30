@@ -1,7 +1,59 @@
 <template>
   <div>
-    <div v-if="loading" class="flex items-center justify-center">
-      <UButton variant="ghost" loading size="xl" />
+    <div v-if="loading">
+      <div class="sr-only" role="status">Loading dashboard</div>
+      <div
+        aria-hidden="true"
+        class="relative isolate rounded-xl overflow-hidden bg-inverted"
+      >
+        <div
+          class="flex flex-col items-center px-6 py-12 sm:px-12 sm:py-24 lg:px-16 lg:py-24"
+        >
+          <USkeleton class="h-9 sm:h-10 w-80 max-w-full bg-default/15" />
+          <div class="mt-6 w-full max-w-2xl flex flex-col items-center gap-3">
+            <USkeleton
+              v-for="line in 3"
+              :key="line"
+              :class="['h-5 bg-default/15', line === 3 ? 'w-2/3' : 'w-full']"
+            />
+          </div>
+          <div class="mt-8 flex flex-wrap justify-center gap-x-6 gap-y-3">
+            <USkeleton
+              v-for="link in 2"
+              :key="link"
+              class="h-10 w-40 bg-default/15"
+            />
+          </div>
+        </div>
+      </div>
+      <div
+        aria-hidden="true"
+        class="mt-10 grid grid-cols-1 lg:grid-cols-2 gap-6 items-start"
+      >
+        <UPageCard
+          v-for="card in 2"
+          :key="card"
+          variant="outline"
+          :ui="{ container: 'min-w-0' }"
+        >
+          <div class="flex items-center justify-between mb-4">
+            <USkeleton class="h-5 w-32" />
+            <USkeleton class="size-8" />
+          </div>
+          <div class="divide-y divide-default">
+            <div class="grid grid-cols-3 gap-4 py-3">
+              <USkeleton v-for="column in 3" :key="column" class="h-3 w-16" />
+            </div>
+            <div
+              v-for="row in 5"
+              :key="row"
+              class="grid grid-cols-3 gap-4 py-3"
+            >
+              <USkeleton v-for="column in 3" :key="column" class="h-4 w-full" />
+            </div>
+          </div>
+        </UPageCard>
+      </div>
     </div>
     <div v-else>
       <UPageCTA
@@ -157,7 +209,7 @@ const createProjectOpen = ref(false);
 const projectsConfig = reactive({
   endpoint: "/api/projects/",
   entityName: "Project",
-  createForm: resolveComponent("ProjectsForm"),
+  createForm: markRaw(resolveComponent("ProjectsForm")),
   formFields,
   formSchema,
   onCreation: (data: Record<string, unknown>) => {
@@ -181,30 +233,34 @@ function fetch() {
           api
             .get("vulnerabilities/latest/")
             .then((r) => (vulnerabilities.value = r)),
-          api
-            .list("hosts/", {}, false, 1, 1)
-            .then((r) => (findings.hosts = r.total)),
-          api
-            .list("ports/", {}, false, 1, 1)
-            .then((r) => (findings.ports = r.total)),
-          api
-            .list("technologies/", {}, false, 1, 1)
-            .then((r) => (findings.technologies = r.total)),
-          api
-            .list("paths/", {}, false, 1, 1)
-            .then((r) => (findings.paths = r.total)),
-          api
-            .list("osint/", {}, false, 1, 1)
-            .then((r) => (findings.osint = r.total)),
-          api
-            .list("credentials/", {}, false, 1, 1)
-            .then((r) => (findings.credentials = r.total)),
-          api
-            .list("vulnerabilities/", {}, false, 1, 1)
-            .then((r) => (findings.vulnerabilities = r.total)),
-          api
-            .list("exploits/", {}, false, 1, 1)
-            .then((r) => (findings.exploits = r.total)),
+          ...(!userStore.is_auditor
+            ? [
+                api
+                  .list("hosts/", {}, false, 1, 1)
+                  .then((r) => (findings.hosts = r.total)),
+                api
+                  .list("ports/", {}, false, 1, 1)
+                  .then((r) => (findings.ports = r.total)),
+                api
+                  .list("technologies/", {}, false, 1, 1)
+                  .then((r) => (findings.technologies = r.total)),
+                api
+                  .list("paths/", {}, false, 1, 1)
+                  .then((r) => (findings.paths = r.total)),
+                api
+                  .list("osint/", {}, false, 1, 1)
+                  .then((r) => (findings.osint = r.total)),
+                api
+                  .list("credentials/", {}, false, 1, 1)
+                  .then((r) => (findings.credentials = r.total)),
+                api
+                  .list("vulnerabilities/", {}, false, 1, 1)
+                  .then((r) => (findings.vulnerabilities = r.total)),
+                api
+                  .list("exploits/", {}, false, 1, 1)
+                  .then((r) => (findings.exploits = r.total)),
+              ]
+            : []),
         ]);
       } else {
         await Promise.all([

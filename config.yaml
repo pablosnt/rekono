@@ -20,6 +20,8 @@ security:
 tools:
   cmseek:
     directory: /usr/share/cmseek
+  emailharvester:
+    directory: /opt/EmailHarvester
   gittools:
     directory: /opt/GitTools
   log4j-scan:

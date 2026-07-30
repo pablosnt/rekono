@@ -20,6 +20,8 @@ Architecture:
 
 Security:
     - Secure XML parsing using defusedxml to prevent XXE attacks
-    - Input validation for parsed data before finding creation
+    - Duplicate finding detection and automatic relationship linking during finding creation
     - Proper handling of sensitive information in tool outputs
+    - Parsing failures are caught and logged rather than propagated, so a broken
+      parser never crashes the wider execution pipeline
 """

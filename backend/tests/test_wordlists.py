@@ -6,6 +6,7 @@ from security.authorization.roles import Role
 from settings.models import Settings
 from tests.framework import ApiTestNoData
 from tests.framework.cases import ApiTestCase, DeleteApiTestCase, PostApiTestCase, PutApiTestCase
+from tools.models import Input
 from wordlists.enums import WordlistType
 from wordlists.models import Wordlist
 
@@ -56,27 +57,13 @@ class WordlistTest(ApiTestNoData, TestCase):
             PostApiTestCase(
                 ["admin1"],
                 data={**wordlist_endpoints, "file": endpoints_path.open("rb")},
-                expected={
-                    "id": 58,
-                    **wordlist_endpoints,
-                    "size": 3,
-                    "owner": {"id": 1, "username": "admin1"},
-                    "liked": False,
-                    "likes": 0,
-                },
+                expected={"id": 58, **wordlist_endpoints, "size": 3, "owner": {"id": 1, "username": "admin1"}},
                 format="multipart",
             ),
             PostApiTestCase(
                 ["auditor1"],
                 data={**wordlist_subdomains, "file": subdomains_path.open("rb")},
-                expected={
-                    "id": 59,
-                    **wordlist_subdomains,
-                    "size": 3,
-                    "owner": {"id": 3, "username": "auditor1"},
-                    "liked": False,
-                    "likes": 0,
-                },
+                expected={"id": 59, **wordlist_subdomains, "size": 3, "owner": {"id": 3, "username": "auditor1"}},
                 format="multipart",
             ),
             PutApiTestCase([Role.AUDITOR], 403, new_wordlist_endpoints, endpoint="58"),
@@ -170,6 +157,20 @@ class WordlistTest(ApiTestNoData, TestCase):
         super().tearDown()
         invalid_extension_path.unlink()
         invalid_size_path.unlink()
+
+    def test_base_input_filter(self) -> None:
+        wordlist = Wordlist(type=WordlistType.ENDPOINT, path=str(endpoints_path))
+        self.assertTrue(wordlist.filter(Input(filter="endpoint")))
+        self.assertFalse(wordlist.filter(Input(filter="subdomain")))
+        # OR
+        self.assertTrue(wordlist.filter(Input(filter="endpoint or subdomain")))
+        # Negation
+        self.assertTrue(wordlist.filter(Input(filter="!subdomain")))
+        self.assertFalse(wordlist.filter(Input(filter="!endpoint")))
+        # Empty filter
+        self.assertTrue(wordlist.filter(Input(filter="")))
+        # Not existing path
+        self.assertFalse(Wordlist(type=WordlistType.ENDPOINT, path="/does/not/exist").filter(Input(filter="endpoint")))
 
     @cached_property
     def object(self) -> Wordlist:

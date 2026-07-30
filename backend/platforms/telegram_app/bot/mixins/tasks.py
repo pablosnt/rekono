@@ -1,7 +1,11 @@
 """Telegram Bot mixin for security task execution confirmation and creation.
 
 Provides task confirmation prompts and task creation functionality for
-security testing workflows including validation and execution setup.
+security testing workflows including validation and execution setup. Runs last in
+every conversation that creates a Task (Tool and Process), after all the other
+mixins have populated the context values it reads. On completion it clears the
+whole conversation context, ending the flow either with a created Task or with
+the user's cancellation.
 """
 
 from telegram import Update
@@ -9,6 +13,7 @@ from telegram.ext import CallbackContext, ConversationHandler
 
 from platforms.telegram_app.bot.enums import Context
 from platforms.telegram_app.bot.mixins.framework import BaseMixin
+from tasks.models import Task
 from tasks.serializers import TaskSerializer
 
 
@@ -30,8 +35,11 @@ class TaskMixin(BaseMixin):
         """Display task confirmation prompt with execution summary.
 
         Shows a comprehensive summary of the security task to be executed
-        including project, target, tool/process, and intensity settings.
-        Validates that all required parameters are present.
+        including project, target, tool/process, and intensity settings. The target
+        line uses Task.get_target(target, target_port), the shared label helper that
+        also builds target labels for execution notifications, so it renders as
+        "<target>:<port><path>" when a target port was selected, or the bare target
+        otherwise. Validates that all required parameters are present.
 
         Args:
             update (Update): The Telegram update containing user interaction.
@@ -43,6 +51,7 @@ class TaskMixin(BaseMixin):
         self.validate_update(update)
         project = self.get_context_value(context, Context.PROJECT)
         target = self.get_context_value(context, Context.TARGET)
+        target_port = self.get_context_value(context, Context.TARGET_PORT)
         process = self.get_context_value(context, Context.PROCESS)
         tool = self.get_context_value(context, Context.TOOL)
         configuration = self.get_context_value(context, Context.CONFIGURATION)
@@ -67,7 +76,7 @@ class TaskMixin(BaseMixin):
 The following task will be executed:
 
 💼 _Project_   *{self.escape(project.name)}*
-🎯 _Target_    *{self.escape(target.target)}*
+🎯 _Target_    *{self.escape(Task.get_target(target, target_port))}*
 {
                     f"🔄 _Process_   *{self.escape(process.name)}*"
                     if process
@@ -102,6 +111,7 @@ Are you sure?
         if chat and update.callback_query and update.callback_query.data:
             if update.callback_query.data == self.yes:
                 target = self.get_context_value(context, Context.TARGET)
+                target_port = self.get_context_value(context, Context.TARGET_PORT)
                 process = self.get_context_value(context, Context.PROCESS)
                 configuration = self.get_context_value(context, Context.CONFIGURATION)
                 wordlist = self.get_context_value(context, Context.WORDLIST)
@@ -115,6 +125,8 @@ Are you sure?
                     "input_technologies": [input_technology.id] if input_technology else [],
                     "input_vulnerabilities": [input_vulnerability.id] if input_vulnerability else [],
                 }
+                if target_port:
+                    data["target_port_id"] = target_port.id
                 if process:
                     data["process_id"] = process.id
                 elif configuration:

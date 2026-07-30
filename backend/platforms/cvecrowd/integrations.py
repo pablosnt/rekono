@@ -31,6 +31,13 @@ class CveCrowd(BaseIntegration):
     Supports both per-execution vulnerability processing and bulk monitoring
     for proactive threat intelligence and security team notification.
 
+    Processing Features:
+        - Trending CVE retrieval from the CVE Crowd API with database caching
+        - Per-execution marking of vulnerabilities that match a trending CVE
+        - Bulk monitoring across all projects with alert-based notifications
+        - Availability reflects a cached database flag refreshed by a live
+          token check whenever the platform settings are saved
+
     Attributes:
         finding_types (list): Supported finding types (Vulnerability only)
         url (str): CVE Crowd API endpoint URL
@@ -188,10 +195,14 @@ class CveCrowd(BaseIntegration):
         if not self.trending_cves:
             self.logger.warning("[CVE Crowd] No trending CVEs found")
             return
+        # Captured before the trending flags below are updated, so only CVEs that start trending
+        # in this run are notified, not the ones that were already trending before it
         already_trending_cves = list(Vulnerability.objects.filter(trending=True).all().values_list("cve", flat=True))
         Vulnerability.objects.filter(trending=True).exclude(cve__in=self.trending_cves).update(trending=False)
         Vulnerability.objects.filter(trending=False, cve__in=self.trending_cves).update(trending=True)
         notifications = [SMTP(), Telegram()]
+        # Tracks vulnerabilities already notified across alerts, so the same one isn't notified
+        # again when multiple TRENDING_CVE alerts match it within the same project
         notified_vulnerabilities: list[int] = []
         for alert in Alert.objects.filter(item=AlertItem.TRENDING_CVE, enabled=True).all():
             vulnerabilities = (

@@ -4,15 +4,13 @@
       <UDropdownMenu
         :items="[
           {
-            label: `${relatedEntity.notes.length} Notes`,
+            label: pluralize(relatedEntity.notes.length, 'Note'),
             icon: 'i-lucide-notebook',
-            color: 'neutral',
             to: `/projects/${project}/notes?${entityNameLower}=${relatedEntity.id}`,
           },
           {
             label: 'Take note',
             icon: 'i-lucide-plus',
-            color: 'neutral',
             onSelect: () => nextTick(() => notesButton?.createNote()),
           },
         ]"
@@ -20,9 +18,9 @@
       >
         <UChip
           :text="formatCount(relatedEntity.notes.length)"
-          size="3xl"
           color="neutral"
           position="top-right"
+          :ui="{ base: 'h-4 min-w-4 px-1 text-[10px] leading-none' }"
         >
           <UButton
             icon="i-lucide-notebook"

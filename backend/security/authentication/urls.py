@@ -1,8 +1,9 @@
 """URL configuration for authentication endpoints.
 
-Defines URL patterns for authentication-related API endpoints including
-login, logout, token refresh, and multi-factor authentication flows.
-These endpoints provide the complete authentication API for the Rekono platform.
+Defines URL patterns for the authentication API using plain Django ``path()``
+calls rather than a DRF router, since each endpoint is a single-purpose view
+rather than a CRUD resource. Covers login, token refresh, MFA login, MFA
+email delivery, and logout.
 """
 
 from django.urls import path

@@ -46,6 +46,7 @@ export interface Execution {
     tool: { id: number; name: string; icon?: string };
   };
   output_plain?: string;
+  executed_command?: string;
   skipped_reason?: string;
   has_report: boolean;
   status: string;

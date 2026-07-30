@@ -14,8 +14,8 @@
           <div class="relative flex items-center w-full justify-start">
             <UColorModeAvatar
               v-if="!open"
-              light="/favicon-light.png"
-              dark="/favicon-dark.png"
+              :light="asset('/favicon-light.png')"
+              :dark="asset('/favicon-dark.png')"
               alt="Rekono"
               class="size-8"
             />
@@ -56,7 +56,7 @@
                 : '',
               class: 'bg-primary-500',
               ui: { fallback: 'text-white' },
-              size: 'sm',
+              size: 'md',
             }"
             :label="open ? userStore.name || undefined : undefined"
             :aria-label="

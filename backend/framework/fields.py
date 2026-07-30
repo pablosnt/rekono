@@ -35,19 +35,21 @@ class ProtectedSecretField(Field):
     """Serializer field for protected secret values.
 
     Provides secure handling of sensitive data by masking values in responses
-    while allowing secure input validation and storage.
+    while allowing secure input validation and storage. Expects to be declared
+    on a ModelSerializer whose Meta.model is a BaseEncrypted subclass, since
+    validation is delegated to that model's encrypted field.
 
     Security Features:
-        - Output values are masked with asterisks
-        - Input validation through model validator functions
+        - Output values are masked with asterisks, one per character, so the
+          secret's length is visible but its content never is
+        - Input length and format are validated against the underlying
+          model's encrypted field before the value is accepted
         - No exposure of actual secret values in API responses
 
     Example:
         ```python
         class AuthSerializer(ModelSerializer):
-            password = ProtectedSecretField(
-                write_only=True
-            )
+            secret = ProtectedSecretField(required=True, allow_null=False)
         ```
     """
 
@@ -60,14 +62,17 @@ class ProtectedSecretField(Field):
             value (str): The internal secret value.
 
         Returns:
-            str: Masked representation with asterisks.
+            str: Masked representation with asterisks, matching the length of
+                 the original value.
         """
         return "*" * len(value)
 
     def to_internal_value(self, value: str) -> str:
         """Convert external representation to internal value.
 
-        Validates the input value using the configured validator if present.
+        Looks up the encrypted field declared on the parent serializer's
+        Meta.model (via its _encrypted_field attribute) and enforces that
+        field's max_length and validators against the incoming value.
 
         Args:
             value (str): The input value to validate and store.
@@ -76,11 +81,14 @@ class ProtectedSecretField(Field):
             str: The validated internal value.
 
         Raises:
-            ValidationError: If validation fails.
+            ValidationError: If the value exceeds the encrypted field's
+                              max_length or fails its validators.
         """
         model = self.parent.Meta.model
         field = model._meta.get_field(model._encrypted_field)
         if hasattr(field, "max_length") and field.max_length and len(value) > field.max_length:
+            # Strip the leading underscore from the private field name (e.g. "_api_token")
+            # so the error code matches the public field name exposed by the serializer
             raise ValidationError("Value exceeds the maximum allowed length", code=model._encrypted_field[1:])
         field.run_validators(value)
         return value

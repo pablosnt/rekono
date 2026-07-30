@@ -1,8 +1,8 @@
-"""Custom JWT token classes for multi-factor authentication workflows.
+"""Custom JWT token class for multi-factor authentication workflows.
 
-Provides specialized JWT token classes for handling multi-factor authentication
-requirements. These tokens have limited scope and are used to bridge the gap
-between initial credential validation and MFA completion.
+Provides the MfaRequiredToken class, a limited-scope JWT issued after primary
+credential validation but before MFA completion. It bridges the gap between
+login and MFA completion without granting access to the rest of the API.
 """
 
 from rest_framework_simplejwt.tokens import BlacklistMixin, Token
@@ -14,24 +14,19 @@ class MfaRequiredToken(BlacklistMixin, Token):
     """Temporary JWT token for MFA completion requirements.
 
     A specialized JWT token issued after successful primary authentication
-    (username/password) but before MFA completion. This token has limited
-    scope and can only be used to access MFA completion endpoints.
+    (username/password) but before MFA completion. Its token_type ("mfa_required")
+    differs from the access token type, so the standard JWT authentication backend
+    rejects it and it cannot be used to reach the rest of the API.
 
-    Features:
-        - Limited lifetime matching access tokens
-        - Automatic blacklisting support for security
-        - Restricted scope for MFA completion only
-        - Integration with JWT authentication framework
-
-    Security:
-        - Short-lived to minimize exposure window
-        - Single-use enforcement through blacklisting
-        - Cannot be used for general API access
-        - Requires completion of MFA challenge for full tokens
+    Security Features:
+        - Short-lived, matching the access token lifetime, to minimize the exposure window
+        - Rejected by the standard JWT authentication backend due to its distinct token type
+        - Blacklisted by the MFA login flow once the MFA code is verified, so it cannot be reused
+        - A full access/refresh token pair is only issued after the MFA challenge succeeds
 
     Attributes:
         token_type (str): Identifier for this token type ("mfa_required").
-        lifetime (timedelta): Token lifetime from JWT configuration.
+        lifetime (timedelta): Token lifetime, matching the access token lifetime.
     """
 
     token_type = "mfa_required"

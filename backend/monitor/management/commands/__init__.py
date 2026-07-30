@@ -1,5 +1,5 @@
-"""Management commands package for monitor app.
+"""Django management commands for the monitor app.
 
-Contains custom Django management commands for the monitor app,
-including the monitor command for triggering background jobs.
+Contains the monitor command, which enqueues a background job to refresh
+trending CVE and EPSS data from the configured threat intelligence platforms.
 """

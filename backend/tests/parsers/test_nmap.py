@@ -100,6 +100,18 @@ class NmapTest(ParserTest, TestCase):
                 {"model": Vulnerability, "name": "CVE-2019-0197", "cve": "CVE-2019-0197"},
                 {"model": Vulnerability, "name": "CVE-2020-11993", "cve": "CVE-2020-11993"},
                 {"model": Vulnerability, "name": "CVE-2019-10092", "cve": "CVE-2019-10092"},
+                {"model": Path, "path": "/.git", "type": PathType.ENDPOINT},
+                {
+                    "model": Vulnerability,
+                    "name": "Exposed git repository",
+                    "description": (
+                        "Git repository is exposed in the endpoint /.git/ and it's possible to dump it "
+                        "and access the git history and source code"
+                    ),
+                    "severity": Severity.HIGH,
+                    "cwes": ["CWE-527"],
+                    "reference": "https://iosentrix.com/blog/git-source-code-disclosure-vulnerability/",
+                },
             ],
         ),
         ParserTestCase(
@@ -230,6 +242,27 @@ class NmapTest(ParserTest, TestCase):
                     "description": "Anonymous access is allowed to the SMB share shared",
                     "severity": Severity.CRITICAL,
                     "cwes": ["CWE-287"],
+                },
+            ],
+        ),
+        ParserTestCase(
+            "multiple-hosts-udp.xml",
+            [
+                {"model": Host, "ip": "10.10.10.10"},
+                {
+                    "model": Port,
+                    "port": 67,
+                    "status": PortStatus.OPEN_FILTERED,
+                    "protocol": TransportProtocol.UDP,
+                    "service": "dhcps",
+                },
+                {"model": Host, "ip": "10.10.10.11"},
+                {
+                    "model": Port,
+                    "port": 80,
+                    "status": PortStatus.OPEN,
+                    "protocol": TransportProtocol.TCP,
+                    "service": "http",
                 },
             ],
         ),

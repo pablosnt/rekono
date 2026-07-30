@@ -5,29 +5,23 @@
         v-if="currentProject"
         class="flex items-center w-full justify-start gap-2"
       >
+        <UTooltip
+          v-if="open"
+          :text="currentProject.name"
+          :content="{ side: 'right', sideOffset: 8, collisionPadding: 8 }"
+        >
+          <h1 :class="['font-bold font-mono truncate min-w-0', nameSizeClass]">
+            {{ currentProject.name }}
+          </h1>
+        </UTooltip>
         <UAvatar
+          v-else
           :text="currentProject.name.charAt(0).toUpperCase()"
           class="bg-primary-500"
           :ui="{ fallback: 'text-white' }"
           :alt="currentProject.name"
           width="30"
         />
-        <UTooltip
-          v-if="open"
-          :text="
-            nameRef && nameRef?.scrollWidth > nameRef?.clientWidth
-              ? currentProject.name
-              : undefined
-          "
-          :content="{ side: 'right', sideOffset: 8, collisionPadding: 8 }"
-        >
-          <h1
-            ref="nameRef"
-            :class="['font-bold font-mono truncate min-w-0', namSizeClass]"
-          >
-            {{ currentProject.name }}
-          </h1>
-        </UTooltip>
       </div>
     </template>
     <template #content-header>
@@ -62,8 +56,7 @@ const userStore = useUserStore();
 const { panelRefresh, projectHasActiveFindings } = usePanel();
 const { currentProject, setCurrentProject } = useCurrentProject();
 const breakpoints = useBreakpoints(breakpointsTailwind);
-const nameRef = ref<HTMLElement | null>(null);
-const namSizeClass = computed(() => {
+const nameSizeClass = computed(() => {
   const len = currentProject.value?.name?.length ?? 0;
   if (len <= 10) return "text-2xl";
   if (len <= 16) return "text-xl";
@@ -521,4 +514,6 @@ onMounted(() => {
   mounting.value = true;
   onProjectChange();
 });
+
+onUnmounted(() => setCurrentProject(null));
 </script>

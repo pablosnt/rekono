@@ -25,5 +25,5 @@ class Log4jscan(BaseParser):
         Searches for Log4Shell vulnerability indicators in scan output and
         creates Vulnerability findings for confirmed detections.
         """
-        if "[!!!] Targets Affected" in self.output:
+        if "[!!!] Targets Affected" in (self.output or ""):
             self.create_finding(Vulnerability, name="Log4Shell", cve="CVE-2021-44228")

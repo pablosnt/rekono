@@ -1,27 +1,25 @@
 <template>
-  <UPageCard
+  <MetricsCard
     title="Operative Systems"
     class="w-full"
-    variant="outline"
-    :ui="{ container: 'min-w-0' }"
+    :loading="loading"
+    :has-data="data.length > 0"
+    :skeleton-height="200"
+    :skeleton-legend="hostOS.length"
   >
-    <USkeleton v-if="loading" class="h-[200px] w-full rounded-lg" />
-    <template v-else-if="data.length">
-      <VisBulletLegend
-        :items="legendItems"
-        :on-legend-item-click="onLegendItemClick"
+    <VisBulletLegend
+      :items="legendItems"
+      :on-legend-item-click="onLegendItemClick"
+    />
+    <VisSingleContainer :data="activeData" :height="200" class="flex-none">
+      <VisDonut
+        :value="(d) => d.count"
+        :color="(d) => d.color"
+        :arc-width="25"
       />
-      <VisSingleContainer :data="activeData" :height="200" class="flex-none">
-        <VisDonut
-          :value="(d) => d.count"
-          :color="(d) => d.color"
-          :arc-width="25"
-        />
-        <VisTooltip :triggers="tooltipTriggers" />
-      </VisSingleContainer>
-    </template>
-    <MetricsChartsEmpty v-else />
-  </UPageCard>
+      <VisTooltip :triggers="tooltipTriggers" />
+    </VisSingleContainer>
+  </MetricsCard>
 </template>
 
 <script setup lang="ts">

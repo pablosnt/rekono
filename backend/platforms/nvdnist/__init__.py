@@ -11,5 +11,5 @@ Key Features:
     - CWE (Common Weakness Enumeration) mapping and classification
     - API token management for enhanced rate limits and access
     - Comprehensive vulnerability reference linking and documentation
-    - Batch processing for efficient vulnerability intelligence gathering
+    - Per-finding processing with one HTTP request per CVE, in a sequential loop
 """

@@ -16,7 +16,7 @@ class OSINTTest(FindingTest, TestCase):
     expected_defectdojo = {
         "title": f"{OSINTDataType.USER.value} found on public sources",
         "description": "Data: admin10\nSource: Google",
-        "severity": Severity.LOW,
+        "severity": str(Severity.LOW),
     }
     expected_string = f"admin10 - {OSINTDataType.USER.value}"
 
@@ -55,3 +55,11 @@ class OSINTTest(FindingTest, TestCase):
             second.id,
             OSINT.objects.create_finding(self.execution, data="10.10.10.90", data_type=OSINTDataType.DOMAIN).id,
         )
+
+    def test_deduplication_ignores_data_case(self):
+        first = OSINT.objects.create_finding(
+            self.execution, data="Rekono.com", data_type=OSINTDataType.DOMAIN, source="Shodan"
+        )
+        second = OSINT.objects.create_finding(self.execution, data="rekono.com", data_type=OSINTDataType.DOMAIN)
+        self.assertEqual(first.id, second.id)
+        self.assertEqual(1, OSINT.objects.filter(data__iexact="rekono.com", data_type=OSINTDataType.DOMAIN).count())

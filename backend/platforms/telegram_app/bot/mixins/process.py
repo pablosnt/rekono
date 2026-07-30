@@ -2,6 +2,9 @@
 
 Provides process selection functionality for conversations that require
 process context including process listing, selection, and context storage.
+Processes are global definitions shared across projects, so unlike targets
+they are listed without filtering by the selected project. Leaves
+Context.PROCESS set for the mixins that configure and launch the task.
 """
 
 from telegram import Update

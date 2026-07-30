@@ -1,18 +1,13 @@
 <template>
   <div class="flex flex-col sm:flex-row gap-6 mt-6">
-    <UPageCard
+    <MetricsCard
       title="Findings per Triage Status"
       description="Only open findings"
       class="sm:flex-1 min-w-0"
-      variant="outline"
-      :ui="{ container: 'min-w-0' }"
+      :loading="loading"
+      :has-data="hasOpenFindings"
     >
-      <USkeleton v-if="loading" class="h-[400px] w-full rounded-lg" />
-      <VisSingleContainer
-        v-else-if="hasOpenFindings"
-        :data="treemapData"
-        :height="400"
-      >
+      <VisSingleContainer :data="treemapData" :height="400">
         <VisTreemap
           :value="(d) => d.open"
           :layers="treemapLayers"
@@ -27,26 +22,22 @@
         />
         <VisTooltip :triggers="treemapTooltip" />
       </VisSingleContainer>
-      <MetricsChartsEmpty v-else />
-    </UPageCard>
-    <UPageCard
+    </MetricsCard>
+    <MetricsCard
       title="False Positives Rate"
       description="Include all triaged findings, including fixed ones"
       class="sm:flex-1 min-w-0"
-      variant="outline"
-      :ui="{ container: 'min-w-0' }"
+      :loading="loading"
+      :has-data="triaged > 0"
     >
       <MetricsChartsHalfDonut
-        v-if="loading || triaged > 0"
         :data="donutData"
-        :loading="loading"
         :central-label="`${fpRate.toPrecision(3)}%`"
         :height="400"
         :radius="250"
         :tooltip="donutTooltip"
       />
-      <MetricsChartsEmpty v-else />
-    </UPageCard>
+    </MetricsCard>
   </div>
 </template>
 

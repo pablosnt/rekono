@@ -1,7 +1,13 @@
 """Telegram Bot mixins for input parameter management in security workflows.
 
 Provides input parameter selection and creation functionality for technology
-and vulnerability parameters used in security testing configurations.
+and vulnerability parameters used in security testing configurations. Both mixins
+expect Context.CONFIGURATION to already be set, since that is used to check whether
+the tool's arguments actually take that kind of input; when they don't, the step is
+skipped. Existing parameters offered for reuse are the ones tied to tasks in any
+project the requesting user is a member of, not just the currently selected project.
+Each mixin leaves its own context key (Context.INPUT_TECHNOLOGY or
+Context.INPUT_VULNERABILITY) set once a value is selected or created.
 """
 
 from typing import Any

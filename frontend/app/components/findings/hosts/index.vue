@@ -63,7 +63,6 @@
 </template>
 
 <script setup lang="ts">
-import { h } from "vue";
 import { hostOS } from "~/constants";
 import { useIntegrationsStore } from "~/store/integrations";
 

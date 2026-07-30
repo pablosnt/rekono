@@ -25,15 +25,16 @@ class Dirsearch(BaseParser):
     def _parse(self) -> None:
         """Parse Dirsearch JSON output and extract path findings.
 
-        Processes JSON enumeration results to create Path findings for
-        discovered web directories and endpoints.
+        Processes JSON enumeration results to create Path findings for discovered web
+        directories and endpoints. Detects which of the two known "results" layouts
+        the report uses and reads it accordingly.
         """
         data = self.load_json_report()
         if not data or not isinstance(data, dict):
             return
         for item in data.get("results", []):
             if "url" in item.keys():
-                # New report format: just a list of findings
+                # Current format: each result is already its own finding, with its own "url"
                 url = urlparse(item.get("url", ""))
                 if url.path:
                     self.create_finding(
@@ -43,7 +44,8 @@ class Dirsearch(BaseParser):
                         type=PathType.ENDPOINT,
                     )
             else:
-                # Old report format: list of findings per target URL
+                # Legacy format: "results" has a single entry keyed by the scanned base URL,
+                # whose value is the list of findings discovered under it
                 for findings in item.values():
                     if not isinstance(findings, list):
                         continue

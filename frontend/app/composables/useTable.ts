@@ -1,6 +1,5 @@
 import type { Configuration, Finding, Tool, User } from "~/types/models";
 import { hostOS } from "~/constants";
-import { h } from "vue";
 import { UAvatar, UBadge, UIcon, UButton } from "#components";
 
 function valueCell(value?: string | number, extraClasses?: string) {
@@ -100,7 +99,11 @@ export default function () {
     return findingCell(
       port,
       "ports",
-      port?.port ? port?.port.toString() : undefined,
+      port?.port
+        ? port.protocol
+          ? `${port.port}/${port.protocol}`
+          : port.port.toString()
+        : undefined,
       project,
       port ? getPortIcon(port.port, port.service) : undefined,
     );

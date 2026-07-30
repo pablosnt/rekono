@@ -190,9 +190,9 @@ class RekonoUserManager(UserManager, LoggingEntity, OtpManagerMixin, MfaManagerM
         Returns:
             Any: Updated user instance with new role.
         """
-        group = Group.objects.get(name=role.value)  # Get user group related to the role
-        user.groups.clear()  # Clean user groups
-        user.groups.set([group])  # Set user group
+        group = Group.objects.get(name=role.value)
+        user.groups.clear()  # Users have exactly one role, so prior group membership must be replaced, not extended
+        user.groups.set([group])
         self.logger.info(f"[User] Role {role} has been assigned to user {user.id}")
         return user
 
@@ -214,17 +214,18 @@ class RekonoUserManager(UserManager, LoggingEntity, OtpManagerMixin, MfaManagerM
     def invite_user(self, email: str, role: Role) -> Any:
         """Create and invite new user account.
 
-        Creates inactive user account with specified email and role,
-        then sends invitation email for account activation.
+        Creates a user account in the invited state (is_active=None) with the
+        specified email and role, then sends an invitation email so the user
+        can complete account activation.
 
         Args:
             email (str): Email address for the new user.
             role (Role): Role to assign to the user.
 
         Returns:
-            Any: Created user instance in inactive state.
+            Any: Created user instance in invited state.
         """
-        # Create new user including an OTP. The user will be inactive while invitation is not accepted
+        # is_active=None marks the account as invited but not yet activated
         user = User.objects.create(email=email, is_active=None)
         self.assign_role(user, role)
         self.send_invitation(user)
@@ -315,13 +316,13 @@ class RekonoUserManager(UserManager, LoggingEntity, OtpManagerMixin, MfaManagerM
         Returns:
             Any: Disabled user instance.
         """
-        user.is_active = False  # Disable user
-        user.set_unusable_password()  # Make its password unusable
-        user.otp = None  # Remove its OTP
+        user.is_active = False
+        user.set_unusable_password()
+        user.otp = None
         user.otp_expiration = None
-        user.mfa = False  # Disable MFA
-        user._mfa_key = None  # Remove MFA secret key
-        user.projects.clear()  # Clear its projects
+        user.mfa = False
+        user._mfa_key = None
+        user.projects.clear()
         user.save(update_fields=["password", "otp", "otp_expiration", "is_active", "mfa", "_mfa_key"])
         ApiToken.objects.filter(user=user).delete()
         self.logger.info(f"[User] User {user.id} has been disabled")
@@ -352,8 +353,8 @@ class RekonoUserManager(UserManager, LoggingEntity, OtpManagerMixin, MfaManagerM
     def reset_password(self, user: Any, password: str) -> Any:
         """Reset user password after OTP verification.
 
-        Resets password, clears OTP, and activates account. Used for
-        password reset workflow after email verification.
+        Resets the password and clears the OTP. Used for the password
+        reset workflow after email verification.
 
         Args:
             user (Any): User instance to reset password for.
@@ -432,10 +433,13 @@ class RekonoUserManager(UserManager, LoggingEntity, OtpManagerMixin, MfaManagerM
         return user
 
     def verify_mfa_or_otp(self, otp: str, user: Any) -> bool:
-        """Verify either MFA or OTP code depending on user settings.
+        """Verify a TOTP code, with an email OTP fallback for MFA-enabled accounts.
 
-        Performs verification based on user's MFA status. If MFA is enabled,
-        verifies against TOTP. Otherwise, verifies against email OTP.
+        Always checks the code against the user's TOTP secret first. If that
+        check fails and the user has MFA enabled, the code is checked again
+        as an email OTP, so accounts are not locked out when the
+        authenticator app is unavailable. Users without MFA enabled get no
+        such fallback.
 
         Args:
             otp (str): OTP code to verify.
@@ -506,7 +510,7 @@ class User(AbstractUser, BaseEncrypted):
         blank=True, null=True, validators=[FutureDatetimeValidator(code="otp_expiration")]
     )
 
-    # Key for Multi Factor Authetication via authenticator app
+    # Key for Multi Factor Authentication via authenticator app
     _mfa_key = models.TextField(max_length=40, blank=True, null=True, db_column="mfa_key")
     mfa = models.BooleanField(default=False)
 

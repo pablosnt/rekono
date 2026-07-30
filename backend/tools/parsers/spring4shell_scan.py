@@ -25,6 +25,7 @@ class Spring4shellscan(BaseParser):
         Searches for Spring Framework vulnerability indicators in scan output and
         creates Vulnerability findings for confirmed detections.
         """
+        output = self.output or ""
         for name, cve in [("Spring Cloud RCE", "CVE-2022-22963"), ("Spring4Shell RCE", "CVE-2022-22965")]:
-            if f"[!!!] Target Affected ({cve})" in self.output:
+            if f"[!!!] Target Affected ({cve})" in output:
                 self.create_finding(Vulnerability, name=name, cve=cve)

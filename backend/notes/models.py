@@ -64,9 +64,9 @@ class Note(BaseLike):
         title (TextField): Note title with validation (max 200 chars)
         body (TextField): Note content body (optional)
         tags (TaggableManager): Tag system for organization and search
-        owner (ForeignKey): The user who created this note
-        public (BooleanField): Whether note is visible to all project members
-        forked_from (ForeignKey): Reference to original note if this is a fork
+        owner (ForeignKey): The user who created this note (optional, set to null if the user is deleted)
+        public (BooleanField): Whether note is visible to all project members (default: False)
+        forked_from (ForeignKey): Reference to original note if this is a fork (optional, set to null if the source note is deleted)
         created_at (DateTimeField): Note creation timestamp
         updated_at (DateTimeField): Note last modification timestamp
 

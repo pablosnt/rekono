@@ -4,15 +4,13 @@
       <UDropdownMenu
         :items="[
           {
-            label: `${relatedEntity.reports.length} Reports`,
+            label: pluralize(relatedEntity.reports.length, 'Report'),
             icon: 'i-lucide-file-text',
-            color: 'neutral',
             to: `/projects/${project}/reports${entityNameLowerCase && entityNameLowerCase !== 'project' ? `?${entityNameLowerCase}=${relatedEntity?.id}` : ''}`,
           },
           {
             label: 'Generate a report',
             icon: 'i-lucide-plus',
-            color: 'neutral',
             onSelect: () => (reportModalOpen = true),
           },
         ]"
@@ -20,9 +18,9 @@
       >
         <UChip
           :text="formatCount(relatedEntity.reports.length)"
-          size="3xl"
           color="neutral"
           position="top-right"
+          :ui="{ base: 'h-4 min-w-4 px-1 text-[10px] leading-none' }"
         >
           <UButton
             icon="i-lucide-file-text"

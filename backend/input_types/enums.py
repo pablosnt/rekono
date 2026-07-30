@@ -16,17 +16,17 @@ class InputTypeName(TextChoices):
     for comprehensive security testing workflows.
 
     Attributes:
-        OSINT (str): Open source intelligence data.
-        HOST (str): Network host information.
-        PORT (str): Network port and service data.
-        PATH (str): File paths and web endpoints.
-        TECHNOLOGY (str): Technology stack information.
-        CREDENTIAL (str): Authentication credentials.
-        VULNERABILITY (str): Security vulnerability data.
-        EXPLOIT (str): Exploit and proof-of-concept data.
-        WORDLIST (str): Wordlist and dictionary data.
-        AUTHENTICATION (str): Authentication configuration.
-        HTTP_HEADER (str): HTTP header information.
+        OSINT (str): Open source intelligence data
+        HOST (str): Network host information
+        PORT (str): Network port and service data
+        PATH (str): File paths and web endpoints
+        TECHNOLOGY (str): Technology stack information
+        CREDENTIAL (str): Authentication credentials
+        VULNERABILITY (str): Security vulnerability data
+        EXPLOIT (str): Exploit and proof-of-concept data
+        WORDLIST (str): Wordlist and dictionary data
+        AUTHENTICATION (str): Authentication configuration
+        HTTP_HEADER (str): HTTP header information
     """
 
     OSINT = "OSINT"

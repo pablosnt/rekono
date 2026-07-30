@@ -73,6 +73,8 @@ class BaseApp:
             for model in self._get_models():
                 if model.objects.exists():
                     if self.skip_fixtures_if_model_exists:
+                        # Abort loading entirely, not just for this model, since any existing
+                        # data means the fixtures were already applied
                         return  # pragma: no cover
                     # Collect user-created entities that should be preserved
                     entities_to_recreate.extend(list(self._select_data_to_recreate(model)))
@@ -109,6 +111,10 @@ class BaseApp:
 
         Returns:
             QuerySet: QuerySet of instances needing relationship restoration.
+
+        Note:
+            This method should be overridden by subclasses to select the
+            entities that need their relationships restored after recreation.
         """
         return model.objects.none()
 
@@ -123,6 +129,10 @@ class BaseApp:
 
         Returns:
             QuerySet: QuerySet of instances to preserve and recreate.
+
+        Note:
+            This method should be overridden by subclasses to select the
+            entities that need to be preserved before fixture recreation.
         """
         return model.objects.none()
 
@@ -177,6 +187,10 @@ class BaseApp:
 
         Returns:
             Any: The corresponding new entity instance, or None if not found.
+
+        Note:
+            This method should be overridden by subclasses to define how the
+            recreated entity is matched back to the one that was removed.
         """
         return None
 

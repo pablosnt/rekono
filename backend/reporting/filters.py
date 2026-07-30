@@ -14,12 +14,17 @@ class ReportFilter(FilterSet):
 
     Provides filtering capabilities for report queries including exact matches
     on key fields and date range filtering for report creation timestamps.
+
+    Attributes:
+        report_format (CharFilter): Filter by report format, mapped to the
+                                    model's format field. Renamed to avoid
+                                    colliding with DRF's format query parameter
     """
 
     report_format = CharFilter(field_name="format", lookup_expr="exact")
 
     class Meta:
-        """Meta configuration for the ReportFilter.
+        """Meta configuration for ReportFilter.
 
         Attributes:
             model (Model): The Report model to filter.

@@ -1,7 +1,7 @@
-"""Django admin interface configuration for process management.
+"""Django admin configuration for processes module.
 
-Registers process and step models with the Django admin interface for
-administrative management of security testing workflows and process steps.
+Registers the Process and Step models with the Django admin interface for
+administrative management of security testing workflow definitions and steps.
 """
 
 from django.contrib import admin

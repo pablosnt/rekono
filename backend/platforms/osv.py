@@ -22,6 +22,14 @@ class OSV(BaseCveProvider):
     details, CVSS scores computed from vector strings, and affected package
     identifiers (preferring PURLs over package names) from the OSV platform.
 
+    Processing Features:
+        - CVE data retrieval from the public OSV API, no authentication required
+        - CVSS base score computed from the vector string with the cvss library,
+          preferring the highest available version (v4 over v3 over v2)
+        - Affected package extraction preferring PURLs over plain package names,
+          falling back to affected version strings when no package is listed
+        - GHSA, EUVD, and OSV-native identifiers extracted from the aliases field
+
     Attributes:
         url (str): OSV API endpoint URL template for CVE queries.
         reference (str): OSV vulnerability detail page URL template.
@@ -71,6 +79,7 @@ class OSV(BaseCveProvider):
                             try:
                                 cvss_base_score = float(cvss_class_mapping[severity["type"]](cvss_vector).scores()[0])
                             except CVSSError:
+                                # A malformed vector string is skipped, leaving cvss_base_score unset
                                 pass
                         break
                 if cvss_vector:

@@ -49,7 +49,7 @@
       title="Exposure Window"
       :description="
         selectedItem.executions.length > 0
-          ? `First detected ${useTimeAgo(new Date(selectedItemExposureWindow[0].date)).value} across ${selectedItem.executions.length} executions${selectedItem.is_fixed ? `. ${firstUpper(fixVerb)}ed ${useTimeAgo(new Date(selectedItem.fixed_date)).value}` : ''}`
+          ? `First detected ${useTimeAgo(new Date(selectedItemExposureWindow[0].date)).value} across ${pluralize(selectedItem.executions.length, 'execution')}${selectedItem.is_fixed ? `. ${firstUpper(fixVerb)}ed ${useTimeAgo(new Date(selectedItem.fixed_date)).value}` : ''}`
           : 'Dates when the finding has been detected'
       "
       :ui="{ content: 'sm:max-w-3xl sm:max-h-xl' }"
@@ -65,7 +65,6 @@
 </template>
 
 <script setup lang="ts">
-import { h } from "vue";
 import type { CrudConfig, DropdownAction } from "~/types/crud";
 import { useUserStore } from "~/store/user";
 import { useIntegrationsStore } from "~/store/integrations";
@@ -123,7 +122,7 @@ onMounted(() => {
     targetOptions,
     route.params.project_id ? { project: route.params.project_id } : undefined,
   );
-  options.tools(toolOptions);
+  options.tools(toolOptions, { ordering: "-liked,-id" });
   if (props.hasHacktricks) integrations.fetchHackTricks();
 });
 
@@ -211,9 +210,11 @@ const config: CrudConfig<Finding> = reactive({
                       (e) => e.configuration?.tool.name === s.name,
                     ).length,
                   ),
-                  size: "3xl",
                   color: "neutral",
                   variant: "ghost",
+                  ui: {
+                    base: "h-4 min-w-4 px-1 text-[10px] leading-none",
+                  },
                 },
                 {
                   default: () =>
@@ -234,13 +235,14 @@ const config: CrudConfig<Finding> = reactive({
                                 src: s.icon,
                                 size: "sm",
                                 alt: s.name,
-                                "aria-label": s.name,
                               })
-                            : h(resolveComponent("UIcon"), {
-                                name: "i-lucide-square-terminal",
-                                "aria-label": s.name,
-                                class: "text-xl text-primary",
-                              }),
+                            : h("span", { class: "inline-flex items-center" }, [
+                                h(resolveComponent("UIcon"), {
+                                  name: "i-lucide-square-terminal",
+                                  class: "text-xl text-primary",
+                                }),
+                                h("span", { class: "sr-only" }, s.name),
+                              ]),
                       },
                     ),
                 },
@@ -381,8 +383,8 @@ const config: CrudConfig<Finding> = reactive({
   },
   ordering: props.ordering || [],
   defaultOrdering: props.defaultOrdering || "-id",
-  pageSize: 25,
-  pageSizeOptions: [25, 50, 100],
+  pageSize: props.disableUrlSync ? 10 : 25,
+  pageSizeOptions: props.disableUrlSync ? [10, 25, 50, 100] : [25, 50, 100],
   tableCopyId: true,
   canRead: true,
   canCreate: false,
@@ -416,5 +418,8 @@ const config: CrudConfig<Finding> = reactive({
   },
 });
 
-defineExpose({ fetch: () => page.value?.fetch() });
+defineExpose({
+  fetch: () => page.value?.fetch(),
+  fetchFirstPage: () => page.value?.fetchFirstPage(),
+});
 </script>

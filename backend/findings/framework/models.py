@@ -9,6 +9,7 @@ from dataclasses import dataclass
 from functools import cached_property
 from typing import Any, Callable
 
+from django.db import transaction
 from django.db.models import (
     SET_NULL,
     BooleanField,
@@ -23,11 +24,12 @@ from django.db.models import (
 from django.utils import timezone
 
 from executions.models import Execution
-from findings.enums import AutoFixedReason, TriageStatus
+from findings.enums import AutoFixedReason, Severity, TriageStatus
 from framework.models import BaseInput
 from projects.models import Project
 from rekono.settings import AUTH_USER_MODEL
 from security.validators.input_validator import Regex, Validator
+from targets.models import Target
 
 
 class FindingManager(Manager):
@@ -76,8 +78,8 @@ class FindingManager(Manager):
         Returns:
             Any | QuerySet: The fixed finding(s) with updated status.
         """
-        # A fix without a user is an automatic one triggered because the finding is no longer
-        # detected; a user-driven fix is manual and keeps the auto-fix reason empty
+        # A fix without a user is automatic, triggered because the finding is no longer detected
+        # A user-driven fix is manual and keeps the auto-fix reason empty
         auto_fixed_reason = AutoFixedReason.NO_LONGER_DETECTED if fixed_by is None else None
         if isinstance(findings, Finding):
             findings.is_fixed = True
@@ -110,13 +112,16 @@ class FindingManager(Manager):
 
         Args:
             finding (Any): Finding to remove fix status from.
-            fixed_by (Any | None): User removing the fix, None for auto-remove.
+            fixed_by (Any | None): User performing a manual removal, which also clears
+                                   the auto-fix from related findings. None for an
+                                   automatic removal, which skips that cascade.
 
         Returns:
             Any: Finding instance with fix status removed.
         """
         if fixed_by:
-            # Remove auto-fix from related findings that were auto-fixed
+            # Related findings were auto-fixed by the same user who originally fixed this one, so
+            # match on finding.fixed_by (the original fixer) rather than the fixed_by argument
             for auto_fixed_and_related_finding in self._get_related_findings(
                 finding, is_fixed=True, auto_fixed__isnull=False, fixed_by=finding.fixed_by
             ):
@@ -132,12 +137,15 @@ class FindingManager(Manager):
         finding.save(update_fields=["is_fixed", "auto_fixed", "fixed_date", "fixed_by"])
         return finding
 
+    @transaction.atomic()
     def create_finding(self, execution: Execution, **fields: Any) -> Any:
         """Create or update a finding with duplicate prevention.
 
         Reuses the existing finding returned by ``self.model._find_duplicate`` or creates a new one.
         A detected finding completes the one it matched (``_merge``); a user-provided finding attaches
-        without modifying it. The finding is always associated with the current execution.
+        without modifying it. The finding is always associated with the current execution. Runs inside
+        a transaction that locks the task's target row, so two concurrent executions on the same target
+        cannot create the same finding at once.
 
         Args:
             execution (Execution): The execution context for this finding.
@@ -147,6 +155,10 @@ class FindingManager(Manager):
             Any: The created or updated finding instance.
         """
         is_user_input = bool(fields.get("created_from_user_input"))
+        # Lock the task's target row during the findings creation
+        # This avoids duplication errors if two concurrent executions
+        # try to create the same findings at the same time
+        Target.objects.select_for_update().get(pk=execution.task.target_id)
         finding = self.model._find_duplicate(execution, fields)
         if finding:
             if not is_user_input:
@@ -230,6 +242,15 @@ class Finding(BaseInput):
     _defectdojo_endpoint_mapping: dict[str, Any | Callable] = {}
 
     class Meta:
+        """Django Meta class configuration for Finding.
+
+        Configures Finding as an abstract base class shared by all finding types
+        without creating its own database table.
+
+        Attributes:
+            abstract (bool): Marks this model as abstract (no database table).
+        """
+
         abstract = True
 
     @dataclass
@@ -241,10 +262,15 @@ class Finding(BaseInput):
             match_null_and_empty (bool): Whether a blank value (null or, for char/text fields, empty)
                 is treated as compatible with anything on this field: an existing finding blank on it
                 matches an incoming real value, and an incoming blank value drops it from the match.
+            ignore_case (bool): Whether a string value is matched case-insensitively, so findings that
+                differ only in the casing of this field are treated as the same. Only meaningful for
+                char/text fields whose casing is cosmetic (e.g. a technology name); it must stay off for
+                fields where case is significant (paths, usernames, secrets).
         """
 
         field: str
         match_null_and_empty: bool = False
+        ignore_case: bool = False
 
     @classmethod
     def _find_duplicate(cls, execution: Execution, fields: dict[str, Any]) -> "Finding | None":
@@ -275,7 +301,8 @@ class Finding(BaseInput):
         Returns None when the field should not constrain the match: a ``match_null_and_empty`` field
         is dropped entirely when the incoming value is blank. Otherwise it matches the value, and for
         a ``match_null_and_empty`` field it also matches existing blanks (null, and empty string for
-        char/text fields) so a partial finding can still be completed by a more detailed one.
+        char/text fields) so a partial finding can still be completed by a more detailed one. An
+        ``ignore_case`` field matches string values case-insensitively.
 
         Args:
             unique_field (UniqueField): The unique field configuration to build the fragment for.
@@ -286,7 +313,13 @@ class Finding(BaseInput):
         """
         if unique_field.match_null_and_empty and new_value in (None, ""):
             return
-        field_query = Q(**{unique_field.field: new_value})
+        field_query = Q(
+            **{
+                f"{unique_field.field}__iexact"
+                if unique_field.ignore_case and isinstance(new_value, str)
+                else unique_field.field: new_value
+            }
+        )
         if unique_field.match_null_and_empty:
             field_query |= Q(**{f"{unique_field.field}__isnull": True})
             if cls._meta.get_field(unique_field.field).get_internal_type() in ["CharField", "TextField"]:
@@ -332,13 +365,16 @@ class Finding(BaseInput):
     def defectdojo_finding(self) -> dict[str, Any]:
         """Generate DefectDojo finding data for platform integration.
 
-        Creates formatted finding data suitable for DefectDojo platform
-        integration using the configured finding mapping.
+        Creates formatted finding data suitable for DefectDojo platform integration using
+        the configured finding mapping. The severity is emitted as its DefectDojo label
+        ("Info", "Low", "Medium", "High", "Critical") as required by the import endpoints.
 
         Returns:
             dict[str, Any]: DefectDojo-formatted finding data.
         """
         default_mapping = {"active": lambda instance: not instance.is_fixed, "is_mitigated": "is_fixed"}
+        # TriageFinding subclasses also report verified/false positive/risk accepted status,
+        # and redefine "active" to additionally require an untriaged or true positive status
         if hasattr(self, "triage_status"):
             default_mapping.update(
                 {
@@ -351,7 +387,10 @@ class Finding(BaseInput):
                     "risk_accepted": lambda instance: instance.triage_status == TriageStatus.WONT_FIX,
                 }
             )
-        return self._apply_defectdojo_mapping({**self._defectdojo_finding_mapping, **default_mapping})
+        data = self._apply_defectdojo_mapping({**self._defectdojo_finding_mapping, **default_mapping})
+        if data.get("severity") is not None:
+            data["severity"] = str(Severity(int(data["severity"])))
+        return data
 
     def defectdojo_endpoint(self) -> dict[str, Any]:
         """Generate DefectDojo endpoint data for platform integration.
@@ -367,11 +406,11 @@ class Finding(BaseInput):
     def __str__(self) -> str:
         """String representation of the finding.
 
-        Generates human-readable string using unique field values
-        for finding identification and display purposes.
+        Joins the string value of each declared unique field with " - ", skipping any
+        that are blank, to build a compact identifier for display and logging.
 
         Returns:
-            str: Formatted string representation of the finding.
+            str: Finding identifier built from its unique field values.
         """
         return " - ".join(
             [
@@ -396,6 +435,15 @@ class HacktricksFinding(Finding):
     hacktricks_link = TextField(max_length=300, blank=True, null=True)
 
     class Meta:
+        """Django Meta class configuration for HacktricksFinding.
+
+        Configures HacktricksFinding as an abstract base class for findings that
+        carry a HackTricks documentation link, without creating its own database table.
+
+        Attributes:
+            abstract (bool): Marks this model as abstract (no database table).
+        """
+
         abstract = True
 
 
@@ -421,4 +469,13 @@ class TriageFinding(Finding):
     triage_by = ForeignKey(AUTH_USER_MODEL, related_name="triaged_%(class)s", on_delete=SET_NULL, blank=True, null=True)
 
     class Meta:
+        """Django Meta class configuration for TriageFinding.
+
+        Configures TriageFinding as an abstract base class for findings that
+        support the triage workflow, without creating its own database table.
+
+        Attributes:
+            abstract (bool): Marks this model as abstract (no database table).
+        """
+
         abstract = True

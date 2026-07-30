@@ -72,7 +72,7 @@
     <UFormField name="include_findings_from_user_input" class="mt-3">
       <UCheckbox
         v-model="formData.include_findings_from_user_input"
-        label="Include findings derivated from manual inputs like targets, ports, etc."
+        label="Include findings derived from manual inputs like targets, ports, etc."
       />
     </UFormField>
     <UFormField
@@ -141,7 +141,7 @@ const formData = ref<Record<string, unknown>>({
   project: parseInt(route.params.project_id),
   target: props.entity ? props.entity.target : undefined,
   task: props.entity ? props.entity.task : undefined,
-  format: "json",
+  format: "pdf",
   only_true_positives: false,
   include_findings_from_user_input: false,
   finding_types: findingTypes.map((t) => t.value),

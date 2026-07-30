@@ -24,9 +24,8 @@ class ProcessTest(ApiTestNoData, TestCase):
     endpoint = "/api/processes/"
     expected_string = first_process_name
     cases = [
-        ApiTestCase([Role.READER], 403),
         ApiTestCase(
-            [Role.ADMIN, Role.AUDITOR],
+            [Role.ADMIN, Role.AUDITOR, Role.READER],
             expected={"id": 1, "name": first_process_name, "owner": None, "liked": False, "likes": 0},
             endpoint="1",
         ),
@@ -35,27 +34,25 @@ class ProcessTest(ApiTestNoData, TestCase):
         PostApiTestCase(
             ["admin1"],
             data=process1,
-            expected={"id": 8, **process1, "owner": {"id": 1, "username": "admin1"}, "liked": False, "likes": 0},
+            expected={"id": 8, **process1, "owner": {"id": 1, "username": "admin1"}},
         ),
         PostApiTestCase([Role.ADMIN, Role.AUDITOR], 400, process1),
         ApiTestCase(
-            [Role.ADMIN, Role.AUDITOR],
+            [Role.ADMIN, Role.AUDITOR, Role.READER],
             expected={"id": 8, **process1, "owner": {"id": 1, "username": "admin1"}, "liked": False, "likes": 0},
             endpoint="8",
         ),
-        ApiTestCase([Role.READER], 403, endpoint="8"),
         PostApiTestCase(
             ["auditor1"],
             data=process2,
-            expected={"id": 9, **process2, "owner": {"id": 3, "username": "auditor1"}, "liked": False, "likes": 0},
+            expected={"id": 9, **process2, "owner": {"id": 3, "username": "auditor1"}},
         ),
         PostApiTestCase([Role.ADMIN, Role.AUDITOR], 400, process2),
         ApiTestCase(
-            [Role.ADMIN, Role.AUDITOR],
+            [Role.ADMIN, Role.AUDITOR, Role.READER],
             expected={"id": 9, **process2, "owner": {"id": 3, "username": "auditor1"}, "liked": False, "likes": 0},
             endpoint="9",
         ),
-        ApiTestCase([Role.READER], 403, endpoint="9"),
         PutApiTestCase(
             [Role.ADMIN],
             data=new_process1,
@@ -93,11 +90,9 @@ class ProcessTest(ApiTestNoData, TestCase):
         DeleteApiTestCase([Role.AUDITOR, Role.READER], 403, endpoint="8"),
         DeleteApiTestCase(["auditor2", Role.READER], 403, endpoint="9"),
         DeleteApiTestCase(["admin2"], endpoint="8"),
-        ApiTestCase([Role.ADMIN, Role.AUDITOR], 404, endpoint="8"),
-        ApiTestCase([Role.READER], 403, endpoint="9"),
+        ApiTestCase([Role.ADMIN, Role.AUDITOR, Role.READER], 404, endpoint="8"),
         DeleteApiTestCase(["auditor1"], endpoint="9"),
-        ApiTestCase([Role.ADMIN, Role.AUDITOR], 404, endpoint="9"),
-        ApiTestCase([Role.READER], 403, endpoint="9"),
+        ApiTestCase([Role.ADMIN, Role.AUDITOR, Role.READER], 404, endpoint="9"),
     ]
 
     @cached_property
@@ -106,7 +101,7 @@ class ProcessTest(ApiTestNoData, TestCase):
 
     def test_steps_exclude_deprecated(self) -> None:
         client = APIClient()
-        client.force_authenticate(self.users[Role.ADMIN][0])
+        client.force_authenticate(self.admin1)
         step = Step.objects.filter(process_id=1, configuration__deprecated=False).first()
         Configuration.objects.filter(pk=step.configuration_id).update(deprecated=True)
         self.assertNotIn(step.pk, [s["id"] for s in client.get("/api/processes/1/").json()["steps"]])
@@ -127,14 +122,14 @@ class StepTest(ApiTestNoData, TestCase):
             endpoint="1",
         ),
         PostApiTestCase([Role.AUDITOR, Role.READER], 403, step1),
-        PostApiTestCase(["admin1"], data=step1, expected={"id": 76, **expected_step1}),
+        PostApiTestCase(["admin1"], data=step1, expected={"id": 77, **expected_step1}),
         PostApiTestCase(["admin2"], 400, step1),
-        ApiTestCase([Role.READER], 403, endpoint="76"),
-        ApiTestCase([Role.ADMIN, Role.AUDITOR], expected={"id": 76, **expected_step1}, endpoint="76"),
-        DeleteApiTestCase([Role.AUDITOR, Role.READER], 403, endpoint="76"),
-        DeleteApiTestCase(["admin2"], endpoint="76"),
-        DeleteApiTestCase(["admin1"], 404, endpoint="76"),
-        ApiTestCase([Role.ADMIN, Role.AUDITOR], 404, endpoint="76"),
+        ApiTestCase([Role.READER], 403, endpoint="77"),
+        ApiTestCase([Role.ADMIN, Role.AUDITOR], expected={"id": 77, **expected_step1}, endpoint="77"),
+        DeleteApiTestCase([Role.AUDITOR, Role.READER], 403, endpoint="77"),
+        DeleteApiTestCase(["admin2"], endpoint="77"),
+        DeleteApiTestCase(["admin1"], 404, endpoint="77"),
+        ApiTestCase([Role.ADMIN, Role.AUDITOR], 404, endpoint="77"),
     ]
 
     def setUp(self) -> None:
@@ -147,7 +142,7 @@ class StepTest(ApiTestNoData, TestCase):
 
     def test_endpoint_excludes_deprecated(self) -> None:
         client = APIClient()
-        client.force_authenticate(self.users[Role.ADMIN][0])
+        client.force_authenticate(self.admin1)
         self.assertEqual(0, Step.objects.filter(configuration__deprecated=True).count())
         step = Step.objects.filter(process_id=1, configuration__deprecated=False).first()
         Configuration.objects.filter(pk=step.configuration_id).update(deprecated=True)

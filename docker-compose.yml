@@ -21,6 +21,8 @@ services:
       - POSTGRES_DB=rekono
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
+    security_opt:
+      - no-new-privileges:true
   
   valkey:
     restart: always
@@ -36,6 +38,8 @@ services:
       - 6379
     networks:
       - internal
+    security_opt:
+      - no-new-privileges:true
 
   initializer:
     restart: 'no'
@@ -52,10 +56,13 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      valkey:
+        condition: service_healthy
     environment:
       - RKN_DB_HOST=postgres
       - RKN_DB_USER=postgres
       - RKN_DB_PASSWORD=postgres
+      - RKN_RQ_HOST=valkey
       - DJANGO_SUPERUSER_EMAIL=${RKN_EMAIL:-rekono@rekono.com}
       - DJANGO_SUPERUSER_USERNAME=${RKN_USERNAME:-rekono}
       - DJANGO_SUPERUSER_PASSWORD=${RKN_PASSWORD:-rekono}
@@ -83,6 +90,10 @@ services:
       - RKN_DB_USER=postgres
       - RKN_DB_PASSWORD=postgres
       - RKN_RQ_HOST=valkey
+    security_opt:
+      - no-new-privileges:true
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   executions-worker:
     restart: always
@@ -109,6 +120,8 @@ services:
       - RKN_DB_USER=postgres
       - RKN_DB_PASSWORD=postgres
       - RKN_RQ_HOST=valkey
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   findings-worker:
     restart: always
@@ -131,6 +144,10 @@ services:
       - RKN_DB_USER=postgres
       - RKN_DB_PASSWORD=postgres
       - RKN_RQ_HOST=valkey
+    security_opt:
+      - no-new-privileges:true
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   monitor-worker:
     restart: always
@@ -153,6 +170,10 @@ services:
       - RKN_DB_USER=postgres
       - RKN_DB_PASSWORD=postgres
       - RKN_RQ_HOST=valkey
+    security_opt:
+      - no-new-privileges:true
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   telegram-bot:
     restart: always
@@ -176,6 +197,10 @@ services:
       - RKN_DB_USER=postgres
       - RKN_DB_PASSWORD=postgres
       - RKN_RQ_HOST=valkey
+    security_opt:
+      - no-new-privileges:true
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   backend:
     restart: always
@@ -209,6 +234,10 @@ services:
       - RKN_RQ_HOST=valkey
       - RKN_TRUSTED_PROXY=true
       - RKN_ALLOWED_HOSTS=*
+    security_opt:
+      - no-new-privileges:true
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
   
   frontend:
     restart: always
@@ -225,6 +254,8 @@ services:
       - 3000
     networks:
       - internal
+    security_opt:
+      - no-new-privileges:true
 
   nginx:
     restart: always
@@ -245,6 +276,8 @@ services:
     networks:
       - internal
       - external
+    security_opt:
+      - no-new-privileges:true
 
 volumes:
   postgres:

@@ -25,14 +25,14 @@ class NoteFilter(LikeFilter, MultipleFieldFilterSet):
         related_task (MultipleModelFilter): Complex task relationship filter covering
             direct task links and indirect paths through finding executions
         related_host (MultipleModelFilter): Complex host relationship filter covering
-            direct host links and indirect paths through ports, paths, technologies,
-            vulnerabilities, and exploits
+            direct host links and indirect paths through ports, paths, credentials,
+            technologies, vulnerabilities, and exploits
         related_port (MultipleModelFilter): Complex port relationship filter covering
-            direct port links and indirect paths through paths, technologies,
-            vulnerabilities, and exploits
+            direct port links and indirect paths through paths, credentials,
+            technologies, vulnerabilities, and exploits
         related_technology (MultipleModelFilter): Complex technology relationship filter
-            covering direct technology links and indirect paths through vulnerabilities
-            and exploits
+            covering direct technology links and indirect paths through credentials,
+            vulnerabilities, and exploits
         related_vulnerability (MultipleModelFilter): Complex vulnerability relationship
             filter covering direct vulnerability links and indirect paths through exploits
         tag (CharFilter): Tag name filter
@@ -76,7 +76,7 @@ class NoteFilter(LikeFilter, MultipleFieldFilterSet):
     )
     # Complex filter that searches for notes related to a host through
     # multiple relationship paths, including indirect relationships through
-    # ports, paths, technologies, vulnerabilities, and exploits
+    # ports, paths, credentials, technologies, vulnerabilities, and exploits
     related_host = MultipleModelFilter(
         queryset=Host.objects.all(),
         fields=[
@@ -93,7 +93,7 @@ class NoteFilter(LikeFilter, MultipleFieldFilterSet):
     )
     # Complex filter that searches for notes related to a port through
     # multiple relationship paths, including indirect relationships through
-    # paths, technologies, vulnerabilities, and exploits
+    # paths, credentials, technologies, vulnerabilities, and exploits
     related_port = MultipleModelFilter(
         queryset=Port.objects.all(),
         fields=[
@@ -128,7 +128,8 @@ class NoteFilter(LikeFilter, MultipleFieldFilterSet):
     # Filter notes by tag names
     tag = CharFilter(field_name="tags__name")
     # Filter notes that are forks (have a forked_from relationship)
-    # This uses a reverse lookup to find notes that are forks of other notes
+    # exclude=True inverts the isnull lookup, so is_fork=True keeps notes whose
+    # forked_from is set rather than notes whose forked_from is null
     is_fork = BooleanFilter(field_name="forked_from", lookup_expr="isnull", exclude=True)
 
     class Meta:

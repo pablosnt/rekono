@@ -4,12 +4,15 @@ Provides queue management for security tool executions including job queuing,
 dependency management, and result processing for background execution workflows.
 """
 
+from typing import Any
+
 import rq
 from django.utils import timezone
 from django_rq import job
-from rq.job import Job
+from rq.job import Dependency, Job
 from rq.registry import DeferredJobRegistry
 
+from executions.enums import Status
 from executions.models import Execution
 from findings.framework.models import Finding
 from findings.queues import FindingsQueue
@@ -43,11 +46,16 @@ class ExecutionsQueue(BaseScanQueue):
         wordlists: list[Wordlist],
         dependencies: list[Job] = [],
         at_front: bool = False,
+        job_id: str | None = None,
     ) -> Job:
         """Enqueue an execution job for background processing.
 
         Queues a security tool execution with all necessary parameters and
-        dependencies for background processing.
+        dependencies for background processing. Dependencies are wired with
+        allow_failure=True so a dependent execution still runs when a dependency
+        fails, treating its input as optional rather than being orphaned as
+        stuck. The enqueue timestamp is persisted alongside the job id so the
+        execution reflects when it entered the queue.
 
         Args:
             execution (Execution): The execution instance to queue
@@ -58,6 +66,9 @@ class ExecutionsQueue(BaseScanQueue):
             wordlists (list[Wordlist]): Wordlists to use
             dependencies (list[Job]): Job dependencies for execution order
             at_front (bool): Whether to prioritize this job in the queue
+            job_id (str | None): Reuse this RQ job id instead of generating a new one.
+                Used when recreating a pending job to add dependencies, so jobs that
+                already depend on it keep pointing at a valid id.
 
         Returns:
             Job: The queued RQ job instance
@@ -71,8 +82,10 @@ class ExecutionsQueue(BaseScanQueue):
             input_technologies=input_technologies,
             wordlists=wordlists,
             result_ttl=7200,
-            depends_on=dependencies,
+            depends_on=Dependency(jobs=dependencies, allow_failure=True) if dependencies else [],
             at_front=at_front,
+            job_id=job_id,
+            on_failure=ExecutionsQueue.on_execution_failure,
         )
         self.logger.info(
             f"[Execution] Execution {execution.id} ({execution.configuration.tool.name} - "
@@ -86,7 +99,7 @@ class ExecutionsQueue(BaseScanQueue):
         job.save_meta()
         execution.enqueued_at = timezone.now()
         execution.rq_job_id = job.id
-        execution.save(update_fields=["rq_job_id"])
+        execution.save(update_fields=["rq_job_id", "enqueued_at"])
         return job
 
     @staticmethod
@@ -102,7 +115,9 @@ class ExecutionsQueue(BaseScanQueue):
         """Process an execution job.
 
         Main job consumer that executes security tools and processes results.
-        Handles dependency resolution, tool execution, and result parsing.
+        Handles dependency resolution, tool execution, and result parsing. Skipped
+        or cancelled executions are returned with no findings, since there is no
+        tool output left to parse.
 
         Args:
             execution (Execution): The execution instance to process
@@ -146,12 +161,46 @@ class ExecutionsQueue(BaseScanQueue):
         else:
             # Execute the tool with provided findings (standard execution path)
             executor.execute(findings, target_ports, input_vulnerabilities, input_technologies, wordlists)
+        # A skipped or cancelled execution has no output and no built arguments to parse, so parsing
+        # would fail. The status is refreshed because cancellations are applied to the execution
+        # directly in the database from the task cancellation endpoint, and would otherwise be missed.
+        execution.refresh_from_db(fields=["status"])
+        if execution.status in [Status.SKIPPED, Status.CANCELLED]:
+            return execution, []
         # Parse the tool output to extract security findings
         parser: BaseParser = execution.configuration.tool.parser_class(executor, execution.output_plain)
         parser.parse()
+        # Successful executions must be completed after parsing their findings
+        if execution.status == Status.RUNNING:
+            execution.completed(executor.hash)
         # Queue the extracted findings for background processing (alerts, integrations, etc.)
         FindingsQueue().enqueue(execution, parser.findings)
         return execution, parser.findings
+
+    @staticmethod
+    def on_execution_failure(job: Job, connection: Any, exc_type: Any, exc_value: Any, traceback: Any) -> None:
+        """Mark the execution as ERROR when its RQ job fails or is abandoned.
+
+        RQ invokes this callback when the execution job raises an unhandled exception or is moved
+        to the failed registry after being abandoned, so the execution is not left stuck in a
+        pending status. Executions that already reached a terminal status are left untouched.
+
+        Args:
+            job (Job): The failed RQ job.
+            connection (Any): The Redis connection (unused).
+            exc_type (Any): The exception type (unused).
+            exc_value (Any): The exception value (unused).
+            traceback (Any): The exception traceback (unused).
+        """
+        execution = job.kwargs.get("execution")
+        if not execution:
+            return
+        try:
+            execution.refresh_from_db()
+        except Execution.DoesNotExist:
+            return
+        if execution.status in Status.in_progress():
+            execution.error()
 
     @staticmethod
     def _get_findings_from_dependencies(
@@ -165,7 +214,9 @@ class ExecutionsQueue(BaseScanQueue):
         """Get findings from job dependencies and create new executions.
 
         Processes job dependencies to extract findings and create new executions
-        for tool chaining workflows based on dependency results.
+        for tool chaining workflows based on dependency results. The execution
+        graph is recreated under a per-task lock so concurrent dependency jobs
+        don't race while rewiring pending jobs with the new dependencies.
 
         Args:
             executor (BaseExecutor): The executor instance
@@ -176,7 +227,9 @@ class ExecutionsQueue(BaseScanQueue):
             current_job (Job): The current job being processed
 
         Returns:
-            ExecutionParametersToEnqueue: Parameters for the next execution
+            ExecutionParametersToEnqueue: Parameters for the current job to execute with.
+                Any additional parameter batches are enqueued as separate Execution jobs
+                rather than returned here.
         """
         findings = []
         self = ExecutionsQueue()
@@ -184,8 +237,22 @@ class ExecutionsQueue(BaseScanQueue):
         # Each dependency job returns (execution, findings) tuple, so we take findings[1]
         for dependency_id in current_job._dependency_ids:
             dependency = self.queue.fetch_job(dependency_id)
-            if dependency and dependency.result:
+            if not dependency:
+                BaseScanQueue.logger.info(
+                    f"[Execution] Execution {executor.execution.id} received no result from not found dependency job {dependency_id}"
+                )
+            elif dependency.result:
                 findings.extend(dependency.result[1])
+                BaseScanQueue.logger.info(
+                    f"[Execution] Execution {executor.execution.id} received {len(dependency.result[1])} findings of type {', '.join(sorted({f.__class__.__name__ for f in dependency.result[1]}))} from dependency job {dependency_id}"
+                )
+            else:
+                BaseScanQueue.logger.info(
+                    f"[Execution] Execution {executor.execution.id} received empty result from dependency job {dependency_id}"
+                )
+        BaseScanQueue.logger.info(
+            f"[Execution] Execution {executor.execution.id} collected {len(findings)} findings of type {', '.join(sorted({f.__class__.__name__ for f in findings}))} from {len(current_job._dependency_ids)} dependencies"
+        )
         # If no findings from dependencies, return only one execution with original parameters
         if not findings:
             return ExecutionParametersToEnqueue(
@@ -194,61 +261,68 @@ class ExecutionsQueue(BaseScanQueue):
         # Calculate new executions based on findings from dependencies
         # This enables automatic tool chaining where findings from one tool
         # trigger executions of other tools
-        executions = [
-            e
-            for e in ExecutionsQueue.calculate_executions(
-                executor.execution.configuration,
-                findings,
-                target_ports,
-                input_vulnerabilities,
-                input_technologies,
-                wordlists,
-            )
+        executions = []
+        for e in ExecutionsQueue.calculate_executions(
+            executor.execution.configuration,
+            findings,
+            target_ports,
+            input_vulnerabilities,
+            input_technologies,
+            wordlists,
+        ):
             if executor.check_arguments(
                 e.findings, e.target_ports, e.input_vulnerabilities, e.input_technologies, e.wordlists
-            )
-        ]
+            ):
+                executions.append(e)
+            else:
+                BaseScanQueue.logger.info(
+                    f"[Execution] Execution {executor.execution.id} discarded a parameter batch ({len(e.findings)} findings of type {', '.join(sorted({f.__class__.__name__ for f in e.findings}))}, {len(e.target_ports)} target ports, {len(e.input_vulnerabilities)} input vulnerabilities, {len(e.input_technologies)} input technologies, and {len(e.wordlists)} wordlists) that can't satisfy the required arguments"
+                )
         BaseScanQueue.logger.info(f"[Execution] New {len(executions) - 1} executions from previous findings")
-        # Create new execution records and queue jobs for additional executions
-        # executions[0] is the current execution, executions[1:] are new ones
-        new_jobs = []
-        for execution in executions[1:]:
-            new_execution = Execution.objects.create(
-                task=executor.execution.task,
-                configuration=executor.execution.configuration,
-            )
-            job = self.enqueue(
-                new_execution,
-                execution.findings,
-                execution.target_ports,
-                execution.input_vulnerabilities,
-                execution.input_technologies,
-                execution.wordlists,
-                # At queue start, because it could be a dependency of next jobs
-                at_front=True,
-            )
-            new_jobs.append(job.id)
-        # Update pending jobs that depend on current_job to include new dependencies
-        # This ensures proper dependency chain for tool chaining workflows
-        if new_jobs:
-            registry = DeferredJobRegistry(queue=self.queue)
-            for pending_job_id in registry.get_job_ids():
-                pending_job = self.fetch_job(pending_job_id)
-                if pending_job and current_job.id in pending_job._dependency_ids:
-                    dependencies = pending_job._dependency_ids
-                    meta = pending_job.get_meta()
-                    # Cancel and recreate the pending job with updated dependencies
-                    self.cancel_job(pending_job_id)
-                    self.delete_job(pending_job_id)
-                    self.enqueue(
-                        meta["execution"],
-                        [],
-                        meta["target_ports"],
-                        meta["input_vulnerabilities"],
-                        meta["input_technologies"],
-                        meta["wordlists"],
-                        dependencies=dependencies + new_jobs,
-                    )
+        # Lock RQ to recalculate the execution graph based on the latest results and the dependencies between jobs
+        with self.queue.connection.lock(f"execution-graph:{executor.execution.task.id}"):
+            new_jobs = []
+            for execution in executions[1:]:
+                new_execution = Execution.objects.create(
+                    task=executor.execution.task,
+                    configuration=executor.execution.configuration,
+                )
+                job = self.enqueue(
+                    new_execution,
+                    execution.findings,
+                    execution.target_ports,
+                    execution.input_vulnerabilities,
+                    execution.input_technologies,
+                    execution.wordlists,
+                    # At queue start, because it could be a dependency of next jobs
+                    at_front=True,
+                )
+                new_jobs.append(job.id)
+            # Update pending jobs that depend on current_job to include new dependencies
+            # This ensures proper dependency chain for tool chaining workflows
+            if new_jobs:
+                registry = DeferredJobRegistry(queue=self.queue)
+                for pending_job_id in registry.get_job_ids():
+                    pending_job = self.fetch_job(pending_job_id)
+                    if pending_job and current_job.id in pending_job._dependency_ids:
+                        meta = pending_job.get_meta()
+                        # Only execution jobs carry an "execution" in their meta and can be recreated
+                        if "execution" not in meta:
+                            continue
+                        dependencies = pending_job._dependency_ids
+                        # Recreate the pending job with updated dependencies
+                        self.delete_job(pending_job_id)
+                        self.enqueue(
+                            meta["execution"],
+                            [],
+                            meta["target_ports"],
+                            meta["input_vulnerabilities"],
+                            meta["input_technologies"],
+                            meta["wordlists"],
+                            dependencies=dependencies + new_jobs,
+                            # Preserve previous job ID to avoid disruptions on dependencies
+                            job_id=pending_job_id,
+                        )
         # Return the first execution (current one) if available, otherwise fallback
         # to original parameters
         return (

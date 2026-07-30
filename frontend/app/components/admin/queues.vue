@@ -10,16 +10,27 @@
     }"
   >
     <template #content>
-      <UProgress :class="[loading ? 'visible' : 'invisible', 'mb-1']" />
-      <UPageGrid
-        v-if="queueStats && Object.keys(queueStats).length > 0"
+      <SkeletonCards
+        v-if="queueStats.length === 0"
         class="grid-cols-1 md:grid-cols-2 xl:grid-cols-4"
+        :count="4"
+        :lines="1"
       >
+        <div class="flex flex-wrap gap-2">
+          <USkeleton class="h-5 flex-1 min-w-fit" />
+          <USkeleton class="h-5 flex-1 min-w-fit" />
+        </div>
+      </SkeletonCards>
+      <UPageGrid v-else class="grid-cols-1 md:grid-cols-2 xl:grid-cols-4">
         <UPageCard
           v-for="queue in queueStats"
           :key="queue.name"
           :title="firstUpper(queue.name)"
-          :description="`${queue.workers} workers`"
+          :description="
+            Number(queue.workers) === 0
+              ? 'No workers'
+              : pluralize(Number(queue.workers), 'worker')
+          "
           :icon="queue.icon"
           variant="subtle"
           spotlight
@@ -29,7 +40,7 @@
           </template>
           <div class="absolute top-4 right-4">
             <UTooltip
-              :text="`${queue.started_jobs} jobs running`"
+              :text="`${pluralize(Number(queue.started_jobs), 'job')} running`"
               :content="{
                 side: 'left',
                 sideOffset: 8,
@@ -53,7 +64,7 @@
               variant="ghost"
               class="flex-1 min-w-fit"
             >
-              {{ queue.scheduled_jobs }} scheduled jobs
+              {{ pluralize(Number(queue.scheduled_jobs), "scheduled job") }}
             </UBadge>
             <UBadge
               v-if="queue.deferred_jobs + queue.jobs > 0"
@@ -61,7 +72,13 @@
               variant="ghost"
               class="flex-1 min-w-fit"
             >
-              {{ queue.deferred_jobs + queue.jobs }} jobs on hold
+              {{
+                pluralize(
+                  Number(queue.deferred_jobs) + Number(queue.jobs),
+                  "job",
+                )
+              }}
+              on hold
             </UBadge>
             <UBadge
               v-if="queue.finished_jobs > 0"
@@ -69,7 +86,7 @@
               variant="ghost"
               class="flex-1 min-w-fit text-success"
             >
-              {{ queue.finished_jobs }} successful jobs
+              {{ pluralize(Number(queue.finished_jobs), "successful job") }}
             </UBadge>
             <UBadge
               v-if="queue.failed_jobs > 0"
@@ -77,7 +94,7 @@
               variant="ghost"
               class="flex-1 min-w-fit text-error"
             >
-              {{ queue.failed_jobs }} failed jobs
+              {{ pluralize(Number(queue.failed_jobs), "failed job") }}
             </UBadge>
           </div>
           <div v-if="queue.name === 'monitor' && monitor">
@@ -105,6 +122,7 @@
                 class="w-full"
                 :min="24"
                 :max="168"
+                :format-options="{ useGrouping: false }"
                 required
                 size="lg"
                 @change="() => updateMonitor()"
@@ -123,9 +141,9 @@ import { useTimeAgo } from "@vueuse/core";
 
 const api = useApi("/api/");
 const userStore = useUserStore();
-const loading = ref(false);
 const queueStats = ref<Array<Record<string, string | number>>>([]);
 const monitor = ref();
+const refresh = ref<ReturnType<typeof setTimeout> | null>(null);
 const icons = {
   tasks: {
     icon: "i-lucide-scan-search",
@@ -146,28 +164,31 @@ const icons = {
 };
 
 function fetch() {
-  loading.value = true;
-  api
-    .get("stats/rq/")
-    .then((response) => {
-      queueStats.value = Object.keys(response).map((queue) => {
-        return {
-          name: queue,
-          icon: icons[queue]["icon"],
-          icon_class: icons[queue]["icon_class"],
-          jobs: response[queue].jobs,
-          workers: response[queue].workers,
-          finished_jobs: response[queue].finished_jobs,
-          started_jobs: response[queue].started_jobs,
-          deferred_jobs: response[queue].deferred_jobs,
-          failed_jobs: response[queue].failed_jobs,
-          scheduled_jobs: response[queue].scheduled_jobs,
-        };
-      });
-    })
-    .finally(() => {
-      loading.value = false;
+  api.get("stats/rq/").then((response) => {
+    queueStats.value = Object.keys(response).map((queue) => {
+      return {
+        name: queue,
+        icon: icons[queue]["icon"],
+        icon_class: icons[queue]["icon_class"],
+        jobs: response[queue].jobs,
+        workers: response[queue].workers,
+        finished_jobs: response[queue].finished_jobs,
+        started_jobs: response[queue].started_jobs,
+        deferred_jobs: response[queue].deferred_jobs,
+        failed_jobs: response[queue].failed_jobs,
+        scheduled_jobs: response[queue].scheduled_jobs,
+      };
     });
+    if (queueStats.value.some((queue) => Number(queue.started_jobs) > 0)) {
+      if (refresh.value) clearTimeout(refresh.value);
+      refresh.value = setTimeout(() => {
+        fetch();
+      }, 5000);
+    } else if (refresh.value) {
+      clearTimeout(refresh.value);
+      refresh.value = null;
+    }
+  });
 }
 
 function fetchMonitor() {
@@ -185,5 +206,9 @@ function updateMonitor() {
 onMounted(() => {
   fetch();
   fetchMonitor();
+});
+
+onUnmounted(() => {
+  if (refresh.value) clearTimeout(refresh.value);
 });
 </script>

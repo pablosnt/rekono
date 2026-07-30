@@ -67,29 +67,38 @@ class FindingsQueue(BaseQueue):
         return job
 
     @staticmethod
-    @job("findings")
-    def consume(execution: Execution, findings: list[Finding]) -> None:
-        """Process findings through background job workflow.
+    def _consume(execution: Execution, findings: list[Finding]) -> None:
+        """Run the findings processing pipeline for an execution.
 
-        Executes complete findings processing pipeline including external
-        platform integrations, alert notifications, and automatic fixing
-        based on system settings and project configuration.
-
-        Processing Steps:
-            - CVE enrichment via multiple providers with quality-score selection
-            - Per-finding integrations
-            - Per-execution integrations
-            - Alert notification dispatch
-            - Automatic finding lifecycle management and cross-execution fix correlation
+        Enriches each finding's CVE data by querying every enabled provider and
+        keeping the enrichment with the highest quality score, then runs the
+        per-finding and per-execution integrations and dispatches alert
+        notifications. Findings are grouped by type and sorted within each type
+        before reaching the per-execution platforms, so the integrations and the
+        notifications always report them in the same meaningful order. When
+        auto-fix is enabled, previously fixed findings that reappear are
+        reactivated, and findings missing from executions sharing the same hash
+        are marked as fixed.
 
         Args:
-            execution (Execution): Source execution for the findings.
+            execution (Execution): Execution that produced the findings.
             findings (list[Finding]): List of findings to process.
         """
         BaseQueue.logger.info(
             f"[Findings] Processing of {len(findings)} findings from execution {execution.id} has started"
         )
         settings = Settings.objects.first()
+        # Finding types with the field used to sort them and whether that sorting must be reversed
+        finding_types = [
+            (OSINT, "data", False),
+            (Host, "ip", False),
+            (Port, "port", False),
+            (Path, "path", False),
+            (Technology, "name", False),
+            (Credential, "id", False),
+            (Vulnerability, "severity", True),
+            (Exploit, "id", False),
+        ]
         if findings:
             cve_providers: list[BaseCveProvider] = [
                 provider
@@ -103,61 +112,92 @@ class FindingsQueue(BaseQueue):
             ]
             integrations_per_execution: list[BaseIntegration] = [DefectDojo()]
             notifications: list[BaseNotification] = [SMTP(), Telegram()]
-            # Process each finding individually
             for finding in findings:
-                # Reactivate previously fixed findings if auto-fix is enabled
-                # This ensures findings that reappear are marked as active again
+                # Auto-fix reactivates a finding that was previously marked as fixed
+                # but has reappeared in this execution
                 if settings.auto_fix_findings and finding.is_fixed:
                     finding.__class__.objects.remove_fix(finding)
-                # Enrich CVEs information before processing the other integrations
+                # CVE enrichment runs first so the other integrations see the enriched finding
                 cve_enrichments: list[tuple[BaseCveProvider, int, BaseCveProvider.CveEnrichment]] = []
                 for cve_provider in cve_providers:
                     if cve_provider.is_finding_processable(finding):
-                        # Get CVE information from the provider
                         enrichment = cve_provider.get_cve(finding.cve)
                         if enrichment:
-                            # Save the provider, its data quality score, and its data
+                            # Track each candidate provider alongside its quality score and data
+                            # so the best one can be picked once every provider has been queried
                             cve_enrichments.append(
                                 (cve_provider, cve_provider.cve_quality_score(enrichment), enrichment)
                             )
                 if len(cve_enrichments) > 0:
-                    # Get the CVE data with the highest data quality score
+                    # Highest quality score wins when multiple providers return data for the same CVE
                     cve_enrichments.sort(key=lambda x: x[1], reverse=True)
                     cve_provider, _, enrichment = cve_enrichments[0]
                     if cve_provider and enrichment:
-                        # Save the CVE enriched information in the finding
                         cve_provider.save(finding, enrichment)
-                # Process findings through integrations that work on individual findings
                 for integration in integrations_per_finding:
                     integration.process_finding(execution, finding)
-                # Check and trigger project alerts for this specific finding
                 for alert in execution.task.target.project.alerts.filter(enabled=True).order_by("-item").all():
                     if alert.must_be_triggered(execution, finding):
-                        # Send notifications through all configured notification platforms
                         for platform in notifications:
                             platform.process_alert(alert, finding)
+            # Sort findings by relevant field, so the integrations and notifications report them in a meaningful order
+            findings_per_type = {
+                finding_type: sorted(
+                    [finding for finding in findings if isinstance(finding, finding_type)],
+                    key=lambda finding: getattr(finding, ordering),
+                    reverse=reverse,
+                )
+                for finding_type, ordering, reverse in finding_types
+            }
+            sorted_findings = sum(findings_per_type.values(), [])
             # Process findings through platforms that run per execution
             for platform in integrations_per_execution + notifications:
-                platform.process_findings(execution, findings)
+                platform.process_findings(execution, sorted_findings)
         # Automatic fixing: mark findings as fixed if they're no longer detected in identical execution contexts
         if settings.auto_fix_findings:
             # For each finding type, mark findings as fixed if they don't appear in the current execution
             # but were found in previous executions with the same parameters
-            for finding_type in [
-                OSINT,
-                Host,
-                Port,
-                Path,
-                Technology,
-                Credential,
-                Vulnerability,
-                Exploit,
-            ]:
+            for finding_type, _, _ in finding_types:
                 finding_type.objects.fix(
                     finding_type.objects.filter(
                         executions__hash=execution.hash,
-                        executions__status=Status.COMPLETED,
+                        executions__status__in=Status.finished(),
                     )
                     .exclude(executions__id=execution.id)
                     .distinct()
+                )
+
+    @staticmethod
+    @job("findings")
+    def consume(execution: Execution, findings: list[Finding]) -> None:
+        """Process findings through background job workflow.
+
+        Executes complete findings processing pipeline including external
+        platform integrations, alert notifications, and automatic fixing
+        based on system settings and project configuration. Processing is
+        serialized per target so multiple workers never process findings for
+        the same target at the same time. Any failure raised by the pipeline
+        is logged rather than propagated, so the RQ job always completes
+        successfully.
+
+        Processing Steps:
+            - Reactivation of previously fixed findings that reappear (when auto-fix is enabled)
+            - CVE enrichment via multiple providers with quality-score selection
+            - Per-finding integrations and alert notification dispatch
+            - Per-execution integrations and notification platforms
+            - Cross-execution fix correlation for findings missing from this execution,
+              independent of whether any findings were passed in (when auto-fix is enabled)
+
+        Args:
+            execution (Execution): Source execution for the findings.
+            findings (list[Finding]): List of findings to process.
+        """
+        self = FindingsQueue()
+        # Lock RQ per target to avoid getting multiple workers processing the same findings at the same time
+        with self.queue.connection.lock(f"findings:{execution.task.target.id}"):
+            try:
+                FindingsQueue._consume(execution, findings)
+            except Exception as ex:
+                self.logger.error(
+                    f"[{self.__class__.__name__}] Error processing {len(findings)} findings from execution {execution.id}: {str(ex)}"
                 )

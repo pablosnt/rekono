@@ -10,7 +10,6 @@
     }"
   >
     <template #content>
-      <UProgress :class="[loading ? 'visible' : 'invisible', 'mb-1']" />
       <CrudForm
         ref="form"
         :api="api"

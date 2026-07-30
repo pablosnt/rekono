@@ -7,6 +7,7 @@ Includes specialized handling for tools that support user interactions.
 
 from typing import Any
 
+from django.db.models import Exists, OuterRef
 from drf_spectacular.utils import extend_schema
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
@@ -26,11 +27,16 @@ class ToolViewSet(LikeViewSet):
     filtering, searching capabilities, and user like/dislike functionality.
     Tools cannot be created or modified through the API.
 
+    Tools whose configurations are all deprecated are excluded, because a tool can
+    only be executed through a configuration. Their Tool and Configuration rows are
+    still kept in the database, so past executions keep resolving the tool name,
+    report format and findings.
+
     Custom Actions:
         like: Like/unlike tools (inherited from LikeViewSet)
 
     Attributes:
-        queryset (QuerySet): All Tool objects
+        queryset (QuerySet): Tool objects with at least one non-deprecated configuration
         serializer_class (Serializer): Serializer for Tool model
         filterset_class (FilterSet): Filter class for query filtering
         permission_classes (list): Required permissions for access control
@@ -39,12 +45,14 @@ class ToolViewSet(LikeViewSet):
         http_method_names (list): Allowed HTTP methods (GET, POST for likes, DELETE for unlikes)
     """
 
-    queryset = Tool.objects.all()
+    queryset = Tool.objects.annotate(
+        has_active_configurations=Exists(Configuration.objects.filter(tool=OuterRef("pk"), deprecated=False))
+    ).filter(has_active_configurations=True)
     serializer_class = ToolSerializer
     filterset_class = ToolFilter
     permission_classes = [IsAuthenticated, RekonoModelPermission]
     search_fields = ["name", "command", "script"]
-    ordering_fields = ["id", "name", "command", "likes_count"]
+    ordering_fields = ["id", "name", "command", "liked", "likes"]
     # "post" and "delete" are needed to allow POST requests to like and dislike tools
     http_method_names = ["get", "post", "delete"]
 
@@ -61,7 +69,7 @@ class ToolViewSet(LikeViewSet):
             **kwargs: Arbitrary keyword arguments
 
         Returns:
-            Response: Method not allowed response
+            Response: HTTP 405 Method Not Allowed response
         """
         return self._method_not_allowed("POST")  # pragma: no cover
 
@@ -78,7 +86,7 @@ class ToolViewSet(LikeViewSet):
             **kwargs: Arbitrary keyword arguments
 
         Returns:
-            Response: Method not allowed response
+            Response: HTTP 405 Method Not Allowed response
         """
         return self._method_not_allowed("DELETE")  # pragma: no cover
 

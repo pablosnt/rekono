@@ -77,15 +77,15 @@ class PlanJob:
         """Add a RQ job to this plan job.
 
         Args:
-            dependency (Job): The RQ Job object to associate with this plan job
+            job (Job): The RQ Job object to associate with this plan job
         """
         self.jobs.append(job)
 
-    def __eq__(self, other: Any) -> bool:
+    def __eq__(self, other: object) -> bool:
         """Check equality based on step ID.
 
         Args:
-            other (Any): Object to compare with
+            other (object): Object to compare with
 
         Returns:
             bool: True if both have the same step ID
@@ -151,8 +151,11 @@ class TasksQueue(BaseScanQueue):
         The task target is re-validated against the deny list before any
         execution is created, because targets are only validated when created
         and a deny list change or DNS rebinding afterwards could otherwise let a
-        previously-saved target be scanned. A denied target finishes the task
-        without producing executions.
+        previously-saved target be scanned. A rejected target does not run: the
+        task is kept and the rejection is recorded as skipped executions so its
+        history survives and the reason is visible. Its scheduling is cleared so
+        a recurring or scheduled task is not re-run against the denied target
+        over and over.
 
         Args:
             task (Task): The task to process
@@ -164,12 +167,33 @@ class TasksQueue(BaseScanQueue):
         # Re-validate the task target before creating any execution
         try:
             TargetValidator(Regex.TARGET)(task.target.target)
-        except ValidationError:
+        except ValidationError as error:
+            skipped_reason = " ".join(error.messages)
             TasksQueue.logger.warning(
-                f"[Security] Task {task.id} target '{task.target.target}' is denied by policy at execution time"
+                f"[Security] Task {task.id} target '{task.target.target}' was rejected at execution time: "
+                f"{skipped_reason}"
             )
-            task.delete()
-            return
+            dt = timezone.now()
+            for configuration in (
+                [task.configuration]
+                if task.configuration
+                else [step.configuration for step in task.process.steps.filter(configuration__deprecated=False)]
+            ):
+                Execution.objects.create(
+                    task=task,
+                    configuration=configuration,
+                    status=Status.SKIPPED,
+                    skipped_reason=skipped_reason,
+                    start=dt,
+                    end=dt,
+                )
+            task.start = dt
+            task.end = dt
+            # Clear next task iteration
+            task.repeat_in = None
+            task.repeat_time_unit = None
+            task.save(update_fields=["start", "end", "repeat_in", "repeat_time_unit"])
+            return task
         if task.configuration:
             TasksQueue._consume_tool_task(task)
         elif task.process:
@@ -189,7 +213,7 @@ class TasksQueue(BaseScanQueue):
         executions = TasksQueue.calculate_executions(
             task.configuration,
             [],
-            task.target.target_ports.all(),
+            task.get_scoped_target_ports(),
             task.input_vulnerabilities.all(),
             task.input_technologies.all(),
             task.wordlists.all(),
@@ -216,10 +240,9 @@ class TasksQueue(BaseScanQueue):
         Args:
             task (Task): The process task to process
         """
-        # Create execution plan for multi-step process with dependency management
         plan: list[PlanJob] = []
         # Order steps by stage, input complexity, output complexity, and configuration ID
-        # This ensures proper execution order where simpler tools run before complex ones
+        # so that simpler tools are planned before the more complex ones depending on their output
         steps = (
             task.process.steps.filter(configuration__deprecated=False)
             .annotate(
@@ -229,45 +252,37 @@ class TasksQueue(BaseScanQueue):
             .order_by("configuration__stage", "max_input", "max_output", "configuration__id")
         )
         executions_queue = ExecutionsQueue()
-        # Build dependency graph for each step in the process
         for step in steps:
             item = PlanJob(step)
-            # Only include steps that can be executed at the current task intensity level
             if Intensity.objects.filter(tool=step.configuration.tool, value__lte=task.intensity).exists():
-                # Check dependencies against all previously planned jobs
-                # A dependency exists when a previous job's output matches this job's input type
+                # A dependency exists when a previously planned job's output type matches this job's input type
                 for execution_job in plan:
                     for output in execution_job.outputs:
                         if output in item.inputs:
-                            # Add dependency to ensure proper execution order
                             if execution_job not in item.dependencies:
                                 item.add_dependency(execution_job)
-                            break  # One matching output type is sufficient for dependency
+                            break  # One matching output type is enough to establish the dependency
                 plan.append(item)
             else:
-                # Skip tools that cannot run at the specified intensity level
+                # The step is never planned or enqueued, but a SKIPPED execution is still
+                # created for it so the process history shows every step and why it didn't run
                 Execution.objects.create(
                     task=task,
                     configuration=step.configuration,
                     status=Status.SKIPPED,
                     skipped_reason=f"Tool {step.configuration.tool.name} can't be executed with intensity {IntensityValue(task.intensity).name.capitalize()}",
                 )
-        # Execute the planned jobs with proper dependency management
         for execution_job in plan:
-            # Calculate execution parameters for this step's configuration
             executions = TasksQueue.calculate_executions(
                 execution_job.step.configuration,
-                [],  # No findings from previous steps yet (will be resolved by dependencies)
-                task.target.target_ports.all(),
+                [],  # No findings from previous steps yet; those become available once dependencies run
+                task.get_scoped_target_ports(),
                 task.input_vulnerabilities.all(),
                 task.input_technologies.all(),
                 task.wordlists.all(),
             )
-            # Create and enqueue execution jobs for each parameter combination
             for parameters in executions:
                 execution = Execution.objects.create(task=task, configuration=execution_job.step.configuration)
-                # Enqueue execution with dependencies from all prerequisite jobs
-                # Dependencies ensure this execution waits for required inputs to be available
                 execution_job.add_job(
                     executions_queue.enqueue(
                         execution,
@@ -276,7 +291,7 @@ class TasksQueue(BaseScanQueue):
                         parameters.input_vulnerabilities,
                         parameters.input_technologies,
                         parameters.wordlists,
-                        # Flatten all dependency job lists into a single dependency list
+                        # Flatten the dependency jobs of every prerequisite PlanJob into one list
                         dependencies=sum([d.jobs for d in execution_job.dependencies], []),
                     )
                 )

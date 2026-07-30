@@ -4,6 +4,7 @@ from findings.enums import Severity
 from tests.framework import ApiTest
 from tests.framework.cases import ApiTestCase
 from tests.framework.data import SetupProject
+from tests.stats.test_base import BaseStatsAuthorizationTest
 
 # pytype: disable=wrong-arg-types
 
@@ -34,7 +35,7 @@ class VulnerabilityCVEStatsTest(ApiTest, TestCase):
                 {"cve": "CVE-2025-2001", "open": 1, "fixed": 0},
             ],
         ),
-        ApiTestCase(["not_members"]),
+        ApiTestCase(["not_members"], expected=[]),
         ApiTestCase(
             ["members"],
             expected=[
@@ -44,6 +45,7 @@ class VulnerabilityCVEStatsTest(ApiTest, TestCase):
             ],
             endpoint="{endpoint}?project=1",
         ),
+        ApiTestCase(["not_members"], expected=[], endpoint="{endpoint}?project=1"),
         ApiTestCase(
             ["members"],
             expected=[
@@ -52,7 +54,7 @@ class VulnerabilityCVEStatsTest(ApiTest, TestCase):
             ],
             endpoint="{endpoint}?project=2",
         ),
-        ApiTestCase(["not_members"], endpoint="{endpoint}?project=1"),
+        ApiTestCase(["not_members"], expected=[], endpoint="{endpoint}?project=2"),
     ]
 
 
@@ -82,7 +84,7 @@ class VulnerabilityCWEStatsTest(ApiTest, TestCase):
                 {"cwe": "CWE-89", "open": 1, "fixed": 0},
             ],
         ),
-        ApiTestCase(["not_members"]),
+        ApiTestCase(["not_members"], expected=[]),
         ApiTestCase(
             ["members"],
             expected=[
@@ -92,6 +94,7 @@ class VulnerabilityCWEStatsTest(ApiTest, TestCase):
             ],
             endpoint="{endpoint}?project=1",
         ),
+        ApiTestCase(["not_members"], expected=[], endpoint="{endpoint}?project=1"),
         ApiTestCase(
             ["members"],
             expected=[
@@ -100,7 +103,7 @@ class VulnerabilityCWEStatsTest(ApiTest, TestCase):
             ],
             endpoint="{endpoint}?project=2",
         ),
-        ApiTestCase(["not_members"], endpoint="{endpoint}?project=1"),
+        ApiTestCase(["not_members"], expected=[], endpoint="{endpoint}?project=2"),
     ]
 
 
@@ -122,32 +125,32 @@ class VulnerabilityExploitCoverageStatsTest(ApiTest, TestCase):
                 {"has_exploits": True, "count": 1},
             ],
         ),
-        ApiTestCase(["not_members"]),
+        ApiTestCase(["not_members"], expected=[]),
         ApiTestCase(
             ["members"],
             expected=[{"has_exploits": False, "count": 1}],
             endpoint="{endpoint}?project=1",
         ),
-        ApiTestCase(["not_members"], endpoint="{endpoint}?project=1"),
+        ApiTestCase(["not_members"], expected=[], endpoint="{endpoint}?project=1"),
         ApiTestCase(
             ["members"],
             expected=[{"has_exploits": True, "count": 1}],
             endpoint="{endpoint}?project=2",
         ),
-        ApiTestCase(["not_members"], endpoint="{endpoint}?project=2"),
+        ApiTestCase(["not_members"], expected=[], endpoint="{endpoint}?project=2"),
         ApiTestCase(["members"], endpoint="{endpoint}?project=3"),
         ApiTestCase(
             ["members"],
             expected=[{"has_exploits": False, "count": 1}],
             endpoint="{endpoint}?target=1",
         ),
-        ApiTestCase(["not_members"], endpoint="{endpoint}?target=1"),
+        ApiTestCase(["not_members"], expected=[], endpoint="{endpoint}?target=1"),
         ApiTestCase(
             ["members"],
             expected=[{"has_exploits": True, "count": 1}],
             endpoint="{endpoint}?target=2",
         ),
-        ApiTestCase(["members"], endpoint="{endpoint}?target=3"),
+        ApiTestCase(["members"], endpoint="{endpoint}?target=2"),
     ]
 
 
@@ -187,7 +190,7 @@ class VulnerabilityStatusPerSeverityStatsTest(ApiTest, TestCase):
                 {"severity": Severity.INFO.name.capitalize(), "open": 1, "fixed": 0},
             ],
         ),
-        ApiTestCase(["not_members"]),
+        ApiTestCase(["not_members"], expected=[]),
         ApiTestCase(
             ["members"],
             expected=[
@@ -199,6 +202,7 @@ class VulnerabilityStatusPerSeverityStatsTest(ApiTest, TestCase):
             ],
             endpoint="{endpoint}?project=1",
         ),
+        ApiTestCase(["not_members"], expected=[], endpoint="{endpoint}?project=1"),
         ApiTestCase(
             ["members"],
             expected=[
@@ -208,5 +212,33 @@ class VulnerabilityStatusPerSeverityStatsTest(ApiTest, TestCase):
             ],
             endpoint="{endpoint}?project=2",
         ),
-        ApiTestCase(["not_members"], endpoint="{endpoint}?project=1"),
+        ApiTestCase(["not_members"], expected=[], endpoint="{endpoint}?project=2"),
     ]
+
+
+class VulnerabilityCVEStatsAuthorizationTest(BaseStatsAuthorizationTest, TestCase):
+    endpoint = "/api/stats/vulnerability-cve/"
+    project_1_members_expected = [
+        {"cve": "CVE-2025-1001", "severity_value": Severity.CRITICAL.name.capitalize(), "open": 1, "fixed": 0}
+    ]
+    project_2_members_expected = [
+        {"cve": "CVE-2025-2002", "severity_value": Severity.LOW.name.capitalize(), "open": 1, "fixed": 0}
+    ]
+
+
+class VulnerabilityCWEStatsAuthorizationTest(BaseStatsAuthorizationTest, TestCase):
+    endpoint = "/api/stats/vulnerability-cwe/"
+    project_1_members_expected = [{"cwe": "CWE-79", "open": 1, "fixed": 0}]
+    project_2_members_expected = [{"cwe": "CWE-22", "open": 1, "fixed": 0}]
+
+
+class VulnerabilityStatusStatsAuthorizationTest(BaseStatsAuthorizationTest, TestCase):
+    endpoint = "/api/stats/vulnerability-status/"
+    project_1_members_expected = [{"severity": Severity.CRITICAL.name.capitalize(), "open": 1, "fixed": 0}]
+    project_2_members_expected = [{"severity": Severity.LOW.name.capitalize(), "open": 1, "fixed": 0}]
+
+
+class VulnerabilityExploitCoverageStatsAuthorizationTest(BaseStatsAuthorizationTest, TestCase):
+    endpoint = "/api/stats/exploit-coverage/"
+    project_1_members_expected = [{"has_exploits": True, "count": 1}]
+    project_2_members_expected = [{"has_exploits": True, "count": 1}]

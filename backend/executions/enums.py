@@ -30,7 +30,25 @@ class Status(models.TextChoices):
     ERROR = "Error"
     COMPLETED = "Completed"
 
+    @classmethod
+    def in_progress(cls) -> list[str]:
+        """Return the statuses of executions that are still queued or running.
 
-# Type annotation fix for pytype compatibility
-# https://github.com/google/pytype/issues/1048
+        Returns:
+            list[Status]: Non-terminal statuses (REQUESTED, RUNNING).
+        """
+        return [cls.REQUESTED, cls.RUNNING]
+
+    @classmethod
+    def finished(cls) -> list[str]:
+        """Return the terminal statuses an execution can end up in.
+
+        Returns:
+            list[Status]: Terminal statuses (COMPLETED, ERROR, SKIPPED, CANCELLED).
+        """
+        return [cls.COMPLETED, cls.ERROR, cls.SKIPPED, cls.CANCELLED]
+
+
+# Type annotation workaround for pytype compatibility
+# See: https://github.com/google/pytype/issues/1048
 Status: type[Choices] = Status

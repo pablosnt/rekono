@@ -69,9 +69,8 @@ class SimpleConfigurationSerializer(ModelSerializer):
 class ToolSerializer(LikeSerializer):
     """Comprehensive serializer for Tool model with nested relationships and computed fields.
 
-    Provides complete tool information including intensities, configurations,
-    and input requirement analysis for wordlists, technologies, and vulnerabilities.
-    Extends LikeSerializer to include like functionality.
+    Provides complete tool information including intensity levels and non-deprecated
+    configurations. Extends LikeSerializer to include like functionality.
 
     Attributes:
         intensities (IntensitySerializer): Nested intensity configurations
@@ -88,7 +87,7 @@ class ToolSerializer(LikeSerializer):
             instance (Tool): The tool instance being serialized
 
         Returns:
-            list[SimpleConfigurationSerializer]: Serialized non-deprecated configurations
+            list[dict[str, Any]]: Serialized non-deprecated configuration data
         """
         return SimpleConfigurationSerializer(instance.configurations.filter(deprecated=False), many=True).data
 
@@ -177,7 +176,7 @@ class ConfigurationSerializer(SimpleConfigurationSerializer):
         and whether it's required for tool execution.
 
         Args:
-            configuration (Configuration): The tool instance to analyze
+            configuration (Configuration): The configuration instance to analyze
             input_type (InputTypeName): The input type to check requirements for
 
         Returns:
@@ -191,10 +190,10 @@ class ConfigurationSerializer(SimpleConfigurationSerializer):
         )
 
     def get_wordlists(self, instance: Any) -> dict[str, bool]:
-        """Get wordlist requirement information for the tool.
+        """Get wordlist requirement information for this configuration.
 
         Args:
-            instance (Tool): The tool instance being serialized
+            instance (Configuration): The configuration instance being serialized
 
         Returns:
             dict[str, bool]: Dictionary with 'required' and 'supported' boolean flags
@@ -202,10 +201,10 @@ class ConfigurationSerializer(SimpleConfigurationSerializer):
         return self._get_argument_requirement(instance, InputTypeName.WORDLIST)
 
     def get_input_technologies(self, instance: Any) -> dict[str, bool]:
-        """Get technology input requirement information for the tool.
+        """Get technology input requirement information for this configuration.
 
         Args:
-            instance (Tool): The tool instance being serialized
+            instance (Configuration): The configuration instance being serialized
 
         Returns:
             dict[str, bool]: Dictionary with 'required' and 'supported' boolean flags
@@ -213,10 +212,10 @@ class ConfigurationSerializer(SimpleConfigurationSerializer):
         return self._get_argument_requirement(instance, InputTypeName.TECHNOLOGY)
 
     def get_input_vulnerabilities(self, instance: Any) -> dict[str, bool]:
-        """Get vulnerability input requirement information for the tool.
+        """Get vulnerability input requirement information for this configuration.
 
         Args:
-            instance (Tool): The tool instance being serialized
+            instance (Configuration): The configuration instance being serialized
 
         Returns:
             dict[str, bool]: Dictionary with 'required' and 'supported' boolean flags

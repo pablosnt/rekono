@@ -74,9 +74,47 @@
         </div>
       </template>
       <template #body>
-        <pre
-          class="font-mono text-sm whitespace-pre-wrap break-all bg-neutral-950 text-neutral-100 p-4 rounded-lg overflow-auto h-full leading-relaxed"
-          >{{ selectedExecution?.output_plain }}</pre>
+        <div class="flex flex-col h-full gap-3">
+          <div
+            v-if="selectedExecution?.executed_command"
+            class="font-mono text-sm text-terminal bg-black p-4 rounded-lg shrink-0 leading-relaxed flex items-start gap-3"
+          >
+            <span class="select-none shrink-0">$</span>
+            <span
+              class="whitespace-pre-wrap break-all flex-1 max-h-[4.5rem] overflow-y-auto"
+              >{{ selectedExecution.executed_command }}</span
+            >
+            <UButton
+              icon="i-lucide-copy"
+              variant="ghost"
+              size="sm"
+              aria-label="Copy command"
+              class="shrink-0 -mt-1 -mr-1 text-neutral-400 hover:text-terminal"
+              @click="
+                copyText(
+                  selectedExecution.executed_command,
+                  'Command copied to clipboard',
+                )
+              "
+            />
+          </div>
+          <pre
+            v-if="selectedExecution?.output_plain"
+            class="font-mono text-sm whitespace-pre-wrap break-all bg-neutral-950 text-neutral-100 p-4 rounded-lg overflow-auto flex-1 min-h-0 leading-relaxed"
+            >{{ selectedExecution.output_plain }}</pre>
+          <div
+            v-else
+            class="flex-1 min-h-0 flex items-center justify-center bg-neutral-950 rounded-lg"
+          >
+            <UIcon
+              v-if="['Running', 'Requested'].includes(selectedExecution.status)"
+              name="i-lucide-loader"
+              class="text-4xl text-muted animate-spin"
+              aria-label="Execution running"
+            />
+            <span v-else class="font-mono text-sm text-muted">No output</span>
+          </div>
+        </div>
       </template>
     </LazyUSlideover>
   </div>
@@ -111,7 +149,6 @@ const selectedExecution = ref();
 const runningExecutions = ref(0);
 const outputOpen = ref(false);
 const toolOptions = ref<FilterOption[]>([]);
-
 const config: CrudConfig<Execution> = reactive({
   endpoint: "/api/executions/",
   entityName: "Execution",
@@ -161,11 +198,13 @@ const config: CrudConfig<Execution> = reactive({
           },
           {
             default: () =>
-              h(resolveComponent("UIcon"), {
-                name: status?.icon,
-                class: `text-lg text-${status?.color}${isRunning ? " animate-spin" : ""}`,
-                "aria-label": row.original.status,
-              }),
+              h("span", { class: "inline-flex items-center" }, [
+                h(resolveComponent("UIcon"), {
+                  name: status?.icon,
+                  class: `text-lg text-${status?.color}${isRunning ? " animate-spin" : ""}`,
+                }),
+                h("span", { class: "sr-only" }, row.original.status),
+              ]),
           },
         );
       },
@@ -222,12 +261,14 @@ const config: CrudConfig<Execution> = reactive({
     skipped: false,
     id: false,
   },
-  pageSizeOptions: [24, 50, 100],
+  pageSize: props.disableUrlSync ? 10 : 24,
+  pageSizeOptions: props.disableUrlSync ? [10, 24, 50, 100] : [24, 50, 100],
   onItemClick: (item: Execution) => {
     selectedExecution.value = item;
     outputOpen.value = true;
   },
-  isRowClickable: (item: Execution) => !!item.output_plain,
+  isRowClickable: (item: Execution) =>
+    !!item.output_plain || !!item.executed_command,
   searchable: true,
   searchPlaceholder: "Search executions...",
   filters: [
@@ -279,7 +320,7 @@ function onExecutions(items: Execution[], total: number) {
 }
 
 onMounted(() => {
-  options.tools(toolOptions);
+  options.tools(toolOptions, { ordering: "-liked,-id" });
   integrations.fetchDefectDojo();
 });
 

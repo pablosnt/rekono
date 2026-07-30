@@ -2,6 +2,10 @@
 
 Provides wordlist selection functionality for conversations that require
 wordlist context including conditional wordlist requirements and default options.
+Expects either Context.CONFIGURATION (Tool conversation) or Context.PROCESS
+(Process conversation) to already be set, since that determines whether any of
+the tool's or process's arguments actually take a wordlist, and whether one is
+required. Leaves Context.WORDLIST set, or unset when the default wordlist is kept.
 """
 
 from asgiref.sync import sync_to_async
@@ -115,9 +119,8 @@ class WordlistMixin(BaseMixin):
         if update.callback_query and update.callback_query.data and update.callback_query.data == self.default_wordlist:
             await update.callback_query.answer()
             return await self.go_to_next_state(update, context, self.get_next_state(self.save_wordlist))
-        else:
-            return await self.go_to_next_state(
-                update,
-                context,
-                await self.save(update, context, Context.WORDLIST, Wordlist, self.get_next_state(self.save_wordlist)),
-            )
+        return await self.go_to_next_state(
+            update,
+            context,
+            await self.save(update, context, Context.WORDLIST, Wordlist, self.get_next_state(self.save_wordlist)),
+        )

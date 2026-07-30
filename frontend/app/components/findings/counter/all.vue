@@ -1,8 +1,11 @@
 <template>
   <div
-    v-if="total > 0"
+    v-if="showEmpty || loading || total > 0"
     class="grid grid-cols-2 sm:grid-cols-4 xl:grid-cols-8 gap-3"
   >
+    <div v-if="loading" class="sr-only" role="status">
+      Loading findings summary
+    </div>
     <template v-for="item in counters" :key="item.plural">
       <FindingsCounter
         :task-id="taskId"
@@ -22,13 +25,16 @@ const props = defineProps<{
   targetId?: number;
   projectId?: number;
   onlyActive?: boolean;
+  showEmpty?: boolean;
 }>();
 
 const api = useApi("/api/");
-const total = ref(0);
 const loading = ref(false);
 const counters = ref(
-  findingTypes.map((ft) => Object.assign({ count: 0, loading: false }, ft)),
+  findingTypes.map((ft) => Object.assign({ count: 0, loading: true }, ft)),
+);
+const total = computed(() =>
+  counters.value.reduce((sum, c) => sum + (c.count as number), 0),
 );
 
 function getFilters(isTriageable: boolean) {
@@ -47,7 +53,6 @@ function getFilters(isTriageable: boolean) {
 }
 
 function fetch() {
-  total.value = 0;
   loading.value = true;
   counters.value.forEach((c) => {
     c.loading = true;
@@ -61,13 +66,8 @@ function fetch() {
         1,
         1,
       )
-      .then((response) => {
-        counters.value[index].count = response.total;
-        total.value += response.total;
-      })
-      .catch(() => {
-        counters.value[index].count = 0;
-      })
+      .then((response) => (counters.value[index].count = response.total))
+      .catch(() => (counters.value[index].count = 0))
       .finally(() => {
         counters.value[index].loading = false;
         loading.value = counters.value.some((c) => c.loading);

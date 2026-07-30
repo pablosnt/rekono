@@ -9,6 +9,7 @@ from tests.framework.cases import ParserTestCase
 class CmseekTest(ParserTest, TestCase):
     tool_name = "CMSeeK"
     cases = [
+        ParserTestCase("empty.json", []),
         ParserTestCase(
             "dvwp.json",
             [

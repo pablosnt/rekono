@@ -1,97 +1,114 @@
 <template>
-  <div v-if="currentProject">
-    <UForm
-      class="space-y-4 p-3"
-      :schema="schema"
-      :state="state"
-      :validate-on="['input', 'change']"
-    >
+  <div class="space-y-4 p-3">
+    <template v-if="!currentProject">
+      <div class="sr-only" role="status">Loading project</div>
       <div
+        aria-hidden="true"
         class="flex flex-row flex-wrap items-center justify-between w-full gap-2"
       >
-        <UFormField name="name" class="flex-1 min-w-0">
-          <UInput
-            v-model="state.name"
+        <USkeleton class="h-14 flex-1 min-w-0" />
+        <div class="flex flex-wrap items-center gap-3">
+          <USkeleton class="size-8 rounded-full" />
+          <USkeleton class="size-8" />
+        </div>
+      </div>
+      <div aria-hidden="true" class="mt-5">
+        <USkeleton class="h-9 w-full" />
+      </div>
+      <div aria-hidden="true" class="mt-8">
+        <USkeleton class="h-[212px] w-full" />
+      </div>
+    </template>
+    <template v-else>
+      <UForm :schema="schema" :state="state" :validate-on="['input', 'change']">
+        <div
+          class="flex flex-row flex-wrap items-center justify-between w-full gap-2"
+        >
+          <UFormField name="name" class="flex-1 min-w-0">
+            <UInput
+              v-model="state.name"
+              class="w-full"
+              placeholder="Name"
+              required
+              type="text"
+              variant="ghost"
+              size="xl"
+              aria-label="Name"
+              :disabled="!userStore.is_admin"
+              :ui="{ base: 'text-4xl font-bold' }"
+              @update:model-value="update()"
+            />
+          </UFormField>
+          <div class="flex flex-wrap items-center gap-3">
+            <TasksButton
+              v-if="userStore.is_auditor && currentProject.targets.length > 0"
+              :project="currentProject"
+            />
+            <LazyDefectdojoModal
+              :sync="currentProject.defectdojo_sync"
+              @update="fetch()"
+            />
+            <UDropdownMenu
+              v-if="userStore.is_admin"
+              :items="[
+                {
+                  label: 'Copy link',
+                  icon: 'i-lucide-copy',
+                  onSelect: copyLink,
+                },
+                {
+                  label: 'Delete',
+                  icon: 'i-lucide-trash',
+                  color: 'error',
+                  onSelect: () => (deleteOpen = true),
+                },
+              ]"
+            >
+              <UButton
+                icon="i-lucide-more-horizontal"
+                variant="subtle"
+                color="neutral"
+                aria-label="Project actions"
+              />
+            </UDropdownMenu>
+            <LazyCrudDeleteModal
+              :open="deleteOpen"
+              :item="currentProject"
+              :config="deleteConfig"
+              :api="api"
+              @open="(open) => (deleteOpen = open)"
+              @deleted="navigateTo('/projects')"
+            />
+          </div>
+        </div>
+        <UFormField v-if="userStore.is_admin" class="mt-5" name="tags">
+          <TagsForm v-model="state.tags" @update:model-value="update()" />
+        </UFormField>
+        <Tags
+          v-else-if="currentProject.tags.length"
+          :tags="currentProject.tags"
+        />
+        <UFormField class="mt-8" name="description">
+          <UTextarea
+            v-model="state.description"
             class="w-full"
-            placeholder="Name"
-            required
-            type="text"
-            variant="ghost"
-            size="xl"
-            aria-label="Name"
+            :rows="10"
+            :maxrows="20"
+            placeholder="Project description..."
+            autoresize
+            color="neutral"
+            aria-label="Description"
             :disabled="!userStore.is_admin"
-            :ui="{ base: 'text-4xl font-bold' }"
             @update:model-value="update()"
           />
         </UFormField>
-        <div class="flex flex-wrap items-center gap-3">
-          <TasksButton
-            v-if="userStore.is_auditor && currentProject.targets.length > 0"
-            :project="currentProject"
-          />
-          <LazyDefectdojoModal
-            :sync="currentProject.defectdojo_sync"
-            @update="fetch()"
-          />
-          <UDropdownMenu
-            v-if="userStore.is_admin"
-            :items="[
-              {
-                label: 'Copy link',
-                icon: 'i-lucide-copy',
-                onSelect: copyLink,
-              },
-              {
-                label: 'Delete',
-                icon: 'i-lucide-trash',
-                color: 'error',
-                onSelect: () => (deleteOpen = true),
-              },
-            ]"
-          >
-            <UButton
-              icon="i-lucide-more-horizontal"
-              variant="subtle"
-              color="neutral"
-              aria-label="Project actions"
-            />
-          </UDropdownMenu>
-          <LazyCrudDeleteModal
-            :open="deleteOpen"
-            :item="currentProject"
-            :config="deleteConfig"
-            :api="api"
-            @open="(open) => (deleteOpen = open)"
-            @deleted="navigateTo('/projects')"
-          />
-        </div>
+      </UForm>
+      <div v-if="projectHasActiveFindings">
+        <USeparator class="mb-8 mt-8" />
+        <h2 class="text-2xl font-bold text-default m-5">Findings</h2>
+        <LazyFindingsCounterAll :project-id="currentProject?.id" only-active />
       </div>
-      <UFormField v-if="userStore.is_admin" class="mt-5" name="tags">
-        <TagsForm v-model="state.tags" @update:model-value="update()" />
-      </UFormField>
-      <Tags
-        v-else-if="currentProject.tags.length"
-        :tags="currentProject.tags"
-      />
-      <UFormField class="mt-8" name="description">
-        <UTextarea
-          v-model="state.description"
-          class="w-full"
-          :rows="10"
-          :maxrows="20"
-          placeholder="Project description..."
-          autoresize
-          color="neutral"
-          aria-label="Description"
-          :disabled="!userStore.is_admin"
-        />
-      </UFormField>
-    </UForm>
-    <div v-if="projectHasActiveFindings">
-      <USeparator class="mb-8 mt-8" />
-      <h2 class="text-2xl font-bold text-default m-5">Findings</h2>
-      <LazyFindingsCounterAll :project-id="currentProject.id" only-active />
-    </div>
+    </template>
   </div>
 </template>
 

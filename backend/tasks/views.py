@@ -73,11 +73,14 @@ class TaskViewSet(BaseViewSet):
     executions_queue = ExecutionsQueue()
 
     def destroy(self, request: Request, pk: str, *args: Any, **kwargs: Any) -> Response:
-        """Cancel and delete a task with proper cleanup of running executions.
+        """Cancel a task by stopping its queued or running executions.
 
-        Handles task cancellation by stopping queued jobs, cancelling running
-        executions, and performing proper cleanup. Tasks with completed
-        executions cannot be cancelled.
+        Stops the task's own queued job and any executions still in a
+        non-terminal state (requested or running), marking them as cancelled,
+        then sets the task's end time. This does not delete the task record;
+        DELETE is used here as the cancellation trigger. Tasks whose
+        executions have all already reached a terminal state (skipped,
+        cancelled, errored, or completed) cannot be cancelled.
 
         Args:
             request (Request): The HTTP request object
@@ -86,11 +89,11 @@ class TaskViewSet(BaseViewSet):
             **kwargs (Any): Additional keyword arguments
 
         Returns:
-            Response: HTTP 204 on successful cancellation, HTTP 400 if task cannot be cancelled
+            Response: HTTP 204 on successful cancellation, HTTP 400 if the task's executions have already finished
         """
         task = self.get_object()
         has_executions = task.executions.exists()
-        running_executions = task.executions.filter(status__in=[Status.REQUESTED, Status.RUNNING]).all()
+        running_executions = task.executions.filter(status__in=Status.in_progress()).all()
         if not running_executions.exists() and has_executions:
             self.logger.warning(f"[Task] Task {task.id} can't be cancelled")
             return Response({"task": f"Task {task.id} can't be cancelled"}, status=status.HTTP_400_BAD_REQUEST)
@@ -117,24 +120,26 @@ class TaskViewSet(BaseViewSet):
         task.save(update_fields=["end"])
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @extend_schema(request=None, responses={200: TaskSerializer})
+    @extend_schema(request=None, responses={201: TaskSerializer})
     @action(detail=True, methods=["POST"])
     def repeat(self, request: Request, pk: str) -> Response:
         """Create a duplicate task for re-execution.
 
-        Creates a new task with the same configuration as the original task,
-        including all associated wordlists, technologies, and vulnerabilities.
-        The new task is immediately enqueued for execution.
+        Creates a new task with the same target, target port, intensity, and
+        process or configuration as the original task, including all associated
+        wordlists, technologies, and vulnerabilities. The new task is immediately
+        enqueued for execution.
 
         Args:
             request (Request): The HTTP request object
             pk (str): Primary key of the task to repeat
 
         Returns:
-            Response: HTTP 201 with new task data on success, HTTP 400 if task is still running
+            Response: HTTP 201 with new task data on success, HTTP 400 if the task is
+                     still running or its configuration has been deprecated
         """
         task = self.get_object()
-        if task.executions.filter(status__in=[Status.REQUESTED, Status.RUNNING]).exists():
+        if task.executions.filter(status__in=Status.in_progress()).exists():
             return Response({"task": "Task is still running"}, status=status.HTTP_400_BAD_REQUEST)
         if task.configuration and task.configuration.deprecated:  # pragma: no cover
             return Response(
@@ -142,12 +147,13 @@ class TaskViewSet(BaseViewSet):
             )
         new_task = Task.objects.create(
             target=task.target,
+            target_port=task.target_port,
             process=task.process,
             configuration=task.configuration,
             intensity=task.intensity,
             executor=request.user,
         )
-        new_task.wordlists.set(task.wordlists.all())  # Add wordlists from original task
+        new_task.wordlists.set(task.wordlists.all())
         new_task.input_technologies.set(task.input_technologies.all())
         new_task.input_vulnerabilities.set(task.input_vulnerabilities.all())
         self.tasks_queue.enqueue(new_task)

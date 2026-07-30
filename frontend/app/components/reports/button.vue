@@ -44,7 +44,7 @@ const api = useApi("/api/reports/");
 const route = useRoute();
 const config = ref({
   entityName: "Report",
-  editForm: resolveComponent("ReportsForm"),
+  editForm: markRaw(resolveComponent("ReportsForm")),
   onCreation: () => {
     return navigateTo(`/projects/${route.params.project_id}/reports`);
   },

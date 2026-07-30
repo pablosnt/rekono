@@ -1,29 +1,29 @@
 """Process management module for Rekono.
 
-This module provides comprehensive management of security testing processes and
-workflows within the Rekono platform. It handles the creation, configuration,
-and execution of multi-step security assessment processes that chain together
-various security tools to perform complete vulnerability assessments and
-penetration testing workflows.
+This module provides management of security testing processes and workflows
+within the Rekono platform. It handles the creation and configuration of
+multi-step security assessment processes, reusable sets of tool configurations
+that are chained together and executed as complete vulnerability assessment
+and penetration testing workflows.
 
 Key Features:
     - Process creation and management with step-by-step tool configuration
-    - Workflow orchestration for automated security testing pipelines
-    - Tool chaining with dependency management for complex assessments
-    - Community-driven process sharing with tagging and rating system
+    - Community-driven process sharing through a like system and tagging
     - Wordlist compatibility detection for content discovery tools
     - REST API endpoints for process and step lifecycle management
+    - Fixture-based recreation that refreshes default processes while
+      preserving user-created processes and their steps
 
 Process Architecture:
-    Processes consist of multiple sequential steps, where each step represents
-    a configured security tool execution. The system supports tool chaining,
-    dependency management, and conditional execution based on previous step
-    results. This enables automated security testing workflows from initial
-    reconnaissance through vulnerability exploitation.
+    A process is a named collection of steps, and each step references the
+    tool configuration to run. Steps carry no explicit order or dependency of
+    their own. When a process is executed, the task engine resolves the run
+    order from each step's tool stage and chains steps automatically whenever
+    one step's output type matches another step's input type.
 
 Security:
     - User-based ownership and access control for process management
-    - Input validation and sanitization for process configurations
-    - Secure parameter handling for tool execution workflows
-    - Integration with project-level permission enforcement
+    - Input validation and sanitization for process names and descriptions
+    - Django model permissions combined with ownership checks for process
+      and step access
 """

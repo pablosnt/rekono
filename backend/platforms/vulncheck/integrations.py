@@ -16,8 +16,8 @@ class VulnCheck(NvdNist):
     """Integration class for VulnCheck NVD++ vulnerability intelligence platform.
 
     Extends NvdNist to query VulnCheck's NVD++ index, which mirrors the NVD schema
-    and enriches it with CISA KEV data and VulnCheck-specific threat intelligence.
-    Since the response schema is identical to NVD NIST, the parent's _parse_cve
+    and additionally provides pre-resolved CPE data via vcVulnerableCPEs. Since the
+    response schema is otherwise identical to NVD NIST, the parent's _parse_cve
     method is reused directly. The only structural difference is that VulnCheck
     wraps CVE records in a top-level 'data' list rather than 'vulnerabilities',
     which is handled in _get_cve before handing off to the inherited parser.

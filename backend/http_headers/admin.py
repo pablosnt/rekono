@@ -1,7 +1,8 @@
-"""Django admin configuration for HTTP headers management.
+"""Django admin configuration for HTTP header management.
 
-Provides administrative interface for HTTP header management
-with basic registration for the HttpHeader model.
+Registers the HttpHeader model with the Django admin interface for
+administrative management of header configurations across the global,
+user-specific, and target-specific scopes used during security testing.
 """
 
 from django.contrib import admin

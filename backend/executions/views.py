@@ -36,7 +36,7 @@ class ExecutionViewSet(BaseViewSet):
         download_report: Download execution output files for completed executions
 
     Attributes:
-        queryset (QuerySet): Execution model instances
+        queryset (QuerySet): Execution model instances annotated with a started boolean flag
         serializer_class (Serializer): Serializer for Execution model
         filterset_class (FilterSet): Filter class for query filtering
         permission_classes (list): Required permissions for access control
@@ -45,6 +45,7 @@ class ExecutionViewSet(BaseViewSet):
         http_method_names (list): Allowed HTTP methods (GET only)
     """
 
+    # Started annotation allows frontend to sort executions consistently based on their startup
     queryset = Execution.objects.all().annotate(
         started=Case(When(start__isnull=False, then=True), default=False, output_field=BooleanField())
     )

@@ -140,6 +140,9 @@ class HackTricks(BaseIntegration):
         """
         for mapped_value, services in self.services_mapping.items():
             if service in services:
+                # Some mapping values are already full HackTricks URLs and can be returned directly.
+                # Others are just normalized service aliases (e.g. "ftp") that still need to be
+                # matched against the sitemap links by the caller
                 if self.url in (mapped_value or ""):
                     return mapped_value, None
                 else:
@@ -183,6 +186,8 @@ class HackTricks(BaseIntegration):
                     url_service_parts = url_service_path.split("-")
                     if "/" not in url_service_path and (
                         service_comparator in url_service_parts
+                        # Falls back to the port number when the service name itself isn't part of
+                        # the URL, since some HackTricks pages are named after the port instead
                         or (
                             str(finding.port) in url_service_parts
                             and any(

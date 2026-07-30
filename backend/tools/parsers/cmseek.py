@@ -26,15 +26,21 @@ class Cmseek(BaseParser):
         """Parse CMSeek JSON output and extract CMS security findings.
 
         Processes JSON scan results to create Technology, Path, Vulnerability,
-        and Credential findings from CMS detection and security analysis.
+        and Credential findings from CMS detection and security analysis. CMSeek
+        names most fields after the detected CMS, but not always with the same
+        prefix, so several lookups below need to account for that.
         """
         data = self.load_json_report()
         if not data or not isinstance(data, dict) or not data.get("cms_name") or not data.get("cms_id"):
             return
+        # The version field is prefixed with cms_id for some CMS modules (e.g. "wp_version")
+        # and with cms_name for others (e.g. "joomla_version" when cms_id is "joom")
         version = data.get(f"{data.get('cms_id')}_version") or data.get(f"{data.get('cms_name')}_version")
         base_url = data.get("url", "")
         parser = urlparse(base_url)
         if parser.path:
+            # CMSeek's url can include a sub-path (e.g. a demo folder); strip it so base_url is
+            # the host root, matching the full paths reported for the other fields below
             base_url = base_url.replace(parser.path, "/")
         cms = self.create_finding(
             Technology,
@@ -55,6 +61,10 @@ class Cmseek(BaseParser):
                 "url",
             ]:
                 continue
+            # Fields hold their values as a list, a comma-separated string, or a single string
+            # depending on the CMS module, so all three shapes are normalized into a list here.
+            # Dict-valued fields, like the *_vulns block handled further below, never match
+            # base_url and are filtered out here, leaving them to the "_vulns" branch instead
             paths = [
                 path.replace(base_url, "/").strip()
                 for path in (
@@ -85,6 +95,8 @@ class Cmseek(BaseParser):
                             cwes=[cwe],
                         )
             elif "_users" in key and value != "disabled":
+                # CMSeek reports this field as the literal string "disabled" when there is
+                # nothing to list, otherwise as a comma-separated string of usernames
                 for user in value.split(","):
                     if user:
                         self.create_finding(
@@ -95,6 +107,8 @@ class Cmseek(BaseParser):
                             context=f"{cms.name} username",
                         )
             elif "_debug_mode" in key and value != "disabled":
+                # CMSeek reports this field as "enabled" or "disabled"; any other value is
+                # still treated as debug mode being on rather than assuming it means disabled
                 self.create_finding(
                     Vulnerability,
                     linked_finding=True,
@@ -114,13 +128,19 @@ class Cmseek(BaseParser):
                         technology=cms,
                         name=vulnerability.get("type", "").strip(),
                         description=vulnerability.get("name", "").strip(),
+                        # cve can be absent on some entries, so it is only read once its
+                        # presence is confirmed rather than risking an exception here that
+                        # would abandon the rest of this loop, see BaseParser._parse
                         cve=vulnerability.get("cve").strip() if vulnerability.get("cve") is not None else None,
                         cvss_base_score=float(base_score) if base_score else None,
+                        # CMSeek uses the literal "N/A" as a sentinel for "no fixed version known"
                         remediation=f"Update {cms.name} to version {fixed_version}"
                         if fixed_version and fixed_version != "N/A"
                         else None,
                     )
             elif "Version" in value and "," in value:
+                # Any field whose value looks like a "<name> Version <version>," list (plugins,
+                # themes, etc.) is parsed generically here, regardless of the key name
                 for component in value.split(","):
                     technology = component
                     version = None

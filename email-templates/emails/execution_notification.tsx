@@ -1,4 +1,4 @@
-import { Button, Heading, Hr, Img, Preview, Text } from "react-email";
+import { Button, Heading, Img, Preview, Text } from "react-email";
 import { Layout } from "./_layout";
 import {
   cell,
@@ -12,7 +12,7 @@ import {
 
 const summaryRows: [string, string, boolean][] = [
   ["Project", "{{ execution.task.target.project.name }}", false],
-  ["Target", "{{ execution.task.target.target }}", true],
+  ["Target", "{{ target }}", true],
   ["Tool", "{{ execution.configuration.tool.name }}", false],
   ["Configuration", "{{ execution.configuration.name }}", false],
   ["Status", "{{ execution.status }}", false],
@@ -173,6 +173,33 @@ export default function ExecutionNotification() {
           </tbody>
         </table>
       </div>
+      {"{% if summary_counts %}"}
+      <Heading as="h3" className="text-gray-700 font-bold uppercase m-0 mb-2">
+        Findings summary
+      </Heading>
+      <Text className="text-gray-500 text-sm leading-relaxed m-0 mb-5">
+        Here is a breakdown of everything this scan uncovered. Dive into Rekono
+        to explore the details behind each finding.
+      </Text>
+      <table
+        cellPadding={0}
+        cellSpacing={0}
+        className="w-full border-collapse border border-gray-200 mb-8"
+      >
+        <tbody>
+          {"{% for row in summary_counts %}"}
+          <tr>
+            <td className="text-gray-700 text-sm px-3.5 py-2.5 align-top border-b border-gray-200">
+              {"{{ row.title }}"}
+            </td>
+            <td className="text-gray-900 text-sm font-bold font-mono text-right px-3.5 py-2.5 align-top border-b border-gray-200">
+              {"{{ row.count }}"}
+            </td>
+          </tr>
+          {"{% endfor %}"}
+        </tbody>
+      </table>
+      {"{% endif %}"}
       <Button
         href={
           "{{ rekono_url }}/projects/{{ execution.task.target.project.id }}/scans/{{ execution.task.id }}"
@@ -181,10 +208,11 @@ export default function ExecutionNotification() {
       >
         View scan
       </Button>
-      <Hr className="border-gray-200 m-0 mb-8" />
+      {"{% if not summary_counts %}"}
       {tables.map((table) => (
         <FindingTable key={table.list} {...table} />
       ))}
+      {"{% endif %}"}
     </Layout>
   );
 }

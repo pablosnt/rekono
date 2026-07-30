@@ -6,6 +6,15 @@
     :series="series"
     :y-label="(item) => item.cwe"
     :tooltip="tooltip"
+    :on-bar-click="
+      (d) =>
+        d.cwe
+          ? navigateTo(
+              `https://cwe.mitre.org/data/definitions/${d.cwe.toUpperCase().replace('CWE-', '')}.html`,
+              { external: true, open: { target: '_blank' } },
+            )
+          : null
+    "
     class="w-full"
   />
 </template>

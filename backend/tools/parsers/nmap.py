@@ -14,6 +14,16 @@ from findings.models import Credential, Host, Path, Port, Technology, Vulnerabil
 from security.validators.input_validator import Regex
 from tools.parsers.base import BaseParser
 
+# Nmap can report combined states such as "open|filtered" that can't be directly resolved to PortStatus values
+PORT_STATUSES = {
+    "open": PortStatus.OPEN,
+    "unfiltered": PortStatus.OPEN,
+    "closed": PortStatus.CLOSED,
+    "filtered": PortStatus.FILTERED,
+    "open|filtered": PortStatus.OPEN_FILTERED,
+    "closed|filtered": PortStatus.CLOSED_FILTERED,
+}
+
 
 class Nmap(BaseParser):
     """Parser for Nmap XML output files.
@@ -29,8 +39,9 @@ class Nmap(BaseParser):
     def _parse(self) -> None:
         """Parse Nmap XML output and extract security findings.
 
-        Processes Nmap scan results to create Host, Port, Technology, and Vulnerability
-        findings. Handles OS detection, service fingerprinting, and NSE script results.
+        Processes Nmap scan results to create Host, Port, Technology, Path, Credential and
+        Vulnerability findings. Handles OS detection, service fingerprinting, and NSE
+        script results, which is where Credential findings come from.
         """
         report = NmapParser.parse_fromfile(self.report)
         for nmap_host in report.hosts:
@@ -59,7 +70,10 @@ class Nmap(BaseParser):
                     linked_finding=True,
                     host=host,
                     port=service.port,
-                    status=PortStatus[service.state.upper()],
+                    # Any state string nmap reports that isn't covered by PORT_STATUSES falls back
+                    # to OPEN_FILTERED instead of raising, so an unrecognized value doesn't abort
+                    # parsing the rest of the hosts
+                    status=PORT_STATUSES.get(service.state.lower(), PortStatus.OPEN_FILTERED),
                     protocol=TransportProtocol[service.protocol.upper()],
                     service=service.service,
                 )
@@ -134,7 +148,8 @@ class Nmap(BaseParser):
                         name="FTP Backdoor",
                         description="FTP ProFTPD 1.3.3c Backdoor",
                         severity=Severity.CRITICAL,
-                        # CWE-78: Improper Neutralization of Special Elements used in an OS Command ('OS Command Injection')
+                        # CWE-78: Improper Neutralization of Special Elements used in an OS
+                        # Command ('OS Command Injection')
                         cwes=["CWE-78"],
                     )
                 case "ftp-vsftpd-backdoor":
@@ -174,7 +189,8 @@ class Nmap(BaseParser):
                             "covert channel to exfiltrate data, launch remote commands, or execute arbitrary code."
                         ),
                         severity=Severity.CRITICAL,
-                        # CWE-78: Improper Neutralization of Special Elements used in an OS Command ('OS Command Injection')
+                        # CWE-78: Improper Neutralization of Special Elements used in an OS
+                        # Command ('OS Command Injection')
                         cwes=["CWE-78"],
                         reference="https://www.tenable.com/plugins/nnm/700059",
                     )
@@ -203,6 +219,8 @@ class Nmap(BaseParser):
                 ):
                     self._parse_nse_vulners(script, smb_technology, port)
                 case "smb-enum-users":
+                    # Unlike smb-enum-shares, this script's output is plain text lines such as
+                    # "username (RID: 500)" instead of a structured "elements" table
                     for line in script.get("output").split("\n"):
                         data = line.strip()
                         if data and " (RID:" in data:
@@ -214,7 +232,6 @@ class Nmap(BaseParser):
                                 context="SMB user",
                             )
                 case "smb-enum-shares":
-                    # Process SMB share enumeration results from Nmap's smb-enum-shares script
                     for share, fields in script.get("elements", {}).items():
                         # Skip shares that are metadata entries (contain account_used)
                         if "account_used" not in share:
@@ -250,8 +267,30 @@ class Nmap(BaseParser):
                                 )
                 case "smb-protocols":
                     if smb_technology:
+                        # Nmap's NSE table entries without a "key" attribute are parsed into a list
+                        # stored under the key None, which is where the dialects list ends up here
                         smb_technology.description = f"Protocols: {', '.join([p.split('[dangerous', 1)[0].strip() for p in script.get('elements', {}).get('dialects', {}).get(None)])}"
                         smb_technology.save(update_fields=["description"])
+                case "http-git":
+                    if "Git repository found!" in script.get("output", ""):
+                        self.create_finding(
+                            Path,
+                            linked_finding=is_technology_link,
+                            port=technology.port if technology else port,
+                            path=Path.clean_path("/.git"),
+                            type=PathType.ENDPOINT,
+                        )
+                        self.create_finding(
+                            Vulnerability,
+                            linked_finding=is_technology_link,
+                            **technology_link,
+                            name="Exposed git repository",
+                            description="Git repository is exposed in the endpoint /.git/ and it's possible to dump it and access the git history and source code",
+                            severity=Severity.HIGH,
+                            # CWE-527: Exposure of Version-Control Repository to an Unauthorized Control Sphere
+                            cwes=["CWE-527"],
+                            reference="https://iosentrix.com/blog/git-source-code-disclosure-vulnerability/",
+                        )
                 case _:
                     self._parse_nse_vulners(script, technology, port)
 

@@ -1,6 +1,32 @@
 <template>
   <div class="w-full">
-    <UPageCard v-if="task" variant="outline" class="mb-10">
+    <div v-if="!task">
+      <div class="sr-only" role="status">Loading task</div>
+      <UPageCard aria-hidden="true" variant="outline" class="mb-10">
+        <div class="flex flex-wrap items-center justify-between gap-4">
+          <div class="flex items-center gap-3">
+            <USkeleton class="size-10 rounded-lg" />
+            <div class="min-w-0 space-y-1.5">
+              <USkeleton class="h-7 w-40" />
+              <USkeleton class="h-5 w-28" />
+            </div>
+          </div>
+          <div class="flex items-center gap-2 flex-wrap">
+            <USkeleton class="h-8 w-24" />
+            <USkeleton class="size-8" />
+            <USkeleton class="size-8" />
+          </div>
+        </div>
+        <USeparator />
+        <div class="flex flex-wrap justify-around items-center gap-4">
+          <div v-for="i in 5" :key="i" class="space-y-1.5">
+            <USkeleton class="h-3 w-16" />
+            <USkeleton class="h-5 w-24" />
+          </div>
+        </div>
+      </UPageCard>
+    </div>
+    <UPageCard v-else variant="outline" class="mb-10">
       <div class="flex flex-wrap items-center justify-between gap-4">
         <div class="flex items-center gap-3">
           <div
@@ -87,7 +113,7 @@
             variant="subtle"
           />
           <ReportsDropdown
-            v-if="task.progress === 100"
+            v-if="task.progress === 100 && projectHasActiveFindings"
             :related-entity="task"
             entity-name="Task"
             :project="parseInt($route.params.project_id)"
@@ -187,14 +213,18 @@
       ref="findings"
       :task-id="task.id"
       :project-id="task.target.project"
+      show-empty
       class="mb-8"
     />
 
     <Executions
       v-if="task"
       ref="executions"
-      :task="route.params.scan_id"
-      @finished="findings.fetch()"
+      :task="task.id"
+      @finished="
+        findings.fetch();
+        refreshPanelCounts();
+      "
     />
 
     <LazyCrudDeleteModal
@@ -227,6 +257,7 @@ const route = useRoute();
 const tasksApi = useApi("/api/tasks/");
 const userStore = useUserStore();
 const options = useOptions();
+const { projectHasActiveFindings, refreshPanelCounts } = usePanel();
 const cancelOpen = ref(false);
 const repeating = ref(false);
 const task = ref<Task | null>();
@@ -261,8 +292,8 @@ function processTask(data?: Task) {
   ) {
     if (refresh.value) clearTimeout(refresh.value);
     refresh.value = setTimeout(() => {
-      fetchTask();
       executions.value?.page?.fetch();
+      fetchTask();
     }, 5000);
   } else if (refresh.value) {
     clearTimeout(refresh.value);
@@ -278,7 +309,7 @@ function fetchTask(initial: boolean = false) {
 
 onMounted(() => {
   fetchTask(true);
-  options.tools(toolOptions);
+  options.tools(toolOptions, { ordering: "-liked,-id" });
 });
 
 onUnmounted(() => {

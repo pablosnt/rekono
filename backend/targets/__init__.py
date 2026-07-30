@@ -16,5 +16,5 @@ Security:
     - Project-level access control and permission enforcement
     - Input validation and sanitization for target specifications
     - Integration with security testing frameworks and tools
-    - Secure target classification with network topology awareness
+    - Target classification that distinguishes private from public IP scope
 """

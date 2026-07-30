@@ -55,11 +55,11 @@ class OSINT(TriageFinding):
     data_type = models.TextField(max_length=10, choices=OSINTDataType.choices)
     source = models.TextField(max_length=50, blank=True, null=True)
 
-    _unique_fields = [Finding.UniqueField("data"), Finding.UniqueField("data_type")]
+    _unique_fields = [Finding.UniqueField("data", ignore_case=True), Finding.UniqueField("data_type")]
     _parse_mapping = {
         InputKeyword.TARGET: "data",
         InputKeyword.HOST: "data",
-        InputKeyword.URL: lambda instance, target: instance.get_url(target, instance.data),
+        InputKeyword.URL: lambda instance, task: instance.get_url(instance.data, task=task),
     }
     _defectdojo_finding_mapping = {
         "title": lambda instance: f"{instance.data_type} found on public sources",
@@ -69,20 +69,20 @@ class OSINT(TriageFinding):
         "severity": Severity.LOW,
     }
 
-    def parse(self, target: Any, accumulated: dict[str, Any] = {}) -> dict[str, Any]:
+    def parse(self, task: Any, accumulated: dict[str, Any] = {}) -> dict[str, Any]:
         """Parse OSINT data for tool execution input.
 
         Processes IP and Domain OSINT data types for use as tool execution
         targets, filtering out non-targetable data types.
 
         Args:
-            target (Any): Target context for parsing
+            task (Any): Task context for parsing (e.g., for URL generation)
             accumulated (dict[str, Any]): Previously accumulated parsing data.
 
         Returns:
             dict[str, Any]: Parsed data for target creation, empty for non-targetable types.
         """
-        return super().parse(target, accumulated) if self.data_type in [OSINTDataType.IP, OSINTDataType.DOMAIN] else {}
+        return super().parse(task, accumulated) if self.data_type in [OSINTDataType.IP, OSINTDataType.DOMAIN] else {}
 
 
 class Host(HacktricksFinding):
@@ -142,7 +142,7 @@ class Host(HacktricksFinding):
     _parse_mapping = {
         InputKeyword.TARGET: "ip",
         InputKeyword.HOST: "ip",
-        InputKeyword.URL: lambda instance, target: instance.get_url(target, instance.ip),
+        InputKeyword.URL: lambda instance, task: instance.get_url(instance.ip, task=task),
     }
     _defectdojo_finding_mapping = {
         "title": "Host discovered",
@@ -185,7 +185,7 @@ class Port(HacktricksFinding):
     Attributes:
         host (ForeignKey): Parent host where port was discovered (optional relationship)
         port (IntegerField): Network port number in range 1-65535
-        status (TextField): Port scan status from PortStatus enum (default: OPEN, max 15 characters)
+        status (TextField): Port scan status from PortStatus enum (default: OPEN, max 17 characters)
         protocol (TextField): Transport protocol from TransportProtocol enum (optional, max 5 characters)
         service (TextField): Identified service name or banner information (optional, max 50 characters)
 
@@ -205,7 +205,7 @@ class Port(HacktricksFinding):
 
     host = models.ForeignKey(Host, related_name="port", on_delete=models.DO_NOTHING, blank=True, null=True)
     port = models.IntegerField()
-    status = models.TextField(max_length=15, choices=PortStatus.choices, default=PortStatus.OPEN)
+    status = models.TextField(max_length=17, choices=PortStatus.choices, default=PortStatus.OPEN)
     protocol = models.TextField(max_length=5, choices=TransportProtocol.choices, blank=True, null=True)
     service = models.TextField(max_length=50, blank=True, null=True)
 
@@ -216,7 +216,7 @@ class Port(HacktricksFinding):
     ]
     _root_findings = ("host",)
     # _parse_dependencies is not used to avoid recalculation of URLs
-    _parse_mapping = {InputKeyword.PORT: "port", InputKeyword.PORTS: lambda instance, target: [instance.port]}
+    _parse_mapping = {InputKeyword.PORT: "port", InputKeyword.PORTS: lambda instance, task: [instance.port]}
     _defectdojo_finding_mapping = {
         "title": "Port discovered",
         "description": lambda instance: "\n".join(
@@ -240,20 +240,20 @@ class Port(HacktricksFinding):
         Finding.Filter(str, "service", contains=True, processor=lambda s: s.lower()),
     ]
 
-    def parse(self, target: Any, accumulated: dict[str, Any] = {}) -> dict[str, Any]:
+    def parse(self, task: Any, accumulated: dict[str, Any] = {}) -> dict[str, Any]:
         """Parse port data for tool execution targeting.
 
         Generates target specifications combining host and port information
         for detailed service-specific security analysis.
 
         Args:
-            target (Any): Target context for parsing
+            task (Any): Task context for parsing (e.g., for URL generation)
             accumulated (dict[str, Any]): Previously accumulated parsing data.
 
         Returns:
             dict[str, Any]: Port-specific target data including host:port combinations.
         """
-        output = super().parse(target, accumulated)
+        output = super().parse(task, accumulated)
         output[InputKeyword.PORTS_COMMAS.name.lower()] = ",".join(
             [str(p) for p in output.get(InputKeyword.PORTS.name.lower()) or []]
         )
@@ -264,7 +264,7 @@ class Port(HacktricksFinding):
                     InputKeyword.HOST.name.lower(): self.host.ip,
                 }
             )
-            url = self.get_url(target, self.host.ip, self.port)
+            url = self.get_url(self.host.ip, self.port, task=task)
             if url is not None:
                 output[InputKeyword.URL.name.lower()] = url
         return output
@@ -301,7 +301,6 @@ class Path(Finding):
 
     port = models.ForeignKey(Port, related_name="path", on_delete=models.DO_NOTHING, blank=True, null=True)
     path = models.TextField(max_length=500)
-    # Status received for that path. Probably HTTP status
     status = models.IntegerField(blank=True, null=True)
     extra_info = models.TextField(max_length=100, blank=True, null=True)
     # Path type depending on the protocol where it's found
@@ -315,9 +314,9 @@ class Path(Finding):
         Finding.Filter(str, "path", contains=True, processor=lambda p: p.lower()),
     ]
     _parse_mapping = {
-        InputKeyword.ENDPOINT: lambda instance, target: instance.clean_path(instance.path),
-        InputKeyword.URL: lambda instance, target: (
-            (instance.get_url(target, instance.port.host.ip, instance.port.port, instance.clean_path(instance.path)))
+        InputKeyword.ENDPOINT: lambda instance, task: instance.clean_path(instance.path),
+        InputKeyword.URL: lambda instance, task: (
+            (instance.get_url(instance.port.host.ip, instance.port.port, instance.clean_path(instance.path), task=task))
             if instance.port and instance.port.host
             else None
         ),
@@ -347,24 +346,24 @@ class Path(Finding):
                 value += "/"
         return value
 
-    def filter(self, input: Any, target: Target | None = None) -> bool:
+    def filter(self, argument_input: Any, target: Target | None = None) -> bool:
         """Filter paths against target port path restrictions.
 
         Applies additional filtering for paths within target port scope
         when target port paths are configured.
 
         Args:
-            input (Any): Filter criteria to match against.
+            argument_input (Any): Filter criteria to match against.
             target (Target | None): Target context for scope validation.
 
         Returns:
             bool: True if path matches criteria and scope restrictions.
         """
-        filter = super().filter(input, target)
+        filter = super().filter(argument_input, target)
         if self.port:
             target_port = TargetPort.objects.filter(target=target, port=self.port.port).first()
             if target_port and target_port.path:
-                # If there is a target por with path, only paths within it will be considered
+                # If there is a target port with path, only paths within it will be considered
                 filter = filter and self._clean_comparison_path(self.path).startswith(
                     self._clean_comparison_path(target_port.path)
                 )
@@ -414,12 +413,17 @@ class Technology(HacktricksFinding):
 
     _unique_fields = [
         Finding.UniqueField("port"),
-        Finding.UniqueField("name"),
-        Finding.UniqueField("version", match_null_and_empty=True),
+        Finding.UniqueField("name", ignore_case=True),
+        Finding.UniqueField("version", match_null_and_empty=True, ignore_case=True),
     ]
     _root_findings = ("port",)
     _filters = [Finding.Filter(str, "name", contains=True, processor=lambda n: n.lower())]
-    _parse_mapping = {InputKeyword.TECHNOLOGY: "name", InputKeyword.VERSION: "version"}
+    # Version is parsed as empty string when None, as most of the tools working from
+    # technologies only require the technology name
+    _parse_mapping = {
+        InputKeyword.TECHNOLOGY: "name",
+        InputKeyword.VERSION: lambda instance, task: instance.version or "",
+    }
     _parse_dependencies = ["port"]
     _defectdojo_finding_mapping = {
         "title": lambda instance: f"Technology {instance.name} detected",
@@ -470,13 +474,12 @@ class Credential(TriageFinding):
     )
     email = models.TextField(max_length=100, blank=True, null=True)
     username = models.TextField(max_length=100, blank=True, null=True)
-    # Secret (password, key, etc.) if found
     secret = models.TextField(max_length=300, blank=True, null=True)
     context = models.TextField(max_length=300, blank=True, null=True)
 
     _unique_fields = [
         Finding.UniqueField("technology"),
-        Finding.UniqueField("email"),
+        Finding.UniqueField("email", ignore_case=True),
         Finding.UniqueField("username"),
         Finding.UniqueField("secret"),
     ]
@@ -519,10 +522,11 @@ class Vulnerability(TriageFinding):
         cvss_version (TextField): CVSS framework version identifier (optional, max 3 characters)
         cvss_vector (TextField): CVSS vector string for detailed scoring (optional, max 200 characters)
         cvss_base_score (FloatField): CVSS base score numerical value (optional)
-        cve (TextField): Common Vulnerabilities and Exposures identifier (optional, max 20 characters)
+        cve (TextField): Common Vulnerabilities and Exposures identifier (optional, max 30 characters)
         euvd_id (TextField): ENISA EUVD identifier (optional, max 30 characters)
         ghsa_id (TextField): GitHub Security Advisory identifier (optional, max 30 characters)
-        osv_generic_id (TextField): OSV-native identifier for non-CVE/GHSA/EUVD ecosystems (optional, max 100 characters)
+        osv_generic_id (TextField): OSV-native identifier for non-CVE/GHSA/EUVD ecosystems
+                                    (optional, max 100 characters)
         cwes (JSONField): Sorted list of CWE identifiers (e.g. ["CWE-79", "CWE-200"])
         epss_score (FloatField): EPSS probability of exploitation in 30 days (optional, 0.0–1.0)
         epss_percentile (FloatField): EPSS percentile rank among all scored CVEs (optional, 0.0–1.0)
@@ -543,7 +547,7 @@ class Vulnerability(TriageFinding):
             cvss_vector="CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
             cvss_base_score=9.8,
             cve="CVE-2021-12345",
-            cwe="CWE-120",
+            cwes=["CWE-120"],
             remediation="Update to the latest version or apply security patches",
             trending=True
         )
@@ -584,16 +588,12 @@ class Vulnerability(TriageFinding):
     _unique_fields = [
         Finding.UniqueField("technology"),
         Finding.UniqueField("port"),
-        Finding.UniqueField("name"),
-        Finding.UniqueField("cve"),
+        Finding.UniqueField("name", ignore_case=True),
+        Finding.UniqueField("cve", ignore_case=True),
     ]
     # Ordered by priority for deduplication: technology is a deeper root than port
     _root_findings = ("technology", "port")
-    _filters = [
-        Finding.Filter(Severity, "severity"),
-        Finding.Filter(str, "cve", contains=True, processor=lambda c: c.lower()),
-        Finding.Filter(str, "cwes", contains=True, processor=lambda cwes: " ".join(c.lower() for c in (cwes or []))),
-    ]
+    _filters = [Finding.Filter(str, "cve", contains=True, processor=lambda c: c.lower())]
     _parse_mapping = {InputKeyword.CVE: "cve"}
     _parse_dependencies = ["technology", "port"]
     _defectdojo_finding_mapping = {
@@ -602,16 +602,16 @@ class Vulnerability(TriageFinding):
         "severity": "severity",
         "cve": "cve",
         "cwe": lambda instance: int(instance.cwes[-1].split("-", 1)[1]) if instance.cwes else None,
-        "cvss3": lambda instance: (
+        "cvssv3": lambda instance: (
             instance.cvss_vector if instance.cvss_version and instance.cvss_version.startswith("3") else None
         ),
-        "cvss3_score": lambda instance: (
+        "cvssv3_score": lambda instance: (
             instance.cvss_base_score if instance.cvss_version and instance.cvss_version.startswith("3") else None
         ),
-        "cvss4": lambda instance: (
+        "cvssv4": lambda instance: (
             instance.cvss_vector if instance.cvss_version and instance.cvss_version.startswith("4") else None
         ),
-        "cvss4_score": lambda instance: (
+        "cvssv4_score": lambda instance: (
             instance.cvss_base_score if instance.cvss_version and instance.cvss_version.startswith("4") else None
         ),
         "mitigation": "remediation",
@@ -635,7 +635,9 @@ class Vulnerability(TriageFinding):
             Vulnerability | None: The matched vulnerability, or None if there is no duplicate.
         """
         technology = fields.get("technology")
-        identity = models.Q(cve=fields["cve"]) if fields.get("cve") else models.Q(name=fields.get("name"))
+        identity = (
+            models.Q(cve__iexact=fields["cve"]) if fields.get("cve") else models.Q(name__iexact=fields.get("name"))
+        )
         if technology:
             search = cls.objects.filter(
                 identity, executions__task__target=execution.task.target, technology=technology
@@ -666,7 +668,7 @@ class Exploit(TriageFinding):
         vulnerability (ForeignKey): Target vulnerability for this exploit (optional relationship)
         technology (ForeignKey): Affected technology component (optional relationship)
         title (TextField): Exploit name or descriptive title (max 100 characters)
-        edb_id (IntegerField): Exploit Database unique identifier (optional)
+        edb_id (IntegerField): Exploit Database identifier for this exploit (optional)
         reference (TextField): Exploit source URL or documentation link (optional, max 250 characters)
 
     Example:
@@ -697,7 +699,7 @@ class Exploit(TriageFinding):
         null=True,
     )
     title = models.TextField(max_length=100)
-    edb_id = models.IntegerField(blank=True, null=True)  # Id in Exploit-DB
+    edb_id = models.IntegerField(blank=True, null=True)
     reference = models.TextField(max_length=250, blank=True, null=True)
 
     _unique_fields = [

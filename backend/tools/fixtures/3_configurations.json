@@ -265,7 +265,7 @@
         "fields": {
             "tool": 4,
             "name": "Web scan",
-            "command_template": "{url} -Format xml -output {output} {authentication} {cookie} {headers}",
+            "command_template": "{url} -Format xml -output {output} -nocheck {authentication} {cookie} {headers}",
             "stage": 4,
             "default": true,
             "default_scanned_port": null,
@@ -386,7 +386,7 @@
             "stage": 1,
             "default": true,
             "default_scanned_port": null,
-            "deprecated": false
+            "deprecated": true
         }
     },
     {
@@ -395,7 +395,7 @@
         "fields": {
             "tool": 13,
             "name": "Search emails",
-            "command_template": "{target} --exclude ask --save {output}",
+            "command_template": "{script} {target} --save {output}",
             "stage": 1,
             "default": true,
             "default_scanned_port": null,
