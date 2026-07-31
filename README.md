@@ -114,6 +114,7 @@ Rekono supports the execution of this hacking tools:
 - [OWASP JoomScan](https://github.com/OWASP/joomscan)
 - [OWASP ZAP](https://www.zaproxy.org/)
 - [Nikto](https://github.com/sullo/nikto)
+- [Darkmoon](https://github.com/ASCIT31/Dark-Moon) - Open source (GPL-3.0) autonomous AI penetration testing platform covering web, API, Active Directory and Kubernetes, with proof of exploitation.
 - [Nuclei](https://github.com/projectdiscovery/nuclei)
 - [SearchSploit](https://www.exploit-db.com/searchsploit)
 - [Metasploit](https://www.metasploit.com/)
