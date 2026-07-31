@@ -14,10 +14,10 @@
   },
   "dependencies": {
     "@iconify-json/cif": "^1.2.7",
-    "@iconify-json/codicon": "^1.2.63",
-    "@iconify-json/lucide": "^1.2.117",
+    "@iconify-json/codicon": "^1.2.64",
+    "@iconify-json/lucide": "^1.2.119",
     "@iconify-json/mdi": "^1.2.3",
-    "@iconify-json/simple-icons": "^1.2.90",
+    "@iconify-json/simple-icons": "^1.2.91",
     "@nuxt/eslint": "^1.16.0",
     "@nuxt/ui": "^4.10.0",
     "@pinia/nuxt": "1.0.1",
@@ -31,7 +31,7 @@
     "@unovis/ts": "^1.6.7",
     "@unovis/vue": "^1.6.7",
     "jwt-decode": "^4.0.0",
-    "nuxt": "^4.4.8",
+    "nuxt": "^4.5.0",
     "nuxt-qrcode": "^0.4.10",
     "pinia": "^4.0.2",
     "shiki": "^4.3.1",
@@ -42,10 +42,10 @@
     "eslint": "^10.7.0",
     "eslint-config-prettier": "^10.1.8",
     "frontend": "link:",
-    "prettier": "^3.9.5",
+    "prettier": "^3.9.6",
     "typescript": "^6.0.3",
     "vue": "^3.5.40",
-    "vue-tsc": "^3.3.7"
+    "vue-tsc": "^3.3.8"
   },
-  "packageManager": "pnpm@10.33.0"
+  "packageManager": "pnpm@11.17.0"
 }

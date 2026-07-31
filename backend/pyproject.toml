@@ -5,7 +5,7 @@ description = "Pentesting automation platform that combines hacking tools to com
 readme = "../../README.md"
 requires-python = ">=3.11,<4.0"
 dependencies = [
-    "certifi==2026.6.17",
+    "certifi==2026.7.22",
     "cvss==3.6",
     "cryptography==49.0.0",
     "defusedxml==0.7.1",
@@ -36,8 +36,8 @@ dependencies = [
 
 [dependency-groups]
 dev = [
-    "coverage>=7.10.0",
-    "tblib>=3.1.0",
+    "coverage==7.15.2",
+    "tblib==3.2.2",
 ]
 
 [tool.uv]
