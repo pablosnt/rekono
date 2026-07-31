@@ -153,7 +153,7 @@ const config: CrudConfig<Wordlist> = reactive({
   ordering: [
     "id",
     "name",
-    {id: "size", label: "Words"},
+    { id: "size", label: "Words" },
     "type",
     "owner",
     { id: "likes", label: "Likes" },
