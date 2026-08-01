@@ -77,8 +77,8 @@ class FindingsQueue(BaseQueue):
         before reaching the per-execution platforms, so the integrations and the
         notifications always report them in the same meaningful order. When
         auto-fix is enabled, previously fixed findings that reappear are
-        reactivated, and findings missing from executions sharing the same hash
-        are marked as fixed.
+        reactivated, and findings missing from previous executions against the
+        same target with the same hash are marked as fixed.
 
         Args:
             execution (Execution): Execution that produced the findings.
@@ -156,10 +156,11 @@ class FindingsQueue(BaseQueue):
         # Automatic fixing: mark findings as fixed if they're no longer detected in identical execution contexts
         if settings.auto_fix_findings:
             # For each finding type, mark findings as fixed if they don't appear in the current execution
-            # but were found in previous executions with the same parameters
+            # but were found in previous executions with the same parameters over the same target
             for finding_type, _, _ in finding_types:
                 finding_type.objects.fix(
                     finding_type.objects.filter(
+                        executions__task__target=execution.task.target,
                         executions__hash=execution.hash,
                         executions__status__in=Status.finished(),
                     )
