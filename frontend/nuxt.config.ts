@@ -39,6 +39,8 @@ export default defineNuxtConfig({
           defer: true,
           src: "https://cloud.umami.is/script.js",
           "data-website-id": "f765ec70-c85e-499b-a75f-93744bdcabef",
+          "data-exclude-search": "true",
+          "data-exclude-hash": "true",
         },
       ],
     },
