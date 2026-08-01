@@ -16,6 +16,7 @@ from rest_framework.response import Response
 
 from framework.context import RequestContext
 from framework.logging import LoggingEntity
+from rest_framework.throttling import BaseThrottle
 from rekono.settings import CONFIG
 
 # Maps request path prefixes to the Content-Security-Policy applied to matching responses.
@@ -119,28 +120,6 @@ class SecurityMiddleware(LoggingEntity):
 
     get_response: Any
 
-    def _get_source_ip_address(self, request: HttpRequest) -> str:
-        """Extract the real client IP address from request headers.
-
-        Determines the actual client IP address by checking X-Forwarded-For
-        headers when behind trusted proxies, falling back to REMOTE_ADDR
-        for direct connections. This ensures accurate IP logging and
-        security monitoring.
-
-        Args:
-            request (HttpRequest): Django HTTP request object.
-
-        Returns:
-            str: The client's IP address.
-        """
-        x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
-        if x_forwarded_for and CONFIG.trusted_proxy:
-            # Trust the rightmost entry, not the leftmost: our nginx appends the real client IP on
-            # the right via $proxy_add_x_forwarded_for, so any value to its left was supplied by the
-            # client and is spoofable (throttle bypass / log forging).
-            return x_forwarded_for.split(",")[-1].strip()
-        return request.META["REMOTE_ADDR"]
-
     def _get_options_response(self, request: HttpRequest) -> Response:
         """Generate HTTP OPTIONS response.
 
@@ -234,7 +213,7 @@ class SecurityMiddleware(LoggingEntity):
         applying security headers, and logging all transactions.
 
         Processing Flow:
-            1. Extract and normalize client IP address
+            1. Replace REMOTE_ADDR with the real client IP address
             2. Store request in context-local storage for downstream components
             3. Return a custom response for OPTIONS requests, or forward the request
                through the rest of the Django middleware chain otherwise
@@ -248,7 +227,10 @@ class SecurityMiddleware(LoggingEntity):
         Returns:
             Any: Processed HTTP response with security controls applied.
         """
-        request.META["REMOTE_ADDR"] = self._get_source_ip_address(request)
+        # DRF resolves the client IP from X-Forwarded-For based on the configured number of trusted
+        # proxies, so only the entries appended by them are trusted and the ones supplied by the
+        # client are ignored
+        request.META["REMOTE_ADDR"] = BaseThrottle().get_ident(request)
         RequestContext.set(request)
         try:
             response = (

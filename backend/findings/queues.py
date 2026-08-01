@@ -77,8 +77,9 @@ class FindingsQueue(BaseQueue):
         before reaching the per-execution platforms, so the integrations and the
         notifications always report them in the same meaningful order. When
         auto-fix is enabled, previously fixed findings that reappear are
-        reactivated, and findings missing from previous executions against the
-        same target with the same hash are marked as fixed.
+        reactivated, and findings from matching previous executions against the
+        same target with the same hash that are absent from the current execution
+        are marked as fixed.
 
         Args:
             execution (Execution): Execution that produced the findings.

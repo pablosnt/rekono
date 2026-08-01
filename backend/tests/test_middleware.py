@@ -1,11 +1,12 @@
-from unittest import mock
-
+from django.conf import settings
 from django.http import HttpRequest
-from django.test import TestCase
+from django.test import TestCase, override_settings
 
-from security.middleware import CONFIG, SecurityMiddleware
+from rest_framework.throttling import BaseThrottle
 
 # pytype: disable=wrong-arg-types
+
+TRUSTED_PROXIES = {**settings.REST_FRAMEWORK, "NUM_PROXIES": 1}
 
 
 class MiddlewareTest(TestCase):
@@ -18,21 +19,19 @@ class MiddlewareTest(TestCase):
         request.META["REMOTE_ADDR"] = self.remote_source_ip
         if x_forwarded_for is not None:
             request.META["HTTP_X_FORWARDED_FOR"] = x_forwarded_for
-        return SecurityMiddleware(get_response=None)._get_source_ip_address(request)
+        return BaseThrottle().get_ident(request)
 
-    def test_remote_addr_used_without_trusted_proxy(self) -> None:
+    def test_remote_addr_used_without_trusted_proxies(self) -> None:
         # Without a trusted proxy the client-supplied header is ignored
         self.assertEqual(self.remote_source_ip, self._source_ip(f"{self.tampered_source_ip}, {self.nginx_source_ip}"))
 
-    def test_rightmost_value_used_with_trusted_proxy(self) -> None:
-        with mock.patch.object(type(CONFIG), "trusted_proxy", new_callable=mock.PropertyMock, return_value=True):
-            # nginx appends the real client IP on the right, so the spoofed leftmost value is ignored
-            self.assertEqual(
-                self.nginx_source_ip, self._source_ip(f"{self.tampered_source_ip}, {self.nginx_source_ip}")
-            )
-            # A single (real) value is returned as-is, trimmed
-            self.assertEqual(self.nginx_source_ip, self._source_ip(f" {self.nginx_source_ip} "))
+    @override_settings(REST_FRAMEWORK=TRUSTED_PROXIES)
+    def test_rightmost_value_used_with_trusted_proxies(self) -> None:
+        # nginx appends the real client IP on the right, so the spoofed leftmost value is ignored
+        self.assertEqual(self.nginx_source_ip, self._source_ip(f"{self.tampered_source_ip}, {self.nginx_source_ip}"))
+        # A single (real) value is returned as-is, trimmed
+        self.assertEqual(self.nginx_source_ip, self._source_ip(f" {self.nginx_source_ip} "))
 
+    @override_settings(REST_FRAMEWORK=TRUSTED_PROXIES)
     def test_remote_addr_used_when_header_absent(self) -> None:
-        with mock.patch.object(type(CONFIG), "trusted_proxy", new_callable=mock.PropertyMock, return_value=True):
-            self.assertEqual(self.remote_source_ip, self._source_ip())
+        self.assertEqual(self.remote_source_ip, self._source_ip())
