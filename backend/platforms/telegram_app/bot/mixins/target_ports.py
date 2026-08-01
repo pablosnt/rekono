@@ -19,6 +19,7 @@ from platforms.telegram_app.bot.mixins.framework import BaseMixin
 from target_ports.models import TargetPort
 from target_ports.serializers import TargetPortSerializer
 from targets.models import Target
+from users.models import User
 
 
 class TargetPortMixin(BaseMixin):
@@ -36,11 +37,15 @@ class TargetPortMixin(BaseMixin):
     all_target_ports = "🌐 All ports"
 
     @sync_to_async
-    def _get_target_ports_keyboard_async(self, target: Target) -> list[InlineKeyboardButton]:
+    def _get_target_ports_keyboard_async(self, target: Target, user: User) -> list[InlineKeyboardButton]:
         """Generate keyboard buttons for the target ports of a target (async wrapper).
+
+        Only ports of targets belonging to the user's projects are listed, so an
+        empty keyboard is returned for targets the user has no access to.
 
         Args:
             target (Target): The target whose ports should be listed.
+            user (User): User that must be a member of the target's project.
 
         Returns:
             list[InlineKeyboardButton]: Buttons for the available target ports,
@@ -48,15 +53,17 @@ class TargetPortMixin(BaseMixin):
         """
         return [
             InlineKeyboardButton(f"{tp.port} - {tp.path}" if tp.path else str(tp.port), callback_data=tp.id)
-            for tp in TargetPort.objects.filter(target=target).order_by("port")
+            for tp in TargetPort.objects.filter(target=target, target__project__members=user).order_by("port")
         ]
 
     async def ask_for_target_port(self, update: Update, context: CallbackContext) -> int:
         """Display target port selection options for the selected target.
 
         Shows one button per target port of the selected target plus an option to
-        run against the whole target. When the target has no ports, the step is
-        skipped silently and the conversation advances to the next state.
+        run against the whole target. The conversation ends when the chat isn't
+        linked to an authorized user or no target has been selected yet. When the
+        target has no ports, the step is skipped silently and the conversation
+        advances to the next state.
 
         Args:
             update (Update): The Telegram update containing user interaction.
@@ -65,12 +72,14 @@ class TargetPortMixin(BaseMixin):
         Returns:
             int: Next conversation state after the prompt or when skipped.
         """
-        self.validate_update(update)
+        chat = await self.get_active_telegram_chat(update)
+        if not chat:
+            return ConversationHandler.END
         target = self.get_context_value(context, Context.TARGET)
         if not target:
             await self.reply(update, "No target selected")
             return ConversationHandler.END
-        keyboard = await self._get_target_ports_keyboard_async(target)
+        keyboard = await self._get_target_ports_keyboard_async(target, chat.user)
         if not keyboard:
             return await self.go_to_next_state(update, context, self.get_next_state(self.save_target_port))
         keyboard.append(InlineKeyboardButton(self.all_target_ports, callback_data=self.all_target_ports))

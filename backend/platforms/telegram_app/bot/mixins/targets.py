@@ -27,7 +27,9 @@ class TargetMixin(BaseMixin):
         """Display target selection options within the current project.
 
         Shows a list of targets available in the selected project and allows
-        selection for use in security testing operations.
+        selection for use in security testing operations. Only targets of projects
+        the chat user belongs to are listed. The conversation ends when the chat
+        isn't linked to an authorized user or no project has been selected yet.
 
         Args:
             update (Update): The Telegram update containing the user interaction.
@@ -36,13 +38,19 @@ class TargetMixin(BaseMixin):
         Returns:
             int: Next conversation state based on target availability.
         """
-        self.validate_update(update)
+        chat = await self.get_active_telegram_chat(update)
+        if not chat:
+            return ConversationHandler.END
+        project = self.get_context_value(context, Context.PROJECT)
+        if not project:
+            await self.reply(update, "No project selected")
+            return ConversationHandler.END
         return await self.go_to_next_state(
             update,
             context,
             await self.ask(
                 update,
-                Target.objects.filter(project=self.get_context_value(context, Context.PROJECT)).all(),
+                Target.objects.filter(project=project, project__members=chat.user).all(),
                 "target",
                 3,
                 "Choose target",

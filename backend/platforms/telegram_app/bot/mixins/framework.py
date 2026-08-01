@@ -18,6 +18,8 @@ from platforms.telegram_app.bot.commands import Cancel
 from platforms.telegram_app.bot.enums import Context
 from platforms.telegram_app.bot.framework import BaseTelegramBot
 from platforms.telegram_app.models import TelegramChat
+from projects.models import Project
+from users.models import User
 
 
 class BaseMixin(BaseTelegramBot):
@@ -124,17 +126,35 @@ class BaseMixin(BaseTelegramBot):
         return queryset.exists()
 
     @sync_to_async
-    def _get_model_instance_async(self, model: Any, pk: int) -> Any:
-        """Get model instance by primary key (async wrapper).
+    def _get_model_instance_async(self, model: Any, pk: int, user: User) -> Any:
+        """Get model instance by primary key, limited to the user's projects (async wrapper).
+
+        The primary key comes from the callback data of a Telegram button, which the
+        user can replay with any value, so the lookup is scoped to the projects the
+        user belongs to. The project relation is taken from the model's
+        _project_field, except for Project itself, which exposes its members
+        directly. Models without a project relation are global and are retrieved
+        without any scoping.
 
         Args:
             model (Any): Django model class to query.
             pk (int): Primary key of the instance to retrieve.
+            user (User): User that must be a member of the related project.
 
         Returns:
-            Any: Model instance matching the primary key.
+            Any: Model instance matching the primary key, or None if it doesn't
+                 exist or belongs to a project the user isn't a member of.
         """
-        return model.objects.get(pk=pk)
+        members_field = None
+        if model == Project:
+            members_field = "members"
+        elif model._project_field:
+            members_field = f"{model._project_field}__members"
+        return (
+            model.objects.filter(**{members_field: user, "pk": pk}).first()
+            if members_field
+            else model.objects.get(pk=pk)
+        )
 
     @sync_to_async
     def _get_keyboard_from_queryset_async(self, queryset: QuerySet, attribute: str) -> list[InlineKeyboardButton]:
@@ -282,7 +302,9 @@ class BaseMixin(BaseTelegramBot):
         """Save selected model instance to conversation context.
 
         Processes user's callback query selection, retrieves the model instance,
-        and stores it in the conversation context for subsequent use.
+        and stores it in the conversation context for subsequent use. The instance
+        is looked up on behalf of the chat user, so only entities from the user's
+        projects can be selected.
 
         Args:
             update (Update): The Telegram update containing callback query.
@@ -297,7 +319,7 @@ class BaseMixin(BaseTelegramBot):
         """
         chat = chat or await self.get_active_telegram_chat(update)
         if chat and update.callback_query and update.callback_query.data:
-            entity = await self._get_model_instance_async(model, int(update.callback_query.data))
+            entity = await self._get_model_instance_async(model, int(update.callback_query.data), chat.user)
             self.add_context_value(context, context_key, entity)
             await update.callback_query.answer(f"{model.__name__} #{update.callback_query.data} has been selected")
             return next_state
