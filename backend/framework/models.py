@@ -9,9 +9,11 @@ import re
 from dataclasses import dataclass
 from functools import cached_property
 from typing import Any, Callable, cast
+from urllib.parse import urlparse
 
 import requests
 import urllib3
+from django.core.exceptions import ValidationError
 from django.db.models import ManyToManyField, Model, Q, TextChoices
 
 from framework.cache import Cache
@@ -19,6 +21,7 @@ from framework.enums import InputKeyword
 from framework.logging import LoggingEntity
 from rekono.settings import AUTH_USER_MODEL, CONFIG
 from security.cryptography import Crypto
+from security.validators.enums import Regex
 
 
 class BaseModel(Model, LoggingEntity):
@@ -383,6 +386,9 @@ class BaseInput(BaseModel):
         up in _url_cache before issuing a request, and the resulting URL is cached
         afterwards, so repeated calls for the same URL (e.g. across multiple tool
         arguments) don't repeat the same HTTP request and get the same redirections.
+        Redirections are only followed while they stay within the targets allowed
+        by the target validation policy, so a redirect can't move a scan onto a
+        host that could never have been set as a target.
 
         Args:
             host (str): The hostname or IP address.
@@ -395,7 +401,7 @@ class BaseInput(BaseModel):
 
         Returns:
             str | None: A valid URL string, after following the redirects, or None if no
-            working URL found.
+            working URL found or the redirection points to a denied target.
         """
         # Disable SSL warnings since we're testing connectivity with disabled certificate verification
         urllib3.disable_warnings(category=urllib3.exceptions.InsecureRequestWarning)
@@ -438,8 +444,20 @@ class BaseInput(BaseModel):
                     # Use disabled SSL verification for testing purposes and short timeout for efficiency
                     # nosemgrep: python.requests.security.disabled-cert-validation.disabled-cert-validation
                     response = requests.get(url_to_test, timeout=5, verify=False)
-                    # Follow redirection if any
-                    working_url = response.url or url_to_test
+                    working_url = url_to_test
+                    # Follow redirection if any, but only after checking that the new host is a target
+                    # that the user could have created
+                    if response.url and response.url != url_to_test:
+                        from security.validators.target_validator import TargetValidator
+
+                        try:
+                            TargetValidator(Regex.TARGET)(urlparse(response.url).hostname)
+                        except ValidationError as error:
+                            self.logger.warning(
+                                f"[Security] HTTP GET {url_to_test} redirects to {response.url} which is a target denied by policy: {' '.join(error.messages)}"
+                            )
+                            return
+                        working_url = response.url
                     self._url_cache.set(url_to_test, working_url)
                     return working_url
                 except Exception:
