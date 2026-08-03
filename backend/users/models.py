@@ -502,7 +502,7 @@ class User(AbstractUser, BaseEncrypted):
         pending_email (EmailField): New email address awaiting OTP verification (optional, max 150 chars)
         is_active (BooleanField): Account status (None/True/False for invitation/active/disabled)
         otp (TextField): Hashed one-time password for secure operations (max 200 chars)
-        otp_scope (TextField): Operation the OTP was issued for (from OtpScope enum)
+        otp_scope (IntegerField): Operation the OTP was issued for (from OtpScope enum)
         otp_expiration (DateTimeField): OTP expiration timestamp with future validation
         _mfa_key (TextField): Encrypted MFA secret key (stored as 'mfa_key', max 40 chars)
         mfa (BooleanField): Whether MFA is enabled for this account

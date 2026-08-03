@@ -106,7 +106,7 @@ class Property:
         # Convert to bool if needed
         if isinstance(self.default, bool) and not isinstance(value, bool):
             value = str(value).lower() == "true"
-        # Convert to int if needed
+        # Convert to int if needed, after the bool check since bool is a subclass of int
         elif isinstance(self.default, int) and not isinstance(value, int):
             try:
                 value = int(value)
@@ -447,7 +447,11 @@ class RekonoConfig:
 
     @property
     def trusted_proxies(self) -> int:
-        """Get trusted proxy configuration.
+        """Get the number of trusted proxies deployed in front of Rekono.
+
+        It's the number of entries that these proxies append to the X-Forwarded-For
+        header, so the client IP address can be resolved from the header ignoring the
+        entries that the client supplied itself.
 
         Returns:
             int: Number of trusted proxies in front of Rekono, or 0 if there is none.

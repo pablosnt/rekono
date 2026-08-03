@@ -2,7 +2,7 @@
 
 Defines notification scope options for user preference management and the
 purposes that a one-time password can be issued for, with Django TextChoices
-implementation.
+and IntegerChoices implementations.
 """
 
 from django.db import models
@@ -35,10 +35,10 @@ class OtpScope(models.IntegerChoices):
     the account password or to pass the MFA second factor.
 
     Attributes:
-        INVITATION (str): Account creation after an invitation
-        PASSWORD_RESET (str): Password reset, including the account enabling email
-        EMAIL_VERIFICATION (str): Confirmation of a pending email address change
-        MFA (str): Multi-factor authentication second factor sent via email
+        INVITATION (int): Account creation after an invitation
+        PASSWORD_RESET (int): Password reset, including the account enabling email
+        EMAIL_VERIFICATION (int): Confirmation of a pending email address change
+        MFA (int): Multi-factor authentication second factor sent via email
     """
 
     INVITATION = 1

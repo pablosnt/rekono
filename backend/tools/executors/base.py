@@ -298,6 +298,8 @@ class BaseExecutor(LoggingEntity):
         # - Double quotes group as well, but are kept, so the tool receives them as part of
         #   the value. Only needed by tools that parse quotes themselves, like Nikto, whose
         #   STATIC-COOKIE option ignores any cookie that isn't written as "name=value"
+        # A quoted value that ends up empty is still matched as a single token, so its quotes
+        # can't be joined to the next argument and break the structure of the command
         return [
             a.replace("'", "")
             for a in re.findall(

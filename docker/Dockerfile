@@ -192,7 +192,7 @@ RUN apt update && \
     # Initializer script
     mkdir -p /entrypoints && \
     echo "#!/bin/bash" > /entrypoints/initializer.sh && \
-    echo "uv run --no-dev manage.py migrate" > /entrypoints/initializer.sh && \
+    echo "uv run --no-dev manage.py migrate" >> /entrypoints/initializer.sh && \
     echo "uv run --no-dev manage.py createsuperuser --no-input  || true" >> /entrypoints/initializer.sh && \
     echo "uv run --no-dev manage.py monitor" >> /entrypoints/initializer.sh && \
     chmod +x /entrypoints/initializer.sh && \
@@ -207,7 +207,7 @@ RUN apt update && \
     chmod 700 /usr/local/sbin/update-tooling.sh && \
     # Executions worker script
     echo "#!/bin/bash" > /entrypoints/executions-worker.sh && \
-    echo "nuclei -update-templates" > /entrypoints/executions-worker.sh && \
+    echo "nuclei -update-templates" >> /entrypoints/executions-worker.sh && \
     echo "sudo /usr/local/sbin/update-tooling.sh &" >> /entrypoints/executions-worker.sh && \
     echo "uv run --no-dev manage.py rqworker executions" >> /entrypoints/executions-worker.sh && \
     chmod +x /entrypoints/executions-worker.sh && \
