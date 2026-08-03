@@ -301,7 +301,7 @@ class BaseExecutor(LoggingEntity):
         return [
             a.replace("'", "")
             for a in re.findall(
-                r'[^\s\'"]*[\'"][^\'"]+[\'"]|[^\'"\s]+',
+                r'[^\s\'"]*[\'"][^\'"]*[\'"]|[^\'"\s]+',
                 self.execution.configuration.command_template.format(**parameters),
             )
         ]

@@ -206,6 +206,23 @@ class ToolExecutorTest(BaseTest, TestCase):
         self.assertIn('"root secret"', arguments)
         self.assertNotIn("root secret", arguments)
 
+    @mock.patch("framework.models.BaseInput.get_url", get_url)
+    def test_get_arguments_keeps_empty_value_from_splitting_the_next_one(self) -> None:
+        argument = Argument.objects.get(configuration=self.fake_configuration, name="token")
+        argument.argument = "-u '{username}' -p '{secret}'"
+        argument.save(update_fields=["argument"])
+        secret = "root --output /home/rekono/.rekono/owned.txt"
+        self.authentication.type = AuthenticationType.BASIC
+        self.authentication.name = ""
+        self.authentication.secret = secret
+        self.authentication.save(update_fields=["type", "name", "_secret"])
+        arguments = self.executor.get_arguments(
+            [self.host, self.port, self.technology, self.vulnerability], [], [], [], []
+        )
+        self.assertIn("", arguments)
+        self.assertIn(secret, arguments)
+        self.assertNotIn("--output", arguments)
+
     @mock.patch("framework.models.BaseInput.get_url", return_value=None)
     def test_get_arguments_skips_when_required_url_not_reachable(self, get_url_mock: mock.MagicMock) -> None:
         with self.assertRaises(RuntimeError):
