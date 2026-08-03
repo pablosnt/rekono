@@ -149,7 +149,7 @@ class TargetValidator(RegexValidator, LoggingEntity):
             # A reversed range would otherwise expand into an empty list that never matches a target
             ipaddress.summarize_address_range(first, last)
             return [ipaddress.ip_address(address) for address in range(int(first), int(last) + 1)]
-        except:
+        except Exception:
             return []
 
     def __call__(self, value: str | None) -> None:
