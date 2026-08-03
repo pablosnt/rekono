@@ -74,7 +74,9 @@ class Authentication(BaseInput, BaseEncrypted):
         InputKeyword.CREDENTIAL_TYPE_LOWER: lambda instance, task: instance.type.lower(),
         InputKeyword.TOKEN: "token",
         InputKeyword.USERNAME: lambda instance, task: (
-            instance.name if instance.type == AuthenticationType.BASIC else None
+            instance.name
+            if instance.type in [AuthenticationType.BASIC, AuthenticationType.DIGEST, AuthenticationType.NTLM]
+            else None
         ),
     }
     _encrypted_field = "_secret"

@@ -312,8 +312,8 @@
         "pk": 29,
         "fields": {
             "configuration": 15,
-            "name": "authentication",
-            "argument": "--auth={token} --auth-type={credential_type_lower}",
+            "name": "token_auth",
+            "argument": "--auth='{token}' --auth-type={credential_type_lower}",
             "required": false,
             "multiple": false
         }
@@ -367,8 +367,8 @@
         "pk": 34,
         "fields": {
             "configuration": 16,
-            "name": "authentication",
-            "argument": "--auth={token} --auth-type={credential_type_lower}",
+            "name": "token_auth",
+            "argument": "--auth='{token}' --auth-type={credential_type_lower}",
             "required": false,
             "multiple": false
         }
@@ -422,8 +422,8 @@
         "pk": 39,
         "fields": {
             "configuration": 17,
-            "name": "authentication",
-            "argument": "--auth={token} --auth-type={credential_type_lower}",
+            "name": "token_auth",
+            "argument": "--auth='{token}' --auth-type={credential_type_lower}",
             "required": false,
             "multiple": false
         }
@@ -477,8 +477,8 @@
         "pk": 44,
         "fields": {
             "configuration": 18,
-            "name": "authentication",
-            "argument": "--auth={token} --auth-type={credential_type_lower}",
+            "name": "token_auth",
+            "argument": "--auth='{token}' --auth-type={credential_type_lower}",
             "required": false,
             "multiple": false
         }
@@ -555,7 +555,7 @@
         "fields": {
             "configuration": 21,
             "name": "authentication",
-            "argument": "-id {username}:{secret}",
+            "argument": "-id '{username}:{secret}'",
             "required": false,
             "multiple": false
         }
@@ -566,7 +566,7 @@
         "fields": {
             "configuration": 21,
             "name": "cookie",
-            "argument": "-Option STATIC-COOKIE='{cookie_name}={secret}'",
+            "argument": "-Option STATIC-COOKIE=\"{cookie_name}={secret}\"",
             "required": false,
             "multiple": false
         }
@@ -577,7 +577,7 @@
         "fields": {
             "configuration": 21,
             "name": "headers",
-            "argument": "-vhost {header_value}",
+            "argument": "-vhost '{header_value}'",
             "required": false,
             "multiple": true
         }
@@ -632,7 +632,7 @@
         "fields": {
             "configuration": 25,
             "name": "authentication",
-            "argument": "ZAP_AUTH_HEADER='Authorization' ZAP_AUTH_HEADER_VALUE='{credential_type} {token}'",
+            "argument": "ZAP_AUTH_HEADER=Authorization ZAP_AUTH_HEADER_VALUE='{credential_type} {token}'",
             "required": false,
             "multiple": false
         }
@@ -643,7 +643,7 @@
         "fields": {
             "configuration": 25,
             "name": "cookie",
-            "argument": "ZAP_AUTH_HEADER='Cookie' ZAP_AUTH_HEADER_VALUE='{cookie_name}={secret}'",
+            "argument": "ZAP_AUTH_HEADER=Cookie ZAP_AUTH_HEADER_VALUE='{cookie_name}={secret}'",
             "required": false,
             "multiple": false
         }
@@ -665,7 +665,7 @@
         "fields": {
             "configuration": 26,
             "name": "technology",
-            "argument": "{technology} {version}",
+            "argument": "'{technology}' '{version}'",
             "required": true,
             "multiple": false
         }
@@ -720,7 +720,7 @@
         "fields": {
             "configuration": 32,
             "name": "headers",
-            "argument": "--user-agent {header_value}",
+            "argument": "--user-agent '{header_value}'",
             "required": false,
             "multiple": true
         }
@@ -775,7 +775,7 @@
         "fields": {
             "configuration": 35,
             "name": "authentication",
-            "argument": "-u {username} -p {secret}",
+            "argument": "-u '{username}' -p '{secret}'",
             "required": false,
             "multiple": false
         }
@@ -1017,7 +1017,7 @@
         "fields": {
             "configuration": 47,
             "name": "basic_auth",
-            "argument": "--username {username} --password {secret}",
+            "argument": "--username '{username}' --password '{secret}'",
             "required": false,
             "multiple": false
         }
@@ -1028,7 +1028,7 @@
         "fields": {
             "configuration": 47,
             "name": "cookie",
-            "argument": "--cookie '{cookie_name}={secret}'",
+            "argument": "--cookies '{cookie_name}={secret}'",
             "required": false,
             "multiple": false
         }
@@ -1083,7 +1083,7 @@
         "fields": {
             "configuration": 48,
             "name": "basic_auth",
-            "argument": "--username {username} --password {secret}",
+            "argument": "--username '{username}' --password '{secret}'",
             "required": false,
             "multiple": false
         }
@@ -1094,7 +1094,7 @@
         "fields": {
             "configuration": 48,
             "name": "cookie",
-            "argument": "--cookie '{cookie_name}={secret}'",
+            "argument": "--cookies '{cookie_name}={secret}'",
             "required": false,
             "multiple": false
         }
@@ -1162,6 +1162,50 @@
             "name": "cve",
             "argument": "--cve {cve}",
             "required": true,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 108,
+        "fields": {
+            "configuration": 15,
+            "name": "basic_auth",
+            "argument": "--auth='{username}:{secret}' --auth-type={credential_type_lower}",
+            "required": false,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 109,
+        "fields": {
+            "configuration": 16,
+            "name": "basic_auth",
+            "argument": "--auth='{username}:{secret}' --auth-type={credential_type_lower}",
+            "required": false,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 110,
+        "fields": {
+            "configuration": 17,
+            "name": "basic_auth",
+            "argument": "--auth='{username}:{secret}' --auth-type={credential_type_lower}",
+            "required": false,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 111,
+        "fields": {
+            "configuration": 18,
+            "name": "basic_auth",
+            "argument": "--auth='{username}:{secret}' --auth-type={credential_type_lower}",
+            "required": false,
             "multiple": false
         }
     }

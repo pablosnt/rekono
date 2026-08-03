@@ -425,7 +425,7 @@
         "fields": {
             "argument": 29,
             "type": 10,
-            "filter": "!cookie",
+            "filter": "bearer or jwt",
             "order": 1
         }
     },
@@ -485,7 +485,7 @@
         "fields": {
             "argument": 34,
             "type": 10,
-            "filter": "!cookie",
+            "filter": "bearer or jwt",
             "order": 1
         }
     },
@@ -545,7 +545,7 @@
         "fields": {
             "argument": 39,
             "type": 10,
-            "filter": "!cookie",
+            "filter": "bearer or jwt",
             "order": 1
         }
     },
@@ -605,7 +605,7 @@
         "fields": {
             "argument": 44,
             "type": 10,
-            "filter": "!cookie",
+            "filter": "bearer or jwt",
             "order": 1
         }
     },
@@ -1386,6 +1386,46 @@
             "argument": 107,
             "type": 6,
             "filter": "cve",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 144,
+        "fields": {
+            "argument": 108,
+            "type": 10,
+            "filter": "basic or digest or ntlm",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 145,
+        "fields": {
+            "argument": 109,
+            "type": 10,
+            "filter": "basic or digest or ntlm",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 146,
+        "fields": {
+            "argument": 110,
+            "type": 10,
+            "filter": "basic or digest or ntlm",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 147,
+        "fields": {
+            "argument": 111,
+            "type": 10,
+            "filter": "basic or digest or ntlm",
             "order": 1
         }
     }

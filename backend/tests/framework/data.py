@@ -264,6 +264,7 @@ class TestingDataMixin:
             ("token", False, False, [InputTypeName.AUTHENTICATION]),
             ("wordlist", False, False, [InputTypeName.WORDLIST]),
         ]
+        quoted_patterns = ["secret", "technology", "token"]
 
         for pattern, _, _, _ in argument_patterns:
             format_pattern = "{" + pattern + "}"
@@ -283,7 +284,9 @@ class TestingDataMixin:
             argument = Argument.objects.create(
                 configuration=self.fake_configuration,
                 name=pattern,
-                argument=f"-p {format_pattern}",
+                # User supplied values are quoted in the real tool fixtures, so that values
+                # containing whitespace reach the tool as one argument
+                argument=(f"-p '{format_pattern}'" if pattern in quoted_patterns else f"-p {format_pattern}"),
                 required=required,
                 multiple=multiple,
             )
