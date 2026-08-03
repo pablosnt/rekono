@@ -46,7 +46,9 @@ class TargetValidator(RegexValidator, LoggingEntity):
         - IPv4/IPv6 network validation and blocking, comparing networks in both
           directions so a network that contains a denied one is denied as well
         - Resilient matching that cannot be crashed by a malformed deny list
-          entry (invalid regex, IP range or network)
+          entry (invalid regex, IP range or network), including the IP range
+          entries that the pattern accepts but that cover no address, like the
+          ones with octets over 255 or with a start greater than the end
 
     Validation Process:
         1. Basic regex pattern validation
@@ -111,12 +113,19 @@ class TargetValidator(RegexValidator, LoggingEntity):
         self.logger.warning(f"[Security] Target '{value}' {reason} {denied_target.target}")
         raise ValidationError(self.message, code=self.code, params={"value": value})
 
-    def get_ip_range_addresses(self, ip_range: str) -> list[ipaddress.IPv4Address | ipaddress.IPv6Address]:
+    @staticmethod
+    def get_ip_range_addresses(ip_range: str) -> list[ipaddress.IPv4Address | ipaddress.IPv6Address]:
         """Expand an IP range into every address that it covers.
 
         Ranges are written as "10.10.30.1-50", where the value after the dash is only
         the last octet of the final address, so it is completed with the network part
-        of the first one before iterating over the addresses in between.
+        of the first one before iterating over the addresses in between. The IP range
+        pattern only checks the shape of the value, so both ends are parsed as addresses
+        here to reject the ranges that it accepts but that cover no address, like the
+        ones with octets over 255 or with a start greater than the end.
+
+        It's a static method because it is also used by Target.get_type to tell a real
+        IP range from a value that just looks like one.
 
         Args:
             ip_range (str): IP range to expand.
@@ -124,11 +133,24 @@ class TargetValidator(RegexValidator, LoggingEntity):
         Returns:
             list[ipaddress.IPv4Address | ipaddress.IPv6Address]: All the addresses of
             the range, including both ends.
+
+        Raises:
+            ValueError: If any of the ends is not a valid IP address or the range is
+                reversed, both raised by the ipaddress module itself. ValueError is used
+                instead of ValidationError because deny list entries are expanded with this
+                method too, and a malformed entry must be ignored instead of denying the target.
         """
         start, end = ip_range.rsplit("-", 1)
         network = start.rsplit(".", 1)[0]
         first, last = ipaddress.ip_address(start), ipaddress.ip_address(f"{network}.{end}")
-        return [ipaddress.ip_address(ip) for ip in range(int(first), int(last) + 1)]
+        try:
+            # Both ends are valid addresses at this point, so this only checks that the range isn't
+            # reversed, like 10.10.30.50-1, since summarize_address_range raises ValueError for it.
+            # A reversed range would otherwise expand into an empty list that never matches a target
+            ipaddress.summarize_address_range(first, last)
+            return [ipaddress.ip_address(address) for address in range(int(first), int(last) + 1)]
+        except:
+            return []
 
     def __call__(self, value: str | None) -> None:
         """Validate target against regex patterns and deny lists.

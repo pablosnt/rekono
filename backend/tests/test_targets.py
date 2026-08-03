@@ -22,6 +22,9 @@ target3 = {"project": 1, "target": "10.10.10.1-24"}
 target4 = {"project": 1, "target": "10.10.10.0/24"}
 target5 = {"project": 1, "target": "8.8.8.8"}
 invalid_target = {"project": 1, "target": "domain-not-found"}
+# IP ranges accepted by the IP range pattern that can't be expanded into addresses
+invalid_ip_range = {"project": 1, "target": "10.10.10.1-999"}
+reversed_ip_range = {"project": 1, "target": "10.10.10.50-1"}
 
 
 class TargetTest(ApiTest, TestCase):
@@ -32,6 +35,8 @@ class TargetTest(ApiTest, TestCase):
         ApiTestCase([Role.ADMIN, Role.AUDITOR, Role.READER]),
         PostApiTestCase(["admin2", "auditor2", "reader1", "reader2"], 403, target1),
         PostApiTestCase(["admin1", "auditor1"], 400, invalid_target),
+        PostApiTestCase(["admin1", "auditor1"], 400, invalid_ip_range),
+        PostApiTestCase(["admin1", "auditor1"], 400, reversed_ip_range),
         PostApiTestCase(["admin1"], data=target1, expected={"id": 1, "type": TargetType.PRIVATE_IP, **target1}),
         PostApiTestCase(["auditor1"], data=target2, expected={"id": 2, "type": TargetType.DOMAIN, **target2}),
         PostApiTestCase(["auditor1"], data=target3, expected={"id": 3, "type": TargetType.IP_RANGE, **target3}),
