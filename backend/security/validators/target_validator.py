@@ -85,6 +85,18 @@ class TargetValidator(RegexValidator, LoggingEntity):
         # isinstance verification is needed to keep compatibility with old database migrations
         super().__init__(regex.value if isinstance(regex, Regex) else regex, message, code, inverse_match, flags)
 
+    def _deny(self, value: str, denied_target: TargetDenylist, reason: str):
+        denied_target.blocked = F("blocked") + 1
+        denied_target.save(update_fields=["blocked"])
+        self.logger.warning(f"[Security] Target '{value}' {reason} {denied_target.target}")
+        raise ValidationError(self.message, code=self.code, params={"value": value})
+
+    def get_ip_range_addresses(self, ip_range: str) -> list[ipaddress.IPv4Address | ipaddress.IPv6Address]:
+        start, end = ip_range.rsplit("-", 1)
+        network = start.rsplit(".", 1)[0]
+        first, last = ipaddress.ip_address(start), ipaddress.ip_address(f"{network}.{end}")
+        return [ipaddress.ip_address(ip) for ip in range(int(first), int(last) + 1)]
+
     def __call__(self, value: str | None) -> None:
         """Validate target against regex patterns and deny lists.
 
@@ -108,12 +120,26 @@ class TargetValidator(RegexValidator, LoggingEntity):
         if not value:
             raise ValidationError("Target is required", code=self.code, params={"value": value})
         candidates = set([value])
-        if not CONFIG.testing:  # pragma: no cover
-            from targets.models import Target
 
+        from targets.models import Target
+
+        try:
+            target_type = Target.get_type(value)
+        except Exception:
+            target_type = None
+
+        if target_type in [TargetType.PRIVATE_IP, TargetType.PUBLIC_IP]:
+            ip = ipaddress.ip_address(value)
+            # An IPv4-mapped IPv6 address reaches the same host as the IPv4 one that it maps, so
+            # ::ffff:127.0.0.1 can't be used to reach a denied IPv4 address
+            if ip.version == 6 and ip.ipv4_mapped:
+                candidates.add(str(ip.ipv4_mapped))
+        elif target_type == TargetType.IP_RANGE:
+            candidates.update([str(ip) for ip in self.get_ip_range_addresses(value)])
+
+        if not CONFIG.testing:  # pragma: no cover
             # Resolution errors must not block validation
             try:
-                target_type = Target.get_type(value)
                 if target_type in [TargetType.PRIVATE_IP, TargetType.PUBLIC_IP]:
                     resolved_domain, _, _ = socket.gethostbyaddr(value)
                     if resolved_domain:
@@ -132,36 +158,30 @@ class TargetValidator(RegexValidator, LoggingEntity):
             for denied_value in TargetDenylist.objects.all():
                 denied_target = denied_value.target.lower()
                 if candidate == denied_target:
-                    # F() increments the counter at the database level, so concurrent
-                    # validations hitting the same entry don't lose updates to a race condition
-                    denied_value.blocked = F("blocked") + 1
-                    denied_value.save(update_fields=["blocked"])
-                    self.logger.warning(f"[Security] Target '{value}' is denied by policy")
-                    raise ValidationError(self.message, code=self.code, params={"value": value})
+                    self._deny(value, denied_value, "matches denied target")
                 # A malformed deny list entry (invalid regex) must be ignored instead of crashing validation
                 try:
-                    regex_match = bool(re.fullmatch(denied_target, candidate))
-                except Exception:
-                    regex_match = False
-                if regex_match:
-                    denied_value.blocked = F("blocked") + 1
-                    denied_value.save(update_fields=["blocked"])
-                    self.logger.warning(f"[Security] Target '{value}' match the denied value {denied_value.target}")
-                    raise ValidationError(self.message, code=self.code, params={"value": value})
-                for address_class, network_class in [
-                    (ipaddress.IPv4Address, ipaddress.IPv4Network),
-                    (ipaddress.IPv6Address, ipaddress.IPv6Network),
-                ]:
-                    # ValueError covers AddressValueError and NetmaskValueError so a
-                    # malformed deny list network entry is ignored instead of crashing
-                    try:
-                        network_match = address_class(candidate) in network_class(denied_target)
-                    except Exception:
-                        network_match = False
-                    if network_match:
-                        denied_value.blocked = F("blocked") + 1
-                        denied_value.save(update_fields=["blocked"])
-                        self.logger.warning(
-                            f"[Security] Target '{value}' belongs to the denied network {denied_value.target}"
-                        )
-                        raise ValidationError(self.message, code=self.code, params={"value": value})
+                    if bool(re.fullmatch(denied_target, candidate)):
+                        self._deny(value, denied_value, "matches denied target pattern")
+                    if target_type != TargetType.DOMAIN:
+                        if bool(re.fullmatch(Regex.IP_RANGE.value, denied_target)):
+                            denied_targets = self.get_ip_range_addresses(denied_target)
+                            if target_type == TargetType.NETWORK:
+                                target_network = ipaddress.ip_network(candidate)
+                                if any(denied_target in target_network for denied_target in denied_targets):
+                                    self._deny(value, denied_value, "is included in denied range")
+                            else:
+                                if ipaddress.ip_address(candidate) in denied_targets:
+                                    self._deny(value, denied_value, "belongs to denied range")
+                        if target_type == TargetType.NETWORK:
+                            # A network covers several addresses, so it is compared to the denied network
+                            # in both directions to detect also the networks that include it
+                            if ipaddress.ip_network(candidate).overlaps(ipaddress.ip_network(denied_target)):
+                                self._deny(value, denied_value, "overlaps denied network")
+                        else:
+                            if ipaddress.ip_address(candidate) in ipaddress.ip_network(denied_target):
+                                self._deny(value, denied_value, "belongs to denied network")
+
+                except Exception as ex:
+                    if isinstance(ex, ValidationError):
+                        raise ex

@@ -54,6 +54,28 @@ class TargetDenylistTest(ApiTest, TestCase):
             ["admin1", "auditor1"], 400, {"project": 1, "target": "subdomain.rekono.com"}, endpoint="/api/targets/"
         ),
         PostApiTestCase(["admin1", "auditor1"], 400, {"project": 1, "target": "10.10.10.1"}, endpoint="/api/targets/"),
+        PostApiTestCase(
+            ["admin1", "auditor1"], 400, {"project": 1, "target": "127.0.0.1/32"}, endpoint="/api/targets/"
+        ),
+        PostApiTestCase(["admin1", "auditor1"], 400, {"project": 1, "target": "127.0.0.0/8"}, endpoint="/api/targets/"),
+        PostApiTestCase(["admin1", "auditor1"], 400, {"project": 1, "target": "127.0.0.1-5"}, endpoint="/api/targets/"),
+        PostApiTestCase(
+            ["admin1", "auditor1"], 400, {"project": 1, "target": "::ffff:127.0.0.1"}, endpoint="/api/targets/"
+        ),
+        PostApiTestCase(["admin1", "auditor1"], 400, {"project": 1, "target": "10.0.0.0/8"}, endpoint="/api/targets/"),
+        PostApiTestCase(
+            ["admin1", "auditor1"], 400, {"project": 1, "target": "10.10.10.1-24"}, endpoint="/api/targets/"
+        ),
+        # Networks and IP ranges that don't reach any denied value are still allowed
+        PostApiTestCase(
+            ["admin1"],
+            data={"project": 1, "target": "10.10.20.0/24"},
+            expected={"target": "10.10.20.0/24"},
+            endpoint="/api/targets/",
+        ),
+        ApiTestCase(
+            [Role.ADMIN], expected={"id": 1, "default": True, "target": "127.0.0.1", "blocked": 8}, endpoint="1"
+        ),
         ApiTestCase(
             [Role.ADMIN], expected={"id": 14, "default": False, "blocked": 6, **target_denylist1}, endpoint="14"
         ),
@@ -61,7 +83,7 @@ class TargetDenylistTest(ApiTest, TestCase):
             [Role.ADMIN], expected={"id": 15, "default": False, "blocked": 2, **target_denylist2}, endpoint="15"
         ),
         ApiTestCase(
-            [Role.ADMIN], expected={"id": 16, "default": False, "blocked": 2, **target_denylist3}, endpoint="16"
+            [Role.ADMIN], expected={"id": 16, "default": False, "blocked": 6, **target_denylist3}, endpoint="16"
         ),
         PutApiTestCase([Role.ADMIN], 404, new_target_denylist, endpoint="1"),
         PutApiTestCase(
@@ -81,7 +103,7 @@ class TargetDenylistTest(ApiTest, TestCase):
         DeleteApiTestCase(["admin1"], endpoint="15"),
         DeleteApiTestCase(["admin2"], endpoint="16"),
         DeleteApiTestCase(["admin1"], endpoint="17"),
-        ApiTestCase([Role.ADMIN], expected=default_denylist_1, endpoint="1"),
+        ApiTestCase([Role.ADMIN], expected={**default_denylist_1, "blocked": 8}, endpoint="1"),
         ApiTestCase([Role.ADMIN], 404, endpoint="14"),
     ]
 
