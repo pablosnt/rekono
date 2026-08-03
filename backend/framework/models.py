@@ -9,7 +9,7 @@ import re
 from dataclasses import dataclass
 from functools import cached_property
 from typing import Any, Callable, cast
-from urllib.parse import urlparse
+from urllib.parse import urljoin, urlparse
 
 import requests
 import urllib3
@@ -195,6 +195,7 @@ class BaseInput(BaseModel):
         _url_cache (Cache): Shared cache of probed URLs, used by get_url to avoid repeating
                           the same HTTP request. Reachable URLs cache the one obtained after
                           following the redirects, and unreachable ones cache "0".
+        _max_redirects (int): Number of redirects that get_url follows before giving up on a URL.
 
     Example:
         Create an input model with filtering:
@@ -227,6 +228,7 @@ class BaseInput(BaseModel):
         abstract = True
 
     _url_cache = Cache(prefix="url")
+    _max_redirects = 5
 
     @dataclass
     class Filter:
@@ -369,6 +371,67 @@ class BaseInput(BaseModel):
             value = f"/{value}"
         return "/" if not value else value
 
+    def _is_allowed_url(self, url: str, source_url: str) -> bool:
+        """Check that a URL can be requested, before any connection is made to it.
+
+        Only HTTP and HTTPS URLs whose host would be accepted as a target by the target
+        validation policy are allowed, so a redirect can't move a scan onto a host that
+        could never have been set as a target, like the platform's own internal services.
+
+        Args:
+            url (str): The URL that is about to be requested.
+            source_url (str): The URL that redirected to it, used to report the rejection.
+
+        Returns:
+            bool: True if the URL can be requested, False if it's denied by policy.
+        """
+        from security.validators.target_validator import TargetValidator
+
+        parsed_url = urlparse(url)
+        if parsed_url.scheme not in ["http", "https"]:
+            self.logger.warning(f"[Security] HTTP GET {source_url} redirects to {url}, whose schema isn't supported")
+            return False
+        try:
+            TargetValidator(Regex.TARGET)(parsed_url.hostname)
+        except ValidationError as error:
+            self.logger.warning(f"[Security] HTTP GET {source_url} redirects to {url} which is a target denied by policy: {' '.join(error.messages)}")
+            return False
+        return True
+
+    def _get_url_with_redirects(self, url: str) -> str | None:
+        """Probe a URL and follow its redirects, checking each one before requesting it.
+
+        The HTTP client doesn't follow redirects, so each hop is resolved and validated
+        against the target validation policy first, and the request is only issued once
+        that hop is allowed. This way a denied resource is never contacted, not even as
+        an intermediate step of the redirection chain that ends up somewhere allowed.
+
+        Args:
+            url (str): The URL to probe.
+
+        Returns:
+            str | None: The final URL of the redirection chain, or None when one of its
+            hops is denied by policy.
+
+        Raises:
+            RuntimeError: If the redirection chain loops or doesn't end within
+                _max_redirects hops, so callers treat it like any other failed probe.
+        """
+        requested_urls: list[str] = []
+        while url not in requested_urls and len(requested_urls) < self._max_redirects:
+            requested_urls.append(url)
+            # Use disabled SSL verification for testing purposes and short timeout for efficiency
+            # nosemgrep: python.requests.security.disabled-cert-validation.disabled-cert-validation
+            response = requests.get(url, timeout=5, verify=False, allow_redirects=False)
+            location = response.headers.get("Location") if response.is_redirect else None
+            if not location:
+                return url                
+            # A relative location is resolved against the URL that returned it
+            url = urljoin(url, location)
+            if not self._is_allowed_url(url, requested_urls[-1]):
+                return None
+        raise RuntimeError(f"URL {requested_urls[0]} has too many redirects")
+
     def get_url(
         self,
         host: str,
@@ -386,9 +449,12 @@ class BaseInput(BaseModel):
         up in _url_cache before issuing a request, and the resulting URL is cached
         afterwards, so repeated calls for the same URL (e.g. across multiple tool
         arguments) don't repeat the same HTTP request and get the same redirections.
-        Redirections are only followed while they stay within the targets allowed
-        by the target validation policy, so a redirect can't move a scan onto a
-        host that could never have been set as a target.
+        Redirections are checked against the target validation policy before being
+        requested, so a redirect can't move a scan onto a host that could never have
+        been set as a target, and no request is ever sent to a denied one. A URL that
+        redirects to a denied target returns no URL at all, instead of falling back to
+        another port or protocol, because the host already tried to move the scan out
+        of its allowed scope.
 
         Args:
             host (str): The hostname or IP address.
@@ -440,30 +506,18 @@ class BaseInput(BaseModel):
                         continue
                     return cached_result
                 try:
-                    # Attempt to connect to the URL to verify it's accessible
-                    # Use disabled SSL verification for testing purposes and short timeout for efficiency
-                    # nosemgrep: python.requests.security.disabled-cert-validation.disabled-cert-validation
-                    response = requests.get(url_to_test, timeout=5, verify=False)
-                    working_url = url_to_test
-                    # Follow redirection if any, but only after checking that the new host is a target
-                    # that the user could have created
-                    if response.url and response.url != url_to_test:
-                        from security.validators.target_validator import TargetValidator
-
-                        try:
-                            TargetValidator(Regex.TARGET)(urlparse(response.url).hostname)
-                        except ValidationError as error:
-                            self.logger.warning(
-                                f"[Security] HTTP GET {url_to_test} redirects to {response.url} which is a target denied by policy: {' '.join(error.messages)}"
-                            )
-                            return
-                        working_url = response.url
-                    self._url_cache.set(url_to_test, working_url)
-                    return working_url
+                    # Attempt to connect to the URL to verify it's accessible, following its
+                    # redirections only while they point to targets allowed by policy
+                    working_url = self._get_url_with_redirects(url_to_test)
                 except Exception:
                     # If connection fails, try the next protocol/port combination
                     self._url_cache.set(url_to_test, "0")
                     continue
+                if not working_url:
+                    # The URL doesn't work or redirects to a denied target
+                    return None
+                self._url_cache.set(url_to_test, working_url)
+                return working_url
 
     def filter(self, argument_input: Any, target: Any = None) -> bool:
         """Apply complex filtering logic based on tool argument requirements.
