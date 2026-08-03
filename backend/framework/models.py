@@ -394,7 +394,9 @@ class BaseInput(BaseModel):
         try:
             TargetValidator(Regex.TARGET)(parsed_url.hostname)
         except ValidationError as error:
-            self.logger.warning(f"[Security] HTTP GET {source_url} redirects to {url} which is a target denied by policy: {' '.join(error.messages)}")
+            self.logger.warning(
+                f"[Security] HTTP GET {source_url} redirects to {url} which is a target denied by policy: {' '.join(error.messages)}"
+            )
             return False
         return True
 
@@ -425,7 +427,7 @@ class BaseInput(BaseModel):
             response = requests.get(url, timeout=5, verify=False, allow_redirects=False)
             location = response.headers.get("Location") if response.is_redirect else None
             if not location:
-                return url                
+                return url
             # A relative location is resolved against the URL that returned it
             url = urljoin(url, location)
             if not self._is_allowed_url(url, requested_urls[-1]):
