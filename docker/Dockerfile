@@ -191,6 +191,7 @@ RUN apt update && \
     uv pip install --system --break-system-packages --python /opt/python/bin/python -r /opt/EmailHarvester/requirements.txt && \
     # Initializer script
     mkdir -p /entrypoints && \
+    echo "#!/bin/bash" > /entrypoints/initializer.sh && \
     echo "uv run --no-dev manage.py migrate" > /entrypoints/initializer.sh && \
     echo "uv run --no-dev manage.py createsuperuser --no-input  || true" >> /entrypoints/initializer.sh && \
     echo "uv run --no-dev manage.py monitor" >> /entrypoints/initializer.sh && \
@@ -198,9 +199,14 @@ RUN apt update && \
     # Update tooling resources. This script is executed as root via sudo, so it's kept in a
     # root-owned directory to prevent the rootless user from replacing it and escalating privileges
     searchsploit --update || true && \
-    echo "searchsploit --update || true" > /usr/local/sbin/update-tooling.sh && \
+    # The exploits database is updated as root via Git, so the rootless user can't have write access
+    # to it. Otherwise, it could tamper with the Git repository to get commands executed as root
+    chmod -R go-w /usr/share/exploitdb && \
+    echo "#!/bin/bash" > /usr/local/sbin/update-tooling.sh && \
+    echo "searchsploit --update || true" >> /usr/local/sbin/update-tooling.sh && \
     chmod 700 /usr/local/sbin/update-tooling.sh && \
     # Executions worker script
+    echo "#!/bin/bash" > /entrypoints/executions-worker.sh && \
     echo "nuclei -update-templates" > /entrypoints/executions-worker.sh && \
     echo "sudo /usr/local/sbin/update-tooling.sh &" >> /entrypoints/executions-worker.sh && \
     echo "uv run --no-dev manage.py rqworker executions" >> /entrypoints/executions-worker.sh && \
