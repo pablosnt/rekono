@@ -20,6 +20,7 @@ from platforms.email.notifications import SMTP
 from platforms.telegram_app.notifications import Telegram
 from security.authentication.serializers import MfaSerializer
 from security.authorization.roles import Role
+from users.enums import OtpScope
 from users.models import User
 
 
@@ -291,8 +292,15 @@ class PasswordSerializer(UserSerializer):
 class OTPSerializer(UserSerializer):
     """Serializer for OTP verification operations.
 
-    Handles one-time password verification with user lookup.
+    Handles one-time password verification with user lookup. Each subclass declares the
+    scope its OTPs are issued for, so an OTP sent for one operation is never accepted by
+    another one.
+
+    Attributes:
+        otp_scope (OtpScope): Scope the submitted OTP must have been issued for
     """
+
+    otp_scope = OtpScope.INVITATION
 
     class Meta:
         """Meta configuration for the OTPSerializer.
@@ -315,10 +323,10 @@ class OTPSerializer(UserSerializer):
             dict[str, Any]: Validated data with user instance
 
         Raises:
-            AuthenticationFailed: If OTP is invalid or expired
+            AuthenticationFailed: If OTP is invalid, expired or issued for another scope
         """
         attrs = super().validate(attrs)
-        user = User.objects.verify_otp(attrs.get("otp"))
+        user = User.objects.verify_otp(attrs.get("otp"), self.otp_scope)
         if not user:
             raise AuthenticationFailed(code=status.HTTP_401_UNAUTHORIZED)
         attrs["user"] = user
@@ -330,7 +338,12 @@ class VerifyEmailSerializer(OTPSerializer):
 
     Verifies the OTP sent to the new address and ensures the associated user actually
     has a pending email change awaiting confirmation.
+
+    Attributes:
+        otp_scope (OtpScope): Only OTPs sent to verify an email address are accepted
     """
+
+    otp_scope = OtpScope.EMAIL_VERIFICATION
 
     def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
         """Validate the OTP and ensure a pending email change exists.
@@ -363,7 +376,12 @@ class CreateUserSerializer(OTPSerializer, PasswordSerializer):
 
     Combines OTP verification and password validation for secure
     account activation after invitation.
+
+    Attributes:
+        otp_scope (OtpScope): Only OTPs sent with an invitation are accepted
     """
+
+    otp_scope = OtpScope.INVITATION
 
     class Meta:
         """Meta configuration for the CreateUserSerializer.
@@ -469,7 +487,13 @@ class ResetPasswordSerializer(PasswordSerializer, OTPSerializer):
 
     Combines OTP verification and password validation for secure
     password reset workflow.
+
+    Attributes:
+        otp_scope (OtpScope): Only OTPs sent to reset a password or to enable an
+            account are accepted
     """
+
+    otp_scope = OtpScope.PASSWORD_RESET
 
     class Meta:
         """Meta configuration for the ResetPasswordSerializer.
@@ -517,7 +541,7 @@ class RequestPasswordResetSerializer(Serializer, LoggingEntity):
         # during the password reset request
         user = User.objects.filter(email=email, is_active=True).first()
         if email and user:  # pragma: no cover
-            otp = User.objects.setup_otp(user)
+            otp = User.objects.setup_otp(user, OtpScope.PASSWORD_RESET)
             SMTP().reset_password(user, otp)
             self.logger.info(f"[User] User {user.id} requested a password reset", extra={"user": user.id})
 

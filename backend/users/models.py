@@ -6,7 +6,7 @@ capabilities for secure user lifecycle management.
 """
 
 from datetime import datetime, timedelta
-from typing import Any, cast
+from typing import Any
 
 import pyotp
 from django.contrib.auth.models import AbstractUser, Group, UserManager
@@ -22,7 +22,7 @@ from security.authentication.api import ApiToken
 from security.authorization.roles import Role
 from security.cryptography import Crypto
 from security.validators.input_validator import FutureDatetimeValidator, Regex, Validator
-from users.enums import Notification
+from users.enums import Notification, OtpScope
 
 
 class OtpManagerMixin:
@@ -65,15 +65,17 @@ class OtpManagerMixin:
         """
         return timezone.now() + timedelta(**time)
 
-    def setup_otp(self, user: Any, time: dict[str, int] | None = None) -> str:
+    def setup_otp(self, user: Any, scope: OtpScope, time: dict[str, int] | None = None) -> str:
         """Set up OTP for a user account.
 
-        Generates a new OTP, hashes it for storage, and sets the expiration
-        time on the user account. Used for secure operations requiring
-        email verification.
+        Generates a new OTP, hashes it for storage, and sets the scope and the
+        expiration time on the user account. Used for secure operations
+        requiring email verification.
 
         Args:
             user (Any): User instance to set up OTP for.
+            scope (OtpScope): Operation that the OTP is issued for. It's the only
+                operation that will accept it during verification.
             time (dict[str, int] | None, optional): Custom expiration time.
                 Defaults to system configuration.
 
@@ -82,15 +84,16 @@ class OtpManagerMixin:
         """
         plain_otp = self.generate_otp()
         user.otp = Crypto.hash(plain_otp)
+        user.otp_scope = scope
         user.otp_expiration = self.get_otp_expiration_time(time) if time is not None else self.get_otp_expiration_time()
-        user.save(update_fields=["otp", "otp_expiration"])
+        user.save(update_fields=["otp", "otp_scope", "otp_expiration"])
         return plain_otp
 
     def remove_otp(self, user: Any) -> Any:
         """Remove OTP from user account.
 
-        Clears the OTP and expiration timestamp from the user account,
-        effectively invalidating any pending OTP verification.
+        Clears the OTP, its scope and the expiration timestamp from the user
+        account, effectively invalidating any pending OTP verification.
 
         Args:
             user (Any): User instance to clear OTP from.
@@ -98,25 +101,28 @@ class OtpManagerMixin:
         Returns:
             Any: The updated user instance.
         """
-        user.otp = user.otp_expiration = None
-        user.save(update_fields=["otp", "otp_expiration"])
+        user.otp = user.otp_scope = user.otp_expiration = None
+        user.save(update_fields=["otp", "otp_scope", "otp_expiration"])
         return user
 
-    def verify_otp(self, otp: str, user: Any | None = None) -> Any | None:
-        """Verify OTP against stored hash and expiration.
+    def verify_otp(self, otp: str, scope: OtpScope, user: Any | None = None) -> Any | None:
+        """Verify OTP against stored hash, scope and expiration.
 
         Validates a plain text OTP by comparing its hash against stored
-        values and checking expiration time. Optionally filters by user.
+        values and checking the scope it was issued for and its expiration
+        time. Optionally filters by user. An OTP created for a different
+        operation is never accepted, so it can't be replayed against this one.
 
         Args:
             otp (str): Plain text OTP to verify.
+            scope (OtpScope): Operation that the OTP must have been issued for.
             user (Any | None, optional): Specific user to verify against.
                 If None, searches all users.
 
         Returns:
             Any | None: User instance if OTP is valid, None otherwise.
         """
-        filter = {"otp": Crypto.hash(otp), "otp_expiration__gt": timezone.now()}
+        filter = {"otp": Crypto.hash(otp), "otp_scope": scope, "otp_expiration__gt": timezone.now()}
         if user:
             filter["id"] = user.id
         return User.objects.filter(**filter).first()
@@ -207,8 +213,9 @@ class RekonoUserManager(UserManager, LoggingEntity, OtpManagerMixin, MfaManagerM
         """
         plain_otp = self.generate_otp()
         user.otp = Crypto.hash(plain_otp)
+        user.otp_scope = OtpScope.INVITATION
         user.otp_expiration = self.get_otp_expiration_time()
-        user.save(update_fields=["otp", "otp_expiration"])
+        user.save(update_fields=["otp", "otp_scope", "otp_expiration"])
         SMTP().invite_user(user, plain_otp)
 
     def invite_user(self, email: str, role: Role) -> Any:
@@ -255,9 +262,19 @@ class RekonoUserManager(UserManager, LoggingEntity, OtpManagerMixin, MfaManagerM
         user.set_password(password)
         user.is_active = True
         user.otp = None
+        user.otp_scope = None
         user.otp_expiration = None
         user.save(
-            update_fields=["username", "first_name", "last_name", "password", "is_active", "otp", "otp_expiration"]
+            update_fields=[
+                "username",
+                "first_name",
+                "last_name",
+                "password",
+                "is_active",
+                "otp",
+                "otp_scope",
+                "otp_expiration",
+            ]
         )
         self.logger.info(f"[User] User {user.id} has been created", extra={"user": user.id})
         return user
@@ -279,7 +296,7 @@ class RekonoUserManager(UserManager, LoggingEntity, OtpManagerMixin, MfaManagerM
         """
         extra_fields["is_active"] = True
         user = super().create_superuser(username, email, password, **extra_fields)
-        self.assign_role(user, cast(Role, Role.ADMIN))
+        self.assign_role(user, Role.ADMIN)
         self.logger.info(f"[User] Superuser {user.id} has been created")
         return user
 
@@ -297,9 +314,11 @@ class RekonoUserManager(UserManager, LoggingEntity, OtpManagerMixin, MfaManagerM
         """
         plain_otp = self.generate_otp()
         user.otp = Crypto.hash(plain_otp)
+        # The enable account email links to the password reset page, since disabled accounts have an unusable password
+        user.otp_scope = OtpScope.PASSWORD_RESET
         user.otp_expiration = self.get_otp_expiration_time()
         user.is_active = True
-        user.save(update_fields=["otp", "otp_expiration", "is_active"])
+        user.save(update_fields=["otp", "otp_scope", "otp_expiration", "is_active"])
         SMTP().enable_user_account(user, plain_otp)
         self.logger.info(f"[User] User {user.id} has been enabled")
         return user
@@ -319,11 +338,12 @@ class RekonoUserManager(UserManager, LoggingEntity, OtpManagerMixin, MfaManagerM
         user.is_active = False
         user.set_unusable_password()
         user.otp = None
+        user.otp_scope = None
         user.otp_expiration = None
         user.mfa = False
         user._mfa_key = None
         user.projects.clear()
-        user.save(update_fields=["password", "otp", "otp_expiration", "is_active", "mfa", "_mfa_key"])
+        user.save(update_fields=["password", "otp", "otp_scope", "otp_expiration", "is_active", "mfa", "_mfa_key"])
         ApiToken.objects.filter(user=user).delete()
         self.logger.info(f"[User] User {user.id} has been disabled")
         return user
@@ -365,8 +385,9 @@ class RekonoUserManager(UserManager, LoggingEntity, OtpManagerMixin, MfaManagerM
         """
         user = self.update_password(user, password)
         user.otp = None
+        user.otp_scope = None
         user.otp_expiration = None
-        user.save(update_fields=["otp", "otp_expiration"])
+        user.save(update_fields=["otp", "otp_scope", "otp_expiration"])
         return user
 
     def request_email_change(self, user: Any, new_email: str) -> Any:
@@ -378,6 +399,10 @@ class RekonoUserManager(UserManager, LoggingEntity, OtpManagerMixin, MfaManagerM
         active email is only updated once the user confirms the new address, so an
         unverified or malicious change can never lock the account out.
 
+        The OTP sent to the new address is bound to the email verification scope, so it
+        only confirms the address and can't be replayed to reset the account password or
+        to pass the MFA second factor.
+
         Args:
             user (Any): User instance requesting the email change.
             new_email (str): New email address awaiting verification.
@@ -387,7 +412,7 @@ class RekonoUserManager(UserManager, LoggingEntity, OtpManagerMixin, MfaManagerM
         """
         user.pending_email = new_email
         user.save(update_fields=["pending_email"])
-        plain_otp = self.setup_otp(user)
+        plain_otp = self.setup_otp(user, OtpScope.EMAIL_VERIFICATION)
         SMTP().verify_email(user, plain_otp)
         SMTP().email_change_notification(user)
         self.logger.info(f"[User] User {user.id} requested an email change", extra={"user": user.id})
@@ -409,8 +434,9 @@ class RekonoUserManager(UserManager, LoggingEntity, OtpManagerMixin, MfaManagerM
         user.email = user.pending_email
         user.pending_email = None
         user.otp = None
+        user.otp_scope = None
         user.otp_expiration = None
-        user.save(update_fields=["email", "pending_email", "otp", "otp_expiration"])
+        user.save(update_fields=["email", "pending_email", "otp", "otp_scope", "otp_expiration"])
         self.logger.info(f"[User] User {user.id} verified its new email address", extra={"user": user.id})
         return user
 
@@ -438,8 +464,10 @@ class RekonoUserManager(UserManager, LoggingEntity, OtpManagerMixin, MfaManagerM
         Always checks the code against the user's TOTP secret first. If that
         check fails and the user has MFA enabled, the code is checked again
         as an email OTP, so accounts are not locked out when the
-        authenticator app is unavailable. Users without MFA enabled get no
-        such fallback.
+        authenticator app is unavailable. Only OTPs issued for the MFA scope
+        are accepted as that fallback, so OTPs sent for other operations, like
+        email verification, can't be used as a second factor. Users without MFA
+        enabled get no such fallback.
 
         Args:
             otp (str): OTP code to verify.
@@ -449,7 +477,9 @@ class RekonoUserManager(UserManager, LoggingEntity, OtpManagerMixin, MfaManagerM
             bool: True if verification succeeds, False otherwise.
         """
         mfa_verification = self.verify_mfa(otp, user)
-        return self.verify_otp(otp, user) is not None if not mfa_verification and user.mfa else mfa_verification
+        if mfa_verification or not user.mfa:
+            return mfa_verification
+        return self.verify_otp(otp, OtpScope.MFA, user) is not None
 
 
 class User(AbstractUser, BaseEncrypted):
@@ -472,6 +502,7 @@ class User(AbstractUser, BaseEncrypted):
         pending_email (EmailField): New email address awaiting OTP verification (optional, max 150 chars)
         is_active (BooleanField): Account status (None/True/False for invitation/active/disabled)
         otp (TextField): Hashed one-time password for secure operations (max 200 chars)
+        otp_scope (TextField): Operation the OTP was issued for (from OtpScope enum)
         otp_expiration (DateTimeField): OTP expiration timestamp with future validation
         _mfa_key (TextField): Encrypted MFA secret key (stored as 'mfa_key', max 40 chars)
         mfa (BooleanField): Whether MFA is enabled for this account
@@ -505,7 +536,9 @@ class User(AbstractUser, BaseEncrypted):
     is_active = models.BooleanField(blank=True, null=True, default=None)
 
     # One Time Password used to invite and enable users or reset passwords and MFA via email
+    # OTPs are only valid for the otp_scope that it was issued for
     otp = models.TextField(max_length=200, blank=True, null=True)
+    otp_scope = models.IntegerField(choices=OtpScope.choices, blank=True, null=True)
     otp_expiration = models.DateTimeField(
         blank=True, null=True, validators=[FutureDatetimeValidator(code="otp_expiration")]
     )

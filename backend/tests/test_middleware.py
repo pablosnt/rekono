@@ -1,7 +1,6 @@
 from django.conf import settings
 from django.http import HttpRequest
 from django.test import TestCase, override_settings
-
 from rest_framework.throttling import BaseThrottle
 
 # pytype: disable=wrong-arg-types

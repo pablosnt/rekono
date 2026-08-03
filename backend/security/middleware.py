@@ -13,10 +13,10 @@ from rest_framework import status
 from rest_framework.renderers import JSONRenderer
 from rest_framework.request import HttpRequest
 from rest_framework.response import Response
+from rest_framework.throttling import BaseThrottle
 
 from framework.context import RequestContext
 from framework.logging import LoggingEntity
-from rest_framework.throttling import BaseThrottle
 from rekono.settings import CONFIG
 
 # Maps request path prefixes to the Content-Security-Policy applied to matching responses.

@@ -16,6 +16,7 @@ from security.validators.input_validator import Validator
 from security.validators.target_validator import TargetValidator
 from tests.framework import ApiTest, ApiTestNoData
 from tests.framework.cases import ApiTestCase, CustomApiTestCase
+from users.enums import OtpScope
 from users.models import User
 
 # pytype: disable=wrong-arg-types,attribute-error
@@ -200,7 +201,7 @@ class SecurityTest(ApiTest, TestCase):
             204,
             APIClient().post(f"{self.mfa_login}email/", data={"token": content.get("mfa")}).status_code,
         )
-        plain_otp = User.objects.setup_otp(self.admin1)
+        plain_otp = User.objects.setup_otp(self.admin1, OtpScope.MFA)
         # Invalid token
         self.assertEqual(
             401, APIClient().post(self.mfa_login, data={"token": "invalid JWT", "mfa": plain_otp}).status_code
@@ -219,7 +220,7 @@ class SecurityTest(ApiTest, TestCase):
 
         # After login with email MFA, disable MFA
         self.assertEqual(204, client.post(f"{self.mfa_login}email/").status_code)
-        plain_otp = User.objects.setup_otp(self.admin1)
+        plain_otp = User.objects.setup_otp(self.admin1, OtpScope.MFA)
         # Invalid MFA
         self.assertEqual(401, client.post(f"{self.mfa_user}disable/", data={"mfa": "1111111"}).status_code)
         # Valid MFA
