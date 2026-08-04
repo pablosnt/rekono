@@ -39,7 +39,9 @@ class TaskMixin(BaseMixin):
         line uses Task.get_target(target, target_port), the shared label helper that
         also builds target labels for execution notifications, so it renders as
         "<target>:<port><path>" when a target port was selected, or the bare target
-        otherwise. Validates that all required parameters are present.
+        otherwise. Validates that all required parameters are present, and the
+        configuration only counts as valid when its tool is also in the context,
+        because the summary shows both names.
 
         Args:
             update (Update): The Telegram update containing user interaction.
@@ -59,7 +61,7 @@ class TaskMixin(BaseMixin):
         for condition, text in [
             (project, "project"),
             (target, "target"),
-            ((process or configuration), "process or configuration"),
+            (process or (tool and configuration), "process or configuration"),
             (intensity, "intensity"),
         ]:
             if not condition:
@@ -96,7 +98,10 @@ Are you sure?
 
         Processes user confirmation and creates a security task with all
         configured parameters including target, tool/process, intensity,
-        and optional wordlists and input parameters.
+        and optional wordlists and input parameters. The required values are
+        checked again here instead of trusting the confirmation step, since the
+        user can answer an old confirmation message whose conversation context
+        no longer holds them.
 
         Args:
             update (Update): The Telegram update containing user confirmation.
@@ -114,12 +119,21 @@ Are you sure?
                 target_port = self.get_context_value(context, Context.TARGET_PORT)
                 process = self.get_context_value(context, Context.PROCESS)
                 configuration = self.get_context_value(context, Context.CONFIGURATION)
+                intensity = self.get_context_value(context, Context.INTENSITY)
                 wordlist = self.get_context_value(context, Context.WORDLIST)
                 input_technology = self.get_context_value(context, Context.INPUT_TECHNOLOGY)
                 input_vulnerability = self.get_context_value(context, Context.INPUT_VULNERABILITY)
+                for condition, text in [
+                    (target, "target"),
+                    (process or configuration, "process or configuration"),
+                    (intensity, "intensity"),
+                ]:
+                    if not condition:
+                        await self.reply(update, f"No {text} selected")
+                        return ConversationHandler.END
                 data = {
                     "target_id": target.id,
-                    "intensity": self.get_context_value(context, Context.INTENSITY).capitalize(),
+                    "intensity": intensity.capitalize(),
                     "executor": chat.user,
                     "wordlists": [wordlist.id] if wordlist else [],
                     "input_technologies": [input_technology.id] if input_technology else [],

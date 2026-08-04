@@ -43,6 +43,11 @@ class HttpHeaderTest(ApiTest, TestCase):
         ApiTestCase([Role.ADMIN, Role.AUDITOR], expected={"id": 2, **new_data}, endpoint="2"),
         DeleteApiTestCase(["auditor1"], endpoint="1"),
         ApiTestCase(["admin1", "auditor1"], 404, endpoint="1"),
+        DeleteApiTestCase([Role.AUDITOR, Role.READER], 403, endpoint="2"),
+        DeleteApiTestCase(["admin1"], endpoint="2"),
+        DeleteApiTestCase([Role.ADMIN, "auditor1"], 404, endpoint="3"),
+        DeleteApiTestCase(["auditor2"], endpoint="3"),
+        ApiTestCase([Role.ADMIN, Role.AUDITOR, Role.READER], expected=[]),
     ]
 
     def test_base_input_filter(self) -> None:

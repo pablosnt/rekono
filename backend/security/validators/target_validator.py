@@ -37,17 +37,28 @@ class TargetValidator(RegexValidator, LoggingEntity):
         - DNS-aware checks: domains are forward-resolved and their addresses
           checked, single IPs are reverse-resolved and their hostname checked,
           so a target cannot reach a denied address through name resolution
-        - Regex pattern matching for flexible target specification
-        - IPv4/IPv6 network range validation and blocking
+        - IPv4-mapped IPv6 addresses checked as their IPv4 form, since both
+          reach the same host
+        - IP range targets checked address by address, and IP range deny list
+          entries expanded so they deny both the addresses they cover and the
+          networks that contain any of them
+        - Regex pattern matching for flexible target specification, applied over the
+          original case of the entry so that lower-casing it doesn't invert the escapes
+          that select a character class by case, like \\D or \\S
+        - IPv4/IPv6 network validation and blocking, comparing networks in both
+          directions so a network that contains a denied one is denied as well
         - Resilient matching that cannot be crashed by a malformed deny list
-          entry (invalid regex or network)
+          entry (invalid regex, IP range or network), including the IP range
+          entries that the pattern accepts but that cover no address, like the
+          ones with octets over 255 or with a start greater than the end
 
     Validation Process:
         1. Basic regex pattern validation
-        2. DNS resolution, collecting the literal target and any resolved values
-           into a single candidate set
-        3. Deny list matching of every candidate (exact, regex and IP network),
-           rejecting the target as soon as any one of them matches
+        2. Expansion of the target into a candidate set: the literal value, the
+           addresses of an IP range, the IPv4 form of an IPv4-mapped IPv6 address,
+           and the values obtained from DNS resolution
+        3. Deny list matching of every candidate (exact, regex, IP range and
+           network), rejecting the target as soon as any one of them matches
 
     Args:
         regex (Regex | str): Regex pattern for target format validation.
@@ -85,18 +96,77 @@ class TargetValidator(RegexValidator, LoggingEntity):
         # isinstance verification is needed to keep compatibility with old database migrations
         super().__init__(regex.value if isinstance(regex, Regex) else regex, message, code, inverse_match, flags)
 
+    def _deny(self, value: str, denied_target: TargetDenylist, reason: str) -> None:
+        """Reject a target that matched a deny list entry.
+
+        F() increments the entry's blocked counter at the database level, so concurrent
+        validations hitting the same entry don't lose updates to a race condition.
+
+        Args:
+            value (str): The target being validated.
+            denied_target (TargetDenylist): Deny list entry matched by the target.
+            reason (str): How the target matched the entry, used to build the log message.
+
+        Raises:
+            ValidationError: Always, since reaching this method means the target is denied.
+        """
+        denied_target.blocked = F("blocked") + 1
+        denied_target.save(update_fields=["blocked"])
+        self.logger.warning(f"[Security] Target '{value}' {reason} {denied_target.target}")
+        raise ValidationError(self.message, code=self.code, params={"value": value})
+
+    @staticmethod
+    def get_ip_range_addresses(ip_range: str) -> list[ipaddress.IPv4Address | ipaddress.IPv6Address]:
+        """Expand an IP range into every address that it covers.
+
+        Ranges are written as "10.10.30.1-50", where the value after the dash is only
+        the last octet of the final address, so it is completed with the network part
+        of the first one before iterating over the addresses in between. The IP range
+        pattern only checks the shape of the value, so both ends are parsed as addresses
+        here to reject the ranges that it accepts but that cover no address, like the
+        ones with octets over 255 or with a start greater than the end.
+
+        It's a static method because it is also used by Target.get_type to tell a real
+        IP range from a value that just looks like one.
+
+        Args:
+            ip_range (str): IP range to expand.
+
+        Returns:
+            list[ipaddress.IPv4Address | ipaddress.IPv6Address]: All the addresses of the
+            range, including both ends, or an empty list if it covers no address. Malformed
+            values are reported as an empty list instead of an exception because deny list
+            entries are expanded with this method too, and a malformed entry must be ignored
+            instead of denying the target.
+        """
+        try:
+            start, end = ip_range.rsplit("-", 1)
+            network = start.rsplit(".", 1)[0]
+            # Both ends are parsed to reject the ranges with octets over 255, like 10.10.30.1-999,
+            # and summarize_address_range to reject the reversed ones, like 10.10.30.50-1, since it
+            # raises ValueError for them. A reversed range would otherwise expand into an empty list
+            first, last = ipaddress.ip_address(start), ipaddress.ip_address(f"{network}.{end}")
+            ipaddress.summarize_address_range(first, last)
+            return [ipaddress.ip_address(address) for address in range(int(first), int(last) + 1)]
+        except Exception:
+            return []
+
     def __call__(self, value: str | None) -> None:
         """Validate target against regex patterns and deny lists.
 
         Performs comprehensive target validation including regex pattern matching,
-        deny list checking (exact, regex pattern and IP network), and DNS-aware
-        checking of the values the target resolves to. The target is normalized
-        (lower-cased and trailing-dot stripped) before matching, and a domain is
-        forward-resolved while a single IP is reverse-resolved so the resolved
-        values are checked against the deny list too. Resolution is skipped while
-        testing to keep validation deterministic and free of network dependencies.
-        When an entry denies the target, its blocked counter is incremented to track
-        how often each deny list entry is enforced.
+        deny list checking (exact, regex pattern, IP range and network), and DNS-aware
+        checking of the values the target resolves to. The target is first expanded
+        into a set of candidates, since several ways of writing a target reach the
+        same host: an IP range contributes all its addresses and an IPv4-mapped IPv6
+        address contributes its IPv4 form. A domain is also forward-resolved while a
+        single IP is reverse-resolved, so the resolved values are checked against the
+        deny list too. Resolution is skipped while testing to keep validation
+        deterministic and free of network dependencies. Every candidate is normalized
+        (lower-cased and trailing-dot stripped) and matched against each deny list
+        entry, and the target is rejected as soon as one of them matches. When an
+        entry denies the target, its blocked counter is incremented to track how
+        often each deny list entry is enforced.
 
         Args:
             value (str | None): The target to validate (IP, domain, URL, etc.).
@@ -108,12 +178,26 @@ class TargetValidator(RegexValidator, LoggingEntity):
         if not value:
             raise ValidationError("Target is required", code=self.code, params={"value": value})
         candidates = set([value])
-        if not CONFIG.testing:  # pragma: no cover
-            from targets.models import Target
 
+        from targets.models import Target
+
+        try:
+            target_type = Target.get_type(value)
+        except Exception:
+            target_type = None
+
+        if target_type in [TargetType.PRIVATE_IP, TargetType.PUBLIC_IP]:
+            ip = ipaddress.ip_address(value)
+            # An IPv4-mapped IPv6 address reaches the same host as the IPv4 one that it maps, so
+            # ::ffff:127.0.0.1 can't be used to reach a denied IPv4 address
+            if ip.version == 6 and ip.ipv4_mapped:
+                candidates.add(str(ip.ipv4_mapped))
+        elif target_type == TargetType.IP_RANGE:
+            candidates.update([str(ip) for ip in self.get_ip_range_addresses(value)])
+
+        if not CONFIG.testing:  # pragma: no cover
             # Resolution errors must not block validation
             try:
-                target_type = Target.get_type(value)
                 if target_type in [TargetType.PRIVATE_IP, TargetType.PUBLIC_IP]:
                     resolved_domain, _, _ = socket.gethostbyaddr(value)
                     if resolved_domain:
@@ -123,45 +207,47 @@ class TargetValidator(RegexValidator, LoggingEntity):
                     candidates.update(addresses)
             except Exception:
                 pass
+        denylist_entries = TargetDenylist.objects.all()
         for _candidate in candidates:
             if not _candidate:
                 continue
             # Strip a trailing dot so the FQDN form (example.com.) cannot bypass an
             # entry stored without it, since DNS treats both as equivalent
             candidate = _candidate.strip().rstrip(".").lower()
-            for denied_value in TargetDenylist.objects.all():
+            for denied_value in denylist_entries:
                 denied_target = denied_value.target.lower()
                 if candidate == denied_target:
-                    # F() increments the counter at the database level, so concurrent
-                    # validations hitting the same entry don't lose updates to a race condition
-                    denied_value.blocked = F("blocked") + 1
-                    denied_value.save(update_fields=["blocked"])
-                    self.logger.warning(f"[Security] Target '{value}' is denied by policy")
-                    raise ValidationError(self.message, code=self.code, params={"value": value})
-                # A malformed deny list entry (invalid regex) must be ignored instead of crashing validation
+                    self._deny(value, denied_value, "matches denied target")
+                # A malformed deny list entry (invalid regex, IP range or network) must be
+                # ignored instead of crashing validation
                 try:
-                    regex_match = bool(re.fullmatch(denied_target, candidate))
-                except Exception:
-                    regex_match = False
-                if regex_match:
-                    denied_value.blocked = F("blocked") + 1
-                    denied_value.save(update_fields=["blocked"])
-                    self.logger.warning(f"[Security] Target '{value}' match the denied value {denied_value.target}")
-                    raise ValidationError(self.message, code=self.code, params={"value": value})
-                for address_class, network_class in [
-                    (ipaddress.IPv4Address, ipaddress.IPv4Network),
-                    (ipaddress.IPv6Address, ipaddress.IPv6Network),
-                ]:
-                    # ValueError covers AddressValueError and NetmaskValueError so a
-                    # malformed deny list network entry is ignored instead of crashing
-                    try:
-                        network_match = address_class(candidate) in network_class(denied_target)
-                    except Exception:
-                        network_match = False
-                    if network_match:
-                        denied_value.blocked = F("blocked") + 1
-                        denied_value.save(update_fields=["blocked"])
-                        self.logger.warning(
-                            f"[Security] Target '{value}' belongs to the denied network {denied_value.target}"
-                        )
-                        raise ValidationError(self.message, code=self.code, params={"value": value})
+                    if bool(re.fullmatch(denied_value.target, candidate, re.IGNORECASE)):
+                        self._deny(value, denied_value, "matches denied target pattern")
+                    # A domain only matches an entry as a literal value or as a regex pattern,
+                    # so the address-based comparisons are skipped for it
+                    if target_type != TargetType.DOMAIN:
+                        # An IP range entry denies every address it covers, so it is expanded
+                        # before comparing it with the target
+                        if bool(re.fullmatch(Regex.IP_RANGE.value, denied_target)):
+                            denied_targets = self.get_ip_range_addresses(denied_target)
+                            if target_type == TargetType.NETWORK:
+                                target_network = ipaddress.ip_network(candidate)
+                                if any(denied_target in target_network for denied_target in denied_targets):
+                                    self._deny(value, denied_value, "is included in denied range")
+                            else:
+                                if ipaddress.ip_address(candidate) in denied_targets:
+                                    self._deny(value, denied_value, "belongs to denied range")
+                        if target_type == TargetType.NETWORK:
+                            # A network covers several addresses, so it is compared to the denied network
+                            # in both directions to detect also the networks that include it
+                            if ipaddress.ip_network(candidate).overlaps(ipaddress.ip_network(denied_target)):
+                                self._deny(value, denied_value, "overlaps denied network")
+                        else:
+                            if ipaddress.ip_address(candidate) in ipaddress.ip_network(denied_target):
+                                self._deny(value, denied_value, "belongs to denied network")
+
+                except Exception as ex:
+                    # The rejections raised by _deny happen inside this block too, so they are
+                    # re-raised instead of being ignored as a malformed deny list entry
+                    if isinstance(ex, ValidationError):
+                        raise ex

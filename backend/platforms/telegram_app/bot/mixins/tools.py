@@ -78,7 +78,9 @@ class ConfigurationMixin(BaseMixin):
     async def ask_for_configuration(self, update: Update, context: CallbackContext) -> int:
         """Display tool configuration selection options.
 
-        Shows available configurations for the selected security tool.
+        Shows available configurations for the selected security tool. The
+        conversation ends when no tool has been selected yet, since listing
+        configurations without a tool would offer every configuration in Rekono.
 
         Args:
             update (Update): The Telegram update containing user interaction.
@@ -88,12 +90,16 @@ class ConfigurationMixin(BaseMixin):
             int: Next conversation state based on configuration selection.
         """
         self.validate_update(update)
+        tool = self.get_context_value(context, Context.TOOL)
+        if not tool:
+            await self.reply(update, "No tool selected")
+            return ConversationHandler.END
         return await self.go_to_next_state(
             update,
             context,
             await self.ask(
                 update,
-                Configuration.objects.filter(tool=self.get_context_value(context, Context.TOOL)),
+                Configuration.objects.filter(tool=tool),
                 "name",
                 2,
                 "Choose configuration",
@@ -173,6 +179,8 @@ class IntensityMixin(BaseMixin):
 
         Processes the user's intensity selection, converts to uppercase,
         and stores it in the conversation context for security testing execution.
+        The conversation ends when nothing was stored, so the next states never
+        run with a missing intensity.
 
         Args:
             update (Update): The Telegram update containing user selection.
@@ -189,8 +197,10 @@ class IntensityMixin(BaseMixin):
                 update, context, Context.INTENSITY, "Intensity", self.get_next_state(self.save_intensity)
             ),
         )
+        intensity = self.get_context_value(context, Context.INTENSITY)
+        if not intensity:
+            await self.reply(update, "No intensity selected")
+            return ConversationHandler.END
         if next_state != ConversationHandler.END:
-            self.add_context_value(
-                context, Context.INTENSITY, (self.get_context_value(context, Context.INTENSITY) or "").upper()
-            )
+            self.add_context_value(context, Context.INTENSITY, intensity.upper())
         return await self.go_to_next_state(update, context, next_state)

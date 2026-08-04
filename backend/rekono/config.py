@@ -66,8 +66,11 @@ class Property:
         instead of resolving to None. Combined with ``update``, this is what lets a
         property such as the encryption key be cleared by writing null to the file.
 
-        Includes intelligent type conversion for boolean values and list
-        parsing from environment variables using common separators.
+        Includes intelligent type conversion for boolean and integer values, and
+        list parsing from environment variables using common separators. The type
+        to convert to is taken from the default value, since environment variables
+        are always read as strings. Values that can't be converted fall back to the
+        default instead of raising an error.
 
         Args:
             file_config (dict[str, Any]): Dictionary containing configuration file data.
@@ -103,6 +106,12 @@ class Property:
         # Convert to bool if needed
         if isinstance(self.default, bool) and not isinstance(value, bool):
             value = str(value).lower() == "true"
+        # Convert to int if needed, after the bool check since bool is a subclass of int
+        elif isinstance(self.default, int) and not isinstance(value, int):
+            try:
+                value = int(value)
+            except (TypeError, ValueError):
+                value = self.default
         return value
 
     def update(self, rekono_config: "RekonoConfig", value: Any) -> None:
@@ -161,7 +170,7 @@ class RekonoConfig:
         _rq_port (Property): Redis Queue port configuration property.
         _frontend_url (Property): Frontend URL configuration property.
         _frontend_desktop (Property): Frontend Desktop configuration property.
-        _trusted_proxy (Property): Trusted proxy flag configuration property.
+        _trusted_proxies (Property): Trusted proxies configuration property.
         _allowed_hosts (Property): Allowed hosts list configuration property.
         _encryption_key (Property): Encryption key configuration property.
         _secret_key (Property): Django secret key configuration property.
@@ -202,7 +211,7 @@ class RekonoConfig:
     _frontend_url = Property("RKN_FRONTEND_URL", "frontend.url", "https://127.0.0.1")
     _frontend_desktop = Property("RKN_FRONTEND_DESKTOP", "frontend.desktop", False)
     # Infrastructure context
-    _trusted_proxy = Property("RKN_TRUSTED_PROXY", None, False)
+    _trusted_proxies = Property("RKN_TRUSTED_PROXIES", None, 0)
     # Security
     _allowed_hosts = Property("RKN_ALLOWED_HOSTS", "security.allowed-hosts", ["localhost", "127.0.0.1", "::1"])
     _encryption_key = Property(None, "security.encryption-key", None)
@@ -437,13 +446,17 @@ class RekonoConfig:
         return self._allowed_hosts.read(self.config_from_file)
 
     @property
-    def trusted_proxy(self) -> bool:
-        """Get trusted proxy configuration.
+    def trusted_proxies(self) -> int:
+        """Get the number of trusted proxies deployed in front of Rekono.
+
+        It's the number of entries that these proxies append to the X-Forwarded-For
+        header, so the client IP address can be resolved from the header ignoring the
+        entries that the client supplied itself.
 
         Returns:
-            bool: True if running behind a trusted proxy, False otherwise.
+            int: Number of trusted proxies in front of Rekono, or 0 if there is none.
         """
-        return self._trusted_proxy.read(self.config_from_file)
+        return self._trusted_proxies.read(self.config_from_file)
 
     @property
     def otp_expiration_hours(self) -> int:

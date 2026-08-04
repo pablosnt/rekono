@@ -65,7 +65,7 @@ const props = withDefaults(
     data: Array<unknown>;
     series: BarSeries[];
     yLabel: (item) => string;
-    tooltip?: (d) => string | null;
+    tooltip?: (d) => HTMLElement | null;
     onBarClick?: (d) => void;
     orientation?: "horizontal" | "vertical";
     barHeight?: number;

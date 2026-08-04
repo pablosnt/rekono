@@ -191,50 +191,10 @@
     },
     {
         "model": "tools.input",
-        "pk": 20,
-        "fields": {
-            "argument": 13,
-            "type": 3,
-            "filter": null,
-            "order": 2
-        }
-    },
-    {
-        "model": "tools.input",
-        "pk": 21,
-        "fields": {
-            "argument": 14,
-            "type": 3,
-            "filter": null,
-            "order": 1
-        }
-    },
-    {
-        "model": "tools.input",
         "pk": 22,
         "fields": {
             "argument": 15,
             "type": 2,
-            "filter": null,
-            "order": 1
-        }
-    },
-    {
-        "model": "tools.input",
-        "pk": 23,
-        "fields": {
-            "argument": 15,
-            "type": 3,
-            "filter": null,
-            "order": 2
-        }
-    },
-    {
-        "model": "tools.input",
-        "pk": 24,
-        "fields": {
-            "argument": 16,
-            "type": 3,
             "filter": null,
             "order": 1
         }
@@ -251,50 +211,10 @@
     },
     {
         "model": "tools.input",
-        "pk": 26,
-        "fields": {
-            "argument": 17,
-            "type": 3,
-            "filter": null,
-            "order": 2
-        }
-    },
-    {
-        "model": "tools.input",
-        "pk": 27,
-        "fields": {
-            "argument": 18,
-            "type": 3,
-            "filter": null,
-            "order": 1
-        }
-    },
-    {
-        "model": "tools.input",
         "pk": 28,
         "fields": {
             "argument": 19,
             "type": 2,
-            "filter": null,
-            "order": 1
-        }
-    },
-    {
-        "model": "tools.input",
-        "pk": 29,
-        "fields": {
-            "argument": 19,
-            "type": 3,
-            "filter": null,
-            "order": 2
-        }
-    },
-    {
-        "model": "tools.input",
-        "pk": 30,
-        "fields": {
-            "argument": 20,
-            "type": 3,
             "filter": null,
             "order": 1
         }
@@ -311,50 +231,10 @@
     },
     {
         "model": "tools.input",
-        "pk": 32,
-        "fields": {
-            "argument": 21,
-            "type": 3,
-            "filter": null,
-            "order": 2
-        }
-    },
-    {
-        "model": "tools.input",
-        "pk": 33,
-        "fields": {
-            "argument": 22,
-            "type": 3,
-            "filter": null,
-            "order": 1
-        }
-    },
-    {
-        "model": "tools.input",
         "pk": 34,
         "fields": {
             "argument": 23,
             "type": 2,
-            "filter": null,
-            "order": 1
-        }
-    },
-    {
-        "model": "tools.input",
-        "pk": 35,
-        "fields": {
-            "argument": 23,
-            "type": 3,
-            "filter": null,
-            "order": 2
-        }
-    },
-    {
-        "model": "tools.input",
-        "pk": 36,
-        "fields": {
-            "argument": 24,
-            "type": 3,
             "filter": null,
             "order": 1
         }
@@ -425,7 +305,7 @@
         "fields": {
             "argument": 29,
             "type": 10,
-            "filter": "!cookie",
+            "filter": "bearer or jwt",
             "order": 1
         }
     },
@@ -485,7 +365,7 @@
         "fields": {
             "argument": 34,
             "type": 10,
-            "filter": "!cookie",
+            "filter": "bearer or jwt",
             "order": 1
         }
     },
@@ -545,7 +425,7 @@
         "fields": {
             "argument": 39,
             "type": 10,
-            "filter": "!cookie",
+            "filter": "bearer or jwt",
             "order": 1
         }
     },
@@ -605,7 +485,7 @@
         "fields": {
             "argument": 44,
             "type": 10,
-            "filter": "!cookie",
+            "filter": "bearer or jwt",
             "order": 1
         }
     },
@@ -1101,12 +981,22 @@
     },
     {
         "model": "tools.input",
+        "pk": 112,
+        "fields": {
+            "argument": 82,
+            "type": 3,
+            "filter": "http",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
         "pk": 113,
         "fields": {
             "argument": 82,
             "type": 2,
             "filter": "!ip_range and !network",
-            "order": 1
+            "order": 2
         }
     },
     {
@@ -1141,12 +1031,22 @@
     },
     {
         "model": "tools.input",
+        "pk": 117,
+        "fields": {
+            "argument": 86,
+            "type": 3,
+            "filter": "http",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
         "pk": 118,
         "fields": {
             "argument": 86,
             "type": 2,
             "filter": "!ip_range and !network",
-            "order": 1
+            "order": 2
         }
     },
     {
@@ -1181,12 +1081,22 @@
     },
     {
         "model": "tools.input",
+        "pk": 122,
+        "fields": {
+            "argument": 90,
+            "type": 3,
+            "filter": "http",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
         "pk": 123,
         "fields": {
             "argument": 90,
             "type": 2,
             "filter": "!ip_range and !network",
-            "order": 1
+            "order": 2
         }
     },
     {
@@ -1386,6 +1296,46 @@
             "argument": 107,
             "type": 6,
             "filter": "cve",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 144,
+        "fields": {
+            "argument": 108,
+            "type": 10,
+            "filter": "basic or digest or ntlm",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 145,
+        "fields": {
+            "argument": 109,
+            "type": 10,
+            "filter": "basic or digest or ntlm",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 146,
+        "fields": {
+            "argument": 110,
+            "type": 10,
+            "filter": "basic or digest or ntlm",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 147,
+        "fields": {
+            "argument": 111,
+            "type": 10,
+            "filter": "basic or digest or ntlm",
             "order": 1
         }
     }

@@ -4,6 +4,7 @@ Provides RESTful API endpoints for managing HTTP headers used in security
 testing operations with proper access control and data isolation.
 """
 
+from django.core.exceptions import PermissionDenied
 from django.db.models import Q, QuerySet
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.serializers import Serializer
@@ -13,6 +14,7 @@ from http_headers.filters import HttpHeaderFilter
 from http_headers.models import HttpHeader
 from http_headers.serializers import HttpHeaderSerializer, UpdateHttpHeaderSerializer
 from security.authorization.permissions import (
+    IsAdmin,
     ProjectMemberPermission,
     RekonoModelPermission,
 )
@@ -72,3 +74,25 @@ class HttpHeaderViewSet(BaseViewSet):
             Serializer: UpdateHttpHeaderSerializer for PUT requests, HttpHeaderSerializer otherwise
         """
         return UpdateHttpHeaderSerializer if self.request.method == "PUT" else super().get_serializer_class()
+
+    def perform_destroy(self, instance: HttpHeader) -> None:
+        """Delete an HTTP header after checking its scope against the requesting user.
+
+        Deletions don't go through any serializer, so the scope checks that
+        HttpHeaderSerializer and UpdateHttpHeaderSerializer apply on creation and
+        update are repeated here: a user-specific header can only be removed by its
+        own user, and a global header, which has neither target nor user, only by
+        Admin users. Target-specific headers can still be removed by any project
+        member with deletion permissions.
+
+        Args:
+            instance (HttpHeader): HTTP header to be removed.
+
+        Raises:
+            PermissionDenied: If user lacks permission to delete the header.
+        """
+        if (instance.user is not None and instance.user != self.request.user) or (
+            instance.user is None and instance.target is None and not IsAdmin().has_permission(self.request, self)
+        ):
+            raise PermissionDenied()
+        super().perform_destroy(instance)

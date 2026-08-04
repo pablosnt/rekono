@@ -289,15 +289,21 @@ class BaseExecutor(LoggingEntity):
                     f"Argument '{argument.name}' is required to execute configuration '{argument.configuration.name}'"
                 )
         # Split the formatted command into individual arguments, keeping quoted segments
-        # (e.g. a quoted header value containing spaces) together as a single token
-        # Strip the double quote characters themselves, since these arguments are passed
-        # directly to subprocess.run rather than through a shell that would otherwise
-        # remove them. Single quotes are left in place, so a single-quoted template reaches
-        # the tool with its quotes intact
+        # (e.g. a quoted header value or a secret containing spaces) together as a single
+        # token. The two quote characters mean different things in an argument template,
+        # because these arguments are passed directly to subprocess.run rather than through
+        # a shell that would remove them:
+        # - Single quotes only group, so they are stripped and the tool receives the bare
+        #   value. This is what almost every argument needs
+        # - Double quotes group as well, but are kept, so the tool receives them as part of
+        #   the value. Only needed by tools that parse quotes themselves, like Nikto, whose
+        #   STATIC-COOKIE option ignores any cookie that isn't written as "name=value"
+        # A quoted value that ends up empty is still matched as a single token, so its quotes
+        # can't be joined to the next argument and break the structure of the command
         return [
-            a.replace('"', "")
+            a.replace("'", "")
             for a in re.findall(
-                r'[^\s\'"]*[\'"][^\'"]+[\'"]|[^\'"\s]+',
+                r'[^\s\'"]*[\'"][^\'"]*[\'"]|[^\'"\s]+',
                 self.execution.configuration.command_template.format(**parameters),
             )
         ]

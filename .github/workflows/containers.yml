@@ -29,18 +29,22 @@ jobs:
             dockerfile: docker/Dockerfile
             image: rekono-backend
             target: backend
+            sbom: true
           - name: Frontend
             dockerfile: docker/Dockerfile
             image: rekono-frontend
             target: frontend
+            sbom: true
           - name: Nginx
             dockerfile: docker/nginx/Dockerfile
             image: rekono-nginx
             target: null
+            sbom: true
           - name: Worker
             dockerfile: docker/Dockerfile
             image: rekono-worker
             target: worker
+            sbom: false
             # Docker image is very large and we need some extra GB to complete the build
             clean-disk: true
     name: ${{ matrix.name }}
@@ -100,7 +104,7 @@ jobs:
           tags: ${{ env.DOCKER_USER }}/${{ matrix.image }}:unstable
           load: true
           push: true
-          sbom: true
+          sbom: ${{ matrix.sbom }}
           provenance: true
           build-args: |
             LABEL_CREATED=${{ steps.metadata.outputs.date }}
@@ -118,7 +122,7 @@ jobs:
           tags: ${{ env.DOCKER_USER }}/${{ matrix.image }}:${{ github.event.release.name }},${{ env.DOCKER_USER }}/${{ matrix.image }}:latest,${{ env.DOCKER_USER }}/${{ matrix.image }}:unstable
           load: true
           push: true
-          sbom: true
+          sbom: ${{ matrix.sbom }}
           provenance: true
           build-args: |
             LABEL_CREATED=${{ steps.metadata.outputs.date }}

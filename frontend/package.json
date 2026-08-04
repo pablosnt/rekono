@@ -31,7 +31,7 @@
     "@unovis/ts": "^1.6.7",
     "@unovis/vue": "^1.6.7",
     "jwt-decode": "^4.0.0",
-    "nuxt": "^4.5.0",
+    "nuxt": "4.4.8",
     "nuxt-qrcode": "^0.4.10",
     "pinia": "^4.0.2",
     "shiki": "^4.3.1",

@@ -22,6 +22,7 @@ from platforms.email.notifications import SMTP
 from rekono.settings import CONFIG
 from security.authentication.tokens import MfaRequiredToken
 from security.authorization.roles import Role
+from users.enums import OtpScope
 from users.models import User
 
 
@@ -257,8 +258,9 @@ class SendMfaEmailSerializer(MfaRequiredSerializer):
     def save(self, **kwargs: Any) -> User:
         """Generate and send OTP via email.
 
-        Creates a time-limited OTP code and sends it to the user's
-        registered email address through the SMTP notification system.
+        Creates a time-limited OTP code, bound to the MFA scope so it can only
+        be used as a second factor, and sends it to the user's registered email
+        address through the SMTP notification system.
 
         Args:
             **kwargs (Any): Additional save parameters.
@@ -266,7 +268,8 @@ class SendMfaEmailSerializer(MfaRequiredSerializer):
         Returns:
             User: The user for whom the OTP was generated.
         """
-        SMTP().mfa(self.user, User.objects.setup_otp(self.user, {"minutes": CONFIG.mfa_expiration_minutes}))
+        plain_otp = User.objects.setup_otp(self.user, OtpScope.MFA, {"minutes": CONFIG.mfa_expiration_minutes})
+        SMTP().mfa(self.user, plain_otp)
         return self.user
 
 

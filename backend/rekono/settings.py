@@ -127,7 +127,7 @@ WSGI_APPLICATION = "rekono.wsgi.application"
 SECRET_KEY = CONFIG.secret_key
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = CONFIG.allowed_hosts
 
@@ -245,6 +245,7 @@ REST_FRAMEWORK: dict[str, Any] = {
         "security.authorization.permissions.OwnerPermission",
     ],
     "EXCEPTION_HANDLER": "framework.exceptions.handler",
+    "NUM_PROXIES": CONFIG.trusted_proxies,
 }
 if not CONFIG.testing:
     # Rate limit only for production

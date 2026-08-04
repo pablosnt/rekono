@@ -14,7 +14,7 @@ from security.authorization.roles import Role
 from tests.framework import ApiTest, ApiTestNoData
 from tests.framework.cases import ApiTestCase, DeleteApiTestCase, PostApiTestCase, PutApiTestCase
 from tests.framework.data import SetupProject
-from users.enums import Notification
+from users.enums import Notification, OtpScope
 from users.models import User
 
 # pytype: disable=wrong-arg-types
@@ -285,7 +285,7 @@ class UserTest(ApiTest, TestCase):
         self.assertEqual(204, client.post(f"{self.endpoint}7/resend/").status_code)
 
         new_user = User.objects.get(email=invitation1["email"])
-        otp = User.objects.setup_otp(new_user)
+        otp = User.objects.setup_otp(new_user, OtpScope.INVITATION)
         self.assertEqual(403, client.post(f"{self.endpoint}signup/", data={"otp": otp, **user1}).status_code)
 
         client = APIClient()
@@ -394,7 +394,7 @@ class ProfileTest(ApiTest, TestCase):
 
         # Verify the new address
         verify_endpoint = "/api/users/verify-email/"
-        otp = User.objects.setup_otp(self.admin1)
+        otp = User.objects.setup_otp(self.admin1, OtpScope.EMAIL_VERIFICATION)
         self.assertEqual(200, client.post(verify_endpoint, data={"otp": otp}).status_code)
         self.admin1.refresh_from_db()
         self.assertEqual(new_email, self.admin1.email)
@@ -405,8 +405,31 @@ class ProfileTest(ApiTest, TestCase):
         # Invalid OTP
         self.assertEqual(401, anonymous.post(verify_endpoint, data={"otp": "invalid otp"}).status_code)
         # No pending email
-        otp = User.objects.setup_otp(self.admin1)
+        otp = User.objects.setup_otp(self.admin1, OtpScope.EMAIL_VERIFICATION)
         self.assertEqual(401, anonymous.post(verify_endpoint, data={"otp": otp}).status_code)
+
+    @mock.patch("platforms.email.notifications.SMTP.is_available", lambda self: True)
+    def test_email_change_otp_is_only_valid_to_verify_the_email(self) -> None:
+        client = APIClient()
+        client.force_authenticate(self.admin1)
+        response = client.put(self.endpoint, data={**new_profile, "email": "new-admin1@rekono.com"})
+        self.assertEqual(200, response.status_code)
+        otp = User.objects.setup_otp(self.admin1, OtpScope.EMAIL_VERIFICATION)
+
+        # The OTP sent to the new address can't be used to reset the account password
+        anonymous = APIClient()
+        response = anonymous.put("/api/users/reset-password/", data={"otp": otp, "password": new_valid_password})
+        self.assertEqual(401, response.status_code)
+        self.assertTrue(self.admin1.check_password("admin1"))
+
+        # The OTP sent to the new address can't be used as MFA second factor
+        User.objects.register_mfa(self.admin1)
+        self.admin1.mfa = True
+        self.admin1.save(update_fields=["mfa"])
+        self.assertFalse(User.objects.verify_mfa_or_otp(otp, self.admin1))
+
+        # The OTP is still valid for the operation it was sent for
+        self.assertEqual(200, client.post("/api/users/verify-email/", data={"otp": otp}).status_code)
 
     def test_email_change_without_smtp(self) -> None:
         client = APIClient()
@@ -454,7 +477,7 @@ class ResetPasswordTest(ApiTestNoData, TestCase):
         self.assertEqual(200, client.post(self.endpoint, data={"email": "notfound@rekono.com"}).status_code)
         self.assertEqual(200, client.post(self.endpoint, data={"email": self.admin1.email}).status_code)
 
-        otp = User.objects.setup_otp(User.objects.get(email=self.admin1.email))
+        otp = User.objects.setup_otp(self.admin1, OtpScope.PASSWORD_RESET)
         self.assertEqual(
             401, client.put(self.endpoint, data={"otp": "invalid OTP", "password": new_valid_password}).status_code
         )

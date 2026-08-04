@@ -85,7 +85,8 @@ class Target(BaseInput):
         Target Type Detection Logic:
             1. IPv4/IPv6 address detection with private vs public classification
             2. CIDR network notation validation and detection
-            3. IP range pattern matching (hyphen-separated)
+            3. IP range pattern matching (hyphen-separated) and expansion, since the
+               pattern accepts ranges that don't cover any address
             4. Domain name resolution validation
 
         Args:
@@ -112,7 +113,7 @@ class Target(BaseInput):
         except ValueError:
             pass  # Target is not a network
         # Check if target is an IP range
-        if bool(re.fullmatch(Regex.IP_RANGE.value, target)):
+        if bool(re.fullmatch(Regex.IP_RANGE.value, target)) and len(TargetValidator.get_ip_range_addresses(target)) > 0:
             return TargetType.IP_RANGE
         # Check if target resolves to an IP
         if cls.resolve_domain(target) is not None:

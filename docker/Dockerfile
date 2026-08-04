@@ -191,27 +191,31 @@ RUN apt update && \
     uv pip install --system --break-system-packages --python /opt/python/bin/python -r /opt/EmailHarvester/requirements.txt && \
     # Initializer script
     mkdir -p /entrypoints && \
-    echo "uv run --no-dev manage.py migrate" > /entrypoints/initializer.sh && \
+    echo "#!/bin/bash" > /entrypoints/initializer.sh && \
+    echo "uv run --no-dev manage.py migrate" >> /entrypoints/initializer.sh && \
     echo "uv run --no-dev manage.py createsuperuser --no-input  || true" >> /entrypoints/initializer.sh && \
     echo "uv run --no-dev manage.py monitor" >> /entrypoints/initializer.sh && \
     chmod +x /entrypoints/initializer.sh && \
-    # Update tooling resources
+    # Update tooling resources. This script is executed as root via sudo, so it's kept in a
+    # root-owned directory to prevent the rootless user from replacing it and escalating privileges
     searchsploit --update || true && \
-    echo "searchsploit --update || true" > /entrypoints/update-tooling.sh && \
-    chmod +x /entrypoints/update-tooling.sh && \
+    # The exploits database is updated as root via Git, so the rootless user can't have write access
+    # to it. Otherwise, it could tamper with the Git repository to get commands executed as root
+    chmod -R go-w /usr/share/exploitdb && \
+    echo "#!/bin/bash" > /usr/local/sbin/update-tooling.sh && \
+    echo "searchsploit --update || true" >> /usr/local/sbin/update-tooling.sh && \
+    chmod 700 /usr/local/sbin/update-tooling.sh && \
     # Executions worker script
-    echo "nuclei -update-templates" > /entrypoints/executions-worker.sh && \
-    echo "sudo /entrypoints/update-tooling.sh &" >> /entrypoints/executions-worker.sh && \
+    echo "#!/bin/bash" > /entrypoints/executions-worker.sh && \
+    echo "nuclei -update-templates" >> /entrypoints/executions-worker.sh && \
+    echo "sudo /usr/local/sbin/update-tooling.sh &" >> /entrypoints/executions-worker.sh && \
     echo "uv run --no-dev manage.py rqworker executions" >> /entrypoints/executions-worker.sh && \
     chmod +x /entrypoints/executions-worker.sh && \
     # Rootless user
     useradd --uid 65532 --create-home rekono && \
     chown -R rekono:rekono /opt && \
     chown -R rekono:rekono /code && \
-    chown -R rekono:rekono /entrypoints && \
-    chown root:root /entrypoints/update-tooling.sh && \
-    chmod 700 /entrypoints/update-tooling.sh && \
-    echo "rekono ALL=(root) NOPASSWD: /entrypoints/update-tooling.sh" > /etc/sudoers.d/rekono-update-tooling && \
+    echo "rekono ALL=(root) NOPASSWD: /usr/local/sbin/update-tooling.sh" > /etc/sudoers.d/rekono-update-tooling && \
     chmod 440 /etc/sudoers.d/rekono-update-tooling && \
     chown -R rekono:rekono /usr/share/cmseek && \
     chown -R rekono:rekono /usr/share/seclists && \

@@ -232,7 +232,7 @@ services:
       - RKN_DB_USER=postgres
       - RKN_DB_PASSWORD=postgres
       - RKN_RQ_HOST=valkey
-      - RKN_TRUSTED_PROXY=true
+      - RKN_TRUSTED_PROXIES=1
       - RKN_ALLOWED_HOSTS=*
     security_opt:
       - no-new-privileges:true
