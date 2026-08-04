@@ -51,5 +51,15 @@ constraint-dependencies = [
 line-length = 120
 indent-width = 4
 
+[tool.ruff.lint]
+select = ["D"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = ["D"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+ignore-var-parameters = true
+
 [tool.coverage.run]
 concurrency = ["multiprocessing", "thread"]
