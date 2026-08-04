@@ -127,7 +127,7 @@ WSGI_APPLICATION = "rekono.wsgi.application"
 SECRET_KEY = CONFIG.secret_key
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = CONFIG.allowed_hosts
 
