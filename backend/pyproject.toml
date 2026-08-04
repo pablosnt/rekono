@@ -7,7 +7,7 @@ requires-python = ">=3.11,<4.0"
 dependencies = [
     "certifi==2026.7.22",
     "cvss==3.6",
-    "cryptography==50.0.0",
+    "cryptography==49.0.0",
     "defusedxml==0.7.1",
     "django==5.2.16",
     "django-filter==26.1",
