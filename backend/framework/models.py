@@ -424,7 +424,7 @@ class BaseInput(BaseModel):
             requested_urls.append(url)
             # Use disabled SSL verification for testing purposes and short timeout for efficiency
             # nosemgrep: python.requests.security.disabled-cert-validation.disabled-cert-validation
-            response = requests.get(url, timeout=5, verify=False, allow_redirects=False)
+            response = requests.get(url, timeout=20, verify=False, allow_redirects=False)
             location = response.headers.get("Location") if response.is_redirect else None
             if not location:
                 return url
