@@ -144,17 +144,6 @@
     },
     {
         "model": "tools.argument",
-        "pk": 14,
-        "fields": {
-            "configuration": 7,
-            "name": "ports",
-            "argument": "-p {ports_commas}",
-            "required": false,
-            "multiple": true
-        }
-    },
-    {
-        "model": "tools.argument",
         "pk": 15,
         "fields": {
             "configuration": 8,
@@ -162,17 +151,6 @@
             "argument": "{host}",
             "required": true,
             "multiple": false
-        }
-    },
-    {
-        "model": "tools.argument",
-        "pk": 16,
-        "fields": {
-            "configuration": 8,
-            "name": "ports",
-            "argument": "-p {ports_commas}",
-            "required": false,
-            "multiple": true
         }
     },
     {
@@ -188,17 +166,6 @@
     },
     {
         "model": "tools.argument",
-        "pk": 18,
-        "fields": {
-            "configuration": 9,
-            "name": "ports",
-            "argument": "-p {ports_commas}",
-            "required": false,
-            "multiple": true
-        }
-    },
-    {
-        "model": "tools.argument",
         "pk": 19,
         "fields": {
             "configuration": 10,
@@ -206,17 +173,6 @@
             "argument": "{host}",
             "required": true,
             "multiple": false
-        }
-    },
-    {
-        "model": "tools.argument",
-        "pk": 20,
-        "fields": {
-            "configuration": 10,
-            "name": "ports",
-            "argument": "-p {ports_commas}",
-            "required": false,
-            "multiple": true
         }
     },
     {
@@ -232,17 +188,6 @@
     },
     {
         "model": "tools.argument",
-        "pk": 22,
-        "fields": {
-            "configuration": 11,
-            "name": "ports",
-            "argument": "-p {ports_commas}",
-            "required": false,
-            "multiple": true
-        }
-    },
-    {
-        "model": "tools.argument",
         "pk": 23,
         "fields": {
             "configuration": 12,
@@ -250,17 +195,6 @@
             "argument": "{host}",
             "required": true,
             "multiple": false
-        }
-    },
-    {
-        "model": "tools.argument",
-        "pk": 24,
-        "fields": {
-            "configuration": 12,
-            "name": "ports",
-            "argument": "-p {ports_commas}",
-            "required": false,
-            "multiple": true
         }
     },
     {
@@ -884,8 +818,8 @@
         "pk": 82,
         "fields": {
             "configuration": 39,
-            "name": "host",
-            "argument": "-u {host}",
+            "name": "url",
+            "argument": "-u {url}",
             "required": true,
             "multiple": false
         }
@@ -928,8 +862,8 @@
         "pk": 86,
         "fields": {
             "configuration": 40,
-            "name": "host",
-            "argument": "-u {host}",
+            "name": "url",
+            "argument": "-u {url}",
             "required": true,
             "multiple": false
         }
@@ -972,8 +906,8 @@
         "pk": 90,
         "fields": {
             "configuration": 41,
-            "name": "host",
-            "argument": "-u {host}",
+            "name": "url",
+            "argument": "-u {url}",
             "required": true,
             "multiple": false
         }
