@@ -168,7 +168,7 @@ class FileHandler(LoggingEntity):
         Returns:
             bool: True if checksums match, False if integrity check fails.
         """
-        with open(filepath, "rb+") as file:
+        with open(filepath, "rb") as file:
             checksum = hashlib.sha512(file.read()).hexdigest()
             return checksum == expected_checksum
 
@@ -189,12 +189,12 @@ class FileHandler(LoggingEntity):
         """
         path = directory / f"{str(uuid.uuid4())}.txt"
         checksum = hashlib.sha512()
-        with path.open("wb+") as stored_file:
+        with path.open("wb") as stored_file:
             for chunk in in_memory_file.chunks():
                 stored_file.write(chunk)
                 checksum.update(chunk)
         lines = 0
-        with open(path, "rb+") as stored_file:
+        with open(path, "rb") as stored_file:
             lines = len(stored_file.readlines())
         self.logger.warning(f"[Security] New file uploaded to the server in the path {path}")
         return str(path), checksum.hexdigest(), lines

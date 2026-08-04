@@ -106,7 +106,7 @@ class WordlistsConfig(BaseApp, AppConfig):
             # This prevents errors when wordlist files are missing or inaccessible
             if Path(wordlist.path).is_file() and os.access(wordlist.path, os.R_OK):  # pragma: no cover
                 # Open in binary mode to handle any file encoding issues reliably
-                with open(wordlist.path, "rb+") as wordlist_file:
+                with open(wordlist.path, "rb") as wordlist_file:
                     # Count lines to determine wordlist size for UI display
                     wordlist.size = len(wordlist_file.readlines())
                     # Use update_fields for efficiency, only updating the size field
