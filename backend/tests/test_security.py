@@ -336,7 +336,7 @@ class SecurityTest(ApiTest, TestCase):
 
 
 BLOCKED = "https://evil.com/script.js"
-ORIGIN = "https://rekono.com/projects/"
+ORIGIN = "https://rekono.dev/projects/"
 DIRECTIVE = "script-src"
 INJECTED_BLOCKED = "https://evil.com/script.js\r\nWARNING forged log entry injected by attacker"
 

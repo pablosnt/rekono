@@ -150,7 +150,7 @@ class SMTP(BaseNotification):
         # Callers may pass plain email addresses instead of user objects (see verify_email)
         if not isinstance(users[0], str):
             users = [u.email for u in users]
-        sender = "Rekono <noreply@rekono.com>"
+        sender = "Rekono <noreply@rekono.dev>"
         try:
             # Recipients in BCC not to leak their emails to other recipients
             message = EmailMultiAlternatives(

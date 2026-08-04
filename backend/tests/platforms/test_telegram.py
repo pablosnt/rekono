@@ -40,7 +40,7 @@ class TelegramSettingsTest(ApiTestNoData, TestCase):
 
 class TelegramChatTest(ApiTestNoData, TestCase):
     endpoint = "/api/telegram/link/"
-    expected_string = "admin1@rekono.com - 1"
+    expected_string = "admin1@rekono.dev - 1"
     cases = [ApiTestCase(["members", "not_members"], expected={"telegram_chat": None}, endpoint="/api/profile/")]
 
     def test_link(self) -> None:

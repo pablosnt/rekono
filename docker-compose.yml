@@ -63,7 +63,7 @@ services:
       - RKN_DB_USER=postgres
       - RKN_DB_PASSWORD=postgres
       - RKN_RQ_HOST=valkey
-      - DJANGO_SUPERUSER_EMAIL=${RKN_EMAIL:-rekono@rekono.com}
+      - DJANGO_SUPERUSER_EMAIL=${RKN_EMAIL:-rekono@rekono.dev}
       - DJANGO_SUPERUSER_USERNAME=${RKN_USERNAME:-rekono}
       - DJANGO_SUPERUSER_PASSWORD=${RKN_PASSWORD:-rekono}
   

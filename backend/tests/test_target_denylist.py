@@ -11,12 +11,12 @@ from tests.framework.data import SetupProject
 # pytype: disable=wrong-arg-types
 
 default_denylist_1 = {"id": 1, "default": True, "target": "127.0.0.1", "blocked": 0}
-target_denylist1 = {"target": "rekono.com"}
+target_denylist1 = {"target": "rekono.dev"}
 target_denylist2 = {"target": ".*\.rekono\.com"}
-invalid_regex_denylist = {"target": "*.rekono.com"}
+invalid_regex_denylist = {"target": "*.rekono.dev"}
 target_denylist3 = {"target": "10.10.10.0/24"}
 target_denylist4 = {"target": "10.10.30.1-50"}
-new_target_denylist = {"target": ".*\.new\.rekono.com"}
+new_target_denylist = {"target": ".*\.new\.rekono.dev"}
 invalid_denylist = {"target": "*.rekono;com"}
 
 
@@ -51,11 +51,11 @@ class TargetDenylistTest(ApiTest, TestCase):
         PostApiTestCase(
             ["admin1"], data=target_denylist4, expected={"id": 18, "default": False, "blocked": 0, **target_denylist4}
         ),
-        PostApiTestCase(["admin1", "auditor1"], 400, {"project": 1, "target": "rekono.com"}, endpoint="/api/targets/"),
-        PostApiTestCase(["admin1", "auditor1"], 400, {"project": 1, "target": "REKONO.COM"}, endpoint="/api/targets/"),
-        PostApiTestCase(["admin1", "auditor1"], 400, {"project": 1, "target": "rekono.com."}, endpoint="/api/targets/"),
+        PostApiTestCase(["admin1", "auditor1"], 400, {"project": 1, "target": "rekono.dev"}, endpoint="/api/targets/"),
+        PostApiTestCase(["admin1", "auditor1"], 400, {"project": 1, "target": "REKONO.DEV"}, endpoint="/api/targets/"),
+        PostApiTestCase(["admin1", "auditor1"], 400, {"project": 1, "target": "rekono.dev."}, endpoint="/api/targets/"),
         PostApiTestCase(
-            ["admin1", "auditor1"], 400, {"project": 1, "target": "subdomain.rekono.com"}, endpoint="/api/targets/"
+            ["admin1", "auditor1"], 400, {"project": 1, "target": "subdomain.rekono.dev"}, endpoint="/api/targets/"
         ),
         PostApiTestCase(["admin1", "auditor1"], 400, {"project": 1, "target": "10.10.10.1"}, endpoint="/api/targets/"),
         PostApiTestCase(["admin1", "auditor1"], 400, {"project": 1, "target": "127.0.0.1"}, endpoint="/api/targets/"),
