@@ -78,6 +78,9 @@ LABEL org.opencontainers.image.description="Rekono backend image based on a dist
 ENV PATH=/opt/python/bin:$PATH
 ENV REKONO_HOME=/rekono
 
+# sh required to define RKN_SECRET_KEY dynamically
+COPY --from=busybox:musl /bin/sh /usr/bin/sh
+COPY --chmod=755 --chown=65532:65532 docker/entrypoints/deploy-backend.sh /entrypoints/deploy-backend.sh
 COPY --from=build-backend --chown=65532:65532 /rekono /rekono
 COPY --from=build-backend --chown=65532:65532 /code /code
 COPY --from=build-backend /dpkg /
@@ -123,7 +126,7 @@ LABEL org.opencontainers.image.title="Rekono Frontend"
 LABEL org.opencontainers.image.description="Rekono frontend image based on a distroless debian image"
 
 COPY --from=build-frontend --chown=65532:65532 /code/.output/ /app
-# Wget required to healthcheck
+# wget required to healthcheck
 COPY --from=busybox:musl /bin/wget /usr/bin/wget
 
 WORKDIR /app
@@ -189,28 +192,11 @@ RUN apt update && \
     uv pip install --system --break-system-packages --python /opt/python/bin/python -r /opt/log4j-scan/requirements.txt && \
     uv pip install --system --break-system-packages --python /opt/python/bin/python -r /opt/spring4shell-scan/requirements.txt && \
     uv pip install --system --break-system-packages --python /opt/python/bin/python -r /opt/EmailHarvester/requirements.txt && \
-    # Initializer script
-    mkdir -p /entrypoints && \
-    echo "#!/bin/bash" > /entrypoints/initializer.sh && \
-    echo "uv run --no-dev manage.py migrate" >> /entrypoints/initializer.sh && \
-    echo "uv run --no-dev manage.py createsuperuser --no-input  || true" >> /entrypoints/initializer.sh && \
-    echo "uv run --no-dev manage.py monitor" >> /entrypoints/initializer.sh && \
-    chmod +x /entrypoints/initializer.sh && \
-    # Update tooling resources. This script is executed as root via sudo, so it's kept in a
-    # root-owned directory to prevent the rootless user from replacing it and escalating privileges
+    # Update tooling resources
     searchsploit --update || true && \
     # The exploits database is updated as root via Git, so the rootless user can't have write access
     # to it. Otherwise, it could tamper with the Git repository to get commands executed as root
     chmod -R go-w /usr/share/exploitdb && \
-    echo "#!/bin/bash" > /usr/local/sbin/update-tooling.sh && \
-    echo "searchsploit --update || true" >> /usr/local/sbin/update-tooling.sh && \
-    chmod 700 /usr/local/sbin/update-tooling.sh && \
-    # Executions worker script
-    echo "#!/bin/bash" > /entrypoints/executions-worker.sh && \
-    echo "nuclei -update-templates" >> /entrypoints/executions-worker.sh && \
-    echo "sudo /usr/local/sbin/update-tooling.sh &" >> /entrypoints/executions-worker.sh && \
-    echo "uv run --no-dev manage.py rqworker executions" >> /entrypoints/executions-worker.sh && \
-    chmod +x /entrypoints/executions-worker.sh && \
     # Rootless user
     useradd --uid 65532 --create-home rekono && \
     chown -R rekono:rekono /opt && \
@@ -222,6 +208,9 @@ RUN apt update && \
     chown -R rekono:rekono /usr/share/dirb/wordlists
 
 COPY --from=build-backend --chown=rekono:rekono /rekono /rekono
+COPY --chmod=755 --chown=rekono:rekono docker/entrypoints/initializer.sh /entrypoints/initializer.sh
+COPY --chmod=755 --chown=rekono:rekono docker/entrypoints/executions-worker.sh /entrypoints/executions-worker.sh
+COPY --chmod=700 --chown=root:root docker/entrypoints/update-tooling.sh /usr/local/sbin/update-tooling.sh
 USER rekono
 
 # Pre-install nuclei templates in the rekono user's home
