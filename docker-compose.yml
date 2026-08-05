@@ -205,7 +205,7 @@ services:
   backend:
     restart: always
     image: pablosnt/rekono-backend:unstable
-    command: uv run --no-dev manage.py runserver 0.0.0.0:8000
+    command: sh /entrypoints/deploy-backend.sh
     hostname: backend
     container_name: backend
     healthcheck:
