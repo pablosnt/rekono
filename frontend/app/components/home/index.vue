@@ -131,7 +131,7 @@
             />
             <h2 class="font-bold text-default text-2xl">Findings</h2>
           </div>
-          <LazyFindingsCounterAll only-active />
+          <LazyFindingsCounterAll only-active show-empty />
           <div
             v-if="hosts.length > 0 || vulnerabilities.length > 0"
             class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start"
