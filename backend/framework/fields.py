@@ -1,7 +1,7 @@
-"""Custom serializer fields for Django REST framework.
+"""Custom serializer fields shared by the Rekono API.
 
-Provides specialized field types for tags, protected secrets, and
-integer choices with enhanced security and API documentation features.
+Cover the cases where the value exposed by the API doesn't match the one stored in
+the database: tags, encrypted secrets, and integer choices exposed by name.
 """
 
 from typing import Any
@@ -15,74 +15,49 @@ from taggit.serializers import TagListSerializerField
 
 @extend_schema_field({"type": "array", "items": {"type": "string"}})
 class TagField(TagListSerializerField):
-    """Serializer field for tag lists with proper OpenAPI documentation.
-
-    Extends TagListSerializerField with enhanced OpenAPI schema definitions
-    for automatic API documentation generation.
-
-    Example:
-        ```python
-        class MySerializer(ModelSerializer):
-            tags = TagField()
-        ```
-    """
+    """List of tags, documented as an array of strings in the OpenAPI schema."""
 
     pass
 
 
 @extend_schema_field(OpenApiTypes.STR)
 class ProtectedSecretField(Field):
-    """Serializer field for protected secret values.
+    """Secret value that is never returned to the API clients.
 
-    Provides secure handling of sensitive data by masking values in responses
-    while allowing secure input validation and storage. Expects to be declared
-    on a ModelSerializer whose Meta.model is a BaseEncrypted subclass, since
-    validation is delegated to that model's encrypted field.
-
-    Security Features:
-        - Output values are masked with asterisks, one per character, so the
-          secret's length is visible but its content never is
-        - Input length and format are validated against the underlying
-          model's encrypted field before the value is accepted
-        - No exposure of actual secret values in API responses
-
-    Example:
-        ```python
-        class AuthSerializer(ModelSerializer):
-            secret = ProtectedSecretField(required=True, allow_null=False)
-        ```
+    Expects to be declared on a ModelSerializer whose Meta.model is a BaseEncrypted
+    subclass, since both the validation and the storage are delegated to that
+    model's encrypted field.
     """
 
     def to_representation(self, value: str) -> str:
-        """Convert internal value to external representation.
-
-        Masks the secret value with asterisks for security.
+        """Mask the secret with one asterisk per character.
 
         Args:
-            value (str): The internal secret value.
+            value: Decrypted secret read from the model.
 
         Returns:
-            str: Masked representation with asterisks, matching the length of
-                 the original value.
+            A masked value that keeps the length of the secret, so the clients can
+            tell whether a secret is configured without ever receiving it.
         """
         return "*" * len(value)
 
     def to_internal_value(self, value: str) -> str:
-        """Convert external representation to internal value.
+        """Validate the secret against the encrypted field that will store it.
 
         Looks up the encrypted field declared on the parent serializer's
         Meta.model (via its _encrypted_field attribute) and enforces that
         field's max_length and validators against the incoming value.
 
         Args:
-            value (str): The input value to validate and store.
+            value: Plain secret sent by the client, before it is encrypted.
 
         Returns:
-            str: The validated internal value.
+            The value unchanged, since the encryption happens when the model is
+            saved and not in this field.
 
         Raises:
-            ValidationError: If the value exceeds the encrypted field's
-                              max_length or fails its validators.
+            ValidationError: If the value exceeds the encrypted field's max_length
+              or fails its validators.
         """
         model = self.parent.Meta.model
         field = model._meta.get_field(model._encrypted_field)
@@ -96,53 +71,45 @@ class ProtectedSecretField(Field):
 
 @extend_schema_field(OpenApiTypes.STR)
 class IntegerChoicesField(Field):
-    """Serializer field for integer-based choice fields.
-
-    Converts between integer values stored in the database and
-    human-readable string representations for API responses.
+    """Choice stored as an integer and exposed by its name in the API.
 
     Attributes:
-        model (Any): The choice model/enum class for value conversion.
-
-    Example:
-        ```python
-        class StatusSerializer(ModelSerializer):
-            status = IntegerChoicesField(model=StatusEnum)
-        ```
+        model: Enumeration that maps the names exposed by the API to the integer
+          values stored in the database.
     """
 
     def __init__(self, model: Any, **kwargs: Any):
-        """Initialize the integer choices field.
+        """Prepare the field with the enumeration used to convert the values.
 
         Args:
-            model (Any): The choice model/enum class for conversions.
-            **kwargs (Any): Additional field arguments.
+            model: Enumeration that provides the names and values of the choices.
+            **kwargs: Standard serializer field arguments.
         """
         self.model = model
         super().__init__(**kwargs)
 
     def to_representation(self, value: int) -> str:
-        """Convert integer value to string representation.
+        """Get the capitalized name of the choice with the given value.
 
         Args:
-            value (int): The integer choice value.
+            value: Integer stored in the database.
 
         Returns:
-            str: Capitalized string representation of the choice.
+            The name of the matching choice, capitalized for the API clients.
         """
         return self.model(value).name.capitalize()
 
     def to_internal_value(self, data: str) -> int:
-        """Convert string representation to integer value.
+        """Get the value of the choice with the given name, ignoring the case.
 
         Args:
-            data (str): The string choice representation.
+            data: Name of the choice sent by the client, in any case.
 
         Returns:
-            int: The corresponding integer value.
+            The integer value to store in the database.
 
         Raises:
-            ValidationError: If the string value is not valid.
+            ValidationError: If there is no choice with that name.
         """
         try:
             return self.model[data.upper()].value

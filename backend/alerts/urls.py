@@ -1,8 +1,4 @@
-"""URL configuration for alerts module.
-
-Defines URL patterns for the alerts REST API endpoints, including
-alert management routes.
-"""
+"""URLs of the alert endpoints."""
 
 from rest_framework.routers import SimpleRouter
 

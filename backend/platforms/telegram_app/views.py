@@ -1,8 +1,4 @@
-"""Django REST framework views for Telegram Bot configuration.
-
-Provides REST API endpoints for managing Telegram Bot settings and chat
-relationships with proper authentication and authorization controls.
-"""
+"""Viewsets of the Telegram endpoints."""
 
 from rest_framework.permissions import IsAuthenticated
 
@@ -16,16 +12,14 @@ from security.authorization.permissions import OwnerPermission, RekonoModelPermi
 
 
 class TelegramSettingsViewSet(BaseViewSet):
-    """ViewSet for managing Telegram Bot configuration settings.
-
-    Provides GET and PUT operations for Telegram Bot settings including
-    encrypted token management with proper authentication controls.
+    """Read and update the Telegram configuration.
 
     Attributes:
-        queryset (QuerySet): TelegramSettings model instances
-        serializer_class (Serializer): Serializer for TelegramSettings model
-        permission_classes (list): Required permissions for access control
-        http_method_names (list): Allowed HTTP methods (GET, PUT only)
+        queryset: The only settings instance, created from a fixture.
+        serializer_class: Serializer of the Telegram settings.
+        permission_classes: Only the users that can change the settings model.
+        http_method_names: GET and PUT only, since the settings are never created
+          or removed through the API.
     """
 
     queryset = TelegramSettings.objects.all()
@@ -35,17 +29,15 @@ class TelegramSettingsViewSet(BaseViewSet):
 
 
 class TelegramChatViewSet(BaseViewSet):
-    """ViewSet for managing Telegram chat account linking.
-
-    Provides POST and DELETE operations for Telegram chat relationships
-    with user-scoped access control and ownership permissions.
+    """Link a Telegram chat to the account of a user, or unlink it.
 
     Attributes:
-        queryset (QuerySet): TelegramChat model instances
-        serializer_class (Serializer): Serializer for TelegramChat model
-        permission_classes (list): Required permissions for access control
-        http_method_names (list): Allowed HTTP methods (POST, DELETE only)
-        owner_field (str): Field name for ownership-based access control
+        queryset: All the chats, filtered later by their owner.
+        serializer_class: Serializer of the Telegram chats.
+        permission_classes: Role permissions plus the ownership of the chat, so
+          nobody can unlink the chat of another user.
+        http_method_names: POST to link a chat and DELETE to unlink it.
+        owner_field: Field with the user that the chat belongs to.
     """
 
     queryset = TelegramChat.objects.all()

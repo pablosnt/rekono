@@ -1,10 +1,7 @@
-"""Telegram Bot mixin for authentication configuration workflows.
+"""Steps that ask for the authentication that a target port needs.
 
-Runs after a target port has already been selected or created, since the created
-Authentication is attached to the target port stored in Context.TARGET_PORT. Reads
-Context.COMMAND to offer a "None" choice only for the /newport conversation, letting
-a port be created without authentication. Leaves Context.AUTHENTICATION_TYPE and
-Context.AUTHENTICATION set on completion, or leaves both unset when "None" is chosen.
+The authentication belongs to a port, so these steps need the port to have been
+chosen or created before.
 """
 
 from telegram import Update
@@ -17,31 +14,26 @@ from platforms.telegram_app.bot.mixins.framework import BaseMixin
 
 
 class AuthenticationMixin(BaseMixin):
-    """Mixin providing authentication configuration functionality.
-
-    Enables conversations to configure authentication credentials for a target
-    port, or to skip authentication entirely when running as part of /newport.
+    """Steps that create the authentication of a target port.
 
     Attributes:
-        no_authentication (str): Option value for no authentication required.
-        new_port_command (str): Command name that allows "no authentication" option.
+        no_authentication: Answer that creates a port without authentication.
+        new_port_command: Command whose users can answer that, since the ports
+          that are created to be scanned right away always need one.
     """
 
     no_authentication = "None"
     new_port_command = "newport"
 
     async def ask_for_authentication_type(self, update: Update, context: CallbackContext) -> int:
-        """Display authentication type selection options.
-
-        Shows available authentication types with optional "None" choice for
-        newport command workflows.
+        """Ask the users which kind of authentication the port needs.
 
         Args:
-            update (Update): The Telegram update containing user interaction.
-            context (CallbackContext): The callback context for the conversation.
+            update: Message that the user wrote.
+            context: Data that the conversation remembers.
 
         Returns:
-            int: Next conversation state for authentication type selection.
+            The step that saves the answer.
         """
         self.validate_update(update)
         values = AuthenticationType.values
@@ -61,19 +53,16 @@ class AuthenticationMixin(BaseMixin):
         )
 
     async def save_authentication_type(self, update: Update, context: CallbackContext) -> int:
-        """Save selected authentication type to conversation context.
-
-        When the user picks "None", jumps straight past both ask_for_new_authentication
-        and create_authentication to the state after create_authentication, so no
-        credential is prompted for or created. Otherwise stores the chosen type and
-        proceeds normally to the credential input step.
+        """Remember the kind of authentication that the users chose.
 
         Args:
-            update (Update): The Telegram update containing callback selection.
-            context (CallbackContext): The callback context for the conversation.
+            update: Message that the user wrote.
+            context: Data that the conversation remembers.
 
         Returns:
-            int: Next conversation state based on authentication type.
+            The next step, or the step after creating the authentication if the
+            users answered that the port needs none, so they aren't asked for
+            credentials that won't be used.
         """
         self.validate_update(update)
         if (
@@ -95,16 +84,14 @@ class AuthenticationMixin(BaseMixin):
         )
 
     async def ask_for_new_authentication(self, update: Update, context: CallbackContext) -> int:
-        """Prompt user to input authentication credentials.
-
-        Requests user to provide authentication credentials in 'name - secret' format.
+        """Ask the users to write the credentials of the port.
 
         Args:
-            update (Update): The Telegram update containing user interaction.
-            context (CallbackContext): The callback context for the conversation.
+            update: Message that the user wrote.
+            context: Data that the conversation remembers.
 
         Returns:
-            int: Next conversation state for credential input processing.
+            The step that creates the authentication.
         """
         self.validate_update(update)
         return await self.go_to_next_state(
@@ -116,21 +103,21 @@ class AuthenticationMixin(BaseMixin):
         )
 
     async def create_authentication(self, update: Update, context: CallbackContext) -> int:
-        """Create authentication credentials from user input.
-
-        Parses user input in 'name - secret' format and creates authentication
-        credentials for the selected target port with validation and error handling.
+        """Create the authentication that the users wrote in the chosen port.
 
         Args:
-            update (Update): The Telegram update containing credential input.
-            context (CallbackContext): The callback context for the conversation.
+            update: Message that the user wrote.
+            context: Data that the conversation remembers.
 
         Returns:
-            int: Next conversation state after authentication creation.
+            The next step, the previous one if the credentials aren't valid, or the
+            end of the conversation if no port was chosen.
         """
         self.validate_update(update)
         if not update.effective_message or not update.effective_message.text:
             return ConversationHandler.END
+        # The name and the secret are written in the same message, separated by a dash, so the
+        # users only have to answer once
         name = update.effective_message.text
         secret = None
         if name and " - " in name:

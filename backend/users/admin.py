@@ -1,8 +1,4 @@
-"""Django admin configuration for user models.
-
-Registers User model with Django admin interface for administrative
-user account management and monitoring.
-"""
+"""Registration of the user model in the Django admin site."""
 
 from django.contrib import admin
 

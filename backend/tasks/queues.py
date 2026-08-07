@@ -1,8 +1,8 @@
-"""Queue management for task processing and execution orchestration.
+"""Queue that plans the executions of the tasks.
 
-Provides queue-based task processing capabilities with support for both single
-tool tasks and complex multi-step process tasks. Handles task scheduling,
-dependency management, and execution planning.
+A task in this queue turns into the executions that its tool or process needs,
+which are enqueued in the executions queue. For the processes, the steps are also
+chained here, so a step waits for the ones that provide the findings it consumes.
 """
 
 from dataclasses import dataclass, field
@@ -31,16 +31,12 @@ from tools.models import Intensity
 
 @dataclass
 class PlanJob:
-    """Dataclass representing a planned job in a process execution workflow.
-
-    Represents a single step in a multi-step process execution plan with
-    dependency management and input/output type tracking for proper
-    execution ordering and parameter passing.
+    """Step of a process, with the steps that must be executed before it.
 
     Attributes:
-        step (Step): The process step to be executed
-        dependencies (list): List of PlanJob dependencies that must complete first
-        jobs (list): List of RQ Job objects associated with this plan job
+        step: Step of the process to be executed.
+        dependencies: Steps whose findings this one consumes.
+        jobs: Jobs enqueued for this step, which the dependent steps wait for.
     """
 
     step: Step
@@ -49,83 +45,67 @@ class PlanJob:
 
     @cached_property
     def inputs(self) -> Sequence[InputType]:
-        """Get input types required by this job's tool.
-
-        Returns:
-            Sequence[InputType]: Input types needed by the step's tool
-        """
+        """The input types that the configuration of this step accepts."""
         return InputType.objects.filter(inputs__argument__configuration=self.step.configuration).distinct()
 
     @cached_property
     def outputs(self) -> Sequence[InputType]:
-        """Get output types produced by this job's tool.
-
-        Returns:
-            Sequence[InputType]: Output types produced by the step's configuration
-        """
+        """The input types of the findings that this step reports."""
         return InputType.objects.filter(outputs__configuration=self.step.configuration).distinct()
 
     def add_dependency(self, dependency: "PlanJob") -> None:
-        """Add a dependency to this job.
+        """Add a step that must be executed before this one.
 
         Args:
-            dependency (PlanJob): The job that must complete before this job
+            dependency: Step whose findings this one consumes.
         """
         self.dependencies.append(dependency)
 
     def add_job(self, job: Job) -> None:
-        """Add a RQ job to this plan job.
+        """Add a job enqueued for this step.
 
         Args:
-            job (Job): The RQ Job object to associate with this plan job
+            job: Enqueued job, which the dependent steps wait for.
         """
         self.jobs.append(job)
 
     def __eq__(self, other: object) -> bool:
-        """Check equality based on step ID.
+        """Check if another object plans the same step.
 
         Args:
-            other (object): Object to compare with
+            other: Object to compare with this one.
 
         Returns:
-            bool: True if both have the same step ID
+            Whether both plan the same step. False for any object of a different
+            type.
         """
         if not isinstance(other, PlanJob):
             return False
         return self.step.id == other.step.id
 
     def __hash__(self) -> int:
-        """Generate hash based on step ID.
-
-        Returns:
-            int: Hash value for this PlanJob
-        """
+        """Return a hash of the step, so each step is planned once."""
         return hash(self.step.id)
 
 
 class TasksQueue(BaseScanQueue):
-    """Queue manager for task processing and execution coordination.
-
-    Manages the task execution queue with support for immediate and scheduled
-    task execution, process planning, and recurring task management.
+    """Queue that turns the tasks into the executions that they need.
 
     Attributes:
-        name (str): Name of the queue ("tasks")
+        name: Name of the RQ queue.
     """
 
     name = "tasks"
 
     def enqueue(self, task: Task) -> Job:
-        """Enqueue a task for immediate or scheduled execution.
-
-        Handles both immediate task execution and scheduled task execution
-        with proper queue management and callback setup.
+        """Enqueue a task, at the moment that it's scheduled for.
 
         Args:
-            task (Task): The task to enqueue for execution
+            task: Task to enqueue, which is run right away when it isn't scheduled.
 
         Returns:
-            Job: The RQ Job object for the enqueued task
+            The enqueued job, whose identifier is saved in the task so it can be
+            cancelled while it's still scheduled.
         """
         if task.scheduled_at:
             task.enqueued_at = task.scheduled_at
@@ -142,11 +122,7 @@ class TasksQueue(BaseScanQueue):
     @staticmethod
     @job("tasks")
     def consume(task: Task) -> Task | None:
-        """Process a task by creating and enqueuing executions.
-
-        Main task processing function that handles both single tool tasks
-        and multi-step process tasks. Creates execution records and
-        enqueues them for processing.
+        """Plan and enqueue the executions of one task.
 
         The task target is re-validated against the deny list before any
         execution is created, because targets are only validated when created
@@ -158,13 +134,13 @@ class TasksQueue(BaseScanQueue):
         over and over.
 
         Args:
-            task (Task): The task to process
+            task: Task to plan, as it was when the job was enqueued.
 
         Returns:
-            Task | None: The processed task
+            The task, which the success callback needs to schedule its next
+            repetition.
         """
         BaseScanQueue.logger.info(f"[Task] Task {task.id} has started")
-        # Re-validate the task target before creating any execution
         try:
             TargetValidator(Regex.TARGET)(task.target.target)
         except ValidationError as error:
@@ -189,7 +165,6 @@ class TasksQueue(BaseScanQueue):
                 )
             task.start = dt
             task.end = dt
-            # Clear next task iteration
             task.repeat_in = None
             task.repeat_time_unit = None
             task.save(update_fields=["start", "end", "repeat_in", "repeat_time_unit"])
@@ -202,13 +177,10 @@ class TasksQueue(BaseScanQueue):
 
     @staticmethod
     def _consume_tool_task(task: Task) -> None:
-        """Process a single tool task by creating executions.
-
-        Handles tasks that execute a single security tool with specific
-        configuration and parameters.
+        """Enqueue the executions of a task that runs one tool configuration.
 
         Args:
-            task (Task): The single tool task to process
+            task: Task whose inputs are distributed among its executions.
         """
         executions = TasksQueue.calculate_executions(
             task.configuration,
@@ -232,13 +204,14 @@ class TasksQueue(BaseScanQueue):
 
     @staticmethod
     def _consume_process_task(task: Task) -> None:
-        """Process a multi-step process task with dependency management.
+        """Enqueue the executions of a task that runs a process, chaining its steps.
 
-        Handles tasks that execute complete security processes with multiple
-        steps, managing dependencies between steps and proper execution ordering.
+        A step depends on another one when it accepts the findings that the other
+        reports, so the executions of the dependent steps are enqueued waiting for
+        the ones they need, and the independent steps run in parallel.
 
         Args:
-            task (Task): The process task to process
+            task: Task whose process steps are planned and enqueued.
         """
         plan: list[PlanJob] = []
         # Order steps by stage, input complexity, output complexity, and configuration ID
@@ -255,7 +228,6 @@ class TasksQueue(BaseScanQueue):
         for step in steps:
             item = PlanJob(step)
             if Intensity.objects.filter(tool=step.configuration.tool, value__lte=task.intensity).exists():
-                # A dependency exists when a previously planned job's output type matches this job's input type
                 for execution_job in plan:
                     for output in execution_job.outputs:
                         if output in item.inputs:
@@ -298,18 +270,20 @@ class TasksQueue(BaseScanQueue):
 
     @staticmethod
     def _scheduled_callback(job: Any, connection: Any, result: Task, *args: Any, **kwargs: Any) -> None:
-        """Callback function for handling recurring task scheduling.
+        """Schedule the next repetition of a task that has just been planned.
 
-        Handles automatic recreation of recurring tasks based on repeat
-        configuration. Creates new tasks with the same parameters when
-        a task completes and has repeat settings configured.
+        The repetitions are chained one by one instead of being scheduled all at
+        once, and the interval is counted from the moment when the task was
+        enqueued, so a slow execution doesn't delay the following ones.
 
         Args:
-            job (Any): The completed RQ job
-            connection (Any): Redis connection
-            result (Task): The completed task
-            *args (Any): Additional positional arguments
-            **kwargs (Any): Additional keyword arguments
+            job: Task job that just finished.
+            connection: Redis connection used by RQ to run the callback.
+            result: Task returned by the consume method. A task whose target was
+              rejected comes back with its repetition cleared, so a denied target
+              is not scheduled again.
+            *args: Not used, accepted for compatibility with the RQ callbacks.
+            **kwargs: Not used, accepted for compatibility with the RQ callbacks.
         """
         if result and result.repeat_in and result.repeat_time_unit:
             new_task = Task.objects.create(

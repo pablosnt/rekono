@@ -1,8 +1,4 @@
-"""CMSeek executor for CMS detection and security scanning.
-
-Executes CMSeek tool for Content Management System detection, version
-fingerprinting, and vulnerability assessment with result file management.
-"""
+"""Executor of the CMSeek CMS scanner."""
 
 import pathlib
 import shutil
@@ -14,22 +10,14 @@ from tools.executors.base import BaseExecutor
 
 
 class Cmseek(BaseExecutor):
-    """Executor for CMSeek CMS detection tool.
+    """Execution of CMSeek, which decides itself where to write its report.
 
-    CMSeek writes its JSON result to a path it derives internally from the
-    scanned host and port, rather than to the report path Rekono expects.
-    This executor reconstructs that path from the scanned URL, then locates
-    and moves the resulting file to ``self.report`` once the scan finishes.
+    CMSeek builds the path of its report from the host and the port that it
+    scanned, so the path has to be rebuilt from the scanned URL to find it.
     """
 
     def after_running(self) -> None:  # pragma: no cover
-        """Handle post-execution cleanup and result file management.
-
-        Moves CMSeek result files from the default output directory to the
-        configured report location and cleans up temporary directories. Also
-        removes the ``reports.json`` index CMSeek writes into the current working
-        directory, which would otherwise accumulate across executions.
-        """
+        """Move the report that CMSeek wrote to the path where Rekono expects it."""
         result_path = (
             Path("Result")
             / urlparse(self.arguments[self.arguments.index("-u") + 1]).netloc.replace(":", "_")
@@ -39,6 +27,8 @@ class Cmseek(BaseExecutor):
             if report.is_file():
                 shutil.move(report, self.report)
                 shutil.rmtree(pathlib.Path(report).parent)
+                # CMSeek also writes an index of its reports in the working directory, which
+                # would grow with every execution
                 result_index = Path("reports.json")
                 if result_index.is_file():
                     result_index.unlink()

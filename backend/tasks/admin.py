@@ -1,8 +1,4 @@
-"""Django admin configuration for task models.
-
-Registers task models with the Django admin interface for
-administrative management and monitoring.
-"""
+"""Registration of the task model in the Django admin site."""
 
 from django.contrib import admin
 

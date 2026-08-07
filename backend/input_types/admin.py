@@ -1,8 +1,4 @@
-"""Django admin configuration for input_types module.
-
-Registers the InputType model with Django admin interface for administrative
-management of input type configurations.
-"""
+"""Registration of the input type model in the Django admin site."""
 
 from django.contrib import admin
 

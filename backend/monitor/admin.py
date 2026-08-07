@@ -1,8 +1,4 @@
-"""Django admin configuration for monitor module.
-
-Registers the MonitorSettings model with Django admin interface for
-administrative management of monitoring configuration.
-"""
+"""Registration of the monitor settings model in the Django admin site."""
 
 from django.contrib import admin
 

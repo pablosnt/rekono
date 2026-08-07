@@ -1,9 +1,4 @@
-"""Django REST framework views for user management.
-
-Provides REST API endpoints for comprehensive user account management
-including user administration, profile management, and MFA operations
-with proper authentication and authorization controls.
-"""
+"""Endpoints to administrate the users and to manage the profile of each one."""
 
 from typing import Any
 
@@ -42,20 +37,22 @@ from users.serializers import (
 
 
 class UserViewSet(BaseViewSet):
-    """ViewSet for user account management operations.
+    """Administrate the users: invitations, roles, and account status.
 
-    Provides REST API endpoints for user administration including invitation,
-    role management, account enabling/disabling, and password reset operations.
-    Restricted to admin users for security.
+    It also holds the endpoints of the operations that anonymous users perform over
+    their own account, like the registration and the password reset.
 
     Attributes:
-        queryset (QuerySet): User model instances
-        serializer_class (Serializer): Default serializer for User model
-        filterset_class (FilterSet): Filter class for user queries
-        permission_classes (list): Required permissions for access control
-        search_fields (list): Fields available for text search
-        ordering_fields (list): Fields available for result ordering
-        http_method_names (list): Allowed HTTP methods
+        serializer_class: Serializer used for the administrators, replaced by
+          get_serializer_class for the rest of the roles.
+        queryset: All the users, since they aren't scoped to any project.
+        filterset_class: Filters available to search users.
+        permission_classes: Role permissions, which only let the administrators
+          manage the accounts.
+        search_fields: Fields used by the text search.
+        ordering_fields: Fields that can be used to order the results.
+        http_method_names: Standard CRUD methods, where PUT changes the role and
+          DELETE disables the account.
     """
 
     serializer_class = UserSerializer
@@ -67,7 +64,7 @@ class UserViewSet(BaseViewSet):
     http_method_names = ["get", "post", "put", "delete"]
 
     def get_serializer_class(self) -> type[Serializer]:
-        """Get the serializer class based on the requesting user's role.
+        """Get the serializer that the role of the user is allowed to read.
 
         Admins receive the full serializer including email addresses, which they
         legitimately need to manage users and project members. Any other role
@@ -75,26 +72,26 @@ class UserViewSet(BaseViewSet):
         prevent phishing and social engineering.
 
         Returns:
-            type[Serializer]: UserSerializer for admins, RestrictedUserSerializer otherwise
+            The serializer that the role of the requester is allowed to read.
         """
         if self.request.user.is_authenticated and self.request.user.groups.filter(name=Role.ADMIN.value).exists():
             return UserSerializer
         return RestrictedUserSerializer
 
     def get_object_if_not_current_user(self, request: Request, pk: str) -> User:
-        """Get user object ensuring it's not the current user.
-
-        Prevents users from performing administrative actions on themselves.
+        """Get the user of the request path, as long as it isn't the requester.
 
         Args:
-            request (Request): The HTTP request object
-            pk (str): Primary key of the user
+            request: Request whose user must be a different one.
+            pk: Identifier of the user, taken from the URL and already resolved by
+              the viewset, so it isn't read here.
 
         Returns:
-            User: The requested user object
+            The user of the path.
 
         Raises:
-            PermissionDenied: If user tries to modify their own account
+            PermissionDenied: If administrators try to change their own role or
+              disable their own account, which would leave them locked out.
         """
         instance = self.get_object()
         if instance.id == request.user.id:
@@ -103,16 +100,15 @@ class UserViewSet(BaseViewSet):
 
     @extend_schema(request=InviteUserSerializer, responses={201: UserSerializer})
     def create(self, request: Request, *args, **kwargs):
-        """Create and invite new user account.
-
-        Creates inactive user account with specified role and sends invitation
-        email for account activation.
+        """Invite a new user, creating their account in the invited state.
 
         Args:
-            request (Request): HTTP request with user invitation data
+            request: Request with the email address and the role of the invitation.
+            *args: Standard view arguments.
+            **kwargs: Standard view arguments.
 
         Returns:
-            Response: HTTP 201 with created user data
+            A 201 response with the invited user.
         """
         serializer = InviteUserSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -124,16 +120,15 @@ class UserViewSet(BaseViewSet):
     @extend_schema(request=CreateUserSerializer, responses={201: UserSerializer})
     @action(detail=False, methods=["POST"], url_path="signup", permission_classes=[IsNotAuthenticated])
     def create_after_invitation(self, request: Request, *args, **kwargs) -> Response:
-        """Complete user account creation after invitation.
-
-        Activates user account after successful OTP verification from
-        invitation email. Sets username, password, and personal information.
+        """Complete the registration of an invited user with their invitation OTP.
 
         Args:
-            request (Request): HTTP request with account creation data
+            request: Request with the account details and the invitation OTP.
+            *args: Standard view arguments.
+            **kwargs: Standard view arguments.
 
         Returns:
-            Response: HTTP 201 with activated user data
+            A 201 response with the registered user, who can now log in.
         """
         serializer = CreateUserSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -145,17 +140,15 @@ class UserViewSet(BaseViewSet):
     @extend_schema(request=None, responses={204: None})
     @action(detail=True, methods=["POST"])
     def resend(self, request: Request, pk: str) -> Response:
-        """Resend invitation email to user.
-
-        Sends new invitation email with fresh OTP to users who haven't
-        completed account creation.
+        """Send the invitation email again, with a new one-time password.
 
         Args:
-            request (Request): The HTTP request object
-            pk (str): Primary key of the user
+            request: Request that asks for the invitation to be sent again.
+            pk: Identifier of the invited user, taken from the URL.
 
         Returns:
-            Response: HTTP 204 on success, HTTP 400 with error on failure
+            An empty response, or a validation error if the account was already
+            created or the invitation can't be sent because SMTP isn't available.
         """
         user = self.get_object()
         if user.is_active is not None or user.otp is None:
@@ -171,17 +164,20 @@ class UserViewSet(BaseViewSet):
     @extend_schema(request=ResetPasswordSerializer, responses={200: None}, methods=["PUT"])
     @action(detail=False, methods=["POST", "PUT"], url_path="reset-password", permission_classes=[IsNotAuthenticated])
     def reset_password(self, request: Request, *args, **kwargs) -> Response:
-        """Handle password reset workflow.
+        """Request a password reset with POST, and apply it with PUT.
 
-        POST: Request password reset by sending OTP email
-        PUT: Complete password reset with OTP verification and clear the
-        authentication cookies so the client must sign in again with the new password
+        The authentication cookies are cleared once the password is changed, so the
+        client has to log in again with the new one.
 
         Args:
-            request (Request): HTTP request with reset data
+            request: Request with the email address for POST, or the one-time
+              password and the new password for PUT.
+            *args: Standard view arguments.
+            **kwargs: Standard view arguments.
 
         Returns:
-            Response: HTTP 200 on successful operation
+            An empty 200 response in both cases, so the answer to a request never
+            reveals whether the email address belongs to a Rekono user.
         """
         serializer_class = (
             RequestPasswordResetSerializer if request.method.lower() == "post" else ResetPasswordSerializer
@@ -197,17 +193,18 @@ class UserViewSet(BaseViewSet):
     @extend_schema(request=VerifyEmailSerializer, responses={200: None})
     @action(detail=False, methods=["POST"], url_path="verify-email", permission_classes=[AllowAny])
     def verify_email(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        """Confirm a pending email address change.
+        """Confirm a pending email address change with the OTP sent to it.
 
-        Verifies the OTP sent to the new address and applies the email change. Public
-        endpoint because the verification link may be opened while the user is still
-        logged in or from a different device.
+        Anyone can call it, since the verification link may be opened while the user
+        is still logged in or from a different device.
 
         Args:
-            request (Request): HTTP request with the OTP to verify
+            request: Request with the one-time password sent to the new address.
+            *args: Standard view arguments.
+            **kwargs: Standard view arguments.
 
         Returns:
-            Response: HTTP 200 on success, HTTP 401 if the OTP is invalid or expired
+            An empty 200 response.
         """
         serializer = VerifyEmailSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -216,17 +213,16 @@ class UserViewSet(BaseViewSet):
 
     @extend_schema(request=UpdateRoleSerializer, responses={200: UserSerializer})
     def update(self, request, pk: str, *args, **kwargs):
-        """Update user role assignment.
-
-        Updates the role assigned to a user account. Cannot be used on
-        the current user's own account.
+        """Change the role of a user, which is the only thing that can be updated.
 
         Args:
-            request (Request): HTTP request with role update data
-            pk (str): Primary key of the user
+            request: Request with the new role.
+            pk: Identifier of the user, taken from the URL.
+            *args: Standard view arguments.
+            **kwargs: Standard view arguments.
 
         Returns:
-            Response: HTTP 200 with updated user data
+            A 200 response with the updated user.
         """
         instance = self.get_object_if_not_current_user(request, pk)
         serializer = UpdateRoleSerializer(data=request.data)
@@ -237,21 +233,22 @@ class UserViewSet(BaseViewSet):
         )
 
     def destroy(self, request: Request, pk: str, *args: Any, **kwargs: Any) -> Response:
-        """Delete or disable user account.
+        """Disable a user, or delete it if its account was never created.
 
-        Deletes invited users who haven't created accounts, or disables
-        active users while preserving their data.
+        A user that already worked in Rekono is disabled instead of deleted, so the
+        tasks, findings, and notes that reference them are kept.
 
         Args:
-            request (Request): The HTTP request object
-            pk (str): Primary key of the user
+            request: Request that asks for the user to be removed.
+            pk: Identifier of the user, taken from the URL.
+            *args: Standard view arguments.
+            **kwargs: Standard view arguments.
 
         Returns:
-            Response: HTTP 204 on successful operation
+            An empty 204 response, whether the account was disabled or deleted.
         """
         instance = self.get_object_if_not_current_user(request, pk)
         if instance.is_active is None:
-            # User was invited but the account wasn't created
             super().destroy(request, *args, **kwargs)
         else:
             User.objects.disable_user(instance)
@@ -260,17 +257,14 @@ class UserViewSet(BaseViewSet):
     @extend_schema(request=None, responses={200: UserSerializer})
     @action(detail=True, methods=["POST"])
     def enable(self, request: Request, pk: str) -> Response:
-        """Enable disabled user account.
-
-        Reactivates a disabled user account and sends notification email
-        with new OTP for account access.
+        """Enable a disabled user, sending them an email to set a new password.
 
         Args:
-            request (Request): The HTTP request object
-            pk (str): Primary key of the user
+            request: Request that asks for the account to be enabled.
+            pk: Identifier of the user, taken from the URL.
 
         Returns:
-            Response: HTTP 200 with enabled user data
+            A 200 response with the enabled user.
         """
         instance = self.get_object_if_not_current_user(request, pk)
         User.objects.enable_user(instance)
@@ -278,42 +272,40 @@ class UserViewSet(BaseViewSet):
 
 
 class BaseProfileViewSet(GenericViewSet):
-    """Base ViewSet for user profile management operations.
-
-    Provides common functionality for profile-related ViewSets with
-    simplified permission handling for authenticated users.
+    """Base viewset of the endpoints where a user manages their own account.
 
     Attributes:
-        queryset (QuerySet): User model instances
-        serializer_class (Serializer): Default serializer for profile operations
-        permission_classes (list): Required permissions for access control
+        serializer_class: Serializer of the profile of the user.
+        queryset: All the users, although only the requester is ever accessed.
+        permission_classes: Only authentication is required, because all users can
+          manage their own profile.
     """
 
     serializer_class = ProfileSerializer
     queryset = User.objects.all()
-    # Only IsAuthenticated class is required because all users can manage their own profile
     permission_classes = [IsAuthenticated]
 
     def _get(self, request: Request) -> Response:
-        """Get current user's profile data.
+        """Build the response with the profile of the user that performs the request.
 
         Args:
-            request (Request): The HTTP request object
+            request: Request whose user is the one being serialized.
 
         Returns:
-            Response: HTTP 200 with user profile data
+            A 200 response with their profile.
         """
         return Response(self.get_serializer(instance=request.user).data, status=status.HTTP_200_OK)
 
     def _update(self, request: Request, serializer_class: Serializer) -> Serializer:
-        """Update user profile with specified serializer.
+        """Update the user that performs the request with the given serializer.
 
         Args:
-            request (Request): HTTP request with profile update data
-            serializer_class (Serializer): Serializer class to use for validation
+            request: Request whose user is updated with its own body.
+            serializer_class: Serializer that validates and applies the change.
 
         Returns:
-            Serializer: Validated serializer instance
+            The serializer, already validated and applied, so the caller can build
+            the response with its data.
         """
         serializer = serializer_class(request.user, data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -322,33 +314,33 @@ class BaseProfileViewSet(GenericViewSet):
 
 
 class ProfileViewSet(BaseProfileViewSet):
-    """ViewSet for user profile management.
-
-    Provides REST API endpoints for users to manage their own profile
-    information and password with proper validation and security controls.
-    """
+    """Read and update the profile and the password of the user that requests it."""
 
     @action(detail=False, methods=["GET"])
     def get_profile(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        """Get current user's profile information.
+        """Get the profile of the user that performs the request.
 
         Args:
-            request (Request): The HTTP request object
+            request: Request whose user is the one being read.
+            *args: Standard view arguments.
+            **kwargs: Standard view arguments.
 
         Returns:
-            Response: HTTP 200 with profile data
+            A 200 response with their profile.
         """
         return self._get(request)
 
     @action(detail=False, methods=["PUT"])
     def update_profile(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        """Update current user's profile information.
+        """Update the profile of the user that performs the request.
 
         Args:
-            request (Request): HTTP request with profile update data
+            request: Request with the profile fields to update.
+            *args: Standard view arguments.
+            **kwargs: Standard view arguments.
 
         Returns:
-            Response: HTTP 200 with updated profile data
+            A 200 response with the updated profile.
         """
         serializer = self._update(request, self.serializer_class)
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -356,30 +348,27 @@ class ProfileViewSet(BaseProfileViewSet):
     @extend_schema(request=UpdatePasswordSerializer, responses={200: None})
     @action(detail=False, methods=["PUT"])
     def update_password(self, request: Request) -> Response:
-        """Update current user's password.
+        """Change the password of the user that performs the request.
 
-        Validates old password and updates to new password with security
-        cleanup including token invalidation. Clears the authentication cookies
-        on the response so the current session must re-authenticate.
+        The authentication cookies are cleared, since changing the password closes
+        all the sessions of the user, including the current one.
 
         Args:
-            request (Request): HTTP request with password change data
+            request: Request with the current and the new passwords.
 
         Returns:
-            Response: HTTP 200 on successful password update
+            An empty 200 response, with the authentication cookies removed.
         """
         self._update(request, UpdatePasswordSerializer)
         return CookieJWTAuthentication.clear_cookies(Response(status=status.HTTP_200_OK))
 
 
 class MfaViewSet(BaseProfileViewSet):
-    """ViewSet for Multi-Factor Authentication management.
-
-    Provides REST API endpoints for MFA registration, enabling, and disabling
-    operations with TOTP authenticator app integration.
+    """Register, enable, and disable the MFA of the user that requests it.
 
     Attributes:
-        authentication_classes (list): JWT authentication required for MFA operations
+        authentication_classes: Only the JWT authentication, so the MFA can't be
+          managed by a client authenticated with an API token.
     """
 
     authentication_classes = [CookieJWTAuthentication]
@@ -387,16 +376,16 @@ class MfaViewSet(BaseProfileViewSet):
     @extend_schema(request=None, responses={200: RegisterMfaSerializer})
     @action(detail=False, methods=["POST"])
     def register(self, request: Request, *args, **kwargs) -> Response:
-        """Register MFA for current user.
-
-        Generates MFA secret and returns QR code provisioning URL for
-        authenticator app setup.
+        """Generate the TOTP secret and return the URI for the authenticator app.
 
         Args:
-            request (Request): The HTTP request object
+            request: Request whose user is registering their second factor.
+            *args: Standard view arguments.
+            **kwargs: Standard view arguments.
 
         Returns:
-            Response: HTTP 200 with QR code URL, HTTP 400 if MFA already enabled
+            The provisioning URI, or a validation error if the user already has MFA
+            enabled, since a new secret would invalidate their current one.
         """
         if request.user.mfa:
             return Response({"mfa": "MFA is already enabled"}, status=status.HTTP_400_BAD_REQUEST)
@@ -408,16 +397,14 @@ class MfaViewSet(BaseProfileViewSet):
     @extend_schema(request=EnableMfaSerializer, responses={200: ProfileSerializer})
     @action(detail=False, methods=["POST"])
     def enable(self, request: Request) -> Response:
-        """Enable MFA for current user.
-
-        Enables MFA after verifying OTP from authenticator app.
-        Requires prior MFA registration.
+        """Enable the MFA of the user, verifying a code from their authenticator app.
 
         Args:
-            request (Request): HTTP request with MFA verification data
+            request: Request with the code generated by the authenticator app.
 
         Returns:
-            Response: HTTP 200 with updated profile, HTTP 400 on validation error
+            The updated profile, or a validation error if the MFA is already enabled
+            or the TOTP secret hasn't been registered yet.
         """
         if request.user.mfa:
             return Response({"mfa": "MFA is already enabled"}, status=status.HTTP_400_BAD_REQUEST)
@@ -431,16 +418,14 @@ class MfaViewSet(BaseProfileViewSet):
     @extend_schema(request=DisableMfaSerializer, responses={200: ProfileSerializer})
     @action(detail=False, methods=["POST"])
     def disable(self, request: Request) -> Response:
-        """Disable MFA for current user.
-
-        Disables MFA after verifying current password or OTP.
-        Removes MFA requirement for future logins.
+        """Disable the MFA of the user, verifying a code before doing it.
 
         Args:
-            request (Request): HTTP request with MFA disable verification
+            request: Request with the MFA code that proves the account ownership.
 
         Returns:
-            Response: HTTP 200 with updated profile, HTTP 400 on validation error
+            The updated profile, or a validation error if the MFA is already
+            disabled.
         """
         if not request.user.mfa:
             return Response({"mfa": "MFA is already disabled"}, status=status.HTTP_400_BAD_REQUEST)

@@ -1,8 +1,8 @@
-"""User models for Rekono's authentication and account management.
+"""Model of the Rekono users and the manager that implements their lifecycle.
 
-Provides comprehensive user account models including custom user manager with
-authentication operations, OTP management, MFA support, and role assignment
-capabilities for secure user lifecycle management.
+The manager covers the whole life of an account, from the invitation to the
+deactivation, including the one-time passwords used to verify the email addresses
+and the TOTP secrets used as second authentication factor.
 """
 
 from datetime import datetime, timedelta
@@ -26,24 +26,20 @@ from users.enums import Notification, OtpScope
 
 
 class OtpManagerMixin:
-    """Mixin providing One-Time Password (OTP) management functionality.
+    """Mixin that manages the one-time passwords sent to the users by email.
 
-    Provides methods for generating, validating, and managing one-time passwords
-    used for secure operations like account invitation, password resets, and
-    account activation. Includes collision detection and expiration handling.
+    Each one-time password is bound to the operation that it was issued for, so it
+    can't be replayed against a different one.
     """
 
     def generate_otp(self, model: Any = None) -> str:
-        """Generate a unique OTP with collision detection.
-
-        Creates a cryptographically secure random OTP and ensures uniqueness
-        by checking against existing OTPs in the database.
+        """Generate a one-time password that isn't assigned to any other user.
 
         Args:
-            model (Any, optional): Model class to check for collisions. Defaults to User.
+            model: Model where the collisions are checked, the users by default.
 
         Returns:
-            str: A unique OTP string.
+            The plain one-time password, since only its hash is ever stored.
         """
         otp = Crypto.hash(Crypto.random(3000))
         if (model or User).objects.filter(otp=Crypto.hash(otp)).exists():  # pragma: no cover
@@ -51,36 +47,28 @@ class OtpManagerMixin:
         return otp
 
     def get_otp_expiration_time(self, time: dict[str, int] = {"hours": CONFIG.otp_expiration_hours}) -> datetime:
-        """Calculate OTP expiration timestamp.
-
-        Determines when an OTP should expire based on the configured
-        expiration time or custom time delta.
+        """Get the moment when a one-time password created now will expire.
 
         Args:
-            time (dict[str, int], optional): Time delta parameters.
-                Defaults to configured OTP expiration hours.
+            time: Lifetime of the one-time password, as timedelta arguments.
 
         Returns:
-            datetime: The expiration timestamp.
+            The expiration moment, which is what gets stored with the user.
         """
         return timezone.now() + timedelta(**time)
 
     def setup_otp(self, user: Any, scope: OtpScope, time: dict[str, int] | None = None) -> str:
-        """Set up OTP for a user account.
-
-        Generates a new OTP, hashes it for storage, and sets the scope and the
-        expiration time on the user account. Used for secure operations
-        requiring email verification.
+        """Assign a new one-time password to a user.
 
         Args:
-            user (Any): User instance to set up OTP for.
-            scope (OtpScope): Operation that the OTP is issued for. It's the only
-                operation that will accept it during verification.
-            time (dict[str, int] | None, optional): Custom expiration time.
-                Defaults to system configuration.
+            user: User that will receive the one-time password.
+            scope: Operation that the OTP is issued for. It's the only operation
+              that will accept it during verification.
+            time: Lifetime of the OTP, or None to use the configured one.
 
         Returns:
-            str: The plain text OTP to send to the user.
+            The plain one-time password to be sent to the user, since only its hash
+            is assigned to the user.
         """
         plain_otp = self.generate_otp()
         user.otp = Crypto.hash(plain_otp)
@@ -90,37 +78,30 @@ class OtpManagerMixin:
         return plain_otp
 
     def remove_otp(self, user: Any) -> Any:
-        """Remove OTP from user account.
-
-        Clears the OTP, its scope and the expiration timestamp from the user
-        account, effectively invalidating any pending OTP verification.
+        """Remove the one-time password of a user, so it can't be used anymore.
 
         Args:
-            user (Any): User instance to clear OTP from.
+            user: User whose one-time password is cleared.
 
         Returns:
-            Any: The updated user instance.
+            The user, without the one-time password and its expiration.
         """
         user.otp = user.otp_scope = user.otp_expiration = None
         user.save(update_fields=["otp", "otp_scope", "otp_expiration"])
         return user
 
     def verify_otp(self, otp: str, scope: OtpScope, user: Any | None = None) -> Any | None:
-        """Verify OTP against stored hash, scope and expiration.
-
-        Validates a plain text OTP by comparing its hash against stored
-        values and checking the scope it was issued for and its expiration
-        time. Optionally filters by user. An OTP created for a different
-        operation is never accepted, so it can't be replayed against this one.
+        """Get the user that a valid one-time password belongs to.
 
         Args:
-            otp (str): Plain text OTP to verify.
-            scope (OtpScope): Operation that the OTP must have been issued for.
-            user (Any | None, optional): Specific user to verify against.
-                If None, searches all users.
+            otp: Plain one-time password to be verified.
+            scope: Operation that the OTP must have been issued for.
+            user: User that must own the OTP, or None to search all of them, which
+              is what the operations performed by anonymous users need.
 
         Returns:
-            Any | None: User instance if OTP is valid, None otherwise.
+            The user that owns the OTP, or None if it's expired, was issued for
+            another operation, or simply doesn't exist.
         """
         filter = {"otp": Crypto.hash(otp), "otp_scope": scope, "otp_expiration__gt": timezone.now()}
         if user:
@@ -129,72 +110,47 @@ class OtpManagerMixin:
 
 
 class MfaManagerMixin:
-    """Mixin providing Multi-Factor Authentication (MFA) management functionality.
-
-    Handles TOTP-based multi-factor authentication using authenticator apps.
-    Provides secret generation, QR code provisioning URIs, and OTP verification
-    for enhanced account security.
-    """
+    """Mixin that manages the TOTP secrets used as second authentication factor."""
 
     def register_mfa(self, user: Any) -> str:
-        """Register MFA for a user account.
-
-        Generates a new MFA secret key and creates a provisioning URI
-        for QR code generation. The secret is encrypted before storage.
+        """Generate the TOTP secret of a user and save it encrypted.
 
         Args:
-            user (Any): User instance to register MFA for.
+            user: User that is enabling the multi-factor authentication.
 
         Returns:
-            str: Provisioning URI for authenticator app setup.
+            The provisioning URI that the user scans with their authenticator app,
+            which is the only time the secret leaves the backend.
         """
         user.secret = pyotp.random_base32()
         user.save(update_fields=["_mfa_key"])
         return pyotp.totp.TOTP(user.secret).provisioning_uri(user.email, issuer_name="Rekono")
 
     def verify_mfa(self, otp: str, user: Any) -> bool:
-        """Verify MFA OTP code.
-
-        Validates a time-based OTP code against the user's MFA secret
-        using TOTP algorithm with time window validation.
+        """Check if a code matches the TOTP secret of a user at this moment.
 
         Args:
-            otp (str): Six-digit OTP code from authenticator app.
-            user (Any): User instance with registered MFA.
+            otp: Code provided by the user.
+            user: User whose TOTP secret the code is checked against.
 
         Returns:
-            bool: True if OTP is valid, False otherwise.
+            Whether the code is the valid one right now.
         """
         return pyotp.TOTP(user.secret).verify(otp)
 
 
 class RekonoUserManager(UserManager, LoggingEntity, OtpManagerMixin, MfaManagerMixin):
-    """Custom user manager for Rekono with enhanced authentication features.
-
-    Extends Django's UserManager with comprehensive user lifecycle management
-    including invitation workflows, role assignment, OTP/MFA operations,
-    and security-focused account management.
-
-    Security Features:
-        - Secure invitation workflow with email verification
-        - Role-based access control with automatic group assignment
-        - Password security with validation and token invalidation
-        - Account enabling/disabling with cleanup operations
-        - Comprehensive audit logging for security events
-    """
+    """Manager that implements the lifecycle of the Rekono accounts."""
 
     def assign_role(self, user: Any, role: Role) -> Any:
-        """Assign role to user account.
-
-        Sets the user's role by managing Django group membership.
-        Clears existing groups and assigns the new role group.
+        """Assign a role to a user, replacing the one they had.
 
         Args:
-            user (Any): User instance to assign role to.
-            role (Role): Role enum value to assign.
+            user: User whose role is replaced.
+            role: New role of the user.
 
         Returns:
-            Any: Updated user instance with new role.
+            The user, belonging only to the group of the new role.
         """
         group = Group.objects.get(name=role.value)
         user.groups.clear()  # Users have exactly one role, so prior group membership must be replaced, not extended
@@ -203,13 +159,11 @@ class RekonoUserManager(UserManager, LoggingEntity, OtpManagerMixin, MfaManagerM
         return user
 
     def send_invitation(self, user: Any) -> None:
-        """Send invitation email to user.
-
-        Generates OTP and sends invitation email with account creation
-        instructions and verification code.
+        """Send the invitation email that lets a user create their account.
 
         Args:
-            user (Any): User instance to send invitation to.
+            user: Invited user, who gets a new one-time password bound to the
+              invitation scope.
         """
         plain_otp = self.generate_otp()
         user.otp = Crypto.hash(plain_otp)
@@ -219,18 +173,15 @@ class RekonoUserManager(UserManager, LoggingEntity, OtpManagerMixin, MfaManagerM
         SMTP().invite_user(user, plain_otp)
 
     def invite_user(self, email: str, role: Role) -> Any:
-        """Create and invite new user account.
-
-        Creates a user account in the invited state (is_active=None) with the
-        specified email and role, then sends an invitation email so the user
-        can complete account activation.
+        """Invite a new user, creating their account in the invited state.
 
         Args:
-            email (str): Email address for the new user.
-            role (Role): Role to assign to the user.
+            email: Address where the invitation is sent.
+            role: Role assigned to the new user.
 
         Returns:
-            Any: Created user instance in invited state.
+            The invited user, which can't log in until they complete the
+            registration with the one-time password sent by email.
         """
         # is_active=None marks the account as invited but not yet activated
         user = User.objects.create(email=email, is_active=None)
@@ -240,20 +191,17 @@ class RekonoUserManager(UserManager, LoggingEntity, OtpManagerMixin, MfaManagerM
         return user
 
     def create_user(self, user: Any, username: str, first_name: str, last_name: str, password: str) -> Any:
-        """Complete user account creation after invitation.
-
-        Activates user account by setting personal information, password,
-        and clearing invitation OTP. Called after successful OTP verification.
+        """Complete the registration of an invited user and activate their account.
 
         Args:
-            user (Any): Inactive user instance from invitation.
-            username (str): Chosen username for the account.
-            first_name (str): User's first name.
-            last_name (str): User's last name.
-            password (str): Chosen password for the account.
+            user: Invited user, already verified with their invitation OTP.
+            username: Username chosen by the user.
+            first_name: First name of the user.
+            last_name: Last name of the user.
+            password: Password chosen by the user.
 
         Returns:
-            Any: Activated user instance.
+            The registered user, now active and able to log in.
         """
         user.username = username
         user.first_name = first_name
@@ -280,19 +228,20 @@ class RekonoUserManager(UserManager, LoggingEntity, OtpManagerMixin, MfaManagerM
         return user
 
     def create_superuser(self, username: str, email: str, password: str, **extra_fields: Any) -> Any:
-        """Create superuser account with admin role.
+        """Create an active account with the Admin role, without any invitation.
 
-        Creates active superuser account with admin privileges.
-        Used for initial system setup and administrative access.
+        It's the entry point of the createsuperuser command, which is how the first
+        administrator of a new deployment is created.
 
         Args:
-            username (str): Username for the superuser.
-            email (str): Email address for the superuser.
-            password (str): Password for the superuser.
-            **extra_fields (Any): Additional user fields.
+            username: Username of the new administrator.
+            email: Email address of the new administrator.
+            password: Password of the new administrator.
+            **extra_fields: Extra model fields, whose is_active is always forced to
+              True so the account can be used right away.
 
         Returns:
-            Any: Created superuser instance with admin role.
+            The new administrator, active and able to log in.
         """
         extra_fields["is_active"] = True
         user = super().create_superuser(username, email, password, **extra_fields)
@@ -301,16 +250,13 @@ class RekonoUserManager(UserManager, LoggingEntity, OtpManagerMixin, MfaManagerM
         return user
 
     def enable_user(self, user: Any) -> Any:
-        """Enable disabled user account.
-
-        Reactivates a disabled user account and sends email notification
-        with new OTP for account access.
+        """Enable a disabled account and let the user set a new password.
 
         Args:
-            user (Any): Disabled user instance to enable.
+            user: Disabled user to be enabled again.
 
         Returns:
-            Any: Enabled user instance.
+            The enabled user, who still has to set a password before logging in.
         """
         plain_otp = self.generate_otp()
         user.otp = Crypto.hash(plain_otp)
@@ -324,16 +270,16 @@ class RekonoUserManager(UserManager, LoggingEntity, OtpManagerMixin, MfaManagerM
         return user
 
     def disable_user(self, user: Any) -> Any:
-        """Disable user account and cleanup resources.
+        """Disable an account and revoke everything that could still authenticate it.
 
-        Deactivates user account, makes password unusable, clears OTP,
-        disables MFA, removes project memberships, and deletes API tokens for security.
+        The password becomes unusable, the MFA secret and the pending OTP are
+        removed, the API tokens are deleted, and the user leaves all their projects.
 
         Args:
-            user (Any): User instance to disable.
+            user: User whose account is disabled.
 
         Returns:
-            Any: Disabled user instance.
+            The disabled user, who can no longer authenticate by any means.
         """
         user.is_active = False
         user.set_unusable_password()
@@ -349,17 +295,17 @@ class RekonoUserManager(UserManager, LoggingEntity, OtpManagerMixin, MfaManagerM
         return user
 
     def update_password(self, user: Any, password: str) -> Any:
-        """Update user password with security cleanup.
+        """Change the password of a user and close their open sessions.
 
-        Updates user password and performs security cleanup including
-        JWT token invalidation and Telegram chat disconnection.
+        The Telegram chat is also disconnected, since it authenticates the user by
+        the chat itself and not by their new credentials.
 
         Args:
-            user (Any): User instance to update password for.
-            password (str): New password to set.
+            user: User whose password is changed.
+            password: New plain password, already validated by the serializers.
 
         Returns:
-            Any: Updated user instance.
+            The user, with the new password and no open session left.
         """
         # nosemgrep: python.django.security.audit.unvalidated-password.unvalidated-password
         user.set_password(password)
@@ -371,17 +317,14 @@ class RekonoUserManager(UserManager, LoggingEntity, OtpManagerMixin, MfaManagerM
         return user
 
     def reset_password(self, user: Any, password: str) -> Any:
-        """Reset user password after OTP verification.
-
-        Resets the password and clears the OTP. Used for the password
-        reset workflow after email verification.
+        """Change the password of a user and consume the one-time password used.
 
         Args:
-            user (Any): User instance to reset password for.
-            password (str): New password to set.
+            user: User whose password is reset.
+            password: New plain password, already validated by the serializers.
 
         Returns:
-            Any: Updated user instance with reset password.
+            The user, with the new password and the one-time password consumed.
         """
         user = self.update_password(user, password)
         user.otp = None
@@ -393,22 +336,21 @@ class RekonoUserManager(UserManager, LoggingEntity, OtpManagerMixin, MfaManagerM
     def request_email_change(self, user: Any, new_email: str) -> Any:
         """Start the verification workflow for an email address change.
 
-        Stores the requested address in the pending_email field without touching the
-        active email, generates a one-time password, sends a verification link to the
-        new address, and notifies the current address about the requested change. The
-        active email is only updated once the user confirms the new address, so an
-        unverified or malicious change can never lock the account out.
+        The new address is stored in the pending_email field, and the active email
+        is only updated once the user confirms it, so an unverified or malicious
+        change can never lock the account out. The current address is notified too,
+        so the user knows about a change that they didn't request.
 
         The OTP sent to the new address is bound to the email verification scope, so it
         only confirms the address and can't be replayed to reset the account password or
         to pass the MFA second factor.
 
         Args:
-            user (Any): User instance requesting the email change.
-            new_email (str): New email address awaiting verification.
+            user: User that requested the change.
+            new_email: Address to verify, which doesn't replace the current one yet.
 
         Returns:
-            Any: Updated user instance with the pending email set.
+            The user, with the new address kept as pending until it is confirmed.
         """
         user.pending_email = new_email
         user.save(update_fields=["pending_email"])
@@ -419,17 +361,13 @@ class RekonoUserManager(UserManager, LoggingEntity, OtpManagerMixin, MfaManagerM
         return user
 
     def update_email(self, user: Any) -> Any:
-        """Confirm a pending email change after OTP verification.
-
-        Promotes the pending_email to the active email, clears the pending address, and
-        removes the OTP. Called after the user verifies the new address through the
-        email link.
+        """Apply a pending email change, once the new address has been verified.
 
         Args:
-            user (Any): User instance with a pending email awaiting confirmation.
+            user: User whose pending address has just been confirmed.
 
         Returns:
-            Any: Updated user instance with the new email address applied.
+            The user, whose email address is now the confirmed one.
         """
         user.email = user.pending_email
         user.pending_email = None
@@ -441,16 +379,13 @@ class RekonoUserManager(UserManager, LoggingEntity, OtpManagerMixin, MfaManagerM
         return user
 
     def invalidate_all_tokens(self, user: Any) -> Any:
-        """Invalidate all JWT tokens for user.
-
-        Blacklists all outstanding JWT tokens for the user to force
-        re-authentication. Used for security events like password changes.
+        """Blacklist all the JWT tokens of a user, closing their open sessions.
 
         Args:
-            user (Any): User instance to invalidate tokens for.
+            user: User whose outstanding tokens are blacklisted.
 
         Returns:
-            Any: User instance with invalidated tokens.
+            The user, with none of their previous tokens still valid.
         """
         for token in OutstandingToken.objects.filter(user=user).exclude(
             id__in=BlacklistedToken.objects.filter(token__user=user).values_list("token_id", flat=True)
@@ -470,11 +405,12 @@ class RekonoUserManager(UserManager, LoggingEntity, OtpManagerMixin, MfaManagerM
         enabled get no such fallback.
 
         Args:
-            otp (str): OTP code to verify.
-            user (Any): User instance to verify against.
+            otp: Code provided by the user, either the TOTP one or the one received
+              by email.
+            user: User that is completing their second authentication factor.
 
         Returns:
-            bool: True if verification succeeds, False otherwise.
+            Whether the code is valid for that user.
         """
         mfa_verification = self.verify_mfa(otp, user)
         if mfa_verification or not user.mfa:
@@ -483,42 +419,29 @@ class RekonoUserManager(UserManager, LoggingEntity, OtpManagerMixin, MfaManagerM
 
 
 class User(AbstractUser, BaseEncrypted):
-    """Custom user model for Rekono with enhanced security features.
-
-    Extends Django's AbstractUser with comprehensive security and authentication
-    features including OTP support, MFA capabilities, notification preferences,
-    and encrypted field storage for sensitive data.
-
-    Account States:
-        - is_active=None: User invited but account not created
-        - is_active=True: Active user account
-        - is_active=False: Disabled user account
+    """Account of a person that uses Rekono.
 
     Attributes:
-        username (TextField): Unique username with validation (optional, max 100 chars)
-        first_name (TextField): User's first name (optional, max 100 chars)
-        last_name (TextField): User's last name (optional, max 100 chars)
-        email (EmailField): Unique email address (required, max 150 chars)
-        pending_email (EmailField): New email address awaiting OTP verification (optional, max 150 chars)
-        is_active (BooleanField): Account status (None/True/False for invitation/active/disabled)
-        otp (TextField): Hashed one-time password for secure operations (max 200 chars)
-        otp_scope (IntegerField): Operation the OTP was issued for (from OtpScope enum)
-        otp_expiration (DateTimeField): OTP expiration timestamp with future validation
-        _mfa_key (TextField): Encrypted MFA secret key (stored as 'mfa_key', max 40 chars)
-        mfa (BooleanField): Whether MFA is enabled for this account
-        notification_scope (TextField): Notification preference level (from Notification enum)
-        email_notifications (BooleanField): Whether to send email notifications
-        telegram_notifications (BooleanField): Whether to send Telegram notifications
-
-    Example:
-        Create a new user invitation:
-
-        ```python
-        user = User.objects.invite_user(
-            email="user@example.com",
-            role=Role.READER
-        )
-        ```
+        username: Username chosen during the registration, still empty while the
+          user is only invited.
+        first_name: First name of the user.
+        last_name: Last name of the user.
+        email: Email address where the user receives the notifications.
+        pending_email: New email address awaiting verification.
+        is_active: None while the user is invited, True once their account is
+          created, and False when it's disabled.
+        otp: Hash of the one-time password currently assigned to the user.
+        otp_scope: Operation that the one-time password was issued for.
+        otp_expiration: Moment when the one-time password stops being valid.
+        mfa: Whether the user enabled the multi-factor authentication.
+        notification_scope: Executions that the user wants to be notified about.
+        email_notifications: Whether the user receives notifications by email.
+        telegram_notifications: Whether the user receives notifications by Telegram.
+        USERNAME_FIELD: Field that Django authenticates the users by.
+        EMAIL_FIELD: Field that Django sends the account emails to.
+        REQUIRED_FIELDS: Fields that the createsuperuser command asks for, besides
+          the username and the password.
+        objects: Manager that also creates the users and their one-time passwords.
     """
 
     username = models.TextField(
@@ -531,42 +454,31 @@ class User(AbstractUser, BaseEncrypted):
         max_length=100, blank=True, null=True, validators=[Validator(Regex.NAME, code="last_name")]
     )
     email = models.EmailField(max_length=150, unique=True)
-    # New email address awaiting confirmation
     pending_email = models.EmailField(max_length=150, blank=True, null=True)
     is_active = models.BooleanField(blank=True, null=True, default=None)
 
-    # One Time Password used to invite and enable users or reset passwords and MFA via email
-    # OTPs are only valid for the otp_scope that it was issued for
     otp = models.TextField(max_length=200, blank=True, null=True)
     otp_scope = models.IntegerField(choices=OtpScope.choices, blank=True, null=True)
     otp_expiration = models.DateTimeField(
         blank=True, null=True, validators=[FutureDatetimeValidator(code="otp_expiration")]
     )
 
-    # Key for Multi Factor Authentication via authenticator app
     _mfa_key = models.TextField(max_length=40, blank=True, null=True, db_column="mfa_key")
     mfa = models.BooleanField(default=False)
 
-    # User notification preferences
     notification_scope = models.TextField(
         max_length=18, choices=Notification.choices, default=Notification.MY_EXECUTIONS
     )
     email_notifications = models.BooleanField(default=True)
     telegram_notifications = models.BooleanField(default=False)
 
-    # Generic user configuration
     USERNAME_FIELD = "username"
     EMAIL_FIELD = "email"
     REQUIRED_FIELDS = ["email"]
 
-    # Custom model manager
     objects = RekonoUserManager()
     _encrypted_field = "_mfa_key"
 
     def __str__(self) -> str:
-        """Return string representation of the user.
-
-        Returns:
-            str: User's email address.
-        """
+        """Return the email address of the user."""
         return self.email

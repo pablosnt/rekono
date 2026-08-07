@@ -1,8 +1,4 @@
-"""Django admin configuration for API token models.
-
-Registers the ApiToken model with Django admin interface for
-administrative management of API tokens.
-"""
+"""Registration of the API token model in the Django admin site."""
 
 from django.contrib import admin
 

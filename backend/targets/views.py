@@ -1,8 +1,4 @@
-"""Django REST framework views for target management.
-
-Provides REST API views for target records with CRUD operations,
-filtering capabilities, and project-based authorization controls.
-"""
+"""Endpoints to manage the targets of the projects."""
 
 from rest_framework.permissions import IsAuthenticated
 
@@ -14,20 +10,18 @@ from targets.serializers import TargetSerializer
 
 
 class TargetViewSet(BaseViewSet):
-    """ViewSet for Target model CRUD operations.
-
-    Provides REST API endpoints for target management with filtering,
-    searching, and ordering capabilities. Enforces project-based authorization
-    and user authentication.
+    """Create, list, and delete the targets of the projects.
 
     Attributes:
-        queryset (QuerySet): Target model instances
-        serializer_class (Serializer): Serializer for Target model
-        filterset_class (FilterSet): Filter class for query filtering
-        permission_classes (list): Required permissions for access control
-        search_fields (list): Fields available for text search
-        ordering_fields (list): Fields available for result ordering
-        http_method_names (list): Allowed HTTP methods (GET, POST, DELETE)
+        queryset: All the targets, restricted to the projects of the user by the
+          base viewset.
+        serializer_class: Serializer of the targets.
+        filterset_class: Filters available to search targets.
+        permission_classes: Role permissions plus the membership in the project.
+        search_fields: Fields used by the text search.
+        ordering_fields: Fields that can be used to order the results.
+        http_method_names: The targets can be created and deleted, but not updated,
+          since another value is another target.
     """
 
     queryset = Target.objects.all()

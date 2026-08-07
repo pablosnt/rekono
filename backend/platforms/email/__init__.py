@@ -1,23 +1,6 @@
-"""Email notification platform for Rekono.
+"""Notifications that Rekono sends by email.
 
-This module provides outbound email notification capabilities for the Rekono
-security testing platform through SMTP integration. Rekono sends mail, it does not
-fetch data from mailboxes. It covers execution and alert notifications, user
-lifecycle notifications (invitations, password resets, MFA), and report-ready
-notifications.
-
-Key Features:
-    - SMTP configuration management with encrypted credential storage
-    - HTML email templates authored in React (email-templates/) and built to
-      platforms/email/templates/ via react-email's export pipeline
-    - Execution and alert notifications for discovered security findings
-    - User lifecycle notifications (invitations, password resets, MFA)
-    - Background email processing for user lifecycle notifications
-    - Connection testing and availability validation, skipped while CONFIG.testing
-
-Security:
-    - SMTP credentials encrypted before database storage
-    - Secure TLS/SSL connection support with certificate validation
-    - Per-user notification preferences control who receives execution and
-      report emails
+Rekono only sends emails, it never reads any mailbox. The templates are written in
+React, in the email-templates directory of the repository, and built into the
+templates directory of this app.
 """

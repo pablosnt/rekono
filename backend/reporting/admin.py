@@ -1,8 +1,4 @@
-"""Django admin configuration for reporting models.
-
-Registers the Report model with the Django admin interface for
-administrative management and monitoring of report generation records.
-"""
+"""Registration of the report model in the Django admin site."""
 
 from django.contrib import admin
 

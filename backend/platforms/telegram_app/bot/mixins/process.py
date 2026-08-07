@@ -1,10 +1,7 @@
-"""Telegram Bot mixin for security process selection workflows.
+"""Steps that ask which process a task must run.
 
-Provides process selection functionality for conversations that require
-process context including process listing, selection, and context storage.
-Processes are global definitions shared across projects, so unlike targets
-they are listed without filtering by the selected project. Leaves
-Context.PROCESS set for the mixins that configure and launch the task.
+The processes are shared by all the projects, so they aren't filtered by the
+project that the conversation is about.
 """
 
 from telegram import Update
@@ -16,23 +13,18 @@ from processes.models import Process
 
 
 class ProcessMixin(BaseMixin):
-    """Mixin providing security process selection functionality.
-
-    Enables conversations to display available security processes and handle
-    process selection for security testing workflows.
-    """
+    """Steps that choose the process that a task will run."""
 
     async def ask_for_process(self, update: Update, context: CallbackContext) -> int:
-        """Display security process selection options.
-
-        Shows a list of available security processes for selection in testing workflows.
+        """Ask the users to choose one of the processes.
 
         Args:
-            update (Update): The Telegram update containing user interaction.
-            context (CallbackContext): The callback context for the conversation.
+            update: Message that the user wrote.
+            context: Data that the conversation remembers.
 
         Returns:
-            int: Next conversation state based on process selection.
+            The step that saves the answer, or the end of the conversation if
+            there is no process at all.
         """
         self.validate_update(update)
         return await self.go_to_next_state(
@@ -50,17 +42,14 @@ class ProcessMixin(BaseMixin):
         )
 
     async def save_process(self, update: Update, context: CallbackContext) -> int:
-        """Save selected process to conversation context.
-
-        Processes the user's process selection and stores it in the conversation
-        context for use in subsequent security testing steps.
+        """Remember the process that the users chose.
 
         Args:
-            update (Update): The Telegram update containing user selection.
-            context (CallbackContext): The callback context for the conversation.
+            update: Message that the user wrote.
+            context: Data that the conversation remembers.
 
         Returns:
-            int: Next conversation state after process selection.
+            The next step of the conversation.
         """
         self.validate_update(update)
         return await self.go_to_next_state(

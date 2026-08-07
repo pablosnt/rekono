@@ -1,8 +1,8 @@
-"""Filters for findings models and REST API search capabilities.
+"""Filters of the finding endpoints.
 
-Provides filter classes for all finding types enabling advanced filtering
-and search operations through the REST API with field-specific filter
-configurations and relationship-based filtering.
+Besides their own fields, the findings can be filtered by the ones where they were
+discovered, even if they aren't directly related to them, so all the findings can
+be searched by host and port no matter how deep they are in the finding chain.
 """
 
 from django_filters.filters import CharFilter, ModelChoiceFilter
@@ -22,22 +22,10 @@ from framework.filters import MultipleCharFilter, MultipleNumberFilter
 
 
 class OSINTFilter(TriageFindingFilter):
-    """Filter for Open Source Intelligence findings.
-
-    Enables filtering and search operations for OSINT findings based on
-    data content, data type classification, and source information.
-    """
+    """Filters to search the data found on public sources."""
 
     class Meta:
-        """Meta configuration for OSINTFilter.
-
-        Defines filterable fields and lookup types for OSINT findings
-        with exact match and case-insensitive contains operations.
-
-        Attributes:
-            model (type): OSINT model class.
-            fields (dict): Field names mapped to available lookup types.
-        """
+        """Filter configuration adding the OSINT fields to the common ones."""
 
         model = OSINT
         fields = {
@@ -49,22 +37,10 @@ class OSINTFilter(TriageFindingFilter):
 
 
 class HostFilter(FindingFilter):
-    """Filter for network host findings.
-
-    Enables filtering and search operations for network hosts based on
-    IP addresses, domains, operating systems, and geolocation data.
-    """
+    """Filters to search the hosts found in the network."""
 
     class Meta:
-        """Meta configuration for HostFilter.
-
-        Defines filterable fields and lookup types for host findings
-        including geolocation and operating system filtering.
-
-        Attributes:
-            model (type): Host model class.
-            fields (dict): Field names mapped to available lookup types.
-        """
+        """Filter configuration adding the host fields to the common ones."""
 
         model = Host
         fields = {
@@ -81,22 +57,10 @@ class HostFilter(FindingFilter):
 
 
 class PortFilter(FindingFilter):
-    """Filter for network port findings.
-
-    Enables filtering and search operations for network ports based on
-    host relationships, port numbers, status, protocols, and services.
-    """
+    """Filters to search the ports found in the hosts."""
 
     class Meta:
-        """Meta configuration for PortFilter.
-
-        Defines filterable fields and lookup types for port findings
-        including protocol and service identification filtering.
-
-        Attributes:
-            model (type): Port model class.
-            fields (dict): Field names mapped to available lookup types.
-        """
+        """Filter configuration adding the port fields to the common ones."""
 
         model = Port
         fields = {
@@ -110,27 +74,16 @@ class PortFilter(FindingFilter):
 
 
 class PathFilter(FindingFilter):
-    """Filter for web path findings.
-
-    Enables filtering and search operations for web paths based on
-    associated ports, path content, HTTP status, and resource types.
+    """Filters to search the paths found in the ports.
 
     Attributes:
-        host (ModelChoiceFilter): Filter by host through port relationship
+        host: Filter by the host of the port where the path was found.
     """
 
     host = ModelChoiceFilter(queryset=Host.objects.all(), field_name="port__host")
 
     class Meta:
-        """Meta configuration for PathFilter.
-
-        Defines filterable fields and lookup types for path findings
-        including HTTP status codes and resource type classification.
-
-        Attributes:
-            model (type): Path model class.
-            fields (dict): Field names mapped to available lookup types.
-        """
+        """Filter configuration adding the path fields to the common ones."""
 
         model = Path
         fields = {
@@ -143,27 +96,16 @@ class PathFilter(FindingFilter):
 
 
 class TechnologyFilter(FindingFilter):
-    """Filter for technology findings.
-
-    Enables filtering and search operations for software technologies
-    based on associated ports, technology names, versions, and descriptions.
+    """Filters to search the technologies found in the ports.
 
     Attributes:
-        host (ModelChoiceFilter): Filter by host through port relationship
+        host: Filter by the host of the port where the technology was found.
     """
 
     host = ModelChoiceFilter(queryset=Host.objects.all(), field_name="port__host")
 
     class Meta:
-        """Meta configuration for TechnologyFilter.
-
-        Defines filterable fields and lookup types for technology findings
-        including version matching and description search capabilities.
-
-        Attributes:
-            model (type): Technology model class.
-            fields (dict): Field names mapped to available lookup types.
-        """
+        """Filter configuration adding the technology fields to the common ones."""
 
         model = Technology
         fields = {
@@ -176,29 +118,18 @@ class TechnologyFilter(FindingFilter):
 
 
 class CredentialFilter(TriageFindingFilter):
-    """Filter for credential findings.
-
-    Enables filtering and search operations for credentials based on
-    associated technologies, email addresses, usernames, and secrets.
+    """Filters to search the credentials exposed in the technologies.
 
     Attributes:
-        port (ModelChoiceFilter): Filter by port through technology
-        host (ModelChoiceFilter): Filter by host through technology port
+        port: Filter by the port of the technology that exposed the credential.
+        host: Filter by the host of that port.
     """
 
     port = ModelChoiceFilter(queryset=Port.objects.all(), field_name="technology__port")
     host = ModelChoiceFilter(queryset=Host.objects.all(), field_name="technology__port__host")
 
     class Meta:
-        """Meta configuration for CredentialFilter.
-
-        Defines filterable fields and lookup types for credential findings
-        including technology relationship filtering and credential data search.
-
-        Attributes:
-            model (type): Credential model class.
-            fields (dict): Field names mapped to available lookup types.
-        """
+        """Filter configuration adding the credential fields to the common ones."""
 
         model = Credential
         fields = {
@@ -213,15 +144,13 @@ class CredentialFilter(TriageFindingFilter):
 
 
 class VulnerabilityFilter(TriageFindingFilter):
-    """Filter for vulnerability findings.
-
-    Enables filtering and search operations for vulnerabilities based on
-    technologies, ports, CVE/CWE identifiers, severity, and trending status.
+    """Filters to search the vulnerabilities found in the technologies and ports.
 
     Attributes:
-        port (MultipleNumberFilter): Filter by port through technology or direct
-        host (MultipleNumberFilter): Filter by host through tech port or direct
-        cwe (CharFilter): Case-insensitive substring match on CWE identifiers
+        port: Filter by the port where the vulnerability was found, directly or
+          through its technology.
+        host: Filter by the host of that port.
+        cwe: Filter by one of the CWE identifiers of the vulnerability.
     """
 
     port = MultipleNumberFilter(fields=["technology__port", "port"])
@@ -229,16 +158,7 @@ class VulnerabilityFilter(TriageFindingFilter):
     cwe = CharFilter(field_name="cwes", lookup_expr="icontains")
 
     class Meta:
-        """Meta configuration for VulnerabilityFilter.
-
-        Defines filterable fields and lookup types for vulnerability findings
-        including CVE and other database identifier matching, severity and
-        CVSS/EPSS scoring, and trending indicators.
-
-        Attributes:
-            model (type): Vulnerability model class.
-            fields (dict): Field names mapped to available lookup types.
-        """
+        """Filter configuration adding the vulnerability fields to the common ones."""
 
         model = Vulnerability
         fields = {
@@ -263,18 +183,18 @@ class VulnerabilityFilter(TriageFindingFilter):
 
 
 class ExploitFilter(TriageFindingFilter):
-    """Filter for exploit findings.
-
-    Enables filtering and search operations for exploits based on
-    associated vulnerabilities, technologies, titles, and database identifiers.
+    """Filters to search the exploits found for the vulnerabilities and technologies.
 
     Attributes:
-        port (MultipleNumberFilter): Filter by port through tech or vuln
-        host (MultipleNumberFilter): Filter by host through tech or vuln port
-        technology (MultipleNumberFilter): Filter by tech through direct or vuln
-        technology__name (MultipleCharFilter): Filter by tech name through direct/vuln
-        technology__version (MultipleCharFilter): Filter by tech version direct/vuln
-        vulnerability__cwe (CharFilter): Case-insensitive substring match on the related vulnerability's CWE identifiers
+        port: Filter by the port where the exploit was found, through its technology
+          or through its vulnerability.
+        host: Filter by the host of that port.
+        technology: Filter by the technology that the exploit targets, directly or
+          through its vulnerability.
+        technology__name: Filter by the name of that technology.
+        technology__version: Filter by the version of that technology.
+        vulnerability__cwe: Filter by one of the CWE identifiers of the vulnerability
+          that the exploit takes advantage of.
     """
 
     port = MultipleNumberFilter(fields=["technology__port", "vulnerability__port", "vulnerability__technology__port"])
@@ -287,15 +207,7 @@ class ExploitFilter(TriageFindingFilter):
     vulnerability__cwe = CharFilter(field_name="vulnerability__cwes", lookup_expr="icontains")
 
     class Meta:
-        """Meta configuration for ExploitFilter.
-
-        Defines filterable fields and lookup types for exploit findings
-        including vulnerability relationships and exploit database references.
-
-        Attributes:
-            model (type): Exploit model class.
-            fields (dict): Field names mapped to available lookup types.
-        """
+        """Filter configuration adding the exploit fields to the common ones."""
 
         model = Exploit
         fields = {

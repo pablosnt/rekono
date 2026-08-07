@@ -1,8 +1,4 @@
-"""Django admin interface configuration for CVE Crowd platform management.
-
-Registers CVE Crowd models with the Django admin interface for administrative
-management of threat intelligence platform configuration and its trending CVE cache.
-"""
+"""Registration of the CVE Crowd models in the Django admin site."""
 
 from django.contrib import admin
 

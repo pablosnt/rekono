@@ -1,8 +1,4 @@
-"""SMBMap SMB share enumeration tool output parser.
-
-Processes SMBMap CSV output to extract discovered SMB shares and their
-access permissions from network share enumeration scans.
-"""
+"""Parser of the SMBMap share enumeration tool."""
 
 import csv
 
@@ -12,25 +8,12 @@ from tools.parsers.base import BaseParser
 
 
 class Smbmap(BaseParser):
-    """Parser for SMBMap CSV output files.
-
-    Extracts SMB share findings with access permissions from network share
-    enumeration results. Processes CSV data to identify readable, writable,
-    and inaccessible network shares.
-
-    Attributes:
-        Inherits all attributes from BaseParser
-    """
+    """Findings discovered by SMBMap, read from its CSV report."""
 
     def _parse(self) -> None:
-        """Parse SMBMap CSV output and extract SMB share findings.
-
-        Processes CSV enumeration results to create Path findings for
-        discovered SMB shares with access permission details.
-        """
+        """Create one path per SMB share found, with the access allowed to it."""
         with self.report.open("r") as _report:
             reader = csv.reader(_report)
-            # Discard the CSV header row
             next(reader)
             for row in reader:
                 # The permissions column is the only reliable marker of a real share row,

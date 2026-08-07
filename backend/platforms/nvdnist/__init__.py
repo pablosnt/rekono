@@ -1,15 +1,5 @@
-"""NVD NIST vulnerability intelligence platform integration for Rekono.
+"""Integration with the National Vulnerability Database of the NIST.
 
-This module provides comprehensive integration with the National Vulnerability Database (NVD)
-maintained by the National Institute of Standards and Technology (NIST). The integration
-enables automated vulnerability enrichment, CVSS scoring updates, and security intelligence
-gathering for identified vulnerabilities during security assessments.
-
-Key Features:
-    - Automated CVE data enrichment for discovered vulnerabilities
-    - Real-time CVSS scoring and severity classification updates
-    - CWE (Common Weakness Enumeration) mapping and classification
-    - API token management for enhanced rate limits and access
-    - Comprehensive vulnerability reference linking and documentation
-    - Per-finding processing with one HTTP request per CVE, in a sequential loop
+NVD is the reference source of the CVE data, and it can be used without any
+configuration, so the API token is only needed to raise its rate limit.
 """

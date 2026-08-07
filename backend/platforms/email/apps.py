@@ -1,8 +1,4 @@
-"""Django application configuration for email notification platform.
-
-Configures the email notification platform application with base functionality
-and model initialization for SMTP-based email delivery.
-"""
+"""Django app configuration of the email app."""
 
 from typing import Any
 
@@ -12,27 +8,23 @@ from framework.apps import BaseApp
 
 
 class EmailConfig(BaseApp, AppConfig):
-    """Configuration class for email notification platform application.
-
-    Extends BaseApp and AppConfig to provide proper Django application setup
-    with SMTP settings model registration and fixture management.
+    """Configuration of the email app.
 
     Attributes:
-        name (str): Application name for Django registry
-        skip_fixtures_if_model_exists (bool): Skip fixtures if models exist
+        name: Name of the app in the Django app registry.
+        skip_fixtures_if_model_exists: The settings are only created once, so the
+          configuration of a deployment is never overwritten.
     """
 
     name = "platforms.email"
     skip_fixtures_if_model_exists = True
 
     def _get_models(self) -> list[Any]:
-        """Get list of models for fixture initialization.
-
-        Returns the SMTPSettings model for automatic fixture loading
-        during application initialization.
+        """Get the SMTP settings model, whose data comes from the fixtures.
 
         Returns:
-            list[Any]: List containing SMTPSettings model class
+            The SMTP settings model, imported inside the method because the models
+            don't exist yet the first time that the migrations run.
         """
         from platforms.email.models import SMTPSettings
 

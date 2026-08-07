@@ -1,8 +1,4 @@
-"""Django REST framework views for wordlist management.
-
-Provides REST API views for wordlist records with CRUD operations, file upload
-capabilities, and proper authentication and authorization controls.
-"""
+"""Viewsets of the wordlist endpoints."""
 
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.serializers import Serializer
@@ -15,19 +11,16 @@ from wordlists.serializers import UpdateWordlistSerializer, WordlistSerializer
 
 
 class WordlistViewSet(LikeViewSet):
-    """ViewSet for Wordlist model CRUD operations.
-
-    Provides REST API endpoints for managing wordlist files with filtering, searching,
-    ordering, and like functionality. Enforces owner-based authorization and user
-    authentication for secure wordlist management.
+    """Manage the wordlists that the tools can use.
 
     Attributes:
-        queryset (QuerySet): Wordlist model instances
-        serializer_class (Serializer): Serializer for Wordlist model
-        filterset_class (FilterSet): Filter class for query filtering
-        permission_classes (list): Required permissions for access control
-        search_fields (list): Fields available for text search
-        ordering_fields (list): Fields available for result ordering
+        queryset: All the wordlists, since they are shared by all the projects.
+        serializer_class: Serializer of the wordlists.
+        filterset_class: Filters of the wordlists.
+        permission_classes: Role permissions plus the ownership of the wordlist,
+          so only its owner can update or remove it.
+        search_fields: Free text search over the wordlist name.
+        ordering_fields: Fields that the wordlists can be sorted by.
     """
 
     queryset = Wordlist.objects.all()
@@ -38,9 +31,10 @@ class WordlistViewSet(LikeViewSet):
     ordering_fields = ["id", "name", "size", "type", "owner", "liked", "likes"]
 
     def get_serializer_class(self) -> Serializer:
-        """Get the appropriate serializer class based on the request method.
+        """Get the serializer without the file field for the update requests.
 
         Returns:
-            Serializer: UpdateWordlistSerializer for PUT requests, WordlistSerializer otherwise
+            The update serializer for PUT, so the file of an existing wordlist can't
+            be replaced, and the standard one for the rest of the methods.
         """
         return UpdateWordlistSerializer if self.request.method == "PUT" else super().get_serializer_class()

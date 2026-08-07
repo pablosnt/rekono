@@ -1,23 +1,9 @@
-"""Django models for security tools management and configuration.
+"""Models of the tools that Rekono runs and of what they can do.
 
-Defines comprehensive data models for security tool management including tool
-definitions, configurations, arguments, inputs, and outputs. Models support
-dynamic tool discovery, installation validation, version detection, and
-flexible configuration management for automated security testing workflows.
-
-Key Components:
-    Tool: Core security tool definitions with installation status and version tracking
-    Configuration: Stage-based tool execution configurations with customizable arguments
-    Argument: Tool parameter definitions with input type mapping and validation rules
-    Input: Input type associations for tool arguments with filtering and ordering
-    Output: Expected output types from tool configurations for workflow chaining
-    Intensity: Tool execution intensity levels with performance and thoroughness control
-
-Architecture:
-    The models use a hierarchical relationship structure where tools contain multiple
-    configurations, which define arguments that accept various input types. This design
-    enables flexible tool parameter generation and automated workflow orchestration
-    based on available inputs and desired outputs.
+A tool has one configuration per thing that it can do, each configuration declares
+the arguments that its command accepts, and each argument declares the input types
+that can fill it, so a command can be built from whatever the previous executions
+discovered.
 """
 
 import importlib
@@ -39,40 +25,26 @@ from tools.enums import Stage
 
 
 class Tool(BaseLike):
-    """Model representing a security testing tool with installation and version tracking.
-
-    Represents individual security tools integrated into Rekono with comprehensive
-    metadata, installation status validation, version detection, and dynamic class
-    loading for tool-specific executors and parsers. Supports both command-line
-    tools and script-based tools with configurable execution environments.
+    """Security tool that Rekono can run.
 
     Attributes:
-        name (TextField): Unique tool identifier and display name (max 30 chars)
-        command (TextField): System command or executable name (max 30 chars)
-        script (TextField): Optional script filename for script-based tools (max 100 chars)
-        script_directory_property (TextField): CONFIG property for script location (max 100 chars)
-        run_directory_property (TextField): CONFIG property for execution directory (max 100 chars)
-        ignore_exit_code (BooleanField): Whether to ignore non-zero exit codes
-        is_installed (BooleanField): Current installation status of the tool
-        version (TextField): Detected version string (max 100 chars)
-        version_argument (TextField): Command argument to retrieve version (max 30 chars)
-        output_format (TextField): Expected output file format (max 5 chars)
-        reference (TextField): Documentation or homepage URL (max 250 chars)
-        icon (TextField): Tool icon or logo URL (max 250 chars)
-        defectdojo_scan_type (TextField): DefectDojo integration scan type (max 100 chars)
-
-    Example:
-        Create a new security tool:
-
-        ```python
-        tool = Tool.objects.create(
-            name="Nmap",
-            command="nmap",
-            version_argument="--version",
-            output_format="xml"
-        )
-        tool.update_status()  # Check installation and version
-        ```
+        name: Name of the tool, which also resolves its executor and its parser.
+        command: Command that runs the tool.
+        script: Script that the command runs, for the tools that aren't a command
+          by themselves.
+        script_directory_property: Configuration property with the directory where
+          the script is installed.
+        run_directory_property: Configuration property with the directory where the
+          tool must be run.
+        ignore_exit_code: Whether an execution succeeds even if the tool returns an
+          error code, which some tools do when they find nothing.
+        is_installed: Whether the tool is available in this deployment.
+        version: Version of the tool that is installed.
+        version_argument: Argument that makes the tool report its version.
+        output_format: Extension of the file where the tool writes its results.
+        reference: Link to the documentation of the tool.
+        icon: Link to the logo of the tool.
+        defectdojo_scan_type: Name that DefectDojo gives to the reports of this tool.
     """
 
     name = models.TextField(max_length=30, unique=True)
@@ -90,18 +62,17 @@ class Tool(BaseLike):
     defectdojo_scan_type = models.TextField(max_length=100, blank=True, null=True)
 
     def _get_related_class(self, package: str, name: str) -> Any:
-        """Get the related class for tool-specific functionality.
-
-        Dynamically imports and returns tool-specific executor or parser classes
-        based on the tool name and package. Falls back to base classes when
-        tool-specific implementations are not available.
+        """Get the executor or the parser class that belongs to a tool.
 
         Args:
-            package (str): Package path for the class type (e.g., "tools.parsers")
-            name (str): Tool name to construct the module and class names
+            package: Package where the class is searched, which is tools.executors
+              or tools.parsers.
+            name: Name of the tool, from which the module and the class names are
+              built.
 
         Returns:
-            Any: The tool-specific class or base class if specific implementation not found
+            The class of the tool, or the base one if the tool doesn't need
+            anything special, which is the case for most of them.
         """
         try:
             # nosemgrep: python.lang.security.audit.non-literal-import.non-literal-import
@@ -119,46 +90,26 @@ class Tool(BaseLike):
 
     @cached_property
     def parser_class(self) -> Any:
-        """Get the parser class for this tool.
-
-        Returns the tool-specific parser class for processing output files and
-        extracting security findings. Uses cached property for performance.
-
-        Returns:
-            Any: Tool-specific parser class or BaseParser if specific implementation not found
-        """
+        """The class that turns the output of this tool into findings."""
         return self._get_related_class("tools.parsers", self.name)
 
     @cached_property
     def executor_class(self) -> Any:
-        """Get the executor class for this tool.
-
-        Returns the tool-specific executor class for handling command construction
-        and execution logic. Uses cached property for performance.
-
-        Returns:
-            Any: Tool-specific executor class or BaseExecutor if specific implementation not found
-        """
+        """The class that builds and runs the commands of this tool."""
         return self._get_related_class("tools.executors", self.name)
 
     def update_status(self) -> None:
-        """Update the installation status and version information for this tool.
-
-        Checks if the tool is currently installed on the system and attempts to
-        detect the version if available. Updates the database with current status.
-        """
+        """Check if the tool is installed and which version it runs."""
         self.is_installed = self._is_installed()
         self.version = self._parse_version() if self.is_installed else None
         self.save(update_fields=["is_installed", "version"])
 
     def _is_installed(self) -> bool:
-        """Check if the tool is installed and available for execution.
-
-        Validates tool availability by checking command accessibility and script
-        file existence based on tool configuration.
+        """Check if the tool can be run in this deployment.
 
         Returns:
-            bool: True if the tool is installed and available, False otherwise
+            Whether both the command and the script of the tool are available,
+            skipping the check for the ones that the tool doesn't declare.
         """
         if self.command and not shutil.which(self.command):
             return False
@@ -169,18 +120,16 @@ class Tool(BaseLike):
         return True  # pragma: no cover
 
     def _parse_version(self) -> str | None:  # pragma: no cover
-        """Parse version information from the tool's version output.
-
-        Executes the tool with version argument and extracts version string using
-        regex pattern matching. The tool is executed with the same clean environment
-        used during tool execution, so tools that shell out to a bare `python3` don't
-        inherit Rekono's virtualenv and can resolve their own dependencies.
+        """Get the version that the tool reports.
 
         Returns:
-            str | None: Parsed version string or None if version cannot be determined
+            The version, or None if the tool doesn't report one or if it fails,
+            since the version is only informative.
         """
         version_regex = r"(?!m)[a-z]?[\d]+\.[\d]+\.?[\d]*-?[a-z]*"
         if self.version_argument:
+            # The environment is the same one used to run the tool, so the tools that call a
+            # bare python3 don't inherit the Rekono virtualenv and can find their dependencies
             process = subprocess.run(
                 [i for i in [self.command, self.script, self.version_argument] if i],
                 stdout=subprocess.PIPE,
@@ -202,36 +151,18 @@ class Tool(BaseLike):
                     return version.group()
 
     def __str__(self) -> str:
-        """Return string representation of the tool.
-
-        Returns:
-            str: The tool name
-        """
+        """Return the name of the tool."""
         return self.name
 
 
 class Intensity(BaseModel):
-    """Model representing execution intensity levels for security tools.
-
-    Defines intensity configurations that control tool execution thoroughness
-    and performance characteristics. Each tool can have multiple intensity
-    levels with associated command arguments for different scanning approaches.
+    """Argument that a tool needs to be run with a given intensity.
 
     Attributes:
-        tool (ForeignKey): The associated Tool instance
-        argument (TextField): Command argument for this intensity level (max 50 chars)
-        value (IntegerField): Intensity level from IntensityEnum (SNEAKY, LOW, NORMAL, HARD, INSANE)
-
-    Example:
-        Create intensity configuration:
-
-        ```python
-        intensity = Intensity.objects.create(
-            tool=nmap_tool,
-            argument="-T4",
-            value=IntensityEnum.HARD
-        )
-        ```
+        tool: Tool that the intensity belongs to.
+        argument: Argument that applies the intensity, which is empty for the tools
+          whose default behavior already matches it.
+        value: Intensity that the argument applies.
     """
 
     tool = models.ForeignKey(Tool, related_name="intensities", on_delete=models.CASCADE)
@@ -239,44 +170,25 @@ class Intensity(BaseModel):
     value = models.IntegerField(choices=IntensityEnum.choices, default=IntensityEnum.NORMAL)
 
     def __str__(self) -> str:
-        """Return string representation of the intensity configuration.
-
-        Returns:
-            str: String in format "tool_name - intensity_level"
-        """
+        """Return the tool and the intensity that the argument applies."""
         return f"{self.tool.__str__()} - {IntensityEnum(self.value).name}"
 
 
 class Configuration(BaseModel):
-    """Model representing tool execution configurations for different stages.
-
-    Defines specific configurations for tool execution with stage-based parameters,
-    custom command template, and default selection logic. Configurations determine how
-    tools are executed within security testing workflows.
+    """One of the things that a tool can do, with the command that does it.
 
     Attributes:
-        name (TextField): Configuration identifier and display name (max 30 chars)
-        tool (ForeignKey): The associated Tool instance
-        command_template (TextField): Command template with placeholders (max 250 chars)
-        stage (IntegerField): Execution stage from Stage enum
-        default (BooleanField): Whether this is the default configuration for the tool
-        default_scanned_port (IntegerField): Default port to scan (0-65535, optional)
-        deprecated (BooleanField): Whether this configuration is excluded from new task and
-                                   process creation while remaining available for existing
-                                   executions that already reference it
-
-    Example:
-        Create a tool configuration:
-
-        ```python
-        config = Configuration.objects.create(
-            name="TCP ports & service versions",
-            tool=nmap_tool,
-            command_template="--privileged {host} {intensity} {ports} -sS -sV -A -oX {output}",
-            stage=Stage.ENUMERATION,
-            default=True
-        )
-        ```
+        name: Name of the configuration, unique within its tool.
+        tool: Tool that the configuration belongs to.
+        command_template: Command of the tool, with the placeholders that the
+          arguments fill.
+        stage: Phase of the assessment where the configuration is run.
+        default: Whether this is the configuration used when the users pick the
+          tool without choosing one.
+        default_scanned_port: Port that the configuration scans when the target
+          doesn't define any.
+        deprecated: Whether the configuration can still be used in new tasks and
+          processes, since the old ones are kept for the executions that used them.
     """
 
     name = models.TextField(max_length=30)
@@ -290,49 +202,26 @@ class Configuration(BaseModel):
     deprecated = models.BooleanField(default=False)
 
     class Meta:
-        """Meta configuration for the Configuration model.
-
-        Attributes:
-            constraints (list): Database constraints ensuring tool-name uniqueness
-        """
+        """Model configuration, making the name unique within each tool."""
 
         constraints = [models.UniqueConstraint(fields=["tool", "name"], name="unique_configuration")]
 
     def __str__(self) -> str:
-        """Return string representation of the configuration.
-
-        Returns:
-            str: String in format "tool_name - configuration_name"
-        """
+        """Return the tool and the name of the configuration."""
         return f"{self.tool.__str__()} - {self.name}"
 
 
 class Argument(BaseModel):
-    """Model representing configuration command-line arguments and their specifications.
-
-    Defines individual arguments that configurations accept, including parameter names,
-    command-line flags, requirement status, and multiplicity support. Arguments
-    are mapped to input types for automated parameter generation.
+    """Argument that a configuration accepts in its command.
 
     Attributes:
-        configuration (ForeignKey): The associated Configuration instance
-        name (TextField): Argument identifier and display name (max 20 chars)
-        argument (TextField): Command-line flag or parameter (max 50 chars)
-        required (BooleanField): Whether this argument is mandatory for configuration execution
-        multiple (BooleanField): Whether multiple input values are accepted
-
-    Example:
-        Create a configuration argument:
-
-        ```python
-        argument = Argument.objects.create(
-            configuration=nmap_config,
-            name="ports",
-            argument="-p {ports_commas}",
-            required=False,
-            multiple=True
-        )
-        ```
+        configuration: Configuration that the argument belongs to.
+        name: Name of the placeholder that the argument fills in the command.
+        argument: Text added to the command, with the placeholders of the input
+          data that fills it.
+        required: Whether the configuration can't be run without this argument.
+        multiple: Whether the argument accepts more than one input, so the tool
+          scans everything at once instead of once per input.
     """
 
     configuration = models.ForeignKey(
@@ -341,51 +230,27 @@ class Argument(BaseModel):
     name = models.TextField(max_length=20)
     argument = models.TextField(max_length=50, default="", blank=True)
     required = models.BooleanField(default=False)
-    # Indicates if multiple BaseInputs are accepted
     multiple = models.BooleanField(default=False)
 
     class Meta:
-        """Meta configuration for the Argument model.
-
-        Attributes:
-            constraints (list): Database constraints ensuring configuration-name argument uniqueness
-        """
+        """Model configuration, making the name unique within each configuration."""
 
         constraints = [models.UniqueConstraint(fields=["configuration", "name"], name="unique_argument")]
 
     def __str__(self) -> str:
-        """Return string representation of the argument.
-
-        Returns:
-            str: String in format "configuration_name - argument_name"
-        """
+        """Return the configuration and the name of the argument."""
         return f"{self.configuration.__str__()} - {self.name}"
 
 
 class Input(BaseModel):
-    """Model representing input type associations for tool arguments.
-
-    Links tool arguments to specific input types with optional filtering and
-    ordering specifications. Enables automated parameter generation based on
-    available inputs and their types.
+    """Kind of data that can fill an argument.
 
     Attributes:
-        argument (ForeignKey): The associated Argument instance
-        type (ForeignKey): The InputType that this argument accepts
-        filter (TextField): Optional filter expression for input selection (max 250 chars)
-        order (IntegerField): Processing order for multiple inputs
-
-    Example:
-        Create an input type mapping:
-
-        ```python
-        input_mapping = Input.objects.create(
-            argument=url_argument,
-            type=port_input_type,
-            filter="http",
-            order=1
-        )
-        ```
+        argument: Argument that this input can fill.
+        type: Input type that the argument accepts.
+        filter: Condition that the data must meet, like the service of a port.
+        order: Position of this input among the ones of the argument, since the
+          first one that has data available is the one used.
     """
 
     argument = models.ForeignKey(Argument, related_name="inputs", on_delete=models.CASCADE)
@@ -394,61 +259,34 @@ class Input(BaseModel):
     order = models.IntegerField(default=1)
 
     class Meta:
-        """Meta configuration for the Input model.
-
-        Attributes:
-            constraints (list): Database constraints ensuring argument-order input uniqueness
-        """
+        """Model configuration, making the order unique within each argument."""
 
         constraints = [models.UniqueConstraint(fields=["argument", "order"], name="unique_input")]
 
     def __str__(self) -> str:
-        """Return string representation of the input mapping.
-
-        Returns:
-            str: String in format "argument - input_type"
-        """
+        """Return the argument and the input type that can fill it."""
         return f"{self.argument.__str__()} - {self.type.__str__()}"
 
 
 class Output(BaseModel):
-    """Model representing expected output types from tool configurations.
+    """Kind of finding that a configuration discovers.
 
-    Defines the types of data that tool configurations produce as output,
-    enabling workflow chaining where tool outputs become inputs for subsequent
-    tools in security testing processes.
+    The outputs are what allows a process to chain its configurations, since a
+    configuration can only run after the ones that produce the data that it needs.
 
     Attributes:
-        configuration (ForeignKey): The associated Configuration instance
-        type (ForeignKey): The InputType that this configuration produces as output
-
-    Example:
-        Create an output type specification:
-
-        ```python
-        output = Output.objects.create(
-            configuration=nmap_config,
-            type=port_input_type
-        )
-        ```
+        configuration: Configuration that discovers this kind of finding.
+        type: Input type that the configuration produces.
     """
 
     configuration = models.ForeignKey(Configuration, related_name="outputs", on_delete=models.CASCADE)
     type = models.ForeignKey(InputType, related_name="outputs", on_delete=models.CASCADE)
 
     class Meta:
-        """Meta configuration for the Output model.
-
-        Attributes:
-            constraints (list): Database constraints ensuring configuration-type output uniqueness
-        """
+        """Model configuration, allowing each type once per configuration."""
 
         constraints = [models.UniqueConstraint(fields=["configuration", "type"], name="unique_output")]
 
     def __str__(self) -> str:
-        """Return string representation of the output specification.
-
-        Returns:
-            str: String in format "configuration - output_type"
-        """
+        """Return the configuration and the input type that it produces."""
         return f"{self.configuration.__str__()} - {self.type.__str__()}"

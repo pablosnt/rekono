@@ -1,22 +1,14 @@
-"""Enumeration classes for wordlist types and categories.
-
-Defines enumeration values used throughout the wordlist management system
-for categorizing different types of wordlists based on their intended use.
-"""
+"""Types of wordlists that the tools can use."""
 
 from django.db import models
 from django.db.models.enums import Choices
 
 
 class WordlistType(models.TextChoices):
-    """Enumeration of supported wordlist types for security testing.
+    """Kind of data that a wordlist contains.
 
-    Defines the available categories of wordlists based on their intended use
-    in security tools and testing scenarios.
-
-    Attributes:
-        ENDPOINT (str): Wordlists for endpoint/directory enumeration and brute-forcing
-        SUBDOMAIN (str): Wordlists for subdomain discovery and enumeration
+    The type decides which tools can use a wordlist, since a tool that discovers
+    paths can't do anything with a list of subdomains.
     """
 
     ENDPOINT = "Endpoint"

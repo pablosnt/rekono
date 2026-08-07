@@ -1,8 +1,4 @@
-"""SSLyze SSL/TLS security scanner output parser.
-
-Processes SSLyze JSON output to extract comprehensive SSL/TLS security findings
-including protocol vulnerabilities, cipher suite weaknesses, and certificate issues.
-"""
+"""Parser of the SSLyze TLS scanner."""
 
 from typing import Any
 
@@ -12,18 +8,17 @@ from tools.parsers.base import BaseParser
 
 
 class Sslyze(BaseParser):
-    """Parser for SSLyze JSON output files.
+    """Findings discovered by SSLyze, read from its JSON report.
 
-    Extracts detailed SSL/TLS security findings including supported protocols,
-    cipher suites, certificate validation issues, and known vulnerabilities
-    like Heartbleed, ROBOT, and CRIME attacks. SSLyze's report doesn't rate
-    cipher suite strength itself, so weak ciphers are flagged by matching
-    insecure_cipher_suites_patterns against the cipher suite names it reports.
+    SSLyze never rates the strength of the cipher suites that it finds, so the
+    insecure ones are the ones whose name contains a known insecure algorithm.
 
     Attributes:
-        protocol_versions (dict): Mapping of SSL/TLS protocols to versions
-        insecure_cipher_suites_patterns (list): Name patterns of the cipher suites reported as insecure
-        generic_tech (Technology | None): Generic TLS technology for findings
+        protocol_versions: Versions that each protocol can be scanned for.
+        insecure_cipher_suites_patterns: What the name of a cipher suite contains
+          when it uses an algorithm that shouldn't be used anymore.
+        generic_tech: Technology that the vulnerabilities that don't belong to one
+          protocol are linked to, like the ones of the certificate.
     """
 
     protocol_versions = {"ssl": ["2.0", "3.0"], "tls": ["1.0", "1.1", "1.2", "1.3"]}
@@ -33,16 +28,16 @@ class Sslyze(BaseParser):
     def create_finding(
         self, finding_type: type[Finding], linked_finding: bool = False, **fields: Any
     ) -> Finding | None:
-        """Create findings with automatic TLS technology association.
+        """Create a finding, linking the vulnerabilities without a protocol to TLS.
 
         Args:
-            finding_type (type[Finding]): Type of finding to create
-            linked_finding (bool): Whether the finding has already been linked to other findings
-            **fields (Any): Field values for the finding
+            finding_type: Kind of finding to create.
+            linked_finding: Whether the caller already linked the finding.
+            **fields: Data of the finding.
 
         Returns:
-            Finding | None: Created finding instance with technology association, or None if
-                           creation fails
+            The created finding, linked to a generic TLS technology when it doesn't
+            belong to one of the protocols that the server supports.
         """
         if finding_type == Vulnerability and not fields.get("technology"):
             if not self.generic_tech:
@@ -52,12 +47,10 @@ class Sslyze(BaseParser):
         return super().create_finding(finding_type, linked_finding, **fields)
 
     def _parse(self) -> None:
-        """Parse SSLyze JSON output and extract SSL/TLS security findings.
+        """Create the protocols that the server supports and their vulnerabilities.
 
-        Processes JSON scan results to create Technology and Vulnerability findings
-        for comprehensive SSL/TLS security analysis. Scan commands that were not
-        scheduled or that failed report a null result and are treated as passing
-        every check derived from them, since there's no data indicating otherwise.
+        The checks that SSLyze didn't run, or that failed, are treated as passed,
+        since their result says nothing about the server.
         """
         data = self.load_json_report()
         if not data or not isinstance(data, dict):

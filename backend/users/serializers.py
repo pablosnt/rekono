@@ -1,8 +1,9 @@
-"""Serializers for user management with validation and security features.
+"""Serializers of the users, their profile, and their account operations.
 
-Provides serialization for user models including account creation, profile
-management, password operations, and MFA functionality with comprehensive
-validation and security controls.
+The user data is exposed by three serializers with growing detail, so the email
+addresses only reach the roles that manage users. The rest of the serializers
+implement the operations over an account: the invitation, the registration, the
+password changes, the email verification, and the MFA.
 """
 
 import threading
@@ -25,57 +26,47 @@ from users.models import User
 
 
 class SimpleUserSerializer(ModelSerializer):
-    """Simplified serializer for User model with minimal fields.
+    """Serializer with the minimum data needed to reference a user.
 
-    Provides basic user information for references in other models and acts as
-    the base for the richer user serializers. Email is intentionally excluded to
-    avoid exposing other users' addresses to roles that don't need them (phishing
-    and social engineering prevention).
+    Used by the other models that include their owner, and it's the base of the
+    richer user serializers. Email is intentionally excluded to avoid exposing other
+    users' addresses to roles that don't need them (phishing and social engineering
+    prevention).
 
     Attributes:
-        role (SerializerMethodField): Computed role field from user groups
+        role: Role of the user, taken from the group they belong to.
     """
 
     role = SerializerMethodField()
 
     class Meta:
-        """Meta configuration for the SimpleUserSerializer.
-
-        Attributes:
-            model (Model): The User model to serialize
-            fields (tuple): Field names to include in serialization
-        """
+        """Serializer configuration for the user references."""
 
         model = User
         fields = ("id", "username", "role")
 
     def get_role(self, instance: User) -> str:
-        """Get user's role from Django groups.
+        """Get the role of the user, which is Reader when they have no group.
 
         Args:
-            instance (User): User instance to get role for
+            instance: User being serialized.
 
         Returns:
-            str: Role name or default READER role
+            The name of their role.
         """
         role = instance.groups.first()
         return role.name if role else Role.READER.value
 
 
 class RestrictedUserSerializer(SimpleUserSerializer):
-    """Serializer for User model that hides the email address.
+    """Serializer of a user without their email address.
 
     Used to list users for non-admin roles, exposing the data needed to
     identify and reference users without leaking their email addresses.
     """
 
     class Meta:
-        """Meta configuration for the RestrictedUserSerializer.
-
-        Attributes:
-            model (Model): The User model to serialize
-            fields (tuple): Field names to include in serialization
-        """
+        """Serializer configuration for the users seen by the non-admin roles."""
 
         model = User
         fields = SimpleUserSerializer.Meta.fields + (
@@ -88,57 +79,46 @@ class RestrictedUserSerializer(SimpleUserSerializer):
 
 
 class UserSerializer(RestrictedUserSerializer):
-    """Serializer for User model including the email address.
+    """Serializer of a user including their email address.
 
-    Extends the restricted serializer with the email field, which is only
-    exposed to roles allowed to manage users (admins and the user themselves).
+    Only exposed to the roles that are allowed to manage users, and to the users
+    themselves in their own profile.
     """
 
     class Meta:
-        """Meta configuration for the UserSerializer.
-
-        Attributes:
-            model (Model): The User model to serialize
-            fields (tuple): Field names to include in serialization
-        """
+        """Serializer configuration for the users seen by the administrators."""
 
         model = User
         fields = RestrictedUserSerializer.Meta.fields + ("email",)
 
 
 class InviteUserSerializer(ModelSerializer):
-    """Serializer for user invitation operations.
-
-    Handles user invitation with role assignment and SMTP validation.
+    """Serializer that invites a new user with a given role.
 
     Attributes:
-        role (ChoiceField): Role to assign to invited user
+        role: Role that the invited user will have.
     """
 
     role = ChoiceField(choices=Role.choices, required=True, write_only=True)
 
     class Meta:
-        """Meta configuration for the InviteUserSerializer.
-
-        Attributes:
-            model (Model): The User model to serialize
-            fields (tuple): Field names to include in serialization
-        """
+        """Serializer configuration for the invitations."""
 
         model = User
         fields = ("email", "role")
 
     def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
-        """Validate invitation data including SMTP availability.
+        """Check that the invitation email can be sent.
 
         Args:
-            attrs (dict[str, Any]): Serializer data to validate
+            attrs: Email address and role of the invitation.
 
         Returns:
-            dict[str, Any]: Validated data
+            The same validated data, unchanged.
 
         Raises:
-            ValidationError: If SMTP service is unavailable
+            ValidationError: If SMTP isn't configured, since the invited user would
+              never receive the one-time password needed to register.
         """
         attrs = super().validate(attrs)
         if not SMTP().is_available():
@@ -146,58 +126,49 @@ class InviteUserSerializer(ModelSerializer):
         return attrs
 
     def create(self, validated_data: dict[str, Any]) -> User:
-        """Create invited user account.
+        """Create the invited account and send its invitation email.
 
         Args:
-            validated_data (dict[str, Any]): Validated invitation data
+            validated_data: Email address and role of the invitation.
 
         Returns:
-            User: Created user instance pending invitation acceptance
+            The invited user, who can't log in until they register.
         """
         return User.objects.invite_user(validated_data["email"], Role(validated_data["role"]))
 
 
 class UpdateRoleSerializer(Serializer):
-    """Serializer for updating user role assignments.
-
-    Handles role updates for existing user accounts.
+    """Serializer that changes the role of a user.
 
     Attributes:
-        role (ChoiceField): New role to assign to user
+        role: New role of the user.
     """
 
     role = ChoiceField(choices=Role.choices, required=True, write_only=True)
 
     def update(self, instance: User, validated_data: dict[str, Any]) -> User:
-        """Update user's role assignment.
+        """Assign the new role to the user, replacing the previous one.
 
         Args:
-            instance (User): User instance to update
-            validated_data (dict[str, Any]): Validated role data
+            instance: User whose role is changed.
+            validated_data: New role of the user.
 
         Returns:
-            User: Updated user instance with new role
+            The user, belonging only to the group of the new role.
         """
         return User.objects.assign_role(instance, Role(validated_data["role"]))
 
 
 class ProfileSerializer(UserSerializer):
-    """Serializer for user profile management.
+    """Serializer that a user uses to read and update their own profile.
 
-    Handles user profile data including notification preferences with appropriate
-    read-only fields for security. The email address is writable but changes are not
-    applied directly: a verification workflow updates the address only after the user
-    confirms the new one, so the pending value is never exposed through the API.
+    The email address is writable but changes are not applied directly: a
+    verification workflow updates the address only after the user confirms the new
+    one, so the pending value is never exposed through the API.
     """
 
     class Meta:
-        """Meta configuration for the ProfileSerializer.
-
-        Attributes:
-            model (Model): The User model to serialize
-            fields (tuple): Field names to include in serialization
-            read_only_fields (tuple): Fields that cannot be modified
-        """
+        """Serializer configuration for the profile of the users."""
 
         model = User
         fields = (
@@ -218,16 +189,17 @@ class ProfileSerializer(UserSerializer):
         read_only_fields = ("username", "date_joined", "last_login", "mfa", "role", "telegram_chat")
 
     def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
-        """Validate profile data, requiring SMTP availability for email changes.
+        """Check that a new email address can be verified.
 
         Args:
-            attrs (dict[str, Any]): Serializer data to validate
+            attrs: Profile fields sent by the user, which may include a new email.
 
         Returns:
-            dict[str, Any]: Validated data
+            The same validated data, unchanged.
 
         Raises:
-            ValidationError: If the email changes while SMTP is unavailable to verify it
+            ValidationError: If the email changes while SMTP is unavailable, since
+              the new address could never be confirmed.
         """
         attrs = super().validate(attrs)
         new_email = attrs.get("email")
@@ -236,18 +208,20 @@ class ProfileSerializer(UserSerializer):
         return attrs
 
     def update(self, instance: User, validated_data: dict[str, Any]) -> User:
-        """Update profile fields, routing email changes through OTP verification.
+        """Update the profile, requesting a verification for a new email address.
 
         The email address is never written directly. When it differs from the current
         one, a verification workflow is started instead and the active email is kept
         until the user confirms the new address.
 
         Args:
-            instance (User): User instance to update
-            validated_data (dict[str, Any]): Validated profile data
+            instance: User whose profile is updated.
+            validated_data: Profile fields. The email is removed from it before the
+              update runs, so it never reaches the account directly.
 
         Returns:
-            User: Updated user instance
+            The updated user, whose email address is still the previous one when a
+            change was requested.
         """
         new_email = validated_data.pop("email", None)
         if new_email and new_email != instance.email:
@@ -256,33 +230,26 @@ class ProfileSerializer(UserSerializer):
 
 
 class PasswordSerializer(UserSerializer):
-    """Serializer for password operations with validation.
-
-    Provides password validation using Django's password validators.
-    """
+    """Base serializer of the operations that set a new password."""
 
     class Meta:
-        """Meta configuration for the PasswordSerializer.
-
-        Attributes:
-            model (Model): The User model to serialize
-            fields (tuple): Field names to include in serialization
-        """
+        """Serializer configuration for the passwords."""
 
         model = User
         fields = ("password",)
 
     def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
-        """Validate password against Django's password policies.
+        """Check that the new password satisfies the password policy.
 
         Args:
-            attrs (dict[str, Any]): Serializer data to validate
+            attrs: Validated data including the new password.
 
         Returns:
-            dict[str, Any]: Validated data
+            The same validated data, unchanged.
 
         Raises:
-            ValidationError: If password doesn't meet requirements
+            ValidationError: If the password is rejected by any of the configured
+              Django password validators.
         """
         attrs = super().validate(attrs)
         validate_password(attrs.get("password"))
@@ -290,40 +257,36 @@ class PasswordSerializer(UserSerializer):
 
 
 class OTPSerializer(UserSerializer):
-    """Serializer for OTP verification operations.
+    """Base serializer of the operations verified with a one-time password.
 
-    Handles one-time password verification with user lookup. Each subclass declares the
-    scope its OTPs are issued for, so an OTP sent for one operation is never accepted by
-    another one.
+    Each subclass declares the scope its OTPs are issued for, so an OTP sent for one
+    operation is never accepted by another one.
 
     Attributes:
-        otp_scope (OtpScope): Scope the submitted OTP must have been issued for
+        otp_scope: Operation that the received OTP must have been issued for.
     """
 
     otp_scope = OtpScope.INVITATION
 
     class Meta:
-        """Meta configuration for the OTPSerializer.
-
-        Attributes:
-            model (Model): The User model to serialize
-            fields (tuple): Field names to include in serialization
-        """
+        """Serializer configuration for the one-time passwords."""
 
         model = User
         fields = ("otp",)
 
     def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
-        """Validate OTP and retrieve associated user.
+        """Get the user that the one-time password belongs to.
 
         Args:
-            attrs (dict[str, Any]): Serializer data to validate
+            attrs: Validated data including the one-time password.
 
         Returns:
-            dict[str, Any]: Validated data with user instance
+            The validated data with the resolved user added as ``user``, since the
+            request only carries the OTP and not the account it belongs to.
 
         Raises:
-            AuthenticationFailed: If OTP is invalid, expired or issued for another scope
+            AuthenticationFailed: If the OTP is invalid, expired, or was issued for
+              another operation.
         """
         attrs = super().validate(attrs)
         user = User.objects.verify_otp(attrs.get("otp"), self.otp_scope)
@@ -334,28 +297,26 @@ class OTPSerializer(UserSerializer):
 
 
 class VerifyEmailSerializer(OTPSerializer):
-    """Serializer for confirming a pending email address change.
-
-    Verifies the OTP sent to the new address and ensures the associated user actually
-    has a pending email change awaiting confirmation.
+    """Serializer that confirms a pending email address change.
 
     Attributes:
-        otp_scope (OtpScope): Only OTPs sent to verify an email address are accepted
+        otp_scope: Only OTPs sent to verify an email address are accepted.
     """
 
     otp_scope = OtpScope.EMAIL_VERIFICATION
 
     def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
-        """Validate the OTP and ensure a pending email change exists.
+        """Check that the user still has an email change waiting for confirmation.
 
         Args:
-            attrs (dict[str, Any]): Serializer data to validate
+            attrs: Validated data including the one-time password.
 
         Returns:
-            dict[str, Any]: Validated data with the associated user
+            The validated data with the resolved user added as ``user``.
 
         Raises:
-            AuthenticationFailed: If the OTP is invalid or there is no pending email change
+            AuthenticationFailed: If the OTP is invalid or the change was already
+              applied or discarded.
         """
         attrs = super().validate(attrs)
         if not attrs["user"].pending_email:
@@ -365,47 +326,42 @@ class VerifyEmailSerializer(OTPSerializer):
     def save(self, **kwargs: Any) -> User:
         """Apply the verified email address change.
 
+        Args:
+            **kwargs: Standard serializer arguments, unused because the user comes
+              from the validated one-time password.
+
         Returns:
-            User: Updated user instance with the new email address applied
+            The user, whose email address is now the confirmed one.
         """
         return User.objects.update_email(self.validated_data.get("user"))
 
 
 class CreateUserSerializer(OTPSerializer, PasswordSerializer):
-    """Serializer for user account creation after invitation.
-
-    Combines OTP verification and password validation for secure
-    account activation after invitation.
+    """Serializer that completes the registration of an invited user.
 
     Attributes:
-        otp_scope (OtpScope): Only OTPs sent with an invitation are accepted
+        otp_scope: Only OTPs sent with an invitation are accepted.
     """
 
     otp_scope = OtpScope.INVITATION
 
     class Meta:
-        """Meta configuration for the CreateUserSerializer.
-
-        Attributes:
-            model (Model): The User model to serialize
-            fields (tuple): Field names to include in serialization
-        """
+        """Serializer configuration for the registration of the invited users."""
 
         model = User
         fields = ("username", "first_name", "last_name", "password", "otp")
 
     def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
-        """Validate account creation data and user status.
+        """Check that the account is still waiting for its registration.
 
         Args:
-            attrs (dict[str, Any]): Serializer data to validate
+            attrs: Account details and the one-time password of the invitation.
 
         Returns:
-            dict[str, Any]: Validated data
+            The validated data with the resolved user added as ``user``.
 
         Raises:
-            AuthenticationFailed: If the account is no longer pending invitation
-                (already created or disabled)
+            AuthenticationFailed: If the account was already created or disabled.
         """
         attrs = super().validate(attrs)
         if attrs["user"].is_active is not None:
@@ -413,13 +369,15 @@ class CreateUserSerializer(OTPSerializer, PasswordSerializer):
         return attrs
 
     def create(self, validated_data: dict[str, Any]) -> User:
-        """Create active user account from invitation.
+        """Create the account of the invited user, which becomes active.
 
         Args:
-            validated_data (dict[str, Any]): Validated account creation data
+            validated_data: Account details, plus the user that the validate method
+              resolves from the one-time password, since the request carries the
+              password and not the account that it belongs to.
 
         Returns:
-            User: Activated user instance
+            The registered user, now active and able to log in.
         """
         return User.objects.create_user(
             validated_data.get("user"),
@@ -431,77 +389,63 @@ class CreateUserSerializer(OTPSerializer, PasswordSerializer):
 
 
 class UpdatePasswordSerializer(PasswordSerializer):
-    """Serializer for password update operations.
-
-    Handles password changes with old password verification.
+    """Serializer that a user uses to change their own password.
 
     Attributes:
-        old_password (CharField): Current password for verification
+        old_password: Current password, required to prove that the session belongs
+          to the owner of the account.
     """
 
     old_password = CharField(max_length=150, required=True, write_only=True)
 
     class Meta:
-        """Meta configuration for the UpdatePasswordSerializer.
-
-        Attributes:
-            model (Model): The User model to serialize
-            fields (tuple): Field names to include in serialization
-        """
+        """Serializer configuration for the password changes."""
 
         model = User
         fields = ("password", "old_password")
 
     def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
-        """Validate password change with old password check.
+        """Check the current password before validating the new one.
 
         Args:
-            attrs (dict[str, Any]): Serializer data to validate
+            attrs: Current and new passwords sent by the user.
 
         Returns:
-            dict[str, Any]: Validated data
+            The same validated data, unchanged.
 
         Raises:
-            AuthenticationFailed: If old password is incorrect
+            AuthenticationFailed: If the current password isn't correct.
         """
         if not self.instance.check_password(attrs.get("old_password")):
             raise AuthenticationFailed(code=status.HTTP_401_UNAUTHORIZED)
         return super().validate(attrs)
 
     def update(self, instance: User, validated_data: dict[str, Any]) -> User:
-        """Update user password with security cleanup.
+        """Change the password, warning the user that their sessions are closed.
 
         Args:
-            instance (User): User instance to update
-            validated_data (dict[str, Any]): Validated password data
+            instance: User whose password is changed.
+            validated_data: Current and new passwords, already validated.
 
         Returns:
-            User: Updated user instance
+            The user, with the new password and no open session left.
         """
         Telegram().logout_after_password_change_message(instance)
         return User.objects.update_password(instance, validated_data.get("password"))
 
 
 class ResetPasswordSerializer(PasswordSerializer, OTPSerializer):
-    """Serializer for password reset operations.
-
-    Combines OTP verification and password validation for secure
-    password reset workflow.
+    """Serializer that sets a new password using a one-time password.
 
     Attributes:
-        otp_scope (OtpScope): Only OTPs sent to reset a password or to enable an
-            account are accepted
+        otp_scope: Only OTPs sent to reset a password or to enable an account are
+          accepted.
     """
 
     otp_scope = OtpScope.PASSWORD_RESET
 
     class Meta:
-        """Meta configuration for the ResetPasswordSerializer.
-
-        Attributes:
-            model (Model): The User model to serialize
-            fields (tuple): Field names to include in serialization
-        """
+        """Serializer configuration for the password resets."""
 
         model = User
         fields = ("otp", "password")
@@ -509,36 +453,31 @@ class ResetPasswordSerializer(PasswordSerializer, OTPSerializer):
     def save(self, **kwargs: Any) -> User:
         """Apply the verified password reset.
 
+        Args:
+            **kwargs: Standard serializer arguments, unused because the user comes
+              from the validated one-time password.
+
         Returns:
-            User: Updated user instance with the new password applied
+            The user, with the new password and the one-time password consumed.
         """
         return User.objects.reset_password(self.validated_data.get("user"), self.validated_data.get("password"))
 
 
 class RequestPasswordResetSerializer(Serializer, LoggingEntity):
-    """Serializer for password reset requests.
-
-    Handles password reset email sending with user enumeration protection.
+    """Serializer that sends the email with the code needed to reset a password.
 
     Attributes:
-        email (EmailField): Email address for password reset
+        email: Address of the account whose password is being reset.
     """
 
     email = EmailField(max_length=150, required=True)
 
     def _save_in_thread(self, email: str) -> None:
-        """Send password reset email in background thread.
-
-        Prevents user enumeration by executing database queries and email
-        sending in a separate thread with consistent response time.
+        """Send the password reset email, if the address belongs to an active user.
 
         Args:
-            email (str): Email address to send reset instructions to
+            email: Address received in the request, which may belong to nobody.
         """
-        # Even though the reset-password email is sent in another thread, the
-        # database query and the OTP setup is executed in a different one to
-        # prevent user enumeration by analyzing the Rekono execution time
-        # during the password reset request
         user = User.objects.filter(email=email, is_active=True).first()
         if email and user:  # pragma: no cover
             otp = User.objects.setup_otp(user, OtpScope.PASSWORD_RESET)
@@ -546,33 +485,39 @@ class RequestPasswordResetSerializer(Serializer, LoggingEntity):
             self.logger.info(f"[User] User {user.id} requested a password reset", extra={"user": user.id})
 
     def save(self, **kwargs: Any) -> None:
-        """Initiate password reset process in background thread.
+        """Start the password reset in a thread, so the response is always the same.
 
-        Returns:
-            None: Always returns None to prevent user enumeration
+        Nothing is returned and nothing is awaited, so the response time doesn't
+        reveal whether the email address belongs to a Rekono user.
+
+        Args:
+            **kwargs: Standard serializer arguments, unused because the address
+              comes from the validated data.
         """
         threading.Thread(target=self._save_in_thread, args=(self.validated_data.get("email"),)).start()
 
 
 class EnableMfaSerializer(MfaSerializer):
-    """Serializer for enabling MFA on user accounts.
-
-    Extends the base MFA serializer to activate MFA once the submitted code is
-    verified. Overrides the default validator to require a TOTP code specifically:
-    MFA is not enabled yet at this point, so the base validator would otherwise fall
-    back to email OTP instead of confirming that the authenticator app actually works.
+    """Serializer that enables the multi-factor authentication of a user.
 
     Attributes:
-        validator (callable): TOTP-only verification, overriding the base MFA-or-OTP fallback
+        validator: TOTP verification, replacing the fallback to the email OTPs of
+          the base serializer. MFA is not enabled yet at this point, so that
+          fallback would accept a code without confirming that the authenticator
+          app actually works.
     """
 
     validator = User.objects.verify_mfa
 
     def save(self, **kwargs: Any) -> User:
-        """Enable MFA for the current user.
+        """Enable the multi-factor authentication of the user.
+
+        Args:
+            **kwargs: Standard serializer arguments, unused because the user comes
+              from the authenticated request.
 
         Returns:
-            User: Updated user instance with MFA enabled
+            The user, who now needs a second factor to log in.
         """
         self.context.get("request").user.mfa = True
         self.context.get("request").user.save(update_fields=["mfa"])
@@ -580,16 +525,17 @@ class EnableMfaSerializer(MfaSerializer):
 
 
 class DisableMfaSerializer(MfaSerializer):
-    """Serializer for disabling MFA on user accounts.
-
-    Handles MFA disabling with proper verification.
-    """
+    """Serializer that disables the multi-factor authentication of a user."""
 
     def save(self, **kwargs: Any) -> User:
-        """Disable MFA for the current user.
+        """Disable the multi-factor authentication of the user.
+
+        Args:
+            **kwargs: Standard serializer arguments, unused because the user comes
+              from the authenticated request.
 
         Returns:
-            User: Updated user instance with MFA disabled
+            The user, who logs in with their password alone from now on.
         """
         self.context.get("request").user.mfa = False
         self.context.get("request").user.save(update_fields=["mfa"])
@@ -597,12 +543,10 @@ class DisableMfaSerializer(MfaSerializer):
 
 
 class RegisterMfaSerializer(Serializer):
-    """Serializer for MFA registration responses.
-
-    Provides QR code URL for authenticator app setup.
+    """Serializer of the response returned when the MFA is registered.
 
     Attributes:
-        url (URLField): QR code provisioning URL for MFA setup
+        url: Provisioning URI that the user scans with their authenticator app.
     """
 
     url = URLField(max_length=200, read_only=True)

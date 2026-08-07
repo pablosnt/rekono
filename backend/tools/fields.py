@@ -1,30 +1,19 @@
-"""Custom field implementations for tools serialization.
-
-Provides specialized field classes for tools-specific data types with
-custom serialization logic and representation formatting.
-"""
+"""Serializer fields of the tool endpoints."""
 
 from framework.fields import IntegerChoicesField
 
 
 class StageField(IntegerChoicesField):
-    """Custom field for Stage enum with specialized representation formatting.
-
-    Extends IntegerChoicesField to provide custom string representation
-    for Stage enum values, with special formatting for OSINT stage.
-    """
+    """Stage of a configuration, serialized as its name."""
 
     def to_representation(self, value: int) -> str:
-        """Convert stage value to string representation.
-
-        Applies custom formatting rules, specifically converting OSINT
-        stage (value=1) to uppercase for consistent display.
+        """Get the name of the stage, with OSINT written as an acronym.
 
         Args:
-            value (int): The stage enum integer value
+            value: Stage value stored in the database.
 
         Returns:
-            str: Formatted string representation of the stage
+            The capitalized stage name, uppercased for OSINT.
         """
         representation = super().to_representation(value)
         if value == 1:

@@ -1,9 +1,8 @@
-"""OpenAPI schema extensions for Rekono authentication backends.
+"""OpenAPI schema extensions for the Rekono authentication backends.
 
-Registers drf-spectacular extensions so that custom authentication classes
-are correctly described in the generated OpenAPI schema. Each extension is
-discovered automatically once this module is imported, which happens inside
-SecurityConfig.ready() to guarantee the app registry is fully loaded first.
+The extensions are discovered automatically once this module is imported, which
+happens inside SecurityConfig.ready() to guarantee that the app registry is fully
+loaded first.
 """
 
 from drf_spectacular.extensions import OpenApiAuthenticationExtension
@@ -11,29 +10,25 @@ from drf_spectacular.plumbing import build_bearer_security_scheme_object
 
 
 class CookieJWTAuthenticationScheme(OpenApiAuthenticationExtension):
-    """OpenAPI extension for CookieJWTAuthentication.
+    """Description of the cookie-aware JWT backend as a Bearer security scheme.
 
-    Maps the cookie-aware JWT backend to the standard Bearer security scheme
-    so drf-spectacular can include it in the generated OpenAPI spec. Without
-    this extension, drf-spectacular cannot resolve the authenticator and omits
-    the security requirement from every endpoint that uses it.
+    Without this extension, drf-spectacular can't resolve the authenticator and
+    omits the security requirement from every endpoint that uses it.
 
     Attributes:
-        target_class (str): Fully-qualified import path of the authenticator.
-        name (str): Security scheme name used in the OpenAPI components section.
+        target_class: Import path of the authentication backend it describes.
+        name: Name of the security scheme in the OpenAPI components section.
     """
 
     target_class = "security.authentication.jwt.CookieJWTAuthentication"
     name = "jwtAuth"
 
     def get_security_definition(self, auto_schema):
-        """Return the OpenAPI security scheme object for JWT Bearer auth.
+        """Return the OpenAPI security scheme object for the JWT Bearer tokens.
 
         Args:
-            auto_schema: The drf-spectacular AutoSchema instance.
-
-        Returns:
-            dict: An OpenAPI 3.0 Bearer security scheme object.
+            auto_schema: Schema generator that requests the definition, not needed
+              here because the scheme is the same for every endpoint.
         """
         from rest_framework_simplejwt.settings import api_settings
 

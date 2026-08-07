@@ -1,26 +1,14 @@
-"""Enumeration definitions for security findings categorization.
-
-Provides enumeration classes for categorizing and prioritizing security findings
-discovered during assessments, including severity levels, data types, status values,
-triage classifications, and automatic fixing reasons.
-"""
+"""Values that classify the findings: severity, status, data types, and triage."""
 
 from django.db import models
 from django.db.models.enums import Choices
 
 
 class Severity(models.IntegerChoices):
-    """Security finding severity levels for risk prioritization.
+    """Risk of a vulnerability, used to prioritize its remediation.
 
-    Defines criticality levels from informational to critical for
-    prioritizing security findings and generating reports.
-
-    Attributes:
-        INFO (int): Informational findings with no immediate security impact
-        LOW (int): Low severity findings with minimal risk
-        MEDIUM (int): Medium severity findings requiring attention
-        HIGH (int): High severity findings requiring immediate attention
-        CRITICAL (int): Critical severity findings requiring urgent response
+    The values are ordered from the lowest to the highest risk, so the findings can
+    be filtered and sorted by how urgent they are.
     """
 
     INFO = 1
@@ -30,29 +18,22 @@ class Severity(models.IntegerChoices):
     CRITICAL = 5
 
     def __str__(self) -> str:
-        """Return the severity level as a string.
-
-        Returns:
-            str: Capitalized severity level name.
-        """
+        """Return the capitalized name of the severity."""
         return self.name.capitalize()
 
 
 class OSINTDataType(models.TextChoices):
-    """Open Source Intelligence data type classifications.
-
-    Categories of information discoverable through OSINT techniques
-    including network identifiers, credentials, and organizational data.
+    """Kind of public information that an OSINT finding contains.
 
     Attributes:
-        IP (str): IP address identifiers
-        DOMAIN (str): Domain name identifiers
-        VHOST (str): Virtual host identifiers
-        URL (str): URL resources and endpoints
-        EMAIL (str): Email address identifiers
-        ASN (str): Autonomous System Number identifiers
-        USER (str): Username credentials
-        PASSWORD (str): Password credentials
+        IP: IP address of the organization.
+        DOMAIN: Domain name of the organization.
+        VHOST: Virtual host served by one of its addresses.
+        URL: URL exposed by the organization.
+        EMAIL: Email address of the organization.
+        ASN: Autonomous System Number assigned to it.
+        USER: Username of one of its members.
+        PASSWORD: Leaked password.
     """
 
     IP = "IP"
@@ -66,21 +47,7 @@ class OSINTDataType(models.TextChoices):
 
 
 class HostOS(models.TextChoices):
-    """Host operating system type classifications.
-
-    Categorizes operating systems running on discovered hosts
-    for security analysis and reporting purposes.
-
-    Attributes:
-        LINUX (str): Linux-based operating systems
-        WINDOWS (str): Microsoft Windows operating systems
-        MACOS (str): Apple macOS operating systems
-        IOS (str): Apple iOS mobile operating systems
-        ANDROID (str): Google Android mobile operating systems
-        SOLARIS (str): Oracle Solaris operating systems
-        FREEBSD (str): FreeBSD operating systems
-        OTHER (str): Other or unidentified operating systems
-    """
+    """Operating system that a host runs, as the tools fingerprint it."""
 
     LINUX = "Linux"
     WINDOWS = "Windows"
@@ -93,17 +60,10 @@ class HostOS(models.TextChoices):
 
 
 class PortStatus(models.TextChoices):
-    """Network port scan status classifications.
+    """State of a port, as the port scanners report it.
 
-    Defines the state of network ports discovered during scanning
-    operations for service enumeration and security assessment.
-
-    Attributes:
-        OPEN (str): Port is open and accepting connections
-        OPEN_FILTERED (str): Port appears open but may be filtered
-        FILTERED (str): Port is filtered by firewall or security device
-        CLOSED (str): Port is closed and not accepting connections
-        CLOSED_FILTERED (str): Port appears closed but may be filtered
+    The filtered variants mean that the scanner couldn't tell the state apart from
+    the answer of a firewall.
     """
 
     OPEN = "Open"
@@ -114,28 +74,18 @@ class PortStatus(models.TextChoices):
 
 
 class TransportProtocol(models.TextChoices):
-    """Network transport layer protocol types.
-
-    Defines supported transport protocols for network service identification.
-
-    Attributes:
-        UDP (str): User Datagram Protocol for connectionless communication
-        TCP (str): Transmission Control Protocol for reliable communication
-    """
+    """Transport protocol of the service that listens in a port."""
 
     UDP = "UDP"
     TCP = "TCP"
 
 
 class PathType(models.TextChoices):
-    """Web path and resource type classifications.
-
-    Categorizes discovered web resources as API endpoints or file shares
-    for targeted security analysis.
+    """Kind of resource that a path finding points to.
 
     Attributes:
-        ENDPOINT (str): Web API endpoints and application paths
-        SHARE (str): File shares and directory resources
+        ENDPOINT: Path of a web application.
+        SHARE: Directory shared by a file sharing service.
     """
 
     ENDPOINT = "Endpoint"
@@ -143,15 +93,11 @@ class PathType(models.TextChoices):
 
 
 class AutoFixedReason(models.TextChoices):
-    """Reasons for automatic finding fixing.
-
-    Categorizes why a finding was automatically marked as fixed to help
-    users understand the context behind auto-fix operations without
-    needing to investigate the relationship tree manually.
+    """Why Rekono marked a finding as fixed without the user asking for it.
 
     Attributes:
-        NO_LONGER_DETECTED (str): Finding is no longer detected by the same executions.
-        PARENT_FIXED (str): Finding's parent finding was fixed, cascading the fix.
+        NO_LONGER_DETECTED: The same executions stopped reporting the finding.
+        PARENT_FIXED: The finding where this one was found got fixed.
     """
 
     NO_LONGER_DETECTED = "No longer detected by same executions"
@@ -159,16 +105,13 @@ class AutoFixedReason(models.TextChoices):
 
 
 class TriageStatus(models.TextChoices):
-    """Finding triage workflow status classifications.
-
-    Represents the review state of security findings in the triage process
-    for false positive elimination and confirmation.
+    """Conclusion of the review of a finding by an auditor.
 
     Attributes:
-        FALSE_POSITIVE (str): Finding determined to be a false positive
-        TRUE_POSITIVE (str): Finding confirmed as a legitimate security issue
-        WONT_FIX (str): Legitimate finding but marked as won't fix
-        UNTRIAGED (str): Finding has not been reviewed in triage process
+        FALSE_POSITIVE: The finding isn't real, so it's excluded from the reports.
+        TRUE_POSITIVE: The finding is real and must be remediated.
+        WONT_FIX: The finding is real, but it was accepted as a risk.
+        UNTRIAGED: The finding hasn't been reviewed yet.
     """
 
     FALSE_POSITIVE = "False Positive"

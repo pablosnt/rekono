@@ -1,8 +1,4 @@
-"""Django REST framework views for DefectDojo integration management.
-
-Provides REST API endpoints for DefectDojo configuration and project synchronization
-management with proper authentication and authorization controls.
-"""
+"""Viewsets of the DefectDojo endpoints."""
 
 from rest_framework.permissions import IsAuthenticated
 
@@ -13,17 +9,14 @@ from security.authorization.permissions import ProjectMemberPermission, RekonoMo
 
 
 class DefectDojoSettingsViewSet(BaseViewSet):
-    """ViewSet for DefectDojo integration settings management.
-
-    Provides REST API endpoints for viewing and updating DefectDojo integration
-    configuration settings with proper authentication and authorization controls.
-    Restricts access to authenticated users with appropriate permissions.
+    """Read and update the DefectDojo configuration.
 
     Attributes:
-        queryset (QuerySet): DefectDojoSettings model instances
-        serializer_class (Serializer): Serializer for DefectDojo settings
-        permission_classes (list): Required permissions for access control
-        http_method_names (list): Allowed HTTP methods (GET, PUT only)
+        queryset: The only settings instance, created from a fixture.
+        serializer_class: Serializer of the DefectDojo settings.
+        permission_classes: Only the users that can change the settings model.
+        http_method_names: GET and PUT only, since the settings are never created
+          or removed through the API.
     """
 
     queryset = DefectDojoSettings.objects.all()
@@ -33,17 +26,14 @@ class DefectDojoSettingsViewSet(BaseViewSet):
 
 
 class DefectDojoSyncViewSet(BaseViewSet):
-    """ViewSet for DefectDojo project synchronization management.
-
-    Provides REST API endpoints for creating and deleting DefectDojo project
-    synchronization mappings with project-level access control. Enables users
-    to establish connections between Rekono projects and DefectDojo entities.
+    """Synchronize a project with DefectDojo, or stop synchronizing it.
 
     Attributes:
-        queryset (QuerySet): DefectDojoSync model instances
-        serializer_class (Serializer): Serializer for DefectDojo synchronization
-        permission_classes (list): Required permissions including project membership
-        http_method_names (list): Allowed HTTP methods (POST, DELETE only)
+        queryset: All the synchronizations, filtered later by project membership.
+        serializer_class: Serializer of the synchronizations.
+        permission_classes: Role permissions plus the membership in the project.
+        http_method_names: POST and DELETE only, since a synchronization that
+          changes is a different one, and the project can read it in its own data.
     """
 
     queryset = DefectDojoSync.objects.all()

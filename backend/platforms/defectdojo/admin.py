@@ -1,8 +1,4 @@
-"""Django admin configuration for DefectDojo integration models.
-
-Registers DefectDojo integration models with Django admin interface for
-administrative management of integration settings and synchronization mappings.
-"""
+"""Registration of the DefectDojo models in the Django admin site."""
 
 from django.contrib import admin
 

@@ -1,8 +1,5 @@
-"""Framework components for input parameters management in Rekono.
+"""Base classes shared by all the input parameters.
 
-This submodule provides the foundational framework components for the parameters
-system, including base model classes, views, filters, and serializers that
-support input parameter management across the Rekono platform. The framework
-provides common functionality for parameter types while enabling specialization
-for specific parameter categories like technologies and vulnerabilities.
+The parameters only differ in the data that they store, so the access control, the
+deduplication, and the project that they belong to are defined once here.
 """

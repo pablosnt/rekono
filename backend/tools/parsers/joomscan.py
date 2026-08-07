@@ -1,8 +1,4 @@
-"""JoomScan Joomla CMS vulnerability scanner output parser.
-
-Processes JoomScan plain text output to extract Joomla technology fingerprints,
-vulnerabilities, exploits, and security findings from Joomla CMS scans.
-"""
+"""Parser of the JoomScan Joomla scanner."""
 
 from urllib.parse import urlparse
 
@@ -12,23 +8,14 @@ from tools.parsers.base import BaseParser
 
 
 class Joomscan(BaseParser):
-    """Parser for JoomScan plain text output.
-
-    Extracts Joomla CMS security findings including version detection, CVE
-    vulnerabilities, exploit references, configuration issues, and discovered
-    endpoints from comprehensive Joomla security scans.
-
-    Attributes:
-        Inherits all attributes from BaseParser
-    """
+    """Findings discovered by JoomScan, read from its output."""
 
     def _parse(self) -> None:
-        """Parse JoomScan output and extract Joomla security findings.
+        """Create the Joomla installation found and everything discovered in it.
 
-        Processes plain text scan results to create Technology, Vulnerability,
-        Exploit, and Path findings from Joomla CMS security analysis. JoomScan
-        has no structured report format, so findings are recognized from fixed
-        banner strings and, for some of them, by looking at the previous line.
+        JoomScan writes its results as text meant to be read, so each finding is
+        recognized by the fixed sentences that announce it and, for some of them,
+        by what the previous line says.
         """
         technology = vulnerability_name = None
         # Seeded with "/" so the "Processing <url> ..." banner line at the top of the report,

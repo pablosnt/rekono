@@ -1,9 +1,4 @@
-"""Target models for Rekono.
-
-Defines the Target model for managing security testing targets with automatic
-type detection, validation, and input parsing capabilities for security tool
-integration.
-"""
+"""Model of the targets that Rekono scans."""
 
 import ipaddress
 import re
@@ -23,28 +18,15 @@ from targets.enums import TargetType
 
 
 class Target(BaseInput):
-    """Model representing a security testing target.
+    """Host, network, or domain of a project that can be scanned.
 
-    Represents a target for security testing operations with automatic type
-    detection and validation. Supports multiple target formats including IP
-    addresses, networks, IP ranges, and domain names. Extends BaseInput to
-    provide parsing capabilities for integration with security testing tools.
+    It's the first input of the executions, so the tools receive the target even
+    before any finding has been reported for it.
 
     Attributes:
-        project (ForeignKey): The project this target belongs to
-        target (TextField): Target specification (IP, domain, network, etc.)
-        type (TextField): Automatically detected target type from TargetType enum
-
-    Example:
-        Create a target for domain testing:
-
-        ```python
-        target = Target.objects.create(
-            project=my_project,
-            target="example.com",
-            type=TargetType.DOMAIN
-        )
-        ```
+        project: Project that the target belongs to.
+        target: Value of the target, which is validated against the denylist.
+        type: Kind of target, detected from its value when it's created.
     """
 
     project = models.ForeignKey(Project, related_name="targets", on_delete=models.CASCADE)
@@ -58,68 +40,50 @@ class Target(BaseInput):
         InputKeyword.URL: lambda instance, task: instance.get_url(instance.target, task=task),
     }
     _project_field = "project"
-    # Cache of resolved domain -> IP
     _dns_cache = Cache(prefix="dns")
 
     class Meta:
-        """Meta configuration for the Target model.
-
-        Defines database constraints and table-level configuration for
-        target instances.
-
-        Attributes:
-            constraints (list): Database constraints including unique constraint
-                              for project-target combinations
-        """
+        """Model configuration, allowing each target to be defined once per project."""
 
         constraints = [models.UniqueConstraint(fields=["project", "target"], name="unique_target")]
 
     @classmethod
     def get_type(cls, target: str) -> str:
-        """Automatically detect and classify the target type.
+        """Detect the type of a target from its value.
 
-        Analyzes the target specification to determine its type, validating the
-        format for IP addresses, networks and IP ranges, and confirming that a
-        domain name actually resolves before classifying it as such.
-
-        Target Type Detection Logic:
-            1. IPv4/IPv6 address detection with private vs public classification
-            2. CIDR network notation validation and detection
-            3. IP range pattern matching (hyphen-separated) and expansion, since the
-               pattern accepts ranges that don't cover any address
-            4. Domain name resolution validation
+        The IP ranges are expanded, and the domains are resolved, since both
+        patterns accept values that don't identify any host.
 
         Args:
-            target (str): Target specification to classify
+            target: Value written by the user, as an IP address, IP range,
+              network, domain, or URL.
 
         Returns:
-            str: Target type from TargetType enum
+            The matching TargetType value, and never a plain string, so it can be
+            assigned to the type field directly.
 
         Raises:
-            ValidationError: If target format is invalid or unsupported
+            ValidationError: If the value isn't a supported target, which also
+                covers a domain that doesn't resolve.
         """
         try:
-            # Check if target is an IP address (IPv4 or IPv6)
             ip = ipaddress.ip_address(target)
-            if ip.is_private:  # Private IP (also for IPv6)
+            if ip.is_private:
                 return TargetType.PRIVATE_IP
-            else:  # Public IP (also for IPv4)
+            else:
                 return TargetType.PUBLIC_IP
         except ValueError:
-            pass  # Target is not an IP address
+            pass
         try:
-            ipaddress.ip_network(target)  # Check if target is a network
+            ipaddress.ip_network(target)
             return TargetType.NETWORK
         except ValueError:
-            pass  # Target is not a network
-        # Check if target is an IP range
+            pass
         if bool(re.fullmatch(Regex.IP_RANGE.value, target)) and len(TargetValidator.get_ip_range_addresses(target)) > 0:
             return TargetType.IP_RANGE
-        # Check if target resolves to an IP
         if cls.resolve_domain(target) is not None:
             return TargetType.DOMAIN
         BaseInput.logger.warning(f"[Security] Invalid target {target}")
-        # Target is invalid or target type is not supported
         raise ValidationError(
             "Invalid target. IP address, IP range or domain is required",
             code="target",
@@ -127,11 +91,7 @@ class Target(BaseInput):
         )
 
     def __str__(self) -> str:
-        """String representation of the target.
-
-        Returns:
-            str: Target specification string
-        """
+        """Return the value of the target."""
         return self.target
 
     @classmethod
@@ -146,11 +106,11 @@ class Target(BaseInput):
         into a single lookup and keeps that burst from overwhelming the resolver.
 
         Args:
-            domain (str): The domain name to resolve.
+            domain: Domain name to resolve.
 
         Returns:
-            str | None: The resolved IP address, or None when resolution fails, so callers can
-                        treat the name as unresolvable instead of propagating the error.
+            The resolved IP address, or None when resolution fails, so callers can
+            treat the name as unresolvable instead of propagating the error.
         """
         cached = cls._dns_cache.get(domain)
         if cached:
@@ -164,19 +124,17 @@ class Target(BaseInput):
         return ip
 
     def create_finding_from_user_input(self, execution: Any, **fields: Any) -> Any | None:
-        """Create a Host finding from this target user input.
-
-        Creates a Host finding when user input targets are used in execution context.
-        Handles different target types by performing appropriate resolution and
-        field mapping for domain and IP address targets.
+        """Create the host finding equivalent to this target.
 
         Args:
-            execution (Any): The execution context for the finding
-            **fields (Any): Additional fields for the finding
+            execution: Execution that the created finding belongs to.
+            **fields: Extra values for the finding, unused because a target only
+              provides the host itself.
 
         Returns:
-            Any | None: Created Host finding, or None if the target type is not supported or a
-                        domain target could not be resolved to an IP address
+            The new host finding, or None for the targets that don't identify one
+            single host, like the networks and the IP ranges, and for the domains
+            that can't be resolved.
         """
         from findings.models import Host
 

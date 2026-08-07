@@ -1,16 +1,4 @@
-"""Django models for process management and workflow configuration.
-
-This module provides the core data models for Rekono's process management system,
-which enables security teams to create and manage complex security testing workflows.
-The process system supports multi-step security assessments with tool chaining,
-dependency management, and community-driven process sharing capabilities.
-
-Architecture:
-    The process system uses a hierarchical approach where processes contain multiple
-    steps, each step references a tool configuration, and the system manages execution
-    order and dependencies automatically. This design enables complex security testing
-    workflows while maintaining flexibility and reusability.
-"""
+"""Models of the processes and the steps that they are made of."""
 
 from django.db import models
 from taggit.managers import TaggableManager
@@ -22,31 +10,14 @@ from tools.models import Configuration
 
 
 class Process(BaseLike):
-    """Model representing a security testing workflow with multiple tool execution steps.
-
-    Represents a complete security testing process that consists of multiple tool
-    execution steps designed to perform comprehensive vulnerability assessments.
-    Processes support community sharing through the like system, tagging for
-    categorization, and ownership management for access control.
+    """Group of tool configurations that are executed together as one task.
 
     Attributes:
-        name (TextField): Unique process name for identification (max 100 chars)
-        description (TextField): Detailed process description (max 500 chars)
-        owner (ForeignKey): The user who created this process (optional)
-        tags (TaggableManager): Tag system for process categorization
-        steps (RelatedManager): Related Step objects defining the workflow
-
-    Example:
-        Create a reconnaissance process with multiple steps:
-
-        ```python
-        process = Process.objects.create(
-            name="Web Application Reconnaissance",
-            description="Complete web app discovery and enumeration workflow",
-            owner=user
-        )
-        process.tags.add("reconnaissance", "web", "automation")
-        ```
+        name: Name of the process, unique in the whole platform.
+        description: Description of what the process covers.
+        owner: User that created the process, or None for the ones that Rekono
+          provides by default.
+        tags: Labels that the users assign to organize the processes.
     """
 
     name = models.TextField(max_length=100, unique=True, validators=[Validator(Regex.NAME, code="name")])
@@ -55,37 +26,19 @@ class Process(BaseLike):
     tags = TaggableManager()
 
     def __str__(self) -> str:
-        """Return string representation of the process.
-
-        Returns:
-            str: The process name.
-        """
+        """Return the name of the process."""
         return self.name
 
 
 class Step(BaseModel):
-    """Model representing a single tool execution step within a security process.
+    """Tool configuration that a process executes.
 
-    Represents an individual step in a security testing process that defines
-    which tool configuration to execute. Steps within a process are planned
-    and executed based on dependencies inferred from their configuration's
-    input and output types, so independent steps can run in parallel while
-    dependent ones wait for their prerequisites. Steps form the building
-    blocks of complex security testing workflows.
+    The steps have no order of their own: the tasks decide when each one runs, from
+    the stage of its tool and from the findings that the other steps report.
 
     Attributes:
-        process (ForeignKey): The parent process containing this step
-        configuration (ForeignKey): Tool configuration to execute in this step (optional)
-
-    Example:
-        Add a port scanning step to a process:
-
-        ```python
-        step = Step.objects.create(
-            process=reconnaissance_process,
-            configuration=nmap_config
-        )
-        ```
+        process: Process that this step belongs to.
+        configuration: Tool configuration that the step executes.
     """
 
     process = models.ForeignKey(Process, related_name="steps", on_delete=models.CASCADE)
@@ -98,22 +51,10 @@ class Step(BaseModel):
     )
 
     class Meta:
-        """Meta configuration for Step model.
-
-        Defines database constraints and configuration for the Step model to ensure
-        data integrity and prevent duplicate step configurations within processes.
-
-        Attributes:
-            constraints (list): Database constraints including unique constraint for
-                               process-configuration combinations to prevent duplicates
-        """
+        """Model configuration, allowing each configuration once per process."""
 
         constraints = [models.UniqueConstraint(fields=["process", "configuration"], name="unique_step")]
 
     def __str__(self) -> str:
-        """Return string representation of the step.
-
-        Returns:
-            str: String in format "process - configuration".
-        """
+        """Return the process and the configuration of the step."""
         return f"{self.process.__str__()} - {self.configuration.__str__()}"

@@ -1,8 +1,8 @@
-"""Context-local storage utilities for the Rekono framework.
+"""Access to the active HTTP request from anywhere in the code.
 
-Provides request context propagation across the full request lifecycle,
-making the active HTTP request available to any component without requiring
-explicit parameter passing.
+The request is stored in a context-local variable by the security middleware, so
+models, serializers, and any other component can read the authenticated user or the
+source IP address without receiving the request as a parameter.
 """
 
 from typing import Any
@@ -13,17 +13,9 @@ from asgiref.local import Local
 class RequestContext:
     """Context-local storage for the active HTTP request.
 
-    Stores the active HTTP request in a context-local variable so any component
-    (models, serializers, background logic) can access request metadata such as
-    the authenticated user and source IP without receiving the request as a
-    parameter.
-
-    Uses asgiref.local.Local to isolate state per thread (WSGI) or per async
-    task (ASGI), ensuring concurrent requests never share or overwrite each
-    other's context.
-
-    Attributes:
-        _local (Local): Context-local storage container, isolated per thread or async task.
+    Uses asgiref.local.Local to isolate the request per thread (WSGI) or per async
+    task (ASGI), ensuring concurrent requests never share or overwrite each other's
+    context.
     """
 
     _local = Local()
@@ -33,22 +25,24 @@ class RequestContext:
         """Store the active request for the current thread or async task.
 
         Args:
-            request (Any): Incoming HTTP request to store as current context.
+            request: Request being processed, which stays readable until clear is
+              called.
         """
         cls._local.request = request
 
     @classmethod
     def get(cls) -> Any:
-        """Retrieve the active request for the current thread or async task.
+        """Get the active request being processed.
 
         Returns:
-            Any: The active HTTP request, or None if called outside a request lifecycle.
+            The active request, or None outside the request lifecycle, such as in
+            background jobs and management commands.
         """
         return getattr(cls._local, "request", None)
 
     @classmethod
     def clear(cls) -> None:
-        """Remove the active request from context-local storage.
+        """Remove the active request from the context-local storage.
 
         Must be called in a finally block after request processing to ensure the
         context is always reset before the thread or async task is reused.

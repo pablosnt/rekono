@@ -1,8 +1,4 @@
-"""Django admin configuration for VirusTotal platform models.
-
-This module registers VirusTotal platform models with the Django admin interface
-for administrative management of platform settings and configuration.
-"""
+"""Registration of the VirusTotal settings model in the Django admin site."""
 
 from django.contrib import admin
 

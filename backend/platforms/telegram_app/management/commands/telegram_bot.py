@@ -1,7 +1,7 @@
-"""Django management command for deploying the Telegram Bot.
+"""Command that runs the Telegram bot.
 
-Provides a management command to start and deploy the Telegram Bot
-service through Django's command-line interface.
+The bot runs as its own process, since it has to keep asking Telegram for the
+messages that the users write.
 """
 
 from typing import Any
@@ -12,29 +12,22 @@ from platforms.telegram_app.bot import TelegramBot
 
 
 class Command(BaseCommand):
-    """Management command to deploy and start the Telegram Bot.
-
-    Initializes and starts the Telegram Bot polling process for handling
-    user interactions and security testing commands.
+    """Command that runs the Telegram bot until it's stopped.
 
     Attributes:
-        help (str): Command help text displayed in management interface.
-        bot (TelegramBot): The Telegram Bot instance to deploy.
+        help: Description of the command shown by the Django help.
+        bot: Bot that attends the messages of the users.
     """
 
     help = "Deploy Telegram Bot"
     bot = TelegramBot()
 
     def handle(self, *args: Any, **options: Any) -> None:
-        """Deploy the Telegram Bot and keep it polling until interrupted.
-
-        Blocks on TelegramBot.deploy() for as long as the polling loop runs. A
-        KeyboardInterrupt (e.g. Ctrl+C) stops the loop and is caught here so the
-        shutdown is logged instead of raising a traceback.
+        """Run the bot, logging when it's stopped instead of failing.
 
         Args:
-            *args (Any): Positional arguments passed to the command.
-            **options (Any): Keyword arguments passed to the command.
+            *args: Not used, since the command takes no arguments.
+            **options: Not used, since the command takes no options.
         """
         try:
             self.bot.logger.info("Deploying telegram bot")

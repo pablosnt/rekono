@@ -1,8 +1,4 @@
-"""GitLeaks executor for Git repository secret detection.
-
-Executes GitLeaks tool with Git repository dumping capabilities to extract
-secrets from exposed Git repositories by scanning their commit history.
-"""
+"""Executor of the GitLeaks secret scanner."""
 
 import os
 import subprocess
@@ -16,31 +12,26 @@ from tools.executors.base import BaseExecutor
 
 
 class Gitleaks(BaseExecutor):
-    """Executor for GitLeaks secret detection tool.
+    """Execution of GitLeaks, which needs a repository to scan.
 
-    Handles Git repository dumping and secret scanning by first attempting to
-    dump exposed Git repositories using GitDumper, then running GitLeaks over
-    the dumped repository's commit history to find sensitive information.
+    The repository is downloaded first with GitDumper, so the secrets are searched
+    in the commit history of the Git repositories that a web server exposes.
 
     Attributes:
-        git_directory_dumped (bool): Whether Git repository was successfully dumped
-        execution_directory (Path | None): Directory where Git repository was dumped
+        git_directory_dumped: Whether the target exposed a repository to scan.
+        execution_directory: Directory where the repository was downloaded.
     """
 
     git_directory_dumped = False
     execution_directory = None
 
     def get_environment(self) -> dict[str, Any]:
-        """Prepare the execution environment allowing git to read the dumped repository.
-
-        Extends the base environment with a wildcard safe.directory setting so that
-        GitLeaks (which shells out to the system git to walk the commit history) can
-        operate on the dumped repository even when it's owned by a different user than
-        the worker process, as happens on Docker volume mounts. Without it, git aborts
-        with "detected dubious ownership" and no secret is scanned.
+        """Get the environment variables that GitLeaks will be run with.
 
         Returns:
-            dict[str, Any]: Environment variables for tool execution
+            The environment of the base executor, plus the configuration that lets
+            git read a repository owned by another user, which is what happens with
+            the Docker volumes, since git refuses to read it otherwise.
         """
         return {
             **super().get_environment(),
@@ -50,24 +41,21 @@ class Gitleaks(BaseExecutor):
         }
 
     def run_tool(self, environment: dict[str, Any] = os.environ.copy()) -> None:  # pragma: no cover
-        """Execute GitLeaks with Git repository dumping.
+        """Download the repository of the target and search for secrets in it.
 
-        First attempts to dump the Git repository using GitDumper and considers it
-        exposed only when actual git objects are downloaded. GitLeaks then scans the
-        dumped repository's commit history, so no working tree checkout is needed.
-        Handles both scenarios where the Git repository is available and where it's not.
-        Before dumping, the port embedded in the target URL is parsed and stored as
-        port_from_arguments, so findings from this execution are linked to the scanned
-        port even though it never appears as a plain command-line argument.
+        The execution completes without findings if the target doesn't expose any
+        repository, since that isn't an error.
 
         Args:
-            environment (dict[str, Any]): Environment variables for execution
+            environment: Environment variables to run the tools with.
         """
         self.git_directory_dumped = False
         target_url = environment.get("GIT_DUMPER_TARGET_URL", "")
         if target_url[-1] != "/":
             target_url += "/"
         target_url += ".git/"
+        # The scanned port only appears in the URL of the environment, so it has to be taken
+        # from there for the findings to be linked to it
         try:
             self.port_from_arguments = urlparse(target_url).port
         except Exception:

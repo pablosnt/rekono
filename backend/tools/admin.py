@@ -1,8 +1,4 @@
-"""Django admin configuration for tools module.
-
-Registers tools module models with Django admin interface for
-administrative management of tools, configurations, and related objects.
-"""
+"""Registration of the tool models in the Django admin site."""
 
 from django.contrib import admin
 

@@ -1,8 +1,4 @@
-"""Django REST framework serializers for target port models.
-
-Provides serialization for target port records with nested authentication
-data for comprehensive API responses.
-"""
+"""Serializers of the target port endpoints."""
 
 from rest_framework.serializers import ModelSerializer
 
@@ -11,24 +7,17 @@ from target_ports.models import TargetPort
 
 
 class TargetPortSerializer(ModelSerializer):
-    """Serializer for TargetPort model.
-
-    Handles serialization of target port instances with nested authentication
-    data for comprehensive API responses and secure credential management.
+    """Serializer of a target port, including the credential of its service.
 
     Attributes:
-        authentication (AuthenticationSerializer): Nested authentication details
+        authentication: Credential that the tools use for this port, with its
+          secret masked.
     """
 
     authentication = AuthenticationSerializer(many=False, read_only=True)
 
     class Meta:
-        """Meta configuration for the TargetPortSerializer.
-
-        Attributes:
-            model (Model): The TargetPort model to serialize
-            fields (tuple): Field names to include in serialization
-        """
+        """Serializer configuration for the target ports."""
 
         model = TargetPort
         fields = ("id", "target", "port", "path", "authentication")

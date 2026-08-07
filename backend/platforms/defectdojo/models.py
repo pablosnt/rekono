@@ -1,8 +1,10 @@
-"""Django models for DefectDojo integration configuration and synchronization.
+"""Models of the DefectDojo configuration and of the synchronized projects.
 
-Provides data models for managing DefectDojo integration settings, project
-synchronization mappings, and target-specific engagement tracking. Includes
-encrypted credential storage and comprehensive validation for secure integration.
+Typical usage example:
+
+  settings = DefectDojoSettings.objects.first()
+  settings.secret = "..."  # encrypted into _api_token on save
+  settings.save()
 """
 
 from django.core.validators import MaxValueValidator, MinValueValidator
@@ -15,28 +17,15 @@ from targets.models import Target
 
 
 class DefectDojoSettings(BaseEncrypted):
-    """Model representing DefectDojo integration configuration settings.
-
-    Stores DefectDojo server connection parameters, API credentials, and integration
-    preferences with automatic encryption of sensitive data. Supports TLS validation,
-    custom tagging, and date format configuration for seamless integration.
+    """Configuration of DefectDojo, of which only one instance exists.
 
     Attributes:
-        server (TextField): DefectDojo server URL (max 100 chars)
-        _api_token (TextField): Encrypted DefectDojo API token (max 40 chars)
-        tls_validation (BooleanField): Enable TLS certificate validation (default True)
-        tag (TextField): Custom tag for DefectDojo entities (optional, max 200 chars)
-        date_format (TextField): Date format string for DefectDojo API (max 15 chars)
-
-    Example:
-        Configure DefectDojo integration:
-
-        ```python
-        settings = DefectDojoSettings.objects.first()
-        settings.server = "https://defectdojo.company.com"
-        settings.secret = "your_api_token_here"
-        settings.save()
-        ```
+        server: URL of the DefectDojo server, since it's deployed by the users.
+        tls_validation: Whether the TLS certificate of the server must be valid,
+          which it isn't when DefectDojo is deployed with a self signed one.
+        tag: Tag added to everything that Rekono creates in DefectDojo.
+        date_format: Format that the server expects the dates in, which depends on
+          how DefectDojo itself is configured.
     """
 
     server = models.TextField(max_length=100, validators=[Validator(Regex.TARGET)], blank=True, null=True)
@@ -54,43 +43,22 @@ class DefectDojoSettings(BaseEncrypted):
     _encrypted_field = "_api_token"
 
     def __str__(self) -> str:
-        """Return string representation of DefectDojo settings.
-
-        Returns:
-            str: DefectDojo server URL or parent string representation if not configured
-        """
+        """Return the URL of the server, or the platform name if it isn't configured."""
         return self.server if self.server else super().__str__()
 
 
 class DefectDojoSync(BaseModel):
-    """Model representing project-level synchronization mapping to DefectDojo.
-
-    Maps Rekono projects to DefectDojo hierarchical structure including product types,
-    products, and engagements. Enables project-level vulnerability management and
-    centralized tracking of security findings across multiple targets.
-
-    DefectDojo Hierarchy:
-        Product Type → Product → Engagement → Tests → Findings
+    """Product of DefectDojo that the findings of a project are sent to.
 
     Attributes:
-        project (OneToOneField): Associated Rekono project (one-to-one relationship)
-        product_id (IntegerField): DefectDojo product ID (optional, 1-999999999)
-        engagement_id (IntegerField): DefectDojo engagement ID (optional, 1-999999999)
-        reimport (BooleanField): Reimport findings instead of creating new tests (default False)
-        close_old_findings (BooleanField): Close old findings not present in new import (default False)
-
-    Example:
-        Create project synchronization mapping:
-
-        ```python
-        sync = DefectDojoSync.objects.create(
-            project=rekono_project,
-            product_id=12,
-            engagement_id=34,
-            reimport=True,
-            close_old_findings=False
-        )
-        ```
+        project: Project whose findings are sent to DefectDojo.
+        product_id: Product of DefectDojo that receives the findings.
+        engagement_id: Engagement of that product that receives them, which is
+          created per target if it isn't defined here.
+        reimport: Whether the findings must be added to the test of the previous
+          executions, instead of creating a new test for each execution.
+        close_old_findings: Whether the findings of that test that an execution
+          doesn't discover anymore must be closed.
     """
 
     project = models.OneToOneField(Project, related_name="defectdojo_sync", on_delete=models.CASCADE)
@@ -110,36 +78,17 @@ class DefectDojoSync(BaseModel):
     _project_field = "project"
 
     def __str__(self) -> str:
-        """Return string representation of DefectDojo project synchronization.
-
-        Returns:
-            str: Formatted string with project name and DefectDojo entity IDs
-        """
+        """Return the project and where its findings are sent in DefectDojo."""
         return " - ".join([value.__str__() for value in [self.project, self.product_id, self.engagement_id] if value])
 
 
 class DefectDojoTargetSync(BaseModel):
-    """Model representing target-specific synchronization mapping to DefectDojo engagements.
-
-    Maps individual Rekono targets to specific DefectDojo engagements for granular
-    vulnerability tracking and assessment isolation. Enables target-level security
-    findings organization within the broader project context.
+    """Engagement of DefectDojo that the findings of a target are sent to.
 
     Attributes:
-        defectdojo_sync (ForeignKey): Parent project synchronization mapping
-        target (OneToOneField): Associated Rekono target (one-to-one relationship)
-        engagement_id (IntegerField): DefectDojo engagement ID for this target (1-999999999)
-
-    Example:
-        Create target-specific synchronization:
-
-        ```python
-        target_sync = DefectDojoTargetSync.objects.create(
-            defectdojo_sync=project_sync,
-            target=rekono_target,
-            engagement_id=56
-        )
-        ```
+        defectdojo_sync: Synchronization of the project that the target belongs to.
+        target: Target whose findings are sent to the engagement.
+        engagement_id: Engagement that receives the findings of the target.
     """
 
     defectdojo_sync = models.ForeignKey(DefectDojoSync, related_name="target_syncs", on_delete=models.CASCADE)
@@ -149,9 +98,5 @@ class DefectDojoTargetSync(BaseModel):
     _project_field = "defectdojo_sync__project"
 
     def __str__(self) -> str:
-        """Return string representation of DefectDojo target synchronization.
-
-        Returns:
-            str: Formatted string with project sync info, target name, and engagement ID
-        """
+        """Return the target and the engagement where its findings are sent."""
         return " - ".join([self.defectdojo_sync.__str__(), self.target.target, str(self.engagement_id)])

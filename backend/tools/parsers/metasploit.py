@@ -1,30 +1,14 @@
-"""Metasploit Framework exploit search output parser.
-
-Processes Metasploit Framework search command output to extract available
-exploit modules and references from the Metasploit database.
-"""
+"""Parser of the Metasploit Framework exploit search."""
 
 from findings.models import Exploit
 from tools.parsers.base import BaseParser
 
 
 class Metasploit(BaseParser):
-    """Parser for Metasploit Framework search command output.
-
-    Extracts exploit module findings from Metasploit search results.
-    Processes line-based output to identify available exploit modules
-    with titles and reference paths within the Metasploit Framework.
-
-    Attributes:
-        Inherits all attributes from BaseParser
-    """
+    """Findings discovered by Metasploit, read from its search output."""
 
     def _parse(self) -> None:
-        """Parse Metasploit search output and extract exploit findings.
-
-        Processes numbered search results to create Exploit findings for
-        available Metasploit modules.
-        """
+        """Create one exploit per module found in the search results."""
         entry = 0
         for line in (self.output or "").split("\n"):
             line = line.strip()

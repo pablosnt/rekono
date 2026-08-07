@@ -1,9 +1,4 @@
-"""Django REST framework views for alert management.
-
-Provides REST API endpoints for managing alerts. Includes ViewSets for
-CRUD operations and custom actions for subscription management and alert
-enabling/disabling.
-"""
+"""Viewsets of the alert endpoints."""
 
 from django.db.models import QuerySet
 from drf_spectacular.utils import extend_schema
@@ -27,22 +22,16 @@ from security.authorization.permissions import (
 
 
 class AlertViewSet(BaseViewSet):
-    """ViewSet for managing alert configurations.
-
-    Provides REST API endpoints for alert CRUD operations plus custom actions
-    for subscription management and enabling/disabling alerts.
-
-    Custom Actions:
-        subscription: Subscribe/unsubscribe users to alerts
-        enable: Enable/disable specific alerts
+    """Manage the alerts of a project and the subscriptions to them.
 
     Attributes:
-        queryset (QuerySet): All Alert objects
-        serializer_class (Serializer): Default serializer for alert operations
-        filterset_class (FilterSet): Filter class for querying alerts
-        permission_classes (list): Required permissions for access
-        search_fields (list): Fields that can be searched
-        ordering_fields (list): Fields that can be used for ordering
+        queryset: All the alerts, filtered later by project membership.
+        serializer_class: Serializer of the alerts.
+        filterset_class: Filters of the alerts.
+        permission_classes: Role permissions plus the membership in the project and
+          the ownership of the alert, so only its owner can update or remove it.
+        search_fields: Free text search over the item and the value of the alert.
+        ordering_fields: Fields that the alerts can be sorted by.
     """
 
     queryset = Alert.objects.all()
@@ -58,21 +47,20 @@ class AlertViewSet(BaseViewSet):
     ordering_fields = ["id", "project", "item", "owner"]
 
     def get_serializer_class(self) -> Serializer:
-        """Get the appropriate serializer class based on the request method.
+        """Get the serializer that only allows the value change for the updates.
 
         Returns:
-            Serializer: EditAlertSerializer for PUT requests, AlertSerializer otherwise
+            The edit serializer for PUT, which only exposes the value, and the
+            standard one for the rest of the methods.
         """
         return EditAlertSerializer if self.request.method == "PUT" else super().get_serializer_class()
 
     def get_queryset(self) -> QuerySet:
-        """Get the queryset for this view.
-
-        For PUT requests, filters to only enabled alerts that support value updates.
-        Otherwise returns all alerts.
+        """Get the alerts, keeping only the ones that can be updated for the updates.
 
         Returns:
-            QuerySet: Filtered queryset based on request method
+            All the alerts, or only the enabled ones whose item is filtered by a
+            value, since the value is the only thing that an update can change.
         """
         queryset = super().get_queryset()
         return (
@@ -94,17 +82,16 @@ class AlertViewSet(BaseViewSet):
         ],
     )
     def subscription(self, request: Request, pk: str) -> Response:
-        """Manage user subscription to an alert.
-
-        POST: Subscribe the current user to the alert
-        DELETE: Unsubscribe the current user from the alert
+        """Subscribe to an alert with POST, or unsubscribe from it with DELETE.
 
         Args:
-            request (Request): The HTTP request object
-            pk (str): Primary key of the alert
+            request: Request whose method decides whether the user subscribes or
+              unsubscribes.
+            pk: Identifier of the alert, taken from the URL.
 
         Returns:
-            Response: HTTP 204 on success, HTTP 400 with error message on failure
+            An empty response, or a validation error when the user is already
+            subscribed to the alert or isn't subscribed to it yet.
         """
         alert = self.get_object()
         is_subscribed = alert.subscribers.filter(id=request.user.id).exists()
@@ -126,17 +113,15 @@ class AlertViewSet(BaseViewSet):
     @extend_schema(request=None, responses={200: AlertSerializer})
     @action(detail=True, methods=["POST", "DELETE"])
     def enable(self, request: Request, pk: str) -> Response:
-        """Enable or disable an alert.
-
-        POST: Enable the alert
-        DELETE: Disable the alert
+        """Enable an alert with POST, or disable it with DELETE.
 
         Args:
-            request (Request): The HTTP request object
-            pk (str): Primary key of the alert
+            request: Request whose method decides the new state of the alert.
+            pk: Identifier of the alert, taken from the URL.
 
         Returns:
-            Response: HTTP 200 with alert data on success, HTTP 400 with error on failure
+            The updated alert, or a validation error when the alert is already in
+            the requested state.
         """
         alert = self.get_object()
         bad_request = None

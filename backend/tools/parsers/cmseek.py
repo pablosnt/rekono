@@ -1,8 +1,4 @@
-"""CMSeek CMS detection and vulnerability scanning output parser.
-
-Processes CMSeek JSON output to extract CMS technology fingerprints, discovered
-paths, vulnerabilities, and credential findings from CMS security scans.
-"""
+"""Parser of the CMSeek CMS scanner."""
 
 from urllib.parse import urlparse
 
@@ -12,23 +8,14 @@ from tools.parsers.base import BaseParser
 
 
 class Cmseek(BaseParser):
-    """Parser for CMSeek JSON output files.
-
-    Extracts CMS fingerprinting results including detected technologies, versions,
-    configuration files, backup files, user enumerations, and known vulnerabilities.
-    Processes comprehensive CMS security analysis data.
-
-    Attributes:
-        Inherits all attributes from BaseParser
-    """
+    """Findings discovered by CMSeek, read from its JSON report."""
 
     def _parse(self) -> None:
-        """Parse CMSeek JSON output and extract CMS security findings.
+        """Create the CMS found and everything discovered in it.
 
-        Processes JSON scan results to create Technology, Path, Vulnerability,
-        and Credential findings from CMS detection and security analysis. CMSeek
-        names most fields after the detected CMS, but not always with the same
-        prefix, so several lookups below need to account for that.
+        Every CMS that CMSeek supports writes its own fields in the report, named
+        after the CMS itself, so the fields are recognized by what their name
+        contains instead of by their exact name.
         """
         data = self.load_json_report()
         if not data or not isinstance(data, dict) or not data.get("cms_name") or not data.get("cms_id"):

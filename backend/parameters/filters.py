@@ -1,46 +1,24 @@
-"""Django filters for input parameters REST API endpoints.
-
-Provides filtering capabilities for parameter API queries including
-project and target based filtering with text-based search options.
-"""
+"""Filters of the input parameter endpoints."""
 
 from parameters.framework.filters import InputParameterFilter
 from parameters.models import InputTechnology, InputVulnerability
 
 
 class InputTechnologyFilter(InputParameterFilter):
-    """Filter class for InputTechnology model queries.
-
-    Provides filtering options for technology parameter API endpoints with support
-    for project and target filtering along with name and version search.
-    """
+    """Filters to search the technologies that the users provide."""
 
     class Meta:
-        """Meta configuration for the InputTechnologyFilter.
-
-        Attributes:
-            model (Model): The InputTechnology model to filter
-            fields (dict): Field names and their supported filter operations
-        """
+        """Filter configuration for the input technologies."""
 
         model = InputTechnology
         fields = {"tasks": ["exact"], "name": ["exact", "icontains"], "version": ["exact", "icontains"]}
 
 
 class InputVulnerabilityFilter(InputParameterFilter):
-    """Filter class for InputVulnerability model queries.
-
-    Provides filtering options for vulnerability parameter API endpoints with support
-    for project and target filtering along with CVE identifier search.
-    """
+    """Filters to search the vulnerabilities that the users provide."""
 
     class Meta:
-        """Meta configuration for the InputVulnerabilityFilter.
-
-        Attributes:
-            model (Model): The InputVulnerability model to filter
-            fields (dict): Field names and their supported filter operations
-        """
+        """Filter configuration for the input vulnerabilities."""
 
         model = InputVulnerability
         fields = {"tasks": ["exact"], "cve": ["exact"]}

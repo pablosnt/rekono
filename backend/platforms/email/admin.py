@@ -1,8 +1,4 @@
-"""Django admin configuration for email platform models.
-
-Registers the SMTPSettings model with the Django admin interface for
-administrative management of SMTP email notification configuration.
-"""
+"""Registration of the SMTP settings model in the Django admin site."""
 
 from django.contrib import admin
 

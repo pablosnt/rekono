@@ -1,8 +1,4 @@
-"""Django admin configuration for findings models.
-
-Registers all security finding models with the Django admin interface for
-administrative management and review of discovered security findings.
-"""
+"""Registration of the finding models in the Django admin site."""
 
 from django.contrib import admin
 

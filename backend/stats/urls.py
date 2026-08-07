@@ -1,10 +1,7 @@
-"""URL routing configuration for statistics and analytics API endpoints.
+"""URLs of the statistics endpoints.
 
-Defines URL patterns for the stats ViewSets, covering RQ queue statistics,
-point-in-time snapshots (host OS, host vulnerabilities, port, technology,
-vulnerability CVE/CWE/status, triaging, exploit coverage), and evolution
-statistics tracking trends per finding type (OSINT, host, port, path,
-technology, credential, vulnerability, exploit) over time.
+The statistics are not resources, so they are routed one by one instead of being
+registered in a router, and each URL only answers the list request.
 """
 
 from django.urls import path
@@ -30,7 +27,6 @@ from stats.views import (
     VulnerabilityStatusStatsViewSet,
 )
 
-# All stats ViewSets are read-only and only expose the list action
 get_view = {"get": "list"}
 urlpatterns = [
     path("stats/rq/", RQStatsView.as_view(), name="rq-stats"),

@@ -1,8 +1,4 @@
-"""Django REST framework serializers for SMTP settings management.
-
-Provides serializer classes for SMTP configuration with secure handling of
-sensitive credential data and service availability validation.
-"""
+"""Serializer of the SMTP endpoints."""
 
 from rest_framework.serializers import ModelSerializer, SerializerMethodField
 
@@ -12,41 +8,30 @@ from platforms.email.notifications import SMTP
 
 
 class SMTPSettingsSerializer(ModelSerializer):
-    """Serializer for SMTP settings configuration with security validation.
-
-    Provides secure serialization of SMTP server configuration including
-    protected password field handling and service availability checking.
-    Includes input validation and secure credential management.
+    """Serializer of the SMTP configuration.
 
     Attributes:
-        password (ProtectedSecretField): Secure password field with validation
-        is_available (SerializerMethodField): Real-time SMTP service availability status
+        password: Password, which is masked when the settings are read.
+        is_available: Whether the configured server accepts a connection.
     """
 
     password = ProtectedSecretField(required=False, allow_null=True, source="secret")
     is_available = SerializerMethodField(read_only=True)
 
     class Meta:
-        """Meta configuration for SMTPSettingsSerializer.
-
-        Attributes:
-            model (Model): The SMTPSettings model to serialize
-            fields (tuple): Field names to include in serialization
-        """
+        """Serializer configuration for the SMTP settings."""
 
         model = SMTPSettings
         fields = ("id", "host", "port", "username", "password", "tls", "is_available")
 
     def get_is_available(self, instance: SMTPSettings) -> bool:
-        """Check if SMTP service is currently available and functional.
-
-        Tests SMTP connection and configuration to determine if email
-        notifications can be successfully delivered.
+        """Check if the configured server accepts a connection.
 
         Args:
-            instance (SMTPSettings): SMTP settings instance to test
+            instance: Settings being serialized, not read because the check is
+              performed against the live platform.
 
         Returns:
-            bool: True if SMTP service is available and functional, False otherwise
+            Whether the platform answers with the configured settings.
         """
         return SMTP().is_available()

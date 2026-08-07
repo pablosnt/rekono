@@ -1,8 +1,4 @@
-"""Django REST framework views for target port management.
-
-Provides REST API views for target port records with CRUD operations,
-filtering capabilities, and project-based authorization controls.
-"""
+"""Endpoints to manage the ports of the targets."""
 
 from rest_framework.permissions import IsAuthenticated
 
@@ -17,20 +13,18 @@ from target_ports.serializers import TargetPortSerializer
 
 
 class TargetPortViewSet(BaseViewSet):
-    """ViewSet for TargetPort model CRUD operations.
-
-    Provides REST API endpoints for target port management with filtering,
-    searching, and ordering capabilities. Enforces project-based authorization
-    and user authentication.
+    """Create, list, and delete the ports of the targets.
 
     Attributes:
-        queryset (QuerySet): TargetPort model instances
-        serializer_class (Serializer): Serializer for TargetPort model
-        filterset_class (FilterSet): Filter class for query filtering
-        permission_classes (list): Required permissions for access control
-        search_fields (list): Fields available for text search
-        ordering_fields (list): Fields available for result ordering
-        http_method_names (list): Allowed HTTP methods (GET, POST, DELETE)
+        queryset: All the target ports, restricted to the projects of the user by
+          the base viewset.
+        serializer_class: Serializer of the target ports.
+        filterset_class: Filters available to search target ports.
+        permission_classes: Role permissions plus the membership in the project.
+        search_fields: Fields used by the text search.
+        ordering_fields: Fields that can be used to order the results.
+        http_method_names: The target ports can be created and deleted, but not
+          updated, since another port is another target port.
     """
 
     queryset = TargetPort.objects.all()

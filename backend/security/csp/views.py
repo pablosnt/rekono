@@ -1,9 +1,7 @@
-"""Django REST framework views for Content Security Policy violation reporting.
+"""Endpoints that receive the CSP violation reports sent by the browsers.
 
-Provides two unauthenticated endpoints that receive CSP violation reports from
-browsers and emit them as structured warning log entries for security monitoring.
-Handles the ``report-to`` Reporting API format and the legacy ``report-uri``
-format through separate concrete view classes that share a common parsing base.
+There is one view per delivery format, the modern Reporting API and the legacy
+``report-uri`` directive, and both log the violations they receive.
 """
 
 import json
@@ -20,30 +18,27 @@ from framework.logging import LoggingEntity
 
 
 class CspReportView(APIView, LoggingEntity):
-    """Base view for receiving and logging Content Security Policy violation reports.
-
-    Provides the shared parsing and dispatch logic for CSP violation ingestion.
-    Parses the raw JSON request body and delegates each violation record to
-    ``_process_violation``, which concrete subclasses override to extract fields
-    from the format they handle. Always returns HTTP 204 so browsers do not treat
-    a non-2xx response as a reason to suppress future reports.
+    """Base view that parses the CSP violation reports and logs them.
 
     Attributes:
-        authentication_classes (list): Empty, since browsers send reports without credentials.
-        permission_classes (list): Empty, since no authentication is required for violation delivery.
+        authentication_classes: None, since the browsers deliver the reports
+          without any credential.
+        permission_classes: None, for the same reason.
     """
 
     authentication_classes = []
     permission_classes = []
 
     def _sanitize(self, value: str | None) -> str | None:
-        """Remove control characters and cap the length of a report field.
+        """Clean a value of the report before it's written to the logs.
 
         Args:
-            value (str | None): Raw, attacker-controlled field from the violation report.
+            value: Untrusted value taken from the report, or None.
 
         Returns:
-            str | None: The value with control characters removed and length capped.
+            The value capped at 1000 characters and without the characters that
+            could forge log entries, or the value unchanged when it's empty, since
+            there is nothing to sanitize then.
         """
         if not value:
             return value
@@ -52,14 +47,13 @@ class CspReportView(APIView, LoggingEntity):
         return "".join(char for char in value[:1000] if not unicodedata.category(char).startswith("C"))
 
     def _log_violation(self, blocked: str | None, origin: str | None, directive: str | None) -> None:
-        """Emit a structured warning log entry for a single CSP violation.
+        """Log one CSP violation, if the report identifies what was blocked and why.
 
         Args:
-            blocked (str | None): URI of the resource that was blocked by the policy.
-            origin (str | None): URI of the document where the violation occurred, or
-                ``None`` if the report did not include it.
-            directive (str | None): CSP directive that triggered the block
-                (e.g. ``script-src``), or ``None`` if absent from the report.
+            blocked: URI of the resource that was blocked by the policy.
+            origin: URI of the document where the violation occurred, or None if the
+              report didn't include it.
+            directive: CSP directive that blocked the resource, like ``script-src``.
         """
         if blocked and directive:
             self.logger.warning(
@@ -67,38 +61,32 @@ class CspReportView(APIView, LoggingEntity):
             )
 
     def _process_violation(self, data: dict[str, Any]) -> None:
-        """Extract violation fields from a single report object and log them.
-
-        Subclasses override this method to handle their specific report schema.
-        The base implementation is a no-op so that ``CspReportView`` itself is
-        never registered as a route.
+        """Read one violation from the report, as each delivery format does.
 
         Args:
-            data (dict[str, Any]): A single violation object parsed from the request body.
+            data: One report of the payload, whose shape depends on the format.
         """
 
     def post(self, request: Request, *args: object, **kwargs: object) -> Response:
-        """Ingest a CSP violation report and return HTTP 204.
+        """Receive a CSP report and log the violations that it contains.
 
-        Parses the raw request body as JSON. The Reporting API delivers an array
-        of report objects while ``report-uri`` delivers a single object, so both
-        shapes are normalised to a list before dispatching to ``_process_violation``.
-        Malformed payloads are silently discarded to avoid surfacing internal errors
-        to the browser.
+        The Reporting API delivers an array of reports while ``report-uri`` delivers
+        a single one, so both shapes are normalized to a list. Malformed payloads
+        are discarded, and the response is always 204, so a browser never takes an
+        error as a reason to stop reporting.
 
         Args:
-            request (Request): HTTP request carrying the CSP report payload.
-            *args (object): Additional positional arguments.
-            **kwargs (object): Additional keyword arguments.
+            request: Request whose body holds the report, in the format of the view.
+            *args: Standard view arguments.
+            **kwargs: Standard view arguments.
 
         Returns:
-            Response: HTTP 204 No Content unconditionally.
+            An empty 204 response, even when the payload can't be parsed.
         """
         try:
             body = json.loads(request.body)
         except Exception as ex:  # pragma: no cover
             self.logger.error(f"[{self.__class__.__name__}] Error parsing a CSP report: {str(ex)}")
-            # Discard unparseable payloads, since browsers occasionally send empty or malformed bodies
             return Response(status=status.HTTP_204_NO_CONTENT)
         for violation in body if isinstance(body, list) else [body]:
             self._process_violation(violation)
@@ -107,22 +95,17 @@ class CspReportView(APIView, LoggingEntity):
 
 @extend_schema(exclude=True)
 class CspReportToView(CspReportView):
-    """CSP violation endpoint for the Reporting API (``report-to`` directive).
-
-    Handles JSON payloads delivered by browsers that support the W3C Reporting
-    API. Each element in the array is a report object whose ``type`` field identifies
-    its category; only ``csp-violation`` entries are processed and logged.
-    """
+    """Receive the reports of the browsers that support the Reporting API."""
 
     def _process_violation(self, data: dict[str, Any]) -> None:
-        """Extract and log a violation from a Reporting API report object.
+        """Read one violation from a Reporting API report.
 
-        Filters out non-CSP report types before extracting fields, since the
-        Reporting API multiplexes different report categories over the same
-        endpoint (e.g. ``deprecation``, ``intervention``, ``csp-violation``).
+        The Reporting API multiplexes different report categories over the same
+        endpoint (e.g. ``deprecation``, ``intervention``, ``csp-violation``), so the
+        reports that aren't CSP violations are ignored.
 
         Args:
-            data (dict[str, Any]): A single Reporting API report object.
+            data: One report of the array delivered by the Reporting API.
         """
         if data.get("type", "").lower() == "csp-violation":
             report = data.get("body", {})
@@ -135,18 +118,14 @@ class CspReportToView(CspReportView):
 
 @extend_schema(exclude=True)
 class CspReportUriView(CspReportView):
-    """CSP violation endpoint for the legacy ``report-uri`` directive.
-
-    Handles JSON payloads delivered by browsers using the older ``report-uri``
-    CSP directive. The payload is always a single JSON object (not an array)
-    containing a ``csp-report`` key with the violation details.
-    """
+    """Receive the reports that the ``report-uri`` directive asks the browsers for."""
 
     def _process_violation(self, data: dict[str, Any]) -> None:
-        """Extract and log a violation from a ``report-uri`` payload object.
+        """Read the violation from a ``report-uri`` payload.
 
         Args:
-            data (dict[str, Any]): The top-level ``application/csp-report`` payload object.
+            data: Payload delivered by the browser, wrapping the violation in its
+              ``csp-report`` key.
         """
         report = data.get("csp-report", {})
         self._log_violation(

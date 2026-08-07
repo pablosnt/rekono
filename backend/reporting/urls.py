@@ -1,8 +1,4 @@
-"""URL routing configuration for reporting REST API endpoints.
-
-Defines URL patterns and routing for security report management endpoints
-using Django REST framework routers.
-"""
+"""URLs of the report endpoints."""
 
 from rest_framework.routers import SimpleRouter
 

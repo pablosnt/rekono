@@ -1,8 +1,8 @@
-"""ViewSets for findings REST API endpoints.
+"""Viewsets of the finding endpoints.
 
-Provides ViewSet classes for all finding types with CRUD operations,
-filtering, search capabilities, and custom actions for security findings
-management through the REST API.
+The findings can only be read, fixed, and triaged, since they are created by the
+tools instead of by the users. The only exception is the target creation from an
+OSINT finding, which turns a discovered domain or IP address into a new target.
 """
 
 from django.db.models import Max
@@ -49,20 +49,14 @@ from targets.serializers import TargetSerializer
 
 
 class OSINTViewSet(TriageFindingViewSet):
-    """ViewSet for Open Source Intelligence findings management.
-
-    Provides CRUD operations for OSINT findings with triage capabilities
-    and target creation functionality for IP and domain data types.
-
-    Custom Actions:
-        target: Create a target from OSINT data for IP/Domain types
+    """Read and triage the data found on public sources.
 
     Attributes:
-        queryset (QuerySet): All OSINT objects
-        serializer_class (Serializer): OSINTSerializer for OSINT operations
-        filterset_class (FilterSet): OSINTFilter for querying OSINT findings
-        search_fields (list): Fields that can be searched
-        ordering_fields (list): Fields that can be used for ordering
+        queryset: All the OSINT findings, filtered later by project membership.
+        serializer_class: Serializer of the OSINT findings.
+        filterset_class: Filters of the OSINT findings.
+        search_fields: Free text search over the discovered data.
+        ordering_fields: Fields that the OSINT findings can be sorted by.
     """
 
     queryset = OSINT.objects.all()
@@ -74,17 +68,15 @@ class OSINTViewSet(TriageFindingViewSet):
     @extend_schema(request=None, responses={201: TargetSerializer})
     @action(detail=True, methods=["POST"])
     def target(self, request: Request, pk: str) -> Response:
-        """Create a target from OSINT data.
-
-        Converts OSINT findings with IP or Domain data types into target
-        objects for further security assessment.
+        """Create a new target in the project from the discovered data.
 
         Args:
-            request (Request): HTTP request object.
-            pk (str): Primary key of the OSINT finding.
+            request: Request that asks for the target to be created.
+            pk: Identifier of the OSINT finding, taken from the URL.
 
         Returns:
-            Response: Created target data (201) or error message (400).
+            The created target, or a validation error if the data can't be
+            scanned, since only the IP addresses and the domains can be targets.
         """
         osint = self.get_object()
         if osint.data_type in [OSINTDataType.IP, OSINTDataType.DOMAIN]:
@@ -103,17 +95,14 @@ class OSINTViewSet(TriageFindingViewSet):
 
 
 class HostViewSet(FindingViewSet):
-    """ViewSet for network host findings management.
-
-    Provides CRUD operations for discovered network hosts with
-    search and filtering capabilities for asset inventory.
+    """Read and fix the hosts found in the network.
 
     Attributes:
-        queryset (QuerySet): All Host objects
-        serializer_class (Serializer): HostSerializer for host operations
-        filterset_class (FilterSet): HostFilter for querying host findings
-        search_fields (list): Fields that can be searched
-        ordering_fields (list): Fields that can be used for ordering
+        queryset: All the hosts, filtered later by project membership.
+        serializer_class: Serializer of the hosts.
+        filterset_class: Filters of the hosts.
+        search_fields: Free text search over the host identity and its location.
+        ordering_fields: Fields that the hosts can be sorted by.
     """
 
     queryset = Host.objects.all()
@@ -124,17 +113,14 @@ class HostViewSet(FindingViewSet):
 
 
 class PortViewSet(FindingViewSet):
-    """ViewSet for network port findings management.
-
-    Provides CRUD operations for discovered network ports and services
-    with search and filtering capabilities for attack surface enumeration.
+    """Read and fix the ports found in the hosts.
 
     Attributes:
-        queryset (QuerySet): All Port objects
-        serializer_class (Serializer): PortSerializer for port operations
-        filterset_class (FilterSet): PortFilter for querying port findings
-        search_fields (list): Fields that can be searched
-        ordering_fields (list): Fields that can be used for ordering
+        queryset: All the ports, filtered later by project membership.
+        serializer_class: Serializer of the ports.
+        filterset_class: Filters of the ports.
+        search_fields: Free text search over the port number and its service.
+        ordering_fields: Fields that the ports can be sorted by.
     """
 
     queryset = Port.objects.all()
@@ -145,17 +131,14 @@ class PortViewSet(FindingViewSet):
 
 
 class PathViewSet(FindingViewSet):
-    """ViewSet for web path findings management.
-
-    Provides CRUD operations for discovered web paths and endpoints
-    with search and filtering capabilities for web application analysis.
+    """Read and fix the paths found in the ports.
 
     Attributes:
-        queryset (QuerySet): All Path objects
-        serializer_class (Serializer): PathSerializer for path operations
-        filterset_class (FilterSet): PathFilter for querying path findings
-        search_fields (list): Fields that can be searched
-        ordering_fields (list): Fields that can be used for ordering
+        queryset: All the paths, filtered later by project membership.
+        serializer_class: Serializer of the paths.
+        filterset_class: Filters of the paths.
+        search_fields: Free text search over the path and its extra data.
+        ordering_fields: Fields that the paths can be sorted by.
     """
 
     queryset = Path.objects.all()
@@ -166,17 +149,14 @@ class PathViewSet(FindingViewSet):
 
 
 class TechnologyViewSet(FindingViewSet):
-    """ViewSet for technology findings management.
-
-    Provides CRUD operations for discovered software technologies
-    with search and filtering capabilities for technology stack analysis.
+    """Read and fix the technologies found in the ports.
 
     Attributes:
-        queryset (QuerySet): All Technology objects
-        serializer_class (Serializer): TechnologySerializer for technology operations
-        filterset_class (FilterSet): TechnologyFilter for querying technology findings
-        search_fields (list): Fields that can be searched
-        ordering_fields (list): Fields that can be used for ordering
+        queryset: All the technologies, filtered later by project membership.
+        serializer_class: Serializer of the technologies.
+        filterset_class: Filters of the technologies.
+        search_fields: Free text search over the technology and its description.
+        ordering_fields: Fields that the technologies can be sorted by.
     """
 
     queryset = Technology.objects.all()
@@ -187,17 +167,14 @@ class TechnologyViewSet(FindingViewSet):
 
 
 class CredentialViewSet(TriageFindingViewSet):
-    """ViewSet for credential findings management.
-
-    Provides CRUD operations for discovered credentials with triage
-    capabilities and search/filtering for credential exposure analysis.
+    """Read, triage, and fix the credentials exposed in the technologies.
 
     Attributes:
-        queryset (QuerySet): All Credential objects
-        serializer_class (Serializer): CredentialSerializer for credential operations
-        filterset_class (FilterSet): CredentialFilter for querying credential findings
-        search_fields (list): Fields that can be searched
-        ordering_fields (list): Fields that can be used for ordering
+        queryset: All the credentials, filtered later by project membership.
+        serializer_class: Serializer of the credentials.
+        filterset_class: Filters of the credentials.
+        search_fields: Free text search over the credential data and its context.
+        ordering_fields: Fields that the credentials can be sorted by.
     """
 
     queryset = Credential.objects.all()
@@ -208,17 +185,15 @@ class CredentialViewSet(TriageFindingViewSet):
 
 
 class VulnerabilityViewSet(TriageFindingViewSet):
-    """ViewSet for vulnerability findings management.
-
-    Provides CRUD operations for discovered vulnerabilities with triage
-    capabilities and search/filtering for vulnerability assessment.
+    """Read, triage, and fix the vulnerabilities found in the technologies and ports.
 
     Attributes:
-        queryset (QuerySet): All Vulnerability objects
-        serializer_class (Serializer): VulnerabilitySerializer for vulnerability operations
-        filterset_class (FilterSet): VulnerabilityFilter for querying vulnerability findings
-        search_fields (list): Fields that can be searched
-        ordering_fields (list): Fields that can be used for ordering
+        queryset: All the vulnerabilities, filtered later by project membership.
+        serializer_class: Serializer of the vulnerabilities.
+        filterset_class: Filters of the vulnerabilities.
+        search_fields: Free text search over the vulnerability identity and its
+          identifiers in the vulnerability databases.
+        ordering_fields: Fields that the vulnerabilities can be sorted by.
     """
 
     queryset = Vulnerability.objects.all()
@@ -243,17 +218,14 @@ class VulnerabilityViewSet(TriageFindingViewSet):
 
 
 class ExploitViewSet(TriageFindingViewSet):
-    """ViewSet for exploit findings management.
-
-    Provides CRUD operations for discovered exploits with triage
-    capabilities and search/filtering for exploit availability analysis.
+    """Read, triage, and fix the exploits found for the vulnerabilities.
 
     Attributes:
-        queryset (QuerySet): All Exploit objects
-        serializer_class (Serializer): ExploitSerializer for exploit operations
-        filterset_class (FilterSet): ExploitFilter for querying exploit findings
-        search_fields (list): Fields that can be searched
-        ordering_fields (list): Fields that can be used for ordering
+        queryset: All the exploits, filtered later by project membership.
+        serializer_class: Serializer of the exploits.
+        filterset_class: Filters of the exploits.
+        search_fields: Free text search over the exploit identity and its source.
+        ordering_fields: Fields that the exploits can be sorted by.
     """
 
     queryset = Exploit.objects.all()
@@ -271,16 +243,14 @@ class ExploitViewSet(TriageFindingViewSet):
 
 
 class LatestHostsViewSet(LatestViewSet):
-    """ViewSet for retrieving latest discovered host statistics.
-
-    Provides the most recently discovered hosts that are not fixed,
-    annotated with their latest execution timestamp.
+    """Read the hosts that have been discovered most recently.
 
     Attributes:
-        queryset: Unfixed hosts with latest execution annotations
-        ordering: Most recently discovered hosts first
-        serializer_class: Host serialization
-        filterset_class: Host filtering capabilities
+        queryset: Hosts that are still not fixed, annotated with the start date of
+          the last execution that found them.
+        ordering: The most recently discovered hosts first.
+        serializer_class: Serializer of the hosts.
+        filterset_class: Filters of the hosts.
     """
 
     queryset = Host.objects.filter(is_fixed=False).annotate(latest=Max("executions__start"))
@@ -290,17 +260,16 @@ class LatestHostsViewSet(LatestViewSet):
 
 
 class LatestVulnerabilitiesViewSet(LatestViewSet):
-    """ViewSet for retrieving latest vulnerability statistics.
-
-    Provides the most recently discovered vulnerabilities that are unfixed,
-    not marked as false positives, and not created from user input, with
-    latest execution timestamps.
+    """Read the vulnerabilities that have been discovered most recently.
 
     Attributes:
-        queryset: Active vulnerabilities with latest execution annotations
-        ordering: Most recently discovered vulnerabilities first
-        serializer_class: Vulnerability serialization
-        filterset_class: Vulnerability filtering capabilities
+        queryset: Vulnerabilities that are still not fixed and that the auditors
+          haven't discarded, annotated with the start date of the last execution
+          that found them. The ones created by the users are excluded, since they
+          weren't discovered by any execution.
+        ordering: The most recently discovered vulnerabilities first.
+        serializer_class: Serializer of the vulnerabilities.
+        filterset_class: Filters of the vulnerabilities.
     """
 
     queryset = (

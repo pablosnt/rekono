@@ -1,7 +1,9 @@
-"""Django app configuration utilities for Rekono framework.
+"""Base Django app configuration that loads the fixtures of each Rekono app.
 
-Provides base app class with automatic fixture loading capabilities
-for Django applications in the Rekono platform.
+The default data of Rekono (tools, configurations, processes, wordlists, and
+permissions) is shipped as fixtures that are loaded after every migration, so the
+apps only have to declare which of their data is user-created and must survive that
+reload.
 """
 
 import importlib
@@ -16,17 +18,20 @@ from django.db.models.signals import post_migrate
 
 
 class BaseApp:
-    """Base Django application configuration with fixture loading capabilities.
+    """Base app configuration that loads the app fixtures after the migrations.
 
-    Provides automatic loading of fixture files after database migrations
-    for consistent data initialization across Django applications.
+    Apps whose default data changes between Rekono versions enable recreate_data,
+    and override the selection hooks to keep the entities that the users created on
+    the same models, since the whole model is deleted before the fixtures are
+    loaded again.
 
     Attributes:
-        skip_fixtures_if_model_exists (bool): Whether to skip loading if data exists.
-        recreate_data (bool): Whether to recreate all model data during fixture loading.
-            When True, preserves user-created entities while refreshing default data.
-            Required when new default entities can be defined, old ones removed,
-            and users can create custom entities on the same model.
+        skip_fixtures_if_model_exists: Load the fixtures only once, since any
+          existing data means that they were already applied.
+        recreate_data: Delete the data of the app models before loading the
+          fixtures, so removed default entities disappear and updated ones are
+          refreshed. Requires the selection hooks to be overridden if the users can
+          create their own entities on those models.
     """
 
     skip_fixtures_if_model_exists = False
@@ -34,135 +39,105 @@ class BaseApp:
 
     @cached_property
     def fixtures_path(self) -> Path:
-        """Get the path to the application's fixtures directory.
-
-        Dynamically determines the fixtures directory path based on the
-        application module location, following Django conventions.
-
-        Returns:
-            Path: Absolute path to the fixtures directory for this application.
-        """
+        """The fixtures directory of the app that defines this configuration."""
         # nosemgrep: python.lang.security.audit.non-literal-import.non-literal-import
         module = importlib.import_module(self.__module__)
         return Path(module.__file__).resolve().parent / "fixtures"
 
     def ready(self) -> None:
-        """Configure the application after Django starts.
-
-        Sets up post-migration signal to automatically load fixtures
-        if the fixtures directory exists.
-        """
-        # Configure fixtures to be loaded after migration
+        """Schedule the fixtures of the app to be loaded after each migration."""
         if self.fixtures_path and self.fixtures_path.is_dir():
             post_migrate.connect(self.load_fixtures, sender=self)
 
     def load_fixtures(self, **kwargs: Any) -> None:
-        """Load fixture files into the database with data preservation support.
+        """Load all the fixture files of the app, keeping the user-created data.
 
-        Called automatically after migrations to populate the database with initial data.
-        Supports preserving user-created entities and their relationships during
-        fixture recreation when recreate_data is enabled.
+        The entities selected by the hooks are read before the models are cleared,
+        recreated after the fixtures are loaded, and finally reconnected to the new
+        default entities that replaced the ones they referenced.
 
         Args:
-            **kwargs (Any): Signal arguments from post_migrate.
+            **kwargs: Arguments sent by the post_migrate signal.
         """
         if self.fixtures_path and self.fixtures_path.is_dir():
             entities_to_recreate = []
             entities_to_restore_relationships = []
-            # Phase 1: Collect data that needs to survive the recreation process
             for model in self._get_models():
                 if model.objects.exists():
                     if self.skip_fixtures_if_model_exists:
                         # Abort loading entirely, not just for this model, since any existing
                         # data means the fixtures were already applied
                         return  # pragma: no cover
-                    # Collect user-created entities that should be preserved
                     entities_to_recreate.extend(list(self._select_data_to_recreate(model)))
-                    # Collect entities whose relationships need restoration
                     entities_to_restore_relationships.extend(list(self._select_data_to_restore_relationships(model)))
-                # Phase 2: Clear existing data if recreation is enabled
                 if self.recreate_data:
                     model.objects.all().delete()
-            # Phase 3: Load fresh fixture data from JSON files
             management.call_command(
                 loaddata.Command(),
                 *(self.fixtures_path / fixture for fixture in sorted(self.fixtures_path.rglob("*.json"))),
             )
-            # Phase 4: Recreate preserved user entities
             self._recreate(entities_to_recreate)
-            # Phase 5: Restore relationships for entities that need them
             for item in entities_to_restore_relationships:
                 model = item.__class__
-                # Find the corresponding new entity for relationship restoration
                 entity = self._get_current_entity_from_removed_entity(model, item)
                 if entity:
-                    # Restore all prefetched relationships from the original entity
+                    # The relationships were prefetched by the selection hook, so they are read
+                    # from the removed entity even after its rows are gone from the database
                     for relationship, queryset in item.__dict__.get("_prefetched_objects_cache", {}).items():
                         self._enable_relationship(entity, relationship, queryset)
 
     def _select_data_to_restore_relationships(self, model: Any) -> QuerySet:
-        """Select model instances whose relationships should be restored after recreation.
+        """Select the entities whose relationships must be restored after the reload.
 
-        This method identifies entities that should have their many-to-many and
-        foreign key relationships preserved during the data recreation process.
+        Overridden by the apps that keep entities pointing to default data that the
+        fixtures recreate with different identifiers. The relationships to restore
+        must be prefetched by the returned queryset.
 
         Args:
-            model (Any): The Django model class to query.
+            model: One of the app models that is about to be cleared.
 
         Returns:
-            QuerySet: QuerySet of instances needing relationship restoration.
-
-        Note:
-            This method should be overridden by subclasses to select the
-            entities that need their relationships restored after recreation.
+            No entities, unless the app overrides this hook.
         """
         return model.objects.none()
 
     def _select_data_to_recreate(self, model: Any) -> QuerySet:
-        """Select model instances that should be preserved during fixture recreation.
+        """Select the entities that must be created again after the reload.
 
-        This method identifies user-created or custom entities that should be
-        saved before model data deletion and recreated after fixture loading.
+        Overridden by the apps whose models mix default data with entities created
+        by the users, since only the latter would be lost.
 
         Args:
-            model (Any): The Django model class to query.
+            model: One of the app models that is about to be cleared.
 
         Returns:
-            QuerySet: QuerySet of instances to preserve and recreate.
-
-        Note:
-            This method should be overridden by subclasses to select the
-            entities that need to be preserved before fixture recreation.
+            No entities, unless the app overrides this hook.
         """
         return model.objects.none()
 
     def _recreate(self, data: list[Any]) -> None:
-        """Recreate a list of preserved entities after fixture loading.
-
-        Iterates through the provided list of entities and recreates each one
-        using the _recreate_entity method to restore their data and relationships.
+        """Create again all the entities that were removed before the reload.
 
         Args:
-            data (list[Any]): List of model instances to recreate.
+            data: Entities read from the selection hooks before the models were
+              cleared, so they are no longer stored in the database.
         """
         for entity in data:
             self._recreate_entity(entity)
 
     def _recreate_entity(self, entity: Any) -> Any:
-        """Recreate a model instance with its data and relationships.
-
-        Creates a new database record with the same field values as the original
-        entity, excluding internal Django fields, and restores relationships.
+        """Create a new entity with the values and relationships of the given one.
 
         Args:
-            entity (Any): The original model instance to recreate.
+            entity: Removed entity whose values and prefetched relationships are
+              copied into the new one.
 
         Returns:
-            Any: The newly created model instance with restored relationships.
+            The new entity, which gets a new identifier since the original one may
+            already be taken by the fixtures.
         """
         model = entity.__class__
         data = entity.__dict__
-        # Create new instance excluding Django internal fields
         new_entity = model.objects.create(
             **{
                 field: value
@@ -170,52 +145,41 @@ class BaseApp:
                 if field not in ["id", "_state", "_prefetched_objects_cache"]
             }
         )
-        # Restore relationships from prefetched cache
         for relationship, queryset in data.get("_prefetched_objects_cache", {}).items():
             self._enable_relationship(new_entity, relationship, queryset)
         return new_entity
 
     def _get_current_entity_from_removed_entity(self, model: Any, removed: Any) -> Any:
-        """Find the current equivalent of a removed entity after fixture reload.
+        """Find the entity created by the fixtures that replaces a removed one.
 
-        This method attempts to locate the newly created entity that corresponds
-        to a previously removed entity, typically by matching identifying fields.
+        Overridden by the apps that restore relationships, to define how a removed
+        entity is matched against the new one, usually by a unique field.
 
         Args:
-            model (Any): The Django model class to search in.
-            removed (Any): The original entity that was removed.
+            model: Model where the replacement entity must be searched.
+            removed: Entity deleted before the reload, whose values are the only
+              way to identify its replacement.
 
         Returns:
-            Any: The corresponding new entity instance, or None if not found.
-
-        Note:
-            This method should be overridden by subclasses to define how the
-            recreated entity is matched back to the one that was removed.
+            None, unless the app overrides this hook.
         """
         return None
 
     def _enable_relationship(self, entity: Any, relationship: str, queryset: QuerySet) -> None:
-        """Restore a relationship between an entity and related objects.
-
-        Sets up many-to-many or foreign key relationships for the given entity
-        using the provided queryset of related objects.
+        """Assign the given related objects to one relationship of the entity.
 
         Args:
-            entity (Any): The model instance to set relationships for.
-            relationship (str): The name of the relationship field.
-            queryset (QuerySet): The related objects to associate.
+            entity: Entity whose relationship is set.
+            relationship: Name of the many-to-many field to assign.
+            queryset: Related objects to assign to that field.
         """
         getattr(entity, relationship).set(queryset)
 
     def _get_models(self) -> list[Any]:
-        """Get model classes for existence checking.
+        """Get the app models whose data is managed by the fixtures.
 
         Returns:
-            list[Any]: List of model classes to check for existing data.
-
-        Note:
-            This method should be overridden by subclasses to return
-            the relevant model classes for the application.
+            No models, unless the app overrides this hook.
         """
         # Models can't be defined in a variable because the first time that the migrate command is executed,
         # models don't exist yet. They only can be imported from a post_migrate signal

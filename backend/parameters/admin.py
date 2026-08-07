@@ -1,8 +1,4 @@
-"""Django admin configuration for parameters module.
-
-Registers input parameter models with Django admin interface for
-administrative management of technology and vulnerability parameters.
-"""
+"""Registration of the input parameter models in the Django admin site."""
 
 from django.contrib import admin
 

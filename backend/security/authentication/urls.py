@@ -1,9 +1,7 @@
-"""URL configuration for authentication endpoints.
+"""URLs of the authentication endpoints: login, MFA, token refresh, and logout.
 
-Defines URL patterns for the authentication API using plain Django ``path()``
-calls rather than a DRF router, since each endpoint is a single-purpose view
-rather than a CRUD resource. Covers login, token refresh, MFA login, MFA
-email delivery, and logout.
+They are registered with plain Django ``path()`` calls rather than a DRF router,
+since each endpoint is a single-purpose view rather than a CRUD resource.
 """
 
 from django.urls import path

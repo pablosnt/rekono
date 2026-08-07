@@ -1,8 +1,4 @@
-"""Django REST framework views for monitor settings management.
-
-Provides REST API endpoints for viewing and updating the monitoring
-configuration used by the background monitoring jobs.
-"""
+"""Viewset of the monitor endpoints."""
 
 from rest_framework.permissions import IsAuthenticated
 
@@ -13,16 +9,14 @@ from security.authorization.permissions import RekonoModelPermission
 
 
 class MonitorSettingsViewSet(BaseViewSet):
-    """ViewSet for managing monitoring settings.
-
-    Provides REST API endpoints for viewing and updating monitoring
-    configuration settings. Supports GET and PUT operations only.
+    """Read and update the configuration of the monitor job.
 
     Attributes:
-        queryset (QuerySet): All MonitorSettings objects
-        serializer_class (Serializer): Serializer for monitor settings
-        permission_classes (list): Required permissions for access
-        http_method_names (list): Allowed HTTP methods (GET, PUT only)
+        queryset: The only settings instance, created from a fixture.
+        serializer_class: Serializer of the monitor settings.
+        permission_classes: Only the users that can change the settings model.
+        http_method_names: GET and PUT only, since the settings are never created
+          or removed through the API.
     """
 
     queryset = MonitorSettings.objects.all()

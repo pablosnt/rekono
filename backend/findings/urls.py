@@ -1,8 +1,4 @@
-"""URL routing configuration for findings REST API endpoints.
-
-Defines REST API routes for all finding types using Django REST Framework
-router with ViewSet registration for comprehensive findings management.
-"""
+"""URLs of the finding endpoints, one per kind of finding."""
 
 from django.urls import include, path
 from rest_framework.routers import SimpleRouter

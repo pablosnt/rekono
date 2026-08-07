@@ -1,9 +1,4 @@
-"""HackTricks penetration testing knowledge base integration.
-
-Provides integration with HackTricks.wiki to automatically enrich security
-findings with relevant penetration testing methodologies, exploitation
-techniques, and security guidance documentation.
-"""
+"""Integration with the HackTricks penetration testing wiki."""
 
 import defusedxml.ElementTree as parser
 
@@ -15,33 +10,25 @@ from framework.platforms import BaseIntegration
 
 
 class HackTricks(BaseIntegration):
-    """Integration class for HackTricks penetration testing knowledge base.
-
-    Automatically enriches security findings with links to relevant HackTricks
-    documentation including penetration testing methodologies, privilege escalation
-    techniques, and service-specific exploitation guides.
-
-    Processing Features:
-        - Host-based methodology linking for privilege escalation techniques
-        - Service-specific penetration testing guide mapping
-        - Technology-specific exploitation methodology references
-        - Dynamic sitemap parsing for up-to-date documentation links
-        - Intelligent service name matching and URL construction
+    """Integration that links the findings to the guides about how to attack them.
 
     Attributes:
-        finding_types (list): List of finding types processed by this integration
-        url (str): Base HackTricks documentation URL
+        finding_types: Findings that HackTricks has guides about.
+        url: Base URL of the wiki, in English.
+        sitemap_url: Sitemap that lists every page of the wiki.
+        services_base_url: Section of the wiki with the guides of the services.
+        web_base_url: Section of the wiki with the guides of the web applications.
+        host_type_mapping: Guide that each operating system is linked to.
+        services_mapping: Guide, or name of another service, for the services whose
+          page can't be found by their own name.
+        all_links: Pages of the wiki, which the findings are matched against.
     """
 
     finding_types = [Host, Port, Technology]
     url = "https://hacktricks.wiki/en/"
 
     def __init__(self) -> None:
-        """Initialize HackTricks integration with URL mappings and link discovery.
-
-        Sets up service mappings, host type mappings, and retrieves all available
-        documentation links from the HackTricks sitemap for dynamic matching.
-        """
+        """Prepare the integration, reading the pages that the wiki has."""
         super().__init__()
         self.sitemap_url = f"{self.url}sitemap.xml"
         self.services_base_url = f"{self.url}network-services-pentesting/"
@@ -53,6 +40,8 @@ class HackTricks(BaseIntegration):
             HostOS.ANDROID: f"{self.url}mobile-pentesting/android-app-pentesting/index.html",
             HostOS.IOS: f"{self.url}mobile-pentesting/ios-pentesting/index.html",
         }
+        # The services whose page can't be found by their name, either because the page is
+        # named after another service or because it isn't a service page at all
         self.services_mapping = {
             f"{self.url}generic-methodologies-and-resources/pentesting-network/dhcpv6.html": [
                 "dhcps",
@@ -109,34 +98,25 @@ class HackTricks(BaseIntegration):
         self.all_links = self._get_all_hacktricks_links()
 
     def _get_all_hacktricks_links(self) -> list[str]:  # pragma: no cover
-        """Retrieve all available HackTricks documentation links from sitemap.
-
-        Parses the HackTricks XML sitemap to extract all available documentation
-        URLs for dynamic matching against discovered findings.
+        """Get every page of the wiki, from its sitemap.
 
         Returns:
-            list[str]: List of all HackTricks documentation URLs
-
-        Note:
-            Method separation enables unit testing with mocked network requests.
+            The URL of every page, which is what the findings are matched against,
+            since the wiki has no API to search in it.
         """
         return [
             url[0].text for url in parser.fromstring(self._request(self.session.get, self.sitemap_url, json=False).text)
         ]
 
     def _get_mapped_value_for_service(self, service: str) -> tuple[str | None, str | None]:
-        """Get mapped HackTricks URL for a specific service name.
-
-        Searches the services mapping to find the appropriate HackTricks
-        documentation URL for the given service name.
+        """Get what the services mapping says about a service.
 
         Args:
-            service (str): Service name to find documentation for
+            service: Name of the service, as the tools report it.
 
         Returns:
-            tuple[str | None, str | None]: Tuple containing (hacktricks_url, service_name)
-                                          where hacktricks_url is the mapped URL or None,
-                                          and service_name is the processed service name
+            The page of the service, if the mapping knows it, or the name of the
+            service that its page is named after, so the caller can search for it.
         """
         for mapped_value, services in self.services_mapping.items():
             if service in services:
@@ -150,20 +130,14 @@ class HackTricks(BaseIntegration):
         return None, service
 
     def _process_finding(self, execution: Execution, finding: Finding) -> None:
-        """Process and enrich finding with relevant HackTricks documentation link.
+        """Link a finding to the wiki page that explains how to attack it.
 
-        Analyzes the finding type and characteristics to determine the most
-        appropriate HackTricks methodology or guide, then updates the finding
-        with the documentation link.
-
-        Processing Logic:
-            - Host findings: Match OS type to privilege escalation guides
-            - Port findings: Match service names to penetration testing methodologies
-            - Technology findings: Search for technology-specific exploitation guides
+        A host is linked to the guide of its operating system, a port to the one
+        of its service, and a technology to the one that talks about it.
 
         Args:
-            execution (Execution): The execution context for this processing
-            finding (Finding): The finding to enrich with HackTricks documentation
+            execution: Execution that discovered the finding.
+            finding: Finding to link to the wiki.
         """
         hacktricks_link = None
         if isinstance(finding, Host) and finding.os_type in self.host_type_mapping:

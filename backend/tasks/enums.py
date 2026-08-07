@@ -1,25 +1,11 @@
-"""Enumeration classes for task scheduling and timing.
-
-Defines enumeration values used throughout the task management system
-for specifying time units in recurring task scheduling.
-"""
+"""Time units used to schedule the repetition of the tasks."""
 
 from django.db import models
 from django.db.models.enums import Choices
 
 
 class TimeUnit(models.TextChoices):
-    """Enumeration of supported time units for recurring task scheduling.
-
-    Defines the available time units that can be used with repeat intervals
-    for scheduled and recurring tasks.
-
-    Attributes:
-        MINUTES (str): Minutes time unit for short-interval recurring tasks
-        HOURS (str): Hours time unit for hourly recurring tasks
-        DAYS (str): Days time unit for daily recurring tasks
-        WEEKS (str): Weeks time unit for weekly recurring tasks
-    """
+    """Unit of the interval between two executions of a repeated task."""
 
     MINUTES = "Minutes"
     HOURS = "Hours"

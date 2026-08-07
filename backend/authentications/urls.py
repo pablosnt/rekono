@@ -1,8 +1,4 @@
-"""URL configuration for authentication API endpoints.
-
-Defines URL routing for authentication REST API endpoints with
-CRUD operations for authentication records.
-"""
+"""URLs of the authentication endpoints."""
 
 from rest_framework.routers import SimpleRouter
 

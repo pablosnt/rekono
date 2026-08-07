@@ -1,8 +1,4 @@
-"""Django REST framework views for VulnCheck platform management.
-
-Provides REST API endpoints for managing VulnCheck platform settings and
-Bearer token configuration with proper authentication and authorization.
-"""
+"""Viewset of the VulnCheck endpoints."""
 
 from rest_framework.permissions import IsAuthenticated
 
@@ -13,16 +9,14 @@ from security.authorization.permissions import RekonoModelPermission
 
 
 class VulnCheckSettingsViewSet(BaseViewSet):
-    """ViewSet for managing VulnCheck platform configuration.
-
-    Provides REST API endpoints for retrieving and updating VulnCheck platform
-    settings including Bearer token management and availability status.
+    """Read and update the VulnCheck configuration.
 
     Attributes:
-        queryset (QuerySet): All VulnCheckSettings objects
-        serializer_class (Serializer): Serializer for settings operations
-        permission_classes (list): Required permissions for access
-        http_method_names (list): Allowed HTTP methods (GET, PUT only)
+        queryset: The only settings instance, created from a fixture.
+        serializer_class: Serializer of the VulnCheck settings.
+        permission_classes: Only the users that can change the settings model.
+        http_method_names: GET and PUT only, since the settings are never created
+          or removed through the API.
     """
 
     queryset = VulnCheckSettings.objects.all()

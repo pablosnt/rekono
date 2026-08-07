@@ -1,8 +1,4 @@
-"""Django application configuration for VulnCheck platform integration.
-
-Configures the VulnCheck platform application with proper model registration
-and initialization settings for NVD++ vulnerability intelligence integration.
-"""
+"""Django app configuration of the VulnCheck app."""
 
 from typing import Any
 
@@ -12,27 +8,23 @@ from framework.apps import BaseApp
 
 
 class VulncheckConfig(BaseApp, AppConfig):
-    """Configuration class for VulnCheck platform application.
-
-    Extends BaseApp and AppConfig to provide proper Django application
-    setup with model registration and fixture management.
+    """Configuration of the VulnCheck app.
 
     Attributes:
-        name (str): Application name for Django registration
-        skip_fixtures_if_model_exists (bool): Fixture loading optimization flag
+        name: Name of the app in the Django app registry.
+        skip_fixtures_if_model_exists: The settings are only created once, so the
+          configuration of a deployment is never overwritten.
     """
 
     name = "platforms.vulncheck"
     skip_fixtures_if_model_exists = True
 
     def _get_models(self) -> list[Any]:
-        """Get list of models for this application.
-
-        Returns the VulnCheckSettings model for fixture loading and
-        application initialization processes.
+        """Get the VulnCheck settings model, whose data comes from the fixtures.
 
         Returns:
-            list[Any]: List containing VulnCheckSettings model class.
+            The VulnCheck settings model, imported inside the method because the models
+            don't exist yet the first time that the migrations run.
         """
         from platforms.vulncheck.models import VulnCheckSettings
 

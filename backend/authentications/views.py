@@ -1,8 +1,4 @@
-"""Django REST framework views for authentication models.
-
-Provides REST API views for authentication records with CRUD operations
-and proper authentication and authorization controls.
-"""
+"""Endpoints to manage the credentials of the target services."""
 
 from rest_framework.permissions import IsAuthenticated
 
@@ -17,20 +13,18 @@ from security.authorization.permissions import (
 
 
 class AuthenticationViewSet(BaseViewSet):
-    """ViewSet for Authentication model CRUD operations.
-
-    Provides REST API endpoints for managing authentication records with
-    filtering, searching, and ordering capabilities. Enforces project-based
-    authorization and user authentication.
+    """Create, list, and delete the credentials of the target ports.
 
     Attributes:
-        queryset (QuerySet): Authentication model instances
-        serializer_class (Serializer): Serializer for Authentication model
-        filterset_class (FilterSet): Filter class for query filtering
-        permission_classes (list): Required permissions for access control
-        search_fields (list): Fields available for text search
-        ordering_fields (list): Fields available for result ordering
-        http_method_names (list): Allowed HTTP methods (GET, POST, DELETE)
+        queryset: All the credentials, restricted to the projects of the user by
+          the base viewset.
+        serializer_class: Serializer that keeps the secret masked.
+        filterset_class: Filters available to search credentials.
+        permission_classes: Role permissions plus the membership in the project.
+        search_fields: Fields used by the text search.
+        ordering_fields: Fields that can be used to order the results.
+        http_method_names: The credentials can be created and deleted, but not
+          updated, since a new secret means a new credential.
     """
 
     queryset = Authentication.objects.all()

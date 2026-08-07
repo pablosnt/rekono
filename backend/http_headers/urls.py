@@ -1,8 +1,4 @@
-"""URL routing configuration for HTTP headers API endpoints.
-
-Provides RESTful URL patterns for HTTP header management
-operations through the Django REST framework router.
-"""
+"""URLs of the HTTP header endpoints."""
 
 from rest_framework.routers import SimpleRouter
 

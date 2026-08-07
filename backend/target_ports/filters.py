@@ -1,8 +1,4 @@
-"""Django filters for target port management.
-
-Filter classes for querying and filtering target port objects in the REST API.
-Provides field-based filtering capabilities for target port searches.
-"""
+"""Filters of the target port endpoints."""
 
 from django_filters.filters import ModelChoiceFilter
 from django_filters.rest_framework import FilterSet
@@ -12,24 +8,16 @@ from target_ports.models import TargetPort
 
 
 class TargetPortFilter(FilterSet):
-    """Filter class for TargetPort model.
-
-    Provides filtering capabilities for target port queries based on project,
-    target, port number, and path with various matching options.
+    """Filters to search target ports by their target, port, and path.
 
     Attributes:
-        project (ModelChoiceFilter): Filter by project through target relationship
+        project: Filter by the project that owns the target.
     """
 
     project = ModelChoiceFilter(queryset=Project.objects.all(), field_name="target__project")
 
     class Meta:
-        """Meta configuration for TargetPortFilter.
-
-        Attributes:
-            model (Model): The TargetPort model to filter
-            fields (dict): Available filter fields and their matching options
-        """
+        """Filter configuration for the target ports."""
 
         model = TargetPort
         fields = {"target": ["exact"], "port": ["exact"], "path": ["exact", "icontains"]}

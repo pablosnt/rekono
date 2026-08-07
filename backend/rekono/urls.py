@@ -1,12 +1,10 @@
-"""URL routing configuration for the Rekono platform.
+"""Root URL configuration of the Rekono platform.
 
-This module defines the main URL routing configuration for the Rekono security
-testing platform, including API endpoints, admin interface, and documentation
-routes with OpenAPI schema generation and interactive API documentation.
-
-The schema, Swagger UI, and Redoc endpoints are explicitly configured with
-AllowAny permissions so they remain publicly accessible regardless of the
-project-wide DEFAULT_PERMISSION_CLASSES, which require authentication.
+Mounts the API of every Django app under ``/api/``, the Django admin site, and the
+OpenAPI schema and its documentation viewers. The schema, Swagger UI, and Redoc
+endpoints are explicitly configured with AllowAny permissions so they remain
+publicly accessible regardless of the project-wide DEFAULT_PERMISSION_CLASSES,
+which require authentication.
 """
 
 from django.contrib import admin
@@ -53,19 +51,16 @@ urlpatterns = [
     path("api/", include("tools.urls")),
     path("api/", include("users.urls")),
     path("api/", include("wordlists.urls")),
-    # OpenAPI specification
     path(
         "api/schema/",
         SpectacularAPIView.as_view(permission_classes=[AllowAny], authentication_classes=[]),
         name="schema",
     ),
-    # Swagger-UI
     path(
         "api/schema/swagger-ui/",
         SpectacularSwaggerView.as_view(url_name="schema", permission_classes=[AllowAny], authentication_classes=[]),
         name="swagger-ui",
     ),
-    # Redoc
     path(
         "api/schema/redoc/",
         SpectacularRedocView.as_view(url_name="schema", permission_classes=[AllowAny], authentication_classes=[]),

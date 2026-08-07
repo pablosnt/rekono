@@ -1,8 +1,4 @@
-"""Django REST framework serializers for VulnCheck platform management.
-
-Serializer classes for converting VulnCheck settings models to/from JSON
-for API operations. Includes validation logic and computed availability status.
-"""
+"""Serializer of the VulnCheck endpoints."""
 
 from rest_framework.serializers import ModelSerializer, SerializerMethodField
 
@@ -12,16 +8,12 @@ from platforms.vulncheck.models import VulnCheckSettings
 
 
 class VulnCheckSettingsSerializer(ModelSerializer):
-    """Serializer for VulnCheck platform settings.
-
-    Handles serialization and deserialization of VulnCheckSettings objects
-    for API operations. Includes protected secret field handling and
-    computed availability status based on Bearer token validation.
+    """Serializer of the VulnCheck configuration.
 
     Attributes:
-        api_token (ProtectedSecretField): Secured Bearer token field with masking
-        is_available (SerializerMethodField): Computed field for API availability status
-        client (VulnCheck): Shared integration client instance for availability checks
+        api_token: API token, which is masked when the settings are read.
+        is_available: Whether the platform answers with the configured token.
+        client: Client used to check if the platform answers.
     """
 
     api_token = ProtectedSecretField(required=False, allow_null=True, source="secret")
@@ -29,26 +21,19 @@ class VulnCheckSettingsSerializer(ModelSerializer):
     client = VulnCheck()
 
     class Meta:
-        """Meta configuration for VulnCheckSettingsSerializer.
-
-        Attributes:
-            model (Model): The VulnCheckSettings model to serialize
-            fields (tuple): Field names to include in serialization
-        """
+        """Serializer configuration for the VulnCheck settings."""
 
         model = VulnCheckSettings
         fields = ("id", "api_token", "is_available")
 
     def get_is_available(self, instance: VulnCheckSettings) -> bool:
-        """Check if VulnCheck NVD++ API integration is available and functional.
-
-        Validates the configured Bearer token by testing connectivity to the
-        VulnCheck NVD++ API service and returns availability status.
+        """Check if the platform can be used with the configured token.
 
         Args:
-            instance (VulnCheckSettings): The settings instance being serialized.
+            instance: Settings being serialized, not read because the check is
+              performed against the live platform.
 
         Returns:
-            bool: True if API integration is available and working, False otherwise.
+            Whether the platform answers with the configured settings.
         """
         return self.client.is_available()

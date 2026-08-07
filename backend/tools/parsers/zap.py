@@ -1,8 +1,4 @@
-"""OWASP ZAP web application security scanner output parser.
-
-Processes OWASP ZAP XML output to extract web application vulnerabilities
-and discovered endpoints from security scans.
-"""
+"""Parser of the OWASP ZAP web scanner."""
 
 from html import unescape
 from urllib.parse import urlparse
@@ -13,17 +9,12 @@ from tools.parsers.base import BaseParser
 
 
 class Zap(BaseParser):
-    """Parser for OWASP ZAP XML output files.
-
-    Extracts web application vulnerability findings and discovered endpoints
-    from OWASP ZAP security scans. Processes vulnerability alerts with severity
-    mapping and endpoint discovery for comprehensive web security analysis.
+    """Findings discovered by ZAP, read from its XML report.
 
     Attributes:
-        severity_mapping (dict): Mapping between ZAP and Rekono severity levels
+        severity_mapping: Rekono severity that each ZAP risk code means.
     """
 
-    # Mapping between OWASP ZAP severity values and Rekono severity values
     severity_mapping = {
         0: Severity.INFO,
         1: Severity.LOW,
@@ -32,12 +23,10 @@ class Zap(BaseParser):
     }
 
     def _parse(self) -> None:
-        """Parse OWASP ZAP XML output and extract web security findings.
+        """Create the vulnerabilities and the paths that ZAP reports.
 
-        Processes XML scan results to create Vulnerability and Path findings from web
-        application security tests. Every instance location reported for an alert is
-        appended to its Vulnerability description and, when it resolves to a distinct
-        path, also recorded as its own Path finding.
+        ZAP reports every place where it found a vulnerability, so those places are
+        added to the description and become paths of their own.
         """
         # "/" is preseeded here so it never gets its own Path finding, since it's already
         # implicit for the scanned target
@@ -83,12 +72,12 @@ class Zap(BaseParser):
                     )
 
     def _clean(self, value: str) -> str:
-        """Clean HTML-encoded text from ZAP output.
+        """Get a text without the HTML that ZAP writes its descriptions with.
 
         Args:
-            value (str): HTML-encoded text to clean
+            value: Text taken from the ZAP report.
 
         Returns:
-            str: Cleaned text with HTML entities unescaped and tags removed
+            The text with the HTML entities decoded and the paragraph tags removed.
         """
         return unescape(value).replace("<p>", "").replace("</p>", "")

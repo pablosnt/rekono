@@ -1,14 +1,4 @@
-"""Django REST framework serializers for notes management.
-
-Serializer classes for converting note models to/from JSON for API operations.
-Includes validation logic for entity relationships, forking behavior, and
-collaborative features with tag support.
-
-Write operations accept entity IDs via *_id fields (e.g. target_id, task_id),
-while read operations return full entity objects through the serializers defined
-in each entity's backend module. The project field always uses an integer ID for
-both read and write.
-"""
+"""Serializers of the note endpoints."""
 
 from typing import Any, cast
 
@@ -46,8 +36,7 @@ from tasks.models import Task
 from tasks.serializers import TaskSerializer
 from users.serializers import SimpleUserSerializer
 
-# List of all possible entity relationships for notes (including project).
-# Used for validation and project context determination.
+# Everything that a note can be about, ordered from the most general one to the most specific
 links = [
     "project",
     "target",
@@ -64,41 +53,43 @@ links = [
 
 
 class NoteSerializer(TaggitSerializer, LikeSerializer):
-    """Serializer for Note model with collaborative features.
+    """Serializer of a note and of the thing that it's about.
 
-    Handles serialization and deserialization of Note objects for API operations.
-    Includes validation logic for entity relationships, forking behavior, and
-    tag management with computed fields for fork status.
+    The thing that the note is about is written by its identifier, through the
+    fields whose name ends in "_id", and read as the whole object, so the notes can
+    be shown next to it without having to request it separately. The project is the
+    only exception, since it's always read and written as an identifier.
 
-    Write operations accept entity IDs via *_id fields (e.g. target_id, task_id),
-    while read operations return full entity objects through the serializers defined
-    in each entity's backend module. The project field uses an integer ID for both
-    read and write.
+    The links are declared from the most general scope to the most specific one, and
+    only the most specific one survives the validation, so a note sent with both a
+    host and one of its ports ends up being about the port alone.
 
     Attributes:
-        owner (SimpleUserSerializer): Serialized user information for note owner
-        tags (TagField): Tag field for note categorization
-        forked (SerializerMethodField): Current user's fork of this note, if any
-        target_id (PrimaryKeyRelatedField): Target ID for write operations (write-only)
-        target (SimpleTargetSerializer): Target entity for read operations (read-only)
-        task_id (PrimaryKeyRelatedField): Task ID for write operations (write-only)
-        task (TaskSerializer): Task entity for read operations (read-only)
-        osint_id (PrimaryKeyRelatedField): OSINT ID for write operations (write-only)
-        osint (OSINTSerializer): OSINT entity for read operations (read-only)
-        host_id (PrimaryKeyRelatedField): Host ID for write operations (write-only)
-        host (HostSerializer): Host entity for read operations (read-only)
-        port_id (PrimaryKeyRelatedField): Port ID for write operations (write-only)
-        port (PortSerializer): Port entity for read operations (read-only)
-        path_id (PrimaryKeyRelatedField): Path ID for write operations (write-only)
-        path (PathSerializer): Path entity for read operations (read-only)
-        credential_id (PrimaryKeyRelatedField): Credential ID for write operations (write-only)
-        credential (CredentialSerializer): Credential entity for read operations (read-only)
-        technology_id (PrimaryKeyRelatedField): Technology ID for write operations (write-only)
-        technology (TechnologySerializer): Technology entity for read operations (read-only)
-        vulnerability_id (PrimaryKeyRelatedField): Vulnerability ID for write operations (write-only)
-        vulnerability (VulnerabilitySerializer): Vulnerability entity for read operations (read-only)
-        exploit_id (PrimaryKeyRelatedField): Exploit ID for write operations (write-only)
-        exploit (ExploitSerializer): Exploit entity for read operations (read-only)
+        owner: User that wrote the note.
+        tags: Tags that classify the note.
+        forked: Copy of this note that belongs to the user that makes the request.
+        target_id: Target that the note is about, the widest scope after the project.
+        target: The linked target, read as the whole object.
+        task_id: Task that the note is about.
+        task: The linked task, read as the whole object.
+        osint_id: OSINT finding that the note is about, the least specific of the
+          finding links.
+        osint: The linked OSINT finding, read as the whole object.
+        host_id: Host that the note is about.
+        host: The linked host, read as the whole object.
+        port_id: Port that the note is about, which wins over its host.
+        port: The linked port, read as the whole object.
+        path_id: Path that the note is about, which wins over its port.
+        path: The linked path, read as the whole object.
+        credential_id: Credential that the note is about.
+        credential: The linked credential, read as the whole object.
+        technology_id: Technology that the note is about.
+        technology: The linked technology, read as the whole object.
+        vulnerability_id: Vulnerability that the note is about.
+        vulnerability: The linked vulnerability, read as the whole object.
+        exploit_id: Exploit that the note is about, the most specific link, which
+          wins over every other one.
+        exploit: The linked exploit, read as the whole object.
     """
 
     owner = SimpleUserSerializer(many=False, read_only=True)
@@ -166,14 +157,7 @@ class NoteSerializer(TaggitSerializer, LikeSerializer):
     exploit = ExploitSerializer(many=False, read_only=True)
 
     class Meta:
-        """Meta configuration for the NoteSerializer.
-
-        Attributes:
-            model (Model): The Note model to serialize
-            fields (tuple): Field names to include in serialization.
-                Entity relationships use *_id for write and plain name for read.
-            read_only_fields (tuple): Fields that cannot be modified via API
-        """
+        """Serializer configuration for the notes."""
 
         model = Note
         fields = (
@@ -224,71 +208,61 @@ class NoteSerializer(TaggitSerializer, LikeSerializer):
         )
 
     def get_forked(self, instance: Any) -> int | None:
-        """Check if the current user has forked this note.
+        """Get the copy of this note that the user forked from it.
 
         Args:
-            instance (Note): The note instance being serialized
+            instance: Note being serialized.
 
         Returns:
-            int | None: ID of the current user's fork of this note, if any
+            The identifier of their copy, or None if they don't have one.
         """
         forks = instance.forks.filter(owner=self.context.get("request").user)
         return forks.first().id if forks.exists() else None
 
     def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
-        """Validate note data and ensure at most one entity association.
-
-        A note may be linked directly to a project or to at most one entity
-        (target, task, finding, etc.). When an entity is present, any other
-        entity relationships are cleared and the project context is derived
-        from that entity. Validation uses source names (e.g. "target", not
-        "target_id") since PrimaryKeyRelatedField maps *_id inputs to their
-        source names in attrs.
+        """Check the note data and keep only the thing that the note is about.
 
         Args:
-            attrs (dict[str, Any]): Validated field data
+            attrs: Note fields sent by the user, which may link several things.
 
         Returns:
-            dict[str, Any]: Validated and processed field data
+            The validated data, with all the links removed except the most specific
+            one, and with the project of that link, so the note always belongs to
+            the same project as the thing that it's about.
         """
         attrs = super().validate(attrs)
-        # Find the first (most specific) entity relationship in the data.
-        # Reversed order ensures we get the most specific entity first
-        # (exploit > vulnerability > technology > ... > target > project).
-        # Attrs use source names (e.g. "target") because PrimaryKeyRelatedField
-        # with source="target" stores the resolved instance under "target" in attrs.
+        # The links are named after the source of their write field, since that's where
+        # PrimaryKeyRelatedField leaves the object that it resolves
         data_links = [link for link in reversed(links) if attrs.get(link) is not None]
         if len(data_links) > 0:
-            # Clear all other entity relationships to ensure only one is active
             for link in links:
                 if link != data_links[0]:
                     attrs[link] = None
-            # Set project context from the active entity
             attrs["project"] = cast(BaseModel, attrs.get(data_links[0])).parent_project
         return attrs
 
     def update(self, instance: Note, validated_data: dict[str, Any]) -> Note:
-        """Update note instance with validation for project changes and fork behavior.
-
-        Enforces project immutability and handles fork unlinking when notes become private.
-        Ensures forked notes maintain proper visibility behavior.
+        """Update a note, keeping the project and the visibility of its forks.
 
         Args:
-            instance (Note): The note instance being updated
-            validated_data (dict[str, Any]): The validated update data
+            instance: Note being updated.
+            validated_data: Note fields, plus the project that the validate method
+              resolves from the object that the note is linked to. Its public field
+              is forced to False for a fork, so it isn't always the value sent.
 
         Returns:
-            Note: The updated note instance
+            The updated note. A note that is a fork can never be made public, and
+            the forks of a note that stops being public are unlinked from it, so
+            nobody keeps a reference to a note that they can't read anymore.
 
         Raises:
-            ValidationError: If attempting to change the project of an existing note
+            ValidationError: If the note is moved to another project.
         """
         if instance.project != validated_data.get("project"):
             raise ValidationError("You are not allowed to change the project of a note", code="project")
-        # A fork can never be made public, regardless of what the request asks for.
         if instance.forked_from and validated_data.get("public", True):
             validated_data["public"] = False
-        # Captured before the update so the pre-change visibility is still available afterwards.
+        # Captured before the update so the pre-change visibility is still available afterwards
         unlink_forks = instance.public and not validated_data.get("public", False)
         new_instance = super().update(instance, validated_data)
         if unlink_forks:

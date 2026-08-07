@@ -1,9 +1,4 @@
-"""Target port models for Rekono.
-
-Defines the TargetPort model for managing port-specific targeting within
-security testing workflows. Provides input parsing capabilities for security
-tool integration and supports authentication credential association.
-"""
+"""Model of the ports of a target that the scans must focus on."""
 
 from typing import Any
 
@@ -17,29 +12,15 @@ from targets.models import Target
 
 
 class TargetPort(BaseInput):
-    """Model representing a target port for security testing operations.
+    """Port of a target where a service that must be scanned is exposed.
 
-    Represents a specific port on a target that can be subject to security testing.
-    Extends BaseInput to provide parsing capabilities for integration with security
-    testing tools and frameworks. Supports optional path specification for
-    web-based services and authentication credential association.
+    It's an input of the executions, so the tools that accept a port receive it
+    together with the path and the credential of that service.
 
     Attributes:
-        target (ForeignKey): The target this port belongs to
-        port (IntegerField): Port number with validation (0-65535)
-        path (TextField): Optional path for web services (max 100 chars,
-                          validated)
-
-    Example:
-        Create a target port for HTTP service:
-
-        ```python
-        target_port = TargetPort.objects.create(
-            target=my_target,
-            port=80,
-            path="/api/v1"
-        )
-        ```
+        target: Target where the service is exposed.
+        port: Port where the service is listening.
+        path: Path where a web service is exposed, if it isn't the root one.
     """
 
     target = models.ForeignKey(Target, related_name="target_ports", on_delete=models.CASCADE)
@@ -63,30 +44,24 @@ class TargetPort(BaseInput):
     _project_field = "target__project"
 
     class Meta:
-        """Meta configuration for the TargetPort model.
-
-        Defines database constraints and table-level configuration for
-        target port instances.
-
-        Attributes:
-            constraints (list): Database constraints including unique constraint
-                              for target-port combinations
-        """
+        """Model configuration, allowing each port to be defined once per target."""
 
         constraints = [models.UniqueConstraint(fields=["target", "port"], name="unique_target_port")]
 
     def parse(self, task: Any, accumulated: dict[str, Any] = {}) -> dict[str, Any]:
-        """Parse target port data for security tool integration.
+        """Get the keywords of this target port, including the comma-separated ports.
 
-        Extends the base parsing functionality to include comma-separated ports
-        format for tools that require specific port list formatting.
+        The keyword with the ports joined by commas is calculated here, and not in
+        the parse mapping, because it must include the ports of the other target
+        ports of the same execution.
 
         Args:
-            task (Any): Task context for parsing (e.g., for URL generation)
-            accumulated (dict[str, Any]): Accumulated parsing data from other inputs
+            task: Task of the execution, forwarded to the base implementation.
+            accumulated: Keywords already provided by the other inputs of the same
+              execution, whose ports are joined with the ones of this target port.
 
         Returns:
-            dict[str, Any]: Parsed data including port information in multiple formats
+            The keywords of this target port, including the comma-separated ports.
         """
         output = super().parse(task, accumulated)
         output[InputKeyword.PORTS_COMMAS.name.lower()] = ",".join(
@@ -95,26 +70,20 @@ class TargetPort(BaseInput):
         return output
 
     def __str__(self) -> str:
-        """String representation of the target port.
-
-        Returns:
-            str: String in format "target - port"
-        """
+        """Return the target and the port."""
         return f"{self.target.__str__()} - {self.port}"
 
     def create_finding_from_user_input(self, execution: Any, **fields: Any) -> Any | None:
-        """Create a Port finding from this target port user input.
-
-        Creates a Port finding associated with the target's host when user input
-        target ports are used in execution context. Establishes the relationship
-        between target port and discovered port findings.
+        """Create the port finding equivalent to this target port.
 
         Args:
-            execution (Any): The execution context for the finding
-            **fields (Any): Additional fields for the finding
+            execution: Execution that the created finding belongs to.
+            **fields: Extra values for the finding, unused because a target port
+              only provides the port itself.
 
         Returns:
-            Any | None: Created Port finding or None if host creation fails
+            The new port finding, related to the host finding of the target, or None
+            if that host finding can't be created.
         """
         from findings.models import Port
 

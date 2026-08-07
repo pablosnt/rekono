@@ -1,13 +1,7 @@
-"""Telegram Bot mixins for input parameter management in security workflows.
+"""Steps that ask for the data that the users provide as input for a tool.
 
-Provides input parameter selection and creation functionality for technology
-and vulnerability parameters used in security testing configurations. Both mixins
-expect Context.CONFIGURATION to already be set, since that is used to check whether
-the tool's arguments actually take that kind of input; when they don't, the step is
-skipped. Existing parameters offered for reuse are the ones tied to tasks in any
-project the requesting user is a member of, not just the currently selected project.
-Each mixin leaves its own context key (Context.INPUT_TECHNOLOGY or
-Context.INPUT_VULNERABILITY) set once a value is selected or created.
+The questions are only asked if the chosen configuration accepts that kind of data,
+and the users can reuse what they provided before instead of writing it again.
 """
 
 from typing import Any
@@ -26,22 +20,19 @@ from users.models import User
 
 
 class InputMixin(BaseMixin):
-    """Base mixin for input parameter management.
-
-    Provides common functionality for input parameter selection and creation
-    including keyboard generation for existing parameters with dynamic model support.
-    """
+    """Base steps that choose the data that the users provide for a tool."""
 
     @sync_to_async
     def _get_keyboard_async(self, user: User, model: Any) -> list[InlineKeyboardButton]:
-        """Generate keyboard buttons for user's existing input parameters (async wrapper).
+        """Get one button per parameter that a user can reuse, plus a new one.
 
         Args:
-            user (User): User to filter parameters for.
-            model (Any): Django model class to query for parameters.
+            user: User that will answer.
+            model: Kind of parameter to offer.
 
         Returns:
-            list[InlineKeyboardButton]: Buttons for existing parameters plus "New one" option.
+            The parameters used by the tasks of the projects that the user belongs
+            to, since the parameters aren't tied to any project.
         """
         return [
             InlineKeyboardButton(
@@ -52,24 +43,20 @@ class InputMixin(BaseMixin):
 
 
 class InputTechnologyMixin(InputMixin):
-    """Mixin for managing technology input parameters.
-
-    Provides functionality for selecting and creating technology-specific
-    input parameters for security tool configuration.
-    """
+    """Steps that choose the technology that the users provide for a tool."""
 
     async def ask_for_input_technology(self, update: Update, context: CallbackContext) -> int:
-        """Display technology input parameter selection options.
-
-        Shows existing technology parameters or option to create new ones
-        for security tool configuration.
+        """Ask the users for a technology, if the configuration accepts one.
 
         Args:
-            update (Update): The Telegram update containing user interaction.
-            context (CallbackContext): The callback context for the conversation.
+            update: Message that the user wrote.
+            context: Data that the conversation remembers.
 
         Returns:
-            int: Next conversation state or ConversationHandler.END.
+            The step that saves the answer, the step after creating a technology if
+            the configuration doesn't accept one, the step that creates it if there
+            is nothing to reuse, or the end of the conversation if the chat can't
+            run the command or if no configuration was chosen.
         """
         chat = await self.get_active_telegram_chat(update)
         if not chat:
@@ -102,17 +89,15 @@ class InputTechnologyMixin(InputMixin):
         return await self.go_to_next_state(update, context, self.get_next_state(self.ask_for_input_technology))
 
     async def save_input_technology(self, update: Update, context: CallbackContext) -> int:
-        """Save selected technology parameter to conversation context.
-
-        Processes technology parameter selection or prompts for new parameter
-        creation based on user choice.
+        """Remember the technology that the users chose, or ask for a new one.
 
         Args:
-            update (Update): The Telegram update containing callback selection.
-            context (CallbackContext): The callback context for the conversation.
+            update: Message that the user wrote.
+            context: Data that the conversation remembers.
 
         Returns:
-            int: Next conversation state for parameter creation or selection.
+            The step after creating a technology, or the step that creates it if
+            the users chose to provide a new one.
         """
         self.validate_update(update)
         return (
@@ -138,21 +123,20 @@ class InputTechnologyMixin(InputMixin):
         )
 
     async def create_input_technology(self, update: Update, context: CallbackContext) -> int:
-        """Create new technology input parameter from user input.
-
-        Processes user input to create technology parameter with name and optional
-        version for use in security testing workflows.
+        """Create the technology that the users wrote.
 
         Args:
-            update (Update): The Telegram update containing technology input.
-            context (CallbackContext): The callback context for the conversation.
+            update: Message that the user wrote.
+            context: Data that the conversation remembers.
 
         Returns:
-            int: Next conversation state after parameter creation.
+            The next step, or the previous one if what the users wrote isn't valid.
         """
         self.validate_update(update)
         if not update.effective_message or not update.effective_message.text:
             return ConversationHandler.END
+        # The name and the version are written in the same message, separated by a dash, so the
+        # users only have to answer once
         name = update.effective_message.text
         version = None
         if name and " - " in name:
@@ -172,24 +156,20 @@ class InputTechnologyMixin(InputMixin):
 
 
 class InputVulnerabilityMixin(InputMixin):
-    """Mixin for managing vulnerability input parameters.
-
-    Provides functionality for selecting and creating vulnerability-specific
-    input parameters for security tool configuration.
-    """
+    """Steps that choose the vulnerability that the users provide for a tool."""
 
     async def ask_for_input_vulnerability(self, update: Update, context: CallbackContext) -> int:
-        """Display vulnerability input parameter selection options.
-
-        Shows existing vulnerability parameters or option to create new ones
-        for security tool configuration.
+        """Ask the users for a vulnerability, if the configuration accepts one.
 
         Args:
-            update (Update): The Telegram update containing user interaction.
-            context (CallbackContext): The callback context for the conversation.
+            update: Message that the user wrote.
+            context: Data that the conversation remembers.
 
         Returns:
-            int: Next conversation state or ConversationHandler.END.
+            The step that saves the answer, the step after creating a vulnerability
+            if the configuration doesn't accept one, the step that creates it if
+            there is nothing to reuse, or the end of the conversation if the chat
+            can't run the command or if no configuration was chosen.
         """
         chat = await self.get_active_telegram_chat(update)
         if not chat:
@@ -222,17 +202,15 @@ class InputVulnerabilityMixin(InputMixin):
         return await self.go_to_next_state(update, context, self.get_next_state(self.ask_for_input_vulnerability))
 
     async def save_input_vulnerability(self, update: Update, context: CallbackContext) -> int:
-        """Save selected vulnerability parameter to conversation context.
-
-        Processes vulnerability parameter selection or prompts for new parameter
-        creation based on user choice.
+        """Remember the vulnerability that the users chose, or ask for a new one.
 
         Args:
-            update (Update): The Telegram update containing callback selection.
-            context (CallbackContext): The callback context for the conversation.
+            update: Message that the user wrote.
+            context: Data that the conversation remembers.
 
         Returns:
-            int: Next conversation state for parameter creation or selection.
+            The step after creating a vulnerability, or the step that creates it if
+            the users chose to provide a new one.
         """
         self.validate_update(update)
         return (
@@ -258,17 +236,15 @@ class InputVulnerabilityMixin(InputMixin):
         )
 
     async def create_input_vulnerability(self, update: Update, context: CallbackContext) -> int:
-        """Create new vulnerability input parameter from user input.
-
-        Processes user input to create vulnerability parameter with CVE identifier
-        for use in security testing workflows.
+        """Create the vulnerability that the users wrote.
 
         Args:
-            update (Update): The Telegram update containing vulnerability input.
-            context (CallbackContext): The callback context for the conversation.
+            update: Message that the user wrote.
+            context: Data that the conversation remembers.
 
         Returns:
-            int: Next conversation state after parameter creation.
+            The next step, or the previous one if what the users wrote isn't a
+            valid CVE identifier.
         """
         self.validate_update(update)
         next_state, instance = await self.create(

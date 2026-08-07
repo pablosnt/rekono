@@ -1,8 +1,4 @@
-"""Views for managing API tokens via REST API endpoints.
-
-Provides REST API endpoints for API token CRUD operations with user-scoped
-access and proper authentication controls.
-"""
+"""Endpoints to manage the API tokens of the user that performs the request."""
 
 from django.db.models import QuerySet
 from rest_framework.permissions import IsAuthenticated
@@ -16,28 +12,27 @@ from security.authentication.jwt import CookieJWTAuthentication
 
 
 class ApiTokenViewSet(BaseViewSet):
-    """ViewSet for managing API tokens for the authenticated user.
-
-    Provides GET, POST, and DELETE operations for user-owned API tokens
-    with filtering, searching, and ordering capabilities.
+    """Create, list, and delete the API tokens of a user.
 
     Attributes:
-        queryset (QuerySet): All ApiToken objects
-        serializer_class (Serializer): Default serializer for API tokens
-        filterset_class (FilterSet): Filter class for token queries
-        permission_classes (list): Required permissions for access
-        authentication_classes (list): Authentication classes for request validation
-        http_method_names (list): Allowed HTTP methods
-        search_fields (list): Fields available for text search
-        ordering_fields (list): Fields available for result ordering
-        owner_field (str): Field used for ownership filtering
+        queryset: All the API tokens, restricted to the ones of the user by
+          get_queryset.
+        serializer_class: Serializer that never exposes the token value.
+        filterset_class: Filters available to search API tokens.
+        permission_classes: Only authentication is required, since any user manages
+          their own tokens.
+        authentication_classes: Only the JWT authentication, so a user authenticated
+          with an API token can't manage the API tokens.
+        http_method_names: The tokens can be created and deleted, but not updated.
+        search_fields: Fields used by the text search.
+        ordering_fields: Fields that can be used to order the results.
+        owner_field: Field that references the user that owns each token.
     """
 
     queryset = ApiToken.objects.all()
     serializer_class = ApiTokenSerializer
     filterset_class = ApiTokenFilter
     permission_classes = [IsAuthenticated]
-    # Needed to disallow API token management by a user authenticated with an API token
     authentication_classes = [CookieJWTAuthentication]
     http_method_names = ["get", "post", "delete"]
     search_fields = ["name"]
@@ -45,17 +40,19 @@ class ApiTokenViewSet(BaseViewSet):
     owner_field = "user"
 
     def get_queryset(self) -> QuerySet:
-        """Return queryset filtered to API tokens owned by the current user.
+        """Get the API tokens of the user that performs the request.
 
         Returns:
-            QuerySet: API tokens filtered to the authenticated user
+            Only their own tokens, since a token is personal and is never shared
+            with the rest of the users.
         """
         return super().get_queryset().filter(user=self.request.user).all()
 
     def get_serializer_class(self) -> Serializer:
-        """Return the serializer class based on the request method.
+        """Get the serializer that returns the token value only when it's created.
 
         Returns:
-            Serializer: CreateApiTokenSerializer for POST, ApiTokenSerializer otherwise
+            The creation serializer for POST, which is the only moment when the
+            plain token is available, and the standard one otherwise.
         """
         return CreateApiTokenSerializer if self.request.method == "POST" else super().get_serializer_class()

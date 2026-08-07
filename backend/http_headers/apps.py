@@ -1,8 +1,4 @@
-"""Django app configuration for the http_headers module.
-
-Configures the http_headers Django application with BaseApp integration
-for consistent framework behavior.
-"""
+"""Django app configuration of the HTTP headers app."""
 
 from django.apps import AppConfig
 
@@ -10,13 +6,10 @@ from framework.apps import BaseApp
 
 
 class HttpHeadersConfig(BaseApp, AppConfig):
-    """Configuration class for the http_headers Django application.
-
-    Extends BaseApp to provide standard framework integration for the
-    http_headers module with consistent configuration and behavior.
+    """Configuration of the HTTP headers app.
 
     Attributes:
-        name (str): Django app name identifier
+        name: Name of the app in the Django app registry.
     """
 
     name = "http_headers"

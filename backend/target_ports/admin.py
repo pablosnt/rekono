@@ -1,8 +1,4 @@
-"""Django admin configuration for target ports module.
-
-Registers the TargetPort model with Django admin interface for administrative
-management of target port configurations. Provides basic CRUD operations for target ports.
-"""
+"""Registration of the target port model in the Django admin site."""
 
 from django.contrib import admin
 

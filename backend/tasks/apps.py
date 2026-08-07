@@ -1,8 +1,4 @@
-"""Django app configuration for the tasks module.
-
-Configures the tasks Django application with BaseApp integration
-for consistent framework behavior.
-"""
+"""Django app configuration of the tasks app."""
 
 from django.apps import AppConfig
 
@@ -10,13 +6,10 @@ from framework.apps import BaseApp
 
 
 class TasksConfig(BaseApp, AppConfig):
-    """Configuration class for the tasks Django application.
-
-    Extends BaseApp to provide standard framework integration for the
-    tasks module with consistent configuration and behavior.
+    """Configuration of the tasks app.
 
     Attributes:
-        name (str): The name of the Django application
+        name: Name of the app in the Django app registry.
     """
 
     name = "tasks"

@@ -1,8 +1,4 @@
-"""Django REST framework serializers for alert management.
-
-Serializer classes for converting alert models to/from JSON for API operations.
-Includes validation logic and computed fields.
-"""
+"""Serializers of the alert endpoints."""
 
 from typing import Any
 
@@ -15,28 +11,18 @@ from users.serializers import SimpleUserSerializer
 
 
 class AlertSerializer(ModelSerializer):
-    """Serializer for Alert model.
-
-    Handles serialization and deserialization of Alert objects for API operations.
-    Includes computed fields and validation logic for alert creation.
+    """Serializer of an alert and of the users that it notifies.
 
     Attributes:
-        subscribed (SerializerMethodField): Whether current user is subscribed
-        owner (SimpleUserSerializer): Serialized user information for alert owner
+        subscribed: Whether the user that makes the request is subscribed.
+        owner: User that created the alert.
     """
 
     subscribed = SerializerMethodField(read_only=True)
     owner = SimpleUserSerializer(many=False, read_only=True)
 
     class Meta:
-        """Meta configuration for the AlertSerializer.
-
-        Attributes:
-            model (Model): The Alert model to serialize
-            fields (tuple): Field names to include in serialization
-            read_only_fields (tuple): Fields that cannot be modified
-            extra_kwargs (dict): Additional field configuration
-        """
+        """Serializer configuration for the alerts."""
 
         model = Alert
         fields = (
@@ -54,37 +40,34 @@ class AlertSerializer(ModelSerializer):
         extra_kwargs = {"subscribe_all_members": {"write_only": True}}
 
     def get_subscribed(self, instance: Any) -> bool:
-        """Get whether the current user is subscribed to this alert.
+        """Check if the user that makes the request is subscribed to the alert.
 
         Args:
-            instance (Alert): The Alert instance being serialized
+            instance: Alert being serialized.
 
         Returns:
-            bool: True if the current user is subscribed, False otherwise
+            Whether the user is one of its subscribers.
         """
         return instance.subscribers.filter(pk=self.context.get("request").user.id).exists()
 
     def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
-        """Validate and normalize alert data before saving.
-
-        Clears the filter value when the alert item has no matching field in
-        Alert.mapping, since it would never be used to filter findings. Trending
-        CVE alerts always get their value forced to "True" so the generic
-        value-matching logic in Alert.must_be_triggered only fires for findings
-        marked as trending. Enabled is forced to True on every call, including
-        updates, since EditAlertSerializer reuses this validate() method.
+        """Check the alert data and complete it with the value that its item needs.
 
         Args:
-            attrs (dict[str, Any]): The attributes to validate
+            attrs: Alert fields sent by the user.
 
         Returns:
-            dict[str, Any]: The validated attributes
+            The validated data, with the value removed if the item can't be
+            filtered by value, and with the alert always enabled, since a new
+            alert is never created as disabled.
         """
         attrs = super().validate(attrs)
         if attrs.get("item"):
             filter_field = Alert.mapping.get(attrs.get("item"), {}).get("field")
             if not filter_field:
                 attrs["value"] = None
+            # The trending CVE alerts are triggered by the trending field of the vulnerability,
+            # so its value is the one that a trending vulnerability has
             if attrs["item"] == AlertItem.TRENDING_CVE:
                 attrs["value"] = str(True)
         attrs["enabled"] = True
@@ -92,16 +75,14 @@ class AlertSerializer(ModelSerializer):
 
     @transaction.atomic()
     def create(self, validated_data: dict[str, Any]) -> Alert:
-        """Create a new alert instance.
-
-        Creates the alert and handles subscription setup. If subscribe_all_members
-        is True, all project members are subscribed; otherwise only the owner.
+        """Create a new alert and subscribe the users that must be notified.
 
         Args:
-            validated_data (dict[str, Any]): The validated data for creating the alert
+            validated_data: Alert fields, plus the owner that the viewset adds.
 
         Returns:
-            Alert: The created Alert instance
+            The created alert, whose subscribers are all the members of the project
+            or only its owner, depending on how the alert was created.
         """
         alert = super().create(validated_data)
         if alert.subscribe_all_members:
@@ -112,20 +93,14 @@ class AlertSerializer(ModelSerializer):
 
 
 class EditAlertSerializer(AlertSerializer):
-    """Serializer for editing existing alerts.
+    """Serializer of the alert data that can be updated.
 
-    Specialized version of AlertSerializer that restricts which fields
-    can be modified during updates. Only allows value field modifications.
+    Only the value can be changed, since an alert that watches another item is a
+    different alert, and the subscriptions are managed by their own endpoint.
     """
 
     class Meta:
-        """Meta configuration for the EditAlertSerializer.
-
-        Attributes:
-            model (Model): The Alert model to serialize
-            fields (tuple): Field names to include in serialization
-            read_only_fields (tuple): Fields that cannot be modified during updates
-        """
+        """Serializer configuration for the alert updates."""
 
         model = Alert
         fields = (

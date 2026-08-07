@@ -1,8 +1,4 @@
-"""Django app configuration for the wordlists module.
-
-Configures the wordlists Django application with automatic wordlist size
-calculation and fixture management capabilities.
-"""
+"""Django app configuration of the wordlists app."""
 
 import os
 from pathlib import Path
@@ -16,107 +12,91 @@ from framework.apps import BaseApp
 
 
 class WordlistsConfig(BaseApp, AppConfig):
-    """Configuration class for the wordlists Django application.
-
-    Extends BaseApp to provide automatic wordlist size calculation and fixture
-    management. Handles initialization and maintenance of wordlist metadata.
+    """Configuration of the wordlists app.
 
     Attributes:
-        name (str): The name of the Django application
-        recreate_data (bool): Enable full data recreation during fixture loading
+        name: Name of the app in the Django app registry.
+        recreate_data: The default wordlists are reloaded on every migration, so a
+          deployment gets the wordlists that each Rekono version defines.
     """
 
     name = "wordlists"
     recreate_data = True
 
     def ready(self) -> None:
-        """Initialize the application when Django starts.
-
-        Connects signal handlers for post-migration wordlist size updates.
-        """
+        """Prepare the app, calculating the wordlist sizes after each migration."""
         super().ready()
         post_migrate.connect(self.update_default_wordlists_size, sender=self)
 
     def load_fixtures(self, **kwargs: Any) -> None:
-        """Load fixtures and update wordlist sizes.
+        """Load the wordlist fixtures and calculate the size of their files.
 
         Args:
-            **kwargs (Any): Additional keyword arguments from fixture loading
+            **kwargs: Arguments sent by the post_migrate signal.
         """
         super().load_fixtures(**kwargs)
         self.update_default_wordlists_size()
 
     def _select_data_to_restore_relationships(self, model: Any) -> QuerySet:
-        """Select default wordlists that need relationship restoration.
-
-        Identifies default wordlists (owner is None) that should have
-        their task relationships restored after the recreation process.
+        """Select the default wordlists, to keep the tasks that reference them.
 
         Args:
-            model (Any): The Wordlist model class.
+            model: The wordlist model, which is about to be cleared.
 
         Returns:
-            QuerySet: Default wordlists with prefetched task relationships.
+            The wordlists without owner, with their tasks prefetched.
         """
         return model.objects.filter(owner__isnull=True).prefetch_related("tasks")
 
     def _select_data_to_recreate(self, model: Any) -> QuerySet:
-        """Select user-created wordlists to preserve during fixture recreation.
-
-        Identifies custom wordlists created by users (owner is not None) that
-        should be preserved with their task relationships during data recreation.
+        """Select the wordlists uploaded by the users, with their tasks.
 
         Args:
-            model (Any): The Wordlist model class.
+            model: The wordlist model, which is about to be cleared.
 
         Returns:
-            QuerySet: User wordlists with prefetched task relationships.
+            The wordlists with an owner, with their tasks prefetched.
         """
         return model.objects.filter(owner__isnull=False).prefetch_related("tasks")
 
     def _get_current_entity_from_removed_entity(self, model: Any, removed: Any) -> Any:
-        """Find the current wordlist that matches a removed wordlist by path.
+        """Find the new default wordlist with the same path as a removed one.
 
-        Locates the newly created wordlist instance that corresponds to a
-        removed wordlist by matching the file path. Note that after re-creation
-        database IDs might change.
+        The wordlists are matched by path because the fixtures may assign them a
+        different identifier than the one they had.
 
         Args:
-            model (Any): The Wordlist model class.
-            removed (Any): The removed wordlist instance.
+            model: The wordlist model, where the replacement is searched.
+            removed: Default wordlist deleted before the reload.
 
         Returns:
-            Any: The matching wordlist instance, or None if not found.
+            The new default wordlist, or None if the fixtures no longer define one
+            with that path, so the relationship can't be restored.
         """
         return model.objects.filter(path=removed.path).first()
 
     def update_default_wordlists_size(self, **kwargs: Any) -> None:
-        """Update size field for all existing wordlists.
-
-        Calculates and updates the size field for all wordlists by reading
-        the actual files and counting lines. Only processes accessible files.
+        """Count the words of each wordlist file whose content can be read.
 
         Args:
-            **kwargs (Any): Additional keyword arguments from signal handlers
+            **kwargs: Arguments sent by the post_migrate signal.
         """
         from wordlists.models import Wordlist
 
         for wordlist in Wordlist.objects.all():
-            # Check both file existence and read permissions before processing
-            # This prevents errors when wordlist files are missing or inaccessible
+            # The wordlists uploaded by the users may not exist in this deployment, since only
+            # their metadata is stored in the database
             if Path(wordlist.path).is_file() and os.access(wordlist.path, os.R_OK):  # pragma: no cover
-                # Open in binary mode to handle any file encoding issues reliably
                 with open(wordlist.path, "rb") as wordlist_file:
-                    # Count lines to determine wordlist size for UI display
                     wordlist.size = len(wordlist_file.readlines())
-                    # Use update_fields for efficiency, only updating the size field
                     wordlist.save(update_fields=["size"])
 
     def _get_models(self) -> list[Any]:
-        """Get the models managed by this application.
+        """Get the wordlist model, whose data comes from the fixtures.
 
         Returns:
-            list[Any]: List containing the Wordlist model class
+            The wordlist model, imported inside the method because the models
+            don't exist yet the first time that the migrations run.
         """
         from wordlists.models import Wordlist
 

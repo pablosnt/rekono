@@ -1,8 +1,9 @@
-"""Django REST framework serializers for authentication workflows.
+"""Serializers that implement the login and MFA flows.
 
-Provides serializer classes for user authentication including login validation,
-multi-factor authentication processing, and JWT token management. These serializers
-implement secure authentication workflows with comprehensive validation and logging.
+A login without MFA is completed by LoginSerializer, and one with MFA is split in
+two steps: LoginSerializer issues the temporary MFA token, and MfaLoginSerializer
+verifies the code and issues the final tokens. The MFA validation is also reused by
+the serializers that enable and disable MFA for an authenticated user.
 """
 
 from typing import Any
@@ -27,35 +28,23 @@ from users.models import User
 
 
 class JwtAuthentication(LoggingEntity):
-    """Base class for JWT authentication and token management.
-
-    Provides core JWT authentication functionality including token generation,
-    user login processing, and security logging. This class serves as the
-    foundation for various authentication workflows in the system.
-
-    Security Features:
-        - Previous tokens invalidation on new login
-        - Role-based JWT claims for authorization
-        - Security logging of successful login events
-        - Email notifications for login events
-        - MFA token generation for multi-factor workflows
+    """Issuer of the JWT tokens that a user authenticates with.
 
     Attributes:
-        user (User): The authenticated user instance (default: None).
+        user: User being logged in, set by the serializers that validate their
+          credentials.
     """
 
     user: User = None
 
     def login(self) -> dict[str, str]:
-        """Process user login and generate JWT tokens.
+        """Complete the login of the user and get their new tokens.
 
-        Invalidates all existing tokens for security, generates new access
-        and refresh tokens with role-based claims, updates the user's last
-        login timestamp, sends a login notification, and logs the
-        authentication event.
+        The tokens issued by previous logins are invalidated, so a login always
+        leaves one single valid session, and the user is notified by email.
 
         Returns:
-            dict[str, str]: Dictionary containing 'access' and 'refresh' JWT tokens.
+            The new access and refresh tokens of the user.
         """
         User.objects.invalidate_all_tokens(self.user)
         token = self.__class__.get_token(self.user)
@@ -67,17 +56,16 @@ class JwtAuthentication(LoggingEntity):
 
     @classmethod
     def get_token(cls, user: User) -> Any:
-        """Generate JWT token with role-based claims.
+        """Get a new token pair for a user, including their role as a claim.
 
-        Creates a new JWT token pair with embedded role information
-        from the user's primary group membership. Defaults to READER
-        role if no group is assigned.
+        The role claim lets the frontend know what the user can do without asking
+        for it, and defaults to Reader for the users without a group.
 
         Args:
-            user (User): The user for whom to generate tokens.
+            user: User that the tokens are issued for.
 
         Returns:
-            Any: JWT token pair with role claims embedded.
+            The refresh token, whose access_token attribute holds the access one.
         """
         token = TokenObtainPairSerializer.get_token(user)
         group = user.groups.first()
@@ -86,82 +74,63 @@ class JwtAuthentication(LoggingEntity):
 
     @classmethod
     def get_mfa_required_token(cls, user: User) -> Any:
-        """Generate temporary MFA token for multi-factor authentication.
-
-        Creates a temporary token that allows access only to MFA completion
-        endpoints. This token is issued during the first authentication step
-        for MFA-enabled users.
+        """Get the temporary token that lets a user complete their MFA login.
 
         Args:
-            user (User): The user requiring MFA completion.
+            user: User whose credentials were already validated.
 
         Returns:
-            Any: Temporary MFA token for authentication completion.
+            The MFA token, which only allows completing the login and is
+            blacklisted once it's used.
         """
         return MfaRequiredToken.for_user(user)
 
 
 class LoginSerializer(JwtAuthentication, TokenObtainSerializer):
-    """Serializer for primary user authentication with MFA detection.
-
-    Handles the first step of user authentication by validating credentials
-    and determining whether MFA is required. For MFA-enabled accounts,
-    returns a temporary token; otherwise, completes authentication immediately.
-    """
+    """Serializer that validates the username and the password of a user."""
 
     def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
-        """Validate credentials and handle MFA routing.
-
-        Performs credential validation and routes the authentication flow
-        based on the user's MFA settings. Returns either a temporary MFA
-        token or complete JWT tokens.
+        """Check the credentials and get the tokens that the user needs next.
 
         Args:
-            attrs (dict[str, Any]): Authentication attributes (username, password).
+            attrs: Username and password sent by the client.
 
         Returns:
-            dict[str, Any]: Either MFA token or complete JWT token pair.
+            The access and refresh tokens, or only the temporary MFA token when the
+            user has MFA enabled and the login isn't complete yet.
         """
         super().validate(attrs)
         return {"mfa": str(self.__class__.get_mfa_required_token(self.user))} if self.user.mfa else self.login()
 
 
 class MfaSerializer(Serializer):
-    """Base serializer for multi-factor authentication validation.
-
-    Provides common MFA validation functionality for TOTP and email OTP
-    codes. This base class is shared by MfaLoginSerializer, which completes
-    an in-progress login, and by EnableMfaSerializer and DisableMfaSerializer,
-    which verify a code to enable or disable MFA for an already-authenticated
-    user.
+    """Base serializer that validates an MFA code.
 
     Attributes:
-        mfa (CharField): The MFA code to validate (max 200 characters).
-        validator (callable): User model method for MFA validation.
+        mfa: Code to be validated, either the TOTP one or an OTP sent by email.
+        validator: User method that verifies the code.
     """
 
     mfa = CharField(max_length=200, required=True, write_only=True)
     validator = User.objects.verify_mfa_or_otp
 
     def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
-        """Validate MFA code against user's configured methods.
+        """Check the MFA code against the TOTP secret or the OTP of the user.
 
-        Verifies the provided MFA code using the user's configured
-        authentication methods including TOTP or email OTP. If self.user is
-        already set, as it is for MfaLoginSerializer via MfaRequiredSerializer
-        earlier in the MRO, that user is validated. Otherwise, as for
-        EnableMfaSerializer and DisableMfaSerializer, self.user is not set and
-        the user is instead taken from the authenticated request in the
-        serializer context.
+        If self.user is already set, as it is for MfaLoginSerializer via
+        MfaRequiredSerializer earlier in the MRO, that user is validated. Otherwise,
+        as for EnableMfaSerializer and DisableMfaSerializer, self.user is not set and
+        the user is instead taken from the authenticated request in the serializer
+        context.
 
         Args:
-            attrs (dict[str, Any]): Validation attributes including MFA code.
+            attrs: Validated data, including the MFA code.
 
         Returns:
-            dict[str, Any]: Validated attributes.
+            The same validated data, unchanged.
 
         Raises:
-            AuthenticationFailed: If MFA code validation fails.
+            AuthenticationFailed: If the code isn't valid for that user.
         """
         attrs = super().validate(attrs)
         if not self.validator(
@@ -173,36 +142,31 @@ class MfaSerializer(Serializer):
 
 
 class MfaRequiredSerializer(Serializer):
-    """Base serializer for operations requiring MFA validation.
-
-    Validates temporary MFA tokens and ensures users have MFA enabled.
-    This serializer is used for operations that require completion of
-    the MFA authentication flow.
+    """Base serializer that identifies a user in the middle of an MFA login.
 
     Attributes:
-        token (CharField): Temporary MFA token for user identification.
+        token: Temporary MFA token that identifies the user that is logging in.
     """
 
     token = CharField()
 
     def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
-        """Validate MFA token and verify user MFA status.
+        """Check the MFA token and that the user has MFA enabled.
 
-        If a token is provided, validates it and identifies the associated
-        user from its claims. If no token is provided, self.user is expected
-        to already be set by the caller, such as an authenticated request in
-        a subclass. Either way, verifies that MFA is enabled for the
-        resulting user.
+        If no token is provided, self.user is expected to already be set by the
+        caller, such as an authenticated request in a subclass.
 
         Args:
-            attrs (dict[str, Any]): Validation attributes including MFA token.
+            attrs: Validated data, which may include the temporary MFA token.
 
         Returns:
-            dict[str, Any]: Validated attributes with user context.
+            The same validated data, unchanged. The identified user is kept in
+            self.user for the rest of the flow.
 
         Raises:
-            AuthenticationFailed: If token validation fails.
-            ValidationError: If MFA is not enabled for the user.
+            AuthenticationFailed: If the token is invalid, expired, blacklisted, or
+              identifies a user that doesn't exist.
+            ValidationError: If MFA isn't enabled for that user.
         """
         attrs = super().validate(attrs)
         if attrs.get("token"):
@@ -219,34 +183,28 @@ class MfaRequiredSerializer(Serializer):
 
 
 class SendMfaEmailSerializer(MfaRequiredSerializer):
-    """Serializer for sending MFA codes via email.
-
-    Handles email delivery of one-time passwords for MFA completion when
-    TOTP devices are unavailable. Supports both authenticated and
-    unauthenticated requests for account recovery scenarios.
+    """Serializer that sends the MFA code by email to a user.
 
     Attributes:
-        token (CharField): MFA token, not required at the field level.
-            Custom validation requires it for unauthenticated requests and
-            ignores it when the requester is already authenticated.
+        token: MFA token, not required at the field level. Custom validation
+          requires it for unauthenticated requests and ignores it when the
+          requester is already authenticated.
     """
 
     token = CharField(required=False)
 
     def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
-        """Validate request and determine user context.
-
-        Validates the request context and determines whether the user is
-        authenticated or requires token-based identification for MFA email delivery.
+        """Identify the user, either by the request they authenticated or by the token.
 
         Args:
-            attrs (dict[str, Any]): Validation attributes.
+            attrs: Validated data, which includes the MFA token for the anonymous
+              requests and can omit it for the authenticated ones.
 
         Returns:
-            dict[str, Any]: Validated attributes with user context.
+            The same validated data, unchanged.
 
         Raises:
-            ValidationError: If token is missing for unauthenticated requests.
+            ValidationError: If an anonymous request doesn't include the MFA token.
         """
         is_authenticated = IsAuthenticated().has_permission(self.context.get("request"), None)
         if not is_authenticated and not attrs.get("token"):
@@ -256,17 +214,17 @@ class SendMfaEmailSerializer(MfaRequiredSerializer):
         return super().validate(attrs)
 
     def save(self, **kwargs: Any) -> User:
-        """Generate and send OTP via email.
+        """Send a new one-time password to the email address of the user.
 
-        Creates a time-limited OTP code, bound to the MFA scope so it can only
-        be used as a second factor, and sends it to the user's registered email
-        address through the SMTP notification system.
+        The OTP is bound to the MFA scope, so it can only be used as a second
+        factor and not to reset the password or activate the account.
 
         Args:
-            **kwargs (Any): Additional save parameters.
+            **kwargs: Standard serializer arguments, unused here because the user is
+              already identified during the validation.
 
         Returns:
-            User: The user for whom the OTP was generated.
+            The user that received the one-time password.
         """
         plain_otp = User.objects.setup_otp(self.user, OtpScope.MFA, {"minutes": CONFIG.mfa_expiration_minutes})
         SMTP().mfa(self.user, plain_otp)
@@ -274,24 +232,16 @@ class SendMfaEmailSerializer(MfaRequiredSerializer):
 
 
 class MfaLoginSerializer(MfaSerializer, MfaRequiredSerializer, JwtAuthentication):
-    """Serializer for completing MFA authentication and issuing tokens.
-
-    Combines MFA validation, token verification, and JWT generation to complete
-    the multi-factor authentication flow. Validates MFA codes and issues
-    full JWT tokens upon successful authentication.
-    """
+    """Serializer that completes an MFA login and issues the tokens of the user."""
 
     def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
-        """Complete MFA validation and authentication.
-
-        Validates the MFA code, cleans up any temporary OTP codes,
-        and completes the authentication process by issuing JWT tokens.
+        """Check the MFA code and complete the login of the user.
 
         Args:
-            attrs (dict[str, Any]): Validation attributes including MFA code.
+            attrs: Temporary MFA token and the MFA code to verify.
 
         Returns:
-            dict[str, Any]: Complete JWT token pair (access and refresh tokens).
+            The access and refresh tokens of the user.
         """
         super().validate(attrs)
         # Blacklist the MFA token so it cannot be reused

@@ -1,38 +1,21 @@
-"""Role definitions and permission mappings for Rekono authorization.
-
-Defines the role hierarchy and comprehensive permission mappings for all
-models and operations within the Rekono platform. This module implements
-role-based access control (RBAC) with fine-grained permissions for security,
-compliance, and operational segregation of duties.
-"""
+"""Roles of the Rekono users and the model permissions that each one grants."""
 
 from django.db import models
 from django.db.models.enums import Choices
 
 
 class Role(models.TextChoices):
-    """Enumeration of user roles in the Rekono platform.
+    """Role that a Rekono user has, which decides the models they can manage.
 
-    Defines the hierarchical role structure for role-based access control.
-    Each role represents a different level of access and operational capability
-    within the security testing platform.
+    Admins have full access to every model, including the users, the projects, and
+    all the platform settings. Auditors run the security testing and manage the
+    findings, but they can't manage the users and the projects, can't change any
+    settings, and can't even see the target denylist. Readers mostly view the
+    security data, although they still manage their own notes, alerts, API tokens,
+    reports, and Telegram chat registration.
 
-    Roles:
-        ADMIN: System administrators with full access to every model and operation,
-               including user management, project management, and all platform settings.
-        AUDITOR: Security auditors who can run security testing and manage findings.
-                 They match Admin across most operational data, but cannot create,
-                 modify or delete users and projects, cannot change any settings model,
-                 and cannot see the Admin-only platform settings or the target denylist
-                 at all.
-        READER: Reviewers whose access is mostly limited to viewing findings, reports,
-                and other security data. They can still manage their own notes, alerts,
-                API tokens, reports, and Telegram chat registration.
-
-    Role Hierarchy:
-        Admin > Auditor > Reader. The nesting is strict, every permission granted to a
-        role is also granted to the roles above it. Reader is nonetheless not a read-only
-        role, since it holds write permissions on the personal resources listed above.
+    The nesting is strict, so every permission granted to a role is also granted to
+    the roles above it, from Reader to Auditor to Admin.
     """
 
     ADMIN = "Admin"

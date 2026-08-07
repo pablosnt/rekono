@@ -1,8 +1,4 @@
-"""Django application configuration for integrations module.
-
-Configures the integrations application with custom fixture loading logic
-to preserve user-configured integration enabled states across deployments.
-"""
+"""Django app configuration of the integrations app."""
 
 from typing import Any
 
@@ -13,44 +9,36 @@ from framework.apps import BaseApp
 
 
 class IntegrationsConfig(BaseApp, AppConfig):
-    """Configuration class for the integrations Django application.
-
-    Extends BaseApp to provide custom fixture loading behavior that preserves
-    user-configured integration enabled/disabled states, in both directions,
-    across deployments and migrations.
+    """Configuration of the integrations app.
 
     Attributes:
-        name (str): The Django application name
+        name: Name of the app in the Django app registry.
     """
 
     name = "integrations"
 
     def _select_data_to_recreate(self, model: Any) -> QuerySet:
-        """Snapshot the enabled state of every integration before fixture recreation.
-
-        Captures the current enabled/disabled flag of all integrations so that any
-        user change, in either direction, survives the fixture reload. The fixture
-        hardcodes an enabled value per integration and loaddata restores it on every
-        migrate, so the live state must be snapshotted and re-applied afterwards.
+        """Select which integrations the users have enabled and disabled.
 
         Args:
-            model (Any): The Integration model class.
+            model: The integration model, which is about to be cleared.
 
         Returns:
-            QuerySet: QuerySet of (id, enabled) tuples for every integration.
+            The identifier of each integration with its state, instead of the whole
+            entities, since only that state has to survive the reload.
         """
         return model.objects.values_list("id", "enabled")
 
     def _recreate(self, data: list[Any]) -> None:
-        """Re-apply the user-configured enabled state after fixture recreation.
+        """Enable and disable again the integrations that the users had chosen.
 
-        Takes the (id, enabled) snapshot captured before the fixture reload and
-        restores it, so integrations the user enabled or disabled keep their state
-        even though loaddata reset every record to its fixture default. Integrations
-        added to the fixture after the snapshot are left with their default.
+        The fixtures define whether each integration is enabled, and they are
+        loaded on every migration, so the choice of the users has to be applied
+        again afterwards. The integrations added after the last migration keep
+        what the fixtures say about them.
 
         Args:
-            data (list[Any]): List of (id, enabled) tuples to restore.
+            data: Identifier of each integration with its previous state.
         """
         from integrations.models import Integration
 
@@ -58,10 +46,11 @@ class IntegrationsConfig(BaseApp, AppConfig):
         Integration.objects.filter(id__in=[i for i, enabled in data if not enabled], enabled=True).update(enabled=False)
 
     def _get_models(self) -> list[Any]:
-        """Get model classes for existence checking during fixture loading.
+        """Get the integration model, whose data comes from the fixtures.
 
         Returns:
-            list[Any]: List containing the Integration model class.
+            The integration model, imported inside the method because the models
+            don't exist yet the first time that the migrations run.
         """
         from integrations.models import Integration
 

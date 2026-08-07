@@ -1,8 +1,4 @@
-"""Django admin configuration for settings module.
-
-Registers the Settings model with the Django admin interface for
-administrative access to global platform configuration parameters.
-"""
+"""Registration of the settings model in the Django admin site."""
 
 from django.contrib import admin
 

@@ -1,10 +1,4 @@
-"""Secure file handling utilities for Rekono.
-
-Provides secure file upload validation, storage, and integrity verification
-for user-uploaded content. This module implements defense-in-depth security
-controls to prevent malicious file uploads and ensure data integrity throughout
-the file lifecycle.
-"""
+"""Validation and storage of the files uploaded by the users."""
 
 import hashlib
 import uuid
@@ -22,32 +16,10 @@ from settings.models import Settings
 
 @dataclass
 class FileHandler(LoggingEntity):
-    """Secure file handling class providing upload validation and storage capabilities.
+    """Handler that validates the uploaded files and stores them safely.
 
-    Implements comprehensive file security controls including multi-layer validation,
-    secure storage with integrity verification, and defensive measures against
-    common file upload attack vectors. This class serves as the central file
-    security service for the Rekono platform.
-
-    Security Features:
-        - Defense-in-depth validation with size, extension, and MIME type checks
-        - Content-based MIME type detection to prevent extension spoofing
-        - Cryptographic integrity verification using SHA-512 checksums
-        - Secure file naming to prevent path traversal attacks
-        - Comprehensive audit logging for security monitoring
-
-    Attributes:
-        _allowed_extensions (list[str]): Whitelist of permitted file extensions (default: txt, text, empty).
-        _mime_types (list[str]): Whitelist of permitted MIME types (default: text/plain).
-
-    Example:
-        Validate and store a user-uploaded file:
-
-        ```python
-        handler = FileHandler()
-        handler.validate_file(uploaded_file)
-        path, checksum, lines = handler.store_file(storage_dir, uploaded_file)
-        ```
+    The accepted extensions and MIME types can be given when the handler is
+    created, and default to the plain text ones that the wordlists use.
     """
 
     _allowed_extensions: list[str] | None = None
@@ -55,40 +27,22 @@ class FileHandler(LoggingEntity):
 
     @cached_property
     def allowed_extensions(self) -> list[str]:
-        """Get the whitelist of permitted file extensions for upload validation.
-
-        Returns the configured allowed extensions or default whitelist if not set.
-        Used for extension-based validation to prevent upload of dangerous file types.
-
-        Returns:
-            list[str]: List of allowed file extensions including txt, text, and empty string.
-        """
+        """The accepted extensions, including the empty one for files without it."""
         return self._allowed_extensions if self._allowed_extensions is not None else ["txt", "text", ""]
 
     @cached_property
     def mime_types(self) -> list[str]:
-        """Get the whitelist of permitted MIME types for content validation.
-
-        Returns the configured allowed MIME types or default whitelist if not set.
-        Used for content-based validation to prevent MIME type spoofing attacks.
-
-        Returns:
-            list[str]: List of allowed MIME types with text/plain as default.
-        """
+        """The accepted MIME types, detected from the content of the file."""
         return self._mime_types if self._mime_types is not None else ["text/plain"]
 
     def _validate_size(self, in_memory_file: Any) -> None:
-        """Validate uploaded file size against configured limits.
-
-        Checks the uploaded file size against the system-configured maximum
-        file size limit to prevent DoS attacks via oversized uploads.
-        Logs security warnings for rejected uploads.
+        """Check that the file isn't bigger than the configured maximum size.
 
         Args:
-            in_memory_file (Any): Django InMemoryUploadedFile object to validate.
+            in_memory_file: Uploaded file, whose size is read from its metadata.
 
         Raises:
-            ValidationError: If file size exceeds the configured maximum limit.
+            ValidationError: If the file is too large.
         """
         max_mb_size = Settings.objects.first().max_uploaded_file_mb
         size = in_memory_file.size / (1024 * 1024)
@@ -101,17 +55,14 @@ class FileHandler(LoggingEntity):
             )
 
     def _validate_extension(self, in_memory_file: Any) -> None:
-        """Validate uploaded file extension against whitelist.
-
-        Checks the uploaded file's extension against the configured whitelist
-        of allowed extensions. This prevents upload of potentially dangerous
-        file types while logging security events for rejected uploads.
+        """Check that the file has one of the accepted extensions.
 
         Args:
-            in_memory_file (Any): Django InMemoryUploadedFile object to validate.
+            in_memory_file: Uploaded file, whose extension is taken from the name
+              that the user provided.
 
         Raises:
-            ValidationError: If file extension is not in the allowed extensions list.
+            ValidationError: If the extension isn't accepted.
         """
         extension = Path(in_memory_file.name).suffix[1:].lower()
         if extension not in self.allowed_extensions:
@@ -119,17 +70,14 @@ class FileHandler(LoggingEntity):
             raise ValidationError("Invalid extension", code="file", params={"value": extension})
 
     def _validate_mime_type(self, in_memory_file: Any) -> None:
-        """Validate uploaded file MIME type using content analysis.
-
-        Performs content-based MIME type detection using libmagic to prevent
-        extension spoofing attacks. Validates detected MIME type against
-        the configured whitelist and logs security events for violations.
+        """Check the MIME type of the file content, and not the one it claims.
 
         Args:
-            in_memory_file (Any): Django InMemoryUploadedFile object to validate.
+            in_memory_file: Uploaded file, which is read from its current position,
+              so this check runs before anything else consumes it.
 
         Raises:
-            ValidationError: If detected MIME type is not in the allowed types list.
+            ValidationError: If the detected MIME type isn't accepted.
         """
         # The first 1024 bytes are enough for libmagic to identify the file type from its content
         mime_type = magic.from_buffer(in_memory_file.read(1024), mime=True)
@@ -138,54 +86,45 @@ class FileHandler(LoggingEntity):
             raise ValidationError("Invalid MIME type", code="file", params={"value": mime_type})
 
     def validate_file(self, in_memory_file: Any) -> None:
-        """Perform comprehensive validation of uploaded file.
-
-        Executes multi-layer validation including file size, extension,
-        and MIME type checks to ensure uploaded files meet security
-        requirements. All validation failures are logged for security monitoring.
+        """Check the size, the extension, and the MIME type of an uploaded file.
 
         Args:
-            in_memory_file (Any): Django InMemoryUploadedFile object to validate.
+            in_memory_file: Uploaded file to validate before storing it.
 
         Raises:
-            ValidationError: If any validation check fails (size, extension, or MIME type).
+            ValidationError: If any of the three checks rejects the file.
         """
         self._validate_size(in_memory_file)
         self._validate_extension(in_memory_file)
         self._validate_mime_type(in_memory_file)
 
     def validate_filepath_checksum(self, filepath: str, expected_checksum: str) -> bool:
-        """Validate file integrity using SHA-512 checksum verification.
-
-        Computes and verifies the SHA-512 checksum of a stored file against
-        an expected value to detect tampering or corruption. This provides
-        cryptographic integrity verification for stored files.
+        """Check that a stored file still has the checksum it had when it was stored.
 
         Args:
-            filepath (str): Path to the file to verify.
-            expected_checksum (str): Expected SHA-512 hexadecimal checksum.
+            filepath: Path of the stored file.
+            expected_checksum: SHA-512 checksum returned by store_file.
 
         Returns:
-            bool: True if checksums match, False if integrity check fails.
+            Whether the content of the file is still the same one.
         """
         with open(filepath, "rb") as file:
             checksum = hashlib.sha512(file.read()).hexdigest()
             return checksum == expected_checksum
 
     def store_file(self, directory: Path, in_memory_file: Any) -> tuple[str, str, int]:
-        """Securely store uploaded file with integrity verification.
+        """Store an uploaded file, naming it with a random UUID.
 
-        Stores the validated file in the specified directory using a UUID-based
-        filename to prevent path traversal attacks. Computes SHA-512 checksum
-        during storage for integrity verification and counts file lines for
-        metadata tracking. Logs the storage event for security audit.
+        The name provided by the user is discarded, so it can't be used to write
+        outside the target directory or to overwrite another file.
 
         Args:
-            directory (Path): Target directory for file storage.
-            in_memory_file (Any): Django InMemoryUploadedFile object to store.
+            directory: Directory where the file is written.
+            in_memory_file: Uploaded file, already validated.
 
         Returns:
-            tuple[str, str, int]: File path, SHA-512 checksum, and line count.
+            The path where the file was stored, its SHA-512 checksum, and the number
+            of lines it contains.
         """
         path = directory / f"{str(uuid.uuid4())}.txt"
         checksum = hashlib.sha512()

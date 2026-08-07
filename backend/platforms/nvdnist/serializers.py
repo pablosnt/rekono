@@ -1,8 +1,4 @@
-"""Django REST framework serializers for NVD NIST platform management.
-
-Serializer classes for converting NVD NIST settings models to/from JSON
-for API operations. Includes validation logic and computed availability status.
-"""
+"""Serializer of the NVD NIST endpoints."""
 
 from rest_framework.serializers import ModelSerializer, SerializerMethodField
 
@@ -12,16 +8,12 @@ from platforms.nvdnist.models import NvdNistSettings
 
 
 class NvdNistSettingsSerializer(ModelSerializer):
-    """Serializer for NVD NIST platform settings.
-
-    Handles serialization and deserialization of NvdNistSettings objects
-    for API operations. Includes protected secret field handling and
-    computed availability status based on API token validation.
+    """Serializer of the NVD NIST configuration.
 
     Attributes:
-        api_token (ProtectedSecretField): Secured API token field with validation
-        is_available (SerializerMethodField): Computed field for API availability status
-        client (NvdNist): Shared integration client used to check API availability
+        api_token: API token, which is masked when the settings are read.
+        is_available: Whether the platform answers with the configured token.
+        client: Client used to check if the platform answers.
     """
 
     api_token = ProtectedSecretField(required=False, allow_null=True, source="secret")
@@ -29,26 +21,19 @@ class NvdNistSettingsSerializer(ModelSerializer):
     client = NvdNist()
 
     class Meta:
-        """Meta configuration for NvdNistSettingsSerializer.
-
-        Attributes:
-            model (Model): The NvdNistSettings model to serialize
-            fields (tuple): Field names to include in serialization
-        """
+        """Serializer configuration for the NVD NIST settings."""
 
         model = NvdNistSettings
         fields = ("id", "api_token", "is_available")
 
     def get_is_available(self, instance: NvdNistSettings) -> bool:
-        """Check if NVD NIST API integration is available and functional.
-
-        Validates the configured API token by testing connectivity to the
-        NVD NIST API service and returns availability status.
+        """Check if the platform can be used with the configured token.
 
         Args:
-            instance (NvdNistSettings): The settings instance being serialized
+            instance: Settings being serialized, not read because the check is
+              performed against the live platform.
 
         Returns:
-            bool: True if API integration is available and working, False otherwise
+            Whether the platform answers with the configured settings.
         """
         return self.client.is_available()

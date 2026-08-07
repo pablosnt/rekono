@@ -1,8 +1,4 @@
-"""Django REST framework views for target denylist management.
-
-Provides REST API views for target denylist operations including CRUD
-operations and specialized filtering for administrative and user contexts.
-"""
+"""Endpoints to manage the target denylist."""
 
 from django.db.models import QuerySet
 from rest_framework.permissions import IsAuthenticated
@@ -15,20 +11,17 @@ from target_denylist.serializers import TargetDenylistSerializer
 
 
 class TargetDenylistViewSet(BaseViewSet):
-    """ViewSet for target denylist management operations.
-
-    Provides REST API endpoints for managing target denylist entries with
-    administrative controls and filtering capabilities. Restricts modification
-    of default entries to prevent unauthorized changes to system-wide exclusions.
+    """Manage the denylist entries, which only the administrators can see.
 
     Attributes:
-        queryset (QuerySet): All TargetDenylist objects
-        filterset_class (FilterSet): TargetDenylistFilter for query filtering
-        serializer_class (Serializer): TargetDenylistSerializer for data conversion
-        permission_classes (list): Required permissions for access control
-        search_fields (list): Fields available for text search
-        ordering_fields (list): Fields available for result ordering
-        http_method_names (list): Allowed HTTP methods for CRUD operations
+        queryset: All the denylist entries, since they aren't scoped to a project.
+        filterset_class: Filters available to search denylist entries.
+        serializer_class: Serializer of the denylist entries.
+        permission_classes: Role permissions, which only grant access to the
+          administrators.
+        search_fields: Fields used by the text search.
+        ordering_fields: Fields that can be used to order the results.
+        http_method_names: Standard CRUD methods.
     """
 
     queryset = TargetDenylist.objects.all()
@@ -40,15 +33,14 @@ class TargetDenylistViewSet(BaseViewSet):
     http_method_names = ["get", "post", "put", "delete"]
 
     def get_queryset(self) -> QuerySet:
-        """Get filtered queryset based on request method.
+        """Get the denylist entries, hiding the default ones from the write methods.
 
-        Restricts PUT and DELETE operations to non-default entries only,
-        preventing modification of system-wide default denylist entries.
-        All other operations can access the complete queryset.
+        The entries provided by Rekono protect the platform itself, so they can be
+        read but never updated or removed.
 
         Returns:
-            QuerySet: Full queryset for read and create operations, or the queryset
-                     excluding default entries for PUT and DELETE.
+            All the entries, or only the ones created by the users for the write
+            methods.
         """
         default_queryset = super().get_queryset()
         return (

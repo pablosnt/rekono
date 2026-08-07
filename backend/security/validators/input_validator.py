@@ -1,4 +1,4 @@
-"""Validators used across Rekono's Django models to check field values.
+"""Validators applied to the values that the users send to Rekono.
 
 Provides Validator, which checks a value against one of the shared Regex patterns
 defined in security.validators.enums and can optionally reject values containing
@@ -20,31 +20,15 @@ from security.validators.enums import Regex
 
 
 class Validator(RegexValidator, LoggingEntity):
-    """Regex validator with a required value check and optional injection detection.
+    """Validator that requires a value to fully match one of the Rekono patterns.
 
-    Extends Django's RegexValidator but overrides its call logic entirely: a
-    missing or empty value is always rejected, the value must fully match (or,
-    depending on inverse_match, must not match) the configured regex, and, when
-    deny_injections is enabled, the value is also rejected if it contains a
-    common injection character or a sensitive environment-variable assignment.
+    It replaces the call logic of the Django RegexValidator: an empty value is
+    always rejected, the match must cover the whole value, and every rejection is
+    logged as a security event.
 
-    Security Features:
-        - Missing or empty values are always rejected
-        - Full-string match against the configured regex, not a partial match
-        - Optional rejection of injection characters (;"'&<>$) and sensitive
-          environment-variable assignments (e.g. LD_PRELOAD=...) via deny_injections
-        - Every rejection is logged as a security warning with the offending value
-
-    Args:
-        regex (Regex | str): The Regex pattern to validate against, or a raw
-            pattern string (accepted for values stored by old migrations).
-        message (Any | None): Custom validation error message.
-        code (str | None): Error code for validation failures.
-        inverse_match (bool | None): Match direction. Left unset (the default),
-            or given any other truthy value, the value must match the regex; passing
-            False requires the value not to match it.
-        flags (RegexFlag | None): Regex compilation flags.
-        deny_injections (bool): Enable injection attack detection (default: False).
+    Attributes:
+        deny_injections: Whether the value is also checked against the injection
+          patterns, which the fields that reach a tool command line need.
     """
 
     def __init__(
@@ -56,18 +40,19 @@ class Validator(RegexValidator, LoggingEntity):
         flags: RegexFlag | None = None,
         deny_injections: bool = False,
     ) -> None:
-        """Initialize the validator and configure the underlying RegexValidator.
+        """Prepare the validator with the pattern that the values must match.
 
         Args:
-            regex (Regex | str): The Regex pattern to validate against, or a raw
-                pattern string (accepted for values stored by old migrations).
-            message (Any | None): Custom error message for validation failures.
-            code (str | None): Error code for ValidationError exceptions.
-            inverse_match (bool | None): Match direction. Left unset (the default),
-                or given any other truthy value, the value must match the regex;
-                passing False requires the value not to match it.
-            flags (RegexFlag | None): Regex compilation flags for pattern matching.
-            deny_injections (bool): Enable injection attack detection (default: False).
+            regex: The Regex pattern to validate against, or a raw pattern string
+              (accepted for values stored by old migrations).
+            message: Error message reported when a value is rejected.
+            code: Error code of the raised validation errors.
+            inverse_match: Match direction. Left unset (the default), or given any
+              other truthy value, the value must match the regex; passing False
+              requires the value not to match it.
+            flags: Regex compilation flags.
+            deny_injections: Whether to also reject the values that contain
+              injection characters or a sensitive environment variable assignment.
         """
         self.deny_injections = deny_injections
         # isinstance verification is needed to keep compatibility with old database migrations
@@ -76,20 +61,15 @@ class Validator(RegexValidator, LoggingEntity):
     def __call__(self, value: str | None) -> None:
         """Validate a value against the configured regex and injection rules.
 
-        Rejects a missing or empty value first. Then checks the value against the
-        configured regex (requiring a match or a non-match depending on
-        inverse_match) and, if deny_injections is enabled, also rejects it when it
-        contains an injection character or a sensitive environment-variable
-        assignment. Every rejection is logged as a warning describing the value as
-        not matching the allowed regex, even when the actual cause was one of the
-        injection checks.
+        Every rejection is logged as a warning describing the value as not matching
+        the allowed regex, even when the actual cause was one of the injection checks.
 
         Args:
-            value (str | None): The input value to validate.
+            value: Value sent by the user, which can't be empty.
 
         Raises:
             ValidationError: If the value is empty, fails the regex check, or is
-                rejected by the injection checks while deny_injections is enabled.
+              rejected by the injection checks while deny_injections is enabled.
         """
         if not value:
             raise ValidationError("Value is required", code=self.code, params={"value": value})
@@ -113,75 +93,58 @@ class Validator(RegexValidator, LoggingEntity):
 
 
 class FutureDatetimeValidator(RegexValidator):
-    """Validator ensuring datetime values are in the future.
-
-    Used for validating expiration dates, scheduled tasks, and other
-    temporal fields that must be set to future dates for security
-    and operational correctness.
-    """
+    """Validator for the datetime fields that can only hold a future value."""
 
     def __call__(self, value: Any) -> None:
-        """Validate that the datetime value is in the future.
+        """Validate that a datetime is in the future.
 
         Args:
-            value (Any): The datetime value to validate.
+            value: Datetime sent by the user.
 
         Raises:
-            ValidationError: If the datetime is not in the future.
+            ValidationError: If the datetime is in the past or is right now.
         """
         if value <= timezone.now():
             raise ValidationError("Datetime must be future", code=self.code)
 
 
 class PasswordValidator:
-    """Enforces password complexity requirements.
+    """Complexity policy that the Rekono passwords must satisfy.
 
-    Requires a minimum length and at least one character from each of the
-    lowercase, uppercase, digit, and non-alphanumeric classes. This validator
-    is compatible with Django's password validation framework, so it can be
-    registered as one of the AUTH_PASSWORD_VALIDATORS.
-
-    Security Requirements:
-        - Minimum 12 characters length
-        - At least one lowercase letter (a-z)
-        - At least one uppercase letter (A-Z)
-        - At least one digit (0-9)
-        - At least one non-alphanumeric character, matched via \\W (this also
-          accepts whitespace, and excludes underscore since it counts as a word
-          character)
+    Requires at least 12 characters, including a lowercase letter, an uppercase
+    one, a digit, and a symbol. It's registered as one of the Django
+    AUTH_PASSWORD_VALIDATORS, so it applies wherever a password is set.
 
     Attributes:
-        full_match (str): Combined length and allowed-character-class pattern
-            that the whole password must match
-        lowercase (str): Pattern requiring at least one lowercase letter
-        uppercase (str): Pattern requiring at least one uppercase letter
-        digit (str): Pattern requiring at least one digit
-        symbol (str): Pattern requiring at least one non-word character (\\W)
+        full_match: Length and accepted characters that the whole password must match.
+        lowercase: Pattern that finds a lowercase letter.
+        uppercase: Pattern that finds an uppercase letter.
+        digit: Pattern that finds a digit.
+        symbol: Pattern that finds a symbol, which also accepts whitespace.
     """
 
     # Underscore is a word character, so it isn't covered by \W or by the explicit
     # ranges below; a password containing one always fails this full match
-    full_match = r"[A-Za-z0-9\W]{12,}"  # Full match with all requirements
-    lowercase = r"[a-z]"  # At least one lowercase
-    uppercase = r"[A-Z]"  # At least one uppercase
-    digit = r"[0-9]"  # At least one digit
-    symbol = r"[\W]"  # At least one symbol
+    full_match = r"[A-Za-z0-9\W]{12,}"
+    lowercase = r"[a-z]"
+    uppercase = r"[A-Z]"
+    digit = r"[0-9]"
+    symbol = r"[\W]"
 
     def validate(self, password: str, user: Any = None) -> None:
-        """Validate password against security requirements.
-
-        Checks the combined length and character-class pattern first; if it
-        fails, raises the generic help text. Otherwise checks each character
-        class individually and raises a message naming the first one missing.
+        """Check that a password satisfies the complexity policy.
 
         Args:
-            password (str): The password to validate.
-            user (Any): The user object (for Django compatibility, unused).
+            password: Password to be checked.
+            user: User that the password belongs to, required by the Django
+              validator interface but not needed by this policy.
 
         Raises:
-            ValidationError: If password does not meet security requirements.
+            ValidationError: With the generic help text if the password is too short
+              or contains a character that isn't accepted, and naming the missing
+              character class otherwise.
         """
-        if not bool(re.fullmatch(self.full_match, password)):  # Full check
+        if not bool(re.fullmatch(self.full_match, password)):
             raise ValidationError(self.get_help_text())
         for regex, char_type in [
             (self.lowercase, "lowercase"),
@@ -193,9 +156,5 @@ class PasswordValidator:
                 raise ValidationError(f"Your password must contain at least 1 {char_type}")
 
     def get_help_text(self) -> str:
-        """Get password requirements help text.
-
-        Returns:
-            str: Human-readable description of password requirements.
-        """
+        """Return the description of the password policy shown to the users."""
         return "Your password must contain at least 1 lowercase, 1 uppercase, 1 digit and 1 symbol"

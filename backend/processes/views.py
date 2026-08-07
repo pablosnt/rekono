@@ -1,9 +1,4 @@
-"""Django REST framework views for process management operations.
-
-Provides REST API endpoints for managing security testing processes and steps
-with CRUD operations, filtering, search capabilities, and community features
-through the like system for process sharing and discovery.
-"""
+"""Endpoints to manage the processes and their steps."""
 
 from rest_framework.permissions import IsAuthenticated
 
@@ -15,20 +10,17 @@ from security.authorization.permissions import OwnerPermission, RekonoModelPermi
 
 
 class ProcessViewSet(LikeViewSet):
-    """ViewSet for managing security testing process workflows.
-
-    Provides REST API endpoints for process CRUD operations with community
-    features including like system for process rating and discovery.
-    Supports filtering by tool configurations, stages, and tags.
+    """Manage the processes and like them.
 
     Attributes:
-        queryset (QuerySet): All Process objects
-        serializer_class (Serializer): ProcessSerializer for process operations
-        filterset_class (FilterSet): ProcessFilter for querying processes
-        permission_classes (list): Required permissions for access control
-        search_fields (list): Fields available for text search
-        ordering_fields (list): Fields available for result ordering
-        http_method_names (list): Allowed HTTP methods (GET, POST, PUT, DELETE)
+        queryset: All the processes, since they are shared by all the projects.
+        serializer_class: Serializer of the processes.
+        filterset_class: Filters available to search processes.
+        permission_classes: Role permissions plus the ownership, so a user can only
+          modify the processes that they created.
+        search_fields: Fields used by the text search.
+        ordering_fields: Fields that can be used to order the results.
+        http_method_names: Standard CRUD methods.
     """
 
     queryset = Process.objects.all()
@@ -41,20 +33,19 @@ class ProcessViewSet(LikeViewSet):
 
 
 class StepViewSet(BaseViewSet):
-    """ViewSet for managing process workflow steps.
-
-    Provides REST API endpoints for step CRUD operations within security
-    testing processes. Enables creation and deletion of individual steps
-    with filtering and search capabilities across process and tool configurations.
+    """Add and remove the steps of a process.
 
     Attributes:
-        queryset (QuerySet): Step objects backed by non-deprecated configurations
-        serializer_class (Serializer): StepSerializer for step operations
-        filterset_class (FilterSet): StepFilter for querying steps
-        permission_classes (list): Required permissions for access control
-        search_fields (list): Fields available for text search
-        ordering_fields (list): Fields available for result ordering
-        http_method_names (list): Allowed HTTP methods (GET, POST, DELETE)
+        queryset: Steps whose configuration can still be executed, since the
+          deprecated ones are only kept for the historical executions.
+        serializer_class: Serializer of the steps.
+        filterset_class: Filters available to search steps.
+        permission_classes: Role permissions plus the ownership of the process that
+          contains the step.
+        search_fields: Fields used by the text search.
+        ordering_fields: Fields that can be used to order the results.
+        http_method_names: The steps can be created and deleted, but not updated,
+          since another configuration is another step.
     """
 
     queryset = Step.objects.filter(configuration__deprecated=False)

@@ -1,27 +1,14 @@
-"""Django filter classes for wordlist model queries.
-
-Provides filtering capabilities for wordlist API endpoints with support for
-name, type, owner, and size-based filtering operations.
-"""
+"""Filters of the wordlist endpoints."""
 
 from framework.filters import LikeFilter
 from wordlists.models import Wordlist
 
 
 class WordlistFilter(LikeFilter):
-    """Filter class for Wordlist model queries.
-
-    Extends LikeFilter to provide comprehensive filtering options for wordlist
-    queries including text search, type filtering, ownership, and size ranges.
-    """
+    """Filters to search the wordlists that the tools can use."""
 
     class Meta:
-        """Meta configuration for WordlistFilter.
-
-        Attributes:
-            model (Model): The Wordlist model to filter
-            fields (dict): Available filter fields and their lookup types
-        """
+        """Filter configuration for the wordlists."""
 
         model = Wordlist
         fields = {

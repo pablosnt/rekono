@@ -1,8 +1,4 @@
-"""Django admin configuration for integrations module.
-
-Registers Integration model with Django admin interface for
-administrative management of third-party integrations.
-"""
+"""Registration of the integration model in the Django admin site."""
 
 from django.contrib import admin
 

@@ -1,9 +1,4 @@
-"""GitHub Security Advisory (GHSA) database integration.
-
-Provides integration with the GitHub Security Advisory database for automated
-vulnerability enrichment, CVSS scoring, CWE classification, EPSS data, and
-affected package information gathered from the GitHub advisory platform.
-"""
+"""Integration with the GitHub Security Advisory database."""
 
 from typing import Any
 
@@ -11,55 +6,43 @@ from framework.platforms import BaseCveProvider
 
 
 class GHSA(BaseCveProvider):
-    """Integration class for the GitHub Security Advisory database.
-
-    Provides automated vulnerability enrichment by querying the GitHub Advisory
-    API for CVE details, CVSS scores, CWE identifiers, EPSS probability data,
-    and affected package names from the GitHub security advisory platform.
-
-    Processing Features:
-        - CVE lookup via the GitHub Advisory API
-        - CVSS base score, vector, and version extraction, preferring v4 over v3 over v2
-        - CWE identifier extraction
-        - EPSS probability and percentile score extraction
-        - Affected package name extraction from advisory vulnerability entries
-        - Quality downgrade for unreviewed advisories
+    """CVE provider that completes the vulnerabilities with the GitHub advisories.
 
     Attributes:
-        url (str): GitHub Advisory API endpoint URL template for CVE queries.
+        url: Endpoint that searches advisories by CVE identifier.
     """
 
     url = "https://api.github.com/advisories?direction=asc&cve_id={cve}"
 
     def _get_cve(self, cve: str) -> dict[str, Any]:
-        """Retrieve CVE information from the GitHub Advisory API.
+        """Get the advisories that GitHub has about a CVE.
 
         Args:
-            cve (str): CVE identifier to retrieve information for.
+            cve: CVE identifier to search for.
 
         Returns:
-            dict[str, Any]: List of matching GitHub advisory records.
+            The advisories that GitHub reports for the CVE, which is an empty list
+            if it doesn't know it.
         """
         return self._request(self.session.get, self.url.format(cve=cve))
 
     def _parse_cve(self, cve: str, data: list[dict[str, Any]] | dict[str, Any]) -> BaseCveProvider.CveEnrichment | None:
-        """Parse GitHub Advisory API response into a standardized CVE enrichment object.
-
-        Selects the highest available CVSS version (v4 > v3 > v2) and extracts
-        the CVSS version string from the vector. Unreviewed advisories are handled
-        by cve_quality_score returning 0 to deprioritize them.
+        """Get the CVE data that Rekono uses from what GitHub reports.
 
         Args:
-            cve (str): CVE identifier being parsed.
-            data (list[dict[str, Any]] | dict[str, Any]): GitHub advisory API response.
+            cve: CVE identifier that was searched for.
+            data: Advisories that GitHub reported.
 
         Returns:
-            BaseCveProvider.CveEnrichment | None: Parsed enrichment data, or None if invalid.
+            The data to complete the vulnerability with, or None if GitHub didn't
+            report any advisory about the CVE.
         """
         if isinstance(data, dict) or len(data or []) == 0:
             return
         info = data[0]
         cvss_base_score = cvss_vector = cvss_version = None
+        # GitHub reports the score of every CVSS version that it knows, so the newest one that
+        # actually has a score is the one taken
         for version in ["4", "3", "2"]:
             _cvss = info["cvss_severities"].get(f"cvss_v{version}")
             cvss_base_score = _cvss.get("score", 0)
@@ -67,6 +50,8 @@ class GHSA(BaseCveProvider):
                 continue
             cvss_vector = _cvss.get("vector_string")
             cvss_version = f"{version}.0"
+            # The vector says which minor version was used to calculate the score, which the
+            # key of the score doesn't
             if cvss_vector:
                 parsed_version = cvss_vector.replace("CVSS:", "").split("/", 1)[0]
                 if parsed_version and parsed_version.startswith(version):
@@ -94,15 +79,13 @@ class GHSA(BaseCveProvider):
         )
 
     def cve_quality_score(self, data: BaseCveProvider.CveEnrichment) -> int:
-        """Calculate data quality score, returning 0 for unreviewed advisories.
-
-        Unreviewed GitHub advisories have lower reliability, so they are assigned
-        a score of 0 to prevent them from overriding higher-quality provider data.
+        """Calculate how good the data of a GitHub advisory is.
 
         Args:
-            data (BaseCveProvider.CveEnrichment): CVE enrichment data to score.
+            data: Data that this provider reported about the CVE.
 
         Returns:
-            int: 0 for unreviewed advisories, or the standard quality score otherwise.
+            Zero for the advisories that nobody reviewed, since their data can't
+            be trusted over the one of the other providers.
         """
         return 0 if data.status and data.status.lower() == "unreviewed" else super().cve_quality_score(data)

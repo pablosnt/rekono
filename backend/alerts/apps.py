@@ -1,8 +1,4 @@
-"""Django app configuration for the alerts module.
-
-Configures the alerts Django application with BaseApp integration
-for consistent framework behavior.
-"""
+"""Django app configuration of the alerts app."""
 
 from django.apps import AppConfig
 
@@ -10,13 +6,10 @@ from framework.apps import BaseApp
 
 
 class AlertsConfig(BaseApp, AppConfig):
-    """Django app configuration for alerts.
-
-    Configures the alerts Django application with BaseApp functionality
-    and standard Django app registration.
+    """Configuration of the alerts app.
 
     Attributes:
-        name (str): The name of the Django app
+        name: Name of the app in the Django app registry.
     """
 
     name = "alerts"

@@ -1,9 +1,8 @@
-"""Base class for encryption key management commands.
+"""Base command shared by the commands that manage the encryption key.
 
-Provides common functionality for Django management commands that handle
-encryption key operations including key generation, rotation, and data
-migration. This module implements secure key management operations for
-production deployments.
+The three of them, setup, rotation, and removal, rewrite every encrypted value of
+the database, so the transaction handling and the update of the configuration file
+are implemented once here.
 """
 
 import sys
@@ -20,20 +19,7 @@ from security.cryptography import Crypto
 
 
 class BaseEncryptionKeyCommand(BaseCommand, LoggingEntity):
-    """Base class providing common encryption key management functionality.
-
-    Implements shared functionality for Django management commands that handle
-    encryption key operations. Provides utilities for key validation, generation,
-    and secure data migration during key rotation operations.
-
-    Features:
-        - Database backup warning and confirmation before any encryption key operation
-        - Current encryption key validation and access
-        - New encryption key generation
-        - Secure data migration during key rotations
-        - Error handling with logging and exit codes
-        - Database-wide encrypted field processing
-    """
+    """Base command that rewrites all the encrypted values of the database."""
 
     def handle(self, *args: Any, **options: Any) -> None:
         """Warn about the need of a database backup and ask for confirmation.
@@ -45,8 +31,8 @@ class BaseEncryptionKeyCommand(BaseCommand, LoggingEntity):
         that can actually be performed.
 
         Args:
-            *args (Any): Positional arguments from Django command framework.
-            **options (Any): Keyword arguments from Django command framework.
+            *args: Positional arguments of the command, unused here.
+            **options: Options of the command, unused here.
 
         Raises:
             SystemExit: If the operation isn't confirmed by the user.
@@ -62,43 +48,32 @@ class BaseEncryptionKeyCommand(BaseCommand, LoggingEntity):
 
     @property
     def current_encryptor(self) -> Crypto:
-        """Get the Crypto instance for the current encryption key.
-
-        Reads the encryption key from the Rekono configuration file and validates
-        that one is configured before constructing the Crypto instance, since
-        Crypto requires a valid key to encrypt or decrypt.
-
-        Returns:
-            Crypto: Crypto instance configured with the current encryption key.
+        """The encryptor that uses the key currently stored in the configuration file.
 
         Raises:
-            SystemExit: If no encryption key is configured.
+            SystemExit: If no encryption key is configured, since Crypto requires a
+                valid key to encrypt or decrypt.
         """
         if not CONFIG.encryption_key:
             self.error("Encryption key is not configured. Use setup_encryption_key command first to configure it")
         return Crypto(CONFIG.encryption_key)
 
     def error(self, message: str, exit_code: int = 1) -> None:
-        """Log error message and exit with specified code.
-
-        Logs an error message and terminates the command execution with
-        the specified exit code for proper error handling in scripts.
+        """Report an error and stop the command with the given exit code.
 
         Args:
-            message (str): Error message to log and display.
-            exit_code (int): System exit code (default: 1).
+            message: Error shown to the user in the standard output.
+            exit_code: Status code that the process exits with.
         """
         self.stdout.write(self.style.ERROR(message))
         sys.exit(exit_code)
 
     def new_encryptor(self) -> tuple[Crypto, str]:
-        """Generate a new encryption key and encryptor.
-
-        Creates a new cryptographically secure encryption key and returns
-        both the configured Crypto instance and the raw key string.
+        """Generate a new encryption key.
 
         Returns:
-            tuple[Crypto, str]: Tuple of (Crypto instance, raw key string).
+            The encryptor that uses the new key, and the key itself, which the
+            commands show to the user before applying it.
         """
         new_encryption_key = Crypto.generate_encryption_key()
         return Crypto(new_encryption_key), new_encryption_key
@@ -107,11 +82,11 @@ class BaseEncryptionKeyCommand(BaseCommand, LoggingEntity):
     def rotate_encrypted_values(
         self, new_value_processor: Callable, old_value_processor: Callable, new_encryption_key: str | None
     ) -> None:
-        """Rotate encryption for all encrypted values in the database.
+        """Rewrite every encrypted value of the database and store the new key.
 
-        Performs secure migration of all encrypted data in the database by
-        processing each encrypted field through old and new value processors.
-        This enables key rotation, encryption setup, and encryption removal.
+        Each value is decrypted by the old processor and encrypted again by the new
+        one, which is what lets the same method set up, rotate, and remove the
+        encryption.
 
         Every value is processed within a single database transaction, so an
         interrupted or failed operation rolls back all the values processed so far
@@ -120,19 +95,11 @@ class BaseEncryptionKeyCommand(BaseCommand, LoggingEntity):
         can only be updated once the transaction has been committed, and makes the
         command safe to run again.
 
-        Process:
-            1. Iterate through all Django models
-            2. Identify models with encrypted fields
-            3. Process each encrypted value through the transformation pipeline
-            4. Update the database with the new encrypted values
-            5. Write new_encryption_key to the Rekono configuration file, or clear the
-               configured encryption key entirely when new_encryption_key is None
-
         Args:
-            new_value_processor (Callable): Function to process values with new key.
-            old_value_processor (Callable): Function to process values with old key.
-            new_encryption_key (str | None): Encryption key to store in the configuration
-                file, or None to remove the configured encryption key.
+            new_value_processor: Function that encrypts a value with the new key.
+            old_value_processor: Function that decrypts a value with the old key.
+            new_encryption_key: Encryption key to store in the configuration file, or
+                None to remove the configured encryption key.
 
         Raises:
             SystemExit: If some value can't be decrypted with the configured encryption key.

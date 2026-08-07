@@ -1,8 +1,4 @@
-"""URL configuration for task API endpoints.
-
-Defines URL routing for task-related REST API endpoints using
-Django REST framework's SimpleRouter.
-"""
+"""URLs of the task endpoints."""
 
 from django.urls import include, path
 from rest_framework.routers import SimpleRouter

@@ -1,8 +1,4 @@
-"""Django REST framework serializers for execution models.
-
-Provides serialization for execution records including detailed and simplified
-views with nested configuration data and computed fields.
-"""
+"""Serializers of the execution endpoints."""
 
 from rest_framework.serializers import ModelSerializer, SerializerMethodField
 
@@ -11,26 +7,18 @@ from tools.serializers import ConfigurationSerializer
 
 
 class ExecutionSerializer(ModelSerializer):
-    """Serializer for Execution model with detailed information.
-
-    Provides comprehensive serialization including nested configuration data,
-    finding relationships, and computed fields for API responses.
+    """Serializer of an execution, including its output and its findings.
 
     Attributes:
-        configuration (ConfigurationSerializer): Nested tool configuration details
-        has_report (SerializerMethodField): Whether execution has output report file
+        configuration: Tool configuration that the execution runs.
+        has_report: Whether the tool wrote a report that can be downloaded.
     """
 
     configuration = ConfigurationSerializer(many=False, read_only=True)
     has_report = SerializerMethodField()
 
     class Meta:
-        """Meta configuration for the ExecutionSerializer.
-
-        Attributes:
-            model (Model): The Execution model to serialize
-            fields (tuple): Field names to include in serialization
-        """
+        """Serializer configuration for the executions."""
 
         model = Execution
         fields = (
@@ -56,36 +44,29 @@ class ExecutionSerializer(ModelSerializer):
         )
 
     def get_has_report(self, instance: Execution) -> bool:
-        """Check if the execution has an output report file.
+        """Check if the execution has a report file that can be downloaded.
 
         Args:
-            instance (Execution): The execution instance to check
+            instance: Execution being serialized.
 
         Returns:
-            bool: True if execution has output file, False otherwise
+            Whether the tool wrote a report file. Only some tools write one, so an
+            execution can be completed and still have no report to download.
         """
         return instance.output_file is not None
 
 
 class SimpleExecutionSerializer(ModelSerializer):
-    """Simplified serializer for Execution model.
-
-    Provides minimal view of execution records with only essential fields
-    for list views and basic information display.
+    """Serializer with the minimum data needed to reference an execution.
 
     Attributes:
-        configuration (ConfigurationSerializer): Nested tool configuration details
+        configuration: Tool configuration that the execution runs.
     """
 
     configuration = ConfigurationSerializer(many=False, read_only=True)
 
     class Meta:
-        """Meta configuration for the SimpleExecutionSerializer.
-
-        Attributes:
-            model (Model): The Execution model to serialize
-            fields (tuple): Field names to include in serialization
-        """
+        """Serializer configuration for the execution references."""
 
         model = Execution
         fields = ("id", "task", "configuration", "status", "start", "end", "defectdojo_test_id")

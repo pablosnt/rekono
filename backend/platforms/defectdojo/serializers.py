@@ -1,9 +1,4 @@
-"""Django REST framework serializers for DefectDojo integration management.
-
-Provides serializer classes for DefectDojo configuration, synchronization mappings,
-and entity management with secure handling of sensitive data, validation, and
-integration with DefectDojo API client for entity existence verification.
-"""
+"""Serializers of the DefectDojo endpoints."""
 
 from typing import Any
 
@@ -20,69 +15,53 @@ from platforms.defectdojo.models import (
 
 
 class DefectDojoClientMixin:
-    """Mixin providing DefectDojo client access for serializers.
-
-    Provides shared DefectDojo integration client instance for serializers
-    that need to interact with DefectDojo API for validation or entity creation.
+    """Client that the serializers use to ask things to DefectDojo.
 
     Attributes:
-        client (DefectDojo): Shared DefectDojo integration client instance
+        client: Client shared by all the serializers.
     """
 
     client = DefectDojo()
 
 
 class DefectDojoSettingsSerializer(DefectDojoClientMixin, ModelSerializer):
-    """Serializer for DefectDojo integration settings with security validation.
-
-    Provides secure serialization of DefectDojo server configuration including
-    protected API token field handling and service availability checking.
-    Includes input validation, URL normalization, and real-time connectivity testing.
+    """Serializer of the DefectDojo configuration.
 
     Attributes:
-        api_token (ProtectedSecretField): Secure API token field with validation
-        is_available (SerializerMethodField): Real-time DefectDojo service availability
+        api_token: API token, which is masked when the settings are read.
+        is_available: Whether the configured server answers.
     """
 
     api_token = ProtectedSecretField(required=False, allow_null=True, source="secret")
     is_available = SerializerMethodField(read_only=True)
 
     class Meta:
-        """Meta configuration for DefectDojoSettingsSerializer.
-
-        Attributes:
-            model (Model): The DefectDojoSettings model to serialize
-            fields (tuple): Field names to include in serialization
-        """
+        """Serializer configuration for the DefectDojo settings."""
 
         model = DefectDojoSettings
         fields = ("id", "server", "api_token", "tls_validation", "tag", "is_available")
 
     def get_is_available(self, instance: DefectDojoSettings) -> bool:
-        """Check if DefectDojo service is currently available and functional.
-
-        Tests DefectDojo connection and configuration to determine if integration
-        is properly configured and the service is accessible.
+        """Check if the configured server answers.
 
         Args:
-            instance (DefectDojoSettings): DefectDojo settings instance to test
+            instance: Settings being serialized, not read because the check is
+              performed against the live platform.
 
         Returns:
-            bool: True if DefectDojo service is available and functional, False otherwise
+            Whether the platform answers with the configured settings.
         """
         return self.client.is_available()
 
     def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
-        """Validate and normalize DefectDojo server configuration.
-
-        Performs URL normalization by removing API paths and trailing slashes
-        to ensure consistent server URL format for API interactions.
+        """Check the configuration and clean the URL of the server.
 
         Args:
-            attrs (dict[str, Any]): Serializer attribute dictionary
+            attrs: Settings values sent by the user, including the server URL.
 
         Returns:
-            dict[str, Any]: Validated and normalized attributes
+            The validated data, with the URL of the server as Rekono needs it,
+            since the users tend to configure the URL of the API instead.
         """
         attrs = super().validate(attrs)
         if attrs.get("server"):
@@ -94,39 +73,28 @@ class DefectDojoSettingsSerializer(DefectDojoClientMixin, ModelSerializer):
 
 
 class DefectDojoSyncSerializer(DefectDojoClientMixin, ModelSerializer):
-    """Serializer for DefectDojo project synchronization mappings.
-
-    Provides serialization for project-level synchronization configurations
-    that map Rekono projects to DefectDojo hierarchical entities. Includes
-    validation for referenced DefectDojo entities.
-    """
+    """Serializer of the synchronization between a project and DefectDojo."""
 
     class Meta:
-        """Meta configuration for DefectDojoSyncSerializer.
-
-        Attributes:
-            model (Model): The DefectDojoSync model to serialize
-            fields (tuple): Field names to include in serialization
-        """
+        """Serializer configuration for the project synchronizations."""
 
         model = DefectDojoSync
         fields = ("id", "project", "product_id", "engagement_id", "reimport", "close_old_findings")
 
     def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
-        """Validate DefectDojo integration availability and entity references.
-
-        Performs comprehensive validation including DefectDojo service availability
-        and existence verification for referenced entities (products, engagements)
-        to prevent creation of orphaned or invalid relationships.
+        """Check that the product and the engagement exist in DefectDojo.
 
         Args:
-            attrs (dict[str, Any]): Serializer attribute dictionary
+            attrs: Synchronization values sent by the user, whose product and
+              engagement are looked up in DefectDojo.
 
         Returns:
-            dict[str, Any]: Validated attributes
+            The validated data.
 
         Raises:
-            ValidationError: If DefectDojo is unavailable or referenced entities don't exist
+            ValidationError: If DefectDojo can't be used, if the product or the
+                engagement don't exist, or if the engagement belongs to another
+                product, since the findings would be sent nowhere otherwise.
         """
         if not self.client.is_available():
             raise ValidationError("DefectDojo integration is not configured", code="defectdojo")
@@ -142,7 +110,6 @@ class DefectDojoSyncSerializer(DefectDojoClientMixin, ModelSerializer):
             engagement, exists = self.client.exists("engagements", engagement_id)
             if not exists:
                 raise ValidationError(f"Engagement {engagement_id} doesn't exist", code="engagement")
-            # Verify the engagement belongs to the referenced product
             if product and engagement and engagement.get("product") != product_id:
                 raise ValidationError(
                     f"Engagement {engagement_id} doesn't belong to product {product_id}", code="engagement"
@@ -151,20 +118,10 @@ class DefectDojoSyncSerializer(DefectDojoClientMixin, ModelSerializer):
 
 
 class DefectDojoTargetSyncSerializer(DefectDojoClientMixin, ModelSerializer):
-    """Serializer for DefectDojo target-specific synchronization mappings.
-
-    Provides serialization for target-level synchronization configurations
-    that map individual Rekono targets to specific DefectDojo engagements
-    for granular vulnerability tracking and assessment isolation.
-    """
+    """Serializer of the synchronization between a target and DefectDojo."""
 
     class Meta:
-        """Meta configuration for DefectDojoTargetSyncSerializer.
-
-        Attributes:
-            model (Model): The DefectDojoTargetSync model to serialize
-            fields (tuple): Field names to include in serialization
-        """
+        """Serializer configuration for the target synchronizations."""
 
         model = DefectDojoTargetSync
         fields = ("id", "defectdojo_sync", "target", "engagement_id")

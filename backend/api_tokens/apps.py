@@ -1,8 +1,4 @@
-"""Django app configuration for the api_tokens module.
-
-Configures the API tokens Django application with BaseApp integration
-for consistent framework behavior.
-"""
+"""Django app configuration of the API tokens app."""
 
 from django.apps import AppConfig
 
@@ -10,12 +6,10 @@ from framework.apps import BaseApp
 
 
 class ApiTokensConfig(BaseApp, AppConfig):
-    """Configuration class for the api_tokens app.
-
-    Configures the API tokens Django application with BaseApp functionality.
+    """Configuration of the API tokens app.
 
     Attributes:
-        name (str): The name of the Django app
+        name: Name of the app in the Django app registry.
     """
 
     name = "api_tokens"

@@ -1,12 +1,9 @@
-"""Django settings configuration for Rekono security testing platform.
+"""Django settings of the Rekono platform.
 
-This module contains the comprehensive Django settings configuration for the Rekono
-platform, including database connections, security settings, API configuration,
-authentication systems, and integration with external services and tools.
-
-The configuration system supports both development and production environments with
-secure defaults and extensive customization through environment variables and
-configuration files managed by the RekonoConfig system.
+All the deployment dependent values come from RekonoConfig, so this module only
+declares how they are wired into Django, DRF, and django-rq. Settings that depend
+on the testing mode, such as the in-memory database and the disabled rate limits,
+are selected here too.
 """
 
 import warnings
@@ -17,29 +14,12 @@ from rekono.config import RekonoConfig
 
 warnings.filterwarnings("ignore", category=SyntaxWarning, module=r".*telegram_app.*")
 
-
-################################################################################
-# Rekono basic information                                                     #
-################################################################################
-
 DESCRIPTION = "Offensive security platform that automates attack surface discovery and vulnerability management"
 VERSION = "2.0.0"
 
-
-################################################################################
-# Load configuration                                                           #
-################################################################################
-
 CONFIG = RekonoConfig()
 
-
-################################################################################
-# Django                                                                       #
-################################################################################
-
 BASE_DIR = CONFIG.base_dir
-
-# Application definition
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -118,15 +98,8 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "rekono.wsgi.application"
 
-
-################################################################################
-# Security                                                                     #
-################################################################################
-
-# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = CONFIG.secret_key
 
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
 ALLOWED_HOSTS = CONFIG.allowed_hosts
@@ -157,7 +130,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-# JWT configuration
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=10),
     "REFRESH_TOKEN_LIFETIME": timedelta(hours=1),
@@ -170,7 +142,6 @@ SIMPLE_JWT = {
     "ISSUER": "Rekono",
 }
 
-# Cookies
 JWT_ACCESS_COOKIE = "rekono_access"
 JWT_REFRESH_COOKIE = "rekono_refresh"
 JWT_MFA_COOKIE = "rekono_mfa"
@@ -182,7 +153,6 @@ COOKIES_CONFIG = {
 
 LOGGING: dict[str, Any] = {
     "version": 1,
-    # Disable default Django logging system to avoid noise
     "disable_existing_loggers": False,
     "formatters": {
         "rekono": {
@@ -191,7 +161,7 @@ LOGGING: dict[str, Any] = {
     },
     "filters": {
         "rekono": {
-            "()": "framework.logging.LoggingFilter",  # Custom logging filter
+            "()": "framework.logging.LoggingFilter",
         }
     },
     "handlers": {
@@ -218,11 +188,6 @@ LOGGING: dict[str, Any] = {
     },
 }
 
-
-################################################################################
-# API Rest                                                                     #
-################################################################################
-
 # nosemgrep: python.django.security.audit.django-rest-framework.missing-throttle-config.missing-throttle-config
 REST_FRAMEWORK: dict[str, Any] = {
     "DEFAULT_RENDERER_CLASSES": ["rest_framework.renderers.JSONRenderer"],
@@ -248,13 +213,12 @@ REST_FRAMEWORK: dict[str, Any] = {
     "NUM_PROXIES": CONFIG.trusted_proxies,
 }
 if not CONFIG.testing:
-    # Rate limit only for production
     REST_FRAMEWORK.update(  # pragma: no cover
         {
             "DEFAULT_THROTTLE_CLASSES": [
-                "rest_framework.throttling.AnonRateThrottle",  # Rate limit for anonymous users
-                "rest_framework.throttling.UserRateThrottle",  # Rate limit for authenticated users
-                "rest_framework.throttling.ScopedRateThrottle",  # Rate limit for specific cases
+                "rest_framework.throttling.AnonRateThrottle",
+                "rest_framework.throttling.UserRateThrottle",
+                "rest_framework.throttling.ScopedRateThrottle",
             ],
             "DEFAULT_THROTTLE_RATES": {
                 # 2 requests by second by IP
@@ -276,7 +240,6 @@ if not CONFIG.testing:
         }
     )
 
-# Documentation
 SPECTACULAR_SETTINGS = {
     "TITLE": "Rekono API Rest",
     "DESCRIPTION": DESCRIPTION,
@@ -296,16 +259,9 @@ SPECTACULAR_SETTINGS = {
     },
 }
 
-
-################################################################################
-# Database                                                                     #
-################################################################################
-
 if CONFIG.testing:
-    # In memory database for testing
     DATABASES = {"default": {"ENGINE": "django.db.backends.sqlite3", "NAME": ":memory:"}}
 else:
-    # Production database
     DATABASES = {  # pragma: no cover
         "default": {
             "ENGINE": "django.db.backends.postgresql",
@@ -316,11 +272,6 @@ else:
             "PORT": CONFIG.db_port,
         }
     }
-
-
-################################################################################
-# Redis Queues                                                                 #
-################################################################################
 
 default_rq_queue = {
     "HOST": CONFIG.rq_host,
@@ -349,14 +300,6 @@ RQ_QUEUES["findings"]["DEFAULT_TIMEOUT"] = 28800  # 8 hours
 # block (e.g. during tests or atomic requests), breaking the code that reads the resulting Job.
 RQ = {"COMMIT_MODE": "auto"}
 
-
-################################################################################
-# Miscellaneous                                                                #
-################################################################################
-
-# Internationalization
-# https://docs.djangoproject.com/en/4.2/topics/i18n/
-
 LANGUAGE_CODE = "en-us"
 
 TIME_ZONE = "UTC"
@@ -364,9 +307,6 @@ TIME_ZONE = "UTC"
 USE_I18N = True
 
 USE_TZ = True
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = "static/"
 frontend_public = CONFIG.base_dir.parent / "frontend" / "public"
@@ -376,8 +316,5 @@ else:
     custom_static = CONFIG.base_dir / "static"
     custom_static.mkdir(exist_ok=True)
     STATICFILES_DIRS = [custom_static]
-
-# Default primary key field type
-# https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"

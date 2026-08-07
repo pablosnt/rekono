@@ -1,8 +1,4 @@
-"""URL routing configuration for NVD NIST platform API endpoints.
-
-Defines URL patterns and routing for NVD NIST platform REST API endpoints
-using Django REST framework router configuration.
-"""
+"""URLs of the NVD NIST endpoints."""
 
 from rest_framework.routers import SimpleRouter
 

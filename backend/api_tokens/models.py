@@ -1,8 +1,4 @@
-"""Models for API tokens with secure generation and validation.
-
-Provides the ApiToken model for managing user API tokens with security features
-including unique key generation, expiration validation, and proper constraints.
-"""
+"""Model of the API tokens used to consume the Rekono API."""
 
 from django.db import models
 from rest_framework.authtoken.models import Token
@@ -17,28 +13,16 @@ from security.validators.input_validator import (
 
 
 class ApiToken(Token, BaseModel):
-    """Model representing a secure API token for user authentication.
+    """Token that authenticates the requests performed by an external client.
 
-    Extends Django REST Framework's Token model with additional security features
-    including named tokens, expiration dates, and unique key generation.
+    Extends the DRF token with a name, so a user can tell their tokens apart, and
+    with an expiration date.
 
     Attributes:
-        key (CharField): Unique token identifier (max 128 chars)
-        name (TextField): User-defined name for the token (max 100 chars)
-        user (ForeignKey): The user who owns this token
-        expiration (DateTimeField): Optional token expiration date
-
-    Example:
-        Create a new API token:
-
-        ```python
-        from datetime import datetime, timedelta
-        token = ApiToken.objects.create(
-            name="My API Token",
-            user=user,
-            expiration=datetime.now() + timedelta(days=30)
-        )
-        ```
+        key: Hash of the token value, since the value itself is never stored.
+        name: Name given by the user to identify this token.
+        user: User that owns the token, and whose permissions it grants.
+        expiration: Date when the token stops being valid, or None to never expire.
     """
 
     key = models.CharField(max_length=128, unique=True)
@@ -51,34 +35,16 @@ class ApiToken(Token, BaseModel):
     expiration = models.DateTimeField(blank=True, null=True, validators=[FutureDatetimeValidator(code="expiration")])
 
     class Meta:
-        """Meta configuration for the ApiToken model.
-
-        Defines database constraints and table-level configuration for API token instances.
-
-        Attributes:
-            constraints (list): Database constraints including unique constraint
-                              for name-user combinations
-        """
+        """Model configuration, requiring a unique token name for each user."""
 
         constraints = [models.UniqueConstraint(fields=["name", "user"], name="unique_api_token")]
 
     @classmethod
     def generate_key(cls):
-        """Generate a unique API token key.
-
-        Recursively generates keys until a unique one is found to prevent
-        collisions in the database.
-
-        Returns:
-            str: A unique 40-character hexadecimal token key
-        """
+        """Generate a token value that isn't used by any other API token."""
         key = Token.generate_key()
         return cls.generate_key() if ApiToken.objects.filter(key=key).exists() else key
 
     def __str__(self) -> str:
-        """Return a string representation of the API token.
-
-        Returns:
-            str: String in format "user_email - token_name"
-        """
+        """Return the user that owns the token and the name of the token."""
         return f"{self.user.__str__()} - {self.name}"

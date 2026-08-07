@@ -1,8 +1,8 @@
-"""Base model classes for findings framework architecture.
+"""Base models of the findings, and the manager that creates and fixes them.
 
-Provides foundational model classes including Finding and TriageFinding
-that all specific finding types inherit from, along with FindingManager
-for specialized operations like fixing and relationship management.
+The manager implements the deduplication that keeps one finding per discovery, no
+matter how many executions report it, and the propagation of the fixes through the
+findings that were discovered inside another one.
 """
 
 from dataclasses import dataclass
@@ -33,26 +33,18 @@ from targets.models import Target
 
 
 class FindingManager(Manager):
-    """Custom manager for Finding models with specialized operations.
-
-    Extends Django's Manager to provide finding-specific operations including
-    fixing/unfixing findings, managing related finding relationships, and
-    handling automatic finding lifecycle management.
-    """
+    """Manager that creates the findings and manages their fixed status."""
 
     def _get_related_findings(self, finding: "Finding", **kwargs: Any) -> list[Any]:
-        """Get all findings related to a given finding through input relationships.
-
-        Recursively traverses the relationship tree to identify all findings
-        connected to the specified finding through input type relationships
-        for automatic fixing propagation.
+        """Get all the findings discovered inside a finding, at any depth.
 
         Args:
-            finding (Finding): Source finding to find relationships for.
-            **kwargs (Any): Additional filter criteria for related findings.
+            finding: Finding whose children are searched, like a host whose ports
+              and paths are returned.
+            **kwargs: Extra conditions that the returned findings must match.
 
         Returns:
-            list[Any]: List of related findings in the relationship tree.
+            Every descendant finding, flattened into a single list.
         """
         related_findings = []
         for input_type in finding.input_type.children_input_types:
@@ -66,17 +58,17 @@ class FindingManager(Manager):
         return related_findings
 
     def fix(self, findings: Any | QuerySet, fixed_by: Any | None = None) -> Any | QuerySet:
-        """Mark findings as fixed with automatic relationship handling.
-
-        Marks findings as fixed and automatically propagates the fix status
-        to related findings with proper tracking of manual vs automatic fixes.
+        """Mark findings as fixed, and the ones discovered inside them too.
 
         Args:
-            findings (Any | QuerySet): Single finding or queryset to fix.
-            fixed_by (Any | None): User who fixed the findings, None for auto-fix.
+            findings: One finding or a queryset with several of them.
+            fixed_by: User that fixed them, or None when Rekono fixes them because
+              they aren't detected anymore.
 
         Returns:
-            Any | QuerySet: The fixed finding(s) with updated status.
+            The same finding or queryset that was given, already updated. The
+            findings discovered inside them are fixed too, but they aren't part of
+            the result.
         """
         # A fix without a user is automatic, triggered because the finding is no longer detected
         # A user-driven fix is manual and keeps the auto-fix reason empty
@@ -105,19 +97,16 @@ class FindingManager(Manager):
         return findings
 
     def remove_fix(self, finding: Any, fixed_by: Any | None = None) -> Any:
-        """Remove fixed status from finding with relationship cleanup.
-
-        Removes the fixed status from a finding and handles cleanup of
-        related findings that were automatically fixed as a consequence.
+        """Mark a finding as not fixed anymore.
 
         Args:
-            finding (Any): Finding to remove fix status from.
-            fixed_by (Any | None): User performing a manual removal, which also clears
-                                   the auto-fix from related findings. None for an
-                                   automatic removal, which skips that cascade.
+            finding: Finding that isn't fixed anymore.
+            fixed_by: User performing a manual removal, which also clears the
+              auto-fix from related findings. None for an automatic removal,
+              which skips that cascade.
 
         Returns:
-            Any: Finding instance with fix status removed.
+            The same finding that was given, already updated.
         """
         if fixed_by:
             # Related findings were auto-fixed by the same user who originally fixed this one, so
@@ -139,7 +128,7 @@ class FindingManager(Manager):
 
     @transaction.atomic()
     def create_finding(self, execution: Execution, **fields: Any) -> Any:
-        """Create or update a finding with duplicate prevention.
+        """Create a finding, or reuse the one that was already discovered.
 
         Reuses the existing finding returned by ``self.model._find_duplicate`` or creates a new one.
         A detected finding completes the one it matched (``_merge``); a user-provided finding attaches
@@ -148,11 +137,12 @@ class FindingManager(Manager):
         cannot create the same finding at once.
 
         Args:
-            execution (Execution): The execution context for this finding.
-            **fields (Any): Field values for the finding.
+            execution: Execution that discovered the finding.
+            **fields: Values of the finding fields.
 
         Returns:
-            Any: The created or updated finding instance.
+            The finding, which is related to this execution and to all the previous
+            ones that discovered it too.
         """
         is_user_input = bool(fields.get("created_from_user_input"))
         # Lock the task's target row during the findings creation
@@ -179,8 +169,8 @@ class FindingManager(Manager):
         deeper root it is preserved untouched.
 
         Args:
-            finding (Any): The existing finding to complete.
-            fields (dict[str, Any]): Field values from the incoming finding.
+            finding: Finding that was already discovered.
+            fields: Values reported by the finding that matched it.
         """
         updated_fields = []
         for field, value in fields.items():
@@ -209,19 +199,22 @@ class FindingManager(Manager):
 
 
 class Finding(BaseInput):
-    """Abstract base model for all security findings.
+    """Base model of everything that the tools discover about a target.
 
-    Provides common functionality for all finding types including fixing status
-    tracking, DefectDojo integration, relationship management, and automatic
-    lifecycle operations with execution history.
+    Findings are also inputs of the executions, so what one tool discovers can be
+    used by the next one.
 
     Attributes:
-        executions (ManyToManyField): Related executions that discovered this finding.
-        is_fixed (BooleanField): Whether finding has been marked as fixed (default: False).
-        auto_fixed (TextField): Reason for automatic fixing (None if manually fixed, values from AutoFixedReason).
-        fixed_date (DateTimeField): Timestamp when finding was fixed (optional).
-        fixed_by (ForeignKey): User who fixed the finding (optional).
-        created_from_user_input (BooleanField): Whether finding was created from user input (default: False).
+        executions: Executions that discovered this finding, which are several when
+          it keeps being detected.
+        is_fixed: Whether the finding isn't there anymore.
+        auto_fixed: Why Rekono fixed it, or None when a user did it.
+        fixed_date: Moment when the finding was fixed.
+        fixed_by: User that fixed the finding.
+        created_from_user_input: Whether the finding comes from the data that the
+          auditor provided, instead of from a tool.
+        objects: Manager that deduplicates the findings and fixes the ones that
+          stop being discovered.
     """
 
     executions = ManyToManyField(Execution, related_name="%(class)s")
@@ -242,30 +235,23 @@ class Finding(BaseInput):
     _defectdojo_endpoint_mapping: dict[str, Any | Callable] = {}
 
     class Meta:
-        """Django Meta class configuration for Finding.
-
-        Configures Finding as an abstract base class shared by all finding types
-        without creating its own database table.
-
-        Attributes:
-            abstract (bool): Marks this model as abstract (no database table).
-        """
+        """Model configuration, marking it as abstract."""
 
         abstract = True
 
     @dataclass
     class UniqueField:
-        """Declarative configuration of a field used to identify duplicate findings.
+        """Field that takes part in the identification of the duplicated findings.
 
         Attributes:
-            field (str): Model field name to match on.
-            match_null_and_empty (bool): Whether a blank value (null or, for char/text fields, empty)
-                is treated as compatible with anything on this field: an existing finding blank on it
-                matches an incoming real value, and an incoming blank value drops it from the match.
-            ignore_case (bool): Whether a string value is matched case-insensitively, so findings that
-                differ only in the casing of this field are treated as the same. Only meaningful for
-                char/text fields whose casing is cosmetic (e.g. a technology name); it must stay off for
-                fields where case is significant (paths, usernames, secrets).
+            field: Model field to match on.
+            match_null_and_empty: Whether a blank value (null or, for char/text fields, empty)
+              is treated as compatible with anything on this field: an existing finding blank on it
+              matches an incoming real value, and an incoming blank value drops it from the match.
+            ignore_case: Whether a string value is matched case-insensitively, so findings that
+              differ only in the casing of this field are treated as the same. Only meaningful for
+              char/text fields whose casing is cosmetic (e.g. a technology name); it must stay off for
+              fields where case is significant (paths, usernames, secrets).
         """
 
         field: str
@@ -281,11 +267,11 @@ class Finding(BaseInput):
         so a partial finding can be completed. Complex finding types override this method.
 
         Args:
-            execution (Execution): The execution context for this finding.
-            fields (dict[str, Any]): Field values the finding is being created/matched with.
+            execution: Execution that discovered the finding.
+            fields: Values of the finding that is being created.
 
         Returns:
-            Finding | None: The matched finding, or None if there is no duplicate.
+            The finding that was already discovered, or None if this one is new.
         """
         query = Q(executions__task__target=execution.task.target)
         for unique_field in cls._unique_fields:
@@ -305,11 +291,11 @@ class Finding(BaseInput):
         ``ignore_case`` field matches string values case-insensitively.
 
         Args:
-            unique_field (UniqueField): The unique field configuration to build the fragment for.
-            new_value (Any): The incoming value for that field.
+            unique_field: Field whose query fragment is built.
+            new_value: Value reported for that field.
 
         Returns:
-            Q | None: Query fragment matching this field, or None if it should not constrain the match.
+            The query fragment, or None when the field doesn't constrain the match.
         """
         if unique_field.match_null_and_empty and new_value in (None, ""):
             return
@@ -328,28 +314,21 @@ class Finding(BaseInput):
 
     @cached_property
     def parent_project(self) -> Project:
-        """Get the parent project for this finding.
-
-        Retrieves the project context through the execution relationship
-        for access control and organizational purposes.
-
-        Returns:
-            Project: Parent project containing this finding.
-        """
+        """The project that the finding belongs to, through its first execution."""
         return self.executions.first().task.target.project
 
     def _apply_defectdojo_mapping(self, mapping: dict[str, Any]) -> dict[str, Any]:
-        """Apply DefectDojo field mapping to finding data.
-
-        Processes finding fields according to the mapping configuration. Callable
-        values are invoked with the finding instance; string values are resolved
-        as attribute names; all other values are used as-is.
+        """Build the data that DefectDojo expects, from a field mapping.
 
         Args:
-            mapping (dict[str, Any]): Field mapping configuration dictionary.
+            mapping: DefectDojo field names and how to fill each one. A callable is
+              invoked with the finding, a string that names one of its attributes is
+              replaced by that attribute, and anything else is used as it is.
 
         Returns:
-            dict[str, Any]: Processed data dictionary for DefectDojo integration.
+            The data to be sent to DefectDojo. A string that doesn't name an
+            attribute of the finding stays in it as a literal value, so a mistyped
+            attribute name is sent instead of raising.
         """
         data = {}
         for key, value in mapping.items():
@@ -363,14 +342,13 @@ class Finding(BaseInput):
         return data
 
     def defectdojo_finding(self) -> dict[str, Any]:
-        """Generate DefectDojo finding data for platform integration.
+        """Get this finding in the format that DefectDojo imports.
 
-        Creates formatted finding data suitable for DefectDojo platform integration using
-        the configured finding mapping. The severity is emitted as its DefectDojo label
-        ("Info", "Low", "Medium", "High", "Critical") as required by the import endpoints.
+        The severity is emitted as its DefectDojo label ("Info", "Low", "Medium",
+        "High", "Critical") as required by the import endpoints.
 
         Returns:
-            dict[str, Any]: DefectDojo-formatted finding data.
+            The finding fields that DefectDojo expects, already mapped.
         """
         default_mapping = {"active": lambda instance: not instance.is_fixed, "is_mitigated": "is_fixed"}
         # TriageFinding subclasses also report verified/false positive/risk accepted status,
@@ -393,25 +371,16 @@ class Finding(BaseInput):
         return data
 
     def defectdojo_endpoint(self) -> dict[str, Any]:
-        """Generate DefectDojo endpoint data for platform integration.
-
-        Creates formatted endpoint data suitable for DefectDojo platform
-        integration using the configured endpoint mapping.
+        """Get the endpoint of this finding in the format that DefectDojo imports.
 
         Returns:
-            dict[str, Any]: DefectDojo-formatted endpoint data.
+            The endpoint fields that DefectDojo expects, which is empty for the
+            findings that don't identify one.
         """
         return self._apply_defectdojo_mapping(self._defectdojo_endpoint_mapping)
 
     def __str__(self) -> str:
-        """String representation of the finding.
-
-        Joins the string value of each declared unique field with " - ", skipping any
-        that are blank, to build a compact identifier for display and logging.
-
-        Returns:
-            str: Finding identifier built from its unique field values.
-        """
+        """Return the values that identify the finding, joined by " - "."""
         return " - ".join(
             [
                 getattr(self, unique_field.field).__str__()
@@ -422,43 +391,31 @@ class Finding(BaseInput):
 
 
 class HacktricksFinding(Finding):
-    """Abstract base model for findings enriched with HackTricks documentation.
+    """Base model of the findings that can be linked to a HackTricks guide.
 
-    Extends Finding to add HackTricks integration support. Only finding types
-    whose characteristics can be mapped to a HackTricks penetration testing
-    guide (hosts, ports, and technologies) should inherit from this class.
+    Only the findings whose characteristics can be mapped to a guide, which are the
+    hosts, the ports, and the technologies, extend this model.
 
     Attributes:
-        hacktricks_link (TextField): HackTricks documentation link (optional, max 300 chars).
+        hacktricks_link: Link to the HackTricks guide about this finding.
     """
 
     hacktricks_link = TextField(max_length=300, blank=True, null=True)
 
     class Meta:
-        """Django Meta class configuration for HacktricksFinding.
-
-        Configures HacktricksFinding as an abstract base class for findings that
-        carry a HackTricks documentation link, without creating its own database table.
-
-        Attributes:
-            abstract (bool): Marks this model as abstract (no database table).
-        """
+        """Model configuration, marking it as abstract."""
 
         abstract = True
 
 
 class TriageFinding(Finding):
-    """Abstract base model for findings requiring triage workflow.
-
-    Extends Finding to add triage functionality enabling findings to be
-    classified as false positives, true positives, or won't fix with
-    detailed tracking and audit trails.
+    """Base model of the findings that the auditors review one by one.
 
     Attributes:
-        triage_status (TextField): Current triage status from TriageStatus enum (default: UNTRIAGED, max 15 chars).
-        triage_comment (TextField): Comment explaining triage decision (optional, max 300 chars).
-        triage_date (DateTimeField): Timestamp when finding was triaged (optional).
-        triage_by (ForeignKey): User who performed the triage operation (optional).
+        triage_status: Conclusion of the review, untriaged until someone reviews it.
+        triage_comment: Explanation of that conclusion.
+        triage_date: Moment when the finding was reviewed.
+        triage_by: User that reviewed the finding.
     """
 
     triage_status = TextField(max_length=15, choices=TriageStatus.choices, default=TriageStatus.UNTRIAGED)
@@ -469,13 +426,6 @@ class TriageFinding(Finding):
     triage_by = ForeignKey(AUTH_USER_MODEL, related_name="triaged_%(class)s", on_delete=SET_NULL, blank=True, null=True)
 
     class Meta:
-        """Django Meta class configuration for TriageFinding.
-
-        Configures TriageFinding as an abstract base class for findings that
-        support the triage workflow, without creating its own database table.
-
-        Attributes:
-            abstract (bool): Marks this model as abstract (no database table).
-        """
+        """Model configuration, marking it as abstract."""
 
         abstract = True

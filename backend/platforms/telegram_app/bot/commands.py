@@ -1,8 +1,4 @@
-"""Telegram Bot command implementations for security testing operations.
-
-Provides basic bot commands for user authentication, help system, and
-project management through simple command interactions.
-"""
+"""Bot commands that are answered with a single message."""
 
 from typing import Any
 
@@ -21,35 +17,27 @@ from users.models import User
 
 
 class BaseCommand(CommandHandler, BaseTelegramBot, LoggingEntity):
-    """Base class for Telegram Bot commands.
-
-    Combines CommandHandler functionality with bot framework capabilities
-    to provide a foundation for implementing bot commands with error handling
-    and logging support.
-    """
+    """Base command that the users run by writing its name in the chat."""
 
     def __init__(self, **kwargs: Any) -> None:
-        """Initialize the CommandHandler with this command's name and callback.
+        """Prepare the command to be registered in the bot.
 
         Args:
-            **kwargs (Any): Accepted and discarded. They are not forwarded to the
-                CommandHandler, which is always built from this command's own name
-                and callback.
+            **kwargs: Not used, since a command is always built from its own name
+              and from its own answer.
         """
         super().__init__(command=self.command_name, callback=self.execute_command)
 
     async def execute_command(self, update: Update, context: CallbackContext) -> None | int:
-        """Execute the command with error handling.
-
-        Wrapper method that calls the actual command implementation with
-        exception handling to prevent bot crashes.
+        """Answer the command, logging whatever goes wrong.
 
         Args:
-            update (Update): The Telegram update containing the command.
-            context (CallbackContext): The callback context for the command.
+            update: Message that the user wrote.
+            context: Data that the conversation remembers.
 
         Returns:
-            None | int: Command result or conversation state.
+            The next question of the conversation, or None if the command is
+            answered with a single message or if answering it failed.
         """
         try:
             # Propagate the return value not to break conversations flow
@@ -61,15 +49,13 @@ class BaseCommand(CommandHandler, BaseTelegramBot, LoggingEntity):
 
 
 class Help(BaseCommand):
-    """Help command for displaying available bot commands and usage information.
-
-    Provides comprehensive help system showing all available commands organized
-    by sections with descriptions and usage information.
+    """Command that tells the users what the bot can do.
 
     Attributes:
-        help (str): Command help text displayed in command list.
-        section (Section): Command section for organization (BASIC).
-        allow_readers (bool): Allow users with reader permissions to use this command.
+        help: Description of the command.
+        section: Group of the help message that the command belongs to.
+        allow_readers: Everybody can ask for help.
+        bot_commands: Commands that the help message describes, sorted by section.
     """
 
     help = "Show this message"
@@ -77,23 +63,23 @@ class Help(BaseCommand):
     allow_readers = True
 
     def __init__(self, commands: list[BaseTelegramBot]) -> None:
-        """Initialize the help command with a list of available commands.
+        """Prepare the command with the commands that it has to describe.
 
         Args:
-            commands (list[BaseTelegramBot]): List of bot commands to include in help.
+            commands: Commands of the bot, without this one.
         """
         self.bot_commands = commands + [self]
         self.bot_commands.sort(key=lambda c: c.section.value)
         super().__init__()
 
     def _build_help_message(self, commands: list[BaseTelegramBot]) -> str:
-        """Build formatted help message with commands organized by section.
+        """Write the help message, with the commands grouped by their section.
 
         Args:
-            commands (list[BaseTelegramBot]): List of commands to include in help.
+            commands: Commands to describe.
 
         Returns:
-            str: Formatted help message with escaped Markdown content.
+            The message, escaped so Telegram doesn't read it as Markdown.
         """
         message = f"{self.escape(DESCRIPTION)}\n"
         current_section = None
@@ -105,18 +91,16 @@ class Help(BaseCommand):
         return message
 
     async def _execute_command(self, update: Update, context: CallbackContext) -> int | None:
-        """Execute the help command showing available commands.
-
-        Displays different command sets based on user permissions (auditor vs reader).
+        """Answer with the commands that the user can run.
 
         Args:
-            update (Update): The Telegram update containing the command.
-            context (CallbackContext): The callback context for the command.
+            update: Message that the user wrote.
+            context: Data that the conversation remembers.
 
         Returns:
-            int | None: None for simple command execution.
+            None, since the command is answered with a single message instead of
+            starting a conversation.
         """
-        # await super().execute_command(update, context)
         chat = await self.get_active_telegram_chat(update)
         await self.log_command_execution(update, self.command_name, chat.user if chat else None)
         if chat:
@@ -131,19 +115,15 @@ class Help(BaseCommand):
 
 
 class Start(BaseCommand):
-    """Start command for generating the OTP that links a chat to a Rekono account.
+    """Command that gives the code needed to link the chat to an account.
 
-    Creates a TelegramChat row with user=None and a fresh One-Time Password, then
-    replies with the OTP for the user to paste into their Rekono profile. The bot
-    itself never sets TelegramChat.user; the actual link to a Rekono account is made
-    by the separate telegram/link REST endpoint, which validates the OTP and its
-    expiration and rejects users that already have a linked chat. Until that step
-    completes, this chat is not yet an active, authenticated chat for the bot.
+    The bot never links the chat itself, the users have to redeem the code in
+    Rekono, so nobody can link a chat to an account that isn't theirs.
 
     Attributes:
-        help (str): Command help text displayed in command list.
-        section (Section): Command section for organization (BASIC).
-        allow_readers (bool): Allow users with reader permissions to use this command.
+        help: Description of the command.
+        section: Group of the help message that the command belongs to.
+        allow_readers: Everybody can link their chat.
     """
 
     help = "Initialize the Rekono bot"
@@ -152,13 +132,14 @@ class Start(BaseCommand):
 
     @sync_to_async
     def _update_or_create_telegram_chat_async(self, chat_id: int) -> tuple[TelegramChat, str]:
-        """Create or update Telegram chat with new OTP for account linking.
+        """Give a chat a new code to be linked with.
 
         Args:
-            chat_id (int): The Telegram chat ID to create or update.
+            chat_id: Identifier that the chat has in Telegram.
 
         Returns:
-            tuple[TelegramChat, str]: The chat instance and plain text OTP.
+            The chat and the code that the user has to redeem in Rekono, which is
+            only stored as a hash.
         """
         plain_otp = User.objects.generate_otp(TelegramChat)
         telegram_chat, _ = TelegramChat.objects.update_or_create(
@@ -172,17 +153,15 @@ class Start(BaseCommand):
         return telegram_chat, plain_otp
 
     async def _execute_command(self, update: Update, context: CallbackContext) -> int | None:
-        """Execute the start command to generate account linking token.
-
-        Only runs in private chats. In a group or channel the request is rejected
-        so the linking token is never exposed to other members.
+        """Answer with the code that links the chat to a Rekono account.
 
         Args:
-            update (Update): The Telegram update containing the command.
-            context (CallbackContext): The callback context for the command.
+            update: Message that the user wrote.
+            context: Data that the conversation remembers.
 
         Returns:
-            int | None: None for simple command execution.
+            None, since the command is answered with a single message instead of
+            starting a conversation.
         """
         self.validate_update(update)
         await self.log_command_execution(update, self.command_name)
@@ -215,16 +194,12 @@ Then, run /help to start hacking\!
 
 
 class Logout(BaseCommand):
-    """Logout command for unlinking a Telegram chat from its Rekono account.
-
-    Deletes the TelegramChat row for this chat outright, unlike Start's linking
-    step which goes through the telegram/link REST endpoint. A later /start from
-    the same chat creates a fresh, unlinked TelegramChat with a new OTP.
+    """Command that unlinks the chat from the account that it belongs to.
 
     Attributes:
-        help (str): Command help text displayed in command list.
-        section (Section): Command section for organization (BASIC).
-        allow_readers (bool): Allow users with reader permissions to use this command.
+        help: Description of the command.
+        section: Group of the help message that the command belongs to.
+        allow_readers: Everybody can unlink their chat.
     """
 
     help = "Unlink bot from your account"
@@ -233,10 +208,10 @@ class Logout(BaseCommand):
 
     @sync_to_async
     def _logout_user_in_telegram_async(self, chat_id: int) -> None:
-        """Remove Telegram chat and log user logout.
+        """Remove a chat, so it has to be linked again to be used.
 
         Args:
-            chat_id (int): The Telegram chat ID to remove.
+            chat_id: Identifier that the chat has in Telegram.
         """
         chat = TelegramChat.objects.filter(chat_id=chat_id).first()
         if chat:
@@ -247,16 +222,16 @@ class Logout(BaseCommand):
             chat.delete()
 
     async def _execute_command(self, update: Update, context: CallbackContext) -> int | None:
-        """Execute the logout command to unlink the chat.
+        """Unlink the chat and say goodbye.
 
         Args:
-            update (Update): The Telegram update containing the command.
-            context (CallbackContext): The callback context for the command.
+            update: Message that the user wrote.
+            context: Data that the conversation remembers.
 
         Returns:
-            int | None: None for simple command execution.
+            None, since the command is answered with a single message instead of
+            starting a conversation.
         """
-        # await super().execute_command(update, context)
         self.validate_update(update)
         await self.log_command_execution(update, self.command_name)
         await self._logout_user_in_telegram_async(update.effective_chat.id)
@@ -264,30 +239,26 @@ class Logout(BaseCommand):
 
 
 class Cancel(BaseCommand):
-    """Cancel command for terminating ongoing conversations and operations.
-
-    Cancels any active conversation or operation and clears the conversation
-    context, returning the user to the main bot interface.
+    """Command that stops the conversation that the user is having with the bot.
 
     Attributes:
-        help (str): Command help text displayed in command list.
-        section (Section): Command section for organization (BASIC).
+        help: Description of the command.
+        section: Group of the help message that the command belongs to.
     """
 
     help = "Cancel current operation"
     section = Section.BASIC
 
     async def _execute_command(self, update: Update, context: CallbackContext) -> int | None:
-        """Execute the cancel command to end conversations.
+        """Forget what the conversation asked for and end it.
 
         Args:
-            update (Update): The Telegram update containing the command.
-            context (CallbackContext): The callback context for the command.
+            update: Message that the user wrote.
+            context: Data that the conversation remembers.
 
         Returns:
-            int: ConversationHandler.END to terminate conversations.
+            The end of the conversation.
         """
-        # await super().execute_command(update, context)
         self.validate_update(update)
         await self.log_command_execution(update, self.command_name)
         self.remove_all_context_values(context)
@@ -296,41 +267,35 @@ class Cancel(BaseCommand):
 
 
 class SelectionCommands(BaseCommand):
-    """Base class for project-related commands.
-
-    Abstract base class for commands that handle project operations
-    such as project selection and context management.
+    """Base command that works with the project that the chat is using.
 
     Attributes:
-        section (Section): Command section for organization (PROJECTS).
+        section: Group of the help message that these commands belong to.
     """
 
     section = Section.PROJECTS
 
 
 class ShowProject(SelectionCommands):
-    """Command for displaying the currently selected project.
-
-    Shows the project currently stored in the conversation context,
-    or prompts to select a project if none is selected.
+    """Command that says which project the chat is using.
 
     Attributes:
-        help (str): Command help text displayed in command list.
+        help: Description of the command.
     """
 
     help = "Select one project to be used in next commands"
 
     async def _execute_command(self, update: Update, context: CallbackContext) -> int | None:
-        """Execute the show project command.
+        """Answer with the project that the chat is using.
 
         Args:
-            update (Update): The Telegram update containing the command.
-            context (CallbackContext): The callback context for the command.
+            update: Message that the user wrote.
+            context: Data that the conversation remembers.
 
         Returns:
-            int | None: None for simple command execution.
+            None, since the command is answered with a single message instead of
+            starting a conversation.
         """
-        # await super().execute_command(update, context)
         self.validate_update(update)
         await self.log_command_execution(update, self.command_name)
         project = self.get_context_value(context, Context.PROJECT)
@@ -341,28 +306,25 @@ class ShowProject(SelectionCommands):
 
 
 class ClearProject(SelectionCommands):
-    """Command for clearing the currently selected project from context.
-
-    Removes the project selection from the conversation context,
-    requiring the user to select a new project for subsequent operations.
+    """Command that forgets the project that the chat is using.
 
     Attributes:
-        help (str): Command help text displayed in command list.
+        help: Description of the command.
     """
 
     help = "Clear project selection"
 
     async def _execute_command(self, update: Update, context: CallbackContext) -> int | None:
-        """Execute the clear project command.
+        """Forget the project that the chat is using.
 
         Args:
-            update (Update): The Telegram update containing the command.
-            context (CallbackContext): The callback context for the command.
+            update: Message that the user wrote.
+            context: Data that the conversation remembers.
 
         Returns:
-            int | None: None for simple command execution.
+            None, since the command is answered with a single message instead of
+            starting a conversation.
         """
-        # await super().execute_command(update, context)
         self.validate_update(update)
         await self.log_command_execution(update, self.command_name)
         self.remove_context_value(context, Context.PROJECT)

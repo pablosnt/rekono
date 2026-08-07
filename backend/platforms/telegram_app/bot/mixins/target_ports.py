@@ -1,12 +1,7 @@
-"""Telegram Bot mixin for target port creation and selection workflows.
+"""Steps that ask which port of a target to work with, or create a new one.
 
-Provides target port functionality for conversations that require port
-specification, covering creation with validation and summary display, and
-selection of an existing port to focus an execution on a single target port.
-Every state here expects Context.TARGET to already be set by TargetMixin.
-reply_summary is only used by the /newport conversation, which ends there;
-other conversations leave Context.TARGET_PORT set (or unset for "all ports")
-and move on to further mixins instead.
+The ports belong to a target, so these steps need the target to have been chosen
+before.
 """
 
 from asgiref.sync import sync_to_async
@@ -23,33 +18,25 @@ from users.models import User
 
 
 class TargetPortMixin(BaseMixin):
-    """Mixin providing target port creation and selection functionality.
-
-    Enables conversations to create new target ports and to select an existing
-    target port to focus an execution on, with validation and error handling
-    for security testing workflows.
+    """Steps that choose the port of a target, or create it.
 
     Attributes:
-        all_target_ports (str): Label for the option that runs against the whole
-                                target without linking the task to any target port.
+        all_target_ports: Answer that scans the whole target instead of one of its
+          ports.
     """
 
     all_target_ports = "🌐 All ports"
 
     @sync_to_async
     def _get_target_ports_keyboard_async(self, target: Target, user: User) -> list[InlineKeyboardButton]:
-        """Generate keyboard buttons for the target ports of a target (async wrapper).
-
-        Only ports of targets belonging to the user's projects are listed, so an
-        empty keyboard is returned for targets the user has no access to.
+        """Get one button per port of a target, with its path if it has one.
 
         Args:
-            target (Target): The target whose ports should be listed.
-            user (User): User that must be a member of the target's project.
+            target: Target whose ports are asked for.
+            user: User that answered, who must be a member of its project.
 
         Returns:
-            list[InlineKeyboardButton]: Buttons for the available target ports,
-                                        showing the path when present.
+            The buttons, or none of them if the user can't see that target.
         """
         return [
             InlineKeyboardButton(f"{tp.port} - {tp.path}" if tp.path else str(tp.port), callback_data=tp.id)
@@ -57,20 +44,16 @@ class TargetPortMixin(BaseMixin):
         ]
 
     async def ask_for_target_port(self, update: Update, context: CallbackContext) -> int:
-        """Display target port selection options for the selected target.
-
-        Shows one button per target port of the selected target plus an option to
-        run against the whole target. The conversation ends when the chat isn't
-        linked to an authorized user or no target has been selected yet. When the
-        target has no ports, the step is skipped silently and the conversation
-        advances to the next state.
+        """Ask the users to choose one port of the target, or all of them.
 
         Args:
-            update (Update): The Telegram update containing user interaction.
-            context (CallbackContext): The callback context for the conversation.
+            update: Message that the user wrote.
+            context: Data that the conversation remembers.
 
         Returns:
-            int: Next conversation state after the prompt or when skipped.
+            The step that saves the answer, the step after it if the target has no
+            port defined, or the end of the conversation if the chat can't run the
+            command or if no target was chosen.
         """
         chat = await self.get_active_telegram_chat(update)
         if not chat:
@@ -87,18 +70,15 @@ class TargetPortMixin(BaseMixin):
         return await self.go_to_next_state(update, context, self.get_next_state(self.ask_for_target_port))
 
     async def save_target_port(self, update: Update, context: CallbackContext) -> int:
-        """Save the selected target port to conversation context.
-
-        Stores the selected target port in the conversation context. When the user
-        chooses to run against the whole target, nothing is stored so the task is
-        not linked to any target port.
+        """Remember the port that the users chose, if they chose one.
 
         Args:
-            update (Update): The Telegram update containing target port selection.
-            context (CallbackContext): The callback context for the conversation.
+            update: Message that the user wrote.
+            context: Data that the conversation remembers.
 
         Returns:
-            int: Next conversation state after target port selection.
+            The next step of the conversation. Nothing is remembered when the users
+            choose to scan the whole target, so the task isn't linked to any port.
         """
         self.validate_update(update)
         if update.callback_query and update.callback_query.data == self.all_target_ports:
@@ -113,16 +93,14 @@ class TargetPortMixin(BaseMixin):
         )
 
     async def ask_for_new_target_port(self, update: Update, context: CallbackContext) -> int:
-        """Prompt user to input a new target port number.
-
-        Requests user to provide port number for target port creation.
+        """Ask the users to write the port that they want to add to the target.
 
         Args:
-            update (Update): The Telegram update containing user interaction.
-            context (CallbackContext): The callback context for the conversation.
+            update: Message that the user wrote.
+            context: Data that the conversation remembers.
 
         Returns:
-            int: Next conversation state for port input processing.
+            The step that creates the port.
         """
         self.validate_update(update)
         return await self.go_to_next_state(
@@ -134,17 +112,15 @@ class TargetPortMixin(BaseMixin):
         )
 
     async def create_target_port(self, update: Update, context: CallbackContext) -> int | None:
-        """Create target port from user input with validation.
-
-        Processes user input to create a target port, validates port number format,
-        and handles cancellation commands with proper error messaging.
+        """Add the port that the users wrote to the chosen target.
 
         Args:
-            update (Update): The Telegram update containing port number input.
-            context (CallbackContext): The callback context for the conversation.
+            update: Message that the user wrote.
+            context: Data that the conversation remembers.
 
         Returns:
-            int | None: Next conversation state after port creation or error handling.
+            The next step, the previous one if what the users wrote isn't a valid
+            port, or the end of the conversation if no target was chosen.
         """
         self.validate_update(update)
         if not update.effective_message or not update.effective_message.text:
@@ -175,17 +151,14 @@ class TargetPortMixin(BaseMixin):
         return await self.go_to_next_state(update, context, next_state, invoke_next_state=instance is None)
 
     async def reply_summary(self, update: Update, context: Context) -> int:
-        """Display target port creation summary to user.
-
-        Shows confirmation message with created target port details and
-        cleans up conversation context.
+        """Tell the users which port was created and forget the conversation.
 
         Args:
-            update (Update): The Telegram update containing user interaction.
-            context (Context): The conversation context containing port data.
+            update: Message that the user wrote.
+            context: Data that the conversation remembers.
 
         Returns:
-            int: Next conversation state after summary display.
+            The end of the conversation, since this is its last step.
         """
         self.validate_update(update)
         target_port = self.get_context_value(context, Context.TARGET_PORT)

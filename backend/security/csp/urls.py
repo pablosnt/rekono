@@ -1,9 +1,8 @@
-"""URL configuration for Content Security Policy reporting endpoints.
+"""URLs where the browsers deliver the CSP violation reports.
 
-Defines two distinct URL patterns for CSP violation ingestion: one for the modern
-Reporting API (``report-to`` directive) and one for the legacy ``report-uri``
-directive. Both paths are intentionally unauthenticated so browsers can deliver
-reports without user credentials regardless of the current session state.
+There is one endpoint for the modern Reporting API (``report-to`` directive) and
+another one for the legacy ``report-uri`` directive. Both are unauthenticated, since
+the browsers can't attach credentials when they deliver a report.
 """
 
 from django.urls import path

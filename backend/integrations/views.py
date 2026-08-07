@@ -1,8 +1,4 @@
-"""Django REST framework views for integration management.
-
-Provides REST API endpoints for managing third-party integrations, including
-read operations and enabling or disabling individual integrations.
-"""
+"""Viewset of the integration endpoints."""
 
 from rest_framework.permissions import IsAuthenticated
 
@@ -14,19 +10,18 @@ from security.authorization.permissions import RekonoModelPermission
 
 
 class IntegrationViewSet(BaseViewSet):
-    """ViewSet for managing third-party integration configurations.
-
-    Provides REST API endpoints for integration read operations and status updates.
-    Supports filtering by name and enabled status with search capabilities.
+    """Read the external platforms and enable or disable them.
 
     Attributes:
-        queryset (QuerySet): All Integration objects
-        serializer_class (Serializer): Default serializer for integration operations
-        filterset_class (FilterSet): Filter class for querying integrations
-        permission_classes (list): Required permissions for access
-        search_fields (list): Fields that can be searched
-        ordering_fields (list): Fields that can be used for ordering
-        http_method_names (list): Allowed HTTP methods (GET, PUT only)
+        queryset: All the integrations, since they aren't tied to any project.
+        serializer_class: Serializer of the integrations.
+        filterset_class: Filters of the integrations.
+        permission_classes: Any user can read the integrations, but only the ones
+          that can change them are able to enable or disable them.
+        search_fields: Free text search over the name and the description.
+        ordering_fields: Fields that the integrations can be sorted by.
+        http_method_names: GET and PUT only, since the integrations come from the
+          fixtures.
     """
 
     queryset = Integration.objects.all()

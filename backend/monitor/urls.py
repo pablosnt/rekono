@@ -1,8 +1,4 @@
-"""URL configuration for monitor module.
-
-Defines URL patterns for the monitor REST API endpoint, exposing the
-monitoring settings resource for viewing and updating.
-"""
+"""URLs of the monitor endpoints."""
 
 from rest_framework.routers import SimpleRouter
 

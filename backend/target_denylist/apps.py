@@ -1,8 +1,4 @@
-"""Django application configuration for target denylist module.
-
-Configures the target denylist application with fixture loading support
-and model registration for proper integration with Rekono's framework.
-"""
+"""Django app configuration of the target denylist app."""
 
 from typing import Any
 
@@ -13,38 +9,35 @@ from framework.apps import BaseApp
 
 
 class TargetDenylistConfig(BaseApp, AppConfig):
-    """Application configuration for target denylist module.
-
-    Extends BaseApp and AppConfig to provide proper Django application
-    setup with fixture loading capabilities and model registration.
+    """Configuration of the target denylist app.
 
     Attributes:
-        name (str): Application name identifier.
-        recreate_data (bool): Enable full data recreation during fixture loading.
+        name: Name of the app in the Django app registry.
+        recreate_data: The default entries are reloaded on every migration, so the
+          denylist of a deployment is updated when Rekono adds or removes entries.
     """
 
     name = "target_denylist"
     recreate_data = True
 
     def _select_data_to_recreate(self, model: Any) -> QuerySet:
-        """Select user-created denylist entries to preserve during fixture recreation.
-
-        Identifies custom denylist entries created by users (default=False) that
-        should be preserved during data recreation to maintain user configurations.
+        """Select the entries added by the administrators, to keep them.
 
         Args:
-            model (Any): The TargetDenylist model class.
+            model: The denylist model, which is about to be cleared.
 
         Returns:
-            QuerySet: User-created denylist entries to preserve.
+            The entries that aren't provided by Rekono, since the default ones are
+            loaded again from the fixtures.
         """
         return model.objects.filter(default=False)
 
     def _get_models(self) -> list[Any]:
-        """Get list of models for this application.
+        """Get the denylist model, whose data comes from the fixtures.
 
         Returns:
-            list[Any]: List containing TargetDenylist model class.
+            The denylist model, imported inside the method because the models
+            don't exist yet the first time that the migrations run.
         """
         from target_denylist.models import TargetDenylist
 

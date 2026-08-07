@@ -1,31 +1,28 @@
-"""Enumeration definitions for security validation patterns.
-
-Provides regex pattern enumerations for input validation and security
-controls across the Rekono platform.
-"""
+"""Regex patterns shared by the Rekono validators."""
 
 from enum import Enum
 
 
 class Regex(Enum):
-    """Enumeration of regex patterns for input validation.
+    """Regex pattern that a kind of value must match to be accepted.
 
-    Provides regex patterns for validating user input and implementing
-    security controls to prevent injection attacks and ensure data integrity.
+    All of them describe an accepted shape, except INJECTION and SENSITIVE_ENV,
+    which describe values that must be rejected.
 
     Attributes:
-        IP_RANGE (str): Validates IP address ranges (e.g., 192.168.1.1-50)
-        NAME (str): General name fields with international character support
-        TEXT (str): Safe text content excluding dangerous characters
-        TARGET (str): Security testing target validation (IPs, domains, paths)
-        TARGET_REGEX (str): Extended target patterns with regex metacharacters
-        PATH (str): File and directory path validation
-        PATH_WITH_QUERYPARAMS (str): Web paths including query parameters
-        CVE (str): Common Vulnerabilities and Exposures identifier format
-        SECRET (str): Secure credential and password validation
-        INJECTION (str): Pattern to detect common injection attack vectors
-        SENSITIVE_ENV (str): Pattern to detect sensitive environment variable
-            assignments (PATH, LD_PRELOAD, etc.) that could hijack a subprocess
+        IP_RANGE: Range of IP addresses, like 192.168.1.1-50.
+        NAME: Name of an entity, including accented and punctuation characters.
+        TEXT: Free text, excluding the characters used to inject HTML or commands.
+        TARGET: IP address, IP range, domain, or URL that can be scanned.
+        TARGET_REGEX: Deny list entry, which can also include regex metacharacters
+          to deny several targets at once.
+        PATH: File system or web path.
+        PATH_WITH_QUERYPARAMS: Web path including its query parameters and fragment.
+        CVE: CVE identifier in CVE-YYYY-NNNN form.
+        SECRET: Credential value, which accepts most printable characters.
+        INJECTION: Characters commonly used to inject commands or HTML.
+        SENSITIVE_ENV: Environment variable assignments (PATH, LD_PRELOAD, and so
+          on) that could hijack the subprocess of a tool execution.
     """
 
     IP_RANGE = r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}-\d{1,3}"

@@ -1,9 +1,4 @@
-"""Host metadata enrichment platform integration.
-
-Provides automated host metadata enrichment including DNS resolution,
-geolocation services, and network intelligence gathering for discovered
-host findings during security assessments.
-"""
+"""Integration that completes the hosts with their name and their location."""
 
 import socket
 import warnings
@@ -21,45 +16,29 @@ import geocoder  # noqa: E402
 
 
 class HostsMetadata(BaseIntegration):
-    """Integration class for host metadata enrichment and intelligence gathering.
-
-    Automatically enriches host findings with additional metadata including
-    DNS reverse resolution for domain names and geolocation information for
-    public IP addresses using external geolocation services.
-
-    Processing Features:
-        - DNS reverse resolution to discover the hostname of private and public IPs
-        - Geolocation lookup (country, city, coordinates) for public IPs via geocoder
-        - Always enabled, with no per-integration setting to turn it off
+    """Integration that resolves the domain of a host and where it's located.
 
     Attributes:
-        finding_types (list): List of finding types processed by this integration (Host)
+        finding_types: Only the hosts have a domain and a location.
     """
 
     finding_types = [Host]
 
     def is_enabled(self) -> bool:
-        """Check if host metadata enrichment integration is enabled.
-
-        Always returns True. Unlike the other integrations, HostsMetadata has no
-        Integration configuration record to toggle, since this enrichment is treated
-        as a core part of finding processing rather than an optional connector.
+        """Check if this platform must be used.
 
         Returns:
-            bool: Always True for this integration.
+            Always true, since this is the only platform without an integration
+            that the users can disable: resolving a host is part of discovering it.
         """
         return True
 
     def _process_finding(self, execution: Execution, finding: Finding) -> None:
-        """Process and enrich host finding with metadata and geolocation information.
-
-        Performs DNS reverse resolution to discover hostnames and queries geolocation
-        services for public IP addresses to gather geographic intelligence including
-        country, city, and coordinate information.
+        """Complete a discovered host with its domain and its location.
 
         Args:
-            execution (Execution): The execution context for this processing
-            finding (Finding): The host finding to enrich with metadata
+            execution: Execution that discovered the host.
+            finding: Host to complete.
         """
         ip_type = Target.get_type(finding.ip)
         update = []

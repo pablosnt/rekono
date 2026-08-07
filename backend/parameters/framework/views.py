@@ -1,8 +1,4 @@
-"""Django REST framework base views for input parameters.
-
-Provides base ViewSet implementation for input parameter management
-with project-level access control and permission enforcement.
-"""
+"""Base viewset of the input parameter endpoints."""
 
 from django.db.models import QuerySet
 from rest_framework.permissions import IsAuthenticated
@@ -15,15 +11,13 @@ from security.authorization.permissions import (
 
 
 class InputParameterViewSet(BaseViewSet):
-    """Base ViewSet for input parameter management with project-level access control.
-
-    Provides common functionality for all input parameter ViewSets including
-    project-level filtering and permission enforcement through task associations.
+    """Base viewset to read and create the input parameters.
 
     Attributes:
-        queryset (QuerySet): Base queryset (overridden by concrete implementations)
-        permission_classes (list): Required permissions for access
-        http_method_names (list): Allowed HTTP methods (GET, POST only)
+        queryset: Defined by the viewset of each parameter type.
+        permission_classes: Role permissions plus the membership in the project.
+        http_method_names: GET and POST only, since the parameters can't be updated
+          or removed once a task is using them.
     """
 
     queryset = None
@@ -31,12 +25,9 @@ class InputParameterViewSet(BaseViewSet):
     http_method_names = ["get", "post"]
 
     def get_queryset(self) -> QuerySet:
-        """Filter queryset to show only parameters accessible to the current user.
-
-        Filters parameters based on project membership through task associations,
-        ensuring users only see parameters from projects they belong to.
+        """Get the parameters used by the tasks of the projects of the user.
 
         Returns:
-            QuerySet: Filtered queryset of accessible input parameters
+            The parameters that the user can access, without duplicates.
         """
         return self.queryset.filter(**{f"{self.linked_model._project_field}__members": self.request.user}).distinct()

@@ -1,8 +1,7 @@
-"""Django app configuration for the users module.
+"""Django app configuration of the users app.
 
-Configures the users application with automatic creation of authentication
-groups and role-based permission assignments once database migrations
-are complete.
+It's the last app loaded by Django, since the groups that it creates need the
+permissions of all the other models to exist already.
 """
 
 from typing import Any
@@ -15,38 +14,27 @@ from security.authorization.roles import ROLES, Role
 
 
 class UsersConfig(BaseApp, AppConfig):
-    """Django app configuration for the users module.
-
-    Extends BaseApp and AppConfig to provide user-management-specific
-    initialization, creating Django auth groups and assigning role-based
-    permissions after migrations.
+    """Configuration of the users app.
 
     Attributes:
-        name (str): The name of the Django app
+        name: Name of the app in the Django app registry.
     """
 
     name = "users"
 
     def ready(self) -> None:
-        """Initialize the users application when Django is ready.
-
-        Connects the post-migrate signal to initialize user groups and permissions
-        after database migrations are complete.
-        """
+        """Schedule the groups of the roles to be created after each migration."""
         post_migrate.connect(self.initialize_user_groups, sender=self)
 
     def initialize_user_groups(self, **kwargs: Any) -> None:
-        """Initialize user groups and assign permissions after database migration.
+        """Create the group of each role and set the permissions that it grants.
 
-        Creates Django auth groups for each security role and replaces their
-        permissions with the ones granted by the ROLES configuration. ROLES is the
-        only source of truth for group permissions, so a role removed from an entry
-        loses that permission on the next migration, and any permission granted to a
-        group outside ROLES is discarded.
+        ROLES is the only source of truth for group permissions, so a role removed
+        from an entry loses that permission on the next migration, and any permission
+        granted to a group outside ROLES is discarded.
 
         Args:
-            **kwargs (Any): Django post-migrate signal arguments containing app
-                           registry and migration information.
+            **kwargs: Arguments sent by the post_migrate signal.
         """
         # Models are fetched from the historical app registry passed by the signal,
         # not imported directly, so they match the schema at this migration state

@@ -1,9 +1,4 @@
-"""NVD NIST vulnerability intelligence platform integration.
-
-Provides integration with the National Vulnerability Database (NVD) for
-automated vulnerability enrichment, CVSS scoring, and security intelligence
-gathering during security assessments.
-"""
+"""Integration with the National Vulnerability Database of the NIST."""
 
 from typing import Any
 
@@ -12,24 +7,11 @@ from platforms.nvdnist.models import NvdNistSettings
 
 
 class NvdNist(BaseCveProvider):
-    """Integration class for NVD NIST vulnerability intelligence platform.
-
-    Provides automated vulnerability enrichment by querying the National
-    Vulnerability Database API for detailed CVE information, CVSS scores,
-    CWE classifications, and vulnerability descriptions.
-
-    Processing Features:
-        - Automated CVE data retrieval and parsing
-        - CVSS score mapping to Rekono severity levels
-        - CVSS version and vector string extraction
-        - CVSS base score preservation for detailed analysis
-        - CWE code extraction and classification
-        - Vulnerability description and reference updates
-        - API token authentication for enhanced rate limits
+    """CVE provider that completes the vulnerabilities with the NVD data.
 
     Attributes:
-        url (str): NVD API endpoint URL template for CVE queries
-        reference (str): NVD vulnerability detail page URL template
+        url: Endpoint that returns a vulnerability by its CVE identifier.
+        reference: Page of a vulnerability, which the findings link to.
     """
 
     url = "https://services.nvd.nist.gov/rest/json/cves/2.0?cveId={cve}"
@@ -37,24 +19,18 @@ class NvdNist(BaseCveProvider):
 
     @property
     def settings(self) -> NvdNistSettings:
-        """Get NVD NIST platform configuration settings from database.
-
-        Returns:
-            NvdNistSettings: NVD NIST configuration instance or None if not configured.
-        """
+        """The NVD NIST configuration, or None if it hasn't been created yet."""
         return NvdNistSettings.objects.first()
 
     def _get_cve(self, cve: str) -> dict[str, Any]:
-        """Retrieve CVE information from NVD API.
-
-        Makes authenticated or unauthenticated requests to the NVD API
-        based on available API token configuration.
+        """Get the data that NVD has about a CVE.
 
         Args:
-            cve (str): CVE identifier to retrieve information for
+            cve: CVE identifier to search for.
 
         Returns:
-            dict[str, Any]: JSON response containing CVE details and metadata
+            The vulnerability that NVD reports, or an empty list if it doesn't
+            know the CVE.
         """
         if self.settings.secret is None:
             response = self._request(self.session.get, self.url.format(cve=cve))
@@ -66,19 +42,15 @@ class NvdNist(BaseCveProvider):
         )
 
     def _parse_cve(self, cve: str, data: list[dict[str, Any]] | dict[str, Any]) -> BaseCveProvider.CveEnrichment | None:
-        """Parse NVD API response into a standardized CVE enrichment object.
-
-        Takes the first English description and collects every valid CWE identifier
-        reported across all weaknesses. The CVSS base score is read by iterating
-        primary then secondary metric categories and CVSS versions from newest to
-        oldest, stopping as soon as a base score is found.
+        """Get the CVE data that Rekono uses from what NVD reports.
 
         Args:
-            cve (str): CVE identifier being parsed.
-            data (list[dict[str, Any]] | dict[str, Any]): NVD API response.
+            cve: CVE identifier that was searched for.
+            data: Vulnerability that NVD reported.
 
         Returns:
-            BaseCveProvider.CveEnrichment | None: Parsed enrichment data, or None if not found.
+            The data to complete the vulnerability with, or None if NVD didn't
+            report anything about the CVE.
         """
         if isinstance(data, list):
             return
@@ -99,6 +71,9 @@ class NvdNist(BaseCveProvider):
                 if value.startswith("cwe-") and value != "cwe-0":
                     enrichment.cwes.append(value.upper())
 
+        # NVD reports the score that itself calculated apart from the ones that other
+        # organizations calculated, and the newest CVSS version is the most accurate one, so
+        # the scores are walked from the most reliable one to the least one
         cvss_info = data.get("metrics", {}) or {}
         for category in ["primary", "secondary"]:
             if enrichment.cvss_base_score:
@@ -120,17 +95,13 @@ class NvdNist(BaseCveProvider):
         return enrichment
 
     def _get_technologies(self, data: dict[str, Any]) -> list[str]:
-        """Extract affected technology CPE identifiers from NVD configuration data.
-
-        Traverses the nested configurations structure to collect all CPE criteria
-        strings, which identify the software products and versions affected by
-        the vulnerability.
+        """Get the technologies that a vulnerability affects, as CPE identifiers.
 
         Args:
-            data (dict[str, Any]): NVD API CVE record.
+            data: Vulnerability that NVD reported.
 
         Returns:
-            list[str]: CPE criteria strings collected from all configuration nodes.
+            Every CPE of the configurations that NVD reports as vulnerable.
         """
         technologies = []
         for configuration in data.get("configurations") or []:
@@ -141,19 +112,15 @@ class NvdNist(BaseCveProvider):
         return technologies
 
     def cve_quality_score(self, data: BaseCveProvider.CveEnrichment) -> int:
-        """Calculate NVD-specific data quality score.
-
-        Returns 0 outright for statuses that have not completed NVD's initial analysis or
-        were rejected ("received", "awaiting analysis", "undergoing analysis", "deferred",
-        "rejected"), since their data is not reliable yet. A CVE still in the "modified"
-        status keeps its base score minus a small penalty, since it is being revised again
-        after already going through analysis.
+        """Calculate how good the data that NVD reported about a CVE is.
 
         Args:
-            data (BaseCveProvider.CveEnrichment): CVE enrichment data to score.
+            data: Data that this provider reported about the CVE.
 
         Returns:
-            int: Quality score adjusted for NVD analysis status.
+            Zero for the CVEs that NVD hasn't analyzed yet or that it rejected,
+            since their data isn't reliable, and a penalized score for the ones
+            that are being revised again after having been analyzed.
         """
         status = data.status.lower()
         if status in ["received", "rejected", "awaiting analysis", "undergoing analysis", "deferred"]:

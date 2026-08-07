@@ -1,10 +1,4 @@
-"""Django models for automated threat intelligence monitoring.
-
-Provides the MonitorSettings model for configuring background monitoring
-jobs that periodically query external threat intelligence sources such as
-CveCrowd and First/EPSS. Settings follow a singleton pattern controlling
-the interval between monitoring runs.
-"""
+"""Model of the monitor configuration."""
 
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
@@ -13,28 +7,13 @@ from framework.models import BaseModel
 
 
 class MonitorSettings(BaseModel):
-    """Model for configuring automated threat intelligence monitoring.
-
-    Manages configuration for background monitoring jobs that periodically query
-    external threat intelligence sources.
-    Follows a singleton pattern - only one instance should exist.
-
-    The monitoring system schedules itself using RQ jobs and triggers monitoring
-    alerts when needed.
+    """Configuration of the monitor job, of which only one instance exists.
 
     Attributes:
-        rq_job_id (TextField): ID of the current scheduled monitoring job
-        last_monitor (DateTimeField): Timestamp of the last monitoring execution
-        hour_span (IntegerField): Hours between monitoring runs (24-168 hours)
-
-    Example:
-        Configure monitoring to run every 48 hours:
-
-        ```python
-        settings = MonitorSettings.objects.first()
-        settings.hour_span = 48
-        settings.save()
-        ```
+        rq_job_id: Identifier of the scheduled job, used to know if the monitor is
+          already running before enqueuing a new one.
+        last_monitor: Date when the monitor ran for the last time.
+        hour_span: Hours between two monitor runs, from one day to one week.
     """
 
     rq_job_id = models.TextField(max_length=50, blank=True, null=True)
@@ -42,9 +21,5 @@ class MonitorSettings(BaseModel):
     hour_span = models.IntegerField(default=24, validators=[MinValueValidator(24), MaxValueValidator(168)])
 
     def __str__(self) -> str:
-        """Return string representation of monitor settings.
-
-        Returns:
-            str: Description of last monitor time and next scheduled run
-        """
+        """Return when the monitor ran and when it will run again."""
         return f"Last monitor was at {self.last_monitor}. Next one in {self.hour_span} hours"
