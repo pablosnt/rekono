@@ -129,7 +129,7 @@ class VulnerabilityTest(FindingTest, TestCase):
         )
         self.assertEqual(tech_finding.id, port_finding.id)
         self.assertIsNone(port_finding.port)
-        self.assertEqual(tech_finding.technology, port_finding.technology)
+        self.assertEqual(tech_finding.technology, port_finding.technology)   # trufflehog:ignore
 
     def test_deduplication_with_new_technology(self):
         port_finding = Vulnerability.objects.create_finding(

@@ -32,5 +32,5 @@ class MiddlewareTest(TestCase):
         self.assertEqual(self.nginx_source_ip, self._source_ip(f" {self.nginx_source_ip} "))
 
     @override_settings(REST_FRAMEWORK=TRUSTED_PROXIES)
-    def test_remote_addr_used_when_header_absent(self) -> None:  # trufflehog:ignore
+    def test_remote_addr_used_when_header_absent(self) -> None:
         self.assertEqual(self.remote_source_ip, self._source_ip())
