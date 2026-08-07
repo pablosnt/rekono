@@ -53,7 +53,7 @@ line-length = 120
 indent-width = 4
 
 [tool.ruff.lint]
-select = ["D"]
+extend-select = ["D"]
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**/*.py" = ["D"]

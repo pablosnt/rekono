@@ -12,12 +12,12 @@ from tests.framework.data import SetupProject
 
 default_denylist_1 = {"id": 1, "default": True, "target": "127.0.0.1", "blocked": 0}
 target_denylist1 = {"target": "rekono.dev"}
-target_denylist2 = {"target": ".*\.rekono\.com"}
+target_denylist2 = {"target": ".*\.rekono\.dev"}
 invalid_regex_denylist = {"target": "*.rekono.dev"}
 target_denylist3 = {"target": "10.10.10.0/24"}
 target_denylist4 = {"target": "10.10.30.1-50"}
 new_target_denylist = {"target": ".*\.new\.rekono.dev"}
-invalid_denylist = {"target": "*.rekono;com"}
+invalid_denylist = {"target": "*.rekono;dev"}
 
 
 class TargetDenylistTest(ApiTest, TestCase):
