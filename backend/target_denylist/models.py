@@ -1,9 +1,4 @@
-"""Django models for target denylist management.
-
-Provides the TargetDenylist model for managing excluded targets in security
-testing operations. The model ensures that sensitive or unauthorized targets
-are prevented from being processed by security assessment tools.
-"""
+"""Model of the denylist entries that keep Rekono away from some targets."""
 
 from django.db import models
 
@@ -12,26 +7,13 @@ from security.validators.input_validator import Regex, Validator
 
 
 class TargetDenylist(BaseModel):
-    """Model representing targets that should be excluded from security testing.
-
-    Manages a centralized denylist of targets (IPs, domains, URLs) that must be
-    excluded from all security assessment activities. Supports both administrative
-    default entries and user-defined custom exclusions with proper validation.
+    """Target that can't be scanned, as an exact value, a regex, or an IP network.
 
     Attributes:
-        target (TextField): Unique target pattern to exclude (max 100 characters)
-        default (BooleanField): Whether this is a default system entry (read-only)
-        blocked (IntegerField): Number of times this entry has denied a target (read-only)
-
-    Example:
-        Create a custom denylist entry:
-
-        ```python
-        denylist = TargetDenylist.objects.create(
-            target="192.168.1.0/24",
-            default=False
-        )
-        ```
+        target: Value that the denied targets must match.
+        default: Whether the entry comes from the Rekono fixtures, which means that
+          it can't be updated or removed by the administrators.
+        blocked: Number of times that this entry denied a target.
     """
 
     target = models.TextField(unique=True, max_length=100, validators=[Validator(Regex.TARGET_REGEX)])
@@ -39,9 +21,5 @@ class TargetDenylist(BaseModel):
     blocked = models.IntegerField(default=0)
 
     def __str__(self) -> str:
-        """Return string representation of the denylist entry.
-
-        Returns:
-            str: The target pattern being denied.
-        """
+        """Return the value of the denylist entry."""
         return self.target

@@ -16,7 +16,7 @@ invalid_api_token = {"name": "test1", "expiration": (datetime.now() - timedelta(
 
 class ApiTokenTest(ApiTestNoData, TestCase):
     endpoint = "/api/api-tokens/"
-    expected_string = f"admin1@rekono.com - {valid_api_token['name']}"
+    expected_string = f"admin1@rekono.dev - {valid_api_token['name']}"
     cases = [
         ApiTestCase([Role.ADMIN, Role.AUDITOR, Role.READER]),
         ApiTestCase([Role.ADMIN, Role.AUDITOR, Role.READER], 404, endpoint="1"),

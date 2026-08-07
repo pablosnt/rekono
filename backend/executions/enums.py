@@ -1,26 +1,20 @@
-"""Execution status enumerations for Rekono.
-
-Defines available execution statuses for tracking progress of security
-tool executions throughout their lifecycle.
-"""
+"""Statuses that an execution goes through."""
 
 from django.db import models
 from django.db.models.enums import Choices
 
 
 class Status(models.TextChoices):
-    """Enumeration of execution status values.
-
-    Defines the different states an execution progresses through during
-    its lifecycle from creation to completion.
+    """Status of an execution, which also decides the status of its task.
 
     Attributes:
-        REQUESTED (str): Execution requested but not yet queued
-        SKIPPED (str): Execution skipped due to dependencies or conditions
-        RUNNING (str): Execution currently being processed
-        CANCELLED (str): Execution cancelled before completion
-        ERROR (str): Execution failed with an error
-        COMPLETED (str): Execution completed successfully
+        REQUESTED: The execution is waiting in the queue.
+        SKIPPED: The execution never ran, because the tool isn't installed, its
+          arguments can't be built, or the task was rejected before starting.
+        RUNNING: The tool is being executed.
+        CANCELLED: The execution was cancelled before finishing.
+        ERROR: The tool failed.
+        COMPLETED: The tool finished and its output was parsed.
     """
 
     REQUESTED = "Requested"
@@ -32,20 +26,12 @@ class Status(models.TextChoices):
 
     @classmethod
     def in_progress(cls) -> list[str]:
-        """Return the statuses of executions that are still queued or running.
-
-        Returns:
-            list[Status]: Non-terminal statuses (REQUESTED, RUNNING).
-        """
+        """Return the statuses of the executions that didn't finish yet."""
         return [cls.REQUESTED, cls.RUNNING]
 
     @classmethod
     def finished(cls) -> list[str]:
-        """Return the terminal statuses an execution can end up in.
-
-        Returns:
-            list[Status]: Terminal statuses (COMPLETED, ERROR, SKIPPED, CANCELLED).
-        """
+        """Return the statuses of the executions that already finished."""
         return [cls.COMPLETED, cls.ERROR, cls.SKIPPED, cls.CANCELLED]
 
 

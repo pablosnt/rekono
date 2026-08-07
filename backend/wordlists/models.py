@@ -1,9 +1,4 @@
-"""Wordlist models for Rekono.
-
-Defines the Wordlist model for managing file-based wordlists used in security testing.
-Supports secure file storage, integrity validation, and integration with security
-tools requiring input datasets for enumeration and brute-force operations.
-"""
+"""Model of the wordlists that the tools use."""
 
 from pathlib import Path
 from typing import Any
@@ -20,31 +15,15 @@ from wordlists.enums import WordlistType
 
 
 class Wordlist(BaseInput, BaseLike):
-    """Model representing file-based wordlists for security testing tools.
-
-    Represents wordlists used by security tools for enumeration, directory brute-forcing,
-    subdomain discovery, and other automated testing scenarios. Provides secure file
-    management with integrity validation, user ownership, and integration capabilities.
+    """List of words stored in a file that the tools use to enumerate.
 
     Attributes:
-        name (TextField): Unique name for the wordlist (max 100 characters)
-        type (TextField): Wordlist type from WordlistType enum (max 10 characters)
-        path (TextField): File system path to the wordlist file (unique, max 200 characters)
-        checksum (TextField): SHA-512 checksum for file integrity verification (optional, max 128 characters)
-        size (IntegerField): Number of entries in the wordlist file (auto-calculated)
-        owner (ForeignKey): User who uploaded/owns this wordlist (optional)
-
-    Example:
-        Create a new wordlist for subdomain enumeration:
-
-        ```python
-        wordlist = Wordlist.objects.create(
-            name="Common Subdomains",
-            type=WordlistType.SUBDOMAIN,
-            path="/path/to/subdomains.txt",
-            owner=user
-        )
-        ```
+        name: Name that identifies the wordlist.
+        type: Kind of data that the wordlist contains.
+        path: Location of the wordlist file, which is what the tools receive.
+        checksum: Checksum of the file content, only for the uploaded wordlists.
+        size: Number of words in the file.
+        owner: User that uploaded the wordlist, or nobody for the default ones.
     """
 
     name = models.TextField(max_length=100, unique=True, validators=[Validator(Regex.NAME, code="name")])
@@ -58,18 +37,16 @@ class Wordlist(BaseInput, BaseLike):
     _parse_mapping = {InputKeyword.WORDLIST: "path"}
 
     def filter(self, argument_input: Any, target: Target | None = None) -> bool:
-        """Filter wordlist availability based on file existence and integrity.
-
-        Validates that the wordlist file exists on the file system and, if a checksum
-        is available, verifies the file integrity. This ensures only valid wordlists
-        are used by security tools during execution.
+        """Check if this wordlist can be used as input for an argument.
 
         Args:
-            argument_input (Any): Input configuration for filtering
-            target (Target | None): Target object for context-specific filtering
+            argument_input: Tool input whose filter conditions must be matched.
+            target: Target of the execution, unused because a wordlist is a file
+              and doesn't belong to any target.
 
         Returns:
-            bool: True if wordlist is available and valid, False otherwise
+            Whether the wordlist matches the argument input and its file is still
+            available and hasn't been modified since it was uploaded.
         """
         check = Path(self.path).is_file()
         # Bundled default wordlists have no checksum, so integrity is only verified when one is stored
@@ -80,9 +57,5 @@ class Wordlist(BaseInput, BaseLike):
         return check
 
     def __str__(self) -> str:
-        """Return string representation of the wordlist.
-
-        Returns:
-            str: The name of the wordlist
-        """
+        """Return the name of the wordlist."""
         return self.name

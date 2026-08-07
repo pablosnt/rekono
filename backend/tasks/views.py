@@ -1,8 +1,4 @@
-"""Django REST framework views for task management.
-
-Provides REST API views for task records with CRUD operations, task cancellation,
-repetition functionality, and proper authentication and authorization controls.
-"""
+"""Endpoints to create, cancel, and repeat the tasks."""
 
 from typing import Any
 
@@ -29,26 +25,22 @@ from tasks.serializers import TaskSerializer
 
 
 class TaskViewSet(BaseViewSet):
-    """ViewSet for Task model CRUD operations and task management.
-
-    Provides REST API endpoints for managing security testing tasks with filtering,
-    searching, ordering capabilities. Includes advanced features for task
-    cancellation and repetition with proper execution cleanup.
-
-    Custom Actions:
-        repeat: Create a duplicate task for re-execution
+    """Create and list the tasks, and cancel or repeat the existing ones.
 
     Attributes:
-        queryset (QuerySet): Task model instances
-        serializer_class (Serializer): Serializer for Task model
-        filterset_class (FilterSet): Filter class for query filtering
-        permission_classes (list): Required permissions for access control
-        search_fields (list): Fields available for text search
-        ordering_fields (list): Fields available for result ordering
-        owner_field (str): Field used for ownership-based permissions
-        http_method_names (list): Allowed HTTP methods (GET, POST, DELETE)
-        tasks_queue (TasksQueue): Queue manager for task operations
-        executions_queue (ExecutionsQueue): Queue manager for execution operations
+        queryset: All the tasks, restricted to the projects of the user by the base
+          viewset.
+        serializer_class: Serializer of the tasks.
+        filterset_class: Filters available to search tasks.
+        permission_classes: Role permissions plus the membership in the project.
+        search_fields: Fields used by the text search.
+        ordering_fields: Fields that can be used to order the results.
+        owner_field: Field that references the user that created each task.
+        http_method_names: DELETE cancels a task instead of removing it, and the
+          tasks can't be updated once they are created.
+        tasks_queue: Queue where the tasks are enqueued and cancelled.
+        executions_queue: Queue where the executions of a cancelled task are
+          cancelled too.
     """
 
     queryset = Task.objects.all()
@@ -73,23 +65,21 @@ class TaskViewSet(BaseViewSet):
     executions_queue = ExecutionsQueue()
 
     def destroy(self, request: Request, pk: str, *args: Any, **kwargs: Any) -> Response:
-        """Cancel a task by stopping its queued or running executions.
+        """Cancel a task, stopping the executions that didn't finish yet.
 
-        Stops the task's own queued job and any executions still in a
-        non-terminal state (requested or running), marking them as cancelled,
-        then sets the task's end time. This does not delete the task record;
-        DELETE is used here as the cancellation trigger. Tasks whose
-        executions have all already reached a terminal state (skipped,
-        cancelled, errored, or completed) cannot be cancelled.
+        The task itself is kept, so its history survives its cancellation. Running
+        executions are stopped in their worker, while the ones that are still
+        waiting are removed from the queue.
 
         Args:
-            request (Request): The HTTP request object
-            pk (str): Primary key of the task
-            *args (Any): Additional positional arguments
-            **kwargs (Any): Additional keyword arguments
+            request: Request that asks for the task to be cancelled.
+            pk: Identifier of the task, taken from the URL.
+            *args: Standard view arguments.
+            **kwargs: Standard view arguments.
 
         Returns:
-            Response: HTTP 204 on successful cancellation, HTTP 400 if the task's executions have already finished
+            An empty response, or a validation error when all the executions of the
+            task already finished, so there is nothing left to cancel.
         """
         task = self.get_object()
         has_executions = task.executions.exists()
@@ -123,20 +113,18 @@ class TaskViewSet(BaseViewSet):
     @extend_schema(request=None, responses={201: TaskSerializer})
     @action(detail=True, methods=["POST"])
     def repeat(self, request: Request, pk: str) -> Response:
-        """Create a duplicate task for re-execution.
+        """Create and enqueue a new task with the same data as an existing one.
 
-        Creates a new task with the same target, target port, intensity, and
-        process or configuration as the original task, including all associated
-        wordlists, technologies, and vulnerabilities. The new task is immediately
-        enqueued for execution.
+        The new task belongs to the user that repeats it, and it isn't scheduled or
+        repeated even if the original one was.
 
         Args:
-            request (Request): The HTTP request object
-            pk (str): Primary key of the task to repeat
+            request: Request whose user becomes the executor of the new task.
+            pk: Identifier of the task to repeat, taken from the URL.
 
         Returns:
-            Response: HTTP 201 with new task data on success, HTTP 400 if the task is
-                     still running or its configuration has been deprecated
+            The new task, or a validation error when the original one is still
+            running or executes a configuration that has been deprecated.
         """
         task = self.get_object()
         if task.executions.filter(status__in=Status.in_progress()).exists():
@@ -161,16 +149,14 @@ class TaskViewSet(BaseViewSet):
 
 
 class LatestTasksViewSet(LatestViewSet):
-    """ViewSet for retrieving latest task execution statistics.
-
-    Provides the most recently started tasks, excluding those without
-    a start time. Ordered by start time in descending order.
+    """Read the tasks that started most recently.
 
     Attributes:
-        queryset: Tasks with non-null start times
-        ordering: Most recent tasks first
-        serializer_class: Task serialization
-        filterset_class: Task filtering capabilities
+        queryset: Tasks that already started, since the scheduled ones aren't
+          activity yet.
+        ordering: Most recent tasks first.
+        serializer_class: Serializer of the tasks.
+        filterset_class: Filters available to search tasks.
     """
 
     queryset = Task.objects.exclude(start=None)

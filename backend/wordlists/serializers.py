@@ -1,9 +1,4 @@
-"""Django REST framework serializers for wordlist models.
-
-Provides serializer classes for wordlist file upload, validation, and conversion
-between Django model instances and JSON data. Includes file handling capabilities
-and secure storage with integrity validation.
-"""
+"""Serializers of the wordlist endpoints."""
 
 from typing import Any
 
@@ -17,63 +12,51 @@ from wordlists.models import Wordlist
 
 
 class WordlistSerializer(LikeSerializer):
-    """Serializer for Wordlist model with file upload capabilities.
-
-    Handles serialization of Wordlist instances including secure file upload,
-    validation, and automatic file processing. Integrates with like functionality
-    and user ownership management.
+    """Serializer of a wordlist, including the file with its content.
 
     Attributes:
-        file (FileField): Wordlist content submitted for upload (write-only)
-        owner (SimpleUserSerializer): Serialized user information for wordlist owner
+        file: Content of the wordlist, which is stored in the file system instead
+          of in the database, so it's only used to create the wordlist.
+        owner: User that uploaded the wordlist.
     """
 
     file = FileField(required=True, allow_empty_file=False, write_only=True)
     owner = SimpleUserSerializer(many=False, read_only=True)
 
     class Meta:
-        """Meta configuration for the WordlistSerializer.
-
-        Attributes:
-            model (Model): The Wordlist model to serialize
-            fields (tuple): Field names to include in serialization
-            read_only_fields (tuple): Fields that cannot be modified
-        """
+        """Serializer configuration for the wordlists."""
 
         model = Wordlist
         fields = ("id", "name", "type", "file", "size", "owner", "liked", "likes")
         read_only_fields = ("size", "owner", "liked", "likes")
 
     def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
-        """Validate uploaded wordlist file.
-
-        Performs security validation on the uploaded file to ensure it meets
-        safety requirements before processing and storage.
+        """Check that the uploaded file is safe to store.
 
         Args:
-            attrs (dict[str, Any]): The attributes to validate
+            attrs: Wordlist fields sent by the user, including the uploaded file.
 
         Returns:
-            dict[str, Any]: The validated attributes
+            The same validated data, unchanged.
 
         Raises:
-            ValidationError: If file validation fails
+            ValidationError: If the file is too large, or its extension or MIME type
+              isn't accepted.
         """
-        attrs = super().validate(attrs)  # Run standard attribute validation before the file-specific security checks
+        attrs = super().validate(attrs)
         FileHandler().validate_file(attrs["file"])
         return attrs
 
     def save(self, **kwargs: Any) -> Wordlist:
-        """Save the wordlist with secure file handling.
-
-        Processes the uploaded file, calculates checksum, determines size,
-        and stores it securely in the configured wordlists directory.
+        """Store the uploaded file and save the wordlist that points to it.
 
         Args:
-            **kwargs (Any): Additional keyword arguments for saving
+            **kwargs: Extra fields for the wordlist, like the owner that the viewset
+              adds.
 
         Returns:
-            Wordlist: The created Wordlist instance with file metadata
+            The saved wordlist, with the path, the checksum, and the size that the
+            stored file has, since none of them are provided by the user.
         """
         (
             self.validated_data["path"],
@@ -84,19 +67,14 @@ class WordlistSerializer(LikeSerializer):
 
 
 class UpdateWordlistSerializer(ModelSerializer):
-    """Serializer for updating existing wordlist metadata.
+    """Serializer of the wordlist data that can be updated after the upload.
 
-    Specialized version of the wordlist serializer that only allows modification
-    of metadata fields, not the file itself. Used for wordlist updates.
+    The file can't be replaced, since the executions that used the wordlist would
+    stop matching the content that they actually ran against.
     """
 
     class Meta:
-        """Meta configuration for the UpdateWordlistSerializer.
-
-        Attributes:
-            model (Model): The Wordlist model to serialize
-            fields (tuple): Field names to include in serialization
-        """
+        """Serializer configuration for the wordlist updates."""
 
         model = Wordlist
         fields = ("id", "name", "type")

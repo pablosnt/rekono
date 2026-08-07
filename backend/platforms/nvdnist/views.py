@@ -1,8 +1,4 @@
-"""Django REST framework views for NVD NIST platform management.
-
-Provides REST API endpoints for managing NVD NIST platform settings and
-API token configuration with proper authentication and authorization.
-"""
+"""Viewset of the NVD NIST endpoints."""
 
 from rest_framework.permissions import IsAuthenticated
 
@@ -13,16 +9,14 @@ from security.authorization.permissions import RekonoModelPermission
 
 
 class NvdNistSettingsViewSet(BaseViewSet):
-    """ViewSet for managing NVD NIST platform configuration.
-
-    Provides REST API endpoints for retrieving and updating NVD NIST
-    platform settings including API token management and availability status.
+    """Read and update the NVD NIST configuration.
 
     Attributes:
-        queryset (QuerySet): All NvdNistSettings objects
-        serializer_class (Serializer): Serializer for settings operations
-        permission_classes (list): Required permissions for access
-        http_method_names (list): Allowed HTTP methods (GET, PUT only)
+        queryset: The only settings instance, created from a fixture.
+        serializer_class: Serializer of the NVD NIST settings.
+        permission_classes: Only the users that can change the settings model.
+        http_method_names: GET and PUT only, since the settings are never created
+          or removed through the API.
     """
 
     queryset = NvdNistSettings.objects.all()

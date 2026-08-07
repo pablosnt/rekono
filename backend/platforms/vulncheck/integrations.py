@@ -1,10 +1,4 @@
-"""VulnCheck NVD++ vulnerability intelligence platform integration.
-
-Provides integration with VulnCheck's NVD++ service for automated vulnerability
-enrichment. Extends NvdNist to reuse its parsing logic, since VulnCheck mirrors
-the NVD response schema exactly. Bearer token authentication is required for
-all API requests.
-"""
+"""Integration with the NVD++ service of VulnCheck."""
 
 from typing import Any
 
@@ -13,51 +7,31 @@ from platforms.vulncheck.models import VulnCheckSettings
 
 
 class VulnCheck(NvdNist):
-    """Integration class for VulnCheck NVD++ vulnerability intelligence platform.
+    """CVE provider that completes the vulnerabilities with the NVD++ data.
 
-    Extends NvdNist to query VulnCheck's NVD++ index, which mirrors the NVD schema
-    and additionally provides pre-resolved CPE data via vcVulnerableCPEs. Since the
-    response schema is otherwise identical to NVD NIST, the parent's _parse_cve
-    method is reused directly. The only structural difference is that VulnCheck
-    wraps CVE records in a top-level 'data' list rather than 'vulnerabilities',
-    which is handled in _get_cve before handing off to the inherited parser.
-
-    Processing Features:
-        - CVE data retrieval via VulnCheck NVD++ API with Bearer token authentication
-        - CVSS and CWE extraction via inherited NVD NIST parsing logic
-        - Technology CPE extraction from vcVulnerableCPEs (pre-resolved specific versions)
-        - Required token validation before any API calls are attempted
-        - Quality scoring inherited from NvdNist (status-based penalties)
+    NVD++ reports the vulnerabilities in the same format as NVD, so only how they
+    are requested and how their technologies are read differ from it.
 
     Attributes:
-        url (str): VulnCheck NVD++ API endpoint URL
+        url: Endpoint that returns a vulnerability by its CVE identifier.
     """
 
     url = "https://api.vulncheck.com/v3/index/nist-nvd2"
 
     @property
     def settings(self) -> VulnCheckSettings:
-        """Get VulnCheck platform configuration settings from database.
-
-        Returns:
-            VulnCheckSettings: VulnCheck configuration instance or None if not configured.
-        """
+        """The VulnCheck configuration, or None if it hasn't been created yet."""
         return VulnCheckSettings.objects.first()
 
     def _get_cve(self, cve: str) -> dict[str, Any]:
-        """Retrieve CVE information from VulnCheck NVD++ API.
-
-        Makes an authenticated request to the VulnCheck NVD++ index using a Bearer
-        token. The response wraps CVE records in a top-level 'data' list; this method
-        returns the first element directly so the inherited _parse_cve can process it
-        without modification.
+        """Get the data that VulnCheck has about a CVE.
 
         Args:
-            cve (str): CVE identifier to retrieve information for.
+            cve: CVE identifier to search for.
 
         Returns:
-            dict[str, Any]: First CVE record from the response matching the NVD schema,
-                            or an empty list if no records were returned.
+            The vulnerability that VulnCheck reports, or an empty dict if it
+            doesn't know the CVE.
         """
         response = self._request(
             self.session.get,
@@ -69,19 +43,15 @@ class VulnCheck(NvdNist):
         return data[0] if len(data) > 0 else {}
 
     def _get_technologies(self, data: dict[str, Any]) -> list[str]:
-        """Extract affected technology CPE identifiers from VulnCheck response data.
-
-        Uses the pre-resolved vcVulnerableCPEs list when available, which VulnCheck
-        provides as a flat list of specific CPE strings already expanded from the
-        version ranges in the standard NVD configurations field. Falls back to the
-        parent's configurations-based extraction when the field is absent.
+        """Get the technologies that a vulnerability affects, as CPE identifiers.
 
         Args:
-            data (dict[str, Any]): VulnCheck NVD++ API CVE record.
+            data: Vulnerability that VulnCheck reported.
 
         Returns:
-            list[str]: Specific CPE strings from vcVulnerableCPEs, or CPE criteria
-                       strings from NVD configurations as a fallback.
+            The CPEs that VulnCheck already resolved, which are the exact versions
+            that the version ranges of NVD cover, or the NVD ones if VulnCheck
+            didn't resolve them.
         """
         vc_cpes = data.get("vcVulnerableCPEs")
         if vc_cpes:
@@ -89,15 +59,11 @@ class VulnCheck(NvdNist):
         return super()._get_technologies(data)
 
     def is_available(self) -> bool:
-        """Check whether the VulnCheck NVD++ integration is configured and reachable.
-
-        Validates that a Bearer token is configured before attempting any network
-        request, since the VulnCheck API requires authentication for all calls.
-        Delegates the actual connectivity check to the parent's is_available.
+        """Check if the platform can be used.
 
         Returns:
-            bool: True if a token is configured and the API returns a valid response,
-                  False otherwise.
+            Whether an API token is configured and the platform answers with it,
+            since VulnCheck rejects the requests that aren't authenticated.
         """
         if not self.settings or not self.settings.secret:
             return False

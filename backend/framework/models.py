@@ -1,8 +1,8 @@
-"""Django models for Rekono's core framework infrastructure.
+"""Abstract models that the Rekono models are built on.
 
-Provides base model classes with security features, encryption support, and
-common functionality used across all Rekono modules. Includes project-level
-access control, input parsing capabilities, and secure field handling.
+Provide the features that are shared by several apps: the project that an object
+belongs to, the encryption of the secrets, the likes of the users, and the input
+system that turns model data into the arguments of the tool executions.
 """
 
 import re
@@ -25,56 +25,29 @@ from security.validators.enums import Regex
 
 
 class BaseModel(Model, LoggingEntity):
-    """Abstract base model providing common functionality for all Rekono models.
+    """Base model of all the Rekono models.
 
-    Extends Django's Model class with logging capabilities and project-level access
-    control. All models in Rekono inherit from this base class to ensure consistent
-    behavior and security enforcement across the platform.
-
-    Security Features:
-        - Project-level access control through _project_field configuration
-        - Integration with logging infrastructure for audit trails
-        - Standardized string representation for debugging and logging
-
-    Attributes:
-        _project_field (str): Field path to the associated project for access control.
-                             Empty string indicates no project association.
-
-    Example:
-        Create a model with project association:
-
-        ```python
-        class MyModel(BaseModel):
-            _project_field = "target__project"
-            name = models.CharField(max_length=100)
-        ```
+    Its subclasses declare the path from themselves to the project that their
+    objects belong to, using the Django double underscore notation, so the access
+    control can be applied to any model. That path is empty for the models that
+    aren't related to a project, which are the ones shared by all of them.
     """
 
     _project_field = ""
 
     class Meta:
-        """Django Meta class configuration for BaseModel.
-
-        Configures BaseModel as an abstract base class that provides common
-        functionality without creating its own database table.
-
-        Attributes:
-            abstract (bool): Marks this model as abstract (no database table).
-        """
+        """Model configuration, marking it as abstract."""
 
         abstract = True
 
     @cached_property
     def parent_project(self) -> Any | list[Any] | None:
-        """Get the project associated with this model instance.
+        """The project that this object belongs to, following the _project_field path.
 
-        Traverses the field path specified in _project_field to locate the
-        associated project object. This enables project-level access control
-        and permission enforcement.
-
-        Returns:
-            Any | list[Any] | None: The associated project object, list of projects,
-                                   or None if no project association exists.
+        Several projects for the models that are shared by more than one, so the
+        callers that check a membership have to accept both shapes. None if this
+        model isn't related to a project, or if any reference in that path isn't set
+        for this object.
         """
         filter_field = self.__class__._project_field
         if filter_field:
@@ -87,55 +60,21 @@ class BaseModel(Model, LoggingEntity):
             return project
 
     def __str__(self) -> str:
-        """Return string representation of the model instance.
-
-        Returns:
-            str: The class name of the model instance.
-        """
+        """Return the model name, so all the models have a representation."""
         return self.__class__.__name__
 
 
 class BaseEncrypted(BaseModel):
-    """Abstract base model providing encryption capabilities for sensitive data.
+    """Base model for the models that store a secret value.
 
-    Extends BaseModel with automatic encryption and decryption of sensitive fields.
-    Uses AES encryption when encryption keys are configured, providing transparent
-    data protection for sensitive information like passwords and tokens.
-
-    Security Features:
-        - Automatic AES encryption for sensitive data fields
-        - Transparent encryption/decryption through property accessors
-        - Secure key management integration
-        - Fallback to plain text when encryption is not configured
-
-    Attributes:
-        _encryptor (Crypto | None): The encryption instance for secure operations.
-        _encrypted_field (str): Name of the database field storing encrypted data.
-
-    Example:
-        Create a model with encrypted secret field:
-
-        ```python
-        class SecretModel(BaseEncrypted):
-            _secret = models.TextField(db_column="secret")
-            _encrypted_field = "_secret"
-
-        # Usage
-        model = SecretModel()
-        model.secret = "sensitive_data"  # Automatically encrypted
-        plain_text = model.secret  # Automatically decrypted
-        ```
+    The secret is encrypted before it's saved and decrypted when it's read through
+    the secret property, so the plain value never reaches the database. If no
+    encryption key is configured, the value is stored as it is. Its subclasses
+    declare which of their fields stores the encrypted value.
     """
 
     class Meta:
-        """Django Meta class configuration for BaseEncrypted.
-
-        Configures BaseEncrypted as an abstract base class that extends
-        BaseModel with encryption capabilities without creating its own table.
-
-        Attributes:
-            abstract (bool): Marks this model as abstract (no database table).
-        """
+        """Model configuration, marking it as abstract."""
 
         abstract = True
 
@@ -144,14 +83,7 @@ class BaseEncrypted(BaseModel):
 
     @property
     def secret(self) -> str | None:
-        """Get the decrypted value of the encrypted field.
-
-        Automatically decrypts the stored encrypted value using the configured
-        encryptor. Returns None if the field is empty or encryption is not configured.
-
-        Returns:
-            str | None: The decrypted secret value or None if empty.
-        """
+        """The decrypted secret, or None if this object doesn't have one."""
         return (
             (
                 self._encryptor.decrypt(getattr(self, self._encrypted_field))
@@ -164,15 +96,7 @@ class BaseEncrypted(BaseModel):
 
     @secret.setter
     def secret(self, value: str) -> None:
-        """Set the encrypted field with automatic encryption.
-
-        Automatically encrypts the provided value using the configured encryptor
-        before storing it in the database field. Falls back to plain text storage
-        when encryption is not configured.
-
-        Args:
-            value (str): The plain text value to encrypt and store.
-        """
+        """Encrypt a new secret value and assign it to the encrypted field."""
         if hasattr(self, self._encrypted_field):
             setattr(
                 self,
@@ -182,48 +106,16 @@ class BaseEncrypted(BaseModel):
 
 
 class BaseInput(BaseModel):
-    """Abstract base model for input data used in security tool execution.
+    """Base model for the data that can be used as input of the tool executions.
 
-    Provides parsing and filtering capabilities for various input types used by
-    security tools. Supports complex filtering logic, URL generation and validation, and data
-    transformation for tool integration.
-
-    Attributes:
-        _filters (list[Filter]): List of Filter instances for input validation.
-        _parse_mapping (dict): Mapping of InputKeyword to field names or functions.
-        _parse_dependencies (list[str]): List of dependent fields to parse first.
-        _url_cache (Cache): Shared cache of probed URLs, used by get_url to avoid repeating
-                          the same HTTP request. Reachable URLs cache the one obtained after
-                          following the redirects, and unreachable ones cache "0".
-        _max_redirects (int): Number of redirects that get_url follows before giving up on a URL.
-
-    Example:
-        Create an input model with filtering:
-
-        ```python
-        class PortInput(BaseInput):
-            port = models.IntegerField()
-            service = models.CharField(max_length=50)
-
-            _filters = [
-                BaseInput.Filter(type=str, field="service", contains=True)
-            ]
-            _parse_mapping = {
-                InputKeyword.PORT: "port",
-                InputKeyword.TARGET: lambda instance, task: f"{instance.host}:{instance.port}"
-            }
-        ```
+    Its subclasses declare the filters that decide if their data matches the
+    conditions of a tool input, the value that they provide for each keyword of the
+    argument templates, and the related inputs that must be parsed before them, so
+    a finding can complete the keywords of the ones that it was discovered from.
     """
 
     class Meta:
-        """Django Meta class configuration for BaseInput.
-
-        Configures BaseInput as an abstract base class for input data models
-        used in security tool execution without creating its own table.
-
-        Attributes:
-            abstract (bool): Marks this model as abstract (no database table).
-        """
+        """Model configuration, marking it as abstract."""
 
         abstract = True
 
@@ -232,17 +124,14 @@ class BaseInput(BaseModel):
 
     @dataclass
     class Filter:
-        """Filter configuration for input validation and processing.
-
-        Defines how input values should be filtered and validated based on
-        tool argument requirements. Supports type checking, string matching,
-        and custom processing functions.
+        """One condition that an input must match to be used by a tool argument.
 
         Attributes:
-            type (type): The expected data type for validation.
-            field (str): The model field name to validate against.
-            contains (bool): Whether to use substring matching instead of exact matching.
-            processor (Callable[[Any], Any] | None): Optional preprocessing function.
+            type: Type of the values that this filter can evaluate.
+            field: Model field whose value is compared against the condition.
+            contains: Whether the condition can match a part of the value, instead
+              of requiring the whole value to be equal.
+            processor: Function applied to the value before comparing it.
         """
 
         type: type
@@ -251,55 +140,54 @@ class BaseInput(BaseModel):
         processor: Callable[[Any], Any] | None = None
 
         def filter(self, expected: str, value: Any, is_negative: bool = False) -> bool:
-            """Apply the filter to validate an input value.
+            """Check if a value matches the expected one.
 
-            Performs validation based on the filter configuration, supporting
-            type conversion, negation, and custom processing. A missing value
-            (None) cannot positively match, but it satisfies a negated filter:
-            a value that is absent is "not" anything, so "!cve" matches a
-            finding that has no CVE.
+            A missing value (None) cannot positively match, but it satisfies a
+            negated filter: a value that is absent is "not" anything, so "!cve"
+            matches a finding that has no CVE.
 
             Args:
-                expected (str): The expected value to match against.
-                value (Any): The actual value to validate.
-                is_negative (bool): Whether to negate the filter result.
+                expected: Condition that the value should match.
+                value: Value of the model field, before being processed.
+                is_negative: Whether the condition is negated, so the filter matches
+                  the values that are different from the expected one.
 
             Returns:
-                bool: True if the value passes the filter, False otherwise.
+                Whether the value matches the condition. False for the values whose
+                type this filter can't evaluate.
             """
             if value is None:
                 # Negated filter is satisfied because an absent value is "not" anything
                 return is_negative
-            # If a processor is defined, preprocess the value before filtering
             if self.processor:
                 value = self.processor(value)
             try:
-                # If the filter type is a Django TextChoices enum, compare by name
+                # Choices are compared by name, since the conditions reference the names
+                # that the users know, and not the values stored in the database
                 return (
                     issubclass(self.type, TextChoices)
                     and self._compare(expected.upper(), cast(TextChoices, self.type)(value).name, is_negative)
                 ) or (
-                    # For string or integer types, compare as lowercased strings
                     self.type in [str, int]
                     and self._compare(
                         str(expected).strip().lower(), str(value).strip().lower(), is_negative, self.contains
                     )
                 )
             except (ValueError, KeyError):  # pragma: no cover
-                # If conversion fails, the filter does not match
                 return False
 
         def _compare(self, expected: str, value: str, negative: bool = False, contains: bool = False) -> bool:
-            """Compare expected and actual values with optional negation.
+            """Compare two values, optionally by substring and with a negated result.
 
             Args:
-                expected (str): The expected value.
-                value (str): The actual value.
-                negative (bool): Whether to negate the comparison result.
-                contains (bool): Whether to use substring matching.
+                expected: Condition that the value should match, already processed.
+                value: Value of the model field, already processed.
+                negative: Whether the result of the comparison must be inverted.
+                contains: Whether the expected value only has to be a part of the
+                  value, instead of the whole value.
 
             Returns:
-                bool: The comparison result, optionally negated.
+                Whether the two values match, after applying the negation.
             """
             conclusion = expected == value if not contains else expected in value
             return conclusion if not negative else not conclusion
@@ -313,10 +201,10 @@ class BaseInput(BaseModel):
             so a condition outside the types a model tracks never drops it.
 
             Args:
-                condition (str): A single filter condition, already stripped of "!".
+                condition: A single filter condition, already stripped of "!".
 
             Returns:
-                bool: True if this filter's type can evaluate the condition.
+                Whether this filter is able to judge that condition.
             """
             if issubclass(self.type, TextChoices):
                 return condition.strip().upper() in self.type.names
@@ -329,13 +217,10 @@ class BaseInput(BaseModel):
 
     @cached_property
     def input_type(self) -> Any:
-        """Get the InputType associated with this model.
+        """The input type that references this model, or None if there isn't any.
 
-        Looks up the InputType based on the model's app label and model name,
-        supporting both primary and fallback model references.
-
-        Returns:
-            Any: The associated InputType instance or None if not found.
+        The input types reference their models by app and model name, either as
+        their main model or as the fallback used when no finding is available yet.
         """
         from input_types.models import InputType
 
@@ -357,11 +242,11 @@ class BaseInput(BaseModel):
         no caller needs to know the port.
 
         Args:
-            value (str | None): The path string to normalize.
+            value: Raw path as the tool reported it, or None.
 
         Returns:
-            str | None: The normalized path with leading slash, "/" for an empty
-            string, or None when the value is None (so callers omit the argument).
+            The normalized path with leading slash, "/" for an empty string, or None
+            when the value is None (so callers omit the argument).
         """
         if value is None:
             return None
@@ -379,11 +264,12 @@ class BaseInput(BaseModel):
         could never have been set as a target, like the platform's own internal services.
 
         Args:
-            url (str): The URL that is about to be requested.
-            source_url (str): The URL that redirected to it, used to report the rejection.
+            url: The URL that is about to be requested.
+            source_url: The URL that redirected to it, used to report the rejection.
 
         Returns:
-            bool: True if the URL can be requested, False if it's denied by policy.
+            Whether the URL can be requested. A rejection is logged as a security
+            warning before returning False.
         """
         from security.validators.target_validator import TargetValidator
 
@@ -409,15 +295,16 @@ class BaseInput(BaseModel):
         an intermediate step of the redirection chain that ends up somewhere allowed.
 
         Args:
-            url (str): The URL to probe.
+            url: First URL of the chain, which is requested without being validated,
+              since it was built from data that is already within the scope.
 
         Returns:
-            str | None: The final URL of the redirection chain, or None when one of its
-            hops is denied by policy.
+            The final URL of the redirection chain, or None when one of its hops is
+            denied by policy.
 
         Raises:
             RuntimeError: If the redirection chain loops or doesn't end within
-                _max_redirects hops, so callers treat it like any other failed probe.
+              _max_redirects hops, so callers treat it like any other failed probe.
         """
         requested_urls: list[str] = []
         while url not in requested_urls and len(requested_urls) < self._max_redirects:
@@ -442,47 +329,40 @@ class BaseInput(BaseModel):
         protocols: list[str] = ["https", "http"],
         task: Any = None,
     ) -> str | None:
-        """Construct and validate a URL with automatic protocol detection.
+        """Build the URL of a web service, probing it to know which one works.
 
-        Attempts to construct a valid URL by testing different protocols and
-        validating connectivity. When no specific port is given, the ports to
-        probe come from the task's scoped target ports if a task is provided,
-        otherwise from common web ports. Each protocol/port combination is looked
-        up in _url_cache before issuing a request, and the resulting URL is cached
-        afterwards, so repeated calls for the same URL (e.g. across multiple tool
-        arguments) don't repeat the same HTTP request and get the same redirections.
-        Redirections are checked against the target validation policy before being
-        requested, so a redirect can't move a scan onto a host that could never have
-        been set as a target, and no request is ever sent to a denied one. A URL that
-        redirects to a denied target returns no URL at all, instead of falling back to
-        another port or protocol, because the host already tried to move the scan out
-        of its allowed scope.
+        Each protocol and port combination is looked up in _url_cache before issuing
+        a request, and the resulting URL is cached afterwards, so repeated calls for
+        the same URL (e.g. across multiple tool arguments) don't repeat the same HTTP
+        request and get the same redirections. Redirections are checked against the
+        target validation policy before being requested, so a redirect can't move a
+        scan onto a host that could never have been set as a target, and no request
+        is ever sent to a denied one.
 
         Args:
-            host (str): The hostname or IP address.
-            port (int | None): The port number (optional). When set, only this
-                               port is probed and the task scope is ignored.
-            endpoint (str | None): The endpoint path (optional).
-            protocols (list[str]): List of protocols to test (default: ["https", "http"]).
-            task (Any): Task whose scoped target ports are probed when no explicit
-                        port is given.
+            host: Hostname or IP address of the web service.
+            port: Port of the web service. When set, only this port is probed and
+              the task scope is ignored.
+            endpoint: Path to be appended to the URL, with or without leading slash.
+            protocols: Protocols to probe, in the order they should be tried.
+            task: Task whose scoped target ports are probed when no explicit port is
+              given. Without a task, the common web ports are probed instead.
 
         Returns:
-            str | None: A valid URL string, after following the redirects, or None if no
-            working URL found or the redirection points to a denied target.
+            The URL that answered the request, after following its redirects, or
+            None if none of the combinations works. Also None when the URL redirects
+            to a denied target, without falling back to another port or protocol,
+            because the host already tried to move the scan out of its allowed scope.
         """
         # Disable SSL warnings since we're testing connectivity with disabled certificate verification
         urllib3.disable_warnings(category=urllib3.exceptions.InsecureRequestWarning)
 
-        # Normalize endpoint parameter: ensure it doesn't start with '/' to avoid double slashes in URL
+        # The slash between the port and the endpoint is already in the schema
         if endpoint is None:
             endpoint = ""
         elif endpoint.startswith("/"):
-            # Remove leading slash since we'll add it in the schema template
             endpoint = endpoint[1:]
-        # Define URL schema template with placeholders for dynamic components
         schema = "{protocol}://{host}:{port}/{endpoint}"
-        # Determine which ports to test based on input parameters
         default_ports = [443, 80]
         if port:
             ports = [port]
@@ -490,114 +370,89 @@ class BaseInput(BaseModel):
             ports = set([tp.port for tp in task.get_scoped_target_ports()]) or default_ports
         else:
             ports = default_ports
-        # Test all combinations of ports and protocols to find a working URL
         for port in ports:
             for protocol in protocols:
-                # Skip invalid protocol/port combinations to avoid unnecessary requests
-                # Don't try HTTPS on port 80 or HTTP on port 443 when both protocols are available
+                # Don't try HTTPS on port 80 or HTTP on port 443 when both protocols are
+                # available, since the other combination will be tried anyway
                 if len(protocols) > 1 and (
                     (port == 80 and protocol == "https") or (port == 443 and protocol == "http")
                 ):
                     continue
-                # Construct the URL using the current protocol/port combination
                 url_to_test = schema.format(protocol=protocol, host=host, port=port, endpoint=endpoint)
-                # Reuse a previous probe of this exact URL instead of issuing another request
                 cached_result = self._url_cache.get(url_to_test)
                 if cached_result is not None:
+                    # "0" is the cached mark of a URL that didn't answer a previous probe
                     if cached_result == "0":
                         continue
                     return cached_result
                 try:
-                    # Attempt to connect to the URL to verify it's accessible, following its
-                    # redirections only while they point to targets allowed by policy
                     working_url = self._get_url_with_redirects(url_to_test)
                 except Exception:
-                    # If connection fails, try the next protocol/port combination
                     self._url_cache.set(url_to_test, "0")
                     continue
                 if not working_url:
-                    # The URL doesn't work or redirects to a denied target
                     return None
                 self._url_cache.set(url_to_test, working_url)
                 return working_url
 
     def filter(self, argument_input: Any, target: Any = None) -> bool:
-        """Apply complex filtering logic based on tool argument requirements.
+        """Check if this object matches the conditions required by a tool input.
 
-        Processes filter strings with AND/OR logic and negation support, such as
-        "condition1 and condition2", "condition1 or condition2", and negative
-        conditions prefixed with "!". Each condition is evaluated only by the
-        filters that apply to it (see Filter.is_applicable). A condition that no filter
-        can evaluate does not constrain the input, so a model is never dropped by
-        a condition outside the types it tracks (for example a service name
-        against a target port that only knows its port number).
+        The conditions are combined with "and" or "or", and a condition prefixed
+        with "!" is negated. Each condition is evaluated only by the filters that
+        apply to it (see Filter.is_applicable). A condition that no filter can
+        evaluate does not constrain the input, so a model is never dropped by a
+        condition outside the types it tracks (for example a service name against a
+        target port that only knows its port number).
 
         Args:
-            argument_input (Any): The tool argument input with filter configuration.
-            target (Any): Optional target context for filtering (used in subclass implementations).
+            argument_input: Tool input whose filter conditions must be matched.
+            target: Target of the execution, only used by the subclasses that need
+              to check the input against the target scope.
 
         Returns:
-            bool: True if the input passes the filter conditions, False otherwise.
+            Whether this object can be used by that tool input. True when the input
+            has no conditions.
         """
         if not argument_input.filter:
             return True
-        # Determine the logical operator (AND/OR) and set processing mode
-        # This allows for complex conditions like "condition1 and condition2" or "condition3 or condition4"
         operator, is_or = (" or ", True) if " or " in argument_input.filter else (" and ", False)
         conclusions = []
-        # Process each condition in the filter string
         for raw_condition in argument_input.filter.split(operator):
-            # Handle negative conditions (prefixed with "!")
-            # Example: "!admin" means "not admin"
             is_negative = raw_condition.startswith("!")
             condition = raw_condition[1:] if is_negative else raw_condition
             applicable = [f for f in self._filters if f.is_applicable(condition)]
             if not applicable:
-                # No filter can evaluate this condition, so it does not constrain the input
                 conclusions.append(True)
             else:
-                # Check if any filter matches the condition
                 conclusions.append(any(f.filter(condition, getattr(self, f.field), is_negative) for f in applicable))
-        # Apply the boolean operator
         return any(conclusions) if is_or else all(conclusions)
 
     def parse(self, task: Any, accumulated: dict[str, Any] = {}) -> dict[str, Any]:
-        """Parse input data into a format suitable for tool execution.
+        """Get the keywords provided by this object to build the tool arguments.
 
-        Processes the input data according to the configured parse mapping,
-        handling dependencies and accumulation strategies. The task context is
-        forwarded to parse mappings that build URLs so probing stays within the
-        task's target port scope.
+        The dependencies are parsed first, so an object completes the keywords of
+        the objects it belongs to, like a port that adds the host it was found in.
 
         Args:
-            task (Any): Task context for parsing (e.g., for URL generation).
-                        May be None when no task is available.
-            accumulated (dict[str, Any]): Previously accumulated parsing data.
+            task: Task of the execution, forwarded to the parse mappings that build
+              URLs so probing stays within the task's target port scope. May be None
+              when no task is available.
+            accumulated: Keywords already provided by the other inputs of the same
+              execution, so lists and dictionaries are extended instead of replaced.
 
         Returns:
-            dict[str, Any]: Parsed data ready for tool execution.
-
-        Note:
-            Dependencies are parsed first to ensure required data is available
-            when processing the main parsing mappings.
+            The keywords provided by this object, ready to format the arguments.
         """
         result = {}
-        # Process dependencies first - these must be parsed before current input
-        # This ensures that related inputs are available when processing mappings
         for dependency in self._parse_dependencies:
             if (
                 hasattr(self, dependency)
                 and getattr(self, dependency)
                 and isinstance(getattr(self, dependency), BaseInput)
             ):
-                # Recursively parse dependent inputs and merge results
                 result.update(getattr(self, dependency).parse(task))
-        # Process the main parsing mappings
         for keyword, field_or_function in self._parse_mapping.items():
-            # Extract value based on mapping type:
-            # - String: direct field access
-            # - Callable: function call with self as parameter
-            # - Any: direct value assignment
             value = (
                 getattr(self, field_or_function)
                 if isinstance(field_or_function, str) and hasattr(self, field_or_function)
@@ -607,72 +462,43 @@ class BaseInput(BaseModel):
                 continue
             key = keyword.name.lower()
             current_value = accumulated.get(key)
-            # Handle accumulation logic for different data types
             if current_value is not None:
-                # For lists: append new values to existing list
                 if isinstance(current_value, list):
                     result[key] = accumulated.get(key, []) + (value if isinstance(value, list) else [value])
                     continue
-                # For dicts: merge dictionaries
                 elif isinstance(current_value, dict) and isinstance(value, dict):
                     result[key] = {**accumulated.get(key, {}), **value}
                     continue
-            # Default case: assign value directly
             result[key] = value
         return result
 
     def create_finding_from_user_input(self, execution: Any, **fields: Any) -> Any | None:
-        """Create a finding from user input parameters.
+        """Create the finding equivalent to this input, if the model has one.
 
-        Override this method in subclasses to create specific finding types
-        from user input parameters. Used for establishing relationships between
-        user-provided data and tool execution findings.
+        Overridden by the inputs provided by the auditors, so the findings that the
+        tools report can be related to the data that the auditor supplied.
 
         Args:
-            execution (Any): The execution context for the finding.
-            **fields (Any): Additional fields for the finding.
+            execution: Execution that the created finding belongs to.
+            **fields: Extra values for the finding, currently only the port where a
+              technology or a vulnerability supplied by the auditor was found.
 
         Returns:
-            Any | None: Created finding instance or None if not applicable.
+            None, unless the model overrides this method.
         """
         return None  # pragma: no cover
 
 
 class BaseLike(BaseModel):
-    """Abstract base model providing like/favorite functionality.
-
-    Enables users to like or favorite model instances through a many-to-many
-    relationship. Commonly used for findings, notes, and other user-interactive
-    content to track user preferences and engagement.
+    """Base model for the models that the users can like.
 
     Attributes:
-        liked_by (ManyToManyField): Users who have liked this instance.
-
-    Example:
-        Create a likeable model:
-
-        ```python
-        class LikeableContent(BaseLike):
-            title = models.CharField(max_length=200)
-            content = models.TextField()
-
-        # Usage
-        content = LikeableContent.objects.get(id=1)
-        content.liked_by.add(user)  # User likes the content
-        is_liked = content.liked_by.filter(id=user.id).exists()
-        ```
+        liked_by: Users that liked each object.
     """
 
     liked_by = ManyToManyField(AUTH_USER_MODEL, related_name="liked_%(class)s")
 
     class Meta:
-        """Django Meta class configuration for BaseLike.
-
-        Configures BaseLike as an abstract base class that provides like/favorite
-        functionality without creating its own database table.
-
-        Attributes:
-            abstract (bool): Marks this model as abstract (no database table).
-        """
+        """Model configuration, marking it as abstract."""
 
         abstract = True

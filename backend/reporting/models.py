@@ -1,9 +1,4 @@
-"""Django models for security report generation and management.
-
-Defines the Report model for tracking security report generation lifecycle including
-status tracking, format configuration, and project-level access control with support
-for hierarchical project relationships and multi-format output generation.
-"""
+"""Model of the reports that export the findings."""
 
 from functools import cached_property
 
@@ -18,38 +13,21 @@ from tasks.models import Task
 
 
 class Report(BaseModel):
-    """Model representing security reports with generation tracking and access control.
+    """Report of the findings of a project, a target, or a task.
 
-    Represents security assessment reports with comprehensive lifecycle management
-    from creation to completion. Supports multiple output formats and flexible
-    scoping at project, target, or task levels with background processing capabilities.
-
-    Report Lifecycle:
-        PENDING -> READY/ERROR
-        - Reports are created with PENDING status during background generation
-        - Status updates to READY upon successful completion or ERROR on failure
-        - Generated files are stored with secure access controls and unique naming
+    Only one of the three scopes is set, and the report is removed together with
+    the thing that it reports about.
 
     Attributes:
-        project (ForeignKey): Associated project for project-scoped reports (optional)
-        target (ForeignKey): Associated target for target-scoped reports (optional)
-        task (ForeignKey): Associated task for task-scoped reports (optional)
-        status (TextField): Current report generation status (from ReportStatus enum)
-        format (TextField): Output format specification (from ReportFormat enum)
-        path (TextField): Generated report file path (max 300 chars, optional)
-        user (ForeignKey): User who requested the report generation (optional)
-        date (DateTimeField): Report creation timestamp (auto-generated)
-
-    Example:
-        Create a task-scoped PDF report:
-
-        ```python
-        report = Report.objects.create(
-            task=security_task,
-            format=ReportFormat.PDF,
-            user=request.user
-        )
-        ```
+        project: Project whose findings the report includes.
+        target: Target whose findings the report includes.
+        task: Task whose findings the report includes.
+        status: State of the generation, which starts as pending because the report
+          is generated in the background.
+        format: Format of the generated file.
+        path: Location of the generated file, once the generation succeeds.
+        user: User that requested the report.
+        date: Date when the report was requested.
     """
 
     project = models.ForeignKey(Project, related_name="reports", on_delete=models.CASCADE, blank=True, null=True)
@@ -63,23 +41,11 @@ class Report(BaseModel):
 
     @cached_property
     def parent_project(self) -> Project:
-        """Get the parent project for this report.
-
-        Traverses the hierarchical relationship to locate the associated project
-        regardless of report scope level (task, target, or project).
-
-        Returns:
-            Project: The parent project object for access control and permissions.
-        """
+        """The project that the report belongs to, whatever its scope is."""
         return (self.task or self.target or self.project).parent_project
 
     def __str__(self) -> str:
-        """Return string representation of the report.
-
-        Returns:
-            str: String in format "scope - format - user" where scope is the
-                 task, target, or project associated with this report.
-        """
+        """Return the scope of the report, with its format and the user that asked for it."""
         return " - ".join(
             [(self.task or self.target or self.project).__str__(), self.format.value, self.user.__str__()]
         )

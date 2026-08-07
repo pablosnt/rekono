@@ -1,8 +1,8 @@
-"""Background job queue processing for security findings.
+"""Queue that processes the findings reported by an execution.
 
-Handles asynchronous processing of security findings through background job
-queues including external platform integration, notifications, and automatic
-finding lifecycle management.
+The findings are enriched with the information of the CVE providers, sent to the
+integrations, and notified to the users that are interested in them. The findings
+that stop being detected are also fixed here.
 """
 
 from django_rq import job
@@ -40,27 +40,25 @@ from settings.models import Settings
 
 
 class FindingsQueue(BaseQueue):
-    """Background job queue for asynchronous findings processing.
+    """Queue that enriches, integrates, and notifies the findings.
 
-    Manages background processing of security findings including external
-    platform integrations, alert notifications, and automatic finding
-    lifecycle management with Redis Queue (RQ) backend.
+    Attributes:
+        name: Name of the RQ queue.
     """
 
     name = "findings"
 
     def enqueue(self, execution: Execution, findings: list[Finding]) -> Job:
-        """Enqueue findings for background processing.
-
-        Adds findings to the background job queue for asynchronous
-        processing and logs the enqueue operation.
+        """Enqueue the findings reported by an execution.
 
         Args:
-            execution (Execution): Execution that produced the findings.
-            findings (list[Finding]): List of findings to process.
+            execution: Execution that reported the findings. It is serialized as it
+              is at this moment, so it must already be completed for its status and
+              hash to reach the job.
+            findings: Findings that the parser reported for that execution.
 
         Returns:
-            Job: Queued job object for tracking.
+            The enqueued job, which processes the findings once a worker takes it.
         """
         job = super().enqueue(execution=execution, findings=findings)
         self.logger.info(f"[Findings] {len(findings)} findings from execution {execution.id} have been enqueued")
@@ -70,20 +68,11 @@ class FindingsQueue(BaseQueue):
     def _consume(execution: Execution, findings: list[Finding]) -> None:
         """Run the findings processing pipeline for an execution.
 
-        Enriches each finding's CVE data by querying every enabled provider and
-        keeping the enrichment with the highest quality score, then runs the
-        per-finding and per-execution integrations and dispatches alert
-        notifications. Findings are grouped by type and sorted within each type
-        before reaching the per-execution platforms, so the integrations and the
-        notifications always report them in the same meaningful order. When
-        auto-fix is enabled, previously fixed findings that reappear are
-        reactivated, and findings from matching previous executions against the
-        same target with the same hash that are absent from the current execution
-        are marked as fixed.
-
         Args:
-            execution (Execution): Execution that produced the findings.
-            findings (list[Finding]): List of findings to process.
+            execution: Execution that reported the findings. Its hash selects the
+              previous executions that scanned the same thing, so a stale one would
+              fix the findings of the wrong executions.
+            findings: Findings that the parser reported for that execution.
         """
         BaseQueue.logger.info(
             f"[Findings] Processing of {len(findings)} findings from execution {execution.id} has started"
@@ -137,6 +126,7 @@ class FindingsQueue(BaseQueue):
                         cve_provider.save(finding, enrichment)
                 for integration in integrations_per_finding:
                     integration.process_finding(execution, finding)
+                # The alerts are ordered by item so the most specific ones are checked first
                 for alert in execution.task.target.project.alerts.filter(enabled=True).order_by("-item").all():
                     if alert.must_be_triggered(execution, finding):
                         for platform in notifications:
@@ -151,13 +141,11 @@ class FindingsQueue(BaseQueue):
                 for finding_type, ordering, reverse in finding_types
             }
             sorted_findings = sum(findings_per_type.values(), [])
-            # Process findings through platforms that run per execution
             for platform in integrations_per_execution + notifications:
                 platform.process_findings(execution, sorted_findings)
-        # Automatic fixing: mark findings as fixed if they're no longer detected in identical execution contexts
         if settings.auto_fix_findings:
-            # For each finding type, mark findings as fixed if they don't appear in the current execution
-            # but were found in previous executions with the same parameters over the same target
+            # The execution hash identifies the executions that scanned the same thing in the same
+            # way, so a finding that they discovered before and this one didn't is gone
             for finding_type, _, _ in finding_types:
                 finding_type.objects.fix(
                     finding_type.objects.filter(
@@ -172,27 +160,16 @@ class FindingsQueue(BaseQueue):
     @staticmethod
     @job("findings")
     def consume(execution: Execution, findings: list[Finding]) -> None:
-        """Process findings through background job workflow.
+        """Process the findings of one execution.
 
-        Executes complete findings processing pipeline including external
-        platform integrations, alert notifications, and automatic fixing
-        based on system settings and project configuration. Processing is
-        serialized per target so multiple workers never process findings for
-        the same target at the same time. Any failure raised by the pipeline
-        is logged rather than propagated, so the RQ job always completes
-        successfully.
-
-        Processing Steps:
-            - Reactivation of previously fixed findings that reappear (when auto-fix is enabled)
-            - CVE enrichment via multiple providers with quality-score selection
-            - Per-finding integrations and alert notification dispatch
-            - Per-execution integrations and notification platforms
-            - Cross-execution fix correlation for findings missing from this execution,
-              independent of whether any findings were passed in (when auto-fix is enabled)
+        Any failure raised by the pipeline is logged rather than propagated, so the
+        RQ job always completes successfully.
 
         Args:
-            execution (Execution): Source execution for the findings.
-            findings (list[Finding]): List of findings to process.
+            execution: Execution that reported the findings, as it was when the job
+              was enqueued. It must already be completed by then, since its status
+              and hash are read here from the pickled copy.
+            findings: Findings that the parser reported for that execution.
         """
         self = FindingsQueue()
         # Lock RQ per target to avoid getting multiple workers processing the same findings at the same time

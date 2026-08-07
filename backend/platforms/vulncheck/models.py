@@ -1,8 +1,10 @@
-"""Django models for VulnCheck platform configuration and settings.
+"""Model of the VulnCheck configuration.
 
-Provides the VulnCheckSettings model for managing the Bearer API token required
-to authenticate requests to the VulnCheck NVD++ vulnerability intelligence service.
-Supports secure token storage with encryption and validation.
+Typical usage example:
+
+  settings = VulnCheckSettings.objects.first()
+  settings.secret = "..."  # encrypted into _api_token on save
+  settings.save()
 """
 
 from django.db import models
@@ -12,25 +14,10 @@ from security.validators.input_validator import Regex, Validator
 
 
 class VulnCheckSettings(BaseEncrypted):
-    """Model for VulnCheck API configuration and authentication settings.
+    """Configuration of VulnCheck, of which only one instance exists.
 
-    Manages the Bearer API token required for authenticating requests to the
-    VulnCheck NVD++ service. Supports encrypted storage of sensitive tokens
-    with automatic encryption/decryption through the BaseEncrypted framework.
-    The token field allows up to 200 characters to accommodate JWT-style tokens.
-
-    Attributes:
-        _api_token (TextField): Encrypted VulnCheck Bearer token (max 200 chars)
-        _encrypted_field (str): Field name for encryption configuration
-
-    Example:
-        Configure VulnCheck API integration:
-
-        ```python
-        settings = VulnCheckSettings.objects.first()
-        settings.secret = "your-vulncheck-api-token"
-        settings.save()
-        ```
+    Without the API token the platform can't be used, since VulnCheck rejects the
+    requests that aren't authenticated.
     """
 
     _api_token = models.TextField(
@@ -44,9 +31,5 @@ class VulnCheckSettings(BaseEncrypted):
     _encrypted_field = "_api_token"
 
     def __str__(self) -> str:
-        """Return string representation of VulnCheck settings.
-
-        Returns:
-            str: Platform name identifier for display purposes.
-        """
+        """Return the name of the platform."""
         return "VulnCheck"

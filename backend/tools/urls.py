@@ -1,8 +1,4 @@
-"""URL configuration for tools module API endpoints.
-
-Configures REST API routing for tools and configurations endpoints
-using Django REST framework's SimpleRouter.
-"""
+"""URLs of the tool endpoints."""
 
 from rest_framework.routers import SimpleRouter
 

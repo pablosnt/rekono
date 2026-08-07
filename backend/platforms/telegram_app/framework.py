@@ -1,9 +1,7 @@
-"""Base framework for Telegram Bot integration with Rekono.
+"""Base class shared by the Telegram notifications and the Telegram bot.
 
-Provides the foundational BaseTelegram class shared by outbound notification delivery
-(platforms.telegram_app.notifications) and the interactive bot command layer
-(platforms.telegram_app.bot). Covers application initialization, message sending,
-token validation, and error handling common to both directions.
+Both directions talk to the same bot, so creating it, sending messages, and dealing
+with an invalid token are defined once here.
 """
 
 import asyncio
@@ -21,21 +19,13 @@ from platforms.telegram_app.models import TelegramChat, TelegramSettings
 
 
 class BaseTelegram(LoggingEntity):
-    """Base class for Telegram Bot integration with application management.
+    """Telegram bot that Rekono talks to the users through.
 
-    Provides core functionality for Telegram Bot operations including application
-    initialization, message sending, token validation, and error handling.
-
-    Processing Features:
-        - Bot application creation and async initialization, gated on a configured bot token
-        - Markdown V2 message escaping and delivery to a linked chat
-        - Automatic token clearing when the Telegram API rejects the stored token
-        - Global error handling for uncaught exceptions raised by bot handlers
+    The bot client is created the first time that it's needed, and it's only ready
+    once Telegram accepts the configured token.
 
     Attributes:
-        date_format (str): Date format used for execution timestamps in messages.
-        _app (Application | None): Cached Telegram application client.
-        _initialized (bool): Whether the bot application has been initialized.
+        date_format: Format that the dates are written in.
     """
 
     date_format = "%Y-%m-%d %H:%M:%S %Z"
@@ -44,20 +34,14 @@ class BaseTelegram(LoggingEntity):
 
     @cached_property
     def settings(self) -> TelegramSettings:
-        """Get Telegram Bot configuration settings from database.
-
-        Returns:
-            TelegramSettings: Telegram configuration instance or None if not configured.
-        """
+        """The Telegram configuration, or None if it hasn't been created yet."""
         return TelegramSettings.objects.first()
 
     def initialize(self) -> None:
-        """Initialize the Telegram Bot application.
+        """Prepare the bot client to be used, if it isn't ready yet.
 
-        Runs the bot's async initialization once; the _initialized guard makes
-        repeated calls no-ops. Clears the stored token if authentication fails,
-        and leaves the bot uninitialized without clearing the token if the
-        Telegram API is temporarily unreachable, so a later request can retry.
+        The token is removed if Telegram rejects it, but it's kept if Telegram
+        can't be reached, so the next request can try again.
         """
         if not self._initialized and self.app and self.app.bot:  # pytype: disable=attribute-error
             try:
@@ -66,21 +50,13 @@ class BaseTelegram(LoggingEntity):
             except (InvalidToken, Forbidden):
                 self.handle_invalid_token()
             except Exception as ex:
-                # The Telegram API is temporarily unreachable
-                # Keep the token and leave the bot uninitialized so the next request can retry
                 self.logger.error(
                     f"[Telegram] {ex.__class__.__name__} error when trying to initialize the Telegram Bot: {str(ex)}"
                 )
 
     @property
     def app(self) -> Application | None:
-        """Get the Telegram Bot application instance.
-
-        Creates and configures the Telegram Bot application using the stored token.
-
-        Returns:
-            Application | None: The configured bot application or None if no token.
-        """
+        """The bot client, or None if no bot token is configured."""
         if not self._app and self.settings and self.settings.secret:
             try:
                 self._app = Application.builder().token(self.settings.secret).post_init(self.post_init).build()
@@ -91,38 +67,24 @@ class BaseTelegram(LoggingEntity):
 
     @property
     def bot_name(self) -> str | None:
-        """Get the Telegram Bot username.
-
-        The username comes from the get_me call performed during initialization, so it
-        is only available once the bot has been initialized. Accessing it beforehand
-        would raise a RuntimeError, hence the _initialized guard.
-
-        Returns:
-            str | None: The bot username if the bot has been initialized, None otherwise.
-        """
+        """The name of the bot, or None until its client has been prepared."""
         return self.app.bot.username if self._initialized and self.app and self.app.bot else None
 
     async def post_init(self, application: Application) -> None:
-        """Post-initialization hook for the Telegram application.
-
-        Override this method to add custom initialization logic after
-        the application is created but before it starts.
+        """Prepare whatever the bot needs once its client has been created.
 
         Args:
-            application (Application): The Telegram Bot application instance.
+            application: Bot client that was created.
         """
         pass
 
     def send_message(self, chat: TelegramChat, message: str, reply_markup: Any = None) -> None:
         """Send a message to a Telegram chat.
 
-        Sends a formatted message to the specified Telegram chat using Markdown V2
-        parsing and handles network errors gracefully.
-
         Args:
-            chat (TelegramChat): The target chat for the message.
-            message (str): The message content to send.
-            reply_markup (Any, optional): Keyboard markup for interactive messages.
+            chat: Chat where the message is sent.
+            message: Content of the message, written in Markdown.
+            reply_markup: Buttons that the users can answer the message with.
         """
         if self.app and self.app.bot:
             try:
@@ -131,17 +93,16 @@ class BaseTelegram(LoggingEntity):
                 pass
 
     async def _send_message(self, chat: TelegramChat, message: str, reply_markup: Any = None) -> None:
-        """Send a message with a bot HTTP client bound to the current event loop.
-
-        Each call runs in its own `asyncio.run` loop, so the bot's HTTP client is opened and
-        closed within that loop. Reusing it across loops would bind its connection pool to an
-        already closed loop, raising "Event loop is closed" and silently dropping notifications.
+        """Send a message with a client bound to the loop that is running now.
 
         Args:
-            chat (TelegramChat): The target chat for the message.
-            message (str): The message content to send.
-            reply_markup (Any, optional): Keyboard markup for interactive messages.
+            chat: Chat where the message is sent.
+            message: Content of the message, written in Markdown.
+            reply_markup: Buttons that the users can answer the message with.
         """
+        # Every call runs its own event loop, so the HTTP client of the bot has to be opened
+        # and closed in it: reusing it would bind its connections to a loop that is already
+        # closed, and the messages would be dropped
         async with self.app.bot as bot:  # pytype: disable=attribute-error
             await bot.send_message(
                 chat.chat_id,
@@ -151,30 +112,25 @@ class BaseTelegram(LoggingEntity):
             )
 
     def escape(self, value: str, entity_type: str | None = None) -> str:
-        """Escape text for Telegram Markdown V2 formatting.
+        """Escape a text so Telegram doesn't read it as Markdown.
 
         Args:
-            value (str): The text to escape.
-            entity_type (str | None, optional): Markdown V2 entity the text belongs to. Use
-                "text_link" to escape a link URL, where only ")" and "\\" must be escaped instead
-                of the full set of special characters. Defaults to None (general text escaping).
+            value: Text to escape.
+            entity_type: Kind of Markdown entity that the text belongs to, which
+              is only needed for the links, since fewer characters are escaped
+              inside a URL.
 
         Returns:
-            str: The escaped text safe for Markdown V2 parsing.
+            The text as Telegram must show it.
         """
         return escape_markdown(value, version=2, entity_type=entity_type)
 
     async def handle_error(self, update: object, context: CallbackContext) -> None:
-        """Global error handler for uncaught exceptions raised by bot handlers.
-
-        Registered as the Application's error handler so exceptions raised while
-        processing an update (e.g. transient network disconnections) are logged
-        instead of being silently dropped by python-telegram-bot with a
-        "No error handlers are registered" warning.
+        """Log the errors that the bot handlers don't catch themselves.
 
         Args:
-            update (object): The update that caused the error, if any.
-            context (CallbackContext): The callback context holding the raised error.
+            update: Message that was being processed when the error happened.
+            context: Context of the handler, which is where the error is.
         """
         if not isinstance(update, Update):
             return
@@ -185,13 +141,11 @@ class BaseTelegram(LoggingEntity):
         )
 
     def handle_invalid_token(self, log_error: bool = True) -> None:
-        """Handle invalid Telegram Bot token errors.
-
-        Clears the invalid token from settings, resets the cached application,
-        and optionally logs the error.
+        """Remove the bot token that Telegram rejected.
 
         Args:
-            log_error (bool): Whether to log the authentication error. Defaults to True.
+            log_error: Whether the rejection must be logged, which it isn't when
+              the users are the ones checking if the token works.
         """
         self.settings.secret = None
         self.settings.save(update_fields=["_token"])

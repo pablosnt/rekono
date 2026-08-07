@@ -1,10 +1,4 @@
-"""SSH Audit SSH security scanner output parser.
-
-Processes the SSH Audit JSON report to extract the SSH server Technology from its banner and a
-Vulnerability finding for each insecure encryption, key exchange, host key or MAC algorithm the
-report flags. CVE identifiers referenced in the report's algorithm notes are also extracted and
-reported as their own Vulnerability findings.
-"""
+"""Parser of the SSH Audit server scanner."""
 
 import re
 
@@ -15,24 +9,13 @@ from tools.parsers.base import BaseParser
 
 
 class Sshaudit(BaseParser):
-    """Parser for SSH Audit JSON output files.
-
-    Extracts SSH server technology and security findings including insecure
-    encryption algorithms, key exchange methods, and known vulnerabilities.
-    Processes comprehensive SSH configuration security analysis.
-
-    Attributes:
-        Inherits all attributes from BaseParser
-    """
+    """Findings discovered by SSH Audit, read from its JSON report."""
 
     def _parse(self) -> None:
-        """Parse SSH Audit JSON output and extract SSH security findings.
+        """Create the SSH server and one vulnerability per insecure algorithm.
 
-        Creates a Technology finding from the SSH banner and a Vulnerability finding for every
-        enc, kex, key or mac algorithm SSH Audit flagged with a fail or warn note (algorithms
-        with only info notes are skipped). CVE identifiers are extracted with a regex from the
-        free text of those notes, since SSH Audit leaves its own top-level cves field empty for
-        algorithm-level advisories.
+        The algorithms that SSH Audit only comments on are left out, since a note
+        that isn't a warning says that the algorithm is fine.
         """
         data = self.load_json_report()
         if not data or not isinstance(data, dict):

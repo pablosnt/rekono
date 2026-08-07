@@ -1,8 +1,4 @@
-"""Django admin configuration for Telegram Bot models.
-
-Registers Telegram Bot models with Django admin interface for
-administrative management of settings and chat relationships.
-"""
+"""Registration of the Telegram models in the Django admin site."""
 
 from django.contrib import admin
 

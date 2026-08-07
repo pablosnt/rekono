@@ -1,8 +1,4 @@
-"""HTTP Headers filters for advanced API querying.
-
-Provides filtering capabilities for HTTP headers with support for
-project-based filtering and field-specific search operations.
-"""
+"""Filters of the HTTP header endpoints."""
 
 from django_filters.filters import ModelChoiceFilter
 from django_filters.rest_framework import FilterSet
@@ -12,13 +8,10 @@ from projects.models import Project
 
 
 class HttpHeaderFilter(FilterSet):
-    """FilterSet for HTTP header querying and filtering.
-
-    Provides filtering and search operations for HTTP headers based on
-    associated project, target, user, key, and value.
+    """Filters to search the HTTP headers that the tools send.
 
     Attributes:
-        project (ModelChoiceFilter): Filter headers by associated project, through the target relationship
+        project: Filter by the project of the target that the header belongs to.
     """
 
     project = ModelChoiceFilter(
@@ -26,12 +19,7 @@ class HttpHeaderFilter(FilterSet):
     )
 
     class Meta:
-        """Meta configuration for HttpHeaderFilter.
-
-        Attributes:
-            model (Model): The HttpHeader model to filter
-            fields (dict): Field names mapped to supported lookup types
-        """
+        """Filter configuration for the HTTP headers."""
 
         model = HttpHeader
         fields = {

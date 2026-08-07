@@ -1,8 +1,4 @@
-"""URL configuration for wordlist API endpoints.
-
-Defines URL routing for wordlist-related REST API endpoints using
-Django REST framework's SimpleRouter.
-"""
+"""URLs of the wordlist endpoints."""
 
 from rest_framework.routers import SimpleRouter
 

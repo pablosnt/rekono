@@ -1,8 +1,4 @@
-"""Django admin configuration for project models.
-
-Registers the Project model with the Django admin interface for administrative
-management and debugging of project-related data.
-"""
+"""Registration of the project model in the Django admin site."""
 
 from django.contrib import admin
 

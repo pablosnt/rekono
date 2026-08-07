@@ -1,8 +1,4 @@
-"""Serializers for API token models with secure key handling.
-
-Provides serialization for API tokens including secure key generation,
-hashing, and proper display/creation logic.
-"""
+"""Serializers of the API token endpoints."""
 
 from typing import Any
 
@@ -13,55 +9,35 @@ from security.cryptography import Crypto
 
 
 class ApiTokenSerializer(ModelSerializer):
-    """Serializer for displaying API token information.
-
-    Handles serialization of API token data for display purposes.
-    Excludes the actual key for security reasons.
-    """
+    """Serializer of an API token, without its value, which is never exposed."""
 
     class Meta:
-        """Meta configuration for the ApiTokenSerializer.
-
-        Attributes:
-            model (Model): The ApiToken model to serialize
-            fields (tuple): Field names to include in serialization
-        """
+        """Serializer configuration for the API tokens."""
 
         model = ApiToken
         fields = ("id", "name", "expiration")
 
 
 class CreateApiTokenSerializer(ModelSerializer):
-    """Serializer for creating new API tokens with secure key handling.
-
-    Handles token creation including automatic key generation, hashing for storage,
-    and returning the plain key only once during creation.
-    """
+    """Serializer that creates an API token and returns its value once."""
 
     class Meta:
-        """Meta configuration for the CreateApiTokenSerializer.
-
-        Attributes:
-            model (Model): The ApiToken model to serialize
-            fields (tuple): Field names to include in serialization
-            read_only_fields (tuple): Fields that cannot be modified during creation
-        """
+        """Serializer configuration for the creation of API tokens."""
 
         model = ApiToken
         fields = ("id", "key", "name", "expiration")
         read_only_fields = ("key",)
 
     def save(self, **kwargs: Any) -> ApiToken:
-        """Save a new API token with a generated and hashed key.
-
-        Generates a unique key, hashes it for database storage, but returns
-        the plain key for one-time display to the user.
+        """Create the API token, storing its hash and returning its plain value.
 
         Args:
-            **kwargs (Any): Additional keyword arguments for saving
+            **kwargs: Extra fields for the token, like the user that the viewset
+              adds.
 
         Returns:
-            ApiToken: The created API token instance with plain key attached
+            The new API token, with its plain value in the key field, which is the
+            only time that value is available, since the database keeps its hash.
         """
         plain_key = ApiToken.generate_key()
         self.validated_data["key"] = Crypto.hash(plain_key)

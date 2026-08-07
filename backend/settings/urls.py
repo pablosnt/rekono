@@ -1,8 +1,4 @@
-"""URL configuration for the settings module.
-
-Defines URL patterns for the settings REST API endpoint, exposing global
-platform configuration for viewing and updating.
-"""
+"""URLs of the settings endpoints."""
 
 from rest_framework.routers import SimpleRouter
 

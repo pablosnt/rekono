@@ -1,8 +1,8 @@
-"""Django REST framework views for security report generation and management.
+"""Viewset of the report endpoints.
 
-Provides REST API endpoints for report lifecycle management including creation,
-status tracking, and file download with multi-format support and background
-processing capabilities.
+The findings are queried when the report is requested, so the response can tell the
+user right away if there is nothing to report, and the file is written in a thread
+so a big report doesn't block the request.
 """
 
 import importlib
@@ -43,24 +43,19 @@ from tasks.models import Task
 
 
 class ReportingViewSet(BaseViewSet):
-    """ViewSet for security report generation and management.
-
-    Provides REST API endpoints for report operations including creation with
-    background processing, status tracking, and secure file download. Supports
-    multiple output formats with advanced filtering and notification capabilities.
-
-    Custom Actions:
-        download: Download generated report files with secure access controls
+    """Request, download, and remove the reports of the findings.
 
     Attributes:
-        queryset (QuerySet): Report model instances
-        serializer_class (Serializer): Default serializer for report operations
-        filterset_class (FilterSet): Filter class for report queries
-        permission_classes (list): Required permissions including ownership validation
-        search_fields (list): Fields available for text search
-        ordering_fields (list): Fields available for result ordering
-        http_method_names (list): Allowed HTTP methods (GET, POST, DELETE)
-        owner_field (str): Field used for ownership-based access control
+        queryset: All the reports, filtered later by project membership.
+        serializer_class: Serializer of the reports.
+        filterset_class: Filters of the reports.
+        permission_classes: Role permissions plus the ownership of the report, so
+          only the user that requested it can download or remove it.
+        search_fields: Free text search over the format and the status.
+        ordering_fields: Fields that the reports can be sorted by.
+        http_method_names: A report can't be updated, only requested, downloaded,
+          and removed.
+        owner_field: Field with the user that requested the report.
     """
 
     queryset = Report.objects.all()
@@ -73,18 +68,17 @@ class ReportingViewSet(BaseViewSet):
     owner_field = "user"
 
     def _get_project_from_data(self, project_field: str, data: dict[str, Any]) -> Project | None:
-        """Extract project context from the report's scope in request data.
-
-        Resolves the project through whichever scope field was supplied, preferring
-        task over target over project. A request may supply more than one of these
-        fields, and only the highest-priority one, checked in that order, is used.
+        """Get the project of the scope that the new report covers.
 
         Args:
-            project_field (str): The project field name (unused but required by interface)
-            data (dict[str, Any]): Request data containing scope information
+            project_field: Not used, since the project of a report comes from its
+              scope instead of from a field of the request.
+            data: Data of the report that is being created.
 
         Returns:
-            Project | None: The associated project or None if not found
+            The project that the report will belong to, taken from the most
+            specific scope that the request provides, or None if it provides no
+            scope at all.
         """
         return (
             cast(Task, data.get("task")).target.project
@@ -93,10 +87,11 @@ class ReportingViewSet(BaseViewSet):
         )
 
     def get_queryset(self) -> QuerySet:
-        """Get filtered queryset based on user project membership.
+        """Get the reports of the projects that the user belongs to.
 
         Returns:
-            QuerySet: Reports filtered to only include those accessible by the current user
+            The reports that the user can access, whether they are scoped to a
+            project, a target, or a task. None for an unauthenticated request.
         """
         return (
             (
@@ -113,27 +108,27 @@ class ReportingViewSet(BaseViewSet):
         )
 
     def get_serializer_class(self) -> Serializer:
-        """Get appropriate serializer class based on request method.
+        """Get the serializer that accepts the report options for the creation.
 
         Returns:
-            Serializer: CreateReportSerializer for POST requests, ReportSerializer otherwise
+            The creation serializer for POST, which accepts the scope and the
+            format, and the standard one for the rest of the methods.
         """
         return CreateReportSerializer if self.request.method == "POST" else super().get_serializer_class()
 
     @extend_schema(request=CreateReportSerializer, responses=ReportSerializer)
     def create(self, request: Request, *args: Any, **kwargs: Any):
-        """Create a new report with background generation processing.
-
-        Validates report parameters, processes findings data, and initiates
-        background report generation with status tracking.
+        """Request a new report and start generating its file in the background.
 
         Args:
-            request (Request): HTTP request containing report configuration
-            *args (Any): Additional positional arguments
-            **kwargs (Any): Additional keyword arguments
+            request: Request with the scope, the format, and the criteria that
+              select the findings.
+            *args: Standard view arguments.
+            **kwargs: Standard view arguments.
 
         Returns:
-            Response: HTTP 201 with report instance or HTTP 404 if no findings found
+            The created report, which is still pending until its file is written,
+            or a not found error if no finding matches the requested criteria.
         """
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -149,19 +144,20 @@ class ReportingViewSet(BaseViewSet):
         return Response(self.get_serializer(instance=serializer.instance).data, status=status.HTTP_201_CREATED)
 
     def destroy(self, request: Request, pk: str, *args: Any, **kwargs: Any) -> Response:
-        """Delete report and associated file from storage.
+        """Remove a report and the file that was generated for it.
 
         Args:
-            request (Request): HTTP request object
-            pk (str): Primary key of the report to remove
-            *args (Any): Additional positional arguments
-            **kwargs (Any): Additional keyword arguments
+            request: Request that asks for the report to be removed.
+            pk: Identifier of the report, taken from the URL.
+            *args: Standard view arguments.
+            **kwargs: Standard view arguments.
 
         Returns:
-            Response: HTTP 400 if the report is still being generated, otherwise the standard deletion response
+            An empty response, or a validation error if the report is still being
+            generated, since the thread that writes the file would keep running
+            against a report that doesn't exist anymore and leave the file behind.
         """
         report = self.get_object()
-        # The file is created in a background thread, deleting now would let that thread finish against a deleted row and orphan the file on disk.
         if report.status == ReportStatus.PENDING:
             return Response(
                 {"report": "Report can't be deleted while it is being generated"},
@@ -175,14 +171,15 @@ class ReportingViewSet(BaseViewSet):
     @extend_schema(request=None, responses={200: OpenApiResponse(description="Generated report file"), 404: None})
     @action(detail=True, methods=["GET"])
     def download(self, request: Request, pk: str) -> FileResponse:
-        """Download generated report file with secure access validation.
+        """Download the file that was generated for a report.
 
         Args:
-            request (Request): HTTP request object
-            pk (str): Primary key of the report to download
+            request: Request that asks for the file.
+            pk: Identifier of the report, taken from the URL.
 
         Returns:
-            FileResponse: Report file download or error response for invalid status/missing file
+            The report file, a validation error if the report isn't ready yet or
+            its generation failed, or a not found error if the file is gone.
         """
         report = self.get_object()
         if report.status != ReportStatus.READY:
@@ -204,13 +201,15 @@ class ReportingViewSet(BaseViewSet):
     def _get_json_findings_by_type(
         self, serializer: ReportSerializer
     ) -> tuple[dict[type[Finding], list[dict[str, Any]]], int]:
-        """Extract findings data organized by type for JSON/XML report generation.
+        """Get the findings of the report grouped by their type.
 
         Args:
-            serializer (ReportSerializer): Validated report serializer with filtering criteria
+            serializer: Validated report serializer, whose filters select the
+              findings to include.
 
         Returns:
-            tuple[dict[type[Finding], list[dict[str, Any]]], int]: Findings by type and total count
+            The findings of each requested type, already sorted by what matters in
+            each one, and how many findings the report will include in total.
         """
         findings = {}
         count = 0
@@ -236,13 +235,17 @@ class ReportingViewSet(BaseViewSet):
         return findings, count
 
     def _get_findings_for_pdf_report(self, serializer: ReportSerializer) -> tuple[dict[str, Any], int]:
-        """Extract hierarchical findings data with statistics for PDF report generation.
+        """Get the findings of the report grouped by target and by host.
 
         Args:
-            serializer (ReportSerializer): Validated report serializer with filtering criteria
+            serializer: Validated report serializer, whose filters select the
+              findings to include.
 
         Returns:
-            tuple[dict[str, Any], int]: Hierarchical findings with statistics and total count
+            The findings of each host of each target, with the number of findings
+            per severity that the charts of the document need, and how many
+            findings the report will include in total. The targets without
+            findings are left out, so the document has no empty sections.
         """
         count = 0
         results = {"findings": {}, "stats": {severity.name.lower(): 0 for severity in Severity}, "stats_by_target": {}}
@@ -328,6 +331,8 @@ class ReportingViewSet(BaseViewSet):
                     _severity = Severity(vulnerability.severity).name.lower()
                     results["stats_by_target"][target.id][_severity] += 1
                     results["stats"][_severity] += 1
+                # The credentials have no severity of their own, so an exposed secret is
+                # counted as a high risk and a leaked user name as a low one
                 for credential in _credentials.all():
                     _severity = (Severity.HIGH if credential.secret else Severity.LOW).name.lower()
                     results["stats_by_target"][target.id][_severity] += 1
@@ -340,17 +345,11 @@ class ReportingViewSet(BaseViewSet):
         return results, count
 
     def _create_report_file(self, report: Report, *findings: Any) -> None:
-        """Generate report file in background thread with status updates.
-
-        Dispatches to the format-specific generator by report format. If that
-        generator raises or reports failure, the report is marked as ERROR. On
-        success the file path is stored and the created report is announced over
-        Telegram and email. Marking the status explicitly is required because
-        this runs in a raw thread with no queue to surface a crash.
+        """Generate the file of a report and notify the user that it's ready.
 
         Args:
-            report (Report): Report instance to generate file for
-            *findings (Any): Findings data for report content
+            report: Report whose file must be generated.
+            *findings: Findings to include, in the shape that the format needs.
         """
         filename = f"{str(uuid.uuid4())}.{report.format.lower()}"
         try:
@@ -358,6 +357,8 @@ class ReportingViewSet(BaseViewSet):
         except Exception as ex:
             self.logger.error(f"Error while generating the {report.format} report {report.id}: {str(ex)}")
             success = False
+        # This runs in a raw thread instead of in a queue, so nothing else would ever move the
+        # report out of the pending status if the generation fails
         if success:
             report.path = filename
             report.status = ReportStatus.READY
@@ -371,15 +372,17 @@ class ReportingViewSet(BaseViewSet):
     def _create_json_report(
         self, filename: str, report: Report, findings: dict[type[Finding], list[dict[str, Any]]]
     ) -> bool:
-        """Generate JSON format report file.
+        """Write the findings of a report as a JSON file.
 
         Args:
-            filename (str): Target filename for the report
-            report (Report): Report instance for context
-            findings (dict[type[Finding], list[dict[str, Any]]]): Findings data to serialize
+            filename: Name of the file to write inside the generated reports
+              directory.
+            report: Report whose scope and format are being generated.
+            findings: Findings to include, as the corresponding _get_findings method
+              returned them.
 
         Returns:
-            bool: True if generation succeeded, False on error
+            Whether the file could be written.
         """
         try:
             with (CONFIG.generated_reports / filename).open("w") as report:
@@ -389,14 +392,15 @@ class ReportingViewSet(BaseViewSet):
             return False
 
     def _dict_to_xml(self, element: ET.Element, data: dict[str, Any]) -> ET.Element:
-        """Recursively convert dictionary data to XML elements.
+        """Add the data of a finding to an XML element, as one child per field.
 
         Args:
-            element (ET.Element): Parent XML element to append children to
-            data (dict[str, Any]): Dictionary data to convert
+            element: Element that the fields are added to, modified in place.
+            data: Finding fields, whose nested dictionaries become nested
+              elements.
 
         Returns:
-            ET.Element: XML element with converted data as children
+            The same element, so the recursive calls can append it directly.
         """
         for key, value in data.items():
             child = ET.Element(key)
@@ -410,15 +414,17 @@ class ReportingViewSet(BaseViewSet):
     def _create_xml_report(
         self, filename: str, report: Report, findings: dict[type[Finding], list[dict[str, Any]]]
     ) -> bool:
-        """Generate XML format report file.
+        """Write the findings of a report as an XML file.
 
         Args:
-            filename (str): Target filename for the report
-            report (Report): Report instance for context
-            findings (dict[type[Finding], list[dict[str, Any]]]): Findings data to serialize
+            filename: Name of the file to write inside the generated reports
+              directory.
+            report: Report whose scope and format are being generated.
+            findings: Findings to include, as _get_json_findings_by_type returned
+              them.
 
         Returns:
-            bool: True once the XML file has been written
+            Always true, since any failure raises instead of being reported.
         """
         root = ET.Element("findings")
         for finding_type, finding_list in findings.items():
@@ -430,17 +436,15 @@ class ReportingViewSet(BaseViewSet):
         return True
 
     def _pdf_static_content(self, uri: str, rel: str) -> str:
-        """Resolve static file paths for PDF generation.
-
-        Callback function for xhtml2pdf to convert relative URIs to absolute paths
-        for CSS and image resources during PDF generation.
+        """Get the location of a static file referenced by the PDF template.
 
         Args:
-            uri (str): Relative URI from HTML template
-            rel (str): Relationship type (unused)
+            uri: Reference to the file, as the template writes it.
+            rel: Not used, accepted for compatibility with the xhtml2pdf callback.
 
         Returns:
-            str: Absolute file path or original URI if not found
+            The path of the file in the file system, or the reference itself if the
+            file isn't there, since xhtml2pdf just skips what it can't resolve.
         """
         if f"/{STATIC_URL}" in uri:
             filepath = uri.split(f"/{STATIC_URL}", 1)[1]
@@ -451,15 +455,17 @@ class ReportingViewSet(BaseViewSet):
         return uri
 
     def _create_pdf_report(self, filename: str, report: Report, findings: dict[str, Any]) -> bool:
-        """Generate PDF format report file with template rendering.
+        """Write the findings of a report as a PDF document.
 
         Args:
-            filename (str): Target filename for the report
-            report (Report): Report instance for context
-            findings (dict[str, Any]): Hierarchical findings data with statistics
+            filename: Name of the file to write inside the generated reports
+              directory.
+            report: Report whose scope and format are being generated.
+            findings: Findings to include, as the corresponding _get_findings method
+              returned them.
 
         Returns:
-            bool: True if generation succeeded, False on PDF creation errors
+            Whether the document could be created.
         """
         scope = report.task or report.target or report.project
         template = get_template(CONFIG.pdf_report_template).render(

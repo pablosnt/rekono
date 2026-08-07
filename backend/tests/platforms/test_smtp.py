@@ -9,8 +9,8 @@ from tests.framework.cases import ApiTestCase, PutApiTestCase
 
 # pytype: disable=wrong-arg-types
 
-config = {"host": "smtp.rekono.com", "port": 587, "username": "rekono", "password": "rekono", "tls": True}
-invalid_config = {"host": "smtp;rekono.com", "port": 999999, "username": "reko;no", "password": "re;kono", "tls": True}
+config = {"host": "smtp.rekono.dev", "port": 587, "username": "rekono", "password": "rekono", "tls": True}
+invalid_config = {"host": "smtp;rekono.dev", "port": 999999, "username": "reko;no", "password": "re;kono", "tls": True}
 
 
 class SmtpSettingsTest(ApiTestNoData, TestCase):

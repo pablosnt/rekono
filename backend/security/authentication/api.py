@@ -1,9 +1,4 @@
-"""API token authentication backend for Rekono security framework.
-
-Provides secure API token authentication with expiration validation and
-cryptographic token hashing. This module implements Django REST Framework
-authentication backend for API token-based access.
-"""
+"""Authentication based on the API tokens used by the external clients."""
 
 from typing import Any
 
@@ -17,41 +12,22 @@ from security.cryptography import Crypto
 
 
 class ApiAuthentication(TokenAuthentication):
-    """API token authentication backend with expiration and hashing support.
-
-    Extends Django REST Framework's TokenAuthentication to provide secure
-    API token validation with cryptographic hashing and expiration date
-    enforcement. This backend is used for API access authentication.
+    """Authentication backend for the requests with an API token.
 
     Attributes:
-        model (type): The ApiToken model class for token storage.
-
-    Example:
-        Configure in Django settings:
-
-        ```python
-        REST_FRAMEWORK = {
-            'DEFAULT_AUTHENTICATION_CLASSES': [
-                'security.authentication.api.ApiAuthentication',
-            ]
-        }
-        ```
+        model: Model where the API tokens are stored, already hashed.
     """
 
     model = ApiToken
 
     def authenticate_credentials(self, key) -> tuple[Any, Any]:
-        """Authenticate API token credentials with expiration validation.
-
-        Validates the provided API token by hashing it, looking it up in the
-        database, and checking expiration status. Returns the associated user
-        and token objects if authentication succeeds.
+        """Get the user and the API token that match a token value.
 
         Args:
-            key (str): The raw API token to authenticate.
+            key: Value of the API token, as the client sent it.
 
         Returns:
-            tuple[Any, Any]: Tuple of (user, token) objects for successful authentication.
+            The user that owns the token and the token itself.
 
         Raises:
             AuthenticationFailed: If no token matches the hashed key, the token's

@@ -1,8 +1,4 @@
-"""URL configuration for notes REST API endpoints.
-
-Defines URL patterns for note management API using Django REST framework
-router to register ViewSet endpoints for note operations and collaboration features.
-"""
+"""URLs of the note endpoints."""
 
 from rest_framework.routers import SimpleRouter
 

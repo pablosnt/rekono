@@ -1,8 +1,8 @@
-"""Base parser class for tool output processing and finding extraction.
+"""Base parser that turns the output of a tool into findings.
 
-Provides the base functionality for parsing tool outputs and extracting security
-findings. All tool-specific parsers inherit from BaseParser and override the
-_parse method to implement tool-specific parsing logic.
+The tool-specific parsers only implement how to read their output, since linking
+each finding to the ones that it belongs to, and hiding the sensitive data of the
+execution, are the same for all of them.
 """
 
 import json
@@ -27,52 +27,24 @@ from tools.executors.base import BaseExecutor
 
 @dataclass
 class BaseParser:
-    """Base parser class for extracting security findings from tool outputs.
-
-    Provides common functionality for parsing tool execution outputs and creating
-    standardized finding objects. Handles multiple output formats including JSON,
-    XML, and plain text, with automatic relationship management between findings
-    and executions.
-
-    Security Features:
-        - Automatic sanitization of sensitive information in outputs
-        - Secure XML parsing using defusedxml to prevent XXE attacks
-        - Protection of authentication credentials in output data
-        - Safe file handling with proper encoding support
+    """Findings discovered by one execution, read from the output of its tool.
 
     Attributes:
-        executor (BaseExecutor): The executor instance that ran the tool
-        output (str | None): Plain text output from tool execution
-        findings (list): List of findings extracted during parsing
-        user_input_findings (dict): Cache of parent findings derived from user-input
-                                    targets, keyed by target identity, populated during parsing
-
-    Example:
-        Create and use a parser:
-
-        ```python
-        parser = SomeToolParser(executor=executor, output=output)
-        parser.parse()  # Extract findings from output
-        findings = parser.findings  # Access extracted findings
-        ```
+        executor: Executor that ran the tool, which knows what it scanned.
+        output: Text that the tool wrote to the standard output.
+        findings: Findings discovered so far.
+        user_input_findings: Findings created from the target of the execution,
+          reused by all the findings that need the same parent.
     """
 
     executor: BaseExecutor
     output: str | None
     findings: list = field(default_factory=list)
-    # Cache of parent findings derived from user-input targets during parsing
     user_input_findings: dict = field(default_factory=dict)
 
     @cached_property
     def report(self) -> Path | None:
-        """Get the valid report file path if available.
-
-        Returns the executor's report file path only if it exists, has content,
-        and the tool has a defined output format.
-
-        Returns:
-            Path | None: Valid report file path or None if not available
-        """
+        """The report file of the execution, or None if the tool wrote no report."""
         return (
             self.executor.report
             if self.executor.report
@@ -83,42 +55,36 @@ class BaseParser:
         )
 
     def create_user_input_finding(self, related_target: Any) -> Any | None:
-        """Create, or reuse, the parent finding derived from a user-input target.
-
-        Parsers that emit many findings (e.g. every path Dirsearch discovers) link each one to
-        the same parent Host/Port derived from the execution's target. This memoizes that parent
-        per execution keyed by the target identity, so the underlying deduplication query,
-        target-row lock and (for domain targets) DNS resolution run once instead of once per
-        finding. Failed derivations (None) are not memoized, so a transient failure on one
-        finding does not suppress the parent for the rest.
+        """Get the finding that represents the target that the execution scanned.
 
         Args:
-            related_target (Any): The user-input target (Target or TargetPort) to derive from.
+            related_target: Target or target port to create the finding from.
 
         Returns:
-            Any | None: The parent finding, or None when it could not be derived.
+            The finding, or None if it couldn't be created.
         """
+        # The findings of one execution share the same parent, so it's created only once: the
+        # deduplication query, the lock of the target, and the DNS resolution of its domain are
+        # expensive enough to matter when a tool reports hundreds of findings
         key = Crypto.hash("-".join([related_target.__class__.__name__, str(related_target.pk)]))
         if key not in self.user_input_findings:
             finding = related_target.create_finding_from_user_input(self.executor.execution)
+            # A failure isn't remembered, so the next finding can try again
             if finding is None:
                 return None
             self.user_input_findings[key] = finding
         return self.user_input_findings[key]
 
     def is_finding_link_field(self, finding_type: type[Finding], field: str) -> bool:
-        """Check if a field represents a valid finding relationship link.
-
-        Determines whether a given field on a finding type represents a valid
-        relationship that can be used for automatic finding linking, excluding
-        reverse relationships and standard data fields.
+        """Check if a finding type can be linked to another one by a field.
 
         Args:
-            finding_type (type[Finding]): The finding class to check
-            field (str): The field name to validate
+            finding_type: Kind of finding whose fields are inspected.
+            field: Name of the field that would hold the link.
 
         Returns:
-            bool: True if the field is a valid relationship link, False otherwise
+            Whether that field is a link to a single parent finding, and not a
+            plain value or a collection of related findings.
         """
         return (
             hasattr(finding_type, field)
@@ -131,76 +97,56 @@ class BaseParser:
     def create_finding(
         self, finding_type: type[Finding], linked_finding: bool = False, **fields: Any
     ) -> Finding | None:
-        """Create or update a finding with automatic relationship management.
-
-        Creates a new finding or updates an existing one based on unique fields.
-        Automatically establishes relationships with other findings from the same
-        task and associates the finding with the current execution. Supports the
-        creation of findings from data provided by users and ensures the integrity
-        of the relationships between findings.
+        """Create a finding and link it to the one that it was discovered from.
 
         Args:
-            finding_type (type[Finding]): The finding class to create
-            linked_finding (bool): Whether the finding has already been linked to other findings
-            **fields (Any): Field values for the finding
+            finding_type: Kind of finding to create.
+            linked_finding: Whether the caller already linked the finding, which
+              only the parsers that know the relation themselves can do.
+            **fields: Data of the finding.
 
         Returns:
-            Finding | None: The created or updated finding instance, or None if creation fails
+            The created finding, or None if it's discarded because there is nothing
+            to link it to, since a finding without a parent can't be placed
+            anywhere in the target.
         """
         has_parent_findings = finding_type not in [OSINT, Host]
         if has_parent_findings:
-            # Attempt to link with findings already discovered in this execution
-            # This creates hierarchical relationships like Host > Port > Technology > Vulnerability > Exploit
+            # The findings used as input for this execution are the closest parents that a new
+            # finding can have, so they are the first option
             if not linked_finding:
-                # Iterate through all findings that have been used as inputs in this execution
                 for finding_model, related_finding in self.executor.findings_used_in_execution.items():
-                    # Convert the finding model class name to lowercase to match field names
-                    # Example: "Host" becomes "host" to match the foreign key field name
                     field = finding_model.__name__.lower()
-                    # Check if this finding type can be linked to the current finding type
-                    # Avoid self-references and ensure the field exists as a valid relationship
                     if finding_model != finding_type and self.is_finding_link_field(finding_type, field):
                         fields[field] = related_finding
                         linked_finding = True
-                        # Stop after first successful link to avoid multiple relationships
                         break
-            # If no existing findings to link with, try to create relationships from user inputs
+            # Without input findings, the parent is created from what the execution scanned,
+            # searched from the most specific place to the least one
             if not linked_finding:
                 port_for_input_parameter = None
-                # Check if we're dealing with input parameters that require port associations
-                # Technologies and vulnerabilities often need to be associated with specific ports
+                # The technologies and the vulnerabilities that the users provide are always
+                # placed in a port, so the port is what has to be created for them
                 is_port_for_input_parameter = (
                     InputVulnerability in self.executor.targets_used_in_execution
                     or InputTechnology in self.executor.targets_used_in_execution
                 )
-                # Try to establish relationships with target-related inputs in priority order
                 for related_target in [
-                    # 1. First try explicit target port from execution context
                     self.executor.targets_used_in_execution.get(TargetPort),
-                    # 2. Create target port from scanned port if available
                     TargetPort(target=self.executor.execution.task.target, port=self.executor.scanned_port)
                     if self.executor.scanned_port is not None
                     else None,
-                    # 3. Use task's target port if specified
                     self.executor.execution.task.target_port,
-                    # 4. Finally, try the base target
                     self.executor.targets_used_in_execution.get(Target),
                 ]:
-                    # Skip if no target is available at this level
                     if not related_target:
                         continue
-                    # Determine the field name for this relationship type
-                    # Example: Target -> "host", TargetPort -> "port"
                     field = related_target.input_type.model_class.__name__.lower()
                     add_findings_to_field = self.is_finding_link_field(finding_type, field)
-                    # Check if we should create this relationship
                     if not fields.get(field) and (
-                        # For regular findings, create if it's a valid link field
                         (not is_port_for_input_parameter and add_findings_to_field)
-                        # For input parameters, specifically look for port relationships
                         or (is_port_for_input_parameter and field == "port")
                     ):
-                        # Create a finding from the user input
                         related_finding = self.create_user_input_finding(related_target)
                         if not related_finding:
                             continue
@@ -208,29 +154,21 @@ class BaseParser:
                         # to make parser unit tests easier and more intuitive
                         if not CONFIG.testing:  # pragma: no cover
                             self.findings.append(related_finding)
-                        # Establish the relationship if it's a valid link field
                         if add_findings_to_field:
                             fields[field] = related_finding
                             linked_finding = True
-                        # Store port finding for potential use with input parameters
                         if is_port_for_input_parameter:
                             port_for_input_parameter = related_finding
-                        # Stop after first successful relationship
                         break
-                # Handle special case for input parameters (Technologies/Vulnerabilities)
-                # These need to be associated with ports when creating findings
+                # The finding is placed in the technology or in the vulnerability that the users
+                # provided, which is created in the port that was just created for it
                 if is_port_for_input_parameter and port_for_input_parameter and not linked_finding:
-                    # Process technology and vulnerability input parameters
                     for input_parameter_class in [InputVulnerability, InputTechnology]:
                         related_parameter = self.executor.targets_used_in_execution.get(input_parameter_class)
                         if not related_parameter:
                             continue
-                        # Determine field name for the parameter type
-                        # Example: InputTechnology -> "technology", InputVulnerability -> "vulnerability"
                         field = related_parameter.input_type.model_class.__name__.lower()
-                        # Create finding from input parameter if it's a valid relationship
                         if self.is_finding_link_field(finding_type, field):
-                            #  Create the parameter finding and associate it with the port
                             related_finding = related_parameter.create_finding_from_user_input(
                                 self.executor.execution, port=port_for_input_parameter
                             )
@@ -242,29 +180,25 @@ class BaseParser:
                                 self.findings.append(related_finding)
                             fields[field] = related_finding
                             linked_finding = True
-                            # Stop after first successful parameter association
                             break
+            # The tests create the findings without a parent, so the parsers can be tested
+            # without having to build the whole target around them
             if not linked_finding and not CONFIG.testing:
                 self.executor.logger.warning(
                     f"[{self.executor.execution.configuration.tool.name}] {finding_type.__name__} finding found during execution {self.executor.execution.id} is discarded because it has no parent finding to link to"
                 )
                 return
-        # Create the finding if relationships were established or we're in testing mode,
-        # as we need to test parsers completely
-        # Mark as tool-generated (not from user input) since this is from parser output
         fields["created_from_user_input"] = False
-        # Use the manager's create_finding method for proper duplicate handling
         finding = finding_type.objects.create_finding(self.executor.execution, **fields)
-        # Add to the parser's findings list for tracking
         self.findings.append(finding)
         return finding
 
     def load_json_report(self) -> dict[str, Any] | list[dict[str, Any]] | None:
-        """Load and parse JSON report file.
+        """Read the report of the execution as JSON.
 
         Returns:
-            dict[str, Any] | list[dict[str, Any]] | None: Parsed JSON data, or None if no
-            report exists or the report content is not valid JSON
+            The report content, or None if there is no report or if the tool wrote
+            something that isn't valid JSON, which happens when it fails.
         """
         if self.report:
             with self.report.open("r", encoding="utf-8") as report:
@@ -274,23 +208,24 @@ class BaseParser:
                     return None
 
     def load_xml_report(self) -> Any | None:
-        """Load and parse XML report file using secure XML parser.
-
-        Uses defusedxml to safely parse XML content and prevent XXE attacks.
+        """Read the report of the execution as XML.
 
         Returns:
-            Any | None: XML root element or None if parsing fails
+            The root element of the report, or None if there is no report or if the
+            tool wrote something that isn't valid XML, which happens when it fails.
         """
+        # defusedxml is used instead of the standard library to avoid XXE attacks from the
+        # reports, whose content comes from the scanned targets
         try:
             return parser.parse(self.report).getroot()
         except Exception:
             return None
 
     def load_report_by_lines(self) -> list[str]:
-        """Load report file content as list of lines.
+        """Read the report of the execution as a list of lines.
 
         Returns:
-            list[str]: List of lines from the report file or empty list if no report
+            The lines of the report, or an empty list if there is no report.
         """
         if self.report:
             with self.report.open("r", encoding="utf-8") as report:
@@ -298,16 +233,15 @@ class BaseParser:
         return []
 
     def _protect_value(self, value: str | None) -> str | None:
-        """Sanitize sensitive information from output values.
-
-        Replaces authentication credentials and file paths with sanitized values
-        to prevent sensitive information exposure in stored outputs.
+        """Remove the authentication secrets and the Rekono paths from a text.
 
         Args:
-            value (str | None): The value to sanitize
+            value: Text written by the tool, which may quote the credentials that
+              it received or the path of its own report.
 
         Returns:
-            str | None: Sanitized value with sensitive information removed
+            The text with the credentials masked and the report path replaced by a
+            generic output name, or the text unchanged when it's empty.
         """
         if not value:
             return value
@@ -319,11 +253,7 @@ class BaseParser:
         ).strip()
 
     def _protect_execution(self) -> None:
-        """Sanitize sensitive information from execution outputs.
-
-        Removes sensitive information from both plain text output and report files
-        to prevent credential exposure in stored execution data.
-        """
+        """Remove the sensitive data from the output and the report of the execution."""
         self.executor.execution.output_plain = self._protect_value(self.executor.execution.output_plain)
         if self.report and self.report.is_file():
             with self.report.open("r") as read_report:
@@ -333,29 +263,21 @@ class BaseParser:
         self.executor.execution.save(update_fields=["output_plain"])
 
     def _parse(self) -> None:
-        """Parse tool output and extract findings.
+        """Read the output of the tool and create the findings that it reports.
 
-        Override this method in tool-specific parser classes to implement custom
-        parsing logic for extracting findings from tool outputs.
-
-        parse() only catches exceptions raised by this method as a whole, not per
-        iteration, so raising partway through a loop over multiple hosts or entries
-        abandons the rest of that loop and silently drops the findings it would have
-        produced. Implementations that iterate over multiple items should catch and
-        log per-item errors internally instead of letting them propagate.
+        An implementation that iterates over several items must catch and log the
+        errors of each one, because parse() catches the exceptions of the whole
+        method, so a failure in the middle of a loop drops the rest of the findings.
         """
         pass
 
     def parse(self) -> None:
-        """Parse the tool output and sanitize sensitive information from the execution.
+        """Create the findings of the execution and hide its sensitive data.
 
-        Calls the tool-specific _parse method to extract findings. Any exception
-        raised by _parse is caught here and logged instead of propagating, so a
-        parsing failure never crashes the execution pipeline. The exception still
-        unwinds the whole _parse call, so only the findings created before the
-        failure point are kept, see _parse for what this means for subclass
-        implementations. The execution output and report file are sanitized in the
-        finally block regardless of whether parsing succeeded.
+        A parsing failure is logged instead of being propagated, so the findings
+        created before it are kept and the execution isn't marked as failed. The
+        rest of the report is not parsed though, so every finding that the tool
+        reported after the failing one is lost without any sign in the execution.
         """
         try:
             self._parse()

@@ -1,8 +1,8 @@
-"""Models for security findings discovered during assessments.
+"""Models of the findings that the tools discover.
 
-Defines data models representing security findings including hosts, vulnerabilities,
-credentials, and exploits. Models follow hierarchical relationships enabling
-comprehensive security analysis, triage workflows, and automated reporting.
+The findings are chained by foreign keys following the order in which they are
+discovered, from the OSINT data to the exploits, so the deeper ones can be used as
+input for the tools and can be deduplicated within the branch they belong to.
 """
 
 from typing import Any
@@ -26,29 +26,12 @@ from targets.models import Target
 
 
 class OSINT(TriageFinding):
-    """Model representing Open Source Intelligence findings from reconnaissance.
-
-    Represents data discovered through passive reconnaissance and Open Source Intelligence
-    (OSINT) techniques. These findings serve as the foundation for target enumeration
-    and serve as input for further active reconnaissance phases. The model supports
-    various data types including network identifiers, credentials, and organizational
-    information discovered from public sources.
+    """Data found on public sources during the passive reconnaissance.
 
     Attributes:
-        data (TextField): The discovered OSINT data content (max 250 characters)
-        data_type (TextField): Classification from OSINTDataType enum (max 10 characters)
-        source (TextField): Discovery source or platform identifier (optional, max 50 characters)
-
-    Example:
-        Create an OSINT finding for a discovered domain:
-
-        ```python
-        osint = OSINT.objects.create(
-            data="example.com",
-            data_type=OSINTDataType.DOMAIN,
-            source="DNS enumeration"
-        )
-        ```
+        data: The discovered data, whose meaning depends on its type.
+        data_type: What the data is, from IP addresses to user names.
+        source: Public source where the data was found.
     """
 
     data = models.TextField(max_length=250)
@@ -70,57 +53,37 @@ class OSINT(TriageFinding):
     }
 
     def parse(self, task: Any, accumulated: dict[str, Any] = {}) -> dict[str, Any]:
-        """Parse OSINT data for tool execution input.
-
-        Processes IP and Domain OSINT data types for use as tool execution
-        targets, filtering out non-targetable data types.
+        """Get the tool arguments that this finding provides.
 
         Args:
-            task (Any): Task context for parsing (e.g., for URL generation)
-            accumulated (dict[str, Any]): Previously accumulated parsing data.
+            task: Task of the execution, forwarded to the base implementation.
+            accumulated: Keywords already provided by the other inputs of the same
+              execution.
 
         Returns:
-            dict[str, Any]: Parsed data for target creation, empty for non-targetable types.
+            The arguments of the base implementation, or an empty dict for the
+            data types that can't be scanned, like the user names or the emails.
         """
         return super().parse(task, accumulated) if self.data_type in [OSINTDataType.IP, OSINTDataType.DOMAIN] else {}
 
 
 class Host(HacktricksFinding):
-    """Model representing network hosts discovered during reconnaissance and scanning.
-
-    Represents network hosts identified during active and passive reconnaissance phases.
-    Each host record contains network identifiers, system information, and geolocation
-    data essential for asset inventory and attack surface mapping. Hosts serve as the
-    foundation for port scanning, service enumeration, and vulnerability assessment.
+    """Host found in the network, identified by its IP address.
 
     Attributes:
-        ip (TextField): IPv4 or IPv6 address identifier (max 30 characters)
-        domain (TextField): Associated domain name or hostname (optional, max 500 characters)
-        os (TextField): Detailed operating system identification (optional, max 250 characters)
-        os_type (TextField): OS family classification from HostOS enum (default: OTHER, max 10 characters)
-        country (TextField): Geolocation country name (optional, max 100 characters)
-        city (TextField): Geolocation city name (optional, max 100 characters)
-        latitude (FloatField): Geographic latitude coordinate (optional)
-        longitude (FloatField): Geographic longitude coordinate (optional)
-        reputation (IntegerField): VirusTotal reputation score for the IP address (optional)
-        malicious_analysis (IntegerField): Number of malicious verdicts from VirusTotal analysis (optional)
-        suspicious_analysis (IntegerField): Number of suspicious verdicts from VirusTotal analysis (optional)
-        total_analysis (IntegerField): Total number of VirusTotal analysis engines that processed this host (optional)
-        whois (TextField): Raw WHOIS registration record for the IP address (optional)
-
-    Example:
-        Create a host finding with geolocation data:
-
-        ```python
-        host = Host.objects.create(
-            ip="192.168.1.100",
-            domain="server.example.com",
-            os="Ubuntu 20.04.3 LTS",
-            os_type=HostOS.LINUX,
-            country="United States",
-            city="San Francisco"
-        )
-        ```
+        ip: IPv4 or IPv6 address that identifies the host.
+        domain: Domain name that resolves to the IP address.
+        os: Operating system as the tools report it, with its version.
+        os_type: Operating system family, used to select the tools to run.
+        country: Country where the IP address is located.
+        city: City where the IP address is located.
+        latitude: Latitude of the IP address location.
+        longitude: Longitude of the IP address location.
+        reputation: VirusTotal reputation score of the IP address.
+        malicious_analysis: VirusTotal engines that flagged the host as malicious.
+        suspicious_analysis: VirusTotal engines that flagged the host as suspicious.
+        total_analysis: VirusTotal engines that analyzed the host.
+        whois: WHOIS record of the IP address, as the registry returns it.
     """
 
     ip = models.TextField(max_length=30)
@@ -174,33 +137,14 @@ class Host(HacktricksFinding):
 
 
 class Port(HacktricksFinding):
-    """Model representing network services discovered during port scanning and enumeration.
-
-    Represents network ports and associated services identified during active reconnaissance
-    and port scanning operations. Port findings form the foundation for service enumeration,
-    vulnerability scanning, and application-layer security testing. Each port record contains
-    network service information, protocol details, and connection status essential for
-    attack surface analysis and security assessment planning.
+    """Port found in a host, with the service that listens on it.
 
     Attributes:
-        host (ForeignKey): Parent host where port was discovered (optional relationship)
-        port (IntegerField): Network port number in range 1-65535
-        status (TextField): Port scan status from PortStatus enum (default: OPEN, max 17 characters)
-        protocol (TextField): Transport protocol from TransportProtocol enum (optional, max 5 characters)
-        service (TextField): Identified service name or banner information (optional, max 50 characters)
-
-    Example:
-        Create a port finding for an identified web service:
-
-        ```python
-        port = Port.objects.create(
-            host=host_instance,
-            port=443,
-            status=PortStatus.OPEN,
-            protocol=TransportProtocol.TCP,
-            service="https"
-        )
-        ```
+        host: Host where the port was found.
+        port: Port number.
+        status: State of the port, which is open unless a tool reports otherwise.
+        protocol: Transport protocol where the port was found.
+        service: Service that listens on the port, as the tools identify it.
     """
 
     host = models.ForeignKey(Host, related_name="port", on_delete=models.DO_NOTHING, blank=True, null=True)
@@ -215,7 +159,8 @@ class Port(HacktricksFinding):
         Finding.UniqueField("protocol", match_null_and_empty=True),
     ]
     _root_findings = ("host",)
-    # _parse_dependencies is not used to avoid recalculation of URLs
+    # _parse_dependencies is left empty on purpose: parsing the host again would rebuild the
+    # URL that this port already provides, and that means probing it again
     _parse_mapping = {InputKeyword.PORT: "port", InputKeyword.PORTS: lambda instance, task: [instance.port]}
     _defectdojo_finding_mapping = {
         "title": "Port discovered",
@@ -241,17 +186,16 @@ class Port(HacktricksFinding):
     ]
 
     def parse(self, task: Any, accumulated: dict[str, Any] = {}) -> dict[str, Any]:
-        """Parse port data for tool execution targeting.
-
-        Generates target specifications combining host and port information
-        for detailed service-specific security analysis.
+        """Get the tool arguments that this finding provides.
 
         Args:
-            task (Any): Task context for parsing (e.g., for URL generation)
-            accumulated (dict[str, Any]): Previously accumulated parsing data.
+            task: Task of the execution, forwarded to the base implementation.
+            accumulated: Keywords already provided by the other inputs of the same
+              execution.
 
         Returns:
-            dict[str, Any]: Port-specific target data including host:port combinations.
+            The arguments of the base implementation, plus the ones that combine
+            the port with its host, which are only available if the host is known.
         """
         output = super().parse(task, accumulated)
         output[InputKeyword.PORTS_COMMAS.name.lower()] = ",".join(
@@ -271,39 +215,20 @@ class Port(HacktricksFinding):
 
 
 class Path(Finding):
-    """Model representing web paths and endpoints discovered during application reconnaissance.
-
-    Represents discoverable web resources including API endpoints, directory paths, file
-    shares, and hidden resources found during web application security testing. Path
-    findings enable comprehensive attack surface mapping for web applications and provide
-    entry points for authentication bypass, privilege escalation, and data exposure testing.
+    """Path found in a port, like a web endpoint or a shared resource.
 
     Attributes:
-        port (ForeignKey): Network service where path was discovered (optional relationship)
-        path (TextField): URL path or endpoint location (max 500 characters)
-        status (IntegerField): HTTP response status code from server (optional)
-        extra_info (TextField): Additional discovery metadata or context (optional, max 100 characters)
-        type (TextField): Resource classification from PathType enum (default: ENDPOINT)
-
-    Example:
-        Create a path finding for an API endpoint:
-
-        ```python
-        path = Path.objects.create(
-            port=web_port,
-            path="/api/v1/users",
-            status=200,
-            type=PathType.ENDPOINT,
-            extra_info="JSON API endpoint"
-        )
-        ```
+        port: Port where the path was found.
+        path: Location of the path within the service.
+        status: HTTP status code returned by the path.
+        extra_info: Extra data about the path reported by the tool that found it.
+        type: Kind of path, which depends on the protocol where it was found.
     """
 
     port = models.ForeignKey(Port, related_name="path", on_delete=models.DO_NOTHING, blank=True, null=True)
     path = models.TextField(max_length=500)
     status = models.IntegerField(blank=True, null=True)
     extra_info = models.TextField(max_length=100, blank=True, null=True)
-    # Path type depending on the protocol where it's found
     type = models.TextField(choices=PathType.choices, default=PathType.ENDPOINT)
 
     _unique_fields = [Finding.UniqueField("port"), Finding.UniqueField("path")]
@@ -330,13 +255,14 @@ class Path(Finding):
     }
 
     def _clean_comparison_path(self, value: str) -> str:
-        """Normalize path value for comparison operations.
+        """Get a path with a trailing slash, so two paths can be compared.
 
         Args:
-            value (str): Raw path string to normalize.
+            value: Path as it was reported or configured.
 
         Returns:
-            str: Normalized path with consistent trailing slash.
+            The path with a leading and a trailing slash, so a prefix comparison
+            can't match half of a directory name.
         """
         if len(value) > 1:
             value = self.clean_path(value)
@@ -347,17 +273,16 @@ class Path(Finding):
         return value
 
     def filter(self, argument_input: Any, target: Target | None = None) -> bool:
-        """Filter paths against target port path restrictions.
-
-        Applies additional filtering for paths within target port scope
-        when target port paths are configured.
+        """Check if this finding can be used as input for an argument.
 
         Args:
-            argument_input (Any): Filter criteria to match against.
-            target (Target | None): Target context for scope validation.
+            argument_input: Tool input whose filter conditions must be matched.
+            target: Target of the execution, whose target ports may restrict the
+              paths that can be scanned.
 
         Returns:
-            bool: True if path matches criteria and scope restrictions.
+            Whether the path matches the argument input and, if the target defines
+            a path for this port, whether it's inside that path.
         """
         filter = super().filter(argument_input, target)
         if self.port:
@@ -371,32 +296,14 @@ class Path(Finding):
 
 
 class Technology(HacktricksFinding):
-    """Model representing software technologies discovered during service fingerprinting.
-
-    Represents software technologies, frameworks, and applications identified through
-    active and passive fingerprinting techniques. Technology findings provide the
-    foundation for vulnerability assessment, exploit selection, and attack vector
-    identification by mapping the software stack running on discovered services.
+    """Software found in a port, with the version that it runs.
 
     Attributes:
-        port (ForeignKey): Network service where technology was identified (optional relationship)
-        name (TextField): Technology or software name identifier (max 100 characters)
-        version (TextField): Software version string or build information (optional, max 100 characters)
-        description (TextField): Detailed technology information and context (optional, max 200 characters)
-        reference (TextField): Documentation links or vendor information (optional, max 250 characters)
-
-    Example:
-        Create a technology finding for a web server:
-
-        ```python
-        technology = Technology.objects.create(
-            port=web_port,
-            name="Apache HTTP Server",
-            version="2.4.41",
-            description="Open-source web server software",
-            reference="https://httpd.apache.org/"
-        )
-        ```
+        port: Port where the technology was found.
+        name: Name of the technology, as the tools identify it.
+        version: Version of the technology, which is often unknown.
+        description: Extra data about the technology reported by the tools.
+        reference: Link to the technology documentation or vendor.
     """
 
     port = models.ForeignKey(
@@ -438,31 +345,17 @@ class Technology(HacktricksFinding):
 
 
 class Credential(TriageFinding):
-    """Model representing authentication credentials exposed during security assessment.
+    """Credential exposed in a technology or in a public source.
 
-    Represents discovered usernames, passwords, API keys, tokens, and other authentication
-    secrets found through credential harvesting, exposure detection, and security testing.
-    Credential findings represent high-risk security exposures that enable unauthorized
-    access, privilege escalation, and lateral movement within target environments.
+    The three data fields are optional because a leak can expose only one of them,
+    like an email address without its password.
 
     Attributes:
-        technology (ForeignKey): Source technology where credentials were exposed (optional relationship)
-        email (TextField): Associated email address or account identifier (optional, max 100 characters)
-        username (TextField): Account username or login identifier (optional, max 100 characters)
-        secret (TextField): Password, API key, token, or authentication secret (optional, max 300 characters)
-        context (TextField): Discovery method, location, or additional context (optional, max 300 characters)
-
-    Example:
-        Create a credential finding from configuration analysis:
-
-        ```python
-        credential = Credential.objects.create(
-            technology=database_tech,
-            username="admin",
-            secret="password123",
-            context="Found in config.php file"
-        )
-        ```
+        technology: Technology where the credential was exposed.
+        email: Email address that identifies the account.
+        username: User name that identifies the account.
+        secret: Password, API key, or any other secret of the account.
+        context: Where the credential was found and how.
     """
 
     technology = models.ForeignKey(
@@ -506,52 +399,31 @@ class Credential(TriageFinding):
 
 
 class Vulnerability(TriageFinding):
-    """Model representing security vulnerabilities identified during assessment.
+    """Vulnerability found in a technology or in a port.
 
-    Represents confirmed security vulnerabilities discovered through automated scanning,
-    manual testing, and code analysis. Vulnerability findings include industry-standard
-    classifications, severity ratings, CVSS scoring, and trending indicators to support
-    risk-based prioritization and remediation planning within enterprise security programs.
+    Most of the fields are filled by the CVE providers instead of by the tool that
+    discovered the vulnerability, so they are only available for the vulnerabilities
+    with a known identifier.
 
     Attributes:
-        technology (ForeignKey): Vulnerable technology component (optional relationship)
-        port (ForeignKey): Network service where vulnerability was identified (optional relationship)
-        name (TextField): Vulnerability name or identifier (max 100 characters)
-        description (TextField): Detailed technical vulnerability description (optional)
-        severity (IntegerField): Risk severity level from Severity enum (default: MEDIUM)
-        cvss_version (TextField): CVSS framework version identifier (optional, max 3 characters)
-        cvss_vector (TextField): CVSS vector string for detailed scoring (optional, max 200 characters)
-        cvss_base_score (FloatField): CVSS base score numerical value (optional)
-        cve (TextField): Common Vulnerabilities and Exposures identifier (optional, max 30 characters)
-        euvd_id (TextField): ENISA EUVD identifier (optional, max 30 characters)
-        ghsa_id (TextField): GitHub Security Advisory identifier (optional, max 30 characters)
-        osv_generic_id (TextField): OSV-native identifier for non-CVE/GHSA/EUVD ecosystems
-                                    (optional, max 100 characters)
-        cwes (JSONField): Sorted list of CWE identifiers (e.g. ["CWE-79", "CWE-200"])
-        epss_score (FloatField): EPSS probability of exploitation in 30 days (optional, 0.0–1.0)
-        epss_percentile (FloatField): EPSS percentile rank among all scored CVEs (optional, 0.0–1.0)
-        remediation (TextField): Recommended remediation steps or mitigation guidance (optional)
-        reference (TextField): Security advisory or documentation links (optional, max 250 characters)
-        trending (BooleanField): Active exploitation or trending status indicator (default: False)
-
-    Example:
-        Create a vulnerability finding with CVE and CVSS data:
-
-        ```python
-        vulnerability = Vulnerability.objects.create(
-            technology=web_server,
-            name="Remote Code Execution",
-            description="Buffer overflow in HTTP request parsing",
-            severity=Severity.CRITICAL,
-            cvss_version="3.1",
-            cvss_vector="CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
-            cvss_base_score=9.8,
-            cve="CVE-2021-12345",
-            cwes=["CWE-120"],
-            remediation="Update to the latest version or apply security patches",
-            trending=True
-        )
-        ```
+        technology: Technology where the vulnerability was found.
+        port: Port where the vulnerability was found, if the technology is unknown.
+        name: Name of the vulnerability, as the tools report it.
+        description: Explanation of the vulnerability and its impact.
+        severity: Risk of the vulnerability, used to sort and to alert about it.
+        cvss_version: CVSS version used to calculate the score.
+        cvss_vector: CVSS vector with the metrics behind the score.
+        cvss_base_score: CVSS base score of the vulnerability.
+        cve: CVE identifier of the vulnerability.
+        euvd_id: ENISA EUVD identifier of the vulnerability.
+        ghsa_id: GitHub Security Advisory identifier of the vulnerability.
+        osv_generic_id: OSV identifier for the ecosystems without their own one.
+        cwes: CWE identifiers of the weaknesses behind the vulnerability.
+        epss_score: Probability of the vulnerability being exploited in 30 days.
+        epss_percentile: Position of the EPSS score among all the scored CVEs.
+        remediation: Steps to fix or to mitigate the vulnerability.
+        reference: Link to the advisory or to the vulnerability documentation.
+        trending: Whether the vulnerability is being discussed in social networks.
     """
 
     technology = models.ForeignKey(
@@ -620,19 +492,16 @@ class Vulnerability(TriageFinding):
 
     @classmethod
     def _find_duplicate(cls, execution: Execution, fields: dict[str, Any]) -> "Vulnerability | None":
-        """Find an existing vulnerability that duplicates the incoming one, or None.
-
-        Matches on identity (the CVE, or the name when no CVE is known) plus location: the same
-        technology or the same port. When only a port is known, it also reaches up to vulnerabilities
-        recorded against the technologies found on that port, so a port-level finding can complete a
-        technology-level one.
+        """Find an existing vulnerability that duplicates the incoming one.
 
         Args:
-            execution (Execution): The execution context for this finding.
-            fields (dict[str, Any]): Field values the finding is being created/matched with.
+            execution: Execution that discovered the incoming vulnerability.
+            fields: Values that the incoming vulnerability would be created with.
 
         Returns:
-            Vulnerability | None: The matched vulnerability, or None if there is no duplicate.
+            The vulnerability with the same identity, which is the CVE or the name
+            when no CVE is known, found in the same technology or port within the
+            target, or None if this vulnerability wasn't discovered before.
         """
         technology = fields.get("technology")
         identity = (
@@ -645,6 +514,8 @@ class Vulnerability(TriageFinding):
             if search.exists():
                 return search.first()
         port = fields.get("port") or (technology.port if technology else None)
+        # A vulnerability found in a port also matches the ones found in the technologies of that
+        # port, so a tool that doesn't detect the technology can complete a previous finding
         return (
             cls.objects.filter(
                 identity,
@@ -657,31 +528,14 @@ class Vulnerability(TriageFinding):
 
 
 class Exploit(TriageFinding):
-    """Model representing available exploits for vulnerabilities and technologies.
-
-    Represents publicly available exploit code, proof-of-concept scripts, and exploit
-    references that target identified vulnerabilities and technologies. Exploit findings
-    enable security teams to assess real-world impact potential and prioritize remediation
-    efforts based on weaponized threat availability and exploitation complexity.
+    """Public exploit that targets a vulnerability or a technology.
 
     Attributes:
-        vulnerability (ForeignKey): Target vulnerability for this exploit (optional relationship)
-        technology (ForeignKey): Affected technology component (optional relationship)
-        title (TextField): Exploit name or descriptive title (max 100 characters)
-        edb_id (IntegerField): Exploit Database identifier for this exploit (optional)
-        reference (TextField): Exploit source URL or documentation link (optional, max 250 characters)
-
-    Example:
-        Create an exploit finding linked to a vulnerability:
-
-        ```python
-        exploit = Exploit.objects.create(
-            vulnerability=rce_vuln,
-            title="Remote Command Execution via Buffer Overflow",
-            edb_id=12345,
-            reference="https://www.exploit-db.com/exploits/12345"
-        )
-        ```
+        vulnerability: Vulnerability that the exploit takes advantage of.
+        technology: Technology that the exploit targets, if the vulnerability is unknown.
+        title: Name of the exploit, as its source reports it.
+        edb_id: Exploit Database identifier of the exploit.
+        reference: Link to the exploit code or to its documentation.
     """
 
     vulnerability = models.ForeignKey(
@@ -721,22 +575,16 @@ class Exploit(TriageFinding):
 
     @classmethod
     def _find_duplicate(cls, execution: Execution, fields: dict[str, Any]) -> "Exploit | None":
-        """Find an existing exploit that duplicates the incoming one, or None.
-
-        Matches on edb_id and reference (each only when known) plus location, in decreasing order of
-        precedence. When a vulnerability is known, it looks first for an exploit on the same
-        vulnerability, then on that vulnerability's technology, and finally for any exploit attached
-        to a technology on the same port; exploits recorded directly against a different vulnerability
-        are left out of that last step so distinct vulnerabilities are never merged. When only a
-        technology is known, it looks first for an exploit on that technology (directly or through a
-        vulnerability found on it) and then for any exploit at its port.
+        """Find an existing exploit that duplicates the incoming one.
 
         Args:
-            execution (Execution): The execution context for this finding.
-            fields (dict[str, Any]): Field values the finding is being created/matched with.
+            execution: Execution that discovered the incoming exploit.
+            fields: Values that the incoming exploit would be created with.
 
         Returns:
-            Exploit | None: The matched exploit, or None if there is no duplicate.
+            The exploit with the same identifier and reference found in the closest
+            place to the incoming one within the target, or None if this exploit
+            wasn't discovered before.
         """
         query = models.Q(executions__task__target=execution.task.target)
         for unique_field in cls._unique_fields:
@@ -745,6 +593,9 @@ class Exploit(TriageFinding):
             field_query = cls._get_deduplication_field_query(unique_field, fields.get(unique_field.field))
             if field_query is not None:
                 query &= field_query
+        # The exploit is searched from the most specific place where it can be found to the least
+        # one, so the exploits of the same vulnerability are always preferred over the ones that
+        # only share the port where they were found
         vulnerability = fields.get("vulnerability")
         if vulnerability:
             search = cls.objects.filter(query, vulnerability=vulnerability).order_by("id")

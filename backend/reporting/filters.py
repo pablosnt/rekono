@@ -1,8 +1,4 @@
-"""Django filter classes for security report querying and filtering.
-
-Provides filtering capabilities for report queries through REST API endpoints
-with support for exact matches and date range filtering.
-"""
+"""Filters of the report endpoints."""
 
 from django_filters.rest_framework import CharFilter, FilterSet
 
@@ -10,26 +6,17 @@ from reporting.models import Report
 
 
 class ReportFilter(FilterSet):
-    """Filter class for Report model queries.
-
-    Provides filtering capabilities for report queries including exact matches
-    on key fields and date range filtering for report creation timestamps.
+    """Filters to search the reports of a project.
 
     Attributes:
-        report_format (CharFilter): Filter by report format, mapped to the
-                                    model's format field. Renamed to avoid
-                                    colliding with DRF's format query parameter
+        report_format: Filter by the format of the report. It isn't called format
+          because that's the query parameter that DRF uses to select the renderer.
     """
 
     report_format = CharFilter(field_name="format", lookup_expr="exact")
 
     class Meta:
-        """Meta configuration for ReportFilter.
-
-        Attributes:
-            model (Model): The Report model to filter.
-            fields (dict): Field names mapped to allowed filter operations.
-        """
+        """Filter configuration for the reports."""
 
         model = Report
         fields = {

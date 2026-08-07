@@ -1,9 +1,8 @@
-"""Target validation utilities for security testing workflows.
+"""Validation of the targets that Rekono is allowed to scan.
 
-Provides specialized validation for penetration testing targets including
-IP addresses, networks, domains, and URLs. This module implements security
-controls to prevent testing of unauthorized or restricted targets through
-configurable deny lists and policy enforcement.
+Besides checking the format of an IP address, IP range, network, domain, or URL,
+the validator enforces the target denylist, which is what keeps the scans away from
+the hosts that must never be tested.
 """
 
 import ipaddress
@@ -24,51 +23,17 @@ from targets.enums import TargetType
 
 
 class TargetValidator(RegexValidator, LoggingEntity):
-    """Validator for penetration testing targets with deny list enforcement.
+    """Validator that rejects the targets denied by the target denylist.
 
-    Validates security testing targets against both regex patterns and
-    configurable deny lists to prevent unauthorized testing. Supports
-    validation of IP addresses, networks, domains, and regex patterns.
-
-    Security Features:
-        - Deny list enforcement for restricted targets
-        - Target normalization (lower-casing and trailing-dot stripping) so
-          case and trailing-dot variants cannot bypass a denied entry
-        - DNS-aware checks: domains are forward-resolved and their addresses
-          checked, single IPs are reverse-resolved and their hostname checked,
-          so a target cannot reach a denied address through name resolution
-        - IPv4-mapped IPv6 addresses checked as their IPv4 form, since both
-          reach the same host
-        - IP range targets checked address by address, and IP range deny list
-          entries expanded so they deny both the addresses they cover and the
-          networks that contain any of them
-        - Regex pattern matching for flexible target specification, applied over the
-          original case of the entry so that lower-casing it doesn't invert the escapes
-          that select a character class by case, like \\D or \\S
-        - IPv4/IPv6 network validation and blocking, comparing networks in both
-          directions so a network that contains a denied one is denied as well
-        - Resilient matching that cannot be crashed by a malformed deny list
-          entry (invalid regex, IP range or network), including the IP range
-          entries that the pattern accepts but that cover no address, like the
-          ones with octets over 255 or with a start greater than the end
-
-    Validation Process:
-        1. Basic regex pattern validation
-        2. Expansion of the target into a candidate set: the literal value, the
-           addresses of an IP range, the IPv4 form of an IPv4-mapped IPv6 address,
-           and the values obtained from DNS resolution
-        3. Deny list matching of every candidate (exact, regex, IP range and
-           network), rejecting the target as soon as any one of them matches
-
-    Args:
-        regex (Regex | str): Regex pattern for target format validation.
-        message (Any | None): Custom validation error message.
-        code (str | None): Error code for validation failures (default: 'target').
-        inverse_match (bool | None): Whether to invert regex matching (default: False).
-        flags (RegexFlag | None): Regex compilation flags.
+    A target is denied when it matches an entry of the denylist by itself or
+    through any of the other ways of reaching the same host: the addresses of an IP
+    range, the IPv4 form of an IPv4-mapped IPv6 address, the addresses that a domain
+    resolves to, and the domain that an address resolves to. A malformed denylist
+    entry is ignored instead of crashing the validation, so one bad entry can't
+    block every scan.
 
     Attributes:
-        code (str | None): Error code used for validation failure exceptions.
+        code: Error code of the raised validation errors.
     """
 
     def __init__(
@@ -79,18 +44,15 @@ class TargetValidator(RegexValidator, LoggingEntity):
         inverse_match: bool | None = False,
         flags: RegexFlag | None = None,
     ) -> None:
-        """Initialize the target validator with configuration parameters.
-
-        Sets up the validator with regex pattern, error handling, and deny list
-        enforcement configuration. Configures the underlying RegexValidator with
-        the provided parameters while storing the error code for validation failures.
+        """Prepare the validator with the pattern that the targets must match.
 
         Args:
-            regex (Regex | str): Regex pattern enum for target format validation.
-            message (Any | None): Custom error message for validation failures.
-            code (str | None): Error code for ValidationError exceptions (default: 'target').
-            inverse_match (bool | None): Whether to invert the regex matching logic (default: False).
-            flags (RegexFlag | None): Regex compilation flags for pattern matching.
+            regex: The Regex pattern to validate the format of the targets against,
+                or a raw pattern string (accepted for values stored by old migrations).
+            message: Error message reported when a target is rejected.
+            code: Error code of the raised validation errors.
+            inverse_match: Whether the targets must not match the regex.
+            flags: Regex compilation flags.
         """
         self.code = code
         # isinstance verification is needed to keep compatibility with old database migrations
@@ -103,9 +65,9 @@ class TargetValidator(RegexValidator, LoggingEntity):
         validations hitting the same entry don't lose updates to a race condition.
 
         Args:
-            value (str): The target being validated.
-            denied_target (TargetDenylist): Deny list entry matched by the target.
-            reason (str): How the target matched the entry, used to build the log message.
+            value: The target being validated.
+            denied_target: Denylist entry matched by the target.
+            reason: How the target matched the entry, used to build the log message.
 
         Raises:
             ValidationError: Always, since reaching this method means the target is denied.
@@ -130,14 +92,14 @@ class TargetValidator(RegexValidator, LoggingEntity):
         IP range from a value that just looks like one.
 
         Args:
-            ip_range (str): IP range to expand.
+            ip_range: Range written as "10.10.30.1-50", where the value after the
+              dash is only the last octet of the final address.
 
         Returns:
-            list[ipaddress.IPv4Address | ipaddress.IPv6Address]: All the addresses of the
-            range, including both ends, or an empty list if it covers no address. Malformed
-            values are reported as an empty list instead of an exception because deny list
-            entries are expanded with this method too, and a malformed entry must be ignored
-            instead of denying the target.
+            All the addresses of the range, including both ends, or an empty list if it
+            covers no address. Malformed values are reported as an empty list instead of
+            an exception because denylist entries are expanded with this method too, and
+            a malformed entry must be ignored instead of denying the target.
         """
         try:
             start, end = ip_range.rsplit("-", 1)
@@ -152,27 +114,25 @@ class TargetValidator(RegexValidator, LoggingEntity):
             return []
 
     def __call__(self, value: str | None) -> None:
-        """Validate target against regex patterns and deny lists.
+        """Validate the format of a target and check it against the denylist.
 
-        Performs comprehensive target validation including regex pattern matching,
-        deny list checking (exact, regex pattern, IP range and network), and DNS-aware
-        checking of the values the target resolves to. The target is first expanded
-        into a set of candidates, since several ways of writing a target reach the
-        same host: an IP range contributes all its addresses and an IPv4-mapped IPv6
-        address contributes its IPv4 form. A domain is also forward-resolved while a
-        single IP is reverse-resolved, so the resolved values are checked against the
-        deny list too. Resolution is skipped while testing to keep validation
-        deterministic and free of network dependencies. Every candidate is normalized
-        (lower-cased and trailing-dot stripped) and matched against each deny list
-        entry, and the target is rejected as soon as one of them matches. When an
-        entry denies the target, its blocked counter is incremented to track how
-        often each deny list entry is enforced.
+        The target is first expanded into a set of candidates, since several ways of
+        writing a target reach the same host: an IP range contributes all its
+        addresses and an IPv4-mapped IPv6 address contributes its IPv4 form. A domain
+        is also forward-resolved while a single IP is reverse-resolved, so the
+        resolved values are checked against the denylist too. Resolution is skipped
+        while testing to keep validation deterministic and free of network
+        dependencies. Every candidate is normalized (lower-cased and trailing-dot
+        stripped) and matched against each denylist entry, and the target is rejected
+        as soon as one of them matches.
 
         Args:
-            value (str | None): The target to validate (IP, domain, URL, etc.).
+            value: Target to validate, as an IP address, IP range, network, domain,
+              or URL.
 
         Raises:
-            ValidationError: If target is invalid, missing, or denied by policy.
+            ValidationError: If the target is missing, has an invalid format, or is
+                denied by the target denylist.
         """
         super().__call__(value)
         if not value:

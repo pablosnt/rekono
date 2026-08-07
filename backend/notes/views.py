@@ -1,8 +1,4 @@
-"""Django REST framework views for notes management.
-
-Provides REST API endpoints for note CRUD operations, search capabilities,
-and collaborative features including forking and like functionality.
-"""
+"""Viewsets of the note endpoints."""
 
 from typing import Any, cast
 
@@ -28,23 +24,17 @@ from security.authorization.permissions import (
 
 
 class NoteViewSet(LikeViewSet):
-    """ViewSet for managing notes with collaborative features.
-
-    Provides REST API endpoints for note CRUD operations plus forking functionality
-    for knowledge base development. Supports full-text search and filtering with
-    project-level access control and ownership permissions.
-
-    Custom Actions:
-        like: Add or remove a like, open to every role including readers
-        fork: Create a copy of a public note owned by another user
+    """Manage the notes of a project and the copies made from them.
 
     Attributes:
-        queryset (QuerySet): All Note objects
-        serializer_class (Serializer): Default serializer for note operations
-        filterset_class (FilterSet): Filter class for querying notes
-        permission_classes (list): Required permissions for access
-        search_fields (list): Fields that can be searched
-        ordering_fields (list): Fields that can be used for ordering
+        queryset: All the notes, filtered later by ownership and visibility.
+        serializer_class: Serializer of the notes.
+        filterset_class: Filters of the notes.
+        permission_classes: Role permissions plus the membership in the project and
+          the ownership of the note, so only its owner can update or remove it.
+        search_fields: Free text search over the title and the content of the note.
+        ordering_fields: Fields that the notes can be sorted by, including all the
+          things that a note can be about.
     """
 
     queryset = Note.objects.all()
@@ -68,30 +58,27 @@ class NoteViewSet(LikeViewSet):
     )
 
     def _get_project_from_data(self, project_field: str, data: dict[str, Any]) -> Project | None:
-        """Extract project context from entity associations in request data.
-
-        Iterates through all possible entity relationships to determine the project
-        context for a note based on the associated entity.
+        """Get the project of the thing that the new note is about.
 
         Args:
-            project_field (str): The project field name (unused but required by interface)
-            data (dict[str, Any]): Request data containing entity associations
+            project_field: Not used, since the project of a note comes from the
+              thing that it's about instead of from a field of the request.
+            data: Data of the note that is being created.
 
         Returns:
-            Project | None: The project associated with the entity, or None if no association
+            The project that the note will belong to, or None if the note isn't
+            about anything yet.
         """
         for link in links:
             if data.get(link):
                 return cast(BaseModel, data.get(link)).parent_project
 
     def get_queryset(self) -> QuerySet:
-        """Filter queryset to show only accessible notes.
-
-        Returns notes that are either owned by the current user or are public
-        and within projects where the user is a member.
+        """Get the notes of the user, plus the public ones of their projects.
 
         Returns:
-            QuerySet: Filtered queryset of accessible notes
+            The notes that the user can read, so a private note never leaves its
+            owner.
         """
         return (
             super()
@@ -110,17 +97,15 @@ class NoteViewSet(LikeViewSet):
         permission_classes=[IsAuthenticated, ProjectMemberPermission],
     )
     def like(self, request: Request, pk: str) -> Response:
-        """Add or remove like from the current user.
-
-        POST: Add like from current user
-        DELETE: Remove like from current user
+        """Like a note with POST, or remove the like with DELETE.
 
         Args:
-            request (Request): The HTTP request object.
-            pk (str): Primary key of the object to like/unlike.
+            request: Request whose method decides whether the like is added or
+              removed, and whose user is the one that likes the note.
+            pk: Identifier of the note, taken from the URL.
 
         Returns:
-            Response: HTTP 204 No Content on success.
+            An empty 204 response.
         """
         return super().like(request, pk)
 
@@ -135,27 +120,19 @@ class NoteViewSet(LikeViewSet):
         ],
     )
     def fork(self, request: Request, pk: str) -> Response:
-        """Create a fork (copy) of a public note.
-
-        Allows users to fork public notes created by other users, creating a private
-        copy with all content, relationships, and tags preserved. Forked notes
-        maintain a reference to the original note.
+        """Create a private copy of a public note written by another user.
 
         Args:
-            request (Request): The HTTP request object
-            pk (str): Primary key of the note to fork
+            request: Request whose user becomes the owner of the copy.
+            pk: Identifier of the note to fork, taken from the URL.
 
         Returns:
-            Response: Serialized forked note data or 404 if not allowed
-
-        Note:
-            Only public notes owned by other users, and not already forked by the
-            requesting user, can be forked. Forked notes are always created as
-            private and belong to the requesting user.
+            The created copy, with the same content, links, and tags as the
+            original note, or a not found error if the note can't be forked
+            because it isn't public, because it belongs to the user that makes
+            the request, or because they already have a copy of it.
         """
         note = self.get_object()
-        # Only fork notes that are public, not owned by the requesting user, and not
-        # already forked by them, so a note can't be forked twice by the same user
         if (
             note.public
             and note.owner.id != self.request.user.id
@@ -176,7 +153,7 @@ class NoteViewSet(LikeViewSet):
                 title=note.title,
                 body=note.body,
                 owner=self.request.user,
-                public=False,  # Forked notes are always private
+                public=False,
                 forked_from=note,
             )
             fork.tags.set(note.tags.all())

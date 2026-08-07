@@ -1,9 +1,4 @@
-"""Django filters for parameter framework models.
-
-Filter classes for querying and filtering parameter objects in the REST API.
-Provides relationship-based filtering capabilities for parameter searches
-across projects and targets.
-"""
+"""Base filters of the input parameter endpoints."""
 
 from django_filters.filters import ModelChoiceFilter
 from django_filters.rest_framework import FilterSet
@@ -13,14 +8,11 @@ from targets.models import Target
 
 
 class InputParameterFilter(FilterSet):
-    """Filter class for input parameter models.
-
-    Provides filtering capabilities for parameter queries based on associated
-    projects and targets through task relationships.
+    """Base filters to search parameters by where they are used.
 
     Attributes:
-        project (ModelChoiceFilter): Filter by project through task relationships
-        target (ModelChoiceFilter): Filter by target through task relationships
+        project: Filter by the project of the tasks that use the parameter.
+        target: Filter by the target of those tasks.
     """
 
     project = ModelChoiceFilter(queryset=Project.objects.all(), field_name="tasks__target__project")

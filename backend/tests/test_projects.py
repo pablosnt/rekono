@@ -62,8 +62,8 @@ class ProjectTest(ApiTestNoData, TestCase):
         project = Project.objects.create(**project1, owner=self.admin1)
         project.members.add(self.admin1)
         for value in range(40):
-            User.objects.create(username=f"member{value}", email=f"member{value}@rekono.com", is_active=True)
-        member = User.objects.create(username="member", email="member@rekono.com", is_active=True)
+            User.objects.create(username=f"member{value}", email=f"member{value}@rekono.dev", is_active=True)
+        member = User.objects.create(username="member", email="member@rekono.dev", is_active=True)
         client = APIClient()
         client.force_authenticate(self.admin1)
         response = client.post(f"/api/projects/{project.id}/members/{member.pk}/")

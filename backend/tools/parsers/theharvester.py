@@ -1,8 +1,4 @@
-"""TheHarvester OSINT reconnaissance tool output parser.
-
-Processes TheHarvester JSON output to extract open source intelligence
-findings including emails, domains, IPs, and social media information.
-"""
+"""Parser of theHarvester OSINT tool."""
 
 from findings.enums import OSINTDataType
 from findings.models import OSINT
@@ -10,16 +6,11 @@ from tools.parsers.base import BaseParser
 
 
 class Theharvester(BaseParser):
-    """Parser for TheHarvester JSON output files.
-
-    Extracts OSINT findings from passive reconnaissance data including email
-    addresses, domains, IP addresses, social media profiles, and ASN information.
-    The report is a flat JSON object keyed by data source (e.g. "ips", "emails");
-    keys not present in data_types, such as "shodan", are silently skipped since
-    they have no equivalent OSINT data type to map to.
+    """Findings discovered by theHarvester, read from its JSON report.
 
     Attributes:
-        data_types (dict): Mapping between TheHarvester types and OSINT data types
+        data_types: Kind of data that theHarvester reports under each key of its
+          report, without the ones that Rekono can't store, like the Shodan data.
     """
 
     data_types = {
@@ -37,11 +28,7 @@ class Theharvester(BaseParser):
     }
 
     def _parse(self) -> None:
-        """Parse TheHarvester JSON output and extract OSINT findings.
-
-        Creates one OSINT finding per string value under each JSON key that has a matching
-        entry in data_types, using that mapping to set the finding's data_type.
-        """
+        """Create one OSINT finding per piece of data found in the report."""
         data = self.load_json_report()
         if not data or not isinstance(data, dict):
             return

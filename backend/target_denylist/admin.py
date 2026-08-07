@@ -1,8 +1,4 @@
-"""Django admin configuration for target denylist models.
-
-Registers the TargetDenylist model with the Django admin interface for
-administrative management of target exclusion entries.
-"""
+"""Registration of the target denylist model in the Django admin site."""
 
 from django.contrib import admin
 

@@ -1,8 +1,7 @@
-"""Telegram Bot conversation implementations for complex security workflows.
+"""Bot commands that need to ask several things before doing anything.
 
-Provides conversation-based interactions for multi-step security testing
-operations including project management, target configuration, and tool execution
-through interactive Telegram Bot workflows.
+A conversation is a list of steps that ask for something and save what the user
+answers, so adding a step to a command is only adding a method to its list.
 """
 
 from functools import cached_property
@@ -33,30 +32,25 @@ from platforms.telegram_app.bot.mixins.wordlists import WordlistMixin
 
 
 class BaseConversation(ConversationHandler, BaseTelegramBot):
-    """Base class for multi-step conversation workflows.
-
-    Provides the foundation for complex conversation-based interactions
-    combining ConversationHandler with bot framework capabilities for
-    multi-state security testing workflows.
+    """Base conversation that the bot has with a user.
 
     Attributes:
-        first_state (int): The initial state index for conversations.
+        first_state: Position of the first step of a conversation.
     """
 
     first_state = 0
 
     def __init__(self, **kwargs: Any) -> None:
-        """Initialize the conversation with entry points, states, and fallbacks.
-
-        Sets up the conversation handler with automatic state mapping based
-        on method names. Methods starting with 'create_' use MessageHandler
-        for text input, others use CallbackQueryHandler for button interactions.
+        """Prepare the conversation with the steps that it's made of.
 
         Args:
-            **kwargs: Additional keyword arguments for ConversationHandler.
+            **kwargs: Not used, since a conversation is always built from its own
+              steps.
         """
         super().__init__(
             entry_points=[CommandHandler(self.command_name, self.save_command_name)],
+            # The steps whose name starts with create_ are the ones that ask the users to
+            # write something, the rest are answered with buttons
             states={
                 index: [
                     (
@@ -72,25 +66,18 @@ class BaseConversation(ConversationHandler, BaseTelegramBot):
 
     @cached_property
     def states_methods(self) -> list[Callable]:
-        """Get the list of conversation state methods.
-
-        Override this property to define the sequence of methods that
-        represent the conversation states.
-
-        Returns:
-            list[Callable]: List of methods representing conversation states.
-        """
+        """The steps of the conversation, in the order that they are asked."""
         return []
 
     async def save_command_name(self, update: Update, context: CallbackContext) -> int:
-        """Save the command name to context and start the conversation.
+        """Start the conversation, remembering which command started it.
 
         Args:
-            update (Update): The Telegram update containing the command.
-            context (CallbackContext): The callback context for the conversation.
+            update: Message that the user wrote.
+            context: Data that the conversation remembers.
 
         Returns:
-            int: The result of the first state method execution.
+            The next step of the conversation.
         """
         await self.log_command_execution(update, self.command_name)
         self.add_context_value(context, Context.COMMAND, self.command_name)
@@ -98,14 +85,11 @@ class BaseConversation(ConversationHandler, BaseTelegramBot):
 
 
 class SelectProject(BaseConversation, ProjectMixin):
-    """Conversation for selecting a project to use in subsequent operations.
-
-    Provides an interactive workflow for users to select a project from their
-    available projects and save it to the conversation context.
+    """Conversation that chooses the project that the chat will work with.
 
     Attributes:
-        help (str): Command help text displayed in command list.
-        section (Section): Command section for organization (PROJECTS).
+        help: Description of the command.
+        section: Group of the help message that the command belongs to.
     """
 
     help = "Select one project to be used in next commands"
@@ -113,30 +97,23 @@ class SelectProject(BaseConversation, ProjectMixin):
 
     @cached_property
     def states_methods(self) -> list[Callable]:
-        """Define the conversation flow for project selection.
-
-        Returns:
-            list[Callable]: List of methods for project selection workflow.
-        """
+        """The steps of the conversation, in the order that they are asked."""
         return [self.ask_for_project, self.save_project]
 
 
 class BaseConversationFromProject(BaseConversation, ProjectMixin):
-    """Base class for conversations that require a project context.
-
-    Extends BaseConversation with project selection logic, automatically
-    handling project selection if no project is currently selected.
-    """
+    """Base conversation about something that belongs to a project."""
 
     async def ask_for_project(self, update: Update, context: CallbackContext) -> int:
-        """Ask for project selection if none is currently selected.
+        """Ask which project the conversation is about, if it isn't known yet.
 
         Args:
-            update (Update): The Telegram update containing the command.
-            context (CallbackContext): The callback context for the conversation.
+            update: Message that the user wrote.
+            context: Data that the conversation remembers.
 
         Returns:
-            int: Next state index based on project availability.
+            The next step of the conversation, which is the one after choosing a
+            project when the chat already chose one before.
         """
         return (
             await super().ask_for_project(update, context)
@@ -148,14 +125,11 @@ class BaseConversationFromProject(BaseConversation, ProjectMixin):
 
 
 class NewTarget(BaseConversationFromProject, TargetMixin):
-    """Conversation for creating new security testing targets.
-
-    Provides an interactive workflow for users to create new targets
-    within a selected project for security testing operations.
+    """Conversation that creates a target in a project.
 
     Attributes:
-        help (str): Command help text displayed in command list.
-        section (Section): Command section for organization (TARGETS).
+        help: Description of the command.
+        section: Group of the help message that the command belongs to.
     """
 
     help = "Create new target"
@@ -163,23 +137,16 @@ class NewTarget(BaseConversationFromProject, TargetMixin):
 
     @cached_property
     def states_methods(self) -> list[Callable]:
-        """Define the conversation flow for target creation.
-
-        Returns:
-            list[Callable]: List of methods for target creation workflow.
-        """
+        """The steps of the conversation, in the order that they are asked."""
         return [self.ask_for_project, self.save_project, self.ask_for_new_target, self.create_target]
 
 
 class NewPort(BaseConversationFromProject, TargetMixin, TargetPortMixin, AuthenticationMixin):
-    """Conversation for creating new target ports with authentication.
-
-    Provides a comprehensive workflow for creating target ports including
-    port configuration and optional authentication setup for security testing.
+    """Conversation that adds a port to a target, with its authentication.
 
     Attributes:
-        help (str): Command help text displayed in command list.
-        section (Section): Command section for organization (TARGETS).
+        help: Description of the command.
+        section: Group of the help message that the command belongs to.
     """
 
     help = "Create new target port"
@@ -187,11 +154,7 @@ class NewPort(BaseConversationFromProject, TargetMixin, TargetPortMixin, Authent
 
     @cached_property
     def states_methods(self) -> list[Callable]:
-        """Define the conversation flow for target port creation.
-
-        Returns:
-            list[Callable]: List of methods for port and authentication setup.
-        """
+        """The steps of the conversation, in the order that they are asked."""
         return [
             self.ask_for_project,
             self.save_project,
@@ -219,15 +182,11 @@ class Tool(
     InputVulnerabilityMixin,
     TaskMixin,
 ):
-    """Conversation for executing individual security tools.
-
-    Provides a comprehensive workflow for configuring and executing security
-    tools including target selection, target port selection, tool configuration,
-    intensity settings, wordlist selection, and input parameter configuration.
+    """Conversation that runs one tool against a target.
 
     Attributes:
-        help (str): Command help text displayed in command list.
-        section (Section): Command section for organization (TASKS).
+        help: Description of the command.
+        section: Group of the help message that the command belongs to.
     """
 
     help = "Execute a tool"
@@ -235,11 +194,7 @@ class Tool(
 
     @cached_property
     def states_methods(self) -> list[Callable]:
-        """Define the comprehensive conversation flow for tool execution.
-
-        Returns:
-            list[Callable]: List of methods for complete tool configuration workflow.
-        """
+        """The steps of the conversation, in the order that they are asked."""
         return [
             self.ask_for_project,
             self.save_project,
@@ -269,16 +224,11 @@ class Tool(
 class Process(
     BaseConversationFromProject, TargetMixin, TargetPortMixin, ProcessMixin, IntensityMixin, WordlistMixin, TaskMixin
 ):
-    """Conversation for executing security testing processes.
-
-    Provides a workflow for configuring and executing predefined security
-    testing processes including target port selection, process selection,
-    intensity configuration, and wordlist selection for automated security
-    assessments.
+    """Conversation that runs a whole process against a target.
 
     Attributes:
-        help (str): Command help text displayed in command list.
-        section (Section): Command section for organization (TASKS).
+        help: Description of the command.
+        section: Group of the help message that the command belongs to.
     """
 
     help = "Execute a process"
@@ -286,11 +236,7 @@ class Process(
 
     @cached_property
     def states_methods(self) -> list[Callable]:
-        """Define the conversation flow for process execution.
-
-        Returns:
-            list[Callable]: List of methods for process configuration workflow.
-        """
+        """The steps of the conversation, in the order that they are asked."""
         return [
             self.ask_for_project,
             self.save_project,

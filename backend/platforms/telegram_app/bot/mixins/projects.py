@@ -1,12 +1,8 @@
-"""Telegram Bot mixin for project selection and management workflows.
+"""Steps that ask which project a conversation is about.
 
-Provides project selection functionality for conversations that require
-project context including project listing, selection, and context storage.
-This is always the first mixin in a conversation's flow, since TargetMixin and
-TaskMixin read Context.PROJECT, and TargetPortMixin and AuthenticationMixin depend
-on the target chosen from it. The tool, process and wordlist mixins list global
-catalogs and do not read it. Leaves Context.PROJECT set for the rest of the
-conversation to use.
+This is always the first step of a conversation, since everything that the other
+steps ask about belongs to a project, and it's the only answer that survives the
+conversation, so the users don't have to choose it again and again.
 """
 
 from telegram import Update
@@ -18,24 +14,18 @@ from projects.models import Project
 
 
 class ProjectMixin(BaseMixin):
-    """Mixin providing project selection functionality for bot conversations.
-
-    Enables conversations to display project lists and handle project selection
-    for users with appropriate permissions.
-    """
+    """Steps that choose the project that a conversation is about."""
 
     async def ask_for_project(self, update: Update, context: CallbackContext) -> int:
-        """Display project selection options to the user.
-
-        Shows a list of projects that the user is a member of and allows
-        selection for use in subsequent conversation steps.
+        """Ask the users to choose one of the projects that they belong to.
 
         Args:
-            update (Update): The Telegram update containing the user interaction.
-            context (CallbackContext): The callback context for the conversation.
+            update: Message that the user wrote.
+            context: Data that the conversation remembers.
 
         Returns:
-            int: Next conversation state or ConversationHandler.END if no chat.
+            The step that saves the answer, or the end of the conversation if the
+            chat can't run the command or if the user belongs to no project.
         """
         chat = await self.get_active_telegram_chat(update)
         if not chat:
@@ -56,17 +46,15 @@ class ProjectMixin(BaseMixin):
         )
 
     async def save_project(self, update: Update, context: CallbackContext) -> int:
-        """Save the selected project to conversation context.
-
-        Processes the user's project selection and stores it in the conversation
-        context for use in subsequent steps.
+        """Remember the project that the users chose.
 
         Args:
-            update (Update): The Telegram update containing the user selection.
-            context (CallbackContext): The callback context for the conversation.
+            update: Message that the user wrote.
+            context: Data that the conversation remembers.
 
         Returns:
-            int: Next conversation state or ConversationHandler.END if no chat.
+            The next step, or the end of the conversation if the chat can't run
+            the command.
         """
         chat = await self.get_active_telegram_chat(update)
         if not chat:

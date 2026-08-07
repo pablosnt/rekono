@@ -1,12 +1,8 @@
-"""Telegram Bot mixins for security tool and configuration management.
+"""Steps that ask which tool to run, how, and with which intensity.
 
-Provides mixins for tool selection, configuration management, and intensity
-settings in security testing workflows through interactive conversations. Tools,
-like processes, are a global catalog rather than project-scoped. ConfigurationMixin
-expects Context.TOOL to already be set by ToolMixin, since configurations are listed
-for that tool. IntensityMixin also reads Context.TOOL when present to narrow the
-choices to that tool's supported intensities, but works without it, falling back to
-every Intensity value, which is how the Process conversation uses it without a tool.
+The tools are shared by all the projects, so they aren't filtered by the project
+that the conversation is about, but their configurations and their intensities are
+asked for after the tool itself.
 """
 
 from asgiref.sync import sync_to_async
@@ -20,23 +16,17 @@ from tools.models import Configuration, Tool
 
 
 class ToolMixin(BaseMixin):
-    """Mixin providing security tool selection functionality.
-
-    Enables conversations to display available security tools and handle
-    tool selection for security testing operations.
-    """
+    """Steps that choose the tool that a task will run."""
 
     async def ask_for_tool(self, update: Update, context: CallbackContext) -> int:
-        """Display security tool selection options.
-
-        Shows a list of available security tools for selection in testing workflows.
+        """Ask the users to choose one of the tools.
 
         Args:
-            update (Update): The Telegram update containing the user interaction.
-            context (CallbackContext): The callback context for the conversation.
+            update: Message that the user wrote.
+            context: Data that the conversation remembers.
 
         Returns:
-            int: Next conversation state based on tool selection.
+            The step that saves the answer.
         """
         self.validate_update(update)
         return await self.go_to_next_state(
@@ -48,17 +38,14 @@ class ToolMixin(BaseMixin):
         )
 
     async def save_tool(self, update: Update, context: CallbackContext) -> int:
-        """Save selected security tool to conversation context.
-
-        Processes the user's tool selection and stores it in the conversation
-        context for use in subsequent configuration steps.
+        """Remember the tool that the users chose.
 
         Args:
-            update (Update): The Telegram update containing user selection.
-            context (CallbackContext): The callback context for the conversation.
+            update: Message that the user wrote.
+            context: Data that the conversation remembers.
 
         Returns:
-            int: Next conversation state after tool selection.
+            The next step of the conversation.
         """
         self.validate_update(update)
         return await self.go_to_next_state(
@@ -69,25 +56,19 @@ class ToolMixin(BaseMixin):
 
 
 class ConfigurationMixin(BaseMixin):
-    """Mixin providing tool configuration selection functionality.
-
-    Enables conversations to display available configurations for selected
-    security tools and handle configuration selection.
-    """
+    """Steps that choose what the tool of a task will do."""
 
     async def ask_for_configuration(self, update: Update, context: CallbackContext) -> int:
-        """Display tool configuration selection options.
-
-        Shows available configurations for the selected security tool. The
-        conversation ends when no tool has been selected yet, since listing
-        configurations without a tool would offer every configuration in Rekono.
+        """Ask the users to choose one of the configurations of the tool.
 
         Args:
-            update (Update): The Telegram update containing user interaction.
-            context (CallbackContext): The callback context for the conversation.
+            update: Message that the user wrote.
+            context: Data that the conversation remembers.
 
         Returns:
-            int: Next conversation state based on configuration selection.
+            The step that saves the answer, or the end of the conversation if no
+            tool was chosen, since the configurations of every tool would be
+            offered otherwise.
         """
         self.validate_update(update)
         tool = self.get_context_value(context, Context.TOOL)
@@ -109,17 +90,14 @@ class ConfigurationMixin(BaseMixin):
         )
 
     async def save_configuration(self, update: Update, context: CallbackContext) -> int:
-        """Save selected tool configuration to conversation context.
-
-        Processes the user's configuration selection and stores it in the conversation
-        context for use in security testing execution.
+        """Remember the configuration that the users chose.
 
         Args:
-            update (Update): The Telegram update containing user selection.
-            context (CallbackContext): The callback context for the conversation.
+            update: Message that the user wrote.
+            context: Data that the conversation remembers.
 
         Returns:
-            int: Next conversation state after configuration selection.
+            The next step of the conversation.
         """
         self.validate_update(update)
         return await self.go_to_next_state(
@@ -132,37 +110,31 @@ class ConfigurationMixin(BaseMixin):
 
 
 class IntensityMixin(BaseMixin):
-    """Mixin providing intensity level selection functionality.
-
-    Enables conversations to display available intensity levels for selected
-    security tools and handle intensity selection.
-    """
+    """Steps that choose how aggressive a task will be."""
 
     @sync_to_async
     def _get_tool_intensities_async(self, tool: Tool) -> list[str]:
-        """Get available intensity levels for a security tool (async wrapper).
+        """Get the intensities that a tool supports, from the lowest to the highest.
 
         Args:
-            tool (Tool): The security tool to get intensities for.
+            tool: Tool whose intensities are offered to the user.
 
         Returns:
-            list[str]: Intensity level names supported by the tool, ordered by value.
+            The names of the supported intensities, in ascending order.
         """
         return [Intensity(i.value).name for i in tool.intensities.order_by("value").all()]
 
     async def ask_for_intensity(self, update: Update, context: CallbackContext) -> int:
-        """Display intensity level selection options.
-
-        Shows the intensity levels supported by the selected tool, in descending order. When
-        no tool is in context, as in the Process conversation, every intensity level is
-        offered instead.
+        """Ask the users to choose the intensity of the task.
 
         Args:
-            update (Update): The Telegram update containing user interaction.
-            context (CallbackContext): The callback context for the conversation.
+            update: Message that the user wrote.
+            context: Data that the conversation remembers.
 
         Returns:
-            int: Next conversation state.
+            The step that saves the answer. Only the intensities that the tool
+            supports are offered, or all of them when the task runs a process,
+            since each of its tools supports different ones.
         """
         self.validate_update(update)
         tool = self.get_context_value(context, Context.TOOL)
@@ -175,19 +147,15 @@ class IntensityMixin(BaseMixin):
         )
 
     async def save_intensity(self, update: Update, context: CallbackContext) -> int:
-        """Save selected intensity level to conversation context.
-
-        Processes the user's intensity selection, converts to uppercase,
-        and stores it in the conversation context for security testing execution.
-        The conversation ends when nothing was stored, so the next states never
-        run with a missing intensity.
+        """Remember the intensity that the users chose.
 
         Args:
-            update (Update): The Telegram update containing user selection.
-            context (CallbackContext): The callback context for the conversation.
+            update: Message that the user wrote.
+            context: Data that the conversation remembers.
 
         Returns:
-            int: Next conversation state after intensity selection.
+            The next step, or the end of the conversation if the users answered
+            with nothing, so the following steps never run without an intensity.
         """
         self.validate_update(update)
         next_state = await self.go_to_next_state(

@@ -1,9 +1,4 @@
-"""Django REST framework views for SMTP settings management.
-
-Provides REST API endpoints for SMTP configuration management with proper
-authentication and authorization controls. Supports GET and PUT operations
-for viewing and updating SMTP server settings.
-"""
+"""Viewset of the SMTP endpoints."""
 
 from rest_framework.permissions import IsAuthenticated
 
@@ -14,17 +9,14 @@ from security.authorization.permissions import RekonoModelPermission
 
 
 class SMTPSettingsViewSet(BaseViewSet):
-    """ViewSet for SMTP settings configuration management.
-
-    Provides REST API endpoints for viewing and updating SMTP server configuration
-    settings with proper authentication and authorization controls. Restricts access
-    to authenticated users with appropriate permissions.
+    """Read and update the SMTP configuration.
 
     Attributes:
-        queryset (QuerySet): SMTPSettings model instances
-        serializer_class (Serializer): Serializer for SMTP settings
-        permission_classes (list): Required permissions for access control
-        http_method_names (list): Allowed HTTP methods (GET, PUT only)
+        queryset: The only settings instance, created from a fixture.
+        serializer_class: Serializer of the SMTP settings.
+        permission_classes: Only the users that can change the settings model.
+        http_method_names: GET and PUT only, since the settings are never created
+          or removed through the API.
     """
 
     queryset = SMTPSettings.objects.all()

@@ -1,8 +1,4 @@
-"""URL routing configuration for VulnCheck platform API endpoints.
-
-Defines URL patterns and routing for VulnCheck platform REST API endpoints
-using Django REST framework router configuration.
-"""
+"""URLs of the VulnCheck endpoints."""
 
 from rest_framework.routers import SimpleRouter
 

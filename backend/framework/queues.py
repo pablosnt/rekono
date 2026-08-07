@@ -1,7 +1,8 @@
-"""Background job processing infrastructure using Redis Queue (RQ).
+"""Base classes for the background job queues based on RQ.
 
-Provides base classes and utilities for managing security tool executions
-through background job queues with parameter calculation and batching.
+Besides the common job management, this module implements the calculation of the
+executions to be enqueued for a tool configuration, which decides how the available
+inputs are distributed among the executions of that tool.
 """
 
 import copy
@@ -25,29 +26,17 @@ from wordlists.models import Wordlist
 
 @dataclass
 class ExecutionParametersToEnqueue:
-    """Data class for batching execution parameters before queuing.
+    """Inputs that one tool execution will receive.
 
-    Organizes different types of input data that will be passed to
-    security tool executions, enabling efficient batching and deduplication.
+    Implements equality and hashing over its five lists so that identical
+    executions can be deduplicated before being enqueued.
 
     Attributes:
-        findings (list[Finding]): Security findings to use as input.
-        target_ports (list[TargetPort]): Target ports for scanning.
-        input_vulnerabilities (list[InputVulnerability]): Vulnerabilities provided by auditors.
-        input_technologies (list[InputTechnology]): Technologies provided by auditors.
-        wordlists (list[Wordlist]): Wordlists for brute force attacks.
-
-    Example:
-        ```python
-        params = ExecutionParametersToEnqueue(
-            findings=[host_finding],
-            target_ports=[port_80, port_443],
-            input_vulnerabilities=[],
-            input_technologies=[],
-            wordlists=[]
-        )
-        params.append("findings", new_finding)
-        ```
+        findings: Findings from previous executions used as input.
+        target_ports: Target ports defined for the target.
+        input_vulnerabilities: Vulnerabilities provided by the auditor.
+        input_technologies: Technologies provided by the auditor.
+        wordlists: Wordlists to be used by the tool.
     """
 
     findings: list[Finding]
@@ -57,31 +46,32 @@ class ExecutionParametersToEnqueue:
     wordlists: list[Wordlist]
 
     def append(self, field: str, value: BaseInput) -> None:
-        """Append a single value to the specified field list.
+        """Add one input to the list with the given field name.
 
         Args:
-            field (str): The field name to append to.
-            value (BaseInput): The value to append.
+            field: Name of the attribute holding the list to extend.
+            value: Input to add to it.
         """
         setattr(self, field, getattr(self, field) + [value])
 
     def extend(self, field: str, values: list[BaseInput]) -> None:
-        """Extend the specified field list with multiple values.
+        """Add several inputs to the list with the given field name.
 
         Args:
-            field (str): The field name to extend.
-            values (list[BaseInput]): The values to extend with.
+            field: Name of the attribute holding the list to extend.
+            values: Inputs to add to it.
         """
         setattr(self, field, getattr(self, field) + values)
 
     def __eq__(self, other: Any) -> bool:
-        """Check equality with another ExecutionParametersToEnqueue instance.
+        """Check if another object contains exactly the same inputs.
 
         Args:
-            other (Any): The other object to compare with.
+            other: Object to compare with this one.
 
         Returns:
-            bool: True if all fields are equal, False otherwise.
+            Whether both objects hold the same inputs. False for any object of a
+            different type.
         """
         if not isinstance(other, ExecutionParametersToEnqueue):
             return False
@@ -94,11 +84,7 @@ class ExecutionParametersToEnqueue:
         )
 
     def __hash__(self) -> int:
-        """Generate hash for deduplication in sets and dictionaries.
-
-        Returns:
-            int: Hash value based on all field contents.
-        """
+        """Return a hash of all the inputs, so equal executions collapse in a set."""
         return hash(
             (
                 tuple(self.findings),
@@ -111,35 +97,29 @@ class ExecutionParametersToEnqueue:
 
 
 class BaseQueue(LoggingEntity):
-    """Base class for Redis Queue (RQ) job management.
-
-    Provides common functionality for managing background jobs including
-    job lifecycle management with basic queue operations like enqueueing,
-    cancellation, and deletion.
+    """Base queue where Rekono enqueues the jobs that it runs in the background.
 
     Attributes:
-        name (str): The queue name for this job type.
+        name: Name of the RQ queue, which must be one of the queues configured in
+          the RQ_QUEUES setting.
     """
 
     name = ""
 
     @cached_property
     def queue(self) -> Queue:
-        """Get the Redis Queue instance for this queue.
-
-        Returns:
-            Queue: The RQ Queue instance.
-        """
+        """The RQ queue where the jobs of this class are enqueued."""
         return django_rq.get_queue(self.name)
 
     def fetch_job(self, job_id: str) -> Job | None:
-        """Fetch a job by ID from the queue.
+        """Get a job from the queue.
 
         Args:
-            job_id (str): The job ID to fetch.
+            job_id: Identifier returned by RQ when the job was enqueued.
 
         Returns:
-            Job | None: The job instance or None if not found.
+            The job, or None if it doesn't exist anymore or it can't be
+            deserialized because its code changed since it was enqueued.
         """
         try:
             return self.queue.fetch_job(job_id)
@@ -147,10 +127,10 @@ class BaseQueue(LoggingEntity):
             return None
 
     def cancel_job(self, job_id: str) -> None:
-        """Cancel a job by ID.
+        """Cancel a job, doing nothing if it doesn't exist anymore.
 
         Args:
-            job_id (str): The job ID to cancel.
+            job_id: Identifier returned by RQ when the job was enqueued.
         """
         job = self.fetch_job(job_id)
         if job:
@@ -158,10 +138,10 @@ class BaseQueue(LoggingEntity):
             job.cancel()
 
     def delete_job(self, job_id: str) -> None:
-        """Delete a job by ID.
+        """Delete a job, doing nothing if it doesn't exist anymore.
 
         Args:
-            job_id (str): The job ID to delete.
+            job_id: Identifier returned by RQ when the job was enqueued.
         """
         job = self.fetch_job(job_id)
         if job:
@@ -169,63 +149,52 @@ class BaseQueue(LoggingEntity):
             job.delete()
 
     def enqueue(self, *args: Any, **kwargs: Any) -> Job:
-        """Enqueue a job for background processing.
+        """Enqueue a new job that will be processed by the consume method.
 
         Args:
-            *args (Any): Arguments to pass to the consume method.
-            **kwargs (Any): Keyword arguments including job options.
+            *args: Arguments for the consume method.
+            **kwargs: Arguments for the consume method, plus the RQ options like
+              ``depends_on`` or ``on_success``.
 
         Returns:
-            Job: The enqueued job instance.
+            The enqueued job, whose identifier is what the queues keep to fetch,
+            cancel, or delete it later.
         """
         return self.queue.enqueue(self.consume, *args, **kwargs)
 
     @staticmethod
     def consume(**kwargs: Any) -> Any:
-        """Process a job from the queue (implementation specific).
+        """Process one job of the queue, as implemented by each queue.
+
+        Called by the RQ worker instead of by Rekono, so its arguments are the ones
+        that enqueue received, unpickled in the worker process.
 
         Args:
-            **kwargs (Any): Job parameters.
+            **kwargs: Arguments that enqueue received. Each queue replaces this
+              signature with the named arguments that it needs.
 
         Returns:
-            Any: Job result.
-
-        Note:
-            This method should be overridden by concrete implementations.
+            The value that RQ stores as the job result, which is what the success
+            callbacks and the jobs depending on this one receive.
         """
         pass
 
 
 class BaseScanQueue(BaseQueue):
-    """Base class for security scan queues with execution parameter calculation.
-
-    Extends BaseQueue with specialized functionality for security tool executions
-    including parameter calculation, input batching, and finding-based optimization.
-    Used for queues that need to process security scanning operations.
-
-    Execution Optimization:
-        - Finding-based input type grouping and prioritization
-        - Tool argument constraint analysis and batching
-        - Input type dependency resolution and relationship handling
-        - Multi-value argument optimization for efficient execution
-
-    Attributes:
-        Inherits all attributes from BaseQueue.
-    """
+    """Base queue of the ones that plan the executions of the scanning tools."""
 
     @staticmethod
     def _get_findings_by_type(
         findings: list[Finding],
     ) -> dict[InputType, list[Finding]]:
-        """Group findings by their input type for processing efficiency.
+        """Group the findings by input type.
 
         Args:
-            findings (list[Finding]): List of findings to group.
+            findings: Findings reported by the previous executions of a task.
 
         Returns:
-            dict[InputType, list[Finding]]: Findings grouped by input type,
-                                          ordered so parent types (e.g. Host)
-                                          come before their children (e.g. Port, Path).
+            The findings grouped by input type, ordered so parent types (e.g. Host)
+            come before their children (e.g. Port, Path).
         """
         findings_by_type = {}
         for finding in findings:
@@ -246,35 +215,30 @@ class BaseScanQueue(BaseQueue):
         input_technologies: list[InputTechnology],
         wordlists: list[Wordlist],
     ) -> list[ExecutionParametersToEnqueue]:
-        """Calculate execution parameter batches for a tool.
+        """Distribute the available inputs among the executions of a configuration.
 
-        Analyzes tool input requirements and available data to create
-        optimal execution batches that maximize efficiency while respecting
-        tool argument constraints and dependencies.
+        Only the input types that the configuration accepts are used, and only one
+        input per type: the first tool input, by priority order, that isn't filtered
+        out. How many executions are needed depends on the arguments of the tool,
+        since an argument that only supports one value forces a new execution for
+        each extra input.
 
         Args:
-            configuration (Configuration): The security configuration to execute.
-            findings (list[Finding]): Available findings for input.
-            target_ports (list[TargetPort]): Available target ports.
-            input_vulnerabilities (list[InputVulnerability]): Known vulnerabilities.
-            input_technologies (list[InputTechnology]): Detected technologies.
-            wordlists (list[Wordlist]): Available wordlists.
+            configuration: Tool configuration whose inputs are being calculated.
+            findings: Findings from previous executions of the same task.
+            target_ports: Target ports defined for the target.
+            input_vulnerabilities: Vulnerabilities provided by the auditor.
+            input_technologies: Technologies provided by the auditor.
+            wordlists: Wordlists selected for the task.
 
         Returns:
-            list[ExecutionParametersToEnqueue]: Optimized parameter batches for execution.
-
-        Note:
-            The algorithm considers:
-            - Tool input type requirements and filters
-            - Argument multiplicity (single vs multiple values)
-            - Input type dependencies and relationships
-            - Execution optimization through intelligent batching
+            The inputs of each execution to be enqueued, which is always at least
+            one: a configuration that accepts none of the available inputs gets a
+            single execution with no inputs at all.
         """
         input_types_used = set()
-        # Start with a single empty execution batch
         executions = [ExecutionParametersToEnqueue([], [], [], [], [])]
         findings_by_type = BaseScanQueue._get_findings_by_type(findings)
-        # Iterate over all input sources (findings, ports, vulnerabilities, etc.)
         for field, source in [("findings", _findings) for _findings in findings_by_type.values()] + [
             ("target_ports", target_ports),
             ("input_vulnerabilities", input_vulnerabilities),
@@ -284,19 +248,17 @@ class BaseScanQueue(BaseQueue):
             if not source:
                 continue
             input_type = source[0].input_type
-            # Avoid processing the same input type more than once
             if input_type in input_types_used:
                 continue
-            # For each configuration input that matches the input type, ordered by priority order
             for tool_input in Input.objects.filter(argument__configuration=configuration, type=input_type).order_by(
                 "order"
             ):
-                # Filter base inputs according to the tool input's filter logic
                 filtered_base_inputs = [bi for bi in source if bi.filter(tool_input)]
                 if not filtered_base_inputs:
                     continue
-                # Find parent input types, but only those that this configuration actually consumes as inputs
-                # Otherwise the parent findings are never added to any execution batch, and grouping the children by them would discard every child
+                # Only the parent input types that this configuration consumes as inputs, since the
+                # parent findings of the other ones are never added to any execution, and grouping
+                # the children by them would discard every child
                 parent_input_types = [
                     i
                     for i in input_type.parent_input_types
@@ -304,8 +266,9 @@ class BaseScanQueue(BaseQueue):
                     and Input.objects.filter(argument__configuration=configuration, type=i).exists()
                 ]
                 for execution_index, execution in enumerate(copy.deepcopy(executions)):
-                    # If this is a finding and has related input types, only include those related to the current execution
                     if field == "findings" and parent_input_types:
+                        # Keep each execution consistent: its ports and paths must belong to the
+                        # host that the execution already includes, instead of to any other one
                         base_inputs = []
                         for parent_input_type in parent_input_types:
                             base_inputs.extend(
@@ -319,11 +282,11 @@ class BaseScanQueue(BaseQueue):
                     else:
                         base_inputs = list(set(filtered_base_inputs))
                     input_types_used.add(input_type)
-                    # If the tool argument allows multiple values, extend the execution batch
                     if tool_input.argument.multiple:
                         executions[execution_index].extend(field, base_inputs)
                     else:
-                        # For single-value arguments, create a new execution batch for each additional value
+                        # The argument only supports one value, so the first input stays in this
+                        # execution and each extra one gets a copy of the execution for itself
                         original_execution = copy.deepcopy(execution)
                         executions[execution_index].append(field, base_inputs[0])
                         for base_input in base_inputs[1:]:

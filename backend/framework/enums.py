@@ -1,42 +1,22 @@
-"""Enumeration classes for framework input keyword mappings.
+"""Keywords available to build the arguments of the tool executions.
 
-Defines input keywords used for parsing and mapping data between
-security tools and Rekono's internal data structures.
+The input models of Rekono (targets, findings, credentials, wordlists, and HTTP
+headers) provide their data using these keywords, and the tool configurations
+reference them from their argument templates.
 """
 
 from enum import Enum
 
 
 class InputKeyword(Enum):
-    """Enumeration of input keywords for tool argument mapping.
+    """Placeholder that can be used in the argument templates of a tool configuration.
 
-    Defines standardized keywords used to map data from Rekono's internal
-    models to security tool arguments. Each keyword represents a specific
-    type of input data that can be passed to security tools.
-
-    Attributes:
-        TARGET (int): Primary target identifier (IP, domain, URL).
-        HOST (int): Host or server identifier.
-        PORT (int): Single port number.
-        PORTS (int): Multiple port numbers.
-        PORTS_COMMAS (int): Comma-separated port list.
-        TECHNOLOGY (int): Technology or software identifier.
-        VERSION (int): Version information.
-        ENDPOINT (int): API endpoint or path.
-        URL (int): Complete URL with protocol.
-        EMAIL (int): Email address.
-        USERNAME (int): Username for authentication.
-        SECRET (int): Password or secret value.
-        CVE (int): CVE identifier for vulnerabilities.
-        EXPLOIT (int): Exploit reference or identifier.
-        WORDLIST (int): Wordlist file path.
-        COOKIE_NAME (int): HTTP cookie name.
-        TOKEN (int): Authentication token.
-        CREDENTIAL_TYPE (int): Type of credential.
-        CREDENTIAL_TYPE_LOWER (int): Lowercase credential type.
-        HEADERS (int): HTTP headers collection.
-        HEADER_KEY (int): Individual HTTP header name.
-        HEADER_VALUE (int): Individual HTTP header value.
+    The lowercase member name is the placeholder written between braces in the
+    argument, like ``-p {ports}``, and each input model fills the keywords it can
+    provide. A few keywords are just formatting variants: PORTS_COMMAS joins the
+    ports with commas, and CREDENTIAL_TYPE_LOWER lowercases the credential type.
+    HEADERS is the exception, since it holds all the HTTP headers at once and its
+    argument is formatted once per header using HEADER_KEY and HEADER_VALUE.
     """
 
     TARGET = 1

@@ -1,28 +1,14 @@
-"""Enums for alert configuration and management.
-
-Defines enumeration classes for alert types and configuration options
-used throughout the alerts system.
-"""
+"""Things that an alert can watch."""
 
 from django.db.models import TextChoices
 from django.db.models.enums import Choices
 
 
 class AlertItem(TextChoices):
-    """Enumeration of alert item types.
+    """Kind of finding that triggers an alert when it's discovered.
 
-    Defines the types of security findings that can trigger alerts.
-
-    Attributes:
-        OSINT (str): Open Source Intelligence findings
-        HOST (str): Host discovery findings
-        OPEN_PORT (str): Open port findings
-        SERVICE (str): Service detection findings
-        TECHNOLOGY (str): Technology identification findings
-        CREDENTIAL (str): Credential discovery findings
-        VULNERABILITY (str): General vulnerability findings
-        CVE (str): Common Vulnerabilities and Exposures findings
-        TRENDING_CVE (str): Trending CVE findings from monitoring
+    Some items watch the same finding type with a different condition, like the
+    open ports and the services, or the CVEs and the ones that are trending.
     """
 
     OSINT = "OSINT"

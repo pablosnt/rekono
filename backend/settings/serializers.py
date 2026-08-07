@@ -1,9 +1,4 @@
-"""Settings serializers for Rekono API.
-
-Provides the serializer used to expose and update the global Settings model
-through REST API endpoints, covering file upload limits, proxy configuration,
-and the auto-fix findings flag.
-"""
+"""Serializer of the settings endpoints."""
 
 from rest_framework.serializers import ModelSerializer
 
@@ -11,20 +6,10 @@ from settings.models import Settings
 
 
 class SettingsSerializer(ModelSerializer):
-    """Serializer for Settings model API operations.
-
-    Handles serialization and deserialization of Settings model data,
-    exposing file upload limits, proxy configuration, and the auto-fix
-    findings flag through the REST API.
-    """
+    """Serializer of the Rekono configuration."""
 
     class Meta:
-        """Meta configuration for the SettingsSerializer.
-
-        Attributes:
-            model (Model): The Settings model to serialize
-            fields (tuple): Field names to include in serialization
-        """
+        """Serializer configuration for the settings."""
 
         model = Settings
         fields = (

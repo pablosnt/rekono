@@ -1,9 +1,4 @@
-"""Django REST framework serializers for process management operations.
-
-Serializer classes for converting process and step models to/from JSON
-for API operations. Includes validation logic, computed fields, and
-nested serialization for complex process workflow management.
-"""
+"""Serializers of the process and step endpoints."""
 
 from typing import Any
 
@@ -24,36 +19,22 @@ from users.serializers import SimpleUserSerializer
 
 
 class SimpleProcessSerializer(ModelSerializer):
-    """Serializer for simplified Process representation.
-
-    Provides basic process information for nested serialization and
-    reference purposes without detailed process data.
-    """
+    """Serializer with the minimum data needed to reference a process."""
 
     class Meta:
-        """Meta configuration for SimpleProcessSerializer.
-
-        Defines the model and fields for basic process serialization used
-        in nested representations and reference purposes.
-
-        Attributes:
-            model (Model): The Process model to serialize
-            fields (tuple): Basic fields for simplified process representation
-        """
+        """Serializer configuration for the process references."""
 
         model = Process
         fields = ("id", "name")
 
 
 class SimpleStepSerializer(ModelSerializer):
-    """Serializer for Step model with configuration details.
-
-    Handles serialization of process steps with nested configuration
-    information and primary key relationships for API operations.
+    """Serializer of a step, including the configuration that it executes.
 
     Attributes:
-        configuration_id (PrimaryKeyRelatedField): Write-only configuration reference
-        configuration (ConfigurationSerializer): Read-only configuration details
+        configuration_id: Configuration to be executed, which can only be one of
+          the configurations that aren't deprecated.
+        configuration: Data of that configuration.
     """
 
     configuration_id = PrimaryKeyRelatedField(
@@ -66,30 +47,18 @@ class SimpleStepSerializer(ModelSerializer):
     configuration = ConfigurationSerializer(many=False, read_only=True)
 
     class Meta:
-        """Meta configuration for SimpleStepSerializer.
-
-        Defines the model and fields for step serialization with configuration
-        details and primary key relationships.
-
-        Attributes:
-            model (Model): The Step model to serialize
-            fields (tuple): Fields including step identifiers, process reference,
-                           and configuration details
-        """
+        """Serializer configuration for the steps of a known process."""
 
         model = Step
         fields = ("id", "process", "configuration_id", "configuration")
 
 
 class StepSerializer(SimpleStepSerializer):
-    """Extended serializer for Step model with process relationships.
-
-    Extends SimpleStepSerializer with process reference handling for
-    complete step management including both process and configuration details.
+    """Serializer of a step, including the process that contains it.
 
     Attributes:
-        process_id (PrimaryKeyRelatedField): Write-only process reference
-        process (SimpleProcessSerializer): Read-only process details
+        process_id: Process that will contain the step.
+        process: Data of that process.
     """
 
     process_id = PrimaryKeyRelatedField(
@@ -98,33 +67,20 @@ class StepSerializer(SimpleStepSerializer):
     process = SimpleProcessSerializer(many=False, read_only=True)
 
     class Meta:
-        """Meta configuration for StepSerializer.
-
-        Extends SimpleStepSerializer's Meta configuration with additional
-        process reference field for complete step management.
-
-        Attributes:
-            model (Model): The Step model to serialize
-            fields (tuple): Extended fields including all SimpleStepSerializer fields
-                           plus process_id for write operations
-        """
+        """Serializer configuration for the steps."""
 
         model = Step
         fields = SimpleStepSerializer.Meta.fields + ("process_id",)
 
 
 class ProcessSerializer(TaggitSerializer, LikeSerializer):
-    """Comprehensive serializer for Process model with community features.
-
-    Handles serialization and deserialization of Process objects with complete
-    workflow information including steps, tags, user interactions, and
-    wordlist compatibility detection.
+    """Serializer of a process, including its steps and the likes of the users.
 
     Attributes:
-        steps (SerializerMethodField): Non-deprecated step information (read-only)
-        owner (SimpleUserSerializer): Process owner details (read-only)
-        tags (TagField): Tag management field for categorization
-        wordlists (SerializerMethodField): Wordlist compatibility information
+        steps: Steps of the process that can still be executed.
+        owner: User that created the process.
+        tags: Labels assigned to the process.
+        wordlists: Whether the process supports and requires wordlists.
     """
 
     steps = SerializerMethodField(read_only=True)
@@ -133,50 +89,35 @@ class ProcessSerializer(TaggitSerializer, LikeSerializer):
     wordlists = SerializerMethodField(read_only=True)
 
     class Meta:
-        """Meta configuration for ProcessSerializer.
-
-        Defines the model and comprehensive field set for complete process
-        serialization including community features, workflow details, and
-        computed information fields.
-
-        Attributes:
-            model (Model): The Process model to serialize
-            fields (tuple): Complete field set including basic information,
-                           community features, workflow steps, tags, and
-                           computed wordlist compatibility data
-        """
+        """Serializer configuration for the processes."""
 
         model = Process
         fields = ("id", "name", "description", "owner", "liked", "likes", "steps", "tags", "wordlists")
 
     def get_steps(self, instance: Process) -> list[SimpleStepSerializer]:
-        """Serialize the process steps whose configuration is not deprecated.
+        """Get the steps of the process whose configuration isn't deprecated.
 
         Deprecated configurations are kept in the database to preserve historical
         data consistency, but they must not be exposed as selectable process steps.
 
         Args:
-            instance (Process): The Process instance being serialized.
+            instance: Process being serialized.
 
         Returns:
-            list[SimpleStepSerializer]: Serialized steps backed by non-deprecated configurations.
+            The serialized steps that can still be executed.
         """
         return SimpleStepSerializer(instance.steps.filter(configuration__deprecated=False), many=True).data
 
     def get_wordlists(self, instance: Any) -> dict[str, bool]:
-        """Determine wordlist compatibility for the process.
-
-        Analyzes process steps to determine if wordlists are required or
-        supported by any tools in the workflow, enabling proper resource
-        preparation for process execution.
+        """Check how the process uses the wordlists.
 
         Args:
-            instance (Any): The Process instance being serialized.
+            instance: Process being serialized.
 
         Returns:
-            dict[str, bool]: Dictionary containing:
-                - required: True if any step requires wordlists
-                - supported: True if any step supports wordlists
+            Whether any step requires a wordlist, so the process can't be executed
+            without one, and whether any step supports it, so the users know if
+            selecting one changes anything.
         """
         return {
             "required": Argument.objects.filter(

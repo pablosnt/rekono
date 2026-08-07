@@ -1,8 +1,4 @@
-"""Cookie-aware JWT authentication backend for Rekono security framework.
-
-Extends the standard simplejwt JWTAuthentication to support access tokens
-delivered via named cookies in addition to the Authorization header.
-"""
+"""Authentication based on the JWT tokens that the frontend keeps in cookies."""
 
 from django.conf import settings
 from rest_framework.response import Response
@@ -10,47 +6,23 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 
 
 class CookieJWTAuthentication(JWTAuthentication):
-    """JWT authentication backend that accepts tokens from cookies or headers.
+    """Authentication backend for the requests with a JWT access token.
 
-    Extends simplejwt's JWTAuthentication to check the configured access-token
-    cookie before falling back to the standard Authorization: Bearer header.
-    API token authentication (Authorization: Token) is handled by a separate
-    backend and is not affected by this class.
-
-    Priority:
-        1. Cookie named ``settings.JWT_ACCESS_COOKIE``
-        2. Authorization: Bearer <token> header (default simplejwt behaviour)
-
-    Example:
-        Configure in Django settings:
-
-        ```python
-        REST_FRAMEWORK = {
-            'DEFAULT_AUTHENTICATION_CLASSES': [
-                'security.authentication.api.ApiAuthentication',
-                'security.authentication.jwt.CookieJWTAuthentication',
-            ]
-        }
-        ```
+    The token is read from the access token cookie, and from the standard
+    ``Authorization: Bearer`` header when that cookie isn't present. The API tokens
+    are handled by a different backend, so they aren't affected by this class.
     """
 
     def authenticate(self, request):
-        """Authenticate the request using a JWT from cookie or header.
-
-        Checks the access-token cookie first. If the cookie is absent, delegates
-        to the parent implementation which reads from the Authorization header.
-        If the cookie is present, the token is validated and the associated user
-        is looked up. simplejwt raises ``InvalidToken`` for a malformed, expired,
-        or otherwise invalid token, and ``AuthenticationFailed`` if the token has
-        no user identifier or the user cannot be found or is inactive; both are
-        converted to a 401 response by Django REST Framework.
+        """Get the user and the access token of the request, if it has one.
 
         Args:
-            request: The incoming HTTP request.
+            request: Request whose access token cookie is read, falling back to the
+              ``Authorization`` header.
 
         Returns:
-            tuple[User, Token] | None: Authenticated user and validated token,
-                or None if no credential is present.
+            The authenticated user and the validated token, or None when the
+            request doesn't include any credential.
 
         Raises:
             InvalidToken: If the cookie token is malformed, expired, or otherwise invalid.
@@ -71,10 +43,10 @@ class CookieJWTAuthentication(JWTAuthentication):
         and the password change/reset flows so a credential change kills the current session.
 
         Args:
-            response (Response): The response to clear the auth cookies on.
+            response: Response where the removal of the cookies is instructed.
 
         Returns:
-            Response: The same response with both auth cookies deleted.
+            The same response, so it can be returned directly by the callers.
         """
         response.delete_cookie(settings.JWT_ACCESS_COOKIE)
         response.delete_cookie(settings.JWT_REFRESH_COOKIE, f"{settings.CONFIG.root_path or ''}/api/security/")

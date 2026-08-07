@@ -1,8 +1,4 @@
-"""Django admin configuration for NVD NIST platform management.
-
-Registers NVD NIST models with Django admin interface for administrative
-management of platform settings and configuration.
-"""
+"""Registration of the NVD NIST settings model in the Django admin site."""
 
 from django.contrib import admin
 

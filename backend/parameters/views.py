@@ -1,8 +1,4 @@
-"""Django REST framework views for input parameters management.
-
-Provides REST API endpoints for managing input parameters including
-technology specifications and vulnerability references with search and filtering capabilities.
-"""
+"""Viewsets of the input parameter endpoints."""
 
 from parameters.filters import InputTechnologyFilter, InputVulnerabilityFilter
 from parameters.framework.views import InputParameterViewSet
@@ -14,17 +10,14 @@ from parameters.serializers import (
 
 
 class InputTechnologyViewSet(InputParameterViewSet):
-    """ViewSet for managing technology input parameters.
-
-    Provides REST API endpoints for technology parameter CRUD operations
-    with search and filtering capabilities based on name and version.
+    """Read and create the technologies that the users provide as input.
 
     Attributes:
-        queryset (QuerySet): All InputTechnology objects
-        serializer_class (Serializer): Technology parameter serializer
-        filterset_class (FilterSet): Technology parameter filter
-        search_fields (list): Fields that can be searched
-        ordering_fields (list): Fields that can be used for ordering
+        queryset: All the technologies, filtered later by project membership.
+        serializer_class: Serializer of the input technologies.
+        filterset_class: Filters of the input technologies.
+        search_fields: Free text search over the technology and its version.
+        ordering_fields: Fields that the technologies can be sorted by.
     """
 
     queryset = InputTechnology.objects.all()
@@ -35,17 +28,14 @@ class InputTechnologyViewSet(InputParameterViewSet):
 
 
 class InputVulnerabilityViewSet(InputParameterViewSet):
-    """ViewSet for managing vulnerability input parameters.
-
-    Provides REST API endpoints for vulnerability parameter CRUD operations
-    with search and filtering capabilities based on CVE identifiers.
+    """Read and create the vulnerabilities that the users provide as input.
 
     Attributes:
-        queryset (QuerySet): All InputVulnerability objects
-        serializer_class (Serializer): Vulnerability parameter serializer
-        filterset_class (FilterSet): Vulnerability parameter filter
-        search_fields (list): Fields that can be searched
-        ordering_fields (list): Fields that can be used for ordering
+        queryset: All the vulnerabilities, filtered later by project membership.
+        serializer_class: Serializer of the input vulnerabilities.
+        filterset_class: Filters of the input vulnerabilities.
+        search_fields: Free text search over the CVE identifier.
+        ordering_fields: Fields that the vulnerabilities can be sorted by.
     """
 
     queryset = InputVulnerability.objects.all()

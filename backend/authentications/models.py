@@ -1,9 +1,4 @@
-"""Authentication models for Rekono.
-
-Defines the Authentication model for storing encrypted authentication credentials.
-Supports multiple authentication types with validation, encryption, and parsing
-capabilities for security testing tool integration.
-"""
+"""Model of the credentials used to authenticate against the target services."""
 
 import base64
 
@@ -17,34 +12,15 @@ from target_ports.models import TargetPort
 
 
 class Authentication(BaseInput, BaseEncrypted):
-    """Authentication model for storing encrypted credentials.
+    """Credential that the tools can use to authenticate against a target port.
 
-    Represents authentication credentials for security testing with support for
-    multiple authentication types, automatic encryption, and validation.
-
-    Security Features:
-        - Automatic encryption for sensitive credential data
-        - Input validation with injection prevention
-        - Project-scoped access control
-        - Integration with security testing tools
+    It's also an input of the executions, so the tools receive the credential in
+    the format that their arguments expect.
 
     Attributes:
-        name (TextField): Username/name for authentication (optional, max 100 chars)
-        _secret (TextField): Encrypted password/token (stored as 'secret', max 500 chars)
-        type (TextField): Authentication type from AuthenticationType enum
-        target_port (OneToOneField): Associated target port (one-to-one relationship)
-
-    Example:
-        Create basic authentication:
-
-        ```python
-        auth = Authentication.objects.create(
-            name="admin",
-            secret="password123",
-            type=AuthenticationType.BASIC,
-            target_port=target_port
-        )
-        ```
+        name: Username, or cookie name for the cookie credentials.
+        type: Way in which the credential is sent to the service.
+        target_port: Port whose service accepts this credential.
     """
 
     name = models.TextField(
@@ -84,13 +60,10 @@ class Authentication(BaseInput, BaseEncrypted):
 
     @property
     def token(self) -> str:
-        """Generate authentication token based on type.
+        """The credential value as the tools need to send it.
 
-        For Basic auth, returns base64 encoded username:password.
-        For other types, returns the secret directly.
-
-        Returns:
-            str: Formatted authentication token
+        Basic credentials are encoded as the base64 of "username:password", which is
+        what the Authorization header expects, and the rest are sent as they are.
         """
         return (
             base64.b64encode(f"{self.name}:{self.secret}".encode()).decode()
@@ -99,9 +72,5 @@ class Authentication(BaseInput, BaseEncrypted):
         )
 
     def __str__(self) -> str:
-        """String representation of the authentication record.
-
-        Returns:
-            str: String in format "target_port - name" or just "name"
-        """
+        """Return the target port and the name of the credential."""
         return f"{self.target_port.__str__()} - {self.name}" if self.target_port else self.name

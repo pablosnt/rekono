@@ -1,7 +1,8 @@
-"""Django REST framework views for Rekono's core framework.
+"""Base viewsets shared by all the Rekono API endpoints.
 
-Provides base ViewSet classes with integrated security controls, project-level
-access control, and standardized CRUD operations for all Rekono API endpoints.
+Implement the behaviour that every endpoint needs: restricting the objects to the
+projects where the user is a member, assigning the owner of the created objects,
+and the extra features of the likes and the statistics endpoints.
 """
 
 from functools import cached_property
@@ -26,36 +27,23 @@ from security.authorization.permissions import IsAuditor
 
 
 class BaseViewSet(ModelViewSet, LoggingEntity):
-    """Base ViewSet providing standardized REST API operations with security controls.
-
-    Extends Django REST Framework's ModelViewSet with integrated logging,
-    project-level access control, and ownership management. All API ViewSets
-    in Rekono inherit from this base class to ensure consistent behavior.
-
-    Security Features:
-        - Project-level access control through membership validation
-        - Automatic ownership assignment for created objects
-        - Permission-based method restrictions
-        - Integrated audit logging for all operations
+    """Base viewset that applies the project scoping and the ownership of Rekono.
 
     Attributes:
-        ordering (list): Default ordering for query results.
-        http_method_names (list): Allowed HTTP methods (excludes PATCH).
-        owner_field (str): Field name for ownership assignment.
+        ordering: Newest objects first, unless the endpoint orders them differently.
+        http_method_names: Standard CRUD methods, with PATCH removed since partial
+          updates aren't supported by the Rekono serializers.
+        owner_field: Model field where the user that creates an object is saved, or
+          None for the models that don't track their owner.
     """
 
     ordering = ["-id"]
-    # Required to remove PATCH method
     http_method_names = ["get", "post", "put", "delete"]
     owner_field = "owner"
 
     @cached_property
     def linked_model(self) -> type[BaseModel]:
-        """Get the model class associated with this ViewSet.
-
-        Returns:
-            type[BaseModel]: The model class from serializer or filterset metadata.
-        """
+        """The model managed by this viewset, taken from its serializer or filter."""
         for cls in [
             self.get_serializer_class(),
             self.filterset_class if hasattr(self, "filterset_class") else None,
@@ -65,14 +53,16 @@ class BaseViewSet(ModelViewSet, LoggingEntity):
         return BaseModel  # pragma: no cover
 
     def _get_project_from_data(self, project_field: str, data: dict[str, Any]) -> Project | None:
-        """Extract project instance from nested data structure.
+        """Get the project referenced by some validated data.
 
         Args:
-            project_field (str): Field path to the project (e.g., "target__project").
-            data (dict[str, Any]): The data dictionary to traverse.
+            project_field: Path from the model to its project, using the Django
+              double underscore notation, like "target__project".
+            data: Validated data where the first field of the path is looked up.
 
         Returns:
-            Project | None: The project instance or None if not found.
+            The referenced project, or None if the path can't be resolved because
+            the data doesn't include it.
         """
         fields = project_field.split("__")
         if not fields:
@@ -86,13 +76,14 @@ class BaseViewSet(ModelViewSet, LoggingEntity):
         return data if isinstance(data, Project) else None
 
     def get_queryset(self) -> QuerySet:
-        """Get filtered queryset with project-level access control.
+        """Get the objects from the projects where the user is a member.
 
-        Applies project membership filtering to ensure users only access
-        resources from projects they belong to.
+        Models unrelated to a project are returned without this filter, since their
+        access is only controlled by the permissions of the user.
 
         Returns:
-            QuerySet: Filtered queryset based on project membership.
+            The objects that the user can access, or None for an unauthenticated
+            request to a project-related model.
         """
         members_field = None
         if self.linked_model == Project:
@@ -101,42 +92,45 @@ class BaseViewSet(ModelViewSet, LoggingEntity):
             members_field = f"{self.linked_model._project_field}__members"
         if members_field:
             if self.request.user.id:
-                # Read authorization based on project membership
                 return super().get_queryset().filter(**{members_field: self.request.user}).distinct()
             else:  # pragma: no cover
                 return None
         return super().get_queryset().distinct()
 
     def get_serializer(self, *args: Any, **kwargs: Any) -> Serializer:
-        """Get serializer instance with request context.
+        """Get the serializer, adding the request to its context.
+
+        The serializers need the request to know the user that performs it, so it's
+        included here instead of relying on each caller to provide the context.
 
         Args:
-            *args (Any): Positional arguments for serializer.
-            **kwargs (Any): Keyword arguments for serializer.
+            *args: Standard serializer arguments, like the instance or the data.
+            **kwargs: Standard serializer arguments. A context given here is kept
+              and only completed with the request.
 
         Returns:
-            Serializer: Configured serializer instance with request context.
+            The serializer of this viewset, with the request in its context.
         """
         return self.get_serializer_class()(
             *args,
             **{
                 **kwargs,
-                # Pass original request to serializers
                 "context": {**kwargs.get("context", {}), "request": self.request},
             },
         )
 
     def perform_create(self, serializer: Serializer) -> None:
-        """Perform object creation with ownership and permission validation.
+        """Create the object, assigning the user that performs the request as owner.
 
         Args:
-            serializer (Serializer): The serializer instance for creation.
+            serializer: Serializer with the validated data of the new object.
 
         Raises:
-            PermissionDenied: If user is not a member of the associated project.
+            PermissionDenied: If the new object belongs to a project where the user
+              isn't a member. The permissions can't check this, since the project is
+              only known after the data is validated.
         """
         project = self._get_project_from_data(self.linked_model._project_field, serializer.validated_data)
-        # Check project membership before creating related entities
         if project and self.request.user not in project.members.all():
             raise PermissionDenied()
         if self.owner_field and self.linked_model and hasattr(self.linked_model, self.owner_field):
@@ -145,13 +139,13 @@ class BaseViewSet(ModelViewSet, LoggingEntity):
         super().perform_create(serializer)
 
     def _method_not_allowed(self, method: str) -> Response:
-        """Generate method not allowed response.
+        """Build the response returned when an HTTP method isn't allowed.
 
         Args:
-            method (str): The HTTP method that was attempted.
+            method: HTTP method that was rejected, in any case.
 
         Returns:
-            Response: HTTP 405 Method Not Allowed response.
+            A 405 response reporting that method, in the same shape that DRF uses.
         """
         return Response(
             {"detail": f'Method "{method.upper()}" not allowed.'},
@@ -160,20 +154,14 @@ class BaseViewSet(ModelViewSet, LoggingEntity):
 
 
 class LikeViewSet(BaseViewSet):
-    """ViewSet for models with like/favorite functionality.
+    """Base viewset for the models that can be liked by the users.
 
-    Extends BaseViewSet with like management capabilities for user-interactive
-    content such as tools, processes, and wordlists.
-
-    Custom Actions:
-        like: Add or remove likes from authenticated users
-
-    Attributes:
-        Inherits all BaseViewSet attributes with like count annotations.
+    Adds the like action and the annotations that the serializers and the filters
+    need to expose the likes of each object.
     """
 
     def get_queryset(self) -> QuerySet:
-        """Get queryset annotated with like count and current user's like status.
+        """Get the objects annotated with their number of likes and the user's like.
 
         The ``likes`` count is annotated with ``distinct=True`` and ``liked`` is
         resolved through an ``Exists`` subquery instead of a second join on the
@@ -181,7 +169,8 @@ class LikeViewSet(BaseViewSet):
         other's row counts.
 
         Returns:
-            QuerySet: Base queryset with ``likes`` and ``liked`` annotations.
+            The objects that the user can access, annotated with ``likes`` and
+            ``liked``, which the serializers and the filters read.
         """
         return (
             super()
@@ -206,17 +195,15 @@ class LikeViewSet(BaseViewSet):
         permission_classes=[IsAuthenticated, IsAuditor],
     )
     def like(self, request: Request, pk: str) -> Response:
-        """Add or remove like from the current user.
-
-        POST: Add like from current user
-        DELETE: Remove like from current user
+        """Add the like of the user to this object with POST, or remove it with DELETE.
 
         Args:
-            request (Request): The HTTP request object.
-            pk (str): Primary key of the object to like/unlike.
+            request: Request whose method decides whether the like is added or
+              removed, and whose user is the one that likes the object.
+            pk: Identifier of the object, taken from the URL.
 
         Returns:
-            Response: HTTP 204 No Content on success.
+            An empty 204 response, since the likes are read from the object itself.
         """
         if request.method == "POST":
             self.get_object().liked_by.add(request.user)
@@ -226,15 +213,13 @@ class LikeViewSet(BaseViewSet):
 
 
 class StatsViewSet(BaseViewSet):
-    """Base viewset for statistics endpoints.
-
-    Provides common configuration for all statistics views including
-    authentication requirements and HTTP method restrictions.
+    """Base viewset for the endpoints that return statistics.
 
     Attributes:
-        ordering (list): No default ordering applied.
-        http_method_names (list): Restricted to GET requests only.
-        permission_classes (list): Requires authenticated users.
+        ordering: No default ordering, since each statistic defines its own.
+        http_method_names: GET only, because statistics are calculated, not stored.
+        permission_classes: Only authentication is required, so any role can read
+          the statistics of the projects where the user is a member.
     """
 
     ordering = []
@@ -243,27 +228,27 @@ class StatsViewSet(BaseViewSet):
 
 
 class LatestViewSet(StatsViewSet):
-    """Base viewset for retrieving latest items statistics.
+    """Base viewset for the endpoints that return a short ranking of items.
 
-    Extends StatsViewSet to provide functionality for fetching the most
-    recent items with a configurable limit and no pagination.
+    The ranking itself is the ordering that each viewset declares, so it can be the
+    most recent items or the ones that lead any other counter.
 
     Attributes:
-        top_items (int): Maximum number of items to return.
-        pagination_class (type | None): Pagination disabled for latest views.
+        top_items: Number of items returned.
+        pagination_class: None, since the number of items is already limited.
     """
 
     top_items = 5
     pagination_class = None
 
     def filter_queryset(self, queryset):
-        """Apply filtering and limit results to top items.
+        """Filter the items as usual and keep only the first ones of the ordering.
 
         Args:
-            queryset (QuerySet): Base queryset to filter.
+            queryset: Objects to be filtered.
 
         Returns:
-            QuerySet: Filtered queryset limited to top_items count.
+            At most top_items objects, already ordered by the ranking criteria.
         """
         queryset = super().filter_queryset(queryset)
         return queryset[: self.top_items]

@@ -1,8 +1,4 @@
-"""Django filters for project model queries.
-
-Provides filter classes for advanced project querying with support for
-tag-based filtering and DefectDojo integration parameters.
-"""
+"""Filters of the project endpoints."""
 
 from django_filters.filters import CharFilter, ModelChoiceFilter, NumberFilter
 from django_filters.rest_framework import FilterSet
@@ -12,18 +8,16 @@ from targets.models import Target
 
 
 class ProjectFilter(FilterSet):
-    """Filter class for Project model queries.
-
-    Provides advanced filtering capabilities for project queries including
-    tag-based filtering and DefectDojo integration parameters for enhanced
-    project search and organization features.
+    """Filters to search projects by their data and their DefectDojo synchronization.
 
     Attributes:
-        tag (CharFilter): Filter projects by tag names
-        defectdojo_product (NumberFilter): Filter by DefectDojo product ID
-        defectdojo_engagement (NumberFilter): Filter by DefectDojo engagement ID
-        owner_username (CharFilter): Filter by owner username
-        target (ModelChoiceFilter): Filter by target through the project's targets relationship
+        tag: Filter by one of the tags of the project.
+        defectdojo_product: Filter by the DefectDojo product that the project is
+          synchronized with.
+        defectdojo_engagement: Filter by the DefectDojo engagement that the project
+          is synchronized with.
+        owner_username: Filter by the username of the owner.
+        target: Filter by one of the targets of the project.
     """
 
     tag = CharFilter(field_name="tags__name")
@@ -33,15 +27,7 @@ class ProjectFilter(FilterSet):
     target = ModelChoiceFilter(queryset=Target.objects.all(), field_name="targets")
 
     class Meta:
-        """Meta configuration for the ProjectFilter.
-
-        Defines the model and available filter fields for project queries
-        including exact matches and case-insensitive text searches.
-
-        Attributes:
-            model (Model): The Project model to filter
-            fields (dict): Available filter operations for each field
-        """
+        """Filter configuration for the projects."""
 
         model = Project
         fields = {

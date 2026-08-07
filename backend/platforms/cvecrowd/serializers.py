@@ -1,9 +1,4 @@
-"""Django REST framework serializers for CVE Crowd platform management.
-
-Serializer classes for converting CVE Crowd settings models to/from JSON
-for API operations. Includes secure credential handling, validation logic,
-and platform availability detection for threat intelligence integration.
-"""
+"""Serializer of the CVE Crowd endpoints."""
 
 from rest_framework.serializers import ModelSerializer
 
@@ -13,43 +8,31 @@ from platforms.cvecrowd.models import CveCrowdSettings
 
 
 class CveCrowdSettingsSerializer(ModelSerializer):
-    """Serializer for CVE Crowd platform settings.
-
-    Handles serialization and deserialization of CVE Crowd settings with
-    secure API token management. The is_available field is a cached status
-    refreshed with a live API check whenever settings are updated.
+    """Serializer of the CVE Crowd configuration.
 
     Attributes:
-        api_token (ProtectedSecretField): Protected API token field with validation
+        api_token: API token, which is masked when the settings are read.
     """
 
     api_token = ProtectedSecretField(required=False, allow_null=True, source="secret")
 
     class Meta:
-        """Meta configuration for CveCrowdSettingsSerializer.
-
-        Attributes:
-            model (Model): The CveCrowdSettings model to serialize
-            fields (tuple): Field names to include in serialization
-            read_only_fields (tuple): Fields that cannot be modified via API
-        """
+        """Serializer configuration for the CVE Crowd settings."""
 
         model = CveCrowdSettings
         fields = ("id", "trending_span_days", "execute_per_execution", "api_token", "is_available")
         read_only_fields = ("is_available",)
 
     def update(self, instance, validated_data):
-        """Update CVE Crowd settings and refresh the platform availability status.
-
-        Delegates to the parent update method, then performs a live API check to
-        update the is_available field in the database.
+        """Update the configuration and check if the platform answers with it.
 
         Args:
-            instance (CveCrowdSettings): The settings instance to update.
-            validated_data (dict): Validated data from the request.
+            instance: Settings being updated.
+            validated_data: New settings values, already validated.
 
         Returns:
-            CveCrowdSettings: The updated settings instance.
+            The updated settings, which is where the result of the check is
+            stored, since it isn't repeated until the token changes again.
         """
         instance = super().update(instance, validated_data)
         instance.is_available = CveCrowd().live_is_available()

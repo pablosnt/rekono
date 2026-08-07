@@ -1,8 +1,4 @@
-"""Django admin configuration for VulnCheck platform management.
-
-Registers VulnCheck models with Django admin interface for administrative
-management of platform settings and configuration.
-"""
+"""Registration of the VulnCheck settings model in the Django admin site."""
 
 from django.contrib import admin
 

@@ -1,8 +1,4 @@
-"""Django REST framework views for execution models.
-
-Provides REST API views for execution records including list, retrieve
-operations and report download functionality with proper security controls.
-"""
+"""Endpoints to review the executions and to download their reports."""
 
 from django.db.models import BooleanField, Case, When
 from django.http import FileResponse
@@ -26,26 +22,21 @@ from security.authorization.permissions import (
 
 
 class ExecutionViewSet(BaseViewSet):
-    """ViewSet for Execution model operations.
-
-    Provides REST API endpoints for execution records with filtering, searching,
-    and ordering capabilities. Includes report download functionality for
-    completed executions.
-
-    Custom Actions:
-        download_report: Download execution output files for completed executions
+    """List the executions and download the reports of their tools.
 
     Attributes:
-        queryset (QuerySet): Execution model instances annotated with a started boolean flag
-        serializer_class (Serializer): Serializer for Execution model
-        filterset_class (FilterSet): Filter class for query filtering
-        permission_classes (list): Required permissions for access control
-        search_fields (list): Fields available for text search
-        ordering_fields (list): Fields available for result ordering
-        http_method_names (list): Allowed HTTP methods (GET only)
+        queryset: All the executions, restricted to the projects of the user by the
+          base viewset, and annotated with whether they already started.
+        serializer_class: Serializer of the executions.
+        filterset_class: Filters available to search executions.
+        permission_classes: Role permissions plus the membership in the project.
+        search_fields: Fields used by the text search.
+        ordering_fields: Fields that can be used to order the results, including
+          the started annotation, so the executions that didn't start are grouped
+          together.
+        http_method_names: GET only, since the executions are created by the tasks.
     """
 
-    # Started annotation allows frontend to sort executions consistently based on their startup
     queryset = Execution.objects.all().annotate(
         started=Case(When(start__isnull=False, then=True), default=False, output_field=BooleanField())
     )
@@ -84,17 +75,15 @@ class ExecutionViewSet(BaseViewSet):
     )
     @action(detail=True, methods=["GET"], url_path="report", url_name="report")
     def download_report(self, request: Request, pk: str) -> FileResponse:
-        """Download execution report file.
-
-        Allows downloading output report files for completed executions.
-        Only executions with COMPLETED status can have downloadable reports.
+        """Download the report file that the tool of a completed execution wrote.
 
         Args:
-            request (Request): The HTTP request object
-            pk (str): Primary key of the execution
+            request: Request that asks for the report.
+            pk: Identifier of the execution, taken from the URL.
 
         Returns:
-            FileResponse: Report file download or error response
+            The report file, a validation error when the execution isn't completed,
+            or a not found response when the tool didn't write any report.
         """
         execution = self.get_object()
         if execution.status != Status.COMPLETED:

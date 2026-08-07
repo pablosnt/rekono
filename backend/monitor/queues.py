@@ -1,7 +1,8 @@
-"""Background job queues for automated threat intelligence monitoring.
+"""Queue that runs the monitor job.
 
-Queue classes and job functions for handling background monitoring tasks.
-Includes trending CVE monitoring, EPSS score updates, and automated job scheduling.
+The monitor job schedules the next one when it finishes, so the loop keeps running
+as long as one job completes, and it's the only queue whose jobs aren't triggered
+by something that the users do.
 """
 
 from datetime import timedelta
@@ -21,33 +22,23 @@ from platforms.first import First
 
 
 class MonitorQueue(BaseQueue):
-    """Queue for managing monitoring background jobs.
-
-    Handles scheduling and execution of periodic monitoring tasks that check
-    for trending vulnerabilities, refresh EPSS scores, and process other
-    security intelligence updates. Uses RQ for job management with automatic
-    rescheduling.
+    """Queue that refreshes the vulnerability data and recovers the lost executions.
 
     Attributes:
-        name (str): The name of the monitoring queue
+        name: Name of the RQ queue.
     """
 
     name = "monitor"
 
     def enqueue(self, **kwargs: Any) -> Job:
-        """Enqueue a monitoring job.
-
-        Creates and schedules a monitoring job, updating the settings with
-        the new job ID for tracking. If a scheduled monitoring job already
-        exists, no new job is enqueued to avoid running duplicated monitoring
-        loops at the same time.
+        """Enqueue a monitor job to be run as soon as possible.
 
         Args:
-            **kwargs (Any): Accepted for signature compatibility with BaseQueue.enqueue;
-                          unused since monitoring jobs take no parameters
+            **kwargs: Not used, since the monitor job takes no arguments.
 
         Returns:
-            Job: The created RQ job instance, or the existing scheduled one
+            The enqueued job, or the one that is already scheduled, since two
+            monitor loops running at the same time would duplicate the work.
         """
         settings = MonitorSettings.objects.first()
         if settings.rq_job_id:
@@ -67,14 +58,7 @@ class MonitorQueue(BaseQueue):
     @staticmethod
     @job("monitor")
     def consume() -> None:
-        """Execute the monitoring job.
-
-        Runs the monitoring process by updating the last monitor timestamp
-        and invoking each configured monitoring platform to refresh their
-        security intelligence data (trending CVEs, EPSS scores, etc.). Finally,
-        reconciles executions whose RQ job is missing or has already reached a
-        terminal state, so they are not left stuck in a non-terminal status forever.
-        """
+        """Refresh the data of the monitoring platforms and recover the executions."""
         BaseQueue.logger.info("[Monitor] Monitor job has started")
         settings = MonitorSettings.objects.first()
         settings.last_monitor = timezone.now()
@@ -98,23 +82,18 @@ class MonitorQueue(BaseQueue):
 
     @staticmethod
     def _scheduled_callback(job: Any, connection: Any, *args: Any, **kwargs: Any) -> None:
-        """Callback function executed after monitoring job completion.
-
-        Automatically schedules the next monitoring job based on the configured
-        hour span, creating a self-sustaining monitoring loop.
+        """Schedule the next monitor job after the configured hours.
 
         Args:
-            job (Any): The completed RQ job instance
-            connection (Any): The RQ connection object
-            *args (Any): Additional positional arguments
-            **kwargs (Any): Additional keyword arguments
+            job: Monitor job that just finished.
+            connection: Redis connection used by RQ to run the callback.
+            *args: Not used, accepted for compatibility with the RQ callbacks.
+            **kwargs: Not used, accepted for compatibility with the RQ callbacks.
         """
         settings = MonitorSettings.objects.first()
-        # Although this is a static method, we instantiate MonitorQueue to access the queue instance.
-        # This is necessary because the scheduling API is instance-based.
+        # The queue is only reachable from an instance, even though the scheduled job is the
+        # same static method that this callback belongs to
         self = MonitorQueue()
-        # Schedule the next monitoring job to run after the configured hour span.
-        # The job will call this same callback upon completion, creating a recurring schedule.
         job = self.queue.enqueue_at(
             settings.last_monitor + timedelta(hours=settings.hour_span),
             self.consume,

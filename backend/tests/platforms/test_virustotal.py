@@ -56,7 +56,7 @@ class VirusTotalTest(BaseTest, TestCase):
     @mock.patch("platforms.virustotal.integrations.VirusTotal._request", success)
     def test_process_findings(self) -> None:
         self._test_success()
-        self.host.domain = "rekono.com"
+        self.host.domain = "rekono.dev"
         self.host.save(update_fields=["domain"])
         self._test_success()
 

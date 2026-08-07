@@ -1,25 +1,21 @@
-"""Enums for target classification and management.
-
-Defines enumeration classes for target types and configuration options
-used throughout the targets system.
-"""
+"""Types of targets that Rekono can scan."""
 
 from django.db import models
 from django.db.models.enums import Choices
 
 
 class TargetType(models.TextChoices):
-    """Enumeration of supported target types.
+    """Kind of host, or group of hosts, that a target identifies.
 
-    Defines the types of targets that can be specified for security testing
-    operations, including various IP formats, networks, and domain names.
+    The type decides which tools can scan a target, since the ones that only accept
+    one host can't run against a network or an IP range.
 
     Attributes:
-        PRIVATE_IP (str): RFC 1918 private IP addresses (IPv4/IPv6)
-        PUBLIC_IP (str): Internet-routable IP addresses (IPv4/IPv6)
-        NETWORK (str): CIDR notation networks (e.g., 192.168.1.0/24)
-        IP_RANGE (str): Hyphen-separated IP ranges (e.g., 192.168.1.1-100)
-        DOMAIN (str): DNS-resolvable domain names and hostnames
+        PRIVATE_IP: IP address, IPv4 or IPv6, reserved for private networks.
+        PUBLIC_IP: IP address, IPv4 or IPv6, routable on the Internet.
+        NETWORK: Network in CIDR notation, like 192.168.1.0/24.
+        IP_RANGE: Range of addresses, like 192.168.1.1-100.
+        DOMAIN: Domain name that resolves to an IP address.
     """
 
     PRIVATE_IP = "Private IP"

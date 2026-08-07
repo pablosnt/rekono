@@ -19,8 +19,8 @@ from users.models import User
 
 # pytype: disable=wrong-arg-types
 
-invitation1 = {"email": "test1@rekono.com", "role": Role.READER.value}
-invitation2 = {"email": "test2@rekono.com", "role": Role.AUDITOR.value}
+invitation1 = {"email": "test1@rekono.dev", "role": Role.READER.value}
+invitation2 = {"email": "test2@rekono.dev", "role": Role.AUDITOR.value}
 invalid_invitation = {"email": "invalid email", "role": Role.ADMIN.value}
 
 new_profile = {
@@ -48,7 +48,7 @@ invalid_user6 = {**user1, "username": "test;1", "first_name": "test;1"}
 
 class UserTest(ApiTest, TestCase):
     endpoint = "/api/users/"
-    expected_string = "admin1@rekono.com"
+    expected_string = "admin1@rekono.dev"
     data = [SetupProject(targets_and_tasks=0)]
     cases = [
         ApiTestCase(
@@ -68,42 +68,42 @@ class UserTest(ApiTest, TestCase):
                 {
                     "id": 6,
                     "username": "reader2",
-                    "email": "reader2@rekono.com",
+                    "email": "reader2@rekono.dev",
                     "role": Role.READER.value,
                     "is_active": True,
                 },
                 {
                     "id": 5,
                     "username": "reader1",
-                    "email": "reader1@rekono.com",
+                    "email": "reader1@rekono.dev",
                     "role": Role.READER.value,
                     "is_active": True,
                 },
                 {
                     "id": 4,
                     "username": "auditor2",
-                    "email": "auditor2@rekono.com",
+                    "email": "auditor2@rekono.dev",
                     "role": Role.AUDITOR.value,
                     "is_active": True,
                 },
                 {
                     "id": 3,
                     "username": "auditor1",
-                    "email": "auditor1@rekono.com",
+                    "email": "auditor1@rekono.dev",
                     "role": Role.AUDITOR.value,
                     "is_active": True,
                 },
                 {
                     "id": 2,
                     "username": "admin2",
-                    "email": "admin2@rekono.com",
+                    "email": "admin2@rekono.dev",
                     "role": Role.ADMIN.value,
                     "is_active": True,
                 },
                 {
                     "id": 1,
                     "username": "admin1",
-                    "email": "admin1@rekono.com",
+                    "email": "admin1@rekono.dev",
                     "role": Role.ADMIN.value,
                     "is_active": True,
                 },
@@ -115,21 +115,21 @@ class UserTest(ApiTest, TestCase):
                 {
                     "id": 5,
                     "username": "reader1",
-                    "email": "reader1@rekono.com",
+                    "email": "reader1@rekono.dev",
                     "role": Role.READER.value,
                     "is_active": True,
                 },
                 {
                     "id": 3,
                     "username": "auditor1",
-                    "email": "auditor1@rekono.com",
+                    "email": "auditor1@rekono.dev",
                     "role": Role.AUDITOR.value,
                     "is_active": True,
                 },
                 {
                     "id": 1,
                     "username": "admin1",
-                    "email": "admin1@rekono.com",
+                    "email": "admin1@rekono.dev",
                     "role": Role.ADMIN.value,
                     "is_active": True,
                 },
@@ -142,21 +142,21 @@ class UserTest(ApiTest, TestCase):
                 {
                     "id": 6,
                     "username": "reader2",
-                    "email": "reader2@rekono.com",
+                    "email": "reader2@rekono.dev",
                     "role": Role.READER.value,
                     "is_active": True,
                 },
                 {
                     "id": 4,
                     "username": "auditor2",
-                    "email": "auditor2@rekono.com",
+                    "email": "auditor2@rekono.dev",
                     "role": Role.AUDITOR.value,
                     "is_active": True,
                 },
                 {
                     "id": 2,
                     "username": "admin2",
-                    "email": "admin2@rekono.com",
+                    "email": "admin2@rekono.dev",
                     "role": Role.ADMIN.value,
                     "is_active": True,
                 },
@@ -177,7 +177,7 @@ class UserTest(ApiTest, TestCase):
             expected={
                 "id": 6,
                 "username": "reader2",
-                "email": "reader2@rekono.com",
+                "email": "reader2@rekono.dev",
                 "role": Role.ADMIN.value,
                 "is_active": True,
             },
@@ -186,8 +186,8 @@ class UserTest(ApiTest, TestCase):
         ApiTestCase(
             [Role.ADMIN],
             expected=[
-                {"id": 8, "username": None, "email": "test2@rekono.com", "role": Role.AUDITOR.value, "is_active": None},
-                {"id": 7, "username": None, "email": "test1@rekono.com", "role": Role.READER.value, "is_active": None},
+                {"id": 8, "username": None, "email": "test2@rekono.dev", "role": Role.AUDITOR.value, "is_active": None},
+                {"id": 7, "username": None, "email": "test1@rekono.dev", "role": Role.READER.value, "is_active": None},
                 {"id": 6, "username": "reader2", "role": Role.ADMIN.value, "is_active": True},
                 {"id": 5, "username": "reader1", "role": Role.READER.value, "is_active": True},
                 {"id": 4, "username": "auditor2", "role": Role.AUDITOR.value, "is_active": True},
@@ -239,7 +239,7 @@ class UserTest(ApiTest, TestCase):
             expected={
                 "id": 6,
                 "username": "reader2",
-                "email": "reader2@rekono.com",
+                "email": "reader2@rekono.dev",
                 "role": Role.READER.value,
                 "is_active": True,
             },
@@ -250,7 +250,7 @@ class UserTest(ApiTest, TestCase):
             expected={
                 "id": 6,
                 "username": "reader2",
-                "email": "reader2@rekono.com",
+                "email": "reader2@rekono.dev",
                 "role": Role.READER.value,
                 "is_active": True,
             },
@@ -325,7 +325,7 @@ class UserTest(ApiTest, TestCase):
         self.assertEqual(200, client.get("/api/profile/").status_code)
 
     def test_create_superuser(self) -> None:
-        superuser = User.objects.create_superuser("superuser", "superuser@rekono.com", "superuser")
+        superuser = User.objects.create_superuser("superuser", "superuser@rekono.dev", "superuser")
         self.assertTrue(superuser.is_active)
         self.assertEqual(Role.ADMIN.value, superuser.groups.first().name)
 
@@ -342,11 +342,11 @@ class ProfileTest(ApiTest, TestCase):
         ApiTestCase(["reader1"], expected={"id": 5, "username": "reader1", "role": Role.READER.value}),
         PutApiTestCase(
             ["admin2"],
-            data={**new_profile, "email": "admin2@rekono.com"},
+            data={**new_profile, "email": "admin2@rekono.dev"},
             expected={
                 "id": 2,
                 "username": "admin2",
-                "email": "admin2@rekono.com",
+                "email": "admin2@rekono.dev",
                 "role": Role.ADMIN.value,
                 **new_profile,
             },
@@ -381,7 +381,7 @@ class ProfileTest(ApiTest, TestCase):
 
     @mock.patch("platforms.email.notifications.SMTP.is_available", lambda self: True)
     def test_email_change(self) -> None:
-        new_email = "new-admin1@rekono.com"
+        new_email = "new-admin1@rekono.dev"
         client = APIClient()
         client.force_authenticate(self.admin1)
 
@@ -389,7 +389,7 @@ class ProfileTest(ApiTest, TestCase):
         response = client.put(self.endpoint, data={**new_profile, "email": new_email})
         self.assertEqual(200, response.status_code)
         self.admin1.refresh_from_db()
-        self.assertEqual("admin1@rekono.com", self.admin1.email)
+        self.assertEqual("admin1@rekono.dev", self.admin1.email)
         self.assertEqual(new_email, self.admin1.pending_email)
 
         # Verify the new address
@@ -412,7 +412,7 @@ class ProfileTest(ApiTest, TestCase):
     def test_email_change_otp_is_only_valid_to_verify_the_email(self) -> None:
         client = APIClient()
         client.force_authenticate(self.admin1)
-        response = client.put(self.endpoint, data={**new_profile, "email": "new-admin1@rekono.com"})
+        response = client.put(self.endpoint, data={**new_profile, "email": "new-admin1@rekono.dev"})
         self.assertEqual(200, response.status_code)
         otp = User.objects.setup_otp(self.admin1, OtpScope.EMAIL_VERIFICATION)
 
@@ -434,7 +434,7 @@ class ProfileTest(ApiTest, TestCase):
     def test_email_change_without_smtp(self) -> None:
         client = APIClient()
         client.force_authenticate(self.admin1)
-        response = client.put(self.endpoint, data={**new_profile, "email": "another@rekono.com"})
+        response = client.put(self.endpoint, data={**new_profile, "email": "another@rekono.dev"})
         self.assertEqual(400, response.status_code)
 
     def test_notification_scope(self) -> None:
@@ -474,7 +474,7 @@ class ResetPasswordTest(ApiTestNoData, TestCase):
         self.assertEqual(403, client.post(self.endpoint, data={"email": self.admin1.email}).status_code)
 
         client = APIClient()
-        self.assertEqual(200, client.post(self.endpoint, data={"email": "notfound@rekono.com"}).status_code)
+        self.assertEqual(200, client.post(self.endpoint, data={"email": "notfound@rekono.dev"}).status_code)
         self.assertEqual(200, client.post(self.endpoint, data={"email": self.admin1.email}).status_code)
 
         otp = User.objects.setup_otp(self.admin1, OtpScope.PASSWORD_RESET)

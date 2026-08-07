@@ -1,7 +1,8 @@
-"""Nmap output parser for network discovery and service detection findings.
+"""Parser of the Nmap network scanner.
 
-Processes Nmap XML output to extract hosts, ports, services, technologies, and
-vulnerabilities discovered during network scanning operations.
+Besides the hosts, the ports, and the technologies that Nmap discovers itself, its
+NSE scripts report vulnerabilities, credentials, and shared resources, so this
+parser also knows what the scripts that Rekono runs write in their output.
 """
 
 import re
@@ -26,40 +27,24 @@ PORT_STATUSES = {
 
 
 class Nmap(BaseParser):
-    """Parser for Nmap XML output files.
-
-    Extracts network discovery findings including hosts, open ports, running services,
-    detected technologies, and security vulnerabilities from Nmap scan results.
-    Supports NSE script output parsing for enhanced vulnerability detection.
-
-    Attributes:
-        Inherits all attributes from BaseParser
-    """
+    """Findings discovered by Nmap, read from its XML report."""
 
     def _parse(self) -> None:
-        """Parse Nmap XML output and extract security findings.
-
-        Processes Nmap scan results to create Host, Port, Technology, Path, Credential and
-        Vulnerability findings. Handles OS detection, service fingerprinting, and NSE
-        script results, which is where Credential findings come from.
-        """
+        """Create the findings that Nmap and its NSE scripts report."""
         report = NmapParser.parse_fromfile(self.report)
         for nmap_host in report.hosts:
             if not nmap_host.is_up():
                 continue
-            # Analyze OS detection results and select the most accurate match
+            # Nmap reports every operating system that the host could be running, with how
+            # sure it is about each one, so the most accurate one is the one taken
             os_detection = nmap_host.os_match_probabilities()
-            # Choose OS match with highest accuracy score
             selected_os = max(os_detection, key=lambda o: o.accuracy) if os_detection else None
-            # Get the most accurate OS class from the selected OS match
             selected_class = max(selected_os.osclasses, key=lambda c: c.accuracy) if selected_os else None
-            # Map Nmap OS family to our HostOS enum, defaulting to OTHER for unknown families
             os_type = HostOS.OTHER
             if selected_class:
                 try:
                     os_type = HostOS[selected_class.osfamily.upper()]
                 except KeyError:
-                    # Keep default OTHER type if OS family not recognized
                     pass
             host = self.create_finding(
                 Host, ip=nmap_host.address, os=selected_os.name if selected_os else None, os_type=os_type
@@ -78,8 +63,6 @@ class Nmap(BaseParser):
                     service=service.service,
                 )
                 technologies = []
-                # Extract technology information from service fingerprinting results
-                # Only create Technology finding if both product name and version are available
                 if "product" in service.service_dict and "version" in service.service_dict:
                     technology = self.create_finding(
                         Technology,
@@ -89,7 +72,6 @@ class Nmap(BaseParser):
                         version=service.service_dict["version"],
                     )
                     technologies.append(technology)
-                    # Process NSE scripts that provide additional vulnerability and service details
                     if service.scripts_results:
                         self._parse_nse_scripts(service.scripts_results, technology, port)
             if nmap_host.scripts_results:
@@ -98,32 +80,30 @@ class Nmap(BaseParser):
     def _parse_nse_scripts(
         self, results: Any, technologies: list[Technology] | Technology, port: Port | None = None
     ) -> None:
-        """Parse NSE script results and extract vulnerability findings.
+        """Create the findings that the NSE scripts of Nmap report.
 
         Args:
-            results (Any): NSE script results from Nmap output
-            technologies (list[Technology] | Technology): Associated technology findings
-            port (Port | None): Port the scripts belong to, used as a fallback link when no
-                technology was fingerprinted so findings keep traceability to the service
+            results: Output of the scripts that Nmap ran.
+            technologies: Technologies found in the port, or the whole host if the
+              scripts were run against the host instead of against one port.
+            port: Port where the scripts were run, used to link the findings when
+              no technology was identified in it.
         """
-        # Normalize technology input to handle both single Technology objects and lists
         technology = (
             technologies if isinstance(technologies, Technology) else (technologies[0] if technologies else None)
         )
-        # Extract SMB-specific technologies for SMB-related vulnerabilities
-        # SMB services use specific service names in Nmap output
+        # The SMB findings are linked to the SMB technology, which is the only one that can be
+        # identified among the technologies of a host
         smb_technologies = (
             [technologies]
             if isinstance(technologies, Technology)
             else [t for t in technologies if t.port.service in ["microsoft-ds", "netbios-ssn"]]
         )
         smb_technology = smb_technologies[0] if smb_technologies else None
-        # Prepare links for vulnerabilities
         technology_link = {"technology": technology} if technology else {"port": port}
         is_technology_link = technology is not None or port is not None
         smb_link = {"technology": smb_technology} if smb_technology else {"port": port}
         is_smb_link = smb_technology is not None or port is not None
-        # Process each NSE script result based on its ID (script type)
         for script in results:
             match script.get("id"):
                 case "vulners":
@@ -233,12 +213,11 @@ class Nmap(BaseParser):
                             )
                 case "smb-enum-shares":
                     for share, fields in script.get("elements", {}).items():
-                        # Skip shares that are metadata entries (contain account_used)
+                        # The script also reports which account it used to enumerate the shares,
+                        # which isn't a share itself
                         if "account_used" not in share:
-                            # Extract clean share name from UNC path format (\\server\share -> share)
                             path = share.rsplit("\\", 1)[1] if "\\" in share else share
                             anonymous = fields.get("Anonymous access")
-                            # Create a Path finding for each discovered SMB share
                             self.create_finding(
                                 Path,
                                 linked_finding=is_smb_link,
@@ -252,8 +231,6 @@ class Nmap(BaseParser):
                                 ).strip(),
                                 type=PathType.SHARE,
                             )
-                            # Check for security issues with anonymous access to shares
-                            # READ access is high severity, WRITE access is critical
                             if "READ" in anonymous or "WRITE" in anonymous:
                                 self.create_finding(
                                     Vulnerability,
@@ -295,12 +272,13 @@ class Nmap(BaseParser):
                     self._parse_nse_vulners(script, technology, port)
 
     def _parse_nse_vulners(self, script: Any, technology: Technology | None, port: Port | None = None) -> None:
-        """Extract CVE references from NSE vulners script output.
+        """Create one vulnerability per CVE found in the output of an NSE script.
 
         Args:
-            script (Any): NSE script result containing vulnerability data
-            technology (Technology | None): Technology finding to associate vulnerabilities with
-            port (Port | None): Port used as a fallback link when no technology is available
+            script: Output of the script that reported the CVEs.
+            technology: Technology that the vulnerabilities were found in.
+            port: Port where the script was run, used to link the vulnerabilities
+              when no technology was identified in it.
         """
         cves = set()
         for cve in re.findall(Regex.CVE.value, script.get("output", "")):

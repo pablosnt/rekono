@@ -1,8 +1,4 @@
-"""Django admin configuration for alerts module.
-
-Registers the Alert model with Django admin interface for administrative
-management of alert configurations. Provides basic CRUD operations for alerts.
-"""
+"""Registration of the alert model in the Django admin site."""
 
 from django.contrib import admin
 

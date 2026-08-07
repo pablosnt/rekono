@@ -15,23 +15,23 @@ from rest_framework.views import exception_handler
 
 
 def handler(exc: Exception, context: dict[str, Any]) -> Response:
-    """Custom exception handler for Django REST framework.
+    """Handle the exceptions raised during the API requests.
 
-    Provides user-friendly error messages for database integrity violations
-    and falls back to the default DRF exception handler for other exceptions.
+    Database integrity violations are reported as a validation error, since they
+    usually mean that the object already exists, and the rest of the exceptions are
+    delegated to the default DRF handler. Both Django's wrapped IntegrityError and
+    psycopg's UniqueViolation are checked defensively, so a unique constraint
+    violation is caught whether it arrives wrapped (the normal case for all database
+    access through Django) or as the underlying driver exception.
 
     Args:
-        exc (Exception): The exception that was raised.
-        context (dict[str, Any]): Context information about the request.
+        exc: Exception raised while the request was being processed.
+        context: View, request, and arguments where the exception was raised, as
+          provided by DRF.
 
     Returns:
-        Response: HTTP response with appropriate error message and status code.
-
-    Note:
-        Both Django's wrapped IntegrityError and psycopg's UniqueViolation
-        are checked defensively, so a unique constraint violation is caught
-        whether it arrives wrapped (the normal case for all database access
-        through Django) or as the underlying driver exception.
+        The response to send to the client, or None when the default DRF handler
+        doesn't know the exception and it must be reported as a server error.
     """
     if exc.__class__ in [UniqueViolation, IntegrityError]:
         response = Response({"constraint": ["This object already exists"]}, status=HTTP_400_BAD_REQUEST)

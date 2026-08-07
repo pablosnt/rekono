@@ -1,8 +1,4 @@
-"""Django REST framework views for project management.
-
-Provides REST API views for project CRUD operations with team member management,
-access control enforcement, and automated alert subscription handling.
-"""
+"""Endpoints to manage the projects and their members."""
 
 from django.db.models import Count, Q
 from rest_framework import status
@@ -25,21 +21,17 @@ from users.models import User
 
 
 class ProjectViewSet(BaseViewSet):
-    """ViewSet for Project model operations with team member management.
-
-    Provides REST API endpoints for project CRUD operations plus custom actions
-    for team member management with automated alert subscription handling.
-
-    Custom Actions:
-        members: Add/remove team members with automated alert subscription management
+    """Manage the projects and the users that are members of them.
 
     Attributes:
-        queryset (QuerySet): Project model instances
-        serializer_class (Serializer): Serializer for Project model
-        filterset_class (FilterSet): Filter class for query filtering
-        permission_classes (list): Required permissions for access control
-        search_fields (list): Fields available for text search
-        ordering_fields (list): Fields available for result ordering
+        queryset: All the projects, restricted to the ones of the user by the base
+          viewset.
+        serializer_class: Serializer of the projects.
+        filterset_class: Filters available to search projects.
+        permission_classes: Role permissions plus the membership in the project.
+        search_fields: Fields used by the text search, including the targets, so a
+          project can be found by what it scans.
+        ordering_fields: Fields that can be used to order the results.
     """
 
     queryset = Project.objects.all()
@@ -51,30 +43,29 @@ class ProjectViewSet(BaseViewSet):
 
     @action(detail=True, methods=["POST", "DELETE"], url_path="members/(?P<member_id>[0-9]+)")
     def members(self, request: Request, member_id: str, pk: str) -> Response:
-        """Manage project team member membership with automated alert subscriptions.
+        """Add a member to the project with POST, or remove them with DELETE.
 
-        Handles adding and removing team members from projects with automatic
-        management of alert subscriptions based on project alert configurations.
-
-        POST: Add user to project members and subscribe to relevant alerts
-        DELETE: Remove user from project members and unsubscribe from all project alerts
+        The alert subscriptions follow the membership, so a new member is subscribed
+        to the alerts that subscribe all the members, and a removed one stops
+        receiving all the alerts of the project.
 
         Args:
-            request (Request): The HTTP request object
-            member_id (str): User ID of the member to add/remove
-            pk (str): Primary key of the project
+            request: Request whose method decides whether the member is added or
+              removed.
+            member_id: Identifier of the user, taken from the URL.
+            pk: Identifier of the project, taken from the URL.
 
         Returns:
-            Response: HTTP 204 on success, HTTP 400 if trying to remove project owner
+            An empty response, or a validation error when the member to remove is
+            the owner of the project, who can never be removed.
 
         Raises:
-            Http404: If user or project member not found
+            Http404: If the user doesn't exist or isn't a member of the project.
         """
         project = self.get_object()
         if request.method == "POST":
             member = get_object_or_404(User.objects.all(), pk=member_id, is_active=True)
             project.members.add(member)
-            # Subscribe the new member to the default alerts
             for alert in project.alerts.filter(subscribe_all_members=True, enabled=True).all():
                 alert.subscribers.add(member)
         else:
@@ -82,23 +73,19 @@ class ProjectViewSet(BaseViewSet):
             if member.id == project.owner.id:
                 return Response({"user": ["The project owner can't be removed"]}, status=status.HTTP_400_BAD_REQUEST)
             project.members.remove(member)
-            # Unsubscribe the removed member from the project alerts
             for alert in project.alerts.filter(subscribers=member).all():
                 alert.subscribers.remove(member)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class TopProjectsViewSet(LatestViewSet):
-    """ViewSet for retrieving top project statistics by activity.
-
-    Provides projects ranked by security findings and activity metrics,
-    annotated with counts of targets, tasks, hosts, and vulnerabilities.
+    """Read the projects with the most security activity.
 
     Attributes:
-        queryset (QuerySet): Projects annotated with target, task, host, and vulnerability counts
-        ordering (list): Prioritizes projects with most vulnerabilities and activity
-        serializer_class (Serializer): Serializer for Project model
-        filterset_class (FilterSet): Filter class for query filtering
+        queryset: Projects annotated with the counters that rank them.
+        ordering: Vulnerabilities first, and the rest of the counters as tiebreakers.
+        serializer_class: Serializer of the projects.
+        filterset_class: Filters available to search projects.
     """
 
     queryset = (

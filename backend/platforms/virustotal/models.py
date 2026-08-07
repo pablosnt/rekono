@@ -1,9 +1,10 @@
-"""Django models for VirusTotal platform configuration and settings.
+"""Model of the VirusTotal configuration.
 
-This module defines the data models for VirusTotal integration configuration,
-providing secure storage for API credentials and platform settings. The models
-support encrypted field storage to protect sensitive API tokens and maintain
-compliance with security best practices.
+Typical usage example:
+
+  settings = VirusTotalSettings.objects.first()
+  settings.secret = "..."  # encrypted into _api_token on save
+  settings.save()
 """
 
 from django.db import models
@@ -13,30 +14,12 @@ from security.validators.input_validator import Regex, Validator
 
 
 class VirusTotalSettings(BaseEncrypted):
-    """Model for storing VirusTotal platform configuration and API credentials.
-
-    Manages secure storage of VirusTotal API authentication tokens and platform
-    configuration settings. Uses field-level encryption to protect sensitive
-    API credentials and follows singleton pattern for global platform settings.
+    """Configuration of VirusTotal, of which only one instance exists.
 
     Attributes:
-        _api_token (TextField): Encrypted VirusTotal API token for authentication (max 64 chars)
-        _encrypted_field (str): Field name for encryption configuration
-        is_available (BooleanField): Cached platform availability status (default False),
-            refreshed only when the settings are saved through VirusTotalSettingsSerializer.update
-
-    Example:
-        Configure VirusTotal API credentials:
-
-        ```python
-        settings = VirusTotalSettings.objects.first()
-        settings.secret = "your_virustotal_api_token_here"
-        settings.save()
-        ```
-
-    Note:
-        This model follows a singleton pattern - only one instance should exist
-        to maintain global platform configuration consistency.
+        is_available: Whether the platform answered the last time that the API
+          token was saved, which is when it's checked, since asking VirusTotal on
+          every finding would waste the requests that the token allows.
     """
 
     _api_token = models.TextField(
@@ -51,9 +34,5 @@ class VirusTotalSettings(BaseEncrypted):
     _encrypted_field = "_api_token"
 
     def __str__(self) -> str:
-        """Return string representation of VirusTotal settings.
-
-        Returns:
-            str: Platform name identifier for display purposes.
-        """
+        """Return the name of the platform."""
         return "Virus Total"

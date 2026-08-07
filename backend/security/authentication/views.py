@@ -1,8 +1,8 @@
-"""Django REST framework views for authentication endpoints.
+"""Endpoints that authenticate the users and manage their JWT tokens.
 
-Provides REST API endpoints for user authentication including login, multi-factor
-authentication, and token management. These views implement secure authentication
-workflows with rate limiting and comprehensive audit logging.
+All of them accept the tokens in the request body, as the standard simplejwt views
+do, and also in the cookies where the frontend keeps them, so the browsers complete
+the flows without the frontend having to read any token.
 """
 
 from typing import Any
@@ -21,38 +21,30 @@ from security.authorization.permissions import IsNotAuthenticated
 
 
 class LoginView(TokenObtainPairView):
-    """JWT token authentication view with MFA support.
-
-    Handles primary user authentication using username/password credentials.
-    On success, sets ``httponly`` cookies for the access and refresh tokens so
-    browsers carry them automatically on subsequent requests. For MFA-enabled
-    accounts a temporary MFA token cookie is set instead, scoped to the MFA
-    endpoint path. Implements rate limiting to prevent brute force attacks.
+    """Authenticate a user with their username and password.
 
     Attributes:
-        permission_classes (list): Restricts access to unauthenticated users only.
-        throttle_scope (str): Rate limiting scope for login attempts.
+        permission_classes: Only the anonymous users can log in.
+        throttle_scope: Rate limit that makes brute force attacks unfeasible.
     """
 
     permission_classes = [IsNotAuthenticated]
     throttle_scope = "login"
 
     def post(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        """Authenticate and set auth cookies on success.
+        """Log a user in and save their tokens in ``httponly`` cookies.
 
-        Delegates to the parent serializer chain. On HTTP 200 the response
-        tokens are written into ``httponly`` cookies: access and refresh tokens
-        for standard logins, or an MFA token restricted to ``/api/security/mfa/``
-        for accounts with MFA enabled.
+        Users with MFA enabled get the temporary MFA token instead, in a cookie
+        scoped to the MFA endpoint, so it can't be sent to any other one.
 
         Args:
-            request (Request): HTTP request with ``username`` and ``password``.
-            *args (Any): Additional positional arguments.
-            **kwargs (Any): Additional keyword arguments.
+            request: Request with the username and the password.
+            *args: Standard view arguments.
+            **kwargs: Standard view arguments.
 
         Returns:
-            Response: HTTP 200 with token payload and auth cookies, or the
-                upstream error response on failure.
+            The tokens, which are also saved in the cookies, so the frontend never
+            has to read them.
         """
         response = super().post(request, *args, **kwargs)
         if response.status_code == status.HTTP_200_OK:
@@ -75,37 +67,30 @@ class LoginView(TokenObtainPairView):
 
 
 class MfaLoginView(LoginView):
-    """Multi-factor authentication completion view.
-
-    Completes the MFA challenge by validating TOTP codes and issuing full JWT
-    access tokens. Accepts the MFA token either from the request body or from
-    the ``rekono_mfa`` cookie set by ``LoginView``, so the browser can complete
-    the flow without the frontend explicitly forwarding the token. Requires a
-    valid MFA token from the initial login step.
+    """Complete a login with the MFA code of the user.
 
     Attributes:
-        serializer_class (Serializer): MfaLoginSerializer for MFA validation.
-        throttle_scope (str): Rate limiting scope for MFA attempts.
+        serializer_class: Validates the MFA code against the MFA token.
+        throttle_scope: Rate limit that protects the six digits of the code from
+          being brute forced.
     """
 
     serializer_class = MfaLoginSerializer
     throttle_scope = "mfa"
 
     def post(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        """Complete MFA login, reading the MFA token from cookie when absent from body.
+        """Verify the MFA code and issue the access and refresh tokens.
 
-        If the ``token`` field is not present in the request body, the value is
-        read from the ``rekono_mfa`` cookie. On success the MFA cookie is deleted
-        and full access and refresh cookies are set via the parent ``LoginView``.
+        The MFA token is read from the cookie when the request body doesn't include
+        it, and its cookie is removed once the login is complete.
 
         Args:
-            request (Request): HTTP request with ``mfa`` code and optionally ``token``.
-            *args (Any): Additional positional arguments.
-            **kwargs (Any): Additional keyword arguments.
+            request: Request with the MFA code, and optionally the MFA token.
+            *args: Standard view arguments.
+            **kwargs: Standard view arguments.
 
         Returns:
-            Response: HTTP 200 with access token payload and auth cookies on
-                success, or the upstream error response on failure.
+            The access and refresh tokens, which are also saved in the cookies.
         """
         if not request.data.get("token"):
             cookie = request.COOKIES.get(JWT_MFA_COOKIE)
@@ -118,15 +103,12 @@ class MfaLoginView(LoginView):
 
 
 class SendEmailMfaView(GenericAPIView):
-    """Email-based one-time password delivery view.
-
-    Sends time-limited OTP codes via email for MFA-enabled users who cannot
-    access their TOTP device. Provides secure account recovery mechanism for
-    MFA-protected accounts.
+    """Send the MFA code by email to the users without their device.
 
     Attributes:
-        permission_classes (list): No authentication required for account recovery.
-        throttle_scope (str): Rate limiting scope for MFA email requests.
+        permission_classes: None, since the user is in the middle of a login and
+          isn't authenticated yet.
+        throttle_scope: Same rate limit as the MFA login.
     """
 
     permission_classes = []
@@ -134,24 +116,22 @@ class SendEmailMfaView(GenericAPIView):
 
     @extend_schema(request=SendMfaEmailSerializer, responses={204: None})
     def post(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        """Send OTP code via email for MFA completion.
-
-        Generates and sends a time-limited OTP code to the user's registered
-        email address for MFA completion when TOTP devices are unavailable.
+        """Send a one-time password to the email address of the user.
 
         Args:
-            request (Request): HTTP request with user identification.
-            *args (Any): Additional positional arguments.
-            **kwargs (Any): Additional keyword arguments.
+            request: Request with the MFA token, which can also come from the
+              ``rekono_mfa`` cookie, or an authenticated request without it.
+            *args: Standard view arguments.
+            **kwargs: Standard view arguments.
 
         Returns:
-            Response: HTTP 204 on successful OTP delivery.
+            An empty 204 response, since the code is only sent by email.
 
         Raises:
             AuthenticationFailed: If the MFA token from the request body or the
-                ``rekono_mfa`` cookie is invalid, expired, or blacklisted.
+              ``rekono_mfa`` cookie is invalid, expired, or blacklisted.
             ValidationError: If no token is provided for an unauthenticated request,
-                or if MFA is not enabled for the resolved user.
+              or if MFA is not enabled for the resolved user.
         """
         if not request.data.get("token"):
             cookie = request.COOKIES.get(JWT_MFA_COOKIE)
@@ -164,28 +144,23 @@ class SendEmailMfaView(GenericAPIView):
 
 
 class LogoutView(TokenBlacklistView):
-    """JWT logout view that blacklists the refresh token and clears auth cookies.
-
-    Accepts the refresh token from the request body or from the cookie named
-    ``settings.JWT_REFRESH_COOKIE``. On success, both the access and refresh
-    cookies are cleared from the client.
-    """
+    """End a session by blacklisting its refresh token."""
 
     def post(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        """Blacklist the refresh token and delete auth cookies.
+        """Blacklist the refresh token and delete the authentication cookies.
 
-        If the ``refresh`` field is absent from the request body, the value is
-        read from the ``rekono_refresh`` cookie. On a successful blacklist both
-        ``rekono_access`` and ``rekono_refresh`` cookies are deleted.
+        The refresh token is read from the cookie when the request body doesn't
+        include it.
 
         Args:
-            request (Request): HTTP request optionally carrying a refresh token
-                in the body or in the ``rekono_refresh`` cookie.
-            *args (Any): Additional positional arguments.
-            **kwargs (Any): Additional keyword arguments.
+            request: Request with the refresh token, which can also come from the
+              ``rekono_refresh`` cookie.
+            *args: Standard view arguments.
+            **kwargs: Standard view arguments.
 
         Returns:
-            Response: HTTP 200 on success with both auth cookies cleared.
+            The response of the blacklist view, with the authentication cookies
+            already removed.
         """
         if not request.data.get("refresh"):
             cookie = request.COOKIES.get(JWT_REFRESH_COOKIE)
@@ -198,34 +173,29 @@ class LogoutView(TokenBlacklistView):
 
 
 class RefreshTokenViewSet(TokenRefreshView):
-    """JWT refresh token endpoint for token renewal.
-
-    Provides secure token refresh functionality to obtain new access tokens
-    using valid refresh tokens. Implements rate limiting and automatic
-    token rotation for enhanced security.
+    """Renew the access token of a session.
 
     Attributes:
-        throttle_scope (str): Rate limiting scope for token refresh requests.
+        throttle_scope: Rate limit applied to the renewals, independent from the
+          one of the logins.
     """
 
     throttle_scope = "refresh"
 
     def post(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        """Refresh JWT tokens, accepting the refresh token from cookie or body.
+        """Get a new pair of tokens and save them in the cookies.
 
-        If the ``refresh`` field is absent from the request body, the value is
-        read from the cookie named ``settings.JWT_REFRESH_COOKIE``. When
-        both are absent, the serializer validation fails with the standard 400
-        response. The body takes precedence when both are present.
+        The refresh token is read from the cookie when the request body doesn't
+        include it, so the body takes precedence when both are present.
 
         Args:
-            request (Request): HTTP request optionally carrying a refresh token
-                in the body or in the ``rekono_refresh`` cookie.
-            *args (Any): Additional positional arguments.
-            **kwargs (Any): Additional keyword arguments.
+            request: Request with the refresh token, which can also come from the
+              ``rekono_refresh`` cookie.
+            *args: Standard view arguments.
+            **kwargs: Standard view arguments.
 
         Returns:
-            Response: HTTP 200 with new ``access`` and ``refresh`` token pair.
+            The new tokens, which are also saved in the cookies.
 
         Raises:
             InvalidToken: If the refresh token is invalid or blacklisted.

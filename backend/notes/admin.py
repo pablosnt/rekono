@@ -1,8 +1,4 @@
-"""Django admin configuration for notes module.
-
-Registers Note model with Django admin interface for administrative
-management of notes and collaborative documentation.
-"""
+"""Registration of the note model in the Django admin site."""
 
 from django.contrib import admin
 

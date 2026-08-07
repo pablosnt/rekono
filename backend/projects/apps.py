@@ -1,8 +1,4 @@
-"""Django app configuration for the projects module.
-
-Configures the projects Django application with BaseApp integration
-for consistent framework behavior.
-"""
+"""Django app configuration of the projects app."""
 
 from django.apps import AppConfig
 
@@ -10,13 +6,10 @@ from framework.apps import BaseApp
 
 
 class ProjectsConfig(BaseApp, AppConfig):
-    """Configuration class for the projects Django application.
-
-    Extends BaseApp to provide standard framework integration for the
-    projects module with consistent configuration and behavior.
+    """Configuration of the projects app.
 
     Attributes:
-        name (str): The name of the Django application
+        name: Name of the app in the Django app registry.
     """
 
     name = "projects"

@@ -1,7 +1,10 @@
-"""Models for Telegram Bot integration with encrypted settings and chat management.
+"""Models of the Telegram configuration and of the linked chats.
 
-Defines data models for Telegram Bot configuration, user chat relationships,
-and secure account linking with One-Time Password verification.
+Typical usage example:
+
+  settings = TelegramSettings.objects.first()
+  settings.secret = "..."  # encrypted into _token on save
+  settings.save()
 """
 
 from django.db import models
@@ -14,26 +17,7 @@ from security.validators.input_validator import FutureDatetimeValidator, Regex, 
 
 
 class TelegramSettings(BaseEncrypted):
-    """Model for storing encrypted Telegram Bot configuration settings.
-
-    Represents the global Telegram Bot settings including the encrypted API token
-    required for bot authentication with the Telegram Bot API. Fixture-seeded as a
-    single settings row and read via `.first()` throughout the codebase.
-
-    Attributes:
-        _token (TextField): Encrypted Telegram Bot API token (max 200 chars), stored under
-            the 'token' database column.
-        _encrypted_field (str): Field name that contains encrypted data.
-
-    Example:
-        Configure the Telegram Bot token:
-
-        ```python
-        settings = TelegramSettings.objects.first()
-        settings.secret = "1234567890:ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-        settings.save()
-        ```
-    """
+    """Configuration of the Telegram bot, of which only one instance exists."""
 
     _token = models.TextField(
         max_length=200, validators=[Validator(Regex.SECRET, code="api_token")], null=True, blank=True, db_column="token"
@@ -43,29 +27,17 @@ class TelegramSettings(BaseEncrypted):
 
 
 class TelegramChat(BaseModel):
-    """Model representing a Telegram chat linked to a Rekono user account.
+    """Telegram chat that the bot talks to.
 
-    Manages the relationship between Telegram chats and Rekono user accounts,
-    including secure account linking through One-Time Passwords (OTP) with
-    expiration handling and role-based access control.
+    A chat is created the first time that somebody writes to the bot, and it can
+    only be used once it's linked to a Rekono account.
 
     Attributes:
-        user (OneToOneField): The linked Rekono user account (optional).
-        chat_id (IntegerField): Unique Telegram chat identifier.
-        creation (DateTimeField): Timestamp when the chat was first created.
-        otp (TextField): One-Time Password for account linking (max 200 chars, optional).
-        otp_expiration (DateTimeField): OTP expiration timestamp with future validation.
-
-    Example:
-        Create a new Telegram chat for account linking:
-
-        ```python
-        chat = TelegramChat.objects.create(
-            chat_id=123456789,
-            otp="ABC123",
-            otp_expiration=datetime.now() + timedelta(minutes=10)
-        )
-        ```
+        user: Rekono account that the chat is linked to.
+        chat_id: Identifier that the chat has in Telegram.
+        creation: Date when the chat wrote to the bot for the first time.
+        otp: Code that the users need to link the chat to their account.
+        otp_expiration: Date when that code stops being valid.
     """
 
     user = models.OneToOneField(
@@ -77,7 +49,6 @@ class TelegramChat(BaseModel):
     )
     chat_id = models.IntegerField(unique=True)
     creation = models.DateTimeField(auto_now_add=True)
-    # One Time Password to link user account
     otp = models.TextField(max_length=200, blank=True, null=True)
     otp_expiration = models.DateTimeField(
         blank=True,
@@ -86,11 +57,11 @@ class TelegramChat(BaseModel):
     )
 
     def is_auditor(self) -> bool:
-        """Check if the linked user has auditor or admin permissions.
+        """Check if the user of the chat can do more than read the data.
 
         Returns:
-            bool: True if the user has AUDITOR or ADMIN role, False otherwise.
-                 Returns False if no user is linked to this chat.
+            Whether the user has the Auditor or the Admin role. False for a chat
+            that isn't linked to any account yet.
         """
         return (
             self.user.groups.filter(Q(name=str(Role.AUDITOR)) | Q(name=str(Role.ADMIN))).exists()
@@ -99,9 +70,5 @@ class TelegramChat(BaseModel):
         )
 
     def __str__(self) -> str:
-        """Return string representation of the Telegram chat.
-
-        Returns:
-            str: Formatted string with user and chat ID information.
-        """
+        """Return the user of the chat and the chat identifier."""
         return f"{self.user.__str__()} - {self.chat_id}"

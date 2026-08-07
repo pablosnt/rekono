@@ -1,9 +1,4 @@
-"""ENISA European Vulnerability Database (EUVD) integration.
-
-Provides integration with the ENISA EUVD for automated vulnerability enrichment,
-CVSS scoring, EPSS data, and affected product information gathered from the
-European vulnerability intelligence platform.
-"""
+"""Integration with the European Vulnerability Database of ENISA."""
 
 from typing import Any
 
@@ -11,38 +6,26 @@ from framework.platforms import BaseCveProvider
 
 
 class EUVD(BaseCveProvider):
-    """Integration class for the ENISA European Vulnerability Database.
-
-    Provides automated vulnerability enrichment by querying the EUVD API
-    for CVE details, CVSS scores, EPSS probability scores, and affected
-    product identifiers from the ENISA vulnerability intelligence platform.
-
-    Processing Features:
-        - CVE lookup by identifier, matched against each result's aliases field
-        - CVSS base score, vector, and version extraction
-        - EPSS probability score extraction
-        - Affected product identifier extraction from enisaIdProduct entries
-        - EUVD identifier capture for storage as an alternate finding identifier
+    """CVE provider that completes the vulnerabilities with the EUVD data.
 
     Attributes:
-        url (str): EUVD search API endpoint URL template for CVE queries.
-        reference (str): EUVD vulnerability detail page URL template.
+        url: Endpoint that searches vulnerabilities by their identifier.
+        reference: Page of a vulnerability, which the findings link to.
     """
 
     url = "https://euvdservices.enisa.europa.eu/api/search?text={cve}"
     reference = "https://euvd.enisa.europa.eu/vulnerability/{euvd}"
 
     def _get_cve(self, cve: str) -> dict[str, Any]:
-        """Retrieve CVE information from the EUVD API.
-
-        Searches the EUVD by CVE identifier and returns the matching entry
-        by comparing the CVE against the aliases field of each result.
+        """Get the data that EUVD has about a CVE.
 
         Args:
-            cve (str): CVE identifier to retrieve information for.
+            cve: CVE identifier to search for.
 
         Returns:
-            dict[str, Any]: Matching EUVD vulnerability record, or empty dict if not found.
+            The vulnerability whose aliases include the CVE, or an empty dict if
+            EUVD doesn't know it, since the search returns everything that matches
+            the text instead of only the requested CVE.
         """
         response = self._request(self.session.get, self.url.format(cve=cve))
         for item in response.get("items") or []:
@@ -51,14 +34,15 @@ class EUVD(BaseCveProvider):
         return {}
 
     def _parse_cve(self, cve: str, data: list[dict[str, Any]] | dict[str, Any]) -> BaseCveProvider.CveEnrichment | None:
-        """Parse EUVD API response into a standardized CVE enrichment object.
+        """Get the CVE data that Rekono uses from what EUVD reports.
 
         Args:
-            cve (str): CVE identifier being parsed.
-            data (list[dict[str, Any]] | dict[str, Any]): EUVD vulnerability record.
+            cve: CVE identifier that was searched for.
+            data: Vulnerability that EUVD reported.
 
         Returns:
-            BaseCveProvider.CveEnrichment | None: Parsed enrichment data, or None if invalid.
+            The data to complete the vulnerability with, or None if EUVD didn't
+            report anything about the CVE.
         """
         if isinstance(data, list) or not data:
             return

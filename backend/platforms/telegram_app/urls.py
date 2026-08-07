@@ -1,8 +1,4 @@
-"""URL configuration for Telegram Bot REST API endpoints.
-
-Defines URL routes for Telegram Bot settings management and chat linking
-operations through Django REST framework ViewSets.
-"""
+"""URLs of the Telegram endpoints."""
 
 from rest_framework.routers import SimpleRouter
 

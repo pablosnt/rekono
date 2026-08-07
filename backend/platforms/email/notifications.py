@@ -1,9 +1,4 @@
-"""Email notification implementation using SMTP protocol.
-
-Provides comprehensive email notification functionality for Rekono's security testing
-platform. Handles all email-based notifications including security findings, alerts,
-user management events, and system notifications through secure SMTP connections.
-"""
+"""Notifications that Rekono sends by email."""
 
 import os
 import threading
@@ -27,30 +22,16 @@ from tasks.models import Task
 
 
 class SMTP(BaseNotification):
-    """SMTP-based email notification system for Rekono platform.
+    """Notifications sent by email to the users that want to receive them.
 
-    Implements comprehensive email notification functionality using SMTP protocol
-    for delivering security findings, alerts, user management notifications, and
-    system events. Provides secure email delivery with TLS support and HTML
-    template-based formatting.
-
-    Security Features:
-        - Secure SMTP connections with TLS encryption
-        - Certificate validation using trusted certificate authorities
-        - Encrypted credential storage and secure connection management
-
-    Notification Categories:
-        - Security findings and execution completion notifications
-        - Alert notifications for new discoveries and trending threats
-        - User account management (invitations, password resets, MFA)
-        - System notifications and report generation alerts
+    The account emails, like the invitations and the verification codes, are sent
+    to everybody, since they are needed to use Rekono at all.
 
     Attributes:
-        enable_field (str): User preference field for email notification control
-        datetime_format (str): Standard datetime format for email content
-        findings_summary_threshold (int): Finding count above which an execution
-                                          notification switches from detailed
-                                          finding lists to per-type counts
+        enable_field: Field where the users say if they want to be notified.
+        datetime_format: Format that the dates are written in.
+        findings_summary_threshold: Findings that an execution can report before
+          its notification only includes how many of each type were found.
     """
 
     enable_field = "email_notifications"
@@ -60,24 +41,14 @@ class SMTP(BaseNotification):
 
     @property
     def settings(self) -> SMTPSettings:
-        """Get SMTP server configuration settings from database.
-
-        Returns:
-            SMTPSettings: SMTP configuration instance or None if not configured.
-        """
+        """The SMTP configuration, or None if it hasn't been created yet."""
         return SMTPSettings.objects.first()
 
     @cached_property
     def backend(self) -> EmailBackend:
-        """Build the SMTP email backend from the stored configuration.
+        """The client that sends the emails, or None if SMTP isn't configured.
 
-        Configures Django's EmailBackend with the host, port, credentials, TLS flag,
-        and a 5 second connection timeout read from SMTPSettings. The connection itself
-        is only opened later, when a message is sent or when is_available tests it.
-
-        Returns:
-            EmailBackend: Configured SMTP backend instance, or None if SMTP is not
-                          configured at all (SMTPSettings.objects.first() is None).
+        The connection with the server is only opened when an email is sent.
         """
         return (
             EmailBackend(
@@ -93,27 +64,18 @@ class SMTP(BaseNotification):
         )
 
     def __init__(self) -> None:
-        """Initialize SMTP notification system with secure certificate configuration.
-
-        Sets up the SMTP notification system with trusted SSL certificate validation
-        using the certifi package to ensure secure connections to SMTP servers.
-        """
+        """Prepare the platform, trusting the certificate authorities of certifi."""
         super().__init__()
         # Without this, SMTP TLS handshakes fail on systems that lack a system CA bundle
         os.environ["SSL_CERT_FILE"] = certifi.where()
 
     def is_available(self) -> bool:
-        """Check if SMTP email service is available and properly configured.
-
-        Requires a stored SMTPSettings row with both a host and a port before attempting
-        anything else. Availability is always False while CONFIG.testing is set, so unit
-        and integration tests never open a real SMTP connection. Otherwise, it opens and
-        immediately closes a connection to the configured mail server to confirm it is
-        reachable and the credentials are accepted.
+        """Check if the platform can be used.
 
         Returns:
-            bool: True if SMTP is configured and the mail server accepted the
-                  connection, False otherwise.
+            Whether a server is configured and it accepts a connection with the
+            configured credentials. It's always false during the tests, so they
+            never reach a real mail server.
         """
         # Host and port are required for EmailBackend to attempt a connection at all, and
         # CONFIG.testing keeps tests from reaching out to a real mail server
@@ -129,28 +91,24 @@ class SMTP(BaseNotification):
     def _send_messages(
         self, users: list[Any] | list[str], subject: str, template_path: str, data: dict[str, Any]
     ) -> None:
-        """Render an HTML template and send it as an email to the given recipients.
+        """Send an email to the given recipients.
 
-        Accepts either user objects or raw email address strings, since some notifications
-        (email address verification) target a pending address with no user lookup of its
-        own. Recipients are placed in BCC when there is more than one, so they can't see
-        each other's addresses; a single recipient is addressed directly instead. Does
-        nothing if SMTP is unavailable or no users were given, and logs rather than raises
-        if rendering or sending the message fails.
+        A failure is logged instead of being propagated, so an email that can't be
+        sent doesn't stop whatever was being done when it was sent.
 
         Args:
-            users (list[Any] | list[str]): User objects with an email attribute, or raw
-                                           email address strings.
-            subject (str): Email subject line.
-            template_path (str): Filename of the HTML template to render.
-            data (dict[str, Any]): Template context data for rendering.
+            users: Users to notify, or their email addresses, since the address
+              verification is sent to an address that no user has yet.
+            subject: Subject of the email.
+            template_path: Template that the email content is built from.
+            data: Data that the template needs.
         """
         if not self.is_available() or len(users) == 0:
             return
         # Callers may pass plain email addresses instead of user objects (see verify_email)
         if not isinstance(users[0], str):
             users = [u.email for u in users]
-        sender = "Rekono <noreply@rekono.com>"
+        sender = "Rekono <noreply@rekono.dev>"
         try:
             # Recipients in BCC not to leak their emails to other recipients
             message = EmailMultiAlternatives(
@@ -170,18 +128,15 @@ class SMTP(BaseNotification):
     def _notify(
         self, users: list[Any], subject: str, template: str, data: dict[str, Any], background: bool = True
     ) -> None:
-        """Send notification emails to users with optional background processing.
-
-        Core notification method that handles email delivery with support for
-        background processing to avoid blocking operations. Delegates to
-        _send_messages for actual email transmission.
+        """Send a notification by email.
 
         Args:
-            users (list[Any]): List of user objects to notify
-            subject (str): Email subject line
-            template (str): HTML template filename for email content
-            data (dict[str, Any]): Template context data for rendering
-            background (bool): Whether to send emails in background thread (default True)
+            users: Users to notify.
+            subject: Subject of the email.
+            template: Template that the email content is built from.
+            data: Data that the template needs.
+            background: Whether the email must be sent in a thread, which isn't
+              needed when the caller is already running in the background.
         """
         if background:
             threading.Thread(target=self._send_messages, args=(users, subject, template, data)).start()
@@ -189,17 +144,16 @@ class SMTP(BaseNotification):
             self._send_messages(users, subject, template, data)
 
     def _notify_execution(self, users: list[Any], execution: Execution, findings: list[Finding]) -> None:
-        """Send an execution completion notification summarizing its findings.
+        """Notify the users that an execution finished, with what it discovered.
 
-        Groups findings by class name, skipping any created from user input rather than
-        discovered by the tool itself. When the total exceeds findings_summary_threshold,
-        the template receives a per-type count instead of the full finding lists, keeping
-        the email a reasonable size for executions with very large result sets.
+        The findings are grouped by type, and an execution that discovered too many
+        of them is notified with how many there are of each type instead, so the
+        email stays readable.
 
         Args:
-            users (list[Any]): Users to notify about the execution.
-            execution (Execution): The completed execution instance.
-            findings (list[Finding]): Findings discovered by the execution.
+            users: Users to notify.
+            execution: Execution that finished.
+            findings: Findings that the execution discovered.
         """
         findings_by_class: dict[Any, list[Finding]] = {}
         for finding in findings:
@@ -209,7 +163,6 @@ class SMTP(BaseNotification):
                 findings_by_class[finding.__class__.__name__] = []
             findings_by_class[finding.__class__.__name__].append(finding)
         total = sum(len(items) for items in findings_by_class.values())
-        # This is called from findings queue which is already asynchronous
         self._notify(
             users,
             f"{execution.configuration.tool.name} scan completed",
@@ -229,22 +182,19 @@ class SMTP(BaseNotification):
                     else {k.lower(): v for k, v in findings_by_class.items()}
                 ),
             },
+            # Already running in the findings queue, so a thread of its own would only
+            # detach the email from the job that must report its failure
             background=False,
         )
 
     def _notify_alert(self, users: list[Any], alert: Alert, finding: Finding) -> None:
-        """Send an alert notification for a finding that matched an alert rule.
-
-        The subject reads "<cve> is trending" for trending CVE alerts, or
-        "new <finding type> detected" for every other alert item, with "osint"
-        cased as "OSINT".
+        """Notify the users subscribed to an alert that it has been triggered.
 
         Args:
-            users (list[Any]): Users subscribed to the alert.
-            alert (Alert): The triggered alert configuration.
-            finding (Finding): The finding that triggered the alert.
+            users: Users to notify.
+            alert: Alert that was triggered.
+            finding: Finding that triggered the alert.
         """
-        # This is called from findings queue which is already asynchronous
         alert = (
             f"{finding.cve} is trending"
             if alert.item == AlertItem.TRENDING_CVE
@@ -255,41 +205,42 @@ class SMTP(BaseNotification):
             f"Alert triggered: {alert}",
             "alert_notification.html",
             {"alert": alert, "finding": finding, "finding_type": finding.__class__.__name__},
+            # Already running in the findings queue, so a thread of its own would only
+            # detach the email from the job that must report its failure
             background=False,
         )
 
     def invite_user(self, user: Any, otp: str) -> None:
-        """Send a welcome email with the one-time password needed to claim the account.
+        """Invite a user to Rekono, with the code that they need to claim the account.
 
         Args:
-            user (Any): The invited user.
-            otp (str): One-time password for account activation.
+            user: User that was invited.
+            otp: Code that the user needs to set their password.
         """
         self._notify_if_available(
             [user], "You have been invited to Rekono", "user_invitation.html", {"user": user, "user_otp": otp}
         )
 
     def reset_password(self, user: Any, otp: str) -> None:
-        """Send a password reset email with the one-time password needed to reset it.
+        """Send the code that a user needs to reset their password.
 
         Args:
-            user (Any): The user requesting the password reset.
-            otp (str): One-time password for the reset.
+            user: User that asked to reset their password.
+            otp: Code that the user needs to set the new password.
         """
         self._notify_if_available(
             [user], "Reset your password", "user_password_reset.html", {"user": user, "user_otp": otp}
         )
 
     def verify_email(self, user: Any, otp: str) -> None:
-        """Send an email verification message to a pending email address.
+        """Send the code that verifies the new email address of a user.
 
-        Delivers a verification link with a one-time password to the new address a user
-        wants to switch to. The message is sent to the pending address, not the current
-        one, so only someone with access to the new inbox can confirm the change.
+        The code is sent to the new address, so only somebody who can read it is
+        able to complete the change.
 
         Args:
-            user (Any): The user requesting the email change.
-            otp (str): One-time password for confirming the new email address.
+            user: User that asked to change their email address.
+            otp: Code that the user needs to confirm the new address.
         """
         self._notify_if_available(
             [user.pending_email],
@@ -299,14 +250,13 @@ class SMTP(BaseNotification):
         )
 
     def email_change_notification(self, user: Any) -> None:
-        """Send a security notice about a requested email change to the current address.
+        """Warn a user that their email address is being changed.
 
-        Warns the current email address that a change to a different address was
-        requested, so the user can react (for example by resetting their password) if
-        the request was not made by them.
+        The warning goes to the current address, so the user can react if it wasn't
+        them who asked for the change.
 
         Args:
-            user (Any): The user whose email change was requested.
+            user: User whose email address is being changed.
         """
         self._notify_if_available(
             [user],
@@ -316,30 +266,30 @@ class SMTP(BaseNotification):
         )
 
     def mfa(self, user: Any, otp: str) -> None:
-        """Send the one-time password used as the second factor during login.
+        """Send the code that a user needs to complete their login.
 
         Args:
-            user (Any): The user logging in.
-            otp (str): One-time password for multi-factor authentication.
+            user: User that is logging in.
+            otp: Code that the user needs as their second factor.
         """
         self._notify_if_available([user], "Your verification code", "user_mfa.html", {"user": user, "user_otp": otp})
 
     def enable_user_account(self, user: Any, otp: str) -> None:
-        """Send a re-enablement email with the one-time password needed to access the account again.
+        """Send the code that a user needs to use their account again.
 
         Args:
-            user (Any): The user whose account was enabled.
-            otp (str): One-time password for account activation.
+            user: User whose account was enabled again.
+            otp: Code that the user needs to set their password.
         """
         self._notify_if_available(
             [user], "Welcome back to Rekono", "user_enable_account.html", {"user": user, "user_otp": otp}
         )
 
     def login_notification(self, user: Any) -> None:
-        """Send a security notice about a new sign-in to the account, with a timestamp.
+        """Warn a user that somebody logged into their account.
 
         Args:
-            user (Any): The user who signed in.
+            user: User that logged in.
         """
         self._notify_if_available(
             [user],
@@ -349,10 +299,10 @@ class SMTP(BaseNotification):
         )
 
     def telegram_linked_notification(self, user: Any) -> None:
-        """Send a confirmation email that the account was linked to a Telegram chat, with a timestamp.
+        """Warn a user that their account was linked to a Telegram chat.
 
         Args:
-            user (Any): The user who linked their Telegram account.
+            user: User that linked their account.
         """
         self._notify_if_available(
             [user],
@@ -362,14 +312,13 @@ class SMTP(BaseNotification):
         )
 
     def report_created(self, report: Any) -> None:
-        """Send a notification that a requested report has finished generating.
+        """Notify a user that the report that they asked for is ready.
 
-        Uses _notify_if_enabled rather than _notify_if_available, so unlike the account
-        and security emails above, this respects the recipient's email notification
-        preference and is skipped for users who disabled it.
+        This is the only email of this platform that isn't about the account, so
+        it's the only one that the users can choose not to receive.
 
         Args:
-            report (Any): The generated report, providing format and owning user.
+            report: Report that was generated.
         """
         self._notify_if_enabled(
             [report.user], f"Your {report.format.upper()} report is ready", "report_created.html", {"report": report}

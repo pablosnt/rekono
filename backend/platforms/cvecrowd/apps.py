@@ -1,8 +1,4 @@
-"""Django application configuration for CVE Crowd platform integration.
-
-Provides application configuration for the CVE Crowd module with fixture
-management and model registration for threat intelligence integration.
-"""
+"""Django app configuration of the CVE Crowd app."""
 
 from typing import Any
 
@@ -12,27 +8,23 @@ from framework.apps import BaseApp
 
 
 class CvecrowdConfig(BaseApp, AppConfig):
-    """Django application configuration for the CVE Crowd platform module.
-
-    Configures the CVE Crowd application with fixture management and
-    model registration for threat intelligence platform integration.
+    """Configuration of the CVE Crowd app.
 
     Attributes:
-        name (str): Application name for Django registration
-        skip_fixtures_if_model_exists (bool): Skip fixture loading if models exist
+        name: Name of the app in the Django app registry.
+        skip_fixtures_if_model_exists: The settings are only created once, so the
+          configuration of a deployment is never overwritten.
     """
 
     name = "platforms.cvecrowd"
     skip_fixtures_if_model_exists = True
 
     def _get_models(self) -> list[Any]:
-        """Get the model classes for this application.
-
-        Returns the CveCrowdSettings model for fixture loading and application
-        initialization processes.
+        """Get the CVE Crowd settings model, whose data comes from the fixtures.
 
         Returns:
-            list[Any]: List containing CveCrowdSettings model class.
+            The CVE Crowd settings model, imported inside the method because the models
+            don't exist yet the first time that the migrations run.
         """
         from platforms.cvecrowd.models import CveCrowdSettings
 

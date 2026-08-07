@@ -1,11 +1,7 @@
-"""Telegram Bot mixin for security task execution confirmation and creation.
+"""Steps that confirm what will be scanned and create the task.
 
-Provides task confirmation prompts and task creation functionality for
-security testing workflows including validation and execution setup. Runs last in
-every conversation that creates a Task (Tool and Process), after all the other
-mixins have populated the context values it reads. On completion it clears the
-whole conversation context, ending the flow either with a created Task or with
-the user's cancellation.
+These are the last steps of the conversations that scan something, so everything
+that the task needs has already been asked for when they run.
 """
 
 from telegram import Update
@@ -18,37 +14,26 @@ from tasks.serializers import TaskSerializer
 
 
 class TaskMixin(BaseMixin):
-    """Mixin providing security task confirmation and creation functionality.
-
-    Enables conversations to display task summaries, confirm execution parameters,
-    and create security testing tasks with proper validation.
+    """Steps that confirm and create the task that the conversation configured.
 
     Attributes:
-        yes (str): Confirmation button text with emoji.
-        no (str): Rejection button text with emoji.
+        yes: Answer that creates the task.
+        no: Answer that cancels it.
     """
 
     yes = "👍 Yes"
     no = "👎 No"
 
     async def ask_for_task_confirmation(self, update: Update, context: CallbackContext) -> int:
-        """Display task confirmation prompt with execution summary.
-
-        Shows a comprehensive summary of the security task to be executed
-        including project, target, tool/process, and intensity settings. The target
-        line uses Task.get_target(target, target_port), the shared label helper that
-        also builds target labels for execution notifications, so it renders as
-        "<target>:<port><path>" when a target port was selected, or the bare target
-        otherwise. Validates that all required parameters are present, and the
-        configuration only counts as valid when its tool is also in the context,
-        because the summary shows both names.
+        """Show what will be scanned and ask the users to confirm it.
 
         Args:
-            update (Update): The Telegram update containing user interaction.
-            context (CallbackContext): The callback context for the conversation.
+            update: Message that the user wrote.
+            context: Data that the conversation remembers.
 
         Returns:
-            int: Next conversation state for confirmation or ConversationHandler.END.
+            The step that creates the task, or the end of the conversation if
+            something that the task needs is missing.
         """
         self.validate_update(update)
         project = self.get_context_value(context, Context.PROJECT)
@@ -58,6 +43,7 @@ class TaskMixin(BaseMixin):
         tool = self.get_context_value(context, Context.TOOL)
         configuration = self.get_context_value(context, Context.CONFIGURATION)
         intensity = self.get_context_value(context, Context.INTENSITY)
+        # The tool is needed together with the configuration because the summary shows both
         for condition, text in [
             (project, "project"),
             (target, "target"),
@@ -94,21 +80,14 @@ Are you sure?
         )
 
     async def new_task(self, update: Update, context: CallbackContext) -> int:
-        """Create a new security task based on user confirmation.
-
-        Processes user confirmation and creates a security task with all
-        configured parameters including target, tool/process, intensity,
-        and optional wordlists and input parameters. The required values are
-        checked again here instead of trusting the confirmation step, since the
-        user can answer an old confirmation message whose conversation context
-        no longer holds them.
+        """Create the task if the users confirmed it, or cancel it.
 
         Args:
-            update (Update): The Telegram update containing user confirmation.
-            context (CallbackContext): The callback context for the conversation.
+            update: Message that the user wrote.
+            context: Data that the conversation remembers.
 
         Returns:
-            int: ConversationHandler.END after task creation or cancellation.
+            The end of the conversation, since this is its last step.
         """
         chat = await self.get_active_telegram_chat(update)
         next_state = ConversationHandler.END
@@ -123,6 +102,8 @@ Are you sure?
                 wordlist = self.get_context_value(context, Context.WORDLIST)
                 input_technology = self.get_context_value(context, Context.INPUT_TECHNOLOGY)
                 input_vulnerability = self.get_context_value(context, Context.INPUT_VULNERABILITY)
+                # The users can answer an old confirmation, whose conversation doesn't remember
+                # anything anymore, so what the task needs is checked again here
                 for condition, text in [
                     (target, "target"),
                     (process or configuration, "process or configuration"),

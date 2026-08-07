@@ -1,8 +1,4 @@
-"""Django app configuration for Telegram Bot platform integration.
-
-Configures the Telegram Bot application including fixture management
-and model registration for the Rekono platform.
-"""
+"""Django app configuration of the Telegram app."""
 
 from typing import Any
 
@@ -12,24 +8,23 @@ from framework.apps import BaseApp
 
 
 class TelegramAppConfig(BaseApp, AppConfig):
-    """Django app configuration for Telegram Bot platform.
-
-    Extends BaseApp with Telegram-specific configuration including
-    fixture management and model registration.
+    """Configuration of the Telegram app.
 
     Attributes:
-        name (str): The app module path.
-        skip_fixtures_if_model_exists (bool): Skip fixtures if models already exist.
+        name: Name of the app in the Django app registry.
+        skip_fixtures_if_model_exists: The settings are only created once, so the
+          configuration of a deployment is never overwritten.
     """
 
     name = "platforms.telegram_app"
     skip_fixtures_if_model_exists = True
 
     def _get_models(self) -> list[Any]:
-        """Get list of models that should exist before loading fixtures.
+        """Get the Telegram settings model, whose data comes from the fixtures.
 
         Returns:
-            list[Any]: List of model classes to check for fixture loading.
+            The Telegram settings model, imported inside the method because the models
+            don't exist yet the first time that the migrations run.
         """
         from platforms.telegram_app.models import TelegramSettings
 

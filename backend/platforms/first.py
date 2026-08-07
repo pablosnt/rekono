@@ -1,9 +1,4 @@
-"""FIRST EPSS integration for exploit prediction scoring.
-
-Provides integration with the FIRST Exploit Prediction Scoring System (EPSS) API
-for automated enrichment of vulnerability findings with exploit probability scores
-and percentile rankings updated on a per-execution and bulk monitoring basis.
-"""
+"""Integration with the Exploit Prediction Scoring System of FIRST."""
 
 import re
 
@@ -15,44 +10,37 @@ from security.validators.enums import Regex
 
 
 class First(BaseIntegration):
-    """Integration class for the FIRST Exploit Prediction Scoring System (EPSS).
+    """Integration that says how likely a vulnerability is to be exploited.
 
-    Enriches vulnerability findings with EPSS scores and percentile rankings
-    from the FIRST API. Supports both per-execution enrichment for individual
-    CVEs and bulk monitoring to keep EPSS data current across all active findings.
-
-    Processing Features:
-        - Per-execution EPSS enrichment for a single vulnerability finding
-        - Bulk EPSS monitoring across all non-fixed vulnerabilities, in batches of 100 CVEs
-        - CVE identifier validation before bulk requests to keep malformed values out of a batch
+    The probability changes over time, so it isn't only calculated when a
+    vulnerability is discovered, it's also refreshed by the monitor job.
 
     Attributes:
-        finding_types (list): Supported finding types (Vulnerability only).
-        url (str): FIRST EPSS API endpoint URL.
+        finding_types: Only the vulnerabilities have an exploitation probability.
+        url: Endpoint that returns the probability of a group of CVEs.
     """
 
     finding_types = [Vulnerability]
     url = "https://api.first.org/data/v1/epss"
 
     def is_finding_processable(self, finding: Finding) -> bool:
-        """Check if a finding can be enriched with EPSS data.
+        """Check if this platform can say anything about a finding.
 
         Args:
-            finding (Finding): The finding to evaluate.
+            finding: Finding whose type and data are checked.
 
         Returns:
-            bool: True if the finding is a vulnerability with a CVE identifier.
+            Whether the finding is a vulnerability with a known CVE, since the
+            probability is calculated per CVE.
         """
         return super().is_finding_processable(finding) and finding.cve is not None
 
     def is_available(self) -> bool:
-        """Check if the FIRST EPSS API is reachable and returning data.
-
-        Validates platform connectivity by performing a live API request for a
-        known CVE. Returns True if the API responds with at least one EPSS record.
+        """Check if the platform can be used.
 
         Returns:
-            bool: True if the FIRST EPSS API is reachable and returns data, False otherwise.
+            Whether the API answers with the probability of a CVE that it's known
+            to have, so a platform that answers something else isn't used.
         """
         try:
             return bool(self._get_epss_for_cves(["CVE-2022-27225"]))
@@ -60,26 +48,23 @@ class First(BaseIntegration):
             return False
 
     def _get_epss_for_cves(self, cves: list[str]) -> list[dict[str, str]]:
-        """Retrieve EPSS scores for a batch of CVEs from the FIRST API.
+        """Get the exploitation probability of a group of CVEs.
 
         Args:
-            cves (list[str]): CVE identifiers to retrieve EPSS data for.
+            cves: CVE identifiers to ask about.
 
         Returns:
-            list[dict[str, str]]: List of EPSS records, each containing cve, epss,
-                percentile, and date fields.
+            The probability of each CVE and its position among all the scored
+            ones, without the CVEs that FIRST doesn't know.
         """
         return self._request(self.session.get, self.url, params={"cve": ",".join(cves)}).get("data", [])
 
     def _process_finding(self, execution: Execution, finding: Vulnerability) -> None:
-        """Enrich a single vulnerability finding with its current EPSS score.
-
-        Queries the FIRST EPSS API for the finding's CVE and updates the
-        epss_score and epss_percentile fields if data is available.
+        """Save the exploitation probability of a discovered vulnerability.
 
         Args:
-            execution (Execution): The execution that produced the finding.
-            finding (Vulnerability): The vulnerability to enrich with EPSS data.
+            execution: Execution that discovered the vulnerability.
+            finding: Vulnerability to complete with its probability.
         """
         data = self._get_epss_for_cves([finding.cve])
         if len(data) == 1 and data[0]["cve"] == finding.cve:
@@ -94,11 +79,10 @@ class First(BaseIntegration):
                 finding.save(update_fields=update_fields)
 
     def monitor(self) -> None:
-        """Bulk-update EPSS scores for all active vulnerability findings.
+        """Refresh the exploitation probability of the vulnerabilities still open.
 
-        Retrieves the latest EPSS data in batches of 100 CVEs from the FIRST API and
-        updates epss_score and epss_percentile across all non-fixed vulnerabilities
-        with a CVE identifier. Failures on individual batches are silently skipped.
+        The CVEs are asked for in batches, and a batch that fails is logged and
+        skipped, so the rest of the vulnerabilities are still refreshed.
         """
         if not self.is_enabled():
             return

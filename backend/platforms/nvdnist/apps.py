@@ -1,8 +1,4 @@
-"""Django application configuration for NVD NIST platform integration.
-
-Configures the NVD NIST platform application with proper model registration
-and initialization settings for vulnerability intelligence integration.
-"""
+"""Django app configuration of the NVD NIST app."""
 
 from typing import Any
 
@@ -12,27 +8,23 @@ from framework.apps import BaseApp
 
 
 class NvdnistConfig(BaseApp, AppConfig):
-    """Configuration class for NVD NIST platform application.
-
-    Extends BaseApp and AppConfig to provide proper Django application
-    setup with model registration and fixture management.
+    """Configuration of the NVD NIST app.
 
     Attributes:
-        name (str): Application name for Django registration
-        skip_fixtures_if_model_exists (bool): Fixture loading optimization flag
+        name: Name of the app in the Django app registry.
+        skip_fixtures_if_model_exists: The settings are only created once, so the
+          configuration of a deployment is never overwritten.
     """
 
     name = "platforms.nvdnist"
     skip_fixtures_if_model_exists = True
 
     def _get_models(self) -> list[Any]:
-        """Get list of models for this application.
-
-        Returns the NvdNistSettings model for fixture loading and
-        application initialization processes.
+        """Get the NVD NIST settings model, whose data comes from the fixtures.
 
         Returns:
-            list[Any]: List containing NvdNistSettings model class
+            The NVD NIST settings model, imported inside the method because the models
+            don't exist yet the first time that the migrations run.
         """
         from platforms.nvdnist.models import NvdNistSettings
 

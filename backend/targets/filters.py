@@ -1,9 +1,4 @@
-"""Django filters for target management.
-
-Filter classes for querying and filtering target objects in the REST API.
-Provides field-based filtering capabilities for target searches including
-DefectDojo integration filters.
-"""
+"""Filters of the target endpoints."""
 
 from django_filters.filters import NumberFilter
 from django_filters.rest_framework import FilterSet
@@ -12,27 +7,20 @@ from targets.models import Target
 
 
 class TargetFilter(FilterSet):
-    """Filter class for Target model.
-
-    Provides filtering capabilities for target queries based on project,
-    target specification, type, and DefectDojo synchronization status
-    with specialized filters for DefectDojo integration fields.
+    """Filters to search targets by their data and their DefectDojo synchronization.
 
     Attributes:
-        defectdojo_product (NumberFilter): Filter by DefectDojo product ID
-        defectdojo_engagement (NumberFilter): Filter by DefectDojo engagement ID
+        defectdojo_product: Filter by the DefectDojo product that the project of the
+          target is synchronized with.
+        defectdojo_engagement: Filter by the DefectDojo engagement that the target
+          is synchronized with.
     """
 
     defectdojo_product = NumberFilter(field_name="defectdojo_sync__defectdojo_sync__product_id")
     defectdojo_engagement = NumberFilter(field_name="defectdojo_sync__engagement_id")
 
     class Meta:
-        """Meta configuration for TargetFilter.
-
-        Attributes:
-            model (Model): The Target model to filter
-            fields (dict): Available filter fields and their matching options
-        """
+        """Filter configuration for the targets."""
 
         model = Target
         fields = {

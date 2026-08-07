@@ -1,9 +1,8 @@
-"""Security middleware for HTTP request/response processing in Rekono.
+"""Middleware that applies the HTTP security controls of Rekono.
 
-Provides comprehensive security controls for HTTP traffic including security headers,
-Content Security Policy (CSP) configuration, CORS handling, trusted proxy-aware client
-IP resolution, and request/response logging. This middleware implements defense-in-depth
-security measures to protect against common web application attacks.
+Adds the security headers, including the Content Security Policy of each path and
+the CORS headers, resolves the real client IP address behind the trusted proxies,
+and logs every request with its response.
 """
 
 from dataclasses import dataclass
@@ -66,13 +65,10 @@ CSP = {
     ),
     "/api/": "; ".join(["default-src 'none'", "base-uri 'none'", "object-src 'none'", "frame-ancestors 'none'"]),
 }
-# Fixed header values applied to every response. Access-Control-Allow-Origin is always
-# resolved per request in _add_security_headers from the request's Origin header.
-# Content-Security-Policy is resolved per request by matching the path against CSP,
-# but falls back to this None placeholder, sent as the literal string "None", for any
-# path that matches no CSP prefix. Server has no per-request override, so it is always
-# sent as "None" too, instead of whatever value the underlying server would otherwise
-# set, which keeps the real server implementation from being disclosed to clients.
+# Headers applied to every response, where None means that _add_security_headers resolves
+# the value per request. A None that survives it is sent as the literal string "None",
+# which is what hides the real server behind the Server header, and what a path matching
+# no CSP prefix gets.
 SECURITY_HEADERS = {
     "Content-Security-Policy": None,
     "Server": None,
@@ -90,47 +86,29 @@ SECURITY_HEADERS = {
 
 @dataclass
 class SecurityMiddleware(LoggingEntity):
-    """Django security middleware providing comprehensive HTTP security controls.
+    """Middleware that applies the HTTP security controls to every request.
 
-    Implements defense-in-depth security measures for HTTP requests and responses
-    including security headers, Content Security Policy enforcement, CORS handling,
-    and comprehensive request/response logging for security monitoring.
-
-    Security Features:
-        - Path-specific Content Security Policy (CSP) enforcement
-        - Comprehensive security headers to prevent common attacks
-        - CORS origin validation, echoing back only trusted frontend origins
-        - Custom OPTIONS responses
-        - Request/response logging with status code-based log levels
-        - Trusted proxy support for accurate client IP identification
+    It's the first middleware of the chain, so the request context and the client IP
+    address are available to the rest of them, and the security headers are applied
+    to the responses that they generate.
 
     Attributes:
-        get_response (Any): Django middleware callable for processing requests.
-
-    Example:
-        Configure in Django settings MIDDLEWARE:
-
-        ```python
-        MIDDLEWARE = [
-            'security.middleware.SecurityMiddleware',
-            # ... other middleware
-        ]
-        ```
+        get_response: Next callable of the Django middleware chain.
     """
 
     get_response: Any
 
     def _get_options_response(self, request: HttpRequest) -> Response:
-        """Generate HTTP OPTIONS response.
+        """Build the response for the OPTIONS requests, listing the allowed methods.
 
-        Creates a rendered HTTP response for OPTIONS preflight requests, with a
-        JSON content type and an Allow header listing the supported methods.
+        The response is already rendered, since it doesn't go through the view that
+        would render it.
 
         Args:
-            request (HttpRequest): Django HTTP request object.
+            request: OPTIONS request being answered.
 
         Returns:
-            Response: Rendered HTTP 200 response with Allow header.
+            An empty 200 response with the Allow header, ready to be sent.
         """
         response = Response(status=status.HTTP_200_OK)
         response.accepted_renderer = JSONRenderer()
@@ -154,11 +132,11 @@ class SecurityMiddleware(LoggingEntity):
         admin site still carry their origin.
 
         Args:
-            request (HttpRequest): Django HTTP request object.
-            response (Response): Django HTTP response object to modify.
+            request: Request whose path and Origin decide the resolved values.
+            response: Response to be returned, whose headers are set in place.
 
         Returns:
-            Response: Response object with security headers applied.
+            The same response, with the security headers already set.
         """
         origin = request.headers.get("Origin")
         allowed_origins = (
@@ -180,52 +158,40 @@ class SecurityMiddleware(LoggingEntity):
         return response
 
     def _log_request_and_response(self, request: HttpRequest, response: Response):
-        """Log HTTP request and response for security monitoring.
+        """Log a request and its response, using the level that its status deserves.
 
-        Logs all HTTP transactions with appropriate log levels based on
-        response status codes. Provides comprehensive audit trail for
-        security monitoring and incident response.
-
-        Log Levels:
-            - INFO: Successful requests (2XX-3XX status codes)
-            - WARNING: Client errors (4XX status codes)
-            - ERROR: Server errors (5XX status codes)
+        Successful requests are logged as information, the ones rejected because of
+        a client error as warnings, and the failed ones as errors.
 
         Args:
-            request (HttpRequest): Django HTTP request object.
-            response (Response): Django HTTP response object.
+            request: Request that was handled.
+            response: Response that was generated for it, whose status code decides
+              the log level.
         """
         logger_level = self.logger.info
         if response.status_code >= 400 and response.status_code < 500:
-            logger_level = self.logger.warning  # Warning level for 4XX error responses
+            logger_level = self.logger.warning
         elif response.status_code >= 500:  # pragma: no cover
-            logger_level = self.logger.error  # Error level for 5XX error responses
+            logger_level = self.logger.error
         logger_level(
             f"{request.method} {request.get_full_path()} > HTTP {response.status_code}",
             extra={"request": request, "response": response},
         )
 
     def __call__(self, request: HttpRequest) -> Any:
-        """Process HTTP request through security middleware.
+        """Handle one request, applying the security controls to its response.
 
-        Main middleware entry point that processes incoming HTTP requests
-        by extracting client IP, handling CORS preflight requests,
-        applying security headers, and logging all transactions.
-
-        Processing Flow:
-            1. Replace REMOTE_ADDR with the real client IP address
-            2. Store request in context-local storage for downstream components
-            3. Return a custom response for OPTIONS requests, or forward the request
-               through the rest of the Django middleware chain otherwise
-            4. Apply comprehensive security headers to the resulting response
-            5. Log request/response for security monitoring
-            6. Clear request from context-local storage, even if a previous step raised
+        The OPTIONS requests are answered here instead of being forwarded to the
+        views, and the request is always removed from the context-local storage
+        afterwards, even if the request fails, so it isn't reused by the next
+        request handled by the same thread.
 
         Args:
-            request (HttpRequest): Incoming Django HTTP request.
+            request: Request to handle, whose REMOTE_ADDR is replaced by the client
+              address resolved through the trusted proxies.
 
         Returns:
-            Any: Processed HTTP response with security controls applied.
+            The response of the rest of the chain, with the security headers.
         """
         # DRF resolves the client IP from X-Forwarded-For based on the configured number of trusted
         # proxies, so only the entries appended by them are trusted and the ones supplied by the

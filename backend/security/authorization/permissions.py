@@ -1,9 +1,8 @@
-"""Custom permission classes for Django REST Framework authorization.
+"""Permission classes that DRF combines to authorize the API requests.
 
-Implements specialized permission classes for the Rekono platform including
-model-level permissions, role-based access control, project membership validation,
-and ownership-based authorization. These classes integrate with Django REST Framework
-to provide comprehensive security controls for API endpoints.
+Besides the model permissions given by the role of the user, the access to an
+object also depends on the project it belongs to and, for the personal resources,
+on the user that owns it.
 """
 
 from typing import Any
@@ -23,21 +22,13 @@ from wordlists.models import Wordlist
 
 
 class RekonoModelPermission(DjangoModelPermissions):
-    """Extended Django model permissions with view permission enforcement.
+    """Model permissions that also require the view permission to read.
 
-    Extends Django's standard model permissions to include explicit view
-    permissions for GET and HEAD requests. This ensures that read operations
-    are properly controlled through the permission framework alongside create,
-    update, and delete operations.
-
-    Permission Mapping:
-        - GET/HEAD: Requires view permission
-        - POST: Requires add permission (inherited)
-        - PUT/PATCH: Requires change permission (inherited)
-        - DELETE: Requires delete permission (inherited)
+    Django only checks the model permissions of the write methods, so the read
+    ones are added here to let the roles decide which models each user can see.
 
     Attributes:
-        perms_map (dict): Permission mapping for HTTP methods to Django permissions.
+        perms_map: Model permission required by each HTTP method.
     """
 
     perms_map = {
@@ -48,113 +39,71 @@ class RekonoModelPermission(DjangoModelPermissions):
 
 
 class IsNotAuthenticated(BasePermission):
-    """Permission class allowing access only to unauthenticated users.
-
-    Used for endpoints that should only be accessible to anonymous users,
-    such as login, registration, or password reset endpoints. Prevents
-    authenticated users from accessing these endpoints.
-
-    Use Cases:
-        - Login and authentication endpoints
-        - User registration forms
-        - Password reset requests
-        - Public information endpoints
-    """
+    """Access granted only to the anonymous users, like in the login endpoints."""
 
     def has_permission(self, request: Request, view: View) -> bool:
-        """Check if the user is not authenticated.
+        """Check that the request doesn't come from an authenticated user.
 
         Args:
-            request (Request): The HTTP request object.
-            view (View): The view being accessed.
+            request: Request whose authentication is checked.
+            view: View that handles the request, not used to grant the access.
 
         Returns:
-            bool: True if user is not authenticated, False otherwise.
+            Whether the request is anonymous.
         """
         return not request.user.is_authenticated
 
 
 class IsAdmin(BasePermission):
-    """Permission class restricting access to Admin role users only.
-
-    Ensures that only users with the Admin role can access protected endpoints.
-    Used for system administration functions, user management, and sensitive
-    configuration operations that require the highest level of access.
-
-    Access Control:
-        - Only users in the Admin group are granted access
-        - All other users, including Auditors and Readers, are denied
-        - Unauthenticated requests are automatically denied
-    """
+    """Access granted only to the users with the Admin role."""
 
     def has_permission(self, request: Request, view: View) -> bool:
-        """Check if the user has Admin role.
+        """Check that the user has the Admin role.
 
         Args:
-            request (Request): The HTTP request object.
-            view (View): The view being accessed.
+            request: Request whose user roles are checked.
+            view: View that handles the request, not used to grant the access.
 
         Returns:
-            bool: True if user is an Admin, False otherwise.
+            Whether the user has the Admin role.
         """
         return request.user.groups.filter(name=Role.ADMIN.value).exists()
 
 
 class IsAuditor(BasePermission):
-    """Permission class allowing access to Auditor and Admin role users.
-
-    Implements hierarchical access control where Admin users inherit Auditor
-    privileges. Used for security testing operations, findings management,
-    and other operational tasks that require elevated privileges.
-
-    Role Hierarchy:
-        - Admin: Full access (inherits Auditor privileges)
-        - Auditor: Standard access for security operations
-        - Reader: No access (denied)
-    """
+    """Access granted to the users with the Auditor or the Admin role."""
 
     def has_permission(self, request: Request, view: View) -> bool:
-        """Check if the user has Auditor or Admin role.
+        """Check that the user has the Auditor or the Admin role.
 
         Args:
-            request (Request): The HTTP request object.
-            view (View): The view being accessed.
+            request: Request whose user roles are checked.
+            view: View that handles the request, not used to grant the access.
 
         Returns:
-            bool: True if user is an Auditor or Admin, False otherwise.
+            Whether the user has any of those two roles.
         """
         return request.user.groups.filter(name__in=[Role.AUDITOR.value, Role.ADMIN.value]).exists()
 
 
 class ProjectMemberPermission(BasePermission):
-    """Permission class enforcing project membership access control.
-
-    Ensures users can only access resources associated with projects they are
-    members of. This implements multi-tenant security by isolating project
-    data and preventing cross-project data access.
-
-    Features:
-        - Project membership validation for object access
-        - Support for both single and multiple project associations
-        - Automatic approval for objects without project association
-        - Multi-tenant security enforcement
-
-    Security Model:
-        - Users must be explicit members of the project
-        - No access to resources from projects they're not members of
-        - Objects without project association are accessible to all authenticated users
-    """
+    """Access granted only to the members of the project that an object belongs to."""
 
     def has_object_permission(self, request: Request, view: View, obj: Any) -> bool:
-        """Check if user is a member of the object's associated project.
+        """Check that the user is a member of the project that the object belongs to.
+
+        Objects related to several projects are accessible if the user is a member
+        of any of them.
 
         Args:
-            request (Request): The HTTP request object.
-            view (View): The view being accessed.
-            obj (Any): The object being accessed.
+            request: Request whose user is checked against the membership.
+            view: View that handles the request, not used to grant the access.
+            obj: Object to be accessed, which must expose a parent_project holding
+              one project, several of them, or None for the global objects.
 
         Returns:
-            bool: True if user is a project member or object has no project, False otherwise.
+            Whether the user can access the object. True for the global objects,
+            whose access is only controlled by the permissions of the user.
         """
         project = obj.parent_project
         if project is None:
@@ -167,24 +116,13 @@ class ProjectMemberPermission(BasePermission):
 
 
 class OwnerPermission(BasePermission):
-    """Permission class implementing ownership-based access control.
-
-    Enforces ownership permissions where users can only modify resources they own.
-    Supports configurable ownership models with customizable owner field mapping
-    and admin override capabilities for different model types.
-
-    Security Model:
-        - GET requests: Allowed for all authenticated users
-        - Modification requests: Only allowed for owners or admins (if enabled)
-        - Objects without owners: Accessible to all (with admin override enabled)
+    """Access to modify the personal resources granted only to the user that owns them.
 
     Attributes:
-        mapping (dict[Any, dict[str, Any]]): Model-specific ownership configuration mapping.
-
-    Mapping Configuration:
-        - instance: Function to determine the actual object to check ownership against
-        - owner_field: Name of the field containing the owner reference (default: 'owner')
-        - allow_admin: Whether Admin users can bypass ownership checks (default: True)
+        mapping: Ownership configuration of each model that has an owner. The
+          ``instance`` entry gets the object whose owner decides, ``owner_field``
+          names the field that references the owner, and ``allow_admin`` tells if
+          the administrators can modify the resources of other users.
     """
 
     # By default: instance returns the same object, allow_admin is True and owner_field is owner
@@ -201,72 +139,67 @@ class OwnerPermission(BasePermission):
     def _has_object_permission(
         self, request: Request, view: View, instance: Any, owner_field: str, allow_admin: bool
     ) -> bool:
-        """Internal method to check ownership permissions.
-
-        Evaluates ownership permissions based on the owner field, admin privileges,
-        and request method to determine access rights.
+        """Check if the user can modify an object, according to its ownership.
 
         Args:
-            request (Request): The HTTP request object.
-            view (View): The view being accessed.
-            instance (Any): The object instance to check ownership for.
-            owner_field (str): The field name containing the owner reference.
-            allow_admin (bool): Whether admin users can bypass ownership checks.
+            request: Request to be authorized.
+            view: View that handles the request.
+            instance: Object whose owner decides if the request is authorized.
+            owner_field: Field that references the owner of the object.
+            allow_admin: Whether the administrators can modify this object even if
+              they don't own it.
 
         Returns:
-            bool: True if access is permitted, False otherwise.
+            Whether the request is authorized. Always True for the read requests,
+            since the ownership only restricts the modifications.
         """
-        # If object has no owner, allow admin override regardless of configuration
-        # This handles objects that were created without proper ownership assignment
+        # An object without owner can always be managed by the administrators, since
+        # otherwise nobody could manage it
         if not getattr(instance, owner_field):
             allow_admin = True
-        # Evaluate permission based on multiple criteria with OR logic
         return (
-            not instance  # No instance means no restriction
-            or request.method == "GET"  # Read operations are always allowed
-            or (
-                hasattr(instance, owner_field) and getattr(instance, owner_field) == request.user
-            )  # User owns the object
-            or (allow_admin and IsAdmin().has_permission(request, view))  # Admin override if allowed
+            not instance
+            or request.method == "GET"
+            or (hasattr(instance, owner_field) and getattr(instance, owner_field) == request.user)
+            or (allow_admin and IsAdmin().has_permission(request, view))
         )
 
     def has_permission(self, request: Request, view: View) -> bool:
-        """Check permissions for view-level access.
+        """Check that a new step is created in a process owned by the user.
 
-        Special handling for StepViewSet creation to validate ownership of the
-        associated Process. This ensures users can only create steps for processes
-        they own.
+        Creating a step is the only case that can't be authorized by the object
+        permissions, because the object doesn't exist yet and its ownership comes
+        from the process that will contain it.
 
         Args:
-            request (Request): The HTTP request object.
-            view (View): The view being accessed.
+            request: Request whose body provides the process_id when a step is
+              being created.
+            view: View that handles the request, matched by class name, since the
+              step creation is the only case checked here.
 
         Returns:
-            bool: True if access is permitted, False otherwise.
+            Whether the request is authorized. True for every other request, which
+            is authorized by the object permissions instead.
         """
-        # Special case: When creating a Step, check ownership of the parent Process
-        # This prevents users from adding steps to processes they don't own
         return (
             self._has_object_permission(
                 request, view, Process.objects.get(pk=request.data.get("process_id")), "owner", True
             )
             if view.__class__.__name__ == "StepViewSet" and request.method == "POST"
-            else True  # All other operations are handled by has_object_permission
+            else True
         )
 
     def has_object_permission(self, request: Request, view: View, obj: Any) -> bool:
-        """Check ownership permissions for object-level access.
-
-        Uses the configured mapping to determine the appropriate ownership
-        validation parameters for the specific object type.
+        """Check that the user can modify an object, using its model configuration.
 
         Args:
-            request (Request): The HTTP request object.
-            view (View): The view being accessed.
-            obj (Any): The specific object being accessed.
+            request: Request whose user is compared against the object owner.
+            view: View that handles the request, forwarded to the admin check.
+            obj: Object to be accessed, whose model must be one of the keys of the
+              mapping, since that is where its owner field is configured.
 
         Returns:
-            bool: True if access is permitted based on ownership rules, False otherwise.
+            Whether the user can modify the object.
         """
         return self._has_object_permission(
             request,

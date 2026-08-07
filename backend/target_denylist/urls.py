@@ -1,8 +1,4 @@
-"""URL routing configuration for target denylist API endpoints.
-
-Defines URL patterns and routing for target denylist REST API endpoints
-using Django REST Framework's SimpleRouter for standard CRUD operations.
-"""
+"""URLs of the target denylist endpoints."""
 
 from rest_framework.routers import SimpleRouter
 

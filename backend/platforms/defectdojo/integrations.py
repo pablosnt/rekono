@@ -1,9 +1,4 @@
-"""DefectDojo integration client for vulnerability management synchronization.
-
-Provides integration with OWASP DefectDojo vulnerability management platform,
-enabling automated security finding synchronization through native scan import
-and reimport endpoints for centralized vulnerability tracking.
-"""
+"""Integration with the DefectDojo vulnerability management platform."""
 
 import json
 import uuid
@@ -24,44 +19,26 @@ from rekono.settings import CONFIG
 
 
 class DefectDojo(BaseIntegration):
-    """DefectDojo integration client for vulnerability management synchronization.
+    """Integration that sends the findings of each execution to DefectDojo.
 
-    Integrates with OWASP DefectDojo through REST API interactions, pushing security
-    findings to DefectDojo after each tool execution. This is an outbound integration,
-    Rekono only creates or updates data in DefectDojo, it never reads findings back.
-    Supports both native scan file imports (for tools with a registered DefectDojo scan
-    type) and generic JSON finding imports, with optional reimport to update existing
-    tests instead of creating new ones.
-
-    Processing Features:
-        - Outbound synchronization of security findings after each tool execution
-        - Native scan file import for tools with a registered DefectDojo scan type
-        - Generic JSON finding import for tools without a native DefectDojo scan type
-        - Automatic engagement creation when no engagement is configured for the target
-        - Optional reimport into an existing test instead of creating a new one
+    Nothing is ever read back from DefectDojo, Rekono only writes in it, so the
+    findings of both platforms can't get out of sync.
 
     Attributes:
-        generic_import (str): DefectDojo scan type name for generic finding imports.
+        generic_import: Format that DefectDojo accepts from the tools whose reports
+          it doesn't understand.
     """
 
     generic_import = "Generic Findings Import"
 
     @property
     def settings(self) -> DefectDojoSettings:
-        """Get DefectDojo integration configuration settings from database.
-
-        Returns:
-            DefectDojoSettings: DefectDojo configuration instance or None if not configured.
-        """
+        """The DefectDojo configuration, or None if it hasn't been created yet."""
         return DefectDojoSettings.objects.first()
 
     @cached_property
     def url(self) -> str:
-        """Get DefectDojo server URL from configuration settings.
-
-        Returns:
-            str: DefectDojo server base URL for API communications
-        """
+        """The URL of the DefectDojo server, which the users configure."""
         return self.settings.server
 
     def _request(
@@ -72,21 +49,20 @@ class DefectDojo(BaseIntegration):
         trigger_exception: bool = True,
         **kwargs: Any,
     ) -> Any:
-        """Execute authenticated HTTP request to DefectDojo API.
-
-        Performs HTTP request to DefectDojo API v2 with proper authentication
-        headers, TLS validation, and error handling. Automatically constructs
-        full API URL and includes necessary security headers.
+        """Make a request to the DefectDojo API.
 
         Args:
-            method (Callable): HTTP method function (requests.get, requests.post, etc.)
-            url (str): API endpoint path relative to /api/v2
-            json (bool): Whether to parse response as JSON (default True)
-            trigger_exception (bool): Whether to raise exceptions on errors (default True)
-            **kwargs: Additional arguments passed to the HTTP method
+            method: Method of the session that sends the request.
+            url: Path of the endpoint, without the URL of the API.
+            json: Whether the response must be parsed as JSON.
+            trigger_exception: Whether a failed request must raise an exception.
+            **kwargs: Extra arguments for the request, like its parameters.
 
         Returns:
-            Any: Response data (JSON dict if json=True, Response object otherwise)
+            The response of the server, with the API token already included in the
+            request, and with the TLS certificate validated or not depending on
+            the configuration, since a DefectDojo can be deployed with a self
+            signed certificate.
         """
         return super()._request(  # pragma: no cover
             method,
@@ -104,14 +80,11 @@ class DefectDojo(BaseIntegration):
         )
 
     def is_available(self) -> bool:
-        """Check if DefectDojo integration is available and properly configured.
-
-        Validates DefectDojo configuration and tests connectivity to the DefectDojo
-        server by attempting to access a simple API endpoint. Ensures all required
-        settings are present before testing connection.
+        """Check if the platform can be used.
 
         Returns:
-            bool: True if DefectDojo is available and functional, False otherwise
+            Whether a server and an API token are configured, and whether that
+            server answers to them.
         """
         if not self.settings.server or not self.settings.secret:
             return False
@@ -122,18 +95,15 @@ class DefectDojo(BaseIntegration):
             return False
 
     def exists(self, entity_name: str, id: int) -> tuple[dict[str, Any] | None, bool]:
-        """Check if a DefectDojo entity exists by ID.
-
-        Verifies the existence of a DefectDojo entity (product type, product,
-        engagement, etc.) by attempting to retrieve it via the API.
+        """Check if something exists in DefectDojo, like a product or an engagement.
 
         Args:
-            entity_name (str): DefectDojo entity type name (plural form)
-            id (int): DefectDojo entity ID to check
+            entity_name: Kind of thing to look for, in plural, as its endpoint.
+            id: Identifier that it has in DefectDojo.
 
         Returns:
-            tuple[dict[str, Any] | None, bool]: The response and a flag indicating whether the
-                                                entity exists
+            The thing that was found and whether it exists, so the users can't
+            configure a synchronization against something that isn't there.
         """
         try:
             response = self._request(self.session.get, f"/{entity_name}/{id}/")
@@ -144,20 +114,17 @@ class DefectDojo(BaseIntegration):
     def create_engagement(
         self, product: int, name: str, description: str, tags: list[str]
     ) -> dict[str, Any]:  # pragma: no cover
-        """Create a new engagement in DefectDojo under a specific product.
-
-        Creates an engagement representing a specific security assessment or testing
-        period within a product. Engagements contain tests and findings related to
-        a particular security testing activity with defined start and end dates.
+        """Create an engagement in a DefectDojo product.
 
         Args:
-            product (int): DefectDojo product ID
-            name (str): Engagement name
-            description (str): Engagement description
-            tags (list[str]): List of tags for engagement organization
+            product: Product that the engagement belongs to.
+            name: Name of the engagement.
+            description: Explanation of what the engagement covers.
+            tags: Tags that classify the engagement.
 
         Returns:
-            dict[str, Any]: DefectDojo API response containing created engagement data
+            The created engagement, which lasts one week, since DefectDojo requires
+            an engagement to have an end date.
         """
         start = timezone.now()
         end = start + timedelta(days=7)
@@ -177,27 +144,27 @@ class DefectDojo(BaseIntegration):
         )
 
     def _get_test_type(self, name: str) -> dict[str, Any] | None:
-        """Look up a DefectDojo test type by name.
+        """Find a test type in DefectDojo by its name.
 
         Args:
-            name (str): Test type name to search for.
+            name: Name of the test type, which is the name of a tool.
 
         Returns:
-            dict[str, Any] | None: First matching test type record, or None if not found.
+            The test type, or None if DefectDojo doesn't have one for that tool.
         """
         response = self._request(self.session.get, "/test_types/", params={"name": name})
         return response.get("results", [])[0] if response.get("count", 0) > 0 else None
 
     def _get_test(self, engagement: int, test_type: int, scan_type: str) -> dict[str, Any] | None:
-        """Look up an existing DefectDojo test by engagement, test type, and scan type.
+        """Find the test of an engagement that a report can be added to.
 
         Args:
-            engagement (int): DefectDojo engagement ID.
-            test_type (int): DefectDojo test type ID.
-            scan_type (str): Scan type name matching the tool's DefectDojo scan type.
+            engagement: Engagement where the test is searched.
+            test_type: Test type that the test must have.
+            scan_type: Report format that the test must accept.
 
         Returns:
-            dict[str, Any] | None: First matching test record, or None if not found.
+            The test, or None if the engagement has no test for that tool yet.
         """
         response = self._request(
             self.session.get,
@@ -216,24 +183,21 @@ class DefectDojo(BaseIntegration):
         tags: list[str],
         close_old_findings: bool,
     ) -> dict[str, Any]:  # pragma: no cover
-        """Import or reimport a scan report into DefectDojo.
-
-        Uses `import-scan` when no existing test is provided, creating a new test
-        under the given engagement. Uses `reimport-scan` when a test ID is provided,
-        updating an existing test and closing findings absent from the new report
-        when `close_old_findings` is enabled.
+        """Send a report to DefectDojo, in a new test or in an existing one.
 
         Args:
-            scan_type (str): DefectDojo scan type identifier for the report format.
-            report (PathFile): Path to the report file to upload.
-            service (str): Service label (target, optionally with port) stored on the test.
-            engagement (int): DefectDojo engagement ID.
-            test (int | None): Existing DefectDojo test ID for reimport, or None for import.
-            tags (list[str]): Tags applied to the created test, findings, and endpoints.
-            close_old_findings (bool): Close findings from previous imports not present in this one.
+            scan_type: Format of the report, as DefectDojo names it.
+            report: File with the findings to send.
+            service: What was scanned, which is the target and its port.
+            engagement: Engagement where a new test is created.
+            test: Test where the report is added, or None to create a new one.
+            tags: Tags that classify the test and everything imported from it.
+            close_old_findings: Whether the findings of the test that this report
+              doesn't include must be closed.
 
         Returns:
-            dict[str, Any]: DefectDojo API response containing the test ID and import summary.
+            The result of the import, with the identifier of the test that the
+            findings ended up in.
         """
         context = {"engagement": engagement}
         endpoint = "import-scan"
@@ -257,24 +221,17 @@ class DefectDojo(BaseIntegration):
             )
 
     def _process_findings(self, execution: Execution, findings: list[Finding]) -> None:
-        """Synchronize security findings to DefectDojo after execution completion.
+        """Send the findings of an execution to the DefectDojo engagement of its target.
 
-        Excludes Path findings, which are only used to build endpoint data for other
-        finding types, and findings the user entered manually rather than ones a tool
-        detected. Resolves the engagement to push to, from an existing target sync, the
-        project sync, or a newly created one, then imports the remaining findings as a
-        scan report. For tools with a registered DefectDojo scan type the raw output file
-        is sent; otherwise a Generic Findings Import JSON is built from the finding data.
-        If neither a target sync nor a project sync exists for the execution's target,
-        the findings are left unsynchronized and the method returns without error. When
-        the project sync has reimport enabled, an existing test is located and updated
-        instead of creating a new one, except right after an engagement was just created
-        for this call, since a brand new engagement cannot already contain a test.
+        Nothing is sent if neither the target nor its project is synchronized with
+        DefectDojo, since there would be nowhere to send it to.
 
         Args:
-            execution (Execution): Completed security tool execution.
-            findings (list[Finding]): Security findings to synchronize.
+            execution: Execution that discovered the findings.
+            findings: Findings to send.
         """
+        # The paths are only used to build the endpoints of the other findings, and the
+        # findings created by the users were never discovered by a tool
         findings = [
             finding for finding in findings if not isinstance(finding, Path) and not finding.created_from_user_input
         ]
@@ -309,6 +266,8 @@ class DefectDojo(BaseIntegration):
                 )
                 engagement_id = new_sync.engagement_id
         test_id = None
+        # DefectDojo understands the reports of many tools, and the findings of the rest are
+        # sent in the generic format that it accepts from anything
         if execution.configuration.tool.defectdojo_scan_type:
             if execution.output_file is None or not PathFile(execution.output_file).is_file():
                 # The native report file is required for a native import, so skip silently if it is gone
@@ -332,6 +291,7 @@ class DefectDojo(BaseIntegration):
                 )
             test_type_name = f"{execution.configuration.tool.name} ({scan_type})"
         try:
+            # A brand new engagement can't have a test yet, so it's not even searched for
             if project_sync.reimport and not created_engagement:
                 test_type = self._get_test_type(test_type_name)
                 if test_type:
@@ -355,16 +315,14 @@ class DefectDojo(BaseIntegration):
                 report.unlink()
 
     def process_findings(self, execution: Execution, findings: list[Finding]) -> None:
-        """Synchronize findings to DefectDojo, guarding availability and errors.
+        """Send the findings of an execution to DefectDojo, if it can be used.
 
-        Public entry point that skips processing when the integration is disabled
-        or unavailable and delegates the actual scan import to _process_findings.
-        Any failure during the import is logged rather than propagated, so a
-        DefectDojo outage never interrupts the rest of the execution pipeline.
+        A failure is logged instead of being propagated, so a DefectDojo that is
+        down doesn't stop the rest of the platforms.
 
         Args:
-            execution (Execution): Completed security tool execution.
-            findings (list[Finding]): Security findings to synchronize.
+            execution: Execution that discovered the findings.
+            findings: Findings to send.
         """
         if not self.is_enabled() or not self.is_available():
             return

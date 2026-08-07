@@ -1,8 +1,10 @@
-"""Django models for SMTP email configuration management.
+"""Model of the SMTP configuration.
 
-Provides the SMTPSettings model for storing and managing SMTP server configuration
-with automatic encryption of sensitive credential data. Supports TLS connections
-and comprehensive validation for secure email delivery.
+Typical usage example:
+
+  settings = SMTPSettings.objects.first()
+  settings.secret = "..."  # encrypted into _password on save
+  settings.save()
 """
 
 from django.core.validators import MaxValueValidator, MinValueValidator
@@ -13,32 +15,13 @@ from security.validators.input_validator import Regex, Validator
 
 
 class SMTPSettings(BaseEncrypted):
-    """Model representing SMTP server configuration for email notifications.
-
-    Stores SMTP server connection parameters with automatic encryption of sensitive
-    credentials. Supports TLS/SSL connections for secure email delivery and includes
-    comprehensive validation for all configuration parameters.
+    """Configuration of the SMTP server, of which only one instance exists.
 
     Attributes:
-        host (TextField): SMTP server hostname or IP address (max 100 chars)
-        port (IntegerField): SMTP server port number (0-65535, default 587)
-        username (TextField): SMTP authentication username (max 100 chars)
-        _password (TextField): Encrypted SMTP authentication password (max 200 chars)
-        tls (BooleanField): Enable TLS encryption for SMTP connections (default True)
-        _encrypted_field (str): Field name for encryption configuration
-
-    Example:
-        Configure SMTP settings for Gmail:
-
-        ```python
-        settings = SMTPSettings.objects.first()
-        settings.host = "smtp.gmail.com"
-        settings.port = 587
-        settings.username = "notifications@company.com"
-        settings.secret = "app_password_here"
-        settings.tls = True
-        settings.save()
-        ```
+        host: Address of the SMTP server that sends the emails.
+        port: Port where that server listens.
+        username: User that Rekono authenticates as.
+        tls: Whether the connection with the server must be encrypted.
     """
 
     host = models.TextField(max_length=100, validators=[Validator(Regex.TARGET)], blank=True, null=True)
@@ -58,9 +41,5 @@ class SMTPSettings(BaseEncrypted):
     _encrypted_field = "_password"
 
     def __str__(self) -> str:
-        """Return string representation of SMTP settings.
-
-        Returns:
-            str: SMTP server in format "host:port" or "None" if not configured
-        """
+        """Return the server that sends the emails, as the literal "None" if there is none."""
         return f"{self.host}:{self.port}" if self.host and self.port else "None"

@@ -1,9 +1,4 @@
-"""Open Source Vulnerabilities (OSV) database integration.
-
-Provides integration with the OSV database for automated vulnerability enrichment,
-CVSS scoring, and affected package information from the open-source vulnerability
-intelligence platform maintained by Google.
-"""
+"""Integration with the Open Source Vulnerabilities database."""
 
 from typing import Any
 
@@ -11,60 +6,50 @@ from cvss import CVSS2, CVSS3, CVSS4, CVSSError
 
 from framework.platforms import BaseCveProvider
 
-# Maps OSV severity type strings to their corresponding CVSS parser classes
+# Class that calculates the score of a vector, for each CVSS version that OSV can report
 cvss_class_mapping = {"CVSS_V2": CVSS2, "CVSS_V3": CVSS3, "CVSS_V4": CVSS4}
 
 
 class OSV(BaseCveProvider):
-    """Integration class for the Open Source Vulnerabilities (OSV) database.
-
-    Provides automated vulnerability enrichment by querying the OSV API for CVE
-    details, CVSS scores computed from vector strings, and affected package
-    identifiers (preferring PURLs over package names) from the OSV platform.
-
-    Processing Features:
-        - CVE data retrieval from the public OSV API, no authentication required
-        - CVSS base score computed from the vector string with the cvss library,
-          preferring the highest available version (v4 over v3 over v2)
-        - Affected package extraction preferring PURLs over plain package names,
-          falling back to affected version strings when no package is listed
-        - GHSA, EUVD, and OSV-native identifiers extracted from the aliases field
+    """CVE provider that completes the vulnerabilities with the OSV data.
 
     Attributes:
-        url (str): OSV API endpoint URL template for CVE queries.
-        reference (str): OSV vulnerability detail page URL template.
+        url: Endpoint that returns a vulnerability by its identifier.
+        reference: Page of a vulnerability, which the findings link to.
     """
 
     url = "https://api.osv.dev/v1/vulns/{cve}"
     reference = "https://osv.dev/vulnerability/{cve}"
 
     def _get_cve(self, cve: str) -> dict[str, Any]:
-        """Retrieve CVE information from the OSV API.
+        """Get the data that OSV has about a CVE.
 
         Args:
-            cve (str): CVE identifier to retrieve information for.
+            cve: CVE identifier to search for.
 
         Returns:
-            dict[str, Any]: JSON response containing OSV vulnerability details.
+            The vulnerability that OSV reports, or an empty dict if it doesn't
+            know the CVE.
         """
         return self._request(self.session.get, self.url.format(cve=cve))
 
     def _parse_cve(self, cve: str, data: list[dict[str, Any]] | dict[str, Any]) -> BaseCveProvider.CveEnrichment | None:
-        """Parse OSV API response into a standardized CVE enrichment object.
-
-        Selects the highest available CVSS version (v4 > v3 > v2) and computes
-        the base score by parsing the CVSS vector string using the cvss library.
+        """Get the CVE data that Rekono uses from what OSV reports.
 
         Args:
-            cve (str): CVE identifier being parsed.
-            data (list[dict[str, Any]] | dict[str, Any]): OSV API vulnerability record.
+            cve: CVE identifier that was searched for.
+            data: Vulnerability that OSV reported.
 
         Returns:
-            BaseCveProvider.CveEnrichment | None: Parsed enrichment data, or None if invalid.
+            The data to complete the vulnerability with, or None if OSV didn't
+            report anything about the CVE. The score is calculated from the CVSS
+            vector, since OSV only reports the vector itself.
         """
         if isinstance(data, list) or not data:
             return
         cvss_base_score = cvss_vector = cvss_version = None
+        # OSV reports the vector of every CVSS version that it knows, so the newest one is the
+        # one taken
         if data.get("severity"):
             for version in ["4", "3", "2"]:
                 for severity in data.get("severity") or []:
@@ -84,6 +69,8 @@ class OSV(BaseCveProvider):
                         break
                 if cvss_vector:
                     break
+        # The PURL identifies a package better than its name, but not every ecosystem provides
+        # one, and some entries only say which versions are affected
         technologies = []
         for affected in data.get("affected", []):
             package = affected.get("package", {}).get("purl") or affected.get("package", {}).get("name")
@@ -91,6 +78,8 @@ class OSV(BaseCveProvider):
                 technologies.append(package)
             elif affected.get("versions"):
                 technologies.extend(affected.get("versions", []))
+        # OSV lists all the identifiers that a vulnerability has, so the ones that Rekono
+        # stores apart are taken from there, and the rest is kept as the OSV identifier
         euvd_id = ghsa_id = osv_generic_id = None
         for alias in data.get("aliases") or []:
             alias_upper = alias.upper()

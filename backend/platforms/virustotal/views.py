@@ -1,9 +1,4 @@
-"""Django REST Framework views for VirusTotal platform configuration.
-
-This module provides REST API viewsets for managing VirusTotal platform
-configuration and settings. Supports secure configuration management with
-proper authentication and authorization controls.
-"""
+"""Viewset of the VirusTotal endpoints."""
 
 from rest_framework.permissions import IsAuthenticated
 
@@ -14,16 +9,14 @@ from security.authorization.permissions import RekonoModelPermission
 
 
 class VirusTotalSettingsViewSet(BaseViewSet):
-    """ViewSet for managing VirusTotal platform configuration.
-
-    Provides REST API endpoints for retrieving and updating VirusTotal
-    platform settings including token management and availability status.
+    """Read and update the VirusTotal configuration.
 
     Attributes:
-        queryset (QuerySet): All VirusTotalSettings objects
-        serializer_class (Serializer): Serializer for settings operations
-        permission_classes (list): Required permissions for access
-        http_method_names (list): Allowed HTTP methods (GET, PUT only)
+        queryset: The only settings instance, created from a fixture.
+        serializer_class: Serializer of the VirusTotal settings.
+        permission_classes: Only the users that can change the settings model.
+        http_method_names: GET and PUT only, since the settings are never created
+          or removed through the API.
     """
 
     queryset = VirusTotalSettings.objects.all()

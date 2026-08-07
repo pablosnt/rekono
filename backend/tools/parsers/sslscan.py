@@ -1,8 +1,4 @@
-"""SSLScan SSL/TLS security scanner output parser.
-
-Processes SSLScan XML output to extract SSL/TLS protocol vulnerabilities,
-insecure cipher suites, and protocol configuration findings.
-"""
+"""Parser of the SSLScan TLS scanner."""
 
 from dataclasses import dataclass, field
 from typing import Any
@@ -15,15 +11,14 @@ from tools.parsers.base import BaseParser
 
 @dataclass
 class Sslscan(BaseParser):
-    """Parser for SSLScan XML output files.
+    """Findings discovered by SSLScan, read from its XML report.
 
-    Extracts SSL/TLS security findings including supported protocols, cipher suites,
-    and known vulnerabilities like Heartbleed. Unlike SSLyze, SSLScan's report already
-    rates each cipher suite with a strength attribute, so the parser flags on that
-    attribute directly instead of matching cipher suite names.
+    SSLScan rates the strength of every cipher suite that it finds, so the insecure
+    ones are the ones that it rates as such, without having to know their names.
 
     Attributes:
-        technologies (list[Technology]): List of detected SSL/TLS protocol technologies
+        technologies: Protocols that the server supports, created as technologies
+          so the vulnerabilities of each one can be linked to it.
     """
 
     technologies: list[Technology] = field(default_factory=list)
@@ -31,19 +26,17 @@ class Sslscan(BaseParser):
     def create_finding(
         self, finding_type: type[Finding], linked_finding: bool = False, **fields: Any
     ) -> Finding | None:
-        """Create a finding, resolving Vulnerability findings to their SSL/TLS technology.
-
-        Some Vulnerability fields carry an sslversion value (e.g. "TLSv1.2") instead of a
-        technology, because the technology can only be resolved by matching it against the
-        protocols already parsed into self.technologies.
+        """Create a finding, linking the vulnerabilities to the protocol that they affect.
 
         Args:
-            finding_type (type[Finding]): Type of finding to create
-            linked_finding (bool): Whether the finding has already been linked to other findings
-            **fields (Any): Field values for the finding
+            finding_type: Kind of finding to create.
+            linked_finding: Whether the caller already linked the finding.
+            **fields: Data of the finding, which can include the protocol version
+              that SSLScan reports instead of the technology that it belongs to.
 
         Returns:
-            Finding | None: Created finding instance with technology association
+            The created finding, linked to the protocol whose version matches the
+            one that SSLScan reported.
         """
         # The protocol version is only used to find the technology, it isn't a Vulnerability field
         sslversion = fields.pop("sslversion", None)
@@ -55,14 +48,10 @@ class Sslscan(BaseParser):
         return super().create_finding(finding_type, linked_finding, **fields)
 
     def _parse(self) -> None:
-        """Parse SSLScan XML output and extract SSL/TLS security findings.
+        """Create the protocols that the server supports and their vulnerabilities.
 
-        Each ssltest element in the report corresponds to one scanned host:port and holds a
-        flat sequence of protocol, renegotiation, heartbleed and cipher elements, so this
-        method walks every direct child by its tag name instead of relying on nesting. A
-        Technology finding is created for each enabled protocol, and a Vulnerability is added
-        for any protocol other than TLS 1.2 or 1.3, for insecure renegotiation, for Heartbleed,
-        and for any cipher suite whose strength attribute is not "acceptable" or "strong".
+        SSLScan reports everything that it checks as a flat list of elements, so
+        each one is recognized by its tag instead of by where it is in the report.
         """
         root = self.load_xml_report()
         if not root:

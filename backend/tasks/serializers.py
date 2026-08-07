@@ -1,9 +1,4 @@
-"""Django REST framework serializers for task models.
-
-Provides serializer classes for task creation, validation, and conversion between
-Django model instances and JSON data. Includes complex validation logic for
-task configuration and automatic queue management.
-"""
+"""Serializers of the task endpoints."""
 
 import math
 from typing import Any, cast
@@ -30,25 +25,23 @@ from users.serializers import SimpleUserSerializer
 
 
 class TaskSerializer(RelatedNotesSerializer):
-    """Serializer for Task model with comprehensive validation and computed fields.
-
-    Handles serialization of Task instances including complex validation logic
-    for mutually exclusive process/configuration fields, intensity validation,
-    and automatic task queuing upon creation.
+    """Serializer of a task, which also enqueues it when it's created.
 
     Attributes:
-        target_id (PrimaryKeyRelatedField): Target ID for task creation (write-only)
-        target (SimpleTargetSerializer): Serialized target information (read-only)
-        process_id (PrimaryKeyRelatedField): Process ID for multi-step tasks (write-only, optional)
-        process (SimpleProcessSerializer): Serialized process information (read-only)
-        configuration_id (PrimaryKeyRelatedField): Tool configuration ID for single-tool tasks (write-only, optional)
-        configuration (ConfigurationSerializer): Serialized configuration information (read-only)
-        target_port_id (PrimaryKeyRelatedField): Target port ID for task execution (write-only, optional)
-        target_port (TargetPortSerializer): Serialized target port information (read-only)
-        intensity (IntegerChoicesField): Execution intensity level
-        executor (SimpleUserSerializer): Task creator information (read-only)
-        status (SerializerMethodField): Computed task status based on execution states
-        progress (SerializerMethodField): Computed progress percentage (0-100)
+        target_id: Target to be scanned.
+        target: Data of that target.
+        process_id: Process to be executed, if the task doesn't run one single
+          configuration.
+        process: Data of that process.
+        configuration_id: Tool configuration to be executed, if the task doesn't run
+          a process.
+        configuration: Data of that configuration.
+        target_port_id: Port that the scan is limited to, if there is one.
+        target_port: Data of that target port.
+        intensity: How aggressive the executions of the task are.
+        executor: User that created the task.
+        status: Status of the task, calculated from the status of its executions.
+        progress: Percentage of the executions of the task that already finished.
     """
 
     target_id = PrimaryKeyRelatedField(
@@ -73,13 +66,7 @@ class TaskSerializer(RelatedNotesSerializer):
     progress = SerializerMethodField(read_only=True)
 
     class Meta:
-        """Meta configuration for the TaskSerializer.
-
-        Attributes:
-            model (Model): The Task model to serialize
-            fields (tuple): Field names to include in serialization
-            read_only_fields (tuple): Fields that cannot be modified
-        """
+        """Serializer configuration for the tasks."""
 
         model = Task
         fields = (
@@ -124,9 +111,8 @@ class TaskSerializer(RelatedNotesSerializer):
         )
 
     def get_status(self, instance: Any) -> str:
-        """Get the computed status of the task based on execution states.
+        """Get the status of the task, derived from the status of its executions.
 
-        Task status is derived from its executions rather than stored directly.
         Any RUNNING, CANCELLED, or ERROR execution takes priority and becomes the
         task status. If every execution finished as COMPLETED or SKIPPED, the task
         is COMPLETED. A task without executions is CANCELLED once it has ended, or
@@ -134,10 +120,10 @@ class TaskSerializer(RelatedNotesSerializer):
         executions is reported as RUNNING.
 
         Args:
-            instance (Task): The task instance being serialized
+            instance: Task being serialized.
 
         Returns:
-            str: The computed task status
+            The status of the task.
         """
         for status in [Status.RUNNING, Status.CANCELLED, Status.ERROR]:
             if instance.executions.filter(status=status).exists():
@@ -154,18 +140,16 @@ class TaskSerializer(RelatedNotesSerializer):
         return Status.REQUESTED
 
     def get_progress(self, instance: Any) -> int:
-        """Get the completion progress percentage for the task.
+        """Get the percentage of the executions of the task that already finished.
 
-        Calculates progress as the percentage of executions that reached a
-        terminal status (COMPLETED, ERROR, SKIPPED, or CANCELLED). If the task
-        has no executions yet, progress is 100 when the task has already ended,
-        or 0 while it is still pending.
+        A task without executions is at 100 when it already ended, and at 0 while
+        it's still pending.
 
         Args:
-            instance (Task): The task instance being serialized
+            instance: Task being serialized.
 
         Returns:
-            int: Progress percentage from 0 to 100
+            The progress as a percentage between 0 and 100.
         """
         total = instance.executions.count()
         return (
@@ -175,32 +159,28 @@ class TaskSerializer(RelatedNotesSerializer):
         )
 
     def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
-        """Validate task configuration and ensure data consistency.
+        """Check that the task can be executed, and complete its missing data.
 
-        Performs complex validation including:
-        - Target port ownership, ensuring it belongs to the task's target
-        - Defaulting a missing intensity to NORMAL
-        - Requiring either a process or a configuration. If both are given, the
-          configuration wins and the process is discarded rather than rejected
-        - Rejecting deprecated tool configurations
-        - Tool intensity compatibility with the selected configuration
-        - Clearing input technology and vulnerability selections that the selected
-          configuration's tool does not support, and clearing them entirely when a
-          process is selected instead
-        - Repeat scheduling, requiring repeat_in and repeat_time_unit together
+        A task must reference either a process or a configuration. If both are
+        given, the configuration wins and the process is discarded rather than
+        rejected. The inputs that the selected tool doesn't accept are dropped
+        instead of being rejected too, and the repetition is cleared unless both of
+        its fields are provided.
 
         Args:
-            attrs (dict[str, Any]): The attributes to validate
+            attrs: Task fields sent by the user.
 
         Returns:
-            dict[str, Any]: The validated attributes
+            The validated data, with the default intensity applied and the values
+            that this task can't use already removed.
 
         Raises:
-            ValidationError: If validation fails for any reason
+            ValidationError: If neither a process nor a configuration is provided,
+              if the configuration is deprecated or doesn't support the requested
+              intensity, or if the target port belongs to another target.
         """
         if not attrs.get("intensity"):
             attrs["intensity"] = IntensityEnum.NORMAL
-        # Ensure the target port belongs to the task's target
         target = attrs.get("target")
         target_port = attrs.get("target_port")
         if target_port and target and target_port.target_id != target.id:
@@ -216,7 +196,6 @@ class TaskSerializer(RelatedNotesSerializer):
                     f"Invalid intensity {attrs['intensity']} for tool {cast(Configuration, attrs.get('configuration')).tool.name}",
                     code="intensity",
                 )
-            # Drop input selections that the configuration's tool doesn't accept as arguments
             for input_type, field in [
                 (InputTypeName.TECHNOLOGY, "input_technologies"),
                 (InputTypeName.VULNERABILITY, "input_vulnerabilities"),
@@ -236,23 +215,19 @@ class TaskSerializer(RelatedNotesSerializer):
                     "process": "Invalid task. Process or configuration is required",
                 }
             )
-        # Both repeat fields are required together, so clear both if either is missing
         if not attrs.get("repeat_in") or not attrs.get("repeat_time_unit"):
             attrs["repeat_in"] = None
             attrs["repeat_time_unit"] = None
         return super().validate(attrs)
 
     def create(self, validated_data: dict[str, Any]) -> Task:
-        """Create a new task and automatically enqueue it for execution.
-
-        Creates the task instance and immediately adds it to the task queue
-        for processing. Handles both immediate and scheduled task execution.
+        """Create the task and enqueue it, so it starts without any extra request.
 
         Args:
-            validated_data (dict[str, Any]): The validated data for creating the task
+            validated_data: Task fields, already validated.
 
         Returns:
-            Task: The created Task instance
+            The created task, already enqueued.
         """
         task = super().create(validated_data)
         TasksQueue().enqueue(task)

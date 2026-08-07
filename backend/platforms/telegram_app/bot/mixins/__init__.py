@@ -1,6 +1,5 @@
-"""Telegram Bot conversation mixins for security testing operations.
+"""Steps that the bot conversations are built from.
 
-Provides specialized mixins for bot conversations handling different aspects
-of security testing workflows including project management, tool configuration,
-and target management through interactive Telegram interfaces.
+Each mixin knows how to ask for one thing and how to save the answer, so a
+conversation is only a list of the steps that it needs.
 """

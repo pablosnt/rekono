@@ -1,7 +1,8 @@
-"""Telegram Bot command handling and conversation management.
+"""Telegram bot that lets the users work with Rekono from a chat.
 
-Provides bot command framework, conversation workflows, and interactive
-interfaces for Rekono security testing operations through Telegram.
+A command is either a single answer or a conversation that asks whatever it needs
+one question at a time, so the users never have to write anything that can be
+chosen from a list.
 """
 
 import asyncio
@@ -21,15 +22,10 @@ filterwarnings(action="ignore", message=r".*CallbackQueryHandler", category=PTBU
 
 
 class TelegramBot(BaseTelegram):
-    """Main Telegram Bot class for handling security testing commands and conversations.
-
-    Manages the complete lifecycle of the Telegram Bot including command registration,
-    handler setup, and polling operations. Integrates all available commands and
-    conversation workflows for interactive security testing operations.
+    """Bot that attends the commands that the users write in their chats.
 
     Attributes:
-        commands (list): List of available bot command handlers including commands
-                        and conversation workflows for security testing operations.
+        commands: Commands that the bot answers to.
     """
 
     commands = [
@@ -45,25 +41,17 @@ class TelegramBot(BaseTelegram):
     ]
 
     def __init__(self) -> None:
-        """Initialize the Telegram Bot with all available commands and help system.
-
-        Builds the Help command from the other commands plus a standalone Cancel
-        instance, so /cancel is documented in /help even though it is never added to
-        `commands` or registered as its own top-level handler. Cancel only exists as
-        a fallback of each conversation's own ConversationHandler (see conversations.py),
-        which is enough for it to work as a command while a conversation is active.
-        """
+        """Prepare the bot, building its help message from its own commands."""
+        # Cancel isn't a command of the bot, it's a fallback of every conversation, but the
+        # users need to know that it exists
         self.commands.append(Help(self.commands + [Cancel()]))
         super().__init__()
 
     async def post_init(self, application: Application) -> None:
-        """Initialize bot commands and register handlers after application startup.
-
-        Registers all command handlers with the Telegram application and sets up
-        the bot command menu for user interaction.
+        """Register the commands in the bot and in the Telegram command menu.
 
         Args:
-            application (Application): The Telegram Bot application instance.
+            application: Bot client that was created.
         """
         bot_commands = []
         for command in self.commands:
@@ -72,14 +60,10 @@ class TelegramBot(BaseTelegram):
         await application.bot.set_my_commands(bot_commands)
 
     def _wait_for_token(self, sleep_time: int = 60) -> None:
-        """Wait for valid Telegram Bot token configuration before starting.
-
-        Continuously checks for a valid Telegram Bot token in settings and waits
-        if not configured. Handles token validation and application initialization.
+        """Wait until a bot token that Telegram accepts is configured.
 
         Args:
-            sleep_time (int): Time in seconds to wait between token checks.
-                             Defaults to 60 seconds.
+            sleep_time: Seconds to wait between two checks of the configuration.
         """
         self.settings = TelegramSettings.objects.first()
         if not self.settings or not self.settings.secret:
@@ -89,16 +73,18 @@ class TelegramBot(BaseTelegram):
         while not self.settings or not self.settings.secret:
             time.sleep(sleep_time)
             self.settings = TelegramSettings.objects.first()
+        # The client can't be created if Telegram rejects the token, so it's removed and the
+        # users are given the chance to configure another one
         if not self.app or not self.app.updater or not self.app.bot:
             if self.settings.secret:
                 self.handle_invalid_token(False)
             self._wait_for_token(sleep_time)
 
     def deploy(self) -> None:
-        """Deploy and start the Telegram Bot with polling mode.
+        """Run the bot, asking Telegram for the messages that the users write.
 
-        Starts the bot polling process after ensuring valid token configuration.
-        Handles token validation errors and restarts the deployment process if needed.
+        The bot waits until a valid token is configured instead of failing, and it
+        starts again if Telegram rejects the token while it's running.
         """
         self._wait_for_token()
         if not self.app or not self.app.updater or not self.app.bot:

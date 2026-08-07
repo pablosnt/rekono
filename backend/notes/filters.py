@@ -1,7 +1,8 @@
-"""Django filters for notes REST API endpoints.
+"""Filters of the note endpoints.
 
-Provides advanced filtering capabilities for note API queries including
-complex relationship filters, tag-based filtering, and fork detection.
+Besides the thing that a note is directly about, the notes can be searched by the
+findings around it, so asking for the notes of a host also returns the ones written
+about its ports, its technologies, or its vulnerabilities.
 """
 
 from django_filters.filters import BooleanFilter, CharFilter
@@ -14,34 +15,25 @@ from tasks.models import Task
 
 
 class NoteFilter(LikeFilter, MultipleFieldFilterSet):
-    """Filter class for Note model queries with advanced relationship filtering.
-
-    Provides filtering options for note API endpoints with support for complex
-    relationship queries, tag filtering, and fork detection capabilities.
+    """Filters to search the notes of a project.
 
     Attributes:
-        related_target (MultipleModelFilter): Complex target relationship filter covering
-            direct target links and indirect paths through tasks and finding executions
-        related_task (MultipleModelFilter): Complex task relationship filter covering
-            direct task links and indirect paths through finding executions
-        related_host (MultipleModelFilter): Complex host relationship filter covering
-            direct host links and indirect paths through ports, paths, credentials,
-            technologies, vulnerabilities, and exploits
-        related_port (MultipleModelFilter): Complex port relationship filter covering
-            direct port links and indirect paths through paths, credentials,
-            technologies, vulnerabilities, and exploits
-        related_technology (MultipleModelFilter): Complex technology relationship filter
-            covering direct technology links and indirect paths through credentials,
-            vulnerabilities, and exploits
-        related_vulnerability (MultipleModelFilter): Complex vulnerability relationship
-            filter covering direct vulnerability links and indirect paths through exploits
-        tag (CharFilter): Tag name filter
-        is_fork (BooleanFilter): Fork detection filter
+        related_target: Filter by a target, including the notes about its tasks and
+          about the findings that those tasks discovered.
+        related_task: Filter by a task, including the notes about the findings that
+          it discovered.
+        related_host: Filter by a host, including the notes about the findings
+          discovered in its ports.
+        related_port: Filter by a port, including the notes about the findings
+          discovered in it.
+        related_technology: Filter by a technology, including the notes about its
+          credentials, vulnerabilities, and exploits.
+        related_vulnerability: Filter by a vulnerability, including the notes about
+          its exploits.
+        tag: Filter by one of the tags of the note.
+        is_fork: Filter the notes that are a copy of another one.
     """
 
-    # Complex filter that searches for notes related to a target through
-    # multiple relationship paths, including indirect relationships through
-    # executions and tasks
     related_target = MultipleModelFilter(
         queryset=Target.objects.all(),
         fields=[
@@ -57,9 +49,6 @@ class NoteFilter(LikeFilter, MultipleFieldFilterSet):
             "exploit__executions__task__target",
         ],
     )
-    # Complex filter that searches for notes related to a task through
-    # multiple relationship paths, including indirect relationships through
-    # executions
     related_task = MultipleModelFilter(
         queryset=Task.objects.all(),
         fields=[
@@ -74,9 +63,6 @@ class NoteFilter(LikeFilter, MultipleFieldFilterSet):
             "exploit__executions__task",
         ],
     )
-    # Complex filter that searches for notes related to a host through
-    # multiple relationship paths, including indirect relationships through
-    # ports, paths, credentials, technologies, vulnerabilities, and exploits
     related_host = MultipleModelFilter(
         queryset=Host.objects.all(),
         fields=[
@@ -91,9 +77,6 @@ class NoteFilter(LikeFilter, MultipleFieldFilterSet):
             "exploit__technology__port__host",
         ],
     )
-    # Complex filter that searches for notes related to a port through
-    # multiple relationship paths, including indirect relationships through
-    # paths, credentials, technologies, vulnerabilities, and exploits
     related_port = MultipleModelFilter(
         queryset=Port.objects.all(),
         fields=[
@@ -107,9 +90,6 @@ class NoteFilter(LikeFilter, MultipleFieldFilterSet):
             "exploit__technology__port",
         ],
     )
-    # Complex filter that searches for notes related to a technology through
-    # multiple relationship paths, including indirect relationships through
-    # credentials, vulnerabilities and exploits
     related_technology = MultipleModelFilter(
         queryset=Technology.objects.all(),
         fields=[
@@ -120,25 +100,16 @@ class NoteFilter(LikeFilter, MultipleFieldFilterSet):
             "exploit__technology",
         ],
     )
-    # Complex filter that searches for notes related to a vulnerability through
-    # multiple relationship paths, including indirect relationships through exploits
     related_vulnerability = MultipleModelFilter(
         queryset=Vulnerability.objects.all(), fields=["vulnerability", "exploit__vulnerability"]
     )
-    # Filter notes by tag names
     tag = CharFilter(field_name="tags__name")
-    # Filter notes that are forks (have a forked_from relationship)
-    # exclude=True inverts the isnull lookup, so is_fork=True keeps notes whose
-    # forked_from is set rather than notes whose forked_from is null
+    # exclude=True inverts the isnull lookup, so is_fork=True keeps the notes whose forked_from
+    # is set instead of the ones whose forked_from is null
     is_fork = BooleanFilter(field_name="forked_from", lookup_expr="isnull", exclude=True)
 
     class Meta:
-        """Meta configuration for the NoteFilter.
-
-        Attributes:
-            model (Model): The Note model to filter
-            fields (dict): Field names and their supported filter operations
-        """
+        """Filter configuration for the notes."""
 
         model = Note
         fields = {

@@ -1,8 +1,4 @@
-"""URL routing configuration for email platform REST API endpoints.
-
-Defines URL patterns and routing for SMTP settings management endpoints
-using Django REST framework's SimpleRouter for standardized API structure.
-"""
+"""URLs of the SMTP endpoints."""
 
 from rest_framework.routers import SimpleRouter
 

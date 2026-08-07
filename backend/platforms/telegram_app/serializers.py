@@ -1,8 +1,4 @@
-"""Serializers for Telegram Bot models with secure OTP validation and linking.
-
-Provides serialization for Telegram settings and chat management including
-secure One-Time Password validation and user account linking workflows.
-"""
+"""Serializers of the Telegram endpoints."""
 
 from typing import Any
 
@@ -20,17 +16,12 @@ from security.cryptography import Crypto
 
 
 class TelegramSettingsSerializer(ModelSerializer):
-    """Serializer for Telegram Bot settings with encrypted token handling.
-
-    Handles serialization and validation of Telegram Bot configuration including
-    encrypted token management and bot availability status checks.
+    """Serializer of the Telegram configuration.
 
     Attributes:
-        token (ProtectedSecretField): Encrypted Bot API token field with validation
-        bot (SerializerMethodField): Read-only bot username
-        is_available (SerializerMethodField): Bot availability status check
-        client (Telegram): Property that builds and initializes a fresh Telegram client,
-            bound to the current settings, on every access
+        token: Bot token, which is masked when the settings are read.
+        bot: Name of the bot that the configured token belongs to.
+        is_available: Whether Telegram accepts the configured token.
     """
 
     token = ProtectedSecretField(required=False, allow_null=True, source="secret")
@@ -38,72 +29,49 @@ class TelegramSettingsSerializer(ModelSerializer):
     is_available = SerializerMethodField(read_only=True)
 
     class Meta:
-        """Meta configuration for TelegramSettingsSerializer.
-
-        Attributes:
-            model (Model): The TelegramSettings model to serialize
-            fields (tuple): Field names to include in serialization
-        """
+        """Serializer configuration for the Telegram settings."""
 
         model = TelegramSettings
         fields = ("id", "token", "bot", "is_available")
 
     @property
     def client(self) -> Telegram:
-        """Initialize and configure a Telegram client instance.
-
-        Creates a new Telegram client, initializes it, and configures it with
-        the first available TelegramSettings instance from the database.
-
-        Returns:
-            Telegram: Configured Telegram client instance ready for API operations.
-        """
+        """A bot client prepared with the configuration that is stored now."""
         client = Telegram()
         client.initialize()
         client.settings = TelegramSettings.objects.first()
         return client
 
     def get_bot(self, instance: TelegramSettings) -> str | None:
-        """Get the Telegram Bot username from the client.
-
-        Initializes the client and retrieves the bot username from the Telegram API.
+        """Get the name of the bot that the configured token belongs to.
 
         Args:
-            instance (TelegramSettings): The settings instance being serialized.
+            instance: Settings being serialized, not read because the name comes
+              from Telegram itself.
 
         Returns:
-            str | None: The Bot username if available, None otherwise.
+            The name of the bot, or None if Telegram rejects the configured token.
         """
         return self.client.bot_name
 
     def get_is_available(self, instance: TelegramSettings) -> bool:
-        """Check if the Telegram Bot is available and configured.
+        """Check if Telegram accepts the configured token.
 
         Args:
-            instance (TelegramSettings): The settings instance being serialized.
+            instance: Settings being serialized, not read because the check is
+              performed against the live platform.
 
         Returns:
-            bool: True if the Bot is configured and available.
+            Whether the platform answers with the configured settings.
         """
         return self.client.is_available()
 
 
 class TelegramChatSerializer(ModelSerializer, LoggingEntity):
-    """Serializer for Telegram chat account linking with OTP validation.
-
-    Handles the secure account linking process using One-Time Passwords (OTP)
-    including validation, expiration checking, and notification delivery.
-    """
+    """Serializer of the link between a Telegram chat and a Rekono account."""
 
     class Meta:
-        """Meta configuration for TelegramChatSerializer.
-
-        Attributes:
-            model (Model): The TelegramChat model to serialize
-            fields (tuple): Field names to include in serialization
-            read_only_fields (tuple): Fields that are read-only in API operations
-            extra_kwargs (dict): Additional field configuration options
-        """
+        """Serializer configuration for the Telegram chats."""
 
         model = TelegramChat
         fields = ("id", "otp", "user")
@@ -111,20 +79,19 @@ class TelegramChatSerializer(ModelSerializer, LoggingEntity):
         extra_kwargs = {"otp": {"write_only": True}}
 
     def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
-        """Validate OTP and retrieve the corresponding Telegram chat.
-
-        Validates the provided OTP against existing chats with unexpired OTPs
-        and no linked user account.
+        """Check the code that the bot gave and find the chat that it belongs to.
 
         Args:
-            attrs (dict[str, Any]): Serializer attributes to validate.
+            attrs: Validated data including the one-time password that the bot
+              showed in the Telegram conversation.
 
         Returns:
-            dict[str, Any]: Validated attributes with matched Telegram chat.
+            The validated data, with the chat that will be linked.
 
         Raises:
-            ValidationError: If the requesting user already has a linked Telegram chat.
-            AuthenticationFailed: If OTP is invalid or expired.
+            ValidationError: If the user already has a linked chat.
+            AuthenticationFailed: If the code is wrong, if it expired, or if the
+                chat was linked by somebody else in the meantime.
         """
         attrs = super().validate(attrs)
         request = self.context.get("request")
@@ -140,16 +107,15 @@ class TelegramChatSerializer(ModelSerializer, LoggingEntity):
         return attrs
 
     def create(self, validated_data: dict[str, Any]) -> TelegramChat:
-        """Create user-chat link and send notifications.
-
-        Links the Telegram chat to the user account, clears OTP data, and sends
-        confirmation notifications via email and Telegram.
+        """Link the chat to the account and tell the user about it.
 
         Args:
-            validated_data (dict[str, Any]): Validated serializer data.
+            validated_data: The user, and the telegram_chat that the validate
+                method resolves from the code that was sent, since the chat itself
+                is never part of the request.
 
         Returns:
-            TelegramChat: The linked Telegram chat instance.
+            The linked chat, whose code is removed so it can't be used again.
         """
         validated_data["telegram_chat"].otp = None
         validated_data["telegram_chat"].otp_expiration = None

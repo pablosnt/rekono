@@ -1,8 +1,4 @@
-"""Django REST framework base serializers for input parameters.
-
-Provides base serializer implementation for input parameter management
-with automatic deduplication logic and validation capabilities.
-"""
+"""Base serializer of the input parameters."""
 
 from typing import Any
 
@@ -12,27 +8,17 @@ from parameters.models import InputTechnology, InputVulnerability
 
 
 class InputParameterSerializer(ModelSerializer):
-    """Base serializer for input parameters with deduplication logic.
-
-    Provides common functionality for all input parameter serializers including
-    automatic deduplication to prevent redundant parameter creation.
-
-    Deduplication Logic:
-        Before creating a new parameter, checks for existing parameters with
-        identical field values and returns the existing instance if found.
-    """
+    """Base serializer of an input parameter, which is never duplicated."""
 
     def create(self, validated_data: dict[str, Any]) -> InputTechnology | InputVulnerability:
-        """Create or retrieve existing input parameter with deduplication.
-
-        Implements deduplication logic by searching for existing parameters
-        with matching field values before creating a new instance.
+        """Create a new parameter with the given data.
 
         Args:
-            validated_data (dict[str, Any]): Validated parameter data
+            validated_data: Parameter fields, already validated.
 
         Returns:
-            InputTechnology | InputVulnerability: Existing or newly created parameter instance
+            The existing parameter with the same data, if there is one, since the
+            parameters are shared by all the tasks that use them.
         """
         # The id field is excluded because it is auto-generated and never present in validated_data,
         # so comparing on it would prevent any duplicate from matching

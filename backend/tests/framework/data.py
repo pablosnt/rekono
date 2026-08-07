@@ -160,7 +160,7 @@ class TestingDataMixin:
                                 credential = Credential.objects.create(
                                     **{
                                         "context": "Default credentials",
-                                        "email": f"admin{_credential_index}@rekono.com",
+                                        "email": f"admin{_credential_index}@rekono.dev",
                                         "username": f"admin{_credential_index}",
                                         "secret": "admin",
                                         **credential_fields,
@@ -230,7 +230,7 @@ class TestingDataMixin:
                     username=username,
                     first_name=username,
                     last_name=username,
-                    email=f"{username}@rekono.com",
+                    email=f"{username}@rekono.dev",
                     is_active=True,
                 )
                 new_user.set_password(username)

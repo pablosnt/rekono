@@ -58,8 +58,8 @@ class OSINTTest(FindingTest, TestCase):
 
     def test_deduplication_ignores_data_case(self):
         first = OSINT.objects.create_finding(
-            self.execution, data="Rekono.com", data_type=OSINTDataType.DOMAIN, source="Shodan"
+            self.execution, data="Rekono.dev", data_type=OSINTDataType.DOMAIN, source="Shodan"
         )
-        second = OSINT.objects.create_finding(self.execution, data="rekono.com", data_type=OSINTDataType.DOMAIN)
+        second = OSINT.objects.create_finding(self.execution, data="rekono.dev", data_type=OSINTDataType.DOMAIN)
         self.assertEqual(first.id, second.id)
-        self.assertEqual(1, OSINT.objects.filter(data__iexact="rekono.com", data_type=OSINTDataType.DOMAIN).count())
+        self.assertEqual(1, OSINT.objects.filter(data__iexact="rekono.dev", data_type=OSINTDataType.DOMAIN).count())

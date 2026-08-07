@@ -1,7 +1,7 @@
-"""Framework base classes for Telegram Bot command and conversation handling.
+"""Base class shared by all the bot commands and conversations.
 
-Provides abstract base classes for bot commands and conversations with
-context management, authentication validation, and message utilities.
+Everything that the commands need to do before answering, like knowing which user
+is writing and remembering what a conversation already asked, is defined here.
 """
 
 from functools import cached_property
@@ -19,16 +19,14 @@ from users.models import User
 
 
 class BaseTelegramBot(BaseTelegram):
-    """Base class for Telegram Bot commands and conversations.
-
-    Provides common functionality for bot interactions including context management,
-    authentication validation, and message handling utilities.
+    """Base command that the bot answers to.
 
     Attributes:
-        help (str): Help text description for the command or conversation.
-        section (None): Section categorization for command organization.
-        allow_readers (bool): Whether users with reader permissions can use this command.
-        chat (None): Current chat context (set during execution).
+        help: Description of the command, shown in the help and in Telegram.
+        section: Group of the help message that the command belongs to.
+        allow_readers: Whether the users that can only read data can run the
+          command, which is false for everything that creates or runs something.
+        chat: Chat that is running the command.
     """
 
     help = ""
@@ -38,96 +36,84 @@ class BaseTelegramBot(BaseTelegram):
 
     @cached_property
     def command_name(self) -> str:
-        """Get the lowercase class name as the command name.
-
-        Returns:
-            str: The lowercase class name used as the command identifier.
-        """
+        """The name of the command, which is the class name in lowercase."""
         return self.__class__.__name__.lower()
 
     async def _execute_command(self, update: Update, context: CallbackContext) -> int | None:
-        """Execute the bot command with validation and authentication.
-
-        Template method for command execution. Subclasses should override this
-        method to implement specific command logic.
+        """Answer the command.
 
         Args:
-            update (Update): The Telegram update containing the command.
-            context (CallbackContext): The callback context for the command.
+            update: Message that the user wrote.
+            context: Data that the conversation remembers.
 
         Returns:
-            int | None: Conversation state or None for simple commands.
+            The next question of the conversation, or None if the command is
+            answered with a single message.
         """
         pass
 
     def validate_update(self, update: Update) -> None:
-        """Validate that the Telegram update contains required information.
+        """Check that a message comes from a chat and has content.
 
         Args:
-            update (Update): The Telegram update to validate.
+            update: Message that the user wrote.
 
         Raises:
-            Exception: If the update lacks required chat or message information.
+            Exception: If the message has no chat or no content, which shouldn't
+              happen and means that something is wrong with the update.
         """
         if None in [update.effective_chat, update.effective_message]:
             self.logger.error("Invalid provided update")
             raise Exception("Invalid provided update")
 
     async def reply(self, update: Update, message: str, reply_markup: Any = None) -> None:
-        """Reply to a Telegram message with formatted content.
-
-        Sends a reply message with Markdown V2 formatting and optional keyboard markup.
+        """Answer a message that a user wrote.
 
         Args:
-            update (Update): The Telegram update to reply to.
-            message (str): The message content to send.
-            reply_markup (Any, optional): Keyboard markup for interactive replies.
+            update: Message to answer.
+            message: Content of the answer, written in Markdown.
+            reply_markup: Buttons that the users can answer with.
         """
         await update.effective_message.reply_text(message, reply_markup=reply_markup, parse_mode=ParseMode.MARKDOWN_V2)
 
     def get_context_value(self, context: CallbackContext, key: Context) -> Any:
-        """Get a value from the conversation context.
+        """Get something that the conversation already asked for.
 
         Args:
-            context (CallbackContext): The callback context containing chat data.
-            key (Context): The context key to retrieve.
+            context: Data that the conversation remembers.
+            key: Kind of data to get.
 
         Returns:
-            Any: The stored context value or None if not found.
+            The data, or None if the conversation hasn't asked for it yet.
         """
         return (context.chat_data or {}).get(key.value)
 
     def add_context_value(self, context: CallbackContext, key: Context, value: Any) -> None:
-        """Add a value to the conversation context.
-
-        Safely stores a value in the conversation context only if chat_data is available.
+        """Remember something that the conversation just asked for.
 
         Args:
-            context (CallbackContext): The callback context to update.
-            key (Context): The context key to set.
-            value (Any): The value to store.
+            context: Data that the conversation remembers.
+            key: Kind of data to remember.
+            value: Data to remember.
         """
         if context.chat_data is not None:
             context.chat_data[key.value] = value
 
     def remove_context_value(self, context: CallbackContext, key: Context) -> None:
-        """Remove a value from the conversation context.
+        """Forget something that the conversation asked for.
 
         Args:
-            context (CallbackContext): The callback context to update.
-            key (Context): The context key to remove.
+            context: Data that the conversation remembers.
+            key: Kind of data to forget.
         """
         if context.chat_data and key.value in context.chat_data:
             context.chat_data.pop(key.value)
 
     def remove_all_context_values(self, context: CallbackContext) -> None:
-        """Remove all context values except the project context.
-
-        Clears all conversation context data while preserving the project context
-        which is needed for continued operations.
+        """Forget everything that a conversation asked for, except the project.
 
         Args:
-            context (CallbackContext): The callback context to clear.
+            context: Data that the conversation remembers.
         """
         for key in Context:
             if key != Context.PROJECT:
@@ -135,43 +121,38 @@ class BaseTelegramBot(BaseTelegram):
 
     @sync_to_async
     def _get_active_telegram_chat_async(self, chat_id: int) -> TelegramChat:
-        """Get active Telegram chat by ID (async wrapper).
+        """Get the chat with an identifier, if it belongs to an active user.
 
         Args:
-            chat_id (int): The Telegram chat ID to search for.
+            chat_id: Identifier that Telegram gives to the conversation.
 
         Returns:
-            TelegramChat: The active Telegram chat instance or None.
+            The chat, or None when it isn't linked to any account or its user was
+            disabled, so a disabled user can't keep using the bot.
         """
         # select_related caches the user so later user access doesn't trigger a lazy query outside this sync context
         return TelegramChat.objects.select_related("user").filter(chat_id=chat_id, user__is_active=True).first()
 
     @sync_to_async
     def is_auditor_async(self, telegram_chat: TelegramChat) -> bool:
-        """Check if chat user has auditor permissions (async wrapper).
+        """Check if the user of a chat can do more than read the data.
 
         Args:
-            telegram_chat (TelegramChat): The Telegram chat to check.
+            telegram_chat: Chat whose user roles are checked.
 
         Returns:
-            bool: True if the user has auditor or admin permissions.
+            Whether the user has the Auditor or the Admin role.
         """
         return telegram_chat.is_auditor()
 
     async def log_command_execution(self, update: Update, command_name: str, user: User | None = None) -> None:
-        """Log the execution of a Telegram bot command for audit purposes.
-
-        Records the chat where the command was executed and, when known, the
-        user that ran it. Callers that already resolved the chat's user (e.g.
-        via get_active_telegram_chat) should pass it in to avoid an extra
-        lookup; otherwise it's resolved from the update, falling back to
-        logging the user as anonymous when the chat isn't linked to anyone.
+        """Log that a command was run, and who ran it.
 
         Args:
-            update (Update): The Telegram update containing the command.
-            command_name (str): The name of the command being executed.
-            user (User | None, optional): The user that triggered the command,
-                if already known.
+            update: Message that the user wrote.
+            command_name: Name of the command that was run.
+            user: User that ran it, if the caller already knows who they are,
+              since it has to be searched otherwise.
         """
         if update.effective_chat is None:
             return
@@ -185,27 +166,17 @@ class BaseTelegramBot(BaseTelegram):
         )
 
     async def get_active_telegram_chat(self, update: Update) -> TelegramChat | None:
-        """Look up the Telegram chat bound to a Rekono user and report auth problems.
+        """Get the chat that is running a command, if it's allowed to run it.
 
-        A chat is considered authenticated when a TelegramChat row exists for
-        update.effective_chat.id and its linked user is still active; this is how a
-        Telegram chat is bound to a Rekono user, there is no separate login step.
-        If no such chat exists (never linked, or the linked user was deactivated),
-        this replies asking the user to run /start and returns None.
-
-        If the chat is found but the command requires Auditor or Admin (allow_readers
-        is False) and the linked user has neither role, this logs and replies that the
-        user isn't authorized. That rejection is only a message: the chat instance is
-        still returned in this case, so callers only treat the None outcome (chat not
-        found) as a hard stop; the "not authorized" outcome does not by itself prevent
-        the calling command or conversation state from continuing to run.
+        A chat is linked to a Rekono account instead of logging in, so a chat that
+        isn't linked to an active user can't run anything.
 
         Args:
-            update (Update): The Telegram update containing chat information.
+            update: Message that the user wrote.
 
         Returns:
-            TelegramChat | None: The chat linked to this Telegram conversation, or None
-                                 if it isn't linked to an active Rekono user.
+            The chat, or None if it isn't linked to an active user or if that user
+            isn't allowed to run this command. The user is told why in both cases.
         """
         self.validate_update(update)
         chat = await self._get_active_telegram_chat_async(update.effective_chat.id)

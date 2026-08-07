@@ -1,8 +1,9 @@
-"""Platform integration classes for external security tools and services.
+"""Base classes of the integrations with external platforms.
 
-Provides base classes for integrating with external platforms such as
-vulnerability management systems, notification services, and threat
-intelligence platforms.
+Rekono integrates with three kinds of platforms: the ones that receive the findings
+of the executions, the ones that provide extra information about the CVEs, and the
+ones that notify the users. All of them process the findings of an execution, so
+they share the entry points defined here.
 """
 
 from dataclasses import dataclass
@@ -26,73 +27,50 @@ from users.enums import Notification
 
 
 class BasePlatform(LoggingEntity):
-    """Base class for external platform integrations.
-
-    Provides common interface for all external platform integrations
-    including availability checks and findings processing.
-    """
+    """Base platform, which every external platform of Rekono extends."""
 
     def is_available(self) -> bool:
-        """Check if the platform integration is available.
+        """Check if the platform can be used.
 
         Returns:
-            bool: True if the platform is available, False otherwise.
+            True, unless the platform overrides this check.
         """
         return True
 
     def process_findings(self, execution: Execution, findings: list[Finding]) -> None:
-        """Process findings from an execution.
+        """Process the findings of an execution, as implemented by each platform.
 
         Args:
-            execution (Execution): The execution that generated the findings.
-            findings (list[Finding]): List of findings to process.
-
-        Note:
-            This method should be overridden by concrete implementations.
+            execution: Execution that reported the findings.
+            findings: Findings to be processed.
         """
         pass
 
 
 class BaseIntegration(BasePlatform):
-    """Base class for external service integrations.
-
-    Extends BasePlatform with HTTP session management, authentication,
-    and finding filtering capabilities for external API integrations.
-
-    Security Features:
-        - Authenticated HTTP sessions with retry logic
-        - Request logging and error handling
-        - Finding type filtering for selective processing
-        - Integration enable/disable controls
+    """Base platform of the ones whose API Rekono consumes.
 
     Attributes:
-        url (str): Base URL for the external service.
-        finding_types (list): List of Finding types to process (empty = all).
-        timeout (tuple): Connection and read timeouts in seconds applied to every request.
+        url: Base URL of the external API.
+        finding_types: Finding models that this integration processes, or empty to
+          process all of them.
+        timeout: Connection and read timeouts in seconds applied to every request.
     """
 
     url = ""
-    finding_types = []  # If empty, all findings are processed
+    finding_types = []
     # The read timeout is the more generous one because some platforms are slow to answer,
     # but none of them should take more than a few seconds to connect
     timeout = (5, 30)
 
     @cached_property
     def integration(self) -> Integration:
-        """Get the Integration model instance for this platform.
-
-        Returns:
-            Integration: The integration configuration object.
-        """
+        """The integration entity of this platform, identified by its class name."""
         return Integration.objects.get(key=self.__class__.__name__.lower())
 
     @cached_property
     def session(self) -> requests.Session:
-        """Get configured HTTP session with retry logic.
-
-        Returns:
-            requests.Session: Configured session with retry adapter.
-        """
+        """The HTTP session used for all the requests, which retries the failed ones."""
         session = requests.Session()
         session.mount(
             f"{urlparse(self.url).scheme}://",
@@ -107,10 +85,11 @@ class BaseIntegration(BasePlatform):
         return session
 
     def is_enabled(self) -> bool:
-        """Check if the integration is enabled.
+        """Check if this integration is enabled by the administrators.
 
         Returns:
-            bool: True if integration exists and is enabled, False otherwise.
+            Whether the integration is enabled. False when its entity doesn't exist
+            yet, so a missing integration is never used.
         """
         return self.integration.enabled if self.integration else False
 
@@ -122,21 +101,21 @@ class BaseIntegration(BasePlatform):
         trigger_exception: bool = True,
         **kwargs: Any,
     ) -> Any:
-        """Make HTTP request with logging and error handling.
+        """Perform an HTTP request to the external API and log its result.
 
         The timeout is applied to every request, unless the caller passes its own one,
         because the Retry policy only covers connection errors and HTTP status codes,
         not a response that never arrives.
 
         Args:
-            method (Callable): HTTP method function (get, post, etc.).
-            url (str): Request URL.
-            json (bool): Whether to parse response as JSON.
-            trigger_exception (bool): Whether to raise HTTP exceptions.
-            **kwargs (Any): Additional request arguments.
+            method: Method of the session that performs the request, like session.get.
+            url: URL to be requested.
+            json: Whether to return the parsed JSON response instead of the response.
+            trigger_exception: Whether to raise an exception for error status codes.
+            **kwargs: Extra arguments for the request, like the body or the headers.
 
         Returns:
-            Any: Response data (JSON dict or Response object).
+            The parsed JSON response, or the response itself if json is disabled.
         """
         kwargs.setdefault("timeout", self.timeout)
         try:
@@ -152,30 +131,28 @@ class BaseIntegration(BasePlatform):
         return response.json() if json else response
 
     def is_finding_processable(self, finding: Finding) -> bool:
-        """Check if a finding should be processed by this integration.
+        """Check if a finding is one of the types that this integration processes.
 
         Args:
-            finding (Finding): The finding to check.
+            finding: Finding whose type is checked.
 
         Returns:
-            bool: True if finding should be processed, False otherwise.
+            Whether the finding can be processed. True for every finding when the
+            integration doesn't declare any type.
         """
         return finding.__class__ in self.finding_types or len(self.finding_types) == 0
 
     def _process_finding(self, execution: Execution, finding: Finding) -> None:
-        """Process a single finding (implementation specific).
+        """Process one finding, as implemented by each integration.
 
         Args:
-            execution (Execution): The execution that generated the finding.
-            finding (Finding): The finding to process.
-
-        Note:
-            This method should be overridden by concrete implementations.
+            execution: Execution that reported the finding.
+            finding: Finding to be processed.
         """
         pass
 
     def process_finding(self, execution: Execution, finding: Finding) -> None:
-        """Process a finding with enable and type checks.
+        """Process one finding if this integration is enabled and processes its type.
 
         Availability is deliberately not checked here, because this method is called once per
         finding and checking it would perform one live request to the external API for every
@@ -187,8 +164,8 @@ class BaseIntegration(BasePlatform):
         findings doesn't lose the remaining ones because this integration failed for one.
 
         Args:
-            execution (Execution): The execution that generated the finding.
-            finding (Finding): The finding to process.
+            execution: Execution that reported the finding.
+            finding: Finding to be processed.
         """
         # The finding type is checked first because it's the only check that doesn't query anything
         if not self.is_finding_processable(finding) or not self.is_enabled():
@@ -201,7 +178,7 @@ class BaseIntegration(BasePlatform):
             )
 
     def process_findings(self, execution: Execution, findings: list[Finding]) -> None:
-        """Process multiple findings from an execution.
+        """Process all the findings of an execution, one by one.
 
         Skips processing entirely when the integration is disabled or unavailable. This is
         the only place where availability is checked, once per execution, so the findings are
@@ -210,8 +187,8 @@ class BaseIntegration(BasePlatform):
         stop the remaining findings from being processed.
 
         Args:
-            execution (Execution): The execution that generated the findings.
-            findings (list[Finding]): List of findings to process.
+            execution: Execution that reported the findings.
+            findings: Findings to be processed.
         """
         if not self.is_enabled() or not self.is_available():
             return
@@ -220,15 +197,15 @@ class BaseIntegration(BasePlatform):
 
 
 class BaseCveProvider(BaseIntegration):
-    """Base class for CVE enrichment provider integrations.
+    """Base platform of the ones that know extra information about the CVEs.
 
-    Extends BaseIntegration with CVE-specific enrichment logic including
-    data retrieval, parsing, quality scoring, and persistence. Concrete
-    subclasses implement _get_cve and _parse_cve for each provider API.
+    Subclasses implement _get_cve and _parse_cve for their own API, so all the
+    providers return the same enrichment data and can be compared by its quality
+    when several of them know the same CVE.
 
     Attributes:
-        finding_types (list): Supported finding types (Vulnerability only).
-        cvss_mapping (dict): CVSS base score ranges mapped to Rekono severity levels.
+        finding_types: Only vulnerabilities are enriched with CVE data.
+        cvss_mapping: CVSS base score range of each Rekono severity.
     """
 
     finding_types = [Vulnerability]
@@ -242,23 +219,23 @@ class BaseCveProvider(BaseIntegration):
 
     @dataclass
     class CveEnrichment:
-        """Standardized container for CVE enrichment data returned by providers.
+        """Information about a CVE, in the common format of all the providers.
 
         Attributes:
-            name (str | None): Vulnerability name or CISA advisory title.
-            description (str | None): Full technical vulnerability description.
-            cwes (list[str] | None): CWE identifiers in CWE-NNN format.
-            cvss_base_score (float | None): Numeric CVSS base score.
-            cvss_vector (str | None): Full CVSS vector string.
-            cvss_version (str | None): CVSS version prefix (e.g. "3.1", "4.0").
-            epss_score (float | None): EPSS probability of exploitation (0.0–1.0).
-            epss_percentile (float | None): EPSS percentile rank among all CVEs (0.0–1.0).
-            technologies (list[str] | None): Affected product or package identifiers.
-            reference (str | None): Canonical vulnerability detail page URL.
-            status (str | None): Provider-specific advisory status string.
-            euvd_id (str | None): ENISA EUVD identifier.
-            ghsa_id (str | None): GitHub Security Advisory identifier.
-            osv_generic_id (str | None): OSV-native ID for non-CVE/GHSA/EUVD ecosystems.
+            name: Vulnerability name or advisory title.
+            description: Full technical vulnerability description.
+            cwes: CWE identifiers in CWE-NNN format.
+            cvss_base_score: Numeric CVSS base score.
+            cvss_vector: Full CVSS vector string.
+            cvss_version: CVSS version prefix (e.g. "3.1", "4.0").
+            epss_score: EPSS probability of exploitation (0.0-1.0).
+            epss_percentile: EPSS percentile rank among all CVEs (0.0-1.0).
+            technologies: Affected product or package identifiers.
+            reference: Canonical vulnerability detail page URL.
+            status: Provider-specific advisory status string.
+            euvd_id: ENISA EUVD identifier.
+            ghsa_id: GitHub Security Advisory identifier.
+            osv_generic_id: OSV-native ID for non-CVE/GHSA/EUVD ecosystems.
         """
 
         name: str | None = None
@@ -277,13 +254,11 @@ class BaseCveProvider(BaseIntegration):
         osv_generic_id: str | None = None
 
     def is_available(self) -> bool:
-        """Check if the CVE provider API is reachable and functional.
-
-        Tests connectivity by requesting data for a known CVE (Log4Shell)
-        to validate authentication and API availability.
+        """Check if the provider answers with data, which also validates the API token.
 
         Returns:
-            bool: True if the provider API is reachable and returns data, False otherwise.
+            Whether the provider answered with data about a well-known CVE. False
+            for any failure, including an invalid or missing API token.
         """
         try:
             # Test connectivity using Log4Shell as a well-known, reliably indexed CVE
@@ -292,41 +267,42 @@ class BaseCveProvider(BaseIntegration):
             return False
 
     def _get_cve(self, cve: str) -> dict[str, Any]:
-        """Retrieve raw CVE data from the provider API.
+        """Get the raw data of a CVE from the provider API, as each provider does.
 
         Args:
-            cve (str): CVE identifier to retrieve.
+            cve: CVE identifier in CVE-YYYY-NNNN form.
 
         Returns:
-            dict[str, Any]: Raw API response for the CVE.
+            No data, unless the provider overrides this method.
         """
         return {}  # pragma: no cover
 
     def _parse_cve(self, cve: str, data: list[dict[str, Any]] | dict[str, Any]) -> CveEnrichment | None:
-        """Parse raw provider API response into a CveEnrichment object.
+        """Parse the raw data of a CVE into the common format, as each provider does.
 
         Args:
-            cve (str): CVE identifier being parsed.
-            data (list[dict[str, Any]] | dict[str, Any]): Raw API response data.
+            cve: CVE identifier in CVE-YYYY-NNNN form.
+            data: Raw response of the provider API, as returned by _get_cve.
 
         Returns:
-            CveEnrichment | None: Parsed enrichment data, or None if unavailable.
+            The enrichment data, or None if the response doesn't include any useful
+            information about the CVE.
         """
         return None
 
     def get_cve(self, cve: str) -> CveEnrichment | None:
-        """Retrieve and parse CVE enrichment data from the provider.
+        """Get the information that this provider has about a CVE.
 
         A provider that fails for this CVE is logged and treated as having no data, so
         the callers querying several providers still apply the data returned by the
         others, and a provider outage never interrupts the findings processing.
 
         Args:
-            cve (str): CVE identifier to enrich.
+            cve: CVE identifier in CVE-YYYY-NNNN form.
 
         Returns:
-            CveEnrichment | None: Parsed CVE data, or None if the provider returns
-                                  nothing or fails.
+            The enrichment data, or None if the provider doesn't know the CVE or
+            fails to answer.
         """
         try:
             data = self._get_cve(cve)
@@ -336,7 +312,7 @@ class BaseCveProvider(BaseIntegration):
             return None
 
     def cve_quality_score(self, data: CveEnrichment) -> int:
-        """Calculate a data quality score for CVE enrichment data.
+        """Calculate how complete the information provided about a CVE is.
 
         Scores start at 10 and are reduced most heavily for a missing description,
         then for missing CWE or affected technology data, and for missing or
@@ -345,10 +321,11 @@ class BaseCveProvider(BaseIntegration):
         apply provider-specific adjustments.
 
         Args:
-            data (CveEnrichment): CVE enrichment data to score.
+            data: Enrichment data whose completeness is measured.
 
         Returns:
-            int: Quality score used to select the best provider when multiple match.
+            The quality score, used to select the best provider when several of them
+            know the same CVE.
         """
         score = 10
         if not data.description:
@@ -364,15 +341,15 @@ class BaseCveProvider(BaseIntegration):
         return score
 
     def save(self, finding: Vulnerability, data: CveEnrichment) -> None:
-        """Persist CVE enrichment data onto a Vulnerability finding.
+        """Apply the information about a CVE to the vulnerability that reports it.
 
-        Updates the finding's name, description, CWE, CVSS fields, EPSS scores,
-        and reference with data from the enrichment object. Severity is derived
-        from the CVSS base score using the cvss_mapping ranges.
+        The severity is not taken from the provider, but derived from the CVSS base
+        score using the cvss_mapping ranges, so all the vulnerabilities are rated
+        the same way regardless of the provider that enriched them.
 
         Args:
-            finding (Vulnerability): The vulnerability finding to update.
-            data (CveEnrichment): CVE enrichment data to apply.
+            finding: Vulnerability to be enriched, which is updated and saved.
+            data: Enrichment data to apply to it.
         """
         finding.name = data.name
         # Some providers return the description as Markdown starting with a heading; render it to
@@ -425,80 +402,67 @@ class BaseCveProvider(BaseIntegration):
         )
 
     def is_finding_processable(self, finding: Finding) -> bool:
-        """Determine if a finding can be processed by this integration.
-
-        Validates that the finding is a processable vulnerability type
-        with a valid CVE identifier for NVD API queries.
+        """Check if a finding is a vulnerability with a CVE that can be enriched.
 
         Args:
-            finding (Finding): The finding to evaluate for processing
+            finding: Finding whose type and CVE are checked.
 
         Returns:
-            bool: True if finding has CVE and can be processed, False otherwise
+            Whether the finding can be enriched. False for the vulnerabilities
+            without a CVE, since the providers are queried by CVE identifier.
         """
         return self.is_enabled() and super().is_finding_processable(finding) and finding.cve is not None
 
 
 class BaseNotification(BasePlatform):
-    """Base class for notification platform integrations.
-
-    Provides notification capabilities for executions and alerts through
-    various channels like email, Telegram, or other messaging platforms.
-
-    User Management:
-        - Per-user notification preferences via enable_field
-        - Execution-based notifications with scope filtering
-        - Alert-based notifications for subscribers
-        - Availability checks before sending notifications
+    """Base platform of the ones that notify the users.
 
     Attributes:
-        enable_field (str): User model field name controlling notification enablement.
+        enable_field: User field that tells if this notification channel is enabled
+          for that user.
     """
 
     enable_field = ""
 
     def is_enabled(self, user: Any) -> bool:
-        """Check if notifications are enabled for a specific user.
+        """Check if a user enabled this notification channel.
 
         Args:
-            user (Any): The user to check notification preferences for.
+            user: User whose notification preferences are checked.
 
         Returns:
-            bool: True if notifications are enabled for the user, False otherwise.
+            Whether that user wants to be notified through this channel.
         """
         return getattr(user, self.enable_field)
 
     def _notify(self, users: list[Any], *args: Any, **kwargs: Any) -> None:
-        """Send notifications to users (implementation specific).
+        """Send a notification to some users, as implemented by each platform.
 
         Args:
-            users (list[Any]): List of users to notify.
-            *args (Any): Additional notification arguments.
-            **kwargs (Any): Additional notification keyword arguments.
-
-        Note:
-            This method should be overridden by concrete implementations.
+            users: Users to be notified.
+            *args: Content of the notification, defined by each platform.
+            **kwargs: Content of the notification, defined by each platform.
         """
         pass
 
     def _notify_if_available(self, users: list[Any], *args: Any, **kwargs: Any) -> None:
-        """Send notifications if the platform is available.
+        """Send a notification to some users only if the platform can be used.
 
         Args:
-            users (list[Any]): List of users to notify.
-            *args (Any): Additional notification arguments.
-            **kwargs (Any): Additional notification keyword arguments.
+            users: Users to be notified, without checking their preferences.
+            *args: Content of the notification, forwarded to _notify.
+            **kwargs: Content of the notification, forwarded to _notify.
         """
         if self.is_available():
             self._notify(users, *args, **kwargs)
 
     def _notify_if_enabled(self, users: list[Any], *args: Any, **kwargs: Any) -> None:
-        """Send notifications only to users who have notifications enabled.
+        """Send a notification to each user that enabled this channel.
 
         Args:
-            users (list[Any]): List of users to potentially notify.
-            *args (Any): Additional notification arguments.
-            **kwargs (Any): Additional notification keyword arguments.
+            users: Candidate users, filtered by their notification preferences.
+            *args: Content of the notification, forwarded to _notify.
+            **kwargs: Content of the notification, forwarded to _notify.
         """
         if self.is_available():
             for user in users:
@@ -506,16 +470,18 @@ class BaseNotification(BasePlatform):
                     self._notify([user], *args, **kwargs)
 
     def _get_users_to_notify_execution(self, execution: Execution) -> list[Any]:
-        """Get list of users to notify about an execution.
+        """Get the users to be notified about the result of an execution.
 
-        Includes the task executor and project members based on their
-        notification preferences and scope settings.
+        Besides the project members that ask for all the executions, the user that
+        executed the task is notified about their own executions, unless they only
+        want to be notified about alerts. Everybody has to have this notification
+        channel enabled, the executor included.
 
         Args:
-            execution (Execution): The execution to notify about.
+            execution: Execution whose project members and executor are checked.
 
         Returns:
-            list[Any]: List of users who should be notified.
+            The users to notify, without duplicates.
         """
         users = set()
         interested_users = execution.task.target.project.members.filter(
@@ -535,28 +501,25 @@ class BaseNotification(BasePlatform):
         return list(users)
 
     def _notify_execution(self, users: list[Any], execution: Execution, findings: list[Finding]) -> None:
-        """Send execution notifications to users (implementation specific).
+        """Notify the result of an execution, as implemented by each platform.
 
         Args:
-            users (list[Any]): List of users to notify.
-            execution (Execution): The completed execution.
-            findings (list[Finding]): Findings from the execution.
-
-        Note:
-            This method should be overridden by concrete implementations.
+            users: Users to be notified.
+            execution: Execution whose result is reported.
+            findings: Findings reported by that execution.
         """
         pass
 
     def process_findings(self, execution: Execution, findings: list[Finding]) -> None:
-        """Process findings by sending execution notifications.
+        """Notify the interested users about the findings of an execution.
 
         Skips notifying when the integration is unavailable. Any failure while
         building or sending the notification is logged rather than propagated, so
         a broken notification channel never interrupts execution processing.
 
         Args:
-            execution (Execution): The execution that generated the findings.
-            findings (list[Finding]): List of findings from the execution.
+            execution: Execution whose result is reported.
+            findings: Findings reported by that execution.
         """
         if not self.is_available():
             return
@@ -568,35 +531,32 @@ class BaseNotification(BasePlatform):
             )
 
     def _get_users_to_notify_alert(self, alert: Alert) -> list[Any]:
-        """Get list of users to notify about an alert.
+        """Get the alert subscribers that enabled this notification channel.
 
         Args:
-            alert (Alert): The alert that was triggered.
+            alert: Alert whose subscribers are filtered.
 
         Returns:
-            list[Any]: Alert subscribers who have notifications enabled.
+            The subscribers that want to be notified through this channel.
         """
         return alert.subscribers.filter(**{self.enable_field: True}).all()
 
     def _notify_alert(self, users: list[Any], alert: Alert, finding: Finding) -> None:
-        """Send alert notifications to users (implementation specific).
+        """Notify a triggered alert, as implemented by each platform.
 
         Args:
-            users (list[Any]): List of users to notify.
-            alert (Alert): The alert that was triggered.
-            finding (Finding): The finding that triggered the alert.
-
-        Note:
-            This method should be overridden by concrete implementations.
+            users: Users to be notified.
+            alert: Alert that was triggered.
+            finding: Finding that triggered it.
         """
         pass
 
     def process_alert(self, alert: Alert, finding: Finding) -> None:
-        """Process an alert by sending notifications to subscribers.
+        """Notify the subscribers of an alert triggered by a finding.
 
         Args:
-            alert (Alert): The alert that was triggered.
-            finding (Finding): The finding that triggered the alert.
+            alert: Alert that was triggered.
+            finding: Finding that triggered it.
         """
         if not self.is_available():
             return

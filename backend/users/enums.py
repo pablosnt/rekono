@@ -1,24 +1,16 @@
-"""Enumeration classes for user notification preferences and OTP scopes.
-
-Defines notification scope options for user preference management and the
-purposes that a one-time password can be issued for, with Django TextChoices
-and IntegerChoices implementations.
-"""
+"""Notification preferences of the users and purposes of their one-time passwords."""
 
 from django.db import models
 from django.db.models.enums import Choices
 
 
 class Notification(models.TextChoices):
-    """Notification scope preferences for user accounts.
-
-    Defines the scope of notifications users receive about security executions.
-    Controls which execution events trigger notifications to the user.
+    """Executions that a user wants to be notified about.
 
     Attributes:
-        ONLY_ALERTS (str): Only alert notifications, execution notifications disabled
-        MY_EXECUTIONS (str): Only notifications for executions started by the user
-        ALL_EXECUTIONS (str): Notifications for all executions in accessible projects
+        ONLY_ALERTS: No execution notifications at all, only the triggered alerts.
+        MY_EXECUTIONS: Only the executions of the tasks that the user started.
+        ALL_EXECUTIONS: All the executions of the projects where the user is member.
     """
 
     ONLY_ALERTS = "Only alerts"
@@ -35,10 +27,10 @@ class OtpScope(models.IntegerChoices):
     the account password or to pass the MFA second factor.
 
     Attributes:
-        INVITATION (int): Account creation after an invitation
-        PASSWORD_RESET (int): Password reset, including the account enabling email
-        EMAIL_VERIFICATION (int): Confirmation of a pending email address change
-        MFA (int): Multi-factor authentication second factor sent via email
+        INVITATION: Account creation after an invitation.
+        PASSWORD_RESET: Password reset, including the account enabling email.
+        EMAIL_VERIFICATION: Confirmation of a pending email address change.
+        MFA: Multi-factor authentication second factor sent via email.
     """
 
     INVITATION = 1

@@ -1,8 +1,4 @@
-"""Django app configuration for input_types module.
-
-Configures the input_types Django application through BaseApp, which loads
-the default InputType fixture data into the database after migrations.
-"""
+"""Django app configuration of the input types app."""
 
 from django.apps import AppConfig
 
@@ -10,13 +6,10 @@ from framework.apps import BaseApp
 
 
 class InputTypesConfig(BaseApp, AppConfig):
-    """Django app configuration for input_types.
-
-    Extends BaseApp to inherit automatic fixture loading, populating the
-    default InputType records after migrations complete.
+    """Configuration of the input types app.
 
     Attributes:
-        name (str): The name of the Django app.
+        name: Name of the app in the Django app registry.
     """
 
     name = "input_types"

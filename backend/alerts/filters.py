@@ -1,8 +1,4 @@
-"""Django filters for alert management.
-
-Filter classes for querying and filtering alert objects in the REST API.
-Provides field-based filtering capabilities for alert searches.
-"""
+"""Filters of the alert endpoints."""
 
 from django_filters.rest_framework import FilterSet
 
@@ -10,19 +6,10 @@ from alerts.models import Alert
 
 
 class AlertFilter(FilterSet):
-    """Filter class for Alert model.
-
-    Provides filtering capabilities for alert queries based on project,
-    item type, value, enabled status, owner, and subscribers.
-    """
+    """Filters to search the alerts of a project."""
 
     class Meta:
-        """Meta configuration for the AlertFilter.
-
-        Attributes:
-            model (Model): The Alert model to filter
-            fields (dict): Field names and their supported filter operations
-        """
+        """Filter configuration for the alerts."""
 
         model = Alert
         fields = {

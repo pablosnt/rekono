@@ -1,8 +1,4 @@
-"""Telegram notification system for Rekono security events.
-
-Provides Telegram-based notification delivery for security events including
-execution results, alerts, and findings through Bot messaging.
-"""
+"""Notifications that Rekono sends through the Telegram bot."""
 
 from typing import Any
 
@@ -30,21 +26,14 @@ from users.models import User
 
 
 class Telegram(BaseNotification, BaseTelegram):
-    """Telegram notification delivery for security events.
-
-    Delivers execution reports, alerts, findings, and account events (welcome,
-    logout, report creation) to users over Telegram Bot messaging, splitting
-    long reports across multiple messages to stay within Telegram's per-message
-    length limit. Only users with a linked Telegram chat receive a message.
-    When the bot token is missing or invalid, or a send fails with a network
-    error, the notification is skipped without raising an exception.
+    """Notifications sent to the Telegram chats of the users that linked one.
 
     Attributes:
-        enable_field (str): User field name that toggles Telegram notifications.
-        initial_findings_per_message (int): Findings per message when a report is
-            split because it exceeds Telegram's length limit.
-        findings_summary_threshold (int): Finding count above which an execution
-            notification switches from a detailed report to a per-type summary.
+        enable_field: Field where the users say if they want to be notified.
+        initial_findings_per_message: Findings that each message includes when a
+          notification has to be split because it's too long for Telegram.
+        findings_summary_threshold: Findings that an execution can report before
+          its notification only includes how many of each type were found.
     """
 
     enable_field = "telegram_notifications"
@@ -53,41 +42,35 @@ class Telegram(BaseNotification, BaseTelegram):
     findings_summary_threshold = 50
 
     def is_available(self) -> bool:
-        """Check if Telegram notifications are available.
+        """Check if the platform can be used.
 
         Returns:
-            bool: True if bot token is configured and application is ready.
+            Whether a bot token is configured and its client could be created.
         """
         return bool(self.settings and self.settings.secret and self.app and self.app.bot)
 
     def _notify(self, users: list[Any], message: str) -> None:
-        """Send notification message to multiple users via Telegram.
+        """Send a message to the chats of the users that linked one.
 
         Args:
-            users (list[Any]): List of users to notify.
-            message (str): Message content to send.
+            users: Users to notify.
+            message: Content of the message, written in Markdown.
         """
         for user in users:
             if hasattr(user, "telegram_chat"):
                 self.send_message(user.telegram_chat, message)
 
     def _notify_execution(self, users: list[User], execution: Execution, findings: list[Finding]) -> None:
-        """Send execution completion notification with findings summary.
+        """Notify the users that an execution finished, with what it discovered.
 
-        Formats and sends a comprehensive execution report including tool details,
-        execution timing, and organized findings by type. When an execution reports more than
-        `findings_summary_threshold` findings, a single summary message with the counters per
-        finding type is sent instead of their details, keeping the number of messages under
-        Telegram's limits. Otherwise the full report is sent as a single message, but if it
-        exceeds Telegram's message length limit the findings are split into groups of
-        `initial_findings_per_message`, keeping the execution details only in the first message.
-        Any resulting message that is still too long is split in half again until every message
-        fits within the limit.
+        An execution that discovered too many findings is notified with how many
+        there are of each type instead, and a notification that doesn't fit in one
+        Telegram message is split into as many as needed.
 
         Args:
-            users (list[User]): Users to notify about the execution.
-            execution (Execution): The completed security tool execution.
-            findings (list[Finding]): List of security findings discovered.
+            users: Users to notify.
+            execution: Execution that finished.
+            findings: Findings that the execution discovered.
         """
         # Findings entered manually by a user are not scan results, so they are left out of the notification
         findings = [finding for finding in findings if not finding.created_from_user_input]
@@ -111,13 +94,14 @@ class Telegram(BaseNotification, BaseTelegram):
     def _notify_execution_group(
         self, users: list[User], execution: Execution, findings: list[Finding], with_execution: bool
     ) -> None:
-        """Send a group of findings, splitting it in half if it exceeds the length limit.
+        """Notify a group of findings, splitting it again if it's still too long.
 
         Args:
-            users (list[User]): Users to notify about the execution.
-            execution (Execution): The completed security tool execution.
-            findings (list[Finding]): Findings included in this group.
-            with_execution (bool): Whether to prepend the execution details to the message.
+            users: Users to notify.
+            execution: Execution that discovered the findings.
+            findings: Findings that this message includes.
+            with_execution: Whether the message must include the execution data,
+              which only the first message of a notification does.
         """
         message = (
             self._execution_message(execution, self._format_findings(findings))
@@ -135,14 +119,15 @@ class Telegram(BaseNotification, BaseTelegram):
             self._notify_execution_group(users, execution, findings[half:], with_execution=False)
 
     def _execution_message(self, execution: Execution, findings: str) -> str:
-        """Render the execution report template with an already formatted findings section.
+        """Write the message that notifies an execution.
 
         Args:
-            execution (Execution): The completed security tool execution.
-            findings (str): Formatted findings section (details or summary) to embed in the report.
+            execution: Execution that finished.
+            findings: Findings of the execution, already written as a text.
 
         Returns:
-            str: Formatted execution report ready to be sent.
+            The message, with what was scanned, how, and with a link to see the
+            whole scan in Rekono.
         """
         return EXECUTION.format(
             project=self.escape(execution.task.target.project.name),
@@ -158,13 +143,13 @@ class Telegram(BaseNotification, BaseTelegram):
         )
 
     def _format_findings_summary(self, findings: list[Finding]) -> str:
-        """Format the counters of findings per type for a Telegram summary message.
+        """Write how many findings of each type an execution discovered.
 
         Args:
-            findings (list[Finding]): Findings to summarize.
+            findings: Findings to count.
 
         Returns:
-            str: Findings summary with one line per finding type showing its icon, title and count.
+            One line per finding type, with how many of them were discovered.
         """
         counts: dict[Any, int] = {}
         for finding in findings:
@@ -182,13 +167,13 @@ class Telegram(BaseNotification, BaseTelegram):
         )
 
     def _format_findings(self, findings: list[Finding]) -> str:
-        """Format a group of findings organized by type for a Telegram message.
+        """Write a group of findings as a text, grouped by their type.
 
         Args:
-            findings (list[Finding]): Findings to format.
+            findings: Findings to write.
 
         Returns:
-            str: Findings summary grouped by type with the corresponding icons and titles.
+            The findings of each type, under the name of that type.
         """
         texts_by_type: dict[Any, list[str]] = {}
         for finding in findings:
@@ -203,13 +188,13 @@ class Telegram(BaseNotification, BaseTelegram):
         )
 
     def _format_finding(self, finding: Finding) -> str:
-        """Format a security finding for Telegram message display.
+        """Write one finding as a text, following the template of its type.
 
         Args:
-            finding (Finding): The security finding to format.
+            finding: Finding to write.
 
         Returns:
-            str: Formatted finding message with escaped content.
+            The finding data, escaped so Telegram doesn't read it as Markdown.
         """
         values = {}
         for field in model_to_dict(finding):
@@ -220,12 +205,12 @@ class Telegram(BaseNotification, BaseTelegram):
         return FINDINGS[finding.__class__].get("template", "").format(**values)
 
     def _notify_alert(self, users: list[User], alert: Alert, finding: Finding) -> None:
-        """Send security alert notification for a specific finding.
+        """Notify the users subscribed to an alert that it has been triggered.
 
         Args:
-            users (list[User]): Users subscribed to the alert.
-            alert (Alert): The alert configuration that triggered.
-            finding (Finding): The security finding that triggered the alert.
+            users: Users to notify.
+            alert: Alert that was triggered.
+            finding: Finding that triggered the alert.
         """
         self._notify(
             users,
@@ -239,28 +224,28 @@ class Telegram(BaseNotification, BaseTelegram):
         )
 
     def welcome_message(self, user: User) -> None:
-        """Send welcome message to newly linked user.
+        """Welcome a user that has just linked their chat.
 
         Args:
-            user (User): The user who linked their Telegram account.
+            user: User that linked their chat.
         """
         self._notify_if_available([user], f"Welcome *{self.escape(user.username)}*\! Your Rekono bot is ready")
 
     def logout_after_password_change_message(self, user: User) -> None:
-        """Notify user of logout due to password change.
+        """Tell a user that they have to link their chat again.
 
         Args:
-            user (User): The user whose password was changed.
+            user: User whose password changed, which unlinks their chat.
         """
         self._notify_if_available(
             [user], "Your session expired after your password change. Please, execute /start to link it again"
         )
 
     def report_created(self, report: Any) -> None:
-        """Notify user when a security report is created.
+        """Notify a user that the report that they asked for is ready.
 
         Args:
-            report (Any): The generated security report instance.
+            report: Report that was generated.
         """
         report_target = (
             f"project {report.project.name}"

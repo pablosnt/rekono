@@ -1,9 +1,4 @@
-"""Django app configuration for tools module.
-
-Provides app configuration with fixture management for tools and their
-configurations, plus automatic tool status updates after migration completion
-to ensure tool availability information is current.
-"""
+"""Django app configuration of the tools app."""
 
 from typing import Any
 
@@ -14,36 +9,24 @@ from framework.apps import BaseApp
 
 
 class ToolsConfig(BaseApp, AppConfig):
-    """Django app configuration for tools module.
-
-    Extends BaseApp and AppConfig to provide tools-specific initialization,
-    including fixture management for tools and configurations and automatic
-    tool status updates after migrations.
+    """Configuration of the tools app.
 
     Attributes:
-        name (str): The application name
+        name: Name of the app in the Django app registry.
     """
 
     name = "tools"
 
     def ready(self) -> None:
-        """Perform application initialization after Django setup.
-
-        Connects the tool status update handler to post-migration signals
-        to ensure tool availability information is updated after database changes.
-        """
+        """Prepare the app, checking the installed tools after each migration."""
         super().ready()
         post_migrate.connect(self.update_tools_status, sender=self)
 
     def load_fixtures(self, **kwargs: Any) -> None:
-        """Load tool fixtures by recreating internal model data.
-
-        Deletes and recreates internal models (Intensity, Argument, Input, Output)
-        while preserving Tool and Configuration entities to maintain consistency
-        with related entities like Tasks and Processes.
+        """Load the tool fixtures, recreating everything that belongs to a tool.
 
         Args:
-            **kwargs (Any): Additional keyword arguments passed from parent method
+            **kwargs: Arguments sent by the post_migrate signal.
         """
         from tools.models import Argument, Input, Intensity, Output
 
@@ -57,13 +40,10 @@ class ToolsConfig(BaseApp, AppConfig):
         super().load_fixtures(**kwargs)
 
     def update_tools_status(self, **kwargs: Any) -> None:
-        """Update installation status for all tools after migrations.
-
-        Triggered by post_migrate signal to refresh tool availability
-        and version information after database schema changes.
+        """Check which tools are installed in the system and which version they run.
 
         Args:
-            **kwargs (Any): Signal keyword arguments (unused)
+            **kwargs: Arguments sent by the post_migrate signal.
         """
         from tools.models import Tool
 

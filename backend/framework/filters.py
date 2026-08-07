@@ -1,7 +1,8 @@
-"""Custom filter classes for Django REST framework API endpoints.
+"""Custom filters shared by the Rekono API endpoints.
 
-Provides specialized filter implementations for like functionality
-and multiple field filtering capabilities.
+Cover the two filtering needs that aren't solved by the standard django-filter
+classes: filtering by the likes of the user that performs the request, and
+searching a single value across several model fields.
 """
 
 from typing import Any
@@ -12,50 +13,45 @@ from django_filters.rest_framework.filters import BooleanFilter, CharFilter, Fil
 
 
 class LikeFilter(FilterSet):
-    """Filter for models with like/favorite functionality.
-
-    Provides filtering based on whether the current user has liked
-    the objects in the queryset.
+    """Base filter set for the models that can be liked by the users.
 
     Attributes:
-        like (BooleanFilter): Filter for liked/unliked objects.
+        like: Whether to return only the objects liked by the user that performs
+          the request, or only the ones that aren't liked.
     """
 
     like = BooleanFilter(method="get_liked_items")
 
     def get_liked_items(self, queryset: QuerySet, name: str, value: bool) -> QuerySet:
-        """Filter queryset based on user's like status.
+        """Filter the objects by the likes of the user that performs the request.
 
         Args:
-            queryset (QuerySet): The base queryset to filter.
-            name (str): The filter field name (unused).
-            value (bool): True to get liked items, False for unliked items.
+            queryset: Objects to be filtered.
+            name: Name of the filter attribute, required by django-filter but
+              unused, since this method only applies to the ``like`` filter.
+            value: True to keep only the liked objects, False to exclude them.
 
         Returns:
-            QuerySet: Filtered queryset based on like status.
+            The objects liked by the user, or the ones that aren't liked.
         """
         liked = {"liked_by": self.request.user}
         return queryset.filter(Q(**liked) if value else ~Q(**liked)).all()
 
 
 class MultipleFieldFilterSet(FilterSet):
-    """FilterSet with support for multiple field filtering.
-
-    Base FilterSet class that provides the ability to filter across
-    multiple fields with a single filter parameter.
-    """
+    """Base filter set required to use the multiple field filters."""
 
     def multiple_field_filter(self, queryset: QuerySet, name: str, value: Any) -> QuerySet:
-        """Filter queryset across multiple fields with OR logic.
+        """Filter the objects matching the value in any of the configured fields.
 
         Args:
-            queryset (QuerySet): The base queryset to filter.
-            name (str): Name of the filter attribute on this FilterSet, used to
-                        look up its `fields` list in self.filters.
-            value (Any): The value to search for in all specified fields.
+            queryset: Objects to be filtered.
+            name: Name of the filter attribute on this filter set, used to look up
+              its ``fields`` list in self.filters.
+            value: Value to search for in all the configured fields.
 
         Returns:
-            QuerySet: Filtered queryset matching value in any specified field.
+            The objects matching the value in at least one of those fields.
         """
         query = Q()
         for field in self.filters[name].fields:
@@ -64,21 +60,21 @@ class MultipleFieldFilterSet(FilterSet):
 
 
 class MultipleFieldFilter(Filter):
-    """Base filter for searching across multiple fields.
+    """Base filter that searches one value across several model fields.
 
-    Allows filtering a queryset by searching for a value across
-    multiple model fields using OR logic.
+    Only works within a MultipleFieldFilterSet, since that's the filter set that
+    implements the filtering method configured here.
 
     Attributes:
-        fields (list[str]): List of field names to search across.
+        fields: Model fields, including related lookups, where the value is searched.
     """
 
     def __init__(self, fields: list[str], **kwargs: Any) -> None:
-        """Initialize the multiple field filter.
+        """Prepare the filter with the fields where the value will be searched.
 
         Args:
-            fields (list[str]): List of field names to search across.
-            **kwargs (Any): Additional filter arguments.
+            fields: Model fields, including related lookups, to search in.
+            **kwargs: Standard filter arguments.
         """
         self.fields = fields
         # Method defined in MultipleFieldFilterSet
@@ -87,51 +83,18 @@ class MultipleFieldFilter(Filter):
 
 
 class MultipleNumberFilter(MultipleFieldFilter, NumberFilter):
-    """Multiple field filter for numeric values.
-
-    Combines MultipleFieldFilter with NumberFilter to enable
-    searching for numeric values across multiple fields.
-
-    Example:
-        ```python
-        class MyFilterSet(MultipleFieldFilterSet):
-            port_search = MultipleNumberFilter(fields=["port", "target_port"])
-        ```
-    """
+    """Multiple field filter for numeric values."""
 
     pass
 
 
 class MultipleCharFilter(MultipleFieldFilter, CharFilter):
-    """Multiple field filter for character/string values.
-
-    Combines MultipleFieldFilter with CharFilter to enable
-    searching for string values across multiple fields.
-
-    Example:
-        ```python
-        class MyFilterSet(MultipleFieldFilterSet):
-            name_search = MultipleCharFilter(fields=["name", "title", "description"])
-        ```
-    """
+    """Multiple field filter for text values."""
 
     pass
 
 
 class MultipleModelFilter(MultipleFieldFilter, ModelChoiceFilter):
-    """Multiple field filter for model object values.
-
-    Combines MultipleFieldFilter with ModelChoiceFilter to enable
-    filtering by a model instance across multiple relationship fields.
-
-    Example:
-        ```python
-        class MyFilterSet(MultipleFieldFilterSet):
-            tool_search = MultipleModelFilter(
-                queryset=Tool.objects.all(),
-                fields=["configuration__tool", "process__steps__configuration__tool"],
-            )
-        ```
-    """
+    """Multiple field filter for references to another model."""
 
     pass

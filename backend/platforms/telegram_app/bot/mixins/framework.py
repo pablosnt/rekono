@@ -1,7 +1,7 @@
-"""Framework mixins for Telegram Bot conversations and CRUD operations.
+"""Base steps shared by all the bot conversations.
 
-Provides base mixins for conversation state management, pagination,
-CRUD operations, and interactive keyboard handling in Telegram Bot workflows.
+The conversations only differ in what they ask for, so asking, saving the answer,
+and creating something with it are defined once here.
 """
 
 from functools import cached_property
@@ -23,52 +23,46 @@ from users.models import User
 
 
 class BaseMixin(BaseTelegramBot):
-    """Base mixin for Telegram Bot conversation state management.
-
-    Provides utilities for managing conversation states, navigation between
-    states, and handling conversation flow control in complex workflows.
-    """
+    """Base step of a conversation, which knows how to move to the next one."""
 
     @cached_property
     def _mixin_states(self) -> list:
-        """Get the list of conversation state methods.
-
-        Returns:
-            list: List of state methods or empty list if not defined.
-        """
+        """The steps of the conversation that this step belongs to."""
         return [] if not hasattr(self, "states_methods") else self.states_methods
 
     def _get_current_state(self, method: Callable) -> int:
-        """Get the current state index for a method.
+        """Get the position of a step in the conversation.
 
         Args:
-            method (Callable): The method to find in the states list.
+            method: Step whose position is searched.
 
         Returns:
-            int: The state index or ConversationHandler.END if not found.
+            The position of the step, or the end of the conversation when this
+            mixin doesn't declare any step.
         """
         return self._mixin_states.index(method) if len(self._mixin_states) > 0 else ConversationHandler.END
 
     def get_next_state(self, method: Callable) -> int:
-        """Get the next state in the conversation flow.
+        """Get the step that comes after another one.
 
         Args:
-            method (Callable): The current method to find next state for.
+            method: Step whose next one is searched.
 
         Returns:
-            int: The next state index or ConversationHandler.END if at the end.
+            The next step, or the end of the conversation if there is no next one.
         """
         current_state = self._get_current_state(method)
         return ConversationHandler.END if current_state == len(self._mixin_states) - 1 else current_state + 1
 
     def get_previous_state(self, method: Callable) -> int:
-        """Get the previous state in the conversation flow.
+        """Get the step that comes before another one.
 
         Args:
-            method (Callable): The current method to find previous state for.
+            method: Step whose previous one is searched.
 
         Returns:
-            int: The previous state index or 0 if at the beginning.
+            The previous step, or the same one if it's the first of the
+            conversation.
         """
         current_state = self._get_current_state(method)
         return current_state if current_state == 0 else current_state - 1
@@ -76,23 +70,22 @@ class BaseMixin(BaseTelegramBot):
     async def go_to_next_state(
         self, update: Update, context: CallbackContext, next_state: int, invoke_next_state: bool = False
     ) -> int:
-        """Navigate to the next state in the conversation flow.
-
-        Automatically executes certain state methods based on naming conventions
-        or explicit invocation. Methods starting with 'ask_' or 'reply_' are
-        automatically executed, or if invoke_next_state is True.
+        """Move the conversation to its next step.
 
         Args:
-            update (Update): The Telegram update containing user interaction.
-            context (CallbackContext): The callback context for the conversation.
-            next_state (int): The next state index to navigate to.
-            invoke_next_state (bool): Force execution of next state method.
+            update: Message that the user wrote.
+            context: Data that the conversation remembers.
+            next_state: Step to move to.
+            invoke_next_state: Whether that step must be run right away, which the
+              steps that only save an answer don't need.
 
         Returns:
-            int: State index or result of state method execution.
+            The step where the conversation is now.
         """
         if next_state != ConversationHandler.END and len(self._mixin_states) > 0:
             next_callable = self._mixin_states[next_state]
+            # The steps that ask something or that answer something have to be run now,
+            # otherwise the users would receive no message and the conversation would look stuck
             if (
                 invoke_next_state
                 or next_callable.__name__.startswith("ask_")
@@ -103,47 +96,41 @@ class BaseMixin(BaseTelegramBot):
 
     @sync_to_async
     def _is_queryset_async(self, queryset: QuerySet) -> bool:
-        """Check if queryset has any results (async wrapper).
+        """Check if there is anything to choose from.
 
         Args:
-            queryset (QuerySet): Django QuerySet to check.
+            queryset: Options offered to the user, which are evaluated here.
 
         Returns:
-            bool: True if queryset contains any objects.
+            Whether the queryset holds at least one option.
         """
         return bool(queryset)
 
     @sync_to_async
     def queryset_exists_async(self, queryset: QuerySet) -> bool:
-        """Check if queryset exists using Django's exists() method (async wrapper).
+        """Check if there is anything that matches a query.
 
         Args:
-            queryset (QuerySet): Django QuerySet to check for existence.
+            queryset: Query to be checked, which isn't evaluated.
 
         Returns:
-            bool: True if queryset has any matching records.
+            Whether the query matches at least one object.
         """
         return queryset.exists()
 
     @sync_to_async
     def _get_model_instance_async(self, model: Any, pk: int, user: User) -> Any:
-        """Get model instance by primary key, limited to the user's projects (async wrapper).
-
-        The primary key comes from the callback data of a Telegram button, which the
-        user can replay with any value, so the lookup is scoped to the projects the
-        user belongs to. The project relation is taken from the model's
-        _project_field, except for Project itself, which exposes its members
-        directly. Models without a project relation are global and are retrieved
-        without any scoping.
+        """Get what a user chose, if they are allowed to choose it.
 
         Args:
-            model (Any): Django model class to query.
-            pk (int): Primary key of the instance to retrieve.
-            user (User): User that must be a member of the related project.
+            model: Kind of thing that was chosen.
+            pk: Identifier that the user answered with.
+            user: User that answered.
 
         Returns:
-            Any: Model instance matching the primary key, or None if it doesn't
-                 exist or belongs to a project the user isn't a member of.
+            The chosen thing, or None if it doesn't exist or belongs to a project
+            that the user isn't a member of, since the identifier comes from a
+            button that the users can answer with any value.
         """
         members_field = None
         if model == Project:
@@ -158,28 +145,30 @@ class BaseMixin(BaseTelegramBot):
 
     @sync_to_async
     def _get_keyboard_from_queryset_async(self, queryset: QuerySet, attribute: str) -> list[InlineKeyboardButton]:
-        """Generate inline keyboard buttons from QuerySet (async wrapper).
+        """Get one button per thing that the users can choose from.
 
         Args:
-            queryset (QuerySet): Django QuerySet to convert to buttons.
-            attribute (str): Model attribute to use as button text.
+            queryset: Things that the users can choose from.
+            attribute: Field that each button is named after.
 
         Returns:
-            list[InlineKeyboardButton]: List of inline keyboard buttons.
+            The buttons, sorted by their name, and each one carrying the
+            identifier of what it represents.
         """
         return [InlineKeyboardButton(getattr(i, attribute), callback_data=i.id) for i in queryset.order_by(attribute)]
 
     def _get_inline_keyboard_markup(
         self, keyboard: list[InlineKeyboardButton], options_per_row: int
     ) -> InlineKeyboardMarkup:
-        """Create inline keyboard markup with specified buttons per row.
+        """Arrange the buttons of a question in rows.
 
         Args:
-            keyboard (list[InlineKeyboardButton]): List of keyboard buttons.
-            options_per_row (int): Number of buttons to display per row.
+            keyboard: Buttons to arrange.
+            options_per_row: Buttons that each row can have, which depends on how
+              long their names are.
 
         Returns:
-            InlineKeyboardMarkup: Formatted keyboard markup for Telegram.
+            The buttons as Telegram shows them.
         """
         return InlineKeyboardMarkup(
             [keyboard[item : item + options_per_row] for item in range(0, len(keyboard), options_per_row)]
@@ -187,16 +176,13 @@ class BaseMixin(BaseTelegramBot):
 
     @sync_to_async
     def _save_serializer_async(self, serializer: Serializer) -> tuple[Any | None, dict[str, Any]]:
-        """Save serializer data with validation and integrity error handling (async wrapper).
+        """Create something with the data that the users provided.
 
         Args:
-            serializer (Serializer): The serializer to validate and save.
+            serializer: Serializer with the data to create the thing with.
 
         Returns:
-            tuple[Any | None, dict[str, Any]]: Tuple of (saved_instance, errors_dict).
-                                              Returns (instance, {}) on success,
-                                              (None, validation_errors) on validation failure,
-                                              or (None, integrity_error) on database conflicts.
+            The created thing, or the errors that stopped it from being created.
         """
         try:
             return (serializer.save(), {}) if serializer.is_valid() else (None, serializer.errors)
@@ -204,13 +190,13 @@ class BaseMixin(BaseTelegramBot):
             return None, {serializer.Meta.model.__name__.lower(): ["This entity already exists in the database"]}
 
     def _build_error_message_from_serializer_errors(self, serializer_errors: dict[str, Any]) -> str:
-        """Build formatted error message from serializer validation errors.
+        """Write the errors that stopped something from being created.
 
         Args:
-            serializer_errors (dict[str, Any]): Dictionary of field validation errors.
+            serializer_errors: Errors of each field, as the serializer reports them.
 
         Returns:
-            str: Formatted error message for Telegram display.
+            One line per field, escaped so Telegram doesn't read it as Markdown.
         """
         return "*ERRORS*\n" + "\n".join(
             [
@@ -230,23 +216,21 @@ class BaseMixin(BaseTelegramBot):
         next_state: int,
         chat: TelegramChat | None = None,
     ) -> int:
-        """Display selection options from a QuerySet with inline keyboard.
-
-        Creates an inline keyboard from QuerySet objects and displays selection
-        options to the user with pagination support.
+        """Ask the users to choose one of the things that they can choose from.
 
         Args:
-            update (Update): The Telegram update containing user interaction.
-            queryset (QuerySet): Django QuerySet containing selectable objects.
-            attribute (str): Model attribute to use as display text.
-            options_per_row (int): Number of buttons to display per row.
-            message (str): Message to display with the selection options.
-            not_found_message (str): Message to display when no options available.
-            next_state (int): Next conversation state after selection.
-            chat (TelegramChat, optional): Chat context. Auto-retrieved if None.
+            update: Message that the user wrote.
+            queryset: Things that the users can choose from.
+            attribute: Field that each button is named after.
+            options_per_row: Buttons that each row can have.
+            message: Question to ask.
+            not_found_message: Answer when there is nothing to choose from.
+            next_state: Step that saves the answer.
+            chat: Chat that is running the command, if the caller already knows it.
 
         Returns:
-            int: Next conversation state or ConversationHandler.END.
+            The step that saves the answer, or the end of the conversation if the
+            chat can't run the command or if there is nothing to choose from.
         """
         chat = chat or await self.get_active_telegram_chat(update)
         if not chat:
@@ -267,21 +251,19 @@ class BaseMixin(BaseTelegramBot):
         next_state: int,
         chat: TelegramChat | None = None,
     ) -> int:
-        """Display selection options from a list of string values.
-
-        Creates an inline keyboard from string values and displays selection
-        options to the user with pagination support.
+        """Ask the users to choose one of some fixed values.
 
         Args:
-            update (Update): The Telegram update containing user interaction.
-            values (list[str]): List of string values for selection.
-            options_per_row (int): Number of buttons to display per row.
-            message (str): Message to display with the selection options.
-            next_state (int): Next conversation state after selection.
-            chat (TelegramChat, optional): Chat context. Auto-retrieved if None.
+            update: Message that the user wrote.
+            values: Values that the users can choose from.
+            options_per_row: Buttons that each row can have.
+            message: Question to ask.
+            next_state: Step that saves the answer.
+            chat: Chat that is running the command, if the caller already knows it.
 
         Returns:
-            int: Next conversation state or ConversationHandler.END.
+            The step that saves the answer, or the end of the conversation if the
+            chat can't run the command.
         """
         chat = chat or await self.get_active_telegram_chat(update)
         if not chat:
@@ -299,23 +281,19 @@ class BaseMixin(BaseTelegramBot):
         next_state: int,
         chat: TelegramChat | None = None,
     ) -> int:
-        """Save selected model instance to conversation context.
-
-        Processes user's callback query selection, retrieves the model instance,
-        and stores it in the conversation context for subsequent use. The instance
-        is looked up on behalf of the chat user, so only entities from the user's
-        projects can be selected.
+        """Remember what the users chose.
 
         Args:
-            update (Update): The Telegram update containing callback query.
-            context (CallbackContext): The callback context for the conversation.
-            context_key (Context): Context key for storing the selected instance.
-            model (Any): Django model class for the selected instance.
-            next_state (int): Next conversation state after saving.
-            chat (TelegramChat, optional): Chat context. Auto-retrieved if None.
+            update: Message that the user wrote.
+            context: Data that the conversation remembers.
+            context_key: Kind of data that was chosen.
+            model: Kind of thing that was chosen.
+            next_state: Step that comes after this one.
+            chat: Chat that is running the command, if the caller already knows it.
 
         Returns:
-            int: Next conversation state or ConversationHandler.END.
+            The next step, or the end of the conversation if the chat can't run the
+            command or if the users answered with nothing.
         """
         chat = chat or await self.get_active_telegram_chat(update)
         if chat and update.callback_query and update.callback_query.data:
@@ -336,21 +314,19 @@ class BaseMixin(BaseTelegramBot):
         next_state: int,
         chat: TelegramChat | None = None,
     ) -> int:
-        """Save selected string value to conversation context.
-
-        Processes user's callback query selection and stores the string value
-        in the conversation context for subsequent use.
+        """Remember which value the users chose.
 
         Args:
-            update (Update): The Telegram update containing callback query.
-            context (CallbackContext): The callback context for the conversation.
-            context_key (Context): Context key for storing the selected value.
-            name (str): Display name for the selected value type.
-            next_state (int): Next conversation state after saving.
-            chat (TelegramChat, optional): Chat context. Auto-retrieved if None.
+            update: Message that the user wrote.
+            context: Data that the conversation remembers.
+            context_key: Kind of data that was chosen.
+            name: Name of what was chosen, used to confirm it to the users.
+            next_state: Step that comes after this one.
+            chat: Chat that is running the command, if the caller already knows it.
 
         Returns:
-            int: Next conversation state or ConversationHandler.END.
+            The next step, or the end of the conversation if the chat can't run the
+            command or if the users answered with nothing.
         """
         chat = chat or await self.get_active_telegram_chat(update)
         if chat and update.callback_query and update.callback_query.data:
@@ -362,16 +338,16 @@ class BaseMixin(BaseTelegramBot):
         return ConversationHandler.END
 
     async def ask_for_new_attribute(self, update: Update, model_name: str, attribute: str, next_state: int) -> int:
-        """Prompt user to input a new attribute value for model creation.
+        """Ask the users to write the value of a field.
 
         Args:
-            update (Update): The Telegram update containing user interaction.
-            model_name (str): Name of the model being created.
-            attribute (str): Name of the attribute to input.
-            next_state (int): Next conversation state after input.
+            update: Message that the user wrote.
+            model_name: Name of what is being created.
+            attribute: Field whose value is asked for.
+            next_state: Step that creates the thing with that value.
 
         Returns:
-            int: Next conversation state for text input processing.
+            The step that creates the thing.
         """
         await self.reply(update, f"Type the {attribute} value for the new {model_name}")
         return next_state
@@ -386,23 +362,20 @@ class BaseMixin(BaseTelegramBot):
         next_state: int,
         chat: TelegramChat | None = None,
     ) -> tuple[int | None, Any | None]:
-        """Create a new model instance using serializer validation.
-
-        Validates user input data and creates a new model instance with proper
-        error handling and logging. Supports cancel command during creation.
+        """Create something with the data that the users wrote.
 
         Args:
-            update (Update): The Telegram update containing user input.
-            context (CallbackContext): The callback context for the conversation.
-            serializer_class (Serializer): Django serializer class for validation.
-            data (dict[str, Any]): Data dictionary for model creation.
-            previous_state (int): State to return to on validation error.
-            next_state (int): State to proceed to on successful creation.
-            chat (TelegramChat, optional): Chat context. Auto-retrieved if None.
+            update: Message that the user wrote.
+            context: Data that the conversation remembers.
+            serializer_class: Serializer that validates and creates the thing.
+            data: Data to create the thing with.
+            previous_state: Step to go back to if the data isn't valid.
+            next_state: Step that comes after creating the thing.
+            chat: Chat that is running the command, if the caller already knows it.
 
         Returns:
-            tuple[int | None, Any | None]: Next state and created instance.
-                                         Instance is None if creation failed.
+            The next step and the created thing, or the previous step and nothing
+            if the data isn't valid, so the users can write it again.
         """
         chat = chat or await self.get_active_telegram_chat(update)
         if not chat:

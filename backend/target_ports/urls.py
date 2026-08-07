@@ -1,8 +1,4 @@
-"""URL configuration for target ports REST API.
-
-Defines URL routing for target port endpoints using Django REST framework
-router with the TargetPortViewSet for API operations.
-"""
+"""URLs of the target port endpoints."""
 
 from rest_framework.routers import SimpleRouter
 

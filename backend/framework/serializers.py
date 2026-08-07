@@ -1,7 +1,7 @@
-"""Django REST framework serializers for Rekono's core framework.
+"""Base serializers shared by the Rekono apps.
 
-Provides base serializer classes with like functionality and note relationships
-for user-interactive content across the platform.
+Cover the two features that several models have in common: the likes given by the
+users and the notes related to an object.
 """
 
 from typing import Any
@@ -13,16 +13,15 @@ from framework.logging import LoggingEntity
 
 
 class LikeSerializer(ModelSerializer, LoggingEntity):
-    """Base serializer for models with like/favorite functionality.
+    """Base serializer for the models that can be liked by the users.
 
-    Exposes like status and counts for user-interactive content such as tools,
-    processes, and wordlists. Both fields are read-only and their values come
-    directly from the queryset annotations applied in LikeViewSet.get_queryset(),
-    so the calculation lives in a single place and stays usable for ordering.
+    Both fields are read-only and their values come directly from the queryset
+    annotations applied in LikeViewSet.get_queryset(), so the calculation lives in a
+    single place and stays usable for ordering.
 
     Attributes:
-        liked (BooleanField): Whether the current user has liked the object.
-        likes (IntegerField): Total number of likes for the object.
+        liked: Whether the user that performs the request liked this object.
+        likes: Number of users that liked this object.
     """
 
     liked = BooleanField(read_only=True)
@@ -30,28 +29,23 @@ class LikeSerializer(ModelSerializer, LoggingEntity):
 
 
 class RelatedNotesSerializer(ModelSerializer, LoggingEntity):
-    """Serializer for models with related notes functionality.
-
-    Extends ModelSerializer with computed fields for accessing related notes
-    that the current user can view based on visibility permissions.
+    """Base serializer for the models that can be referenced from the notes.
 
     Attributes:
-        notes (SerializerMethodField): List of note IDs accessible to current user.
+        notes: Identifiers of the related notes that the user can access.
     """
 
     notes = SerializerMethodField(read_only=True)
 
     def get_notes(self, instance: Any) -> list[int]:
-        """Get list of note IDs that the current user can access.
-
-        Returns notes that are either public or owned by the current user,
-        ensuring proper access control for note visibility.
+        """Get the identifiers of the related notes visible to the current user.
 
         Args:
-            instance (Any): The model instance with related notes.
+            instance: Object being serialized, whose related notes are filtered.
 
         Returns:
-            list[int]: List of note IDs accessible to the current user.
+            The identifiers of the notes that are public or owned by the user that
+            performs the request.
         """
         return instance.notes.filter(Q(public=True) | Q(owner__id=self.context.get("request").user.id)).values_list(
             "id", flat=True

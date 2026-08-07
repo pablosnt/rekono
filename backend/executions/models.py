@@ -1,8 +1,4 @@
-"""Execution models for Rekono.
-
-Defines the Execution model for tracking security tool execution lifecycle
-including status tracking, timing information, and result management.
-"""
+"""Model of the executions, which are the runs of one tool against a target."""
 
 import logging
 from typing import Any
@@ -17,44 +13,28 @@ from tools.models import Configuration
 
 
 class Execution(BaseModel):
-    """Execution model for tracking security tool runs.
+    """Run of one tool configuration, planned by a task.
 
-    Represents a single execution of a security tool with complete lifecycle
-    tracking from queuing to completion, including status updates, timing
-    information, and result management.
-
-    Execution Lifecycle:
-        REQUESTED -> RUNNING -> COMPLETED/ERROR
-        REQUESTED -> RUNNING -> SKIPPED (tool not installed or arguments unsatisfiable)
-        SKIPPED (created directly with this status, target denylisted or tool
-                 below the required intensity)
-        REQUESTED/RUNNING -> CANCELLED (if manually cancelled)
+    An execution can also be created directly as skipped, when its tool is never
+    going to run because the target was denied or the tool doesn't support the
+    intensity of the task, so the history of a task shows every step of it.
 
     Attributes:
-        task (ForeignKey): The task that triggered this execution
-        rq_job_id (TextField): Redis Queue job identifier for background processing
-        configuration (ForeignKey): The tool configuration used for execution
-        output_file (TextField): Path to the execution output file (max 50 chars)
-        output_plain (TextField): Plain text output from the tool execution
-        executed_command (TextField): Anonymized command line that was executed
-        skipped_reason (TextField): Reason why execution was skipped
-        status (TextField): Current execution status (from Status enum)
-        enqueued_at (DateTimeField): When the execution was queued
-        start (DateTimeField): When the execution started processing
-        end (DateTimeField): When the execution completed
-        hash (TextField): Execution hash for deduplication (max 128 chars)
-        defectdojo_test_id (IntegerField): DefectDojo integration test ID
-
-    Example:
-        Create and track an execution:
-
-        ```python
-        execution = Execution.objects.create(
-            task=task,
-            configuration=tool_config,
-            status=Status.REQUESTED
-        )
-        ```
+        task: Task that planned this execution.
+        rq_job_id: Identifier of the job in the executions queue, needed to cancel
+          or stop it.
+        configuration: Tool configuration that the execution runs.
+        output_file: Path of the file where the tool wrote its report.
+        output_plain: Output that the tool wrote in the standard output.
+        executed_command: Command that was executed, with the secrets removed.
+        skipped_reason: Why the execution never ran, for the skipped ones.
+        status: Current status of the execution.
+        enqueued_at: Moment when the execution was enqueued.
+        start: Moment when the tool started.
+        end: Moment when the execution reached a final status.
+        hash: Hash of the execution environment, used to deduplicate findings.
+        defectdojo_test_id: Test that this execution created in DefectDojo, if the
+          project is synchronized with it.
     """
 
     task = models.ForeignKey(Task, related_name="executions", on_delete=models.CASCADE, blank=True, null=True)
@@ -74,13 +54,10 @@ class Execution(BaseModel):
     _project_field = "task__target__project"
 
     def __str__(self) -> str:
-        """Return string representation of the execution.
+        """Return the task, adding the configuration when the task runs a process.
 
-        Returns:
-            str: String in format "task - configuration" if the task runs a
-                process (which the task's own string already omits), or just
-                "task" when the task's own string already names the
-                configuration it runs.
+        The representation of a task that runs one configuration already names it,
+        so it isn't repeated here.
         """
         return f"{self.task.__str__()}{f' - {self.configuration.__str__()}' if self.task.process else ''}"
 
@@ -108,7 +85,8 @@ class Execution(BaseModel):
         never actually runs.
 
         Args:
-            skipped_reason (str): Human-readable reason the execution was skipped.
+            skipped_reason: Reason why the execution was skipped, which is shown to
+              the users.
         """
         self.logger.error(f"[Tool] {self.configuration.tool.name} execution was skipped due to '{skipped_reason}'")
         self.finish(Status.SKIPPED, skipped_reason=skipped_reason)
@@ -122,8 +100,8 @@ class Execution(BaseModel):
         """Mark the execution as COMPLETED and store its deduplication hash.
 
         Args:
-            hash (str): Hash computed by the executor from the run environment and
-                arguments, used later to deduplicate findings across executions.
+            hash: Hash computed by the executor from the run environment and
+              arguments, used later to deduplicate findings across executions.
         """
         self.logger.info(f"[Tool] {self.configuration.tool.name} execution has been completed")
         self.finish(Status.COMPLETED, hash=hash)
@@ -138,9 +116,9 @@ class Execution(BaseModel):
         transition behaves the same way.
 
         Args:
-            status (Status): Terminal status to apply to the execution.
-            **fields (Any): Extra model fields to persist alongside status and end
-                (e.g. ``skipped_reason`` or ``hash``).
+            status: Terminal status to apply to the execution.
+            **fields: Extra model fields to persist alongside status and end
+              (e.g. ``skipped_reason`` or ``hash``).
         """
         self.status = status
         self.end = timezone.now()

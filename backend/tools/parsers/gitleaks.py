@@ -1,10 +1,4 @@
-"""GitLeaks secret detection tool output parser.
-
-Processes the GitLeaks JSON report, a list with one entry per discovered secret, to extract
-exposed Credential findings, together with the Path and Vulnerability findings for the exposed
-/.git/ endpoint itself. Also mines Credential findings for every Git contributor email found in
-the dumped repository's commit history, not just the ones tied to a GitLeaks match.
-"""
+"""Parser of the GitLeaks secret scanner."""
 
 import subprocess
 from dataclasses import dataclass
@@ -18,15 +12,15 @@ from tools.parsers.base import BaseParser
 
 @dataclass
 class Gitleaks(BaseParser):
-    """Parser for GitLeaks JSON output files.
+    """Findings discovered by GitLeaks, read from its JSON report.
 
-    Extracts secret detection findings including exposed credentials, API keys,
-    and sensitive information from Git repositories. Handles both Git repository
-    exposure vulnerabilities and individual secret findings.
+    Besides the secrets, the exposed repository itself is reported, since being
+    able to read the source code and its history is a vulnerability on its own.
 
     Attributes:
-        executor (GitleaksExecutor): GitLeaks-specific executor instance
-        git_technology (Technology | None): Generic Git technology used to parent credentials
+        executor: Executor that downloaded the repository and ran GitLeaks.
+        git_technology: Technology that the credentials belong to when nothing
+          else was discovered in the target to link them to.
     """
 
     executor: GitleaksExecutor
@@ -35,20 +29,17 @@ class Gitleaks(BaseParser):
     def create_finding(
         self, finding_type: type[Finding], linked_finding: bool = False, **fields: Any
     ) -> Finding | None:
-        """Create a finding, falling back to a generic Git technology for orphan credentials.
-
-        A Credential can only be linked to a Technology, so the base parser normally links
-        it to a technology detected during the execution. When no such technology exists the
-        credential would be discarded (base returns None), so it is retried against a generic
-        Git technology that acts as its parent finding.
+        """Create a finding, keeping the credentials that have no technology.
 
         Args:
-            finding_type (type[Finding]): The finding class to create
-            linked_finding (bool): Whether the finding has already been linked to a parent
-            **fields (Any): Field values for the finding
+            finding_type: Kind of finding to create.
+            linked_finding: Whether the caller already linked the finding.
+            **fields: Data of the finding.
 
         Returns:
-            Finding | None: The created or updated finding, or None if it could not be created
+            The created finding. A credential can only belong to a technology, so
+            the ones that would be discarded because no technology was discovered
+            in the target are linked to a generic Git one instead.
         """
         finding = super().create_finding(finding_type, linked_finding, **fields)
         # A discarded credential (no technology to link to) is retried against a generic Git technology
@@ -61,11 +52,7 @@ class Gitleaks(BaseParser):
         return finding
 
     def _parse(self) -> None:
-        """Parse GitLeaks JSON output and extract secret findings.
-
-        Processes JSON scan results to create Path, Vulnerability and Credential findings
-        for Git repository exposure and discovered secrets.
-        """
+        """Create the exposed repository and the secrets that it contains."""
         if self.executor.git_directory_dumped:
             self.create_finding(Path, path=Path.clean_path("/.git"), type=PathType.ENDPOINT)
             self.create_finding(
@@ -135,17 +122,15 @@ class Gitleaks(BaseParser):
                             self._create_git_contributor_credential(email, (name or "").strip())
 
     def _create_git_contributor_credential(self, email: str | None, name: str | None) -> None:
-        """Create a Credential for a Git contributor email, keeping their name in the context.
+        """Create a credential for a contributor of the repository.
 
-        Contributors reached through the GitLeaks report and through the commit history share the
-        same context format, so both sources produce comparable credentials. Callers are responsible
-        for skipping emails they have already seen, since this method creates a finding every time it
-        is called. The contributor name, when known, is kept in the context to help identify the
-        credential owner.
+        The caller decides which emails are worth creating, since this method
+        creates a credential every time that it's called.
 
         Args:
-            email (str | None): The contributor email address
-            name (str | None): The contributor display name, if known
+            email: Email address of the contributor.
+            name: Name of the contributor, which is kept in the context because it
+              helps to identify who the email belongs to.
         """
         self.create_finding(
             Credential,

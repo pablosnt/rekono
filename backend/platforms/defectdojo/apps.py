@@ -1,8 +1,4 @@
-"""Django application configuration for DefectDojo integration platform.
-
-Configures the DefectDojo integration application with base functionality and
-model initialization for OWASP DefectDojo vulnerability management integration.
-"""
+"""Django app configuration of the DefectDojo app."""
 
 from typing import Any
 
@@ -12,28 +8,23 @@ from framework.apps import BaseApp
 
 
 class DefectDojoConfig(BaseApp, AppConfig):
-    """Django application configuration for DefectDojo integration platform.
-
-    Configures the DefectDojo integration with DefectDojoSettings model initialization
-    and fixture management. Extends BaseApp for consistent application configuration
-    across the Rekono platform.
+    """Configuration of the DefectDojo app.
 
     Attributes:
-        name (str): Application name for Django registry
-        skip_fixtures_if_model_exists (bool): Skip fixtures if models exist
+        name: Name of the app in the Django app registry.
+        skip_fixtures_if_model_exists: The settings are only created once, so the
+          configuration of a deployment is never overwritten.
     """
 
     name = "platforms.defectdojo"
     skip_fixtures_if_model_exists = True
 
     def _get_models(self) -> list[Any]:
-        """Get list of models for fixture initialization.
-
-        Returns the DefectDojoSettings model for automatic fixture loading
-        during application initialization.
+        """Get the DefectDojo settings model, whose data comes from the fixtures.
 
         Returns:
-            list[Any]: List containing DefectDojoSettings model class
+            The DefectDojo settings model, imported inside the method because the models
+            don't exist yet the first time that the migrations run.
         """
         from platforms.defectdojo.models import DefectDojoSettings
 

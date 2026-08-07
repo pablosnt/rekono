@@ -1,8 +1,4 @@
-"""Django filter classes for task model queries.
-
-Provides filtering capabilities for task API endpoints with support for
-project, tool, stage, and various time-based filtering operations.
-"""
+"""Filters of the task endpoints."""
 
 from django_filters.filters import ChoiceFilter, ModelChoiceFilter
 
@@ -14,17 +10,16 @@ from tools.models import Configuration, Tool
 
 
 class TaskFilter(MultipleFieldFilterSet):
-    """Filter class for Task model queries.
-
-    Provides comprehensive filtering options for task queries including
-    project filtering, tool filtering, configuration stages, and time-based filtering.
+    """Filters to search tasks by their target, their tools, and their dates.
 
     Attributes:
-        project (ModelChoiceFilter): Filter by project through target relationship
-        executed_configuration (MultipleModelFilter): Filter by configuration across direct assignment and process steps
-        executed_tool (MultipleModelFilter): Filter by tool across direct configuration and process steps
-        tool (ModelChoiceFilter): Filter by specific tool through configuration
-        stage (ChoiceFilter): Filter by tool execution stage
+        project: Filter by the project that owns the target.
+        executed_configuration: Filter by a configuration executed by the task,
+          either directly or as a step of its process.
+        executed_tool: Filter by a tool executed by the task, either directly or as
+          a step of its process.
+        tool: Filter by the tool of the configuration that the task executes.
+        stage: Filter by the stage of that tool.
     """
 
     project = ModelChoiceFilter(queryset=Project.objects.all(), field_name="target__project")
@@ -38,12 +33,7 @@ class TaskFilter(MultipleFieldFilterSet):
     stage = ChoiceFilter(field_name="configuration__stage", choices=Stage.choices)
 
     class Meta:
-        """Meta configuration for TaskFilter.
-
-        Attributes:
-            model (Model): The Task model to filter
-            fields (dict): Available filter fields and their lookup types
-        """
+        """Filter configuration for the tasks."""
 
         model = Task
         fields = {

@@ -1,8 +1,4 @@
-"""Django app configuration for the executions module.
-
-Defines Django app configuration for the executions application with
-custom settings and initialization.
-"""
+"""Django app configuration of the executions app."""
 
 from django.apps import AppConfig
 
@@ -10,13 +6,10 @@ from framework.apps import BaseApp
 
 
 class ExecutionsConfig(BaseApp, AppConfig):
-    """Django app configuration for the executions module.
-
-    Configures the executions Django app with BaseApp functionality
-    and standard Django app configuration.
+    """Configuration of the executions app.
 
     Attributes:
-        name (str): The name of the Django app
+        name: Name of the app in the Django app registry.
     """
 
     name = "executions"

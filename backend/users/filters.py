@@ -1,8 +1,4 @@
-"""Django filters for user model queries.
-
-Provides filtering capabilities for user queries including project membership
-filtering and role-based filtering with proper access control.
-"""
+"""Filters of the user endpoints."""
 
 from django.db.models import QuerySet
 from django_filters.filters import CharFilter, NumberFilter
@@ -12,30 +8,21 @@ from users.models import User
 
 
 class UserFilter(FilterSet):
-    """Filter class for User model queries.
-
-    Provides filtering capabilities for user searches including project
-    membership filtering and role-based queries with access control.
+    """Filters to search users, including by their membership in a project.
 
     Attributes:
-        project (NumberFilter): Filter users who are members of specific project
-        no_project (NumberFilter): Filter users who are NOT members of specific project
-        role (CharFilter): Filter users by their assigned role
+        project: Filter the members of a project.
+        no_project: Filter the users that aren't members of a project, which is
+          what the project members page needs to offer new members.
+        role: Filter by the role of the users.
     """
 
-    # Get users that are members of this project
     project = NumberFilter(method="filter_project_members")
-    # Get users that are NOT members of this project
     no_project = NumberFilter(method="filter_no_project_members")
     role = CharFilter(field_name="groups__name")
 
     class Meta:
-        """Meta configuration for the UserFilter.
-
-        Attributes:
-            model (Model): The User model to filter
-            fields (dict): Field names mapped to allowed filter operations
-        """
+        """Filter configuration for the users."""
 
         model = User
         fields = {
@@ -49,17 +36,18 @@ class UserFilter(FilterSet):
         }
 
     def filter_project_members(self, queryset: QuerySet, name: str, value: int) -> QuerySet:
-        """Filter users who are members of the specified project.
-
-        Only returns results if the requesting user has access to the project.
+        """Filter the members of a project.
 
         Args:
-            queryset (QuerySet): Base queryset to filter
-            name (str): Filter field name (unused)
-            value (int): Project ID to filter by
+            queryset: Users to be filtered.
+            name: Model field of the filter, not used, since the project is not
+              reached through a single field.
+            value: Identifier of the project, and not of a user.
 
         Returns:
-            QuerySet: Filtered queryset of project members or empty if no access
+            The members of the project, or no user at all when the user that
+            performs the request isn't a member of it, so the members of a project
+            are only known by the project itself.
         """
         return (
             queryset.filter(projects__id=value)
@@ -68,17 +56,17 @@ class UserFilter(FilterSet):
         )
 
     def filter_no_project_members(self, queryset: QuerySet, name: str, value: int) -> QuerySet:
-        """Filter users who are not members of the specified project.
-
-        Only returns results if the requesting user has access to the project.
+        """Filter the users that aren't members of a project.
 
         Args:
-            queryset (QuerySet): Base queryset to filter
-            name (str): Filter field name (unused)
-            value (int): Project ID to filter by
+            queryset: Users to be filtered.
+            name: Model field of the filter, not used, since the project is not
+              reached through a single field.
+            value: Identifier of the project, and not of a user.
 
         Returns:
-            QuerySet: Filtered queryset excluding project members or empty if no access
+            The users that aren't members of the project, or no user at all when the
+            user that performs the request isn't a member of it.
         """
         return (
             queryset.exclude(projects__id=value)

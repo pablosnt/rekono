@@ -1,9 +1,4 @@
-"""Django REST framework views for CVE Crowd platform management.
-
-Provides REST API endpoints for managing CVE Crowd integration settings
-with secure configuration management and platform availability validation
-for threat intelligence integration.
-"""
+"""Viewset of the CVE Crowd endpoints."""
 
 from rest_framework.permissions import IsAuthenticated
 
@@ -14,17 +9,14 @@ from security.authorization.permissions import RekonoModelPermission
 
 
 class CveCrowdSettingsViewSet(BaseViewSet):
-    """ViewSet for managing CVE Crowd platform integration settings.
-
-    Provides REST API endpoints for CVE Crowd configuration management
-    with secure credential handling and platform availability validation.
-    Supports GET and PUT operations for viewing and updating settings.
+    """Read and update the CVE Crowd configuration.
 
     Attributes:
-        queryset (QuerySet): All CveCrowdSettings objects
-        serializer_class (Serializer): CveCrowdSettingsSerializer for settings operations
-        permission_classes (list): Required permissions for access control
-        http_method_names (list): Allowed HTTP methods (GET, PUT only)
+        queryset: The only settings instance, created from a fixture.
+        serializer_class: Serializer of the CVE Crowd settings.
+        permission_classes: Only the users that can change the settings model.
+        http_method_names: GET and PUT only, since the settings are never created
+          or removed through the API.
     """
 
     queryset = CveCrowdSettings.objects.all()

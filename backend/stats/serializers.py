@@ -1,8 +1,7 @@
-"""Django REST framework serializers for statistics data conversion.
+"""Serializers of the statistics endpoints.
 
-Provides serializer classes for statistics API responses including queue monitoring,
-vulnerability analytics, host statistics, and evolution data. Each serializer only
-formats aggregated query results into a consistent JSON shape for read-only endpoints.
+The statistics aren't models, they are the result of aggregating the findings, so
+these serializers only give the calculated data a stable shape.
 """
 
 from rest_framework.serializers import BooleanField, CharField, DateField, IntegerField, Serializer
@@ -12,19 +11,16 @@ from framework.fields import IntegerChoicesField
 
 
 class QueueStatsSerializer(Serializer):
-    """Serializer for background job queue statistics.
-
-    Handles serialization of Redis Queue (RQ) statistics including job counts,
-    worker status, and queue health metrics for system monitoring.
+    """Serializer of the state of one RQ queue.
 
     Attributes:
-        jobs (IntegerField): Total number of jobs in the queue
-        workers (IntegerField): Number of active worker processes
-        finished_jobs (IntegerField): Count of completed jobs
-        started_jobs (IntegerField): Count of currently running jobs
-        deferred_jobs (IntegerField): Count of deferred/scheduled jobs
-        failed_jobs (IntegerField): Count of failed job executions
-        scheduled_jobs (IntegerField): Count of scheduled future jobs
+        jobs: Jobs waiting to be run.
+        workers: Workers attending the queue.
+        finished_jobs: Jobs that completed successfully.
+        started_jobs: Jobs that are being run right now.
+        deferred_jobs: Jobs waiting for the ones that they depend on.
+        failed_jobs: Jobs that raised an exception.
+        scheduled_jobs: Jobs that will be run at a given time.
     """
 
     jobs = IntegerField()
@@ -37,16 +33,13 @@ class QueueStatsSerializer(Serializer):
 
 
 class RQStatsSerializer(Serializer):
-    """Serializer for comprehensive Redis Queue statistics across all queue types.
-
-    Aggregates queue statistics for different job categories including tasks,
-    executions, findings processing, and monitoring operations.
+    """Serializer of the state of all the RQ queues.
 
     Attributes:
-        tasks (QueueStatsSerializer): Statistics for task execution queue
-        executions (QueueStatsSerializer): Statistics for tool execution queue
-        findings (QueueStatsSerializer): Statistics for findings processing queue
-        monitor (QueueStatsSerializer): Statistics for monitoring operations queue
+        tasks: Queue that splits the tasks into executions.
+        executions: Queue that runs the tools.
+        findings: Queue that processes the findings that the tools report.
+        monitor: Queue that refreshes the vulnerability data.
     """
 
     tasks = QueueStatsSerializer()
@@ -56,14 +49,11 @@ class RQStatsSerializer(Serializer):
 
 
 class VulnerabilityCountPerStatusSerializer(Serializer):
-    """Serializer for vulnerability counts categorized by fix status.
-
-    Provides counts of vulnerabilities segmented by their remediation status
-    for tracking security posture improvements.
+    """Serializer of how many findings are fixed and how many aren't.
 
     Attributes:
-        fixed (IntegerField): Number of remediated vulnerabilities
-        open (IntegerField): Number of unresolved vulnerabilities
+        fixed: Findings that aren't there anymore.
+        open: Findings that are still there.
     """
 
     fixed = IntegerField()
@@ -71,49 +61,37 @@ class VulnerabilityCountPerStatusSerializer(Serializer):
 
 
 class CountSerializer(Serializer):
-    """Base serializer for basic count statistics.
-
-    Provides a simple count field for statistical data aggregation
-    across various finding types and categories.
+    """Serializer of how many findings share something.
 
     Attributes:
-        count (IntegerField): Numeric count value
+        count: Findings counted in the group.
     """
 
     count = IntegerField()
 
 
 class HostStatsSerializer(CountSerializer):
-    """Serializer for host statistics grouped by operating system type.
-
-    Provides counts of discovered hosts categorized by their operating
-    system family for infrastructure analysis.
+    """Serializer of how many hosts run each operating system.
 
     Attributes:
-        count (IntegerField): Number of hosts in this OS category
-        os_type (CharField): Operating system family identifier
+        os_type: Operating system family of the hosts.
     """
 
     os_type = CharField()
 
 
 class HostVulnerabilitiesStatsSerializer(VulnerabilityCountPerStatusSerializer):
-    """Serializer for detailed host vulnerability statistics.
-
-    Provides comprehensive vulnerability counts per host including severity
-    breakdown and status tracking for targeted remediation efforts.
+    """Serializer of the vulnerabilities found in each host.
 
     Attributes:
-        id (IntegerField): Host record identifier
-        ip (CharField): Host IP address
-        domain (CharField): Associated domain name
-        fixed (IntegerField): Number of fixed vulnerabilities
-        open (IntegerField): Number of open vulnerabilities
-        critical (IntegerField): Count of open critical vulnerabilities
-        high (IntegerField): Count of open high vulnerabilities
-        medium (IntegerField): Count of open medium vulnerabilities
-        low (IntegerField): Count of open low vulnerabilities
-        info (IntegerField): Count of open informational findings
+        id: Identifier of the host.
+        ip: IP address of the host.
+        domain: Domain name of the host.
+        critical: Open vulnerabilities with critical severity.
+        high: Open vulnerabilities with high severity.
+        medium: Open vulnerabilities with medium severity.
+        low: Open vulnerabilities with low severity.
+        info: Open vulnerabilities with informative severity.
     """
 
     id = IntegerField()
@@ -127,16 +105,12 @@ class HostVulnerabilitiesStatsSerializer(VulnerabilityCountPerStatusSerializer):
 
 
 class PortStatsSerializer(CountSerializer):
-    """Serializer for network port statistics.
-
-    Provides aggregated statistics for discovered network services including
-    port numbers, protocols, and service identification for attack surface analysis.
+    """Serializer of how many hosts expose each service.
 
     Attributes:
-        count (IntegerField): Number of occurrences of this service
-        port (IntegerField): Port number
-        protocol (CharField): Network protocol (TCP/UDP)
-        service (CharField): Identified service name
+        port: Port number where the service was found.
+        protocol: Transport protocol of the port.
+        service: Service that listens on the port.
     """
 
     port = IntegerField()
@@ -145,31 +119,22 @@ class PortStatsSerializer(CountSerializer):
 
 
 class TechnologyStatsSerializer(CountSerializer):
-    """Serializer for technology fingerprinting statistics.
-
-    Provides counts of identified technologies and software components
-    across discovered assets for technology stack analysis.
+    """Serializer of how many times each technology was found.
 
     Attributes:
-        count (IntegerField): Number of instances of this technology
-        name (CharField): Technology or software component name
+        name: Name of the technology.
     """
 
     name = CharField()
 
 
 class VulnerabilityCVEStatsSerializer(VulnerabilityCountPerStatusSerializer):
-    """Serializer for CVE-based vulnerability statistics.
-
-    Provides vulnerability counts grouped by CVE identifiers including
-    severity levels and reference links for vulnerability management.
+    """Serializer of how many times each CVE was found.
 
     Attributes:
-        fixed (IntegerField): Number of fixed vulnerabilities for this CVE
-        open (IntegerField): Number of open vulnerabilities for this CVE
-        cve (CharField): CVE identifier
-        severity_value (IntegerChoicesField): Severity level enumeration value
-        link (CharField): Reference URL for vulnerability details
+        cve: CVE identifier of the vulnerability.
+        severity_value: Severity of the vulnerability, as its name.
+        link: Link to the advisory of the vulnerability.
     """
 
     cve = CharField()
@@ -178,75 +143,53 @@ class VulnerabilityCVEStatsSerializer(VulnerabilityCountPerStatusSerializer):
 
 
 class VulnerabilityCWEStatsSerializer(VulnerabilityCountPerStatusSerializer):
-    """Serializer for CWE-based vulnerability statistics.
-
-    Provides vulnerability counts categorized by Common Weakness Enumeration
-    identifiers for vulnerability pattern analysis.
+    """Serializer of how many vulnerabilities belong to each weakness.
 
     Attributes:
-        fixed (IntegerField): Number of fixed vulnerabilities for this CWE
-        open (IntegerField): Number of open vulnerabilities for this CWE
-        cwe (CharField): CWE identifier
+        cwe: CWE identifier of the weakness.
     """
 
     cwe = CharField()
 
 
 class VulnerabilitySeverityStatsSerializer(VulnerabilityCountPerStatusSerializer):
-    """Serializer for vulnerability statistics grouped by severity level.
-
-    Provides vulnerability counts categorized by severity rating (critical,
-    high, medium, low, info) for security prioritization and risk assessment.
+    """Serializer of how many vulnerabilities have each severity.
 
     Attributes:
-        fixed (IntegerField): Number of fixed vulnerabilities for this severity
-        open (IntegerField): Number of open vulnerabilities for this severity
-        severity (IntegerChoicesField): Severity level enumeration value
+        severity: Severity of the vulnerabilities, as its name.
     """
 
     severity = IntegerChoicesField(model=Severity)
 
 
 class TriagingStatsSerializer(VulnerabilityCountPerStatusSerializer):
-    """Serializer for finding statistics grouped by triage status.
-
-    Provides counts of security findings categorized by their triage
-    status for tracking security assessment progress.
+    """Serializer of how many findings are in each triage status.
 
     Attributes:
-        fixed (IntegerField): Number of fixed findings for this triage status
-        open (IntegerField): Number of open findings for this triage status
-        triage_status (CharField): Triage status identifier
+        triage_status: Decision that the auditors took about the findings.
     """
 
     triage_status = CharField()
 
 
 class ExploitCoverageStatsSerializer(CountSerializer):
-    """Serializer for exploit coverage statistics grouped by exploit availability.
-
-    Provides counts of findings categorized by whether public exploits are
-    available, enabling prioritization of findings with active exploit code.
+    """Serializer of how many vulnerabilities have a public exploit.
 
     Attributes:
-        count (IntegerField): Number of findings in this category
-        has_exploits (BooleanField): Whether findings in this group have exploits
+        has_exploits: Whether the counted vulnerabilities have exploits or not.
     """
 
     has_exploits = BooleanField()
 
 
 class FindingsEvolutionStatsSerializer(Serializer):
-    """Serializer for monthly finding evolution statistics.
-
-    Provides per-month counts of discovered and fixed findings along with
-    a running total of active findings for security posture trend analysis.
+    """Serializer of how the findings of one type evolved during a month.
 
     Attributes:
-        month (DateField): First day of the month this data point represents
-        discovered (IntegerField): Findings first seen in this month
-        fixed (IntegerField): Findings fixed in this month
-        active (IntegerField): Total active findings at end of this month
+        month: First day of the month that the data belongs to.
+        discovered: Findings discovered for the first time during the month.
+        fixed: Findings fixed during the month.
+        active: Findings that were still there when the month ended.
     """
 
     month = DateField()

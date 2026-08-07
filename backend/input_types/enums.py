@@ -1,32 +1,15 @@
-"""Input type name enumerations for defining available input data categories.
-
-This module defines the InputTypeName enum which contains all the valid input
-type names that can be used in the InputType model for security tool integration.
-"""
+"""Names of the input types that the tools can take as arguments."""
 
 from django.db.models import TextChoices
 from django.db.models.enums import Choices
 
 
 class InputTypeName(TextChoices):
-    """Enumeration of valid input type names for security tool execution.
+    """Name of one kind of data that a tool argument takes.
 
-    This enum defines all the different categories of input data that can be
-    provided to security tools during execution, supporting various data types
-    for comprehensive security testing workflows.
-
-    Attributes:
-        OSINT (str): Open source intelligence data
-        HOST (str): Network host information
-        PORT (str): Network port and service data
-        PATH (str): File paths and web endpoints
-        TECHNOLOGY (str): Technology stack information
-        CREDENTIAL (str): Authentication credentials
-        VULNERABILITY (str): Security vulnerability data
-        EXPLOIT (str): Exploit and proof-of-concept data
-        WORDLIST (str): Wordlist and dictionary data
-        AUTHENTICATION (str): Authentication configuration
-        HTTP_HEADER (str): HTTP header information
+    Most of the names match a finding type, since the tools mainly work with what
+    the previous executions discovered, and the rest match the resources that the
+    users create, like the wordlists or the authentications.
     """
 
     OSINT = "OSINT"

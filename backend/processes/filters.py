@@ -1,9 +1,4 @@
-"""Django filtering for process management queries.
-
-Provides filter classes for process and step queries with advanced filtering
-capabilities including tool-based filtering, stage filtering, and owner-based
-filtering for comprehensive process discovery and management.
-"""
+"""Filters of the process and step endpoints."""
 
 from django_filters.filters import CharFilter, ChoiceFilter, ModelChoiceFilter
 from django_filters.rest_framework import FilterSet
@@ -16,18 +11,14 @@ from users.models import User
 
 
 class ProcessFilter(LikeFilter):
-    """Filter class for Process model queries.
-
-    Provides filtering capabilities for security testing processes including
-    tool-based filtering, configuration filtering, and tag-based discovery
-    with community features from LikeFilter.
+    """Filters to search processes, also by the tools that their steps execute.
 
     Attributes:
-        configuration (ModelChoiceFilter): Filter by tool configuration used in process steps
-        tool (ModelChoiceFilter): Filter by security tool used in process steps
-        stage (ChoiceFilter): Filter by security testing stage of the tool configuration used in process steps
-        tag (CharFilter): Filter by process tags for categorization
-        owner_username (CharFilter): Filter by owner username using case-insensitive partial matching
+        configuration: Filter by a tool configuration used by one of the steps.
+        tool: Filter by a tool used by one of the steps.
+        stage: Filter by the stage of the tools used by the steps.
+        tag: Filter by one of the tags of the process.
+        owner_username: Filter by the username of the owner.
     """
 
     configuration = ModelChoiceFilter(queryset=Configuration.objects.all(), field_name="steps__configuration")
@@ -37,14 +28,7 @@ class ProcessFilter(LikeFilter):
     owner_username = CharFilter(field_name="owner__username", lookup_expr="icontains")
 
     class Meta:
-        """Meta configuration for ProcessFilter.
-
-        Defines the model and field-based filtering options for process queries.
-
-        Attributes:
-            model (Model): The Process model to filter
-            fields (dict): Field-based filters with lookup types for name, description, and owner
-        """
+        """Filter configuration for the processes."""
 
         model = Process
         fields = {
@@ -55,18 +39,13 @@ class ProcessFilter(LikeFilter):
 
 
 class StepFilter(FilterSet):
-    """Filter class for Step model queries.
-
-    Provides filtering capabilities for process steps including owner-based
-    filtering, tool-based filtering, and stage-based filtering for workflow
-    step management and discovery.
+    """Filters to search steps by their process and by the tool that they execute.
 
     Attributes:
-        owner (ModelChoiceFilter): Filter by process owner user
-        tool (ModelChoiceFilter): Filter by security tool used in the step configuration
-        stage (ChoiceFilter): Filter by security testing stage of the tool configuration
-        tag (CharFilter): Filter by tool, matching the configuration's tool against the
-                         given value(s) via the "in" lookup
+        owner: Filter by the owner of the process that contains the step.
+        tool: Filter by the tool that the step executes.
+        stage: Filter by the stage of that tool.
+        tag: Filter by several tools at once.
     """
 
     owner = ModelChoiceFilter(queryset=User.objects.all(), field_name="process__owner")
@@ -75,14 +54,7 @@ class StepFilter(FilterSet):
     tag = CharFilter(field_name="configuration__tool", lookup_expr="in")
 
     class Meta:
-        """Meta configuration for StepFilter.
-
-        Defines the model and field-based filtering options for step queries.
-
-        Attributes:
-            model (Model): The Step model to filter
-            fields (dict): Field-based filters with exact lookup for process and configuration
-        """
+        """Filter configuration for the steps."""
 
         model = Step
         fields = {"process": ["exact"], "configuration": ["exact"]}

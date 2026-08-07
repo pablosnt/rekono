@@ -1,8 +1,4 @@
-"""Django REST framework serializers for target denylist models.
-
-Provides serialization for target denylist records with proper field
-configuration and read-only restrictions for administrative controls.
-"""
+"""Serializers of the target denylist endpoints."""
 
 from rest_framework.serializers import ModelSerializer
 
@@ -10,21 +6,14 @@ from target_denylist.models import TargetDenylist
 
 
 class TargetDenylistSerializer(ModelSerializer):
-    """Serializer for TargetDenylist model.
+    """Serializer of a denylist entry.
 
-    Handles serialization of target denylist entries. The default and blocked
-    fields are read-only via the API: default marks system-provided entries
-    and blocked is a counter maintained internally by the target validator.
+    The default and blocked fields are read-only: default marks the entries
+    provided by Rekono, and blocked is a counter maintained by the target validator.
     """
 
     class Meta:
-        """Meta configuration for TargetDenylistSerializer.
-
-        Attributes:
-            model (type): TargetDenylist model class.
-            fields (tuple): Field names included in serialization.
-            read_only_fields (tuple): Fields protected from modification.
-        """
+        """Serializer configuration for the denylist entries."""
 
         model = TargetDenylist
         fields = ("id", "target", "default", "blocked")

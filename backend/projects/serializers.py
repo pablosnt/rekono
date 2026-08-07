@@ -1,8 +1,4 @@
-"""Django REST framework serializers for project management.
-
-Provides serializer classes for project model conversion to/from JSON with
-automated project setup including owner membership and default alert creation.
-"""
+"""Serializers of the project endpoints."""
 
 from typing import Any
 
@@ -19,16 +15,13 @@ from users.serializers import SimpleUserSerializer
 
 
 class ProjectSerializer(TaggitSerializer, RelatedNotesSerializer):
-    """Serializer for Project model with automated setup and nested relationships.
-
-    Handles serialization and deserialization of Project objects with support
-    for tagging, nested relationships, and automated project initialization
-    including owner membership and default security monitoring alerts.
+    """Serializer of a project, including the data of its related entities.
 
     Attributes:
-        owner (SimpleUserSerializer): Serialized user information for project owner
-        tags (TagField): Project organizational tags with tagging support
-        defectdojo_sync (DefectDojoSyncSerializer): DefectDojo integration configuration
+        owner: User that created the project.
+        tags: Labels assigned to the project.
+        defectdojo_sync: Synchronization of the project with DefectDojo, if it's
+          configured.
     """
 
     owner = SimpleUserSerializer(many=False, read_only=True)
@@ -36,13 +29,7 @@ class ProjectSerializer(TaggitSerializer, RelatedNotesSerializer):
     defectdojo_sync = DefectDojoSyncSerializer(many=False, read_only=True)
 
     class Meta:
-        """Meta configuration for the ProjectSerializer.
-
-        Attributes:
-            model (Model): The Project model to serialize
-            fields (tuple): Field names to include in serialization
-            read_only_fields (tuple): Fields that cannot be modified
-        """
+        """Serializer configuration for the projects."""
 
         model = Project
         fields = (
@@ -65,17 +52,18 @@ class ProjectSerializer(TaggitSerializer, RelatedNotesSerializer):
 
     @transaction.atomic()
     def create(self, validated_data: dict[str, Any]) -> Project:
-        """Create a new project with automated setup and default configuration.
+        """Create a project, with its owner as member and its default alert.
 
-        Creates a new project and performs automated initialization including
-        adding the owner to the member list and creating a default trending
-        CVE monitoring alert with owner subscription.
+        The trending CVE alert is created enabled and with all the members
+        subscribed, so a new project starts warning about the CVEs that are being
+        exploited without anyone having to configure it.
 
         Args:
-            validated_data (dict[str, Any]): The validated data for creating the project
+            validated_data: Project fields, plus the owner that the viewset adds
+              when it saves the serializer, since the request never carries it.
 
         Returns:
-            Project: The created Project instance with automated configuration
+            The created project, with its owner already added as a member.
         """
         project = super().create(validated_data)
         project.members.add(validated_data.get("owner"))

@@ -1,8 +1,4 @@
-"""HTTP Headers serializers for REST API data transformation.
-
-Provides serialization and deserialization for HTTP header data
-with comprehensive validation and access control enforcement.
-"""
+"""Serializers of the HTTP header endpoints."""
 
 from typing import Any
 
@@ -14,49 +10,31 @@ from security.authorization.permissions import IsAdmin
 
 
 class HttpHeaderSerializer(ModelSerializer):
-    """Full serializer for HTTP header management with validation.
-
-    Provides complete serialization for HTTP headers including all fields,
-    with validation logic that enforces access control when a header is
-    created.
-    """
+    """Serializer of an HTTP header, including the scope where it applies."""
 
     class Meta:
-        """Meta configuration for HttpHeaderSerializer.
-
-        Defines model reference and field inclusion for complete
-        HTTP header serialization with all relevant attributes.
-
-        Attributes:
-            model (type): HttpHeader model class
-            fields (tuple): All fields included in serialization
-        """
+        """Serializer configuration for the HTTP headers."""
 
         model = HttpHeader
         fields = ("id", "target", "user", "key", "value")
 
     def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
-        """Validate HTTP header data with access control enforcement.
-
-        Validates header attributes and enforces security policies including
-        target precedence over user assignment, user authorization checks,
-        and admin permission validation for global headers.
+        """Check that the user can create a header in the requested scope.
 
         Args:
-            attrs (dict[str, Any]): Header attributes to validate.
+            attrs: Header fields sent by the user, including its scope.
 
         Returns:
-            dict[str, Any]: Validated attributes with proper assignments.
+            The validated data, with the user removed if the header belongs to a
+            target, since both scopes can't be applied at the same time.
 
         Raises:
-            PermissionDenied: If user lacks permission to create the header.
+            PermissionDenied: If the header belongs to another user, or if it's a
+                global header and the user isn't an admin.
         """
         attrs = super().validate(attrs)
-        # A target-specific header has no user, so clear any user assignment once a target is set
         if attrs.get("target"):
             attrs["user"] = None
-        # Users may only assign a header to themselves
-        # A global header, which has neither target nor user, is restricted to Admin users
         if (attrs.get("user") is not None and attrs.get("user") != self.context.get("request").user) or (
             attrs.get("target") is None
             and attrs.get("user") is None
@@ -67,40 +45,31 @@ class HttpHeaderSerializer(ModelSerializer):
 
 
 class UpdateHttpHeaderSerializer(ModelSerializer):
-    """Serializer for updating an existing HTTP header.
+    """Serializer of the HTTP header data that can be updated.
 
-    A header's scope, its target or user association, is fixed when the
-    header is created and cannot be reassigned through an update, so this
-    serializer only exposes the key and value fields. Includes authorization
-    checks for update operations.
+    The scope of a header is fixed when it's created, so a header can't be moved to
+    another target or user without removing it and creating it again.
     """
 
     class Meta:
-        """Meta configuration for UpdateHttpHeaderSerializer.
-
-        Attributes:
-            model (type): HttpHeader model class
-            fields (tuple): Field names to include in serialization
-        """
+        """Serializer configuration for the HTTP header updates."""
 
         model = HttpHeader
         fields = ("id", "key", "value")
 
     def update(self, instance: HttpHeader, validated_data: dict[str, Any]) -> HttpHeader:
-        """Update HTTP header with authorization validation.
-
-        Updates existing HTTP header instance with comprehensive authorization
-        checks to ensure users can only modify headers they have permission to access.
+        """Update the key and the value of a header.
 
         Args:
-            instance (HttpHeader): Existing header instance to update.
-            validated_data (dict[str, Any]): Validated data for update.
+            instance: Header being updated, whose scope can't be changed.
+            validated_data: New key and value.
 
         Returns:
-            HttpHeader: Updated header instance.
+            The updated header.
 
         Raises:
-            PermissionDenied: If user lacks permission to update the header.
+            PermissionDenied: If the header belongs to another user, or if it's a
+                global header and the user isn't an admin.
         """
         if (instance.user is not None and instance.user != self.context.get("request").user) or (
             instance.user is None

@@ -1,7 +1,7 @@
-"""Management command to trigger the monitor system.
+"""Command that starts the monitor loop.
 
-Defines a Django management command that enqueues a background monitoring
-job for immediate execution.
+It's run on every deployment, since the monitor job only schedules the next one, so
+nothing would trigger the first one after an installation or an upgrade.
 """
 
 from typing import Any
@@ -12,22 +12,19 @@ from monitor.queues import MonitorQueue
 
 
 class Command(BaseCommand):
-    """Django management command to trigger the monitor system.
+    """Command that enqueues a monitor job to be run as soon as possible.
 
-    Enqueues a background monitoring job using the MonitorQueue for manual
-    monitoring execution or system initialization.
+    Attributes:
+        help: Description of the command shown by the Django help.
     """
 
     help = "Trigger monitor system"
 
     def handle(self, *args: Any, **options: Any) -> None:
-        """Handle the management command execution.
-
-        Enqueues a monitoring job to refresh trending CVE and EPSS data
-        from the configured threat intelligence platforms.
+        """Enqueue the monitor job.
 
         Args:
-            *args (Any): Positional arguments passed to the command
-            **options (Any): Keyword options passed to the command
+            *args: Not used, since the command takes no arguments.
+            **options: Not used, since the command takes no options.
         """
         MonitorQueue().enqueue()

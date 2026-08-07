@@ -223,7 +223,7 @@ settings = {
     "tag": "rekono",
 }
 new_settings = {
-    "server": "https://defectdojo.rekono.com/api/v2/",
+    "server": "https://defectdojo.rekono.dev/api/v2/",
     "api_token": "any_valid_defectdojo_token",
     "tls_validation": True,
     "tag": "rekono",

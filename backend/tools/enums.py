@@ -1,27 +1,14 @@
-"""Enumeration classes for tools module configuration and constants.
-
-Defines enum classes for tool execution intensity levels and security testing
-stages used throughout the tools system for categorization and workflow control.
-"""
+"""Options that define how and when a tool is run."""
 
 from django.db import models
 from django.db.models.enums import Choices
 
 
 class Intensity(models.IntegerChoices):
-    """Enumeration for tool execution intensity levels.
+    """How aggressive an execution is, from the stealthiest to the fastest.
 
-    Defines intensity levels that control tool execution thoroughness,
-    performance characteristics, and resource usage. Higher intensity
-    levels typically result in more comprehensive scanning but increased
-    execution time and system resource consumption.
-
-    Attributes:
-        SNEAKY (int): Slowest and most stealthy intensity, minimizing detection risk
-        LOW (int): Cautious intensity, faster than SNEAKY but still conservative
-        NORMAL (int): Default, balanced intensity used by most tool configurations
-        HARD (int): Aggressive intensity, favoring speed and thoroughness over stealth
-        INSANE (int): Fastest and most aggressive intensity, prioritizing speed above all else
+    Each tool maps the intensities that it supports to its own arguments, so the
+    users can choose how noisy a scan is without knowing those arguments.
     """
 
     SNEAKY = 1
@@ -32,20 +19,18 @@ class Intensity(models.IntegerChoices):
 
 
 class Stage(models.IntegerChoices):
-    """Enumeration for security testing stages and workflow phases.
+    """Phase of the assessment that a tool configuration belongs to.
 
-    Defines the sequential stages of security testing workflows, enabling
-    proper tool orchestration and dependency management. Stages represent
-    the logical progression of security assessment activities.
+    The stages define the order in which the configurations of a process are run,
+    since each one works from what the previous ones discovered.
 
     Attributes:
-        OSINT (int): Open-source intelligence gathering about the target, including
-                    name resolution and subdomain discovery
-        ENUMERATION (int): Discovery of hosts, ports, and network services
-        VULNERABILITIES (int): Vulnerability scanning against what has been discovered
-        SERVICES (int): In-depth testing of a specific discovered service, such as a
-                       web application, a TLS configuration, or an SSH server
-        EXPLOITATION (int): Exploit research for the findings already identified
+        OSINT: Data gathered from public sources, like the subdomains of a domain.
+        ENUMERATION: Discovery of the hosts, the ports, and their services.
+        VULNERABILITIES: Vulnerability scanning of what was discovered.
+        SERVICES: Deep testing of one service, like a web application or a TLS
+          configuration.
+        EXPLOITATION: Search of the exploits available for the vulnerabilities.
     """
 
     OSINT = 1
