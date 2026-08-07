@@ -6,7 +6,6 @@ database:
   port: 5432
 frontend:
   url: https://localhost
-  desktop: false
 rq:
   host: 127.0.0.1
   port: 6379

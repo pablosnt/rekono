@@ -139,7 +139,6 @@ class RekonoConfig:
     _rq_host = Property("RKN_RQ_HOST", "rq.host", "127.0.0.1")
     _rq_port = Property("RKN_RQ_PORT", "rq.port", 6379)
     _frontend_url = Property("RKN_FRONTEND_URL", "frontend.url", "https://127.0.0.1")
-    _frontend_desktop = Property("RKN_FRONTEND_DESKTOP", "frontend.desktop", False)
     _trusted_proxies = Property("RKN_TRUSTED_PROXIES", None, 0)
     _allowed_hosts = Property("RKN_ALLOWED_HOSTS", "security.allowed-hosts", ["localhost", "127.0.0.1", "::1"])
     _encryption_key = Property(None, "security.encryption-key", None)
@@ -266,15 +265,6 @@ class RekonoConfig:
         """
         parsed = urlparse(self.frontend_url)
         return f"{parsed.scheme}://{parsed.netloc}"
-
-    @property
-    def frontend_desktop(self) -> bool:
-        """Whether the frontend is deployed as a desktop application.
-
-        Cookies are then shared across the app origin, so the SameSite policy is
-        relaxed to None.
-        """
-        return self._frontend_desktop.read(self.config_from_file)
 
     @property
     def root_path(self) -> str:
