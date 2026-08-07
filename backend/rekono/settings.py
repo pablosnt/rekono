@@ -147,7 +147,7 @@ JWT_REFRESH_COOKIE = "rekono_refresh"
 JWT_MFA_COOKIE = "rekono_mfa"
 COOKIES_CONFIG = {
     "httponly": True,
-    "samesite": "None" if CONFIG.frontend_desktop else "Strict",
+    "samesite": "Strict",
     "secure": CONFIG.secure_cookies,
 }
 

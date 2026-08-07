@@ -77,7 +77,7 @@ SECURITY_HEADERS = {
     "X-Content-Type-Options": "nosniff",
     "X-Frame-Options": "DENY",
     "Permissions-Policy": "camera=(), geolocation=(), microphone=(), midi=(), payment=(), usb=()",
-    "Access-Control-Allow-Origin": None,
+    "Access-Control-Allow-Origin": CONFIG.frontend_origin,
     "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
     "Access-Control-Allow-Headers": "content-type, authorization",
     "Access-Control-Allow-Credentials": "true",
@@ -121,37 +121,25 @@ class SecurityMiddleware(LoggingEntity):
     def _add_security_headers(self, request: HttpRequest, response: Response) -> Response:
         """Add security headers to an HTTP response before it is returned to the client.
 
-        Applies every entry in SECURITY_HEADERS as-is, except for three that are
-        resolved per request. Content-Security-Policy is chosen by matching the
-        request path against the CSP prefixes. Access-Control-Allow-Origin echoes
-        back the request Origin only when it is in the allowed list (the configured
-        frontend origin, plus the Tauri desktop app and local dev server origins when
-        CONFIG.frontend_desktop is enabled), and otherwise falls back to the configured
-        frontend origin. Referrer-Policy relaxes from the default no-referrer to
-        strict-origin for paths under /admin, so requests originating from the Django
-        admin site still carry their origin.
+        Applies every entry in SECURITY_HEADERS as-is, except for two that depend on
+        the request path. Content-Security-Policy is chosen by matching the path
+        against the CSP prefixes. Referrer-Policy relaxes from the default no-referrer
+        to strict-origin for paths under /admin, so requests originating from the
+        Django admin site still carry their origin.
 
         Args:
-            request: Request whose path and Origin decide the resolved values.
+            request: Request whose path decides the resolved values.
             response: Response to be returned, whose headers are set in place.
 
         Returns:
             The same response, with the security headers already set.
         """
-        origin = request.headers.get("Origin")
-        allowed_origins = (
-            ["tauri://localhost", "http://localhost:3000", CONFIG.frontend_origin]
-            if CONFIG.frontend_desktop
-            else [CONFIG.frontend_origin]
-        )
         for header, value in SECURITY_HEADERS.items():
             if header == "Content-Security-Policy":
                 for path, csp in CSP.items():
                     if request.path.startswith(path):
                         value = csp
                         break
-            elif header == "Access-Control-Allow-Origin":
-                value = origin if origin in allowed_origins else CONFIG.frontend_origin
             elif header == "Referrer-Policy" and request.path.startswith("/admin"):
                 value = "strict-origin"  # pragma: no cover
             response[header] = value
