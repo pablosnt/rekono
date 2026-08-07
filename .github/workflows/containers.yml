@@ -224,101 +224,101 @@ jobs:
           path: ${{ matrix.name }}-dockle.json
           if-no-files-found: warn
 
-  kali-release:
-    name: Kali Release
-    if: ${{ github.event_name == 'release' }}
-    runs-on: ubuntu-latest
-    environment: gitlab
-    needs: docker-images
-    steps:
-      - name: Checkout GitLab repository
-        run: git clone https://gitlab.com/pablosnt/rekono.git rekono-kbx
+  # kali-release:
+  #   name: Kali Release
+  #   if: ${{ github.event_name == 'release' }}
+  #   runs-on: ubuntu-latest
+  #   environment: gitlab
+  #   needs: docker-images
+  #   steps:
+  #     - name: Checkout GitLab repository
+  #       run: git clone https://gitlab.com/pablosnt/rekono.git rekono-kbx
 
-      - name: Update debian/changelog
-        working-directory: rekono-kbx/debian
-        shell: python
-        env:
-          RELEASE_NAME: ${{ github.event.release.name }}
-          GITLAB_EMAIL: ${{ secrets.GITLAB_EMAIL }}
-        run: |
-          import os
-          import pytz
-          from datetime import datetime
-          release_name = os.environ['RELEASE_NAME']
-          gitlab_email = os.environ['GITLAB_EMAIL']
-          with open('changelog', 'r') as changelog:
-            old_changes = changelog.read()
-          tz = pytz.timezone('Europe/Madrid')
-          d = tz.localize(datetime.now())
-          change_time = d.strftime('%a, %d %b %Y %H:%M:%S %z')
-          new_changes = f'rekono-kbx ({release_name}) kali-dev; urgency=medium\n\n  * Update Rekono version to {release_name}.\n\n -- Pablo Santiago López <{gitlab_email}>  {change_time}\n\n'
-          with open('changelog', 'w') as changelog:
-            changelog.write(new_changes + old_changes)
+  #     - name: Update debian/changelog
+  #       working-directory: rekono-kbx/debian
+  #       shell: python
+  #       env:
+  #         RELEASE_NAME: ${{ github.event.release.name }}
+  #         GITLAB_EMAIL: ${{ secrets.GITLAB_EMAIL }}
+  #       run: |
+  #         import os
+  #         import pytz
+  #         from datetime import datetime
+  #         release_name = os.environ['RELEASE_NAME']
+  #         gitlab_email = os.environ['GITLAB_EMAIL']
+  #         with open('changelog', 'r') as changelog:
+  #           old_changes = changelog.read()
+  #         tz = pytz.timezone('Europe/Madrid')
+  #         d = tz.localize(datetime.now())
+  #         change_time = d.strftime('%a, %d %b %Y %H:%M:%S %z')
+  #         new_changes = f'rekono-kbx ({release_name}) kali-dev; urgency=medium\n\n  * Update Rekono version to {release_name}.\n\n -- Pablo Santiago López <{gitlab_email}>  {change_time}\n\n'
+  #         with open('changelog', 'w') as changelog:
+  #           changelog.write(new_changes + old_changes)
 
-      - name: Commit changes to GitLab
-        working-directory: rekono-kbx
-        env:
-          RELEASE_NAME: ${{ github.event.release.name }}
-          GITLAB_EMAIL: ${{ secrets.GITLAB_EMAIL }}
-          GITLAB_USER: ${{ secrets.GITLAB_USER }}
-          GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
-        run: |
-          git config user.name 'Pablo Santiago'
-          git config user.email "$GITLAB_EMAIL"
-          git checkout -b "release/$RELEASE_NAME"
-          git add .
-          git commit -m "Update Rekono version to $RELEASE_NAME"
-          git config credential.helper '!f() { sleep 1; echo "username=${GITLAB_USER}"; echo "password=${GITLAB_TOKEN}"; }; f'
-          git push --set-upstream origin "release/$RELEASE_NAME"
+  #     - name: Commit changes to GitLab
+  #       working-directory: rekono-kbx
+  #       env:
+  #         RELEASE_NAME: ${{ github.event.release.name }}
+  #         GITLAB_EMAIL: ${{ secrets.GITLAB_EMAIL }}
+  #         GITLAB_USER: ${{ secrets.GITLAB_USER }}
+  #         GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
+  #       run: |
+  #         git config user.name 'Pablo Santiago'
+  #         git config user.email "$GITLAB_EMAIL"
+  #         git checkout -b "release/$RELEASE_NAME"
+  #         git add .
+  #         git commit -m "Update Rekono version to $RELEASE_NAME"
+  #         git config credential.helper '!f() { sleep 1; echo "username=${GITLAB_USER}"; echo "password=${GITLAB_TOKEN}"; }; f'
+  #         git push --set-upstream origin "release/$RELEASE_NAME"
 
-      - name: GitLab merge request
-        shell: python
-        env:
-          RELEASE_NAME: ${{ github.event.release.name }}
-          GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
-          GITLAB_PROJECT_ID: 45783845
-        run: |
-          import os
-          import requests
-          release_name = os.environ['RELEASE_NAME']
-          project_id = os.environ['GITLAB_PROJECT_ID']
-          headers = {
-            'PRIVATE-TOKEN': os.environ['GITLAB_TOKEN']
-          }
-          data = {
-            'title': f'Update Rekono version to {release_name}',
-            'source_branch': f'release/{release_name}',
-            'target_branch': 'kali/master',
-          }
-          response = requests.post(f'https://gitlab.com/api/v4/projects/{project_id}/merge_requests', data=data, headers=headers)
-          if response.status_code != 201:
-            print(response.text)
-          response.raise_for_status()
+  #     - name: GitLab merge request
+  #       shell: python
+  #       env:
+  #         RELEASE_NAME: ${{ github.event.release.name }}
+  #         GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
+  #         GITLAB_PROJECT_ID: 45783845
+  #       run: |
+  #         import os
+  #         import requests
+  #         release_name = os.environ['RELEASE_NAME']
+  #         project_id = os.environ['GITLAB_PROJECT_ID']
+  #         headers = {
+  #           'PRIVATE-TOKEN': os.environ['GITLAB_TOKEN']
+  #         }
+  #         data = {
+  #           'title': f'Update Rekono version to {release_name}',
+  #           'source_branch': f'release/{release_name}',
+  #           'target_branch': 'kali/master',
+  #         }
+  #         response = requests.post(f'https://gitlab.com/api/v4/projects/{project_id}/merge_requests', data=data, headers=headers)
+  #         if response.status_code != 201:
+  #           print(response.text)
+  #         response.raise_for_status()
 
-      - name: GitLab issue in Kali Linux repository
-        shell: python
-        env:
-          RELEASE_NAME: ${{ github.event.release.name }}
-          GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
-          GITLAB_PROJECT_ID: 48406619
-        run: |
-          import os
-          import requests
-          release_name = os.environ['RELEASE_NAME']
-          project_id = os.environ['GITLAB_PROJECT_ID']
-          headers = {
-            'PRIVATE-TOKEN': os.environ['GITLAB_TOKEN']
-          }
-          data = {
-            'title': f'New Rekono version {release_name}',
-            'description': f'''Please, upgrade the `rekono-kbx` Kali Linux package to the latest version `{release_name}`.
+  #     - name: GitLab issue in Kali Linux repository
+  #       shell: python
+  #       env:
+  #         RELEASE_NAME: ${{ github.event.release.name }}
+  #         GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
+  #         GITLAB_PROJECT_ID: 48406619
+  #       run: |
+  #         import os
+  #         import requests
+  #         release_name = os.environ['RELEASE_NAME']
+  #         project_id = os.environ['GITLAB_PROJECT_ID']
+  #         headers = {
+  #           'PRIVATE-TOKEN': os.environ['GITLAB_TOKEN']
+  #         }
+  #         data = {
+  #           'title': f'New Rekono version {release_name}',
+  #           'description': f'''Please, upgrade the `rekono-kbx` Kali Linux package to the latest version `{release_name}`.
 
-            New version details:
-            - [GitHub release](https://github.com/pablosnt/rekono/releases/tag/{release_name})
-            - [Rekono changelog](https://github.com/pablosnt/rekono/blob/main/CHANGELOG.md)
+  #           New version details:
+  #           - [GitHub release](https://github.com/pablosnt/rekono/releases/tag/{release_name})
+  #           - [Rekono changelog](https://github.com/pablosnt/rekono/blob/main/CHANGELOG.md)
 
-            Thank you very much!
-            ''',
-          }
-          response = requests.post(f'https://gitlab.com/api/v4/projects/{project_id}/issues', data=data, headers=headers)
-          response.raise_for_status()
+  #           Thank you very much!
+  #           ''',
+  #         }
+  #         response = requests.post(f'https://gitlab.com/api/v4/projects/{project_id}/issues', data=data, headers=headers)
+  #         response.raise_for_status()
