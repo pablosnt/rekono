@@ -143,7 +143,7 @@ class DefectDojoIntegrationTest(BaseTest, TestCase):
         self._test_is_available_and_exists(True)
 
     @mock.patch("platforms.defectdojo.integrations.DefectDojo._request", exception)
-    def test_is_not_available_and_does_not_exist(self) -> None:
+    def test_is_not_available_and_does_not_exist(self) -> None:  # trufflehog:ignore
         self._test_is_available_and_exists(False)
 
     @mock.patch("platforms.defectdojo.integrations.DefectDojo.is_enabled", return_true)

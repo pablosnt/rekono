@@ -111,7 +111,7 @@ class ToolExecutorTest(BaseTest, TestCase):
         )
 
     @mock.patch("framework.models.BaseInput.get_url", get_url)
-    def test_get_arguments_multiple_target_ports(self) -> None:
+    def test_get_arguments_multiple_target_ports(self) -> None:  # trufflehog:ignore
         second_target_port = TargetPort.objects.create(target=self.target, port=22, path=None)
         self.assertEqual(
             "-p 10.10.10.10 -p http://10.10.10.10:80/ -p 80,22 -p WordPress -p CVE-2025-3010 -p root",
