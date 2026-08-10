@@ -1,3 +1,10 @@
+"""Input validators of version 1.x, kept only so its migrations can still be imported.
+
+Deprecated. Nothing but the restored version 1.x migrations should reference this module,
+and it must be removed once they are squashed away.
+"""
+
+
 def validate_name(value: str) -> None:
     """Placeholder for the version 1.x validation of names."""
 

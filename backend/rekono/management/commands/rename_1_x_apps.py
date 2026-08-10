@@ -1,3 +1,11 @@
+"""Command that applies the version 2.x app names to a database created by version 1.x.
+
+Django plans the pending migrations from django_migrations before it applies anything, so a
+migration cannot rename the rows that decide whether it runs, and the deployment runs this
+before migrate. It is only needed until every deployment has been upgraded, and can be
+removed then.
+"""
+
 from typing import Any
 
 from django.core.management.base import BaseCommand
@@ -10,18 +18,22 @@ RENAMED_APPS = {
     "system": "settings",
     "telegram_bot": "telegram_app",
 }
+# The system table only loses its app prefix here; the System to Settings rename is a migration
 RENAMED_TABLES = {
     "resources_wordlist": "wordlists_wordlist",
     "resources_wordlist_liked_by": "wordlists_wordlist_liked_by",
     "system_system": "settings_system",
     "telegram_bot_telegramchat": "telegram_app_telegramchat",
 }
+# Target ports only need their content type moved: targets.0003_prepare_targetport_move renames
+# their table, since the targets app creates it on a fresh installation too
 MOVED_CONTENT_TYPES = {
     ("resources", "wordlist"): ("wordlists", "wordlist"),
     ("system", "system"): ("settings", "system"),
     ("telegram_bot", "telegramchat"): ("telegram_app", "telegramchat"),
     ("targets", "targetport"): ("target_ports", "targetport"),
 }
+# Django renames the content type of a renamed model, but never the codename of its permissions
 RENAMED_PERMISSIONS = {"system": "settings"}
 
 
@@ -37,9 +49,9 @@ class Command(BaseCommand, LoggingEntity):
     def handle(self, *args: Any, **options: Any) -> None:
         """Apply every rename that the version 1.x database still needs.
 
-        All the renames share one transaction, so a database is either fully renamed
-        or left untouched for the command to be run again. A half renamed one would
-        be migrated against the wrong names.
+        Each step is skipped when its version 1.x name is not found, so this is a no-op on a
+        fresh installation, and they share one transaction, since a half renamed database
+        would be migrated against the wrong names.
 
         Args:
             *args: Not used, since the command takes no arguments.
@@ -92,12 +104,15 @@ class Command(BaseCommand, LoggingEntity):
     def _move_content_types(self) -> int:
         """Move the content types to the apps that own their models in version 2.x.
 
+        They are updated instead of recreated, so the permissions keep pointing to them.
+
         Returns:
             The number of content types that were moved.
         """
         moved = 0
         with connection.cursor() as cursor:
             for (old_app, old_model), (new_app, new_model) in MOVED_CONTENT_TYPES.items():
+                # Two content types of the same model would break the unique constraint
                 cursor.execute(f"SELECT 1 FROM django_content_type WHERE app_label = {new_app} AND model = {new_model}")
                 if cursor.fetchone():
                     continue
