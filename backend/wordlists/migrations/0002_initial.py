@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('resources', '0001_initial'),
+        ('wordlists', '0001_initial'),
     ]
 
     operations = [

@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     "platforms.vulncheck",
     "parameters",
     "projects",
+    "rekono",
     "reporting",
     "security",
     "settings",

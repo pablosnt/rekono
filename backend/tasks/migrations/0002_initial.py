@@ -12,7 +12,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ('tools', '0002_initial'),
         ('tasks', '0001_initial'),
-        ('resources', '0002_initial'),
+        ('wordlists', '0002_initial'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
         ('targets', '0001_initial'),
         ('processes', '0003_initial'),
@@ -42,6 +42,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='task',
             name='wordlists',
-            field=models.ManyToManyField(blank=True, related_name='wordlists', to='resources.Wordlist'),
+            field=models.ManyToManyField(blank=True, related_name='wordlists', to='wordlists.Wordlist'),
         ),
     ]
