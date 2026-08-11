@@ -1,12 +1,9 @@
 """Django app configuration of the wordlists app."""
 
-import os
-from pathlib import Path
 from typing import Any
 
 from django.apps import AppConfig
 from django.db.models import QuerySet
-from django.db.models.signals import post_migrate
 
 from framework.apps import BaseApp
 
@@ -22,20 +19,6 @@ class WordlistsConfig(BaseApp, AppConfig):
 
     name = "wordlists"
     recreate_data = True
-
-    def ready(self) -> None:
-        """Prepare the app, calculating the wordlist sizes after each migration."""
-        super().ready()
-        post_migrate.connect(self.update_default_wordlists_size, sender=self)
-
-    def load_fixtures(self, **kwargs: Any) -> None:
-        """Load the wordlist fixtures and calculate the size of their files.
-
-        Args:
-            **kwargs: Arguments sent by the post_migrate signal.
-        """
-        super().load_fixtures(**kwargs)
-        self.update_default_wordlists_size()
 
     def _select_data_to_restore_relationships(self, model: Any) -> QuerySet:
         """Select the default wordlists, to keep the tasks that reference them.
@@ -74,22 +57,6 @@ class WordlistsConfig(BaseApp, AppConfig):
             with that path, so the relationship can't be restored.
         """
         return model.objects.filter(path=removed.path).first()
-
-    def update_default_wordlists_size(self, **kwargs: Any) -> None:
-        """Count the words of each wordlist file whose content can be read.
-
-        Args:
-            **kwargs: Arguments sent by the post_migrate signal.
-        """
-        from wordlists.models import Wordlist
-
-        for wordlist in Wordlist.objects.all():
-            # The wordlists uploaded by the users may not exist in this deployment, since only
-            # their metadata is stored in the database
-            if Path(wordlist.path).is_file() and os.access(wordlist.path, os.R_OK):  # pragma: no cover
-                with open(wordlist.path, "rb") as wordlist_file:
-                    wordlist.size = len(wordlist_file.readlines())
-                    wordlist.save(update_fields=["size"])
 
     def _get_models(self) -> list[Any]:
         """Get the wordlist model, whose data comes from the fixtures.

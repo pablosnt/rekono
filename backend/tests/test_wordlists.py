@@ -1,5 +1,6 @@
 from functools import cached_property
 
+from django.core.management import call_command
 from django.test import TestCase
 
 from security.authorization.roles import Role
@@ -157,6 +158,15 @@ class WordlistTest(ApiTestNoData, TestCase):
         super().tearDown()
         invalid_extension_path.unlink()
         invalid_size_path.unlink()
+
+    def test_update_wordlists_size_command(self) -> None:
+        wordlist = Wordlist.objects.create(name="test size", type=WordlistType.ENDPOINT, path=str(endpoints_path))
+        missing = Wordlist.objects.create(name="test missing", type=WordlistType.ENDPOINT, path="/does/not/exist")
+        call_command("update_wordlists_size")
+        wordlist.refresh_from_db()
+        missing.refresh_from_db()
+        self.assertEqual(len(endpoints_path.read_text().splitlines()), wordlist.size)
+        self.assertIsNone(missing.size)
 
     def test_base_input_filter(self) -> None:
         wordlist = Wordlist(type=WordlistType.ENDPOINT, path=str(endpoints_path))

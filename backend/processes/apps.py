@@ -20,23 +20,6 @@ class ProcessesConfig(BaseApp, AppConfig):
     name = "processes"
     recreate_data = True
 
-    def load_fixtures(self, **kwargs: Any) -> None:
-        """Load the process fixtures and remove the steps that can't run anymore.
-
-        Deprecated configurations are preserved for historical executions, but a step
-        referencing one can never run again, so it is removed to avoid leaving dead
-        entries in process definitions. This runs after the tools fixtures have
-        flagged the deprecated configurations, and after the process steps have been
-        recreated.
-
-        Args:
-            **kwargs: Arguments sent by the post_migrate signal.
-        """
-        from processes.models import Step
-
-        super().load_fixtures(**kwargs)
-        Step.objects.filter(configuration__deprecated=True).delete()
-
     def _select_data_to_restore_relationships(self, model: Any) -> QuerySet:
         """Select the default processes, to keep the tasks that reference them.
 

@@ -1,5 +1,6 @@
 from functools import cached_property
 
+from django.core.management import call_command
 from django.test import TestCase
 from rest_framework.test import APIClient
 
@@ -80,6 +81,15 @@ class ToolTest(ApiTestNoData, TestCase):
         configuration.deprecated = True
         configuration.save(update_fields=["deprecated"])
         self.assertNotIn(configuration.pk, [c["id"] for c in client.get("/api/tools/1/").json()["configurations"]])
+
+    def test_update_tools_status_command(self) -> None:
+        tool = Tool.objects.create(
+            name="not installed", command="not-installed-command", is_installed=True, version="1.0.0"
+        )
+        call_command("update_tools_status")
+        tool.refresh_from_db()
+        self.assertFalse(tool.is_installed)
+        self.assertIsNone(tool.version)
 
     def test_tools_exclude_no_active_configurations(self) -> None:
         client = APIClient()

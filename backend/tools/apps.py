@@ -3,7 +3,6 @@
 from typing import Any
 
 from django.apps import AppConfig
-from django.db.models.signals import post_migrate
 
 from framework.apps import BaseApp
 
@@ -16,11 +15,6 @@ class ToolsConfig(BaseApp, AppConfig):
     """
 
     name = "tools"
-
-    def ready(self) -> None:
-        """Prepare the app, checking the installed tools after each migration."""
-        super().ready()
-        post_migrate.connect(self.update_tools_status, sender=self)
 
     def load_fixtures(self, **kwargs: Any) -> None:
         """Load the tool fixtures, recreating everything that belongs to a tool.
@@ -38,14 +32,3 @@ class ToolsConfig(BaseApp, AppConfig):
         for model in [Intensity, Argument, Input, Output]:
             model.objects.all().delete()
         super().load_fixtures(**kwargs)
-
-    def update_tools_status(self, **kwargs: Any) -> None:
-        """Check which tools are installed in the system and which version they run.
-
-        Args:
-            **kwargs: Arguments sent by the post_migrate signal.
-        """
-        from tools.models import Tool
-
-        for tool in Tool.objects.all():
-            tool.update_status()
