@@ -49,6 +49,7 @@ constraint-dependencies = [
 ]
 
 [tool.ruff]
+exclude = ["migrations", ".venv"]
 line-length = 120
 indent-width = 4
 

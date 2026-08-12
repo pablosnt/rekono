@@ -2,10 +2,8 @@
 
 from django.apps import AppConfig
 
-from framework.apps import BaseApp
 
-
-class FindingsConfig(BaseApp, AppConfig):
+class FindingsConfig(AppConfig):
     """Configuration of the findings app.
 
     Attributes:

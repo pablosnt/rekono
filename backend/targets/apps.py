@@ -2,10 +2,8 @@
 
 from django.apps import AppConfig
 
-from framework.apps import BaseApp
 
-
-class TargetsConfig(BaseApp, AppConfig):
+class TargetsConfig(AppConfig):
     """Configuration of the targets app.
 
     Attributes:

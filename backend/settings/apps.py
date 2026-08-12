@@ -2,10 +2,8 @@
 
 from django.apps import AppConfig
 
-from framework.apps import BaseApp
 
-
-class SettingsConfig(BaseApp, AppConfig):
+class SettingsConfig(AppConfig):
     """Configuration of the settings app.
 
     Attributes:

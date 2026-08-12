@@ -81,7 +81,9 @@ class Command(BaseCommand, LoggingEntity):
             if old_table not in existing or new_table in existing:
                 continue
             with connection.cursor() as cursor:
-                cursor.execute(f"ALTER TABLE {connection.ops.quote_name(old_table)} RENAME TO {connection.ops.quote_name(new_table)}")
+                cursor.execute(
+                    f"ALTER TABLE {connection.ops.quote_name(old_table)} RENAME TO {connection.ops.quote_name(new_table)}"
+                )
             self.logger.info(f"[DB Upgrade] Table {old_table} renamed to {new_table}")
             renamed += 1
         return renamed
@@ -116,7 +118,9 @@ class Command(BaseCommand, LoggingEntity):
                 cursor.execute(f"SELECT 1 FROM django_content_type WHERE app_label = {new_app} AND model = {new_model}")
                 if cursor.fetchone():
                     continue
-                cursor.execute(f"UPDATE django_content_type SET app_label = {new_app}, model = {new_model} WHERE app_label = {old_app} AND model = {old_model}")
+                cursor.execute(
+                    f"UPDATE django_content_type SET app_label = {new_app}, model = {new_model} WHERE app_label = {old_app} AND model = {old_model}"
+                )
                 if cursor.rowcount:
                     self.logger.info(f"[DB Upgrade] Content type {old_app}.{old_model} moved to {new_app}.{new_model}")
                 moved += cursor.rowcount
@@ -132,7 +136,9 @@ class Command(BaseCommand, LoggingEntity):
         with connection.cursor() as cursor:
             for old_model, new_model in RENAMED_PERMISSIONS.items():
                 for action in ["add", "change", "delete", "view"]:
-                    cursor.execute(f"UPDATE auth_permission SET codename = {action}_{new_model} WHERE codename = {action}_{old_model}")
+                    cursor.execute(
+                        f"UPDATE auth_permission SET codename = {action}_{new_model} WHERE codename = {action}_{old_model}"
+                    )
                     renamed += cursor.rowcount
                 if renamed:
                     self.logger.info(f"[DB Upgrade] Permissions of {old_model} renamed to {new_model}")

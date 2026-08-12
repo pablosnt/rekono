@@ -2,10 +2,8 @@
 
 from django.apps import AppConfig
 
-from framework.apps import BaseApp
 
-
-class HttpHeadersConfig(BaseApp, AppConfig):
+class HttpHeadersConfig(AppConfig):
     """Configuration of the HTTP headers app.
 
     Attributes:

@@ -2,10 +2,8 @@
 
 from django.apps import AppConfig
 
-from framework.apps import BaseApp
 
-
-class VulncheckConfig(BaseApp, AppConfig):
+class VulncheckConfig(AppConfig):
     """Configuration of the VulnCheck app.
 
     Attributes:

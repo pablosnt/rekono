@@ -2,10 +2,8 @@
 
 from django.apps import AppConfig
 
-from framework.apps import BaseApp
 
-
-class NvdnistConfig(BaseApp, AppConfig):
+class NvdnistConfig(AppConfig):
     """Configuration of the NVD NIST app.
 
     Attributes:

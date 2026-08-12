@@ -2,10 +2,8 @@
 
 from django.apps import AppConfig
 
-from framework.apps import BaseApp
 
-
-class TasksConfig(BaseApp, AppConfig):
+class TasksConfig(AppConfig):
     """Configuration of the tasks app.
 
     Attributes:

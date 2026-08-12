@@ -2,10 +2,8 @@
 
 from django.apps import AppConfig
 
-from framework.apps import BaseApp
 
-
-class DefectDojoConfig(BaseApp, AppConfig):
+class DefectDojoConfig(AppConfig):
     """Configuration of the DefectDojo app.
 
     Attributes:

@@ -2,10 +2,8 @@
 
 from django.apps import AppConfig
 
-from framework.apps import BaseApp
 
-
-class SecurityConfig(BaseApp, AppConfig):
+class SecurityConfig(AppConfig):
     """Configuration of the security app.
 
     Attributes:

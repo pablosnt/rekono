@@ -2,10 +2,8 @@
 
 from django.apps import AppConfig
 
-from framework.apps import BaseApp
 
-
-class TargetDenylistConfig(BaseApp, AppConfig):
+class TargetDenylistConfig(AppConfig):
     """Configuration of the target denylist app.
 
     Attributes:

@@ -2,10 +2,8 @@
 
 from django.apps import AppConfig
 
-from framework.apps import BaseApp
 
-
-class AlertsConfig(BaseApp, AppConfig):
+class AlertsConfig(AppConfig):
     """Configuration of the alerts app.
 
     Attributes:

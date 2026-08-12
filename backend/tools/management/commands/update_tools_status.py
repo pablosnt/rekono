@@ -31,5 +31,7 @@ class Command(BaseCommand):
         for tool in Tool.objects.filter(configurations__deprecated=False).distinct():
             tool.update_status()
         self.stdout.write(
-            self.style.SUCCESS(f"{Tool.objects.filter(is_installed=True, configurations__deprecated=False).distinct().count()} tools are installed in this system")
+            self.style.SUCCESS(
+                f"{Tool.objects.filter(is_installed=True, configurations__deprecated=False).distinct().count()} tools are installed in this system"
+            )
         )

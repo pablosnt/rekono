@@ -2,10 +2,8 @@
 
 from django.apps import AppConfig
 
-from framework.apps import BaseApp
 
-
-class TelegramAppConfig(BaseApp, AppConfig):
+class TelegramAppConfig(AppConfig):
     """Configuration of the Telegram app.
 
     Attributes:

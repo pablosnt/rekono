@@ -2,10 +2,8 @@
 
 from django.apps import AppConfig
 
-from framework.apps import BaseApp
 
-
-class TargetPortsConfig(BaseApp, AppConfig):
+class TargetPortsConfig(AppConfig):
     """Configuration of the target ports app.
 
     Attributes:

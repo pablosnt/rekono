@@ -2,10 +2,8 @@
 
 from django.apps import AppConfig
 
-from framework.apps import BaseApp
 
-
-class CvecrowdConfig(BaseApp, AppConfig):
+class CvecrowdConfig(AppConfig):
     """Configuration of the CVE Crowd app.
 
     Attributes:

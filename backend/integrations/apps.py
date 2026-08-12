@@ -2,10 +2,8 @@
 
 from django.apps import AppConfig
 
-from framework.apps import BaseApp
 
-
-class IntegrationsConfig(BaseApp, AppConfig):
+class IntegrationsConfig(AppConfig):
     """Configuration of the integrations app.
 
     Attributes:

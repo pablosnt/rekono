@@ -2,10 +2,8 @@
 
 from django.apps import AppConfig
 
-from framework.apps import BaseApp
 
-
-class VirustotalConfig(BaseApp, AppConfig):
+class VirustotalConfig(AppConfig):
     """Configuration of the VirusTotal app.
 
     Attributes:

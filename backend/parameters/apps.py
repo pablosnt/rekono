@@ -2,10 +2,8 @@
 
 from django.apps import AppConfig
 
-from framework.apps import BaseApp
 
-
-class ParametersConfig(BaseApp, AppConfig):
+class ParametersConfig(AppConfig):
     """Configuration of the parameters app.
 
     Attributes:

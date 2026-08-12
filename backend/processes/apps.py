@@ -2,10 +2,8 @@
 
 from django.apps import AppConfig
 
-from framework.apps import BaseApp
 
-
-class ProcessesConfig(BaseApp, AppConfig):
+class ProcessesConfig(AppConfig):
     """Configuration of the processes app.
 
     Attributes:

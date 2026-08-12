@@ -2,10 +2,8 @@
 
 from django.apps import AppConfig
 
-from framework.apps import BaseApp
 
-
-class ProjectsConfig(BaseApp, AppConfig):
+class ProjectsConfig(AppConfig):
     """Configuration of the projects app.
 
     Attributes:

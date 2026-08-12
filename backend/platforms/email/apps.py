@@ -2,10 +2,8 @@
 
 from django.apps import AppConfig
 
-from framework.apps import BaseApp
 
-
-class EmailConfig(BaseApp, AppConfig):
+class EmailConfig(AppConfig):
     """Configuration of the email app.
 
     Attributes:

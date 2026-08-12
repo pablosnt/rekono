@@ -2,10 +2,8 @@
 
 from django.apps import AppConfig
 
-from framework.apps import BaseApp
 
-
-class WordlistsConfig(BaseApp, AppConfig):
+class WordlistsConfig(AppConfig):
     """Configuration of the wordlists app.
 
     Attributes:

@@ -1,9 +1,10 @@
-"""Base Django app configuration that loads the fixtures of each Rekono app.
+"""Base Django app configuration for the Rekono apps that ship fixtures.
 
 The default data of Rekono is created by the migrations, so a deployment gets it once
 and keeps whatever its users did with it afterwards. Only the entities that nothing
 outside their own app references are left in fixtures, and those are rebuilt from
-scratch after every migration, which lets maintainers reorder them freely.
+scratch after every migration, which lets maintainers reorder them freely. Just the
+input types and the tools app need it, so the rest of the apps extend AppConfig alone.
 """
 
 import importlib
@@ -20,9 +21,9 @@ from django.db.models.signals import post_migrate
 class BaseApp:
     """Base app configuration that loads the app fixtures after the migrations.
 
-    The apps whose fixtures replace the data that they already loaded declare it by
-    overriding the clearing hook, since the fixture files assign the primary keys and
-    a second load would collide with the rows of the first one.
+    The apps whose fixtures are reordered between Rekono versions override the clearing
+    hook, since the fixture files assign the primary keys, and the rows of the previous
+    load would otherwise survive under an identifier that now belongs to another entity.
     """
 
     @cached_property
@@ -51,9 +52,5 @@ class BaseApp:
             management.call_command(loaddata.Command(), *sorted(self.fixtures_path.rglob("*.json")))
 
     def _clear_before_load(self) -> None:
-        """Delete the data that the fixtures create again, before they are loaded.
-
-        Overridden by the apps whose fixtures assign the primary keys of the rows that
-        they create, since loading them twice would collide otherwise.
-        """
+        """Delete the data that the fixtures create again, before they are loaded."""
         return None

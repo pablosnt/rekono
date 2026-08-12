@@ -2,10 +2,8 @@
 
 from django.apps import AppConfig
 
-from framework.apps import BaseApp
 
-
-class MonitorConfig(BaseApp, AppConfig):
+class MonitorConfig(AppConfig):
     """Configuration of the monitor app.
 
     Attributes:
