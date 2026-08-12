@@ -1,7 +1,7 @@
 services:
   postgres:
     restart: always
-    image: postgres:17-bookworm
+    image: postgres:18-bookworm
     hostname: postgres
     container_name: postgres
     user: postgres
