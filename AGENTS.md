@@ -42,6 +42,8 @@ Offensive security platform that automates attack surface discovery and vulnerab
 
 - `uv run manage.py makemigrations`: Generate migrations for the latest model changes
 - `uv run manage.py migrate`: Apply migrations on the database
+- `uv run manage.py rename_1_x_apps`: Applies the version 2.x app names to a database created by version 1.x. To be executed before `migrate`
+- `uv run manage.py migrate_1_x_config`: Migrates the version 1.x configuration file to the version 2.x schema. To be executed after `migrate`
 - `uv run manage.py remove_deprecated_steps`: Removes the process steps whose configuration is deprecated. To be executed after `migrate`
 - `uv run manage.py update_wordlists_size`: Updates the number of words of the wordlists. To be executed after `migrate`
 - `uv run manage.py update_tools_status`: Updates the installation status and version of the tools. To be executed after `migrate`

@@ -81,9 +81,7 @@ class Command(BaseCommand, LoggingEntity):
             if old_table not in existing or new_table in existing:
                 continue
             with connection.cursor() as cursor:
-                cursor.execute(
-                    f"ALTER TABLE {connection.ops.quote_name(old_table)} RENAME TO {connection.ops.quote_name(new_table)}"
-                )
+                cursor.execute(f"ALTER TABLE {connection.ops.quote_name(old_table)} RENAME TO {connection.ops.quote_name(new_table)}")
             self.logger.info(f"[DB Upgrade] Table {old_table} renamed to {new_table}")
             renamed += 1
         return renamed
@@ -97,7 +95,7 @@ class Command(BaseCommand, LoggingEntity):
         renamed = 0
         with connection.cursor() as cursor:
             for old_app, new_app in RENAMED_APPS.items():
-                cursor.execute(f"UPDATE django_migrations SET app = {new_app} WHERE app = {old_app}")
+                cursor.execute("UPDATE django_migrations SET app = %s WHERE app = %s", [new_app, old_app])
                 if cursor.rowcount:
                     self.logger.info(f"[DB Upgrade] App {old_app} renamed to {new_app}")
                 renamed += cursor.rowcount
@@ -115,11 +113,14 @@ class Command(BaseCommand, LoggingEntity):
         with connection.cursor() as cursor:
             for (old_app, old_model), (new_app, new_model) in MOVED_CONTENT_TYPES.items():
                 # Two content types of the same model would break the unique constraint
-                cursor.execute(f"SELECT 1 FROM django_content_type WHERE app_label = {new_app} AND model = {new_model}")
+                cursor.execute(
+                    "SELECT 1 FROM django_content_type WHERE app_label = %s AND model = %s", [new_app, new_model]
+                )
                 if cursor.fetchone():
                     continue
                 cursor.execute(
-                    f"UPDATE django_content_type SET app_label = {new_app}, model = {new_model} WHERE app_label = {old_app} AND model = {old_model}"
+                    "UPDATE django_content_type SET app_label = %s, model = %s WHERE app_label = %s AND model = %s",
+                    [new_app, new_model, old_app, old_model],
                 )
                 if cursor.rowcount:
                     self.logger.info(f"[DB Upgrade] Content type {old_app}.{old_model} moved to {new_app}.{new_model}")
@@ -135,11 +136,14 @@ class Command(BaseCommand, LoggingEntity):
         renamed = 0
         with connection.cursor() as cursor:
             for old_model, new_model in RENAMED_PERMISSIONS.items():
+                renamed_model = 0
                 for action in ["add", "change", "delete", "view"]:
                     cursor.execute(
-                        f"UPDATE auth_permission SET codename = {action}_{new_model} WHERE codename = {action}_{old_model}"
+                        "UPDATE auth_permission SET codename = %s WHERE codename = %s",
+                        [f"{action}_{new_model}", f"{action}_{old_model}"],
                     )
-                    renamed += cursor.rowcount
-                if renamed:
+                    renamed_model += cursor.rowcount
+                if renamed_model:
                     self.logger.info(f"[DB Upgrade] Permissions of {old_model} renamed to {new_model}")
+                renamed += renamed_model
         return renamed

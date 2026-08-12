@@ -48,7 +48,7 @@ services:
     container_name: initializer
     volumes:
       - rekono:/rekono
-      - ./config.yaml:/rekono/config.yaml:ro
+      - ./config.yaml:/rekono/config.yaml
       - wordlists_seclists:/usr/share/seclists
       - wordlists_dirb:/usr/share/dirb/wordlists
     networks:
