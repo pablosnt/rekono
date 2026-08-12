@@ -12,7 +12,7 @@ class SettingsViewSet(BaseViewSet):
     """Read and update the Rekono configuration.
 
     Attributes:
-        queryset: The only settings instance, created from a fixture.
+        queryset: The only settings instance, created by the migrations.
         serializer_class: Serializer of the settings.
         permission_classes: Any user can read the settings, but only the ones that
           can change the settings model are able to update them.

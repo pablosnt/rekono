@@ -11,6 +11,7 @@ export interface DefectDojoSync {
 
 export interface Integration {
   id: number;
+  key: string;
   name: string;
   description: string;
   enabled: boolean;

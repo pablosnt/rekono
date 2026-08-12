@@ -9,7 +9,7 @@
           spotlight
           @click="
             () => {
-              if (item.id in integrationsSettings) {
+              if (item.key in integrationsSettings) {
                 openModal = true;
                 selectedIntegration = item;
               }
@@ -52,7 +52,7 @@
       :api="currentIntegrationSettings.api"
       :title="selectedIntegration.name"
       @open="(open) => (openModal = open)"
-      @submit="(data) => updateSettings(selectedIntegration.id, data)"
+      @submit="(data) => updateSettings(selectedIntegration.key, data)"
     >
       <template #before-close="{ loading }">
         <AvailabilityButton
@@ -84,7 +84,7 @@ const openModal = ref(false);
 const selectedIntegration = ref();
 const cveCrowdDaysSpan = [1, 7, 30];
 const integrationsSettings = ref({
-  1: {
+  defectdojo: {
     config: {
       entityName: "DefectDojo",
       editFormFields: [
@@ -126,7 +126,7 @@ const integrationsSettings = ref({
     },
     api: useApi("/api/defectdojo/settings/"),
   },
-  2: {
+  nvdnist: {
     config: {
       entityName: "NVD NIST",
       editFormFields: [
@@ -144,7 +144,7 @@ const integrationsSettings = ref({
       }),
     },
   },
-  4: {
+  cvecrowd: {
     config: {
       entityName: "CVE Crowd",
       editFormFields: [
@@ -179,7 +179,7 @@ const integrationsSettings = ref({
       }),
     },
   },
-  5: {
+  virustotal: {
     config: {
       entityName: "Virus Total",
       editFormFields: [
@@ -196,7 +196,7 @@ const integrationsSettings = ref({
       }),
     },
   },
-  10: {
+  vulncheck: {
     config: {
       entityName: "VulnCheck NVD++",
       editFormFields: [
@@ -218,8 +218,8 @@ const integrationsSettings = ref({
 });
 const currentIntegrationSettings = computed(() => {
   return selectedIntegration.value &&
-    integrationsSettings.value[selectedIntegration.value.id]
-    ? integrationsSettings.value[selectedIntegration.value.id]
+    integrationsSettings.value[selectedIntegration.value.key]
+    ? integrationsSettings.value[selectedIntegration.value.key]
     : null;
 });
 
@@ -241,11 +241,11 @@ function fetch() {
   }
 }
 
-function updateSettings(integrationId: number, data: Record<string, unknown>) {
-  integrationsSettings.value[integrationId].item = data;
-  if (integrationId === 1)
+function updateSettings(integrationKey: string, data: Record<string, unknown>) {
+  integrationsSettings.value[integrationKey].item = data;
+  if (integrationKey === "defectdojo")
     integrations.updateDefectDojoSettings(data as DefectDojoSettings);
-  else if (integrationId === 5)
+  else if (integrationKey === "virustotal")
     integrations.updateVirusTotalSettings(data as VirusTotalSettings);
   const integration = selectedIntegration.value;
   if (data.is_available && !integration.enabled) {
@@ -256,8 +256,8 @@ function updateSettings(integrationId: number, data: Record<string, unknown>) {
 }
 
 function getIntegrationState(item: Integration) {
-  if (item.id in integrationsSettings.value) {
-    const settings = integrationsSettings.value[item.id];
+  if (item.key in integrationsSettings.value) {
+    const settings = integrationsSettings.value[item.key];
     return item.enabled && settings.item?.is_available;
   }
   return item.enabled;
@@ -269,15 +269,15 @@ function toggleIntegration(
   silent: boolean = false,
 ) {
   if (
-    integration.id in integrationsSettings.value &&
-    !integrationsSettings.value[integration.id].item?.is_available
+    integration.key in integrationsSettings.value &&
+    !integrationsSettings.value[integration.key].item?.is_available
   ) {
     openModal.value = true;
     selectedIntegration.value = integration;
   } else {
-    api.update(`${integration.id}/`, { enabled: enabled }, {}).then(() => {
+    api.update(`${integration.key}/`, { enabled: enabled }, {}).then(() => {
       integration.enabled = enabled;
-      integrations.updateIntegration(integration.id, { enabled: enabled });
+      integrations.updateIntegration(integration.key, { enabled: enabled });
       if (!silent)
         toast.add({
           title: integration.name,

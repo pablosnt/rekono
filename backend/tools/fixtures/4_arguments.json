@@ -476,7 +476,7 @@
         "model": "tools.argument",
         "pk": 50,
         "fields": {
-            "configuration": 20,
+            "configuration": 51,
             "name": "target",
             "argument": "-d {target}",
             "required": true,

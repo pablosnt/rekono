@@ -2,6 +2,7 @@
     {
         "model": "tools.tool",
         "pk": 1,
+        "migration": "0004_remove_argument_unique_argument_and_more",
         "fields": {
             "name": "Nmap",
             "command": "nmap",
@@ -9,8 +10,6 @@
             "script_directory_property": null,
             "run_directory_property": null,
             "ignore_exit_code": false,
-            "is_installed": false,
-            "version": null,
             "version_argument": "--version",
             "output_format": "xml",
             "reference": "https://nmap.org/",
@@ -21,6 +20,7 @@
     {
         "model": "tools.tool",
         "pk": 2,
+        "migration": "0004_remove_argument_unique_argument_and_more",
         "fields": {
             "name": "Dirsearch",
             "command": "dirsearch",
@@ -28,8 +28,6 @@
             "script_directory_property": null,
             "run_directory_property": null,
             "ignore_exit_code": true,
-            "is_installed": false,
-            "version": null,
             "version_argument": "--version",
             "output_format": "json",
             "reference": "https://github.com/maurosoria/dirsearch",
@@ -40,6 +38,7 @@
     {
         "model": "tools.tool",
         "pk": 3,
+        "migration": "0004_remove_argument_unique_argument_and_more",
         "fields": {
             "name": "theHarvester",
             "command": "theHarvester",
@@ -47,8 +46,6 @@
             "script_directory_property": null,
             "run_directory_property": null,
             "ignore_exit_code": false,
-            "is_installed": false,
-            "version": null,
             "version_argument": "--help",
             "output_format": "json",
             "reference": "https://github.com/laramies/theHarvester",
@@ -59,6 +56,7 @@
     {
         "model": "tools.tool",
         "pk": 4,
+        "migration": "0004_remove_argument_unique_argument_and_more",
         "fields": {
             "name": "Nikto",
             "command": "nikto",
@@ -66,8 +64,6 @@
             "script_directory_property": null,
             "run_directory_property": null,
             "ignore_exit_code": true,
-            "is_installed": false,
-            "version": null,
             "version_argument": "-Version",
             "output_format": "xml",
             "reference": "https://github.com/sullo/nikto",
@@ -78,6 +74,7 @@
     {
         "model": "tools.tool",
         "pk": 5,
+        "migration": "0004_remove_argument_unique_argument_and_more",
         "fields": {
             "name": "Sslscan",
             "command": "sslscan",
@@ -85,8 +82,6 @@
             "script_directory_property": null,
             "run_directory_property": null,
             "ignore_exit_code": false,
-            "is_installed": false,
-            "version": null,
             "version_argument": "--version",
             "output_format": "xml",
             "reference": "https://github.com/rbsec/sslscan",
@@ -97,6 +92,7 @@
     {
         "model": "tools.tool",
         "pk": 6,
+        "migration": "0004_remove_argument_unique_argument_and_more",
         "fields": {
             "name": "SSLyze",
             "command": "sslyze",
@@ -104,8 +100,6 @@
             "script_directory_property": null,
             "run_directory_property": null,
             "ignore_exit_code": true,
-            "is_installed": false,
-            "version": null,
             "version_argument": "--help",
             "output_format": "json",
             "reference": "https://nabla-c0d3.github.io/sslyze/documentation/",
@@ -116,6 +110,7 @@
     {
         "model": "tools.tool",
         "pk": 7,
+        "migration": "0004_remove_argument_unique_argument_and_more",
         "fields": {
             "name": "CMSeeK",
             "command": "cmseek",
@@ -123,8 +118,6 @@
             "script_directory_property": null,
             "run_directory_property": null,
             "ignore_exit_code": false,
-            "is_installed": false,
-            "version": null,
             "version_argument": "--version",
             "output_format": "json",
             "reference": "https://github.com/Tuhinshubhra/CMSeeK/",
@@ -135,6 +128,7 @@
     {
         "model": "tools.tool",
         "pk": 8,
+        "migration": "0004_remove_argument_unique_argument_and_more",
         "fields": {
             "name": "ZAP",
             "command": "zaproxy",
@@ -142,8 +136,6 @@
             "script_directory_property": null,
             "run_directory_property": null,
             "ignore_exit_code": false,
-            "is_installed": false,
-            "version": null,
             "version_argument": "-version",
             "output_format": "xml",
             "reference": "https://www.zaproxy.org/",
@@ -154,6 +146,7 @@
     {
         "model": "tools.tool",
         "pk": 9,
+        "migration": "0004_remove_argument_unique_argument_and_more",
         "fields": {
             "name": "SearchSploit",
             "command": "searchsploit",
@@ -161,8 +154,6 @@
             "script_directory_property": null,
             "run_directory_property": null,
             "ignore_exit_code": false,
-            "is_installed": false,
-            "version": null,
             "version_argument": null,
             "output_format": "json",
             "reference": "https://www.exploit-db.com/searchsploit",
@@ -173,6 +164,7 @@
     {
         "model": "tools.tool",
         "pk": 10,
+        "migration": "0004_remove_argument_unique_argument_and_more",
         "fields": {
             "name": "Metasploit",
             "command": "msfconsole",
@@ -180,8 +172,6 @@
             "script_directory_property": null,
             "run_directory_property": null,
             "ignore_exit_code": false,
-            "is_installed": false,
-            "version": null,
             "version_argument": "--version",
             "output_format": null,
             "reference": "https://www.metasploit.com/",
@@ -192,6 +182,7 @@
     {
         "model": "tools.tool",
         "pk": 11,
+        "migration": "0004_remove_argument_unique_argument_and_more",
         "fields": {
             "name": "Log4j Scan",
             "command": "python3",
@@ -199,8 +190,6 @@
             "script_directory_property": "log4j_scan_dir",
             "run_directory_property": "log4j_scan_dir",
             "ignore_exit_code": false,
-            "is_installed": false,
-            "version": null,
             "version_argument": null,
             "output_format": null,
             "reference": "https://github.com/fullhunt/log4j-scan",
@@ -211,6 +200,7 @@
     {
         "model": "tools.tool",
         "pk": 12,
+        "migration": "0004_remove_argument_unique_argument_and_more",
         "fields": {
             "name": "EmailFinder",
             "command": "emailfinder",
@@ -218,8 +208,6 @@
             "script_directory_property": null,
             "run_directory_property": null,
             "ignore_exit_code": false,
-            "is_installed": false,
-            "version": null,
             "version_argument": "--version",
             "output_format": null,
             "reference": "https://github.com/Josue87/EmailFinder",
@@ -230,6 +218,7 @@
     {
         "model": "tools.tool",
         "pk": 13,
+        "migration": "0004_remove_argument_unique_argument_and_more",
         "fields": {
             "name": "EmailHarvester",
             "command": "python3",
@@ -237,8 +226,6 @@
             "script_directory_property": "emailharvester_dir",
             "run_directory_property": "emailharvester_dir",
             "ignore_exit_code": true,
-            "is_installed": false,
-            "version": null,
             "version_argument": "--help",
             "output_format": "txt",
             "reference": "https://github.com/maldevel/EmailHarvester",
@@ -249,6 +236,7 @@
     {
         "model": "tools.tool",
         "pk": 14,
+        "migration": "0004_remove_argument_unique_argument_and_more",
         "fields": {
             "name": "JoomScan",
             "command": "joomscan",
@@ -256,8 +244,6 @@
             "script_directory_property": null,
             "run_directory_property": null,
             "ignore_exit_code": false,
-            "is_installed": false,
-            "version": null,
             "version_argument": "--version",
             "output_format": null,
             "reference": "https://github.com/OWASP/joomscan",
@@ -268,6 +254,7 @@
     {
         "model": "tools.tool",
         "pk": 15,
+        "migration": "0004_remove_argument_unique_argument_and_more",
         "fields": {
             "name": "GitLeaks",
             "command": "gitleaks",
@@ -275,8 +262,6 @@
             "script_directory_property": null,
             "run_directory_property": null,
             "ignore_exit_code": true,
-            "is_installed": false,
-            "version": null,
             "version_argument": "version",
             "output_format": "json",
             "reference": "https://github.com/zricethezav/gitleaks",
@@ -287,6 +272,7 @@
     {
         "model": "tools.tool",
         "pk": 16,
+        "migration": "0004_remove_argument_unique_argument_and_more",
         "fields": {
             "name": "SSH Audit",
             "command": "ssh-audit",
@@ -294,8 +280,6 @@
             "script_directory_property": null,
             "run_directory_property": null,
             "ignore_exit_code": true,
-            "is_installed": false,
-            "version": null,
             "version_argument": "--help",
             "output_format": "json",
             "reference": "https://github.com/jtesta/ssh-audit",
@@ -306,6 +290,7 @@
     {
         "model": "tools.tool",
         "pk": 17,
+        "migration": "0004_remove_argument_unique_argument_and_more",
         "fields": {
             "name": "SMBMap",
             "command": "smbmap",
@@ -313,8 +298,6 @@
             "script_directory_property": null,
             "run_directory_property": null,
             "ignore_exit_code": false,
-            "is_installed": false,
-            "version": null,
             "version_argument": "--help",
             "output_format": "csv",
             "reference": "https://github.com/ShawnDEvans/smbmap",
@@ -325,6 +308,7 @@
     {
         "model": "tools.tool",
         "pk": 18,
+        "migration": "0004_remove_argument_unique_argument_and_more",
         "fields": {
             "name": "Nuclei",
             "command": "nuclei",
@@ -332,8 +316,6 @@
             "script_directory_property": null,
             "run_directory_property": null,
             "ignore_exit_code": false,
-            "is_installed": false,
-            "version": null,
             "version_argument": "--version",
             "output_format": "json",
             "reference": "https://nuclei.projectdiscovery.io",
@@ -344,6 +326,7 @@
     {
         "model": "tools.tool",
         "pk": 19,
+        "migration": "0004_remove_argument_unique_argument_and_more",
         "fields": {
             "name": "Spring4Shell Scan",
             "command": "python3",
@@ -351,8 +334,6 @@
             "script_directory_property": "spring4shell_scan_dir",
             "run_directory_property": "spring4shell_scan_dir",
             "ignore_exit_code": false,
-            "is_installed": false,
-            "version": null,
             "version_argument": null,
             "output_format": null,
             "reference": "https://github.com/fullhunt/spring4shell-scan",
@@ -363,6 +344,7 @@
     {
         "model": "tools.tool",
         "pk": 20,
+        "migration": "0004_remove_argument_unique_argument_and_more",
         "fields": {
             "name": "Gobuster",
             "command": "gobuster",
@@ -370,8 +352,6 @@
             "script_directory_property": null,
             "run_directory_property": null,
             "ignore_exit_code": false,
-            "is_installed": false,
-            "version": null,
             "version_argument": "--version",
             "output_format": "txt",
             "reference": "https://github.com/OJ/gobuster",

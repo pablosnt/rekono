@@ -2,6 +2,7 @@
     {
         "model": "tools.configuration",
         "pk": 1,
+        "migration": "0004_remove_argument_unique_argument_and_more",
         "fields": {
             "tool": 1,
             "name": "TCP ports",
@@ -15,6 +16,7 @@
     {
         "model": "tools.configuration",
         "pk": 2,
+        "migration": "0004_remove_argument_unique_argument_and_more",
         "fields": {
             "tool": 1,
             "name": "UDP ports",
@@ -28,6 +30,7 @@
     {
         "model": "tools.configuration",
         "pk": 3,
+        "migration": "0004_remove_argument_unique_argument_and_more",
         "fields": {
             "tool": 1,
             "name": "TCP ports & service versions",
@@ -41,6 +44,7 @@
     {
         "model": "tools.configuration",
         "pk": 4,
+        "migration": "0004_remove_argument_unique_argument_and_more",
         "fields": {
             "tool": 1,
             "name": "UDP ports & service versions",
@@ -54,6 +58,7 @@
     {
         "model": "tools.configuration",
         "pk": 5,
+        "migration": "0004_remove_argument_unique_argument_and_more",
         "fields": {
             "tool": 1,
             "name": "TCP & UDP ports",
@@ -67,6 +72,7 @@
     {
         "model": "tools.configuration",
         "pk": 6,
+        "migration": "0004_remove_argument_unique_argument_and_more",
         "fields": {
             "tool": 1,
             "name": "TCP & UDP ports & service versions",
@@ -80,6 +86,7 @@
     {
         "model": "tools.configuration",
         "pk": 7,
+        "migration": "0004_remove_argument_unique_argument_and_more",
         "fields": {
             "tool": 1,
             "name": "Fast TCP ports",
@@ -93,6 +100,7 @@
     {
         "model": "tools.configuration",
         "pk": 8,
+        "migration": "0004_remove_argument_unique_argument_and_more",
         "fields": {
             "tool": 1,
             "name": "Fast UDP ports",
@@ -106,6 +114,7 @@
     {
         "model": "tools.configuration",
         "pk": 9,
+        "migration": "0004_remove_argument_unique_argument_and_more",
         "fields": {
             "tool": 1,
             "name": "Fast TCP ports & service versions",
@@ -119,6 +128,7 @@
     {
         "model": "tools.configuration",
         "pk": 10,
+        "migration": "0004_remove_argument_unique_argument_and_more",
         "fields": {
             "tool": 1,
             "name": "Fast UDP ports & service versions",
@@ -132,6 +142,7 @@
     {
         "model": "tools.configuration",
         "pk": 11,
+        "migration": "0004_remove_argument_unique_argument_and_more",
         "fields": {
             "tool": 1,
             "name": "Fast TCP & UDP ports",
@@ -145,6 +156,7 @@
     {
         "model": "tools.configuration",
         "pk": 12,
+        "migration": "0004_remove_argument_unique_argument_and_more",
         "fields": {
             "tool": 1,
             "name": "Fast TCP & UDP ports & service versions",
@@ -158,6 +170,7 @@
     {
         "model": "tools.configuration",
         "pk": 13,
+        "migration": "0004_remove_argument_unique_argument_and_more",
         "fields": {
             "tool": 1,
             "name": "Vulners",
@@ -171,6 +184,7 @@
     {
         "model": "tools.configuration",
         "pk": 14,
+        "migration": "0004_remove_argument_unique_argument_and_more",
         "fields": {
             "tool": 1,
             "name": "FTP NSE scripts",
@@ -184,6 +198,7 @@
     {
         "model": "tools.configuration",
         "pk": 15,
+        "migration": "0004_remove_argument_unique_argument_and_more",
         "fields": {
             "tool": 2,
             "name": "Standard wordlist",
@@ -197,6 +212,7 @@
     {
         "model": "tools.configuration",
         "pk": 16,
+        "migration": "0004_remove_argument_unique_argument_and_more",
         "fields": {
             "tool": 2,
             "name": "Wordlist with extensions",
@@ -210,6 +226,7 @@
     {
         "model": "tools.configuration",
         "pk": 17,
+        "migration": "0004_remove_argument_unique_argument_and_more",
         "fields": {
             "tool": 2,
             "name": "Recursive",
@@ -223,6 +240,7 @@
     {
         "model": "tools.configuration",
         "pk": 18,
+        "migration": "0004_remove_argument_unique_argument_and_more",
         "fields": {
             "tool": 2,
             "name": "Deep recursive",
@@ -236,6 +254,7 @@
     {
         "model": "tools.configuration",
         "pk": 19,
+        "migration": "0004_remove_argument_unique_argument_and_more",
         "fields": {
             "tool": 3,
             "name": "Simple scan",
@@ -249,19 +268,21 @@
     {
         "model": "tools.configuration",
         "pk": 20,
+        "migration": "0004_remove_argument_unique_argument_and_more",
         "fields": {
             "tool": 3,
-            "name": "DNS lookup & Domain take over & Virtual hosts",
-            "command_template": "{target} -b all -f {output} --quiet --dns-lookup --take-over --virtual-host",
+            "name": "Google & Duckduckgo & Bing & Linkedin & Twitter",
+            "command_template": "{target} -b google,duckduckgo,bing,linkedin,linkedin_links,twitter -f {output}",
             "stage": 1,
             "default": false,
             "default_scanned_port": null,
-            "deprecated": false
+            "deprecated": true
         }
     },
     {
         "model": "tools.configuration",
         "pk": 21,
+        "migration": "0004_remove_argument_unique_argument_and_more",
         "fields": {
             "tool": 4,
             "name": "Web scan",
@@ -275,6 +296,7 @@
     {
         "model": "tools.configuration",
         "pk": 22,
+        "migration": "0004_remove_argument_unique_argument_and_more",
         "fields": {
             "tool": 5,
             "name": "SSL/TLS analysis",
@@ -288,6 +310,7 @@
     {
         "model": "tools.configuration",
         "pk": 23,
+        "migration": "0004_remove_argument_unique_argument_and_more",
         "fields": {
             "tool": 6,
             "name": "SSL/TLS analysis",
@@ -301,6 +324,7 @@
     {
         "model": "tools.configuration",
         "pk": 24,
+        "migration": "0004_remove_argument_unique_argument_and_more",
         "fields": {
             "tool": 7,
             "name": "Deep scan",
@@ -314,6 +338,7 @@
     {
         "model": "tools.configuration",
         "pk": 25,
+        "migration": "0004_remove_argument_unique_argument_and_more",
         "fields": {
             "tool": 8,
             "name": "Active scan",
@@ -327,6 +352,7 @@
     {
         "model": "tools.configuration",
         "pk": 26,
+        "migration": "0004_remove_argument_unique_argument_and_more",
         "fields": {
             "tool": 9,
             "name": "Search by technology",
@@ -340,6 +366,7 @@
     {
         "model": "tools.configuration",
         "pk": 27,
+        "migration": "0004_remove_argument_unique_argument_and_more",
         "fields": {
             "tool": 10,
             "name": "Search by CVE",
@@ -353,6 +380,7 @@
     {
         "model": "tools.configuration",
         "pk": 28,
+        "migration": "0004_remove_argument_unique_argument_and_more",
         "fields": {
             "tool": 11,
             "name": "Log4Shell (CVE-2021-44228)",
@@ -366,6 +394,7 @@
     {
         "model": "tools.configuration",
         "pk": 29,
+        "migration": "0004_remove_argument_unique_argument_and_more",
         "fields": {
             "tool": 11,
             "name": "Log4Shell (CVE-2021-44228) with WAF bypass",
@@ -379,6 +408,7 @@
     {
         "model": "tools.configuration",
         "pk": 30,
+        "migration": "0004_remove_argument_unique_argument_and_more",
         "fields": {
             "tool": 12,
             "name": "Search emails",
@@ -392,6 +422,7 @@
     {
         "model": "tools.configuration",
         "pk": 31,
+        "migration": "0004_remove_argument_unique_argument_and_more",
         "fields": {
             "tool": 13,
             "name": "Search emails",
@@ -405,6 +436,7 @@
     {
         "model": "tools.configuration",
         "pk": 32,
+        "migration": "0004_remove_argument_unique_argument_and_more",
         "fields": {
             "tool": 14,
             "name": "Joomla scan",
@@ -418,6 +450,7 @@
     {
         "model": "tools.configuration",
         "pk": 33,
+        "migration": "0004_remove_argument_unique_argument_and_more",
         "fields": {
             "tool": 15,
             "name": "Dump .git and find secrets in all commits",
@@ -431,6 +464,7 @@
     {
         "model": "tools.configuration",
         "pk": 34,
+        "migration": "0004_remove_argument_unique_argument_and_more",
         "fields": {
             "tool": 16,
             "name": "SSH scan",
@@ -444,6 +478,7 @@
     {
         "model": "tools.configuration",
         "pk": 35,
+        "migration": "0004_remove_argument_unique_argument_and_more",
         "fields": {
             "tool": 17,
             "name": "List shares",
@@ -457,6 +492,7 @@
     {
         "model": "tools.configuration",
         "pk": 36,
+        "migration": "0004_remove_argument_unique_argument_and_more",
         "fields": {
             "tool": 17,
             "name": "List shares and directories recursively",
@@ -470,6 +506,7 @@
     {
         "model": "tools.configuration",
         "pk": 37,
+        "migration": "0004_remove_argument_unique_argument_and_more",
         "fields": {
             "tool": 1,
             "name": "SMB NSE scripts",
@@ -483,6 +520,7 @@
     {
         "model": "tools.configuration",
         "pk": 38,
+        "migration": "0004_remove_argument_unique_argument_and_more",
         "fields": {
             "tool": 1,
             "name": "FTP & SMB NSE scripts",
@@ -496,6 +534,7 @@
     {
         "model": "tools.configuration",
         "pk": 39,
+        "migration": "0004_remove_argument_unique_argument_and_more",
         "fields": {
             "tool": 18,
             "name": "All templates",
@@ -509,6 +548,7 @@
     {
         "model": "tools.configuration",
         "pk": 40,
+        "migration": "0004_remove_argument_unique_argument_and_more",
         "fields": {
             "tool": 18,
             "name": "Automatic technology detection",
@@ -522,6 +562,7 @@
     {
         "model": "tools.configuration",
         "pk": 41,
+        "migration": "0004_remove_argument_unique_argument_and_more",
         "fields": {
             "tool": 18,
             "name": "CVE templates",
@@ -535,6 +576,7 @@
     {
         "model": "tools.configuration",
         "pk": 42,
+        "migration": "0004_remove_argument_unique_argument_and_more",
         "fields": {
             "tool": 19,
             "name": "Spring Shell (CVE-2022-22965 & CVE-2022-22963)",
@@ -548,6 +590,7 @@
     {
         "model": "tools.configuration",
         "pk": 43,
+        "migration": "0004_remove_argument_unique_argument_and_more",
         "fields": {
             "tool": 19,
             "name": "Spring Cloud RCE (CVE-2022-22963)",
@@ -561,6 +604,7 @@
     {
         "model": "tools.configuration",
         "pk": 44,
+        "migration": "0004_remove_argument_unique_argument_and_more",
         "fields": {
             "tool": 19,
             "name": "SpringShell RCE (CVE-2022-22965) with WAF bypass",
@@ -574,6 +618,7 @@
     {
         "model": "tools.configuration",
         "pk": 45,
+        "migration": "0004_remove_argument_unique_argument_and_more",
         "fields": {
             "tool": 19,
             "name": "Spring Cloud RCE (CVE-2022-22963) with WAF bypass",
@@ -587,6 +632,7 @@
     {
         "model": "tools.configuration",
         "pk": 46,
+        "migration": "0004_remove_argument_unique_argument_and_more",
         "fields": {
             "tool": 20,
             "name": "Subdomains enumeration",
@@ -600,6 +646,7 @@
     {
         "model": "tools.configuration",
         "pk": 47,
+        "migration": "0004_remove_argument_unique_argument_and_more",
         "fields": {
             "tool": 20,
             "name": "VHOST enumeration",
@@ -613,6 +660,7 @@
     {
         "model": "tools.configuration",
         "pk": 48,
+        "migration": "0004_remove_argument_unique_argument_and_more",
         "fields": {
             "tool": 20,
             "name": "Endpoints enumeration",
@@ -626,6 +674,7 @@
     {
         "model": "tools.configuration",
         "pk": 49,
+        "migration": "0004_remove_argument_unique_argument_and_more",
         "fields": {
             "tool": 7,
             "name": "Light scan",
@@ -639,11 +688,26 @@
     {
         "model": "tools.configuration",
         "pk": 50,
+        "migration": "0004_remove_argument_unique_argument_and_more",
         "fields": {
             "tool": 9,
             "name": "Search by CVE",
             "command_template": "{cve} --json --disable-colour",
             "stage": 5,
+            "default": false,
+            "default_scanned_port": null,
+            "deprecated": false
+        }
+    },
+    {
+        "model": "tools.configuration",
+        "pk": 51,
+        "migration": "0004_remove_argument_unique_argument_and_more",
+        "fields": {
+            "tool": 3,
+            "name": "DNS lookup & Domain take over & Virtual hosts",
+            "command_template": "{target} -b all -f {output} --quiet --dns-lookup --take-over --virtual-host",
+            "stage": 1,
             "default": false,
             "default_scanned_port": null,
             "deprecated": false

@@ -28,7 +28,7 @@ class ToolViewSet(LikeViewSet):
         search_fields: Free text search over the tool name and its command.
         ordering_fields: Fields that the tools can be sorted by.
         http_method_names: GET to read the tools, and POST and DELETE for the like
-          action, since the tools themselves come from the fixtures.
+          action, since the tools themselves are created by the migrations.
     """
 
     queryset = Tool.objects.annotate(
@@ -43,7 +43,7 @@ class ToolViewSet(LikeViewSet):
 
     @extend_schema(exclude=True)
     def create(self, request: Request, *args, **kwargs) -> Response:
-        """Reject the creation of tools, which only the fixtures define.
+        """Reject the creation of tools, which only the migrations define.
 
         Args:
             request: Request that is rejected without being read.
@@ -57,7 +57,7 @@ class ToolViewSet(LikeViewSet):
 
     @extend_schema(exclude=True)
     def destroy(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        """Reject the deletion of tools, which only the fixtures define.
+        """Reject the deletion of tools, which only the migrations define.
 
         Args:
             request: Request that is rejected without being read.
@@ -80,7 +80,8 @@ class ConfigurationViewSet(BaseViewSet):
         filterset_class: Filters of the configurations.
         permission_classes: Only the users that can read the configurations.
         search_fields: Free text search over the configuration name.
-        http_method_names: GET only, since the configurations come from the fixtures.
+        http_method_names: GET only, since the configurations are created by the
+          migrations.
     """
 
     queryset = Configuration.objects.filter(deprecated=False)

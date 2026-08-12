@@ -13,8 +13,8 @@ class Command(BaseCommand):
     Deprecated configurations are preserved for historical executions, but a step
     referencing one can never run again, so it is removed to avoid leaving dead
     entries in process definitions. This is run on every deployment, once the
-    migrations have loaded the fixtures that flag the deprecated configurations and
-    recreate the steps of the default processes.
+    migrations have flagged the deprecated configurations and created the steps of
+    the default processes.
 
     Attributes:
         help: Description of the command shown by the Django help.

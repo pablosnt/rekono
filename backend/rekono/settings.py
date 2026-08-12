@@ -61,10 +61,9 @@ INSTALLED_APPS = [
     "targets",
     "tasks",
     "tools",
-    # Processes MUST be loaded after tools, as their fixtures need configuration fixtures to be loaded first
     "processes",
     "wordlists",
-    # Users MUST be loaded at the latest place, as it will load permissions fixtures from all the other models
+    # Users MUST be loaded at the latest place, as the groups that it creates need the permissions of all the models
     "users",
 ]
 
