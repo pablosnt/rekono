@@ -14,7 +14,7 @@ services:
       retries: 5
       start_period: 10s
     volumes:
-      - postgres:/home/postgres/pgdata/
+      - postgres_18:/var/lib/postgresql
     networks:
       - internal
     environment:
@@ -23,7 +23,31 @@ services:
       - POSTGRES_PASSWORD=postgres
     security_opt:
       - no-new-privileges:true
-  
+
+  # Migrates the PostgreSQL 14 data from Rekono 1.x to the PostgreSQL 18 used since Rekono 2.0.0
+  postgres-migrator:
+    restart: 'no'
+    image: postgres:14-alpine
+    container_name: postgres-migrator
+    user: postgres
+    entrypoint: ["sh", "/entrypoints/postgres-migrator.sh"]
+    volumes:
+      - postgres:/var/lib/postgresql/data
+      - ./docker/entrypoints/postgres-migrator.sh:/entrypoints/postgres-migrator.sh:ro
+    networks:
+      - internal
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      - LEGACY_PG_VERSION=14
+      - RKN_DB_NAME=rekono
+      - RKN_DB_HOST=postgres
+      - RKN_DB_USER=postgres
+      - PGPASSWORD=postgres
+    security_opt:
+      - no-new-privileges:true
+
   valkey:
     restart: always
     image: valkey/valkey:8-bookworm
@@ -56,6 +80,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      postgres-migrator:
+        condition: service_completed_successfully
       valkey:
         condition: service_healthy
     environment:
@@ -280,7 +306,9 @@ services:
       - no-new-privileges:true
 
 volumes:
+  # Volume used by postgres 14 in Rekono 1.x
   postgres:
+  postgres_18:
   nginx:
   rekono:
   wordlists_seclists:
