@@ -93,6 +93,7 @@ DEFAULT_WORDLISTS = [
     ("Oracle WebLogic", "Endpoint", "/usr/share/seclists/Discovery/Web-Content/Service-Specific/Oracle-WebLogic.txt"),
     ("Pulse Secure VPN", "Endpoint", "/usr/share/seclists/Discovery/Web-Content/Service-Specific/PulseSecure-VPN.txt"),
 ]
+# Seclists dropped these files instead of moving them
 REMOVED_WORDLISTS = [
     "Endpoints list for Dirsearch",
     "WebLogic",
@@ -124,18 +125,15 @@ def create_default_wordlists(apps: Any, schema_editor: Any) -> None:
 def remove_old_wordlists(apps: Any, schema_editor: Any) -> None:
     """Remove the wordlists that version 1.x provided and version 2.x doesn't.
 
-    A wordlist that a user uploaded is never removed, even when it has one of these names,
-    and neither is one that a task used, since that would erase the wordlist from the
-    history of an execution that ran with it.
+    A wordlist that a user uploaded is never removed, even when it has one of these names.
+    Removing one that a task used drops it from that task's wordlists too, but the files
+    they name are gone from seclists, so no execution could run with them again anyway.
 
     Args:
         apps: Registry of the historical models, given by the migration framework.
         schema_editor: Not used, since only data is deleted.
     """
-    used_by_tasks = apps.get_model("tasks", "Task").wordlists.through.objects.values("wordlist_id")
-    apps.get_model("wordlists", "Wordlist").objects.filter(
-        name__in=REMOVED_WORDLISTS, owner__isnull=True
-    ).exclude(pk__in=used_by_tasks).delete()
+    apps.get_model("wordlists", "Wordlist").objects.filter(name__in=REMOVED_WORDLISTS, owner__isnull=True).delete()
 
 
 class Migration(migrations.Migration):

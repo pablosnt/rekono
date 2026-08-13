@@ -9,6 +9,8 @@ import security.validators.input_validator
 from django.conf import settings
 from django.db import migrations, models
 
+# Each step is the identifier that tools/data/3_configurations.json gives to the tool
+# configuration that it runs, so renaming a configuration doesn't reach these lists
 DEFAULT_PROCESSES = [
     {
         "name": "All tools",
@@ -84,8 +86,6 @@ def create_default_processes(apps: Any, schema_editor: Any) -> None:
 
     The processes are matched by name, so the ones that a deployment already has are kept
     with the tasks that reference them, and the ones that its users removed stay removed.
-    Each step is the identifier that tools/data/3_configurations.json gives to the tool
-    configuration that it runs, so renaming a configuration doesn't reach this.
 
     Args:
         apps: Registry of the historical models, given by the migration framework.
