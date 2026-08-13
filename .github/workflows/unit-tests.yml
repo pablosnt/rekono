@@ -44,4 +44,4 @@ jobs:
         working-directory: backend
         run: |
           uv run coverage combine
-          uv run coverage report -m --skip-covered --omit="tests/*,platforms/telegram_app/bot/*,platforms/telegram_app/framework.py,platforms/**/notifications.py" --fail-under=$REQUIRED_COVERAGE
+          uv run coverage report -m --skip-covered --fail-under=$REQUIRED_COVERAGE
