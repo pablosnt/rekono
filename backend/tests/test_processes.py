@@ -123,14 +123,14 @@ class StepTest(ApiTestNoData, TestCase):
             endpoint="1",
         ),
         PostApiTestCase([Role.AUDITOR, Role.READER], 403, step1),
-        PostApiTestCase(["admin1"], data=step1, expected={"id": 77, **expected_step1}),
+        PostApiTestCase(["admin1"], data=step1, expected={"id": 73, **expected_step1}),
         PostApiTestCase(["admin2"], 400, step1),
-        ApiTestCase([Role.READER], 403, endpoint="77"),
-        ApiTestCase([Role.ADMIN, Role.AUDITOR], expected={"id": 77, **expected_step1}, endpoint="77"),
-        DeleteApiTestCase([Role.AUDITOR, Role.READER], 403, endpoint="77"),
-        DeleteApiTestCase(["admin2"], endpoint="77"),
-        DeleteApiTestCase(["admin1"], 404, endpoint="77"),
-        ApiTestCase([Role.ADMIN, Role.AUDITOR], 404, endpoint="77"),
+        ApiTestCase([Role.READER], 403, endpoint="73"),
+        ApiTestCase([Role.ADMIN, Role.AUDITOR], expected={"id": 73, **expected_step1}, endpoint="73"),
+        DeleteApiTestCase([Role.AUDITOR, Role.READER], 403, endpoint="73"),
+        DeleteApiTestCase(["admin2"], endpoint="73"),
+        DeleteApiTestCase(["admin1"], 404, endpoint="73"),
+        ApiTestCase([Role.ADMIN, Role.AUDITOR], 404, endpoint="73"),
     ]
 
     def setUp(self) -> None:
