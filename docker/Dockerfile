@@ -10,7 +10,7 @@ ARG LABEL_LICENSES="GPL-3.0"
 ARG BACKEND_DEBIAN_DEPENDENCIES="libpq-dev libmagic1 libgcc-s1 libxml2-dev libxslt-dev python3-dev libjpeg-dev zlib1g-dev"
 
 
-FROM node:26-bookworm-slim AS build-email-templates
+FROM node:26-trixie-slim AS build-email-templates
 
 ENV CI=true
 
@@ -25,7 +25,7 @@ RUN PNPM_VERSION=$(node -p "require('./package.json').packageManager.split('@')[
     node scripts/unescape-django-tags.mjs /templates/dist
 
 
-FROM ghcr.io/astral-sh/uv:python3.13-bookworm-slim AS build-backend
+FROM ghcr.io/astral-sh/uv:python3.13-trixie-slim AS build-backend
 
 ARG BACKEND_DEBIAN_DEPENDENCIES
 
@@ -39,7 +39,7 @@ RUN mkdir -p /opt/python/ /dpkg && \
     # Explicitly install python in order to export it to the next stage
     uv python install --managed-python --install-dir /tmp/python && \
     # Save python environment
-    mv /tmp/python/cpython*/* /opt/python/ && \
+    mv $(find /tmp/python -maxdepth 1 -type d -name 'cpython-*')/* /opt/python/ && \
     # Install debian dependencies required to build python dependencies
     apt update && \
     apt install --yes --no-install-recommends $BACKEND_DEBIAN_DEPENDENCIES && \
@@ -90,7 +90,7 @@ COPY --from=build-backend /usr/local/bin/uv /bin/
 WORKDIR /code
 
 
-FROM node:26.2.0-bookworm-slim AS build-frontend
+FROM node:26-trixie-slim AS build-frontend
 
 ENV CI=true
 
