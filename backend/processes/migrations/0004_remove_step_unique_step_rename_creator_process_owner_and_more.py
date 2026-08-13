@@ -18,30 +18,7 @@ DEFAULT_PROCESSES = [
             "research. This process provides complete coverage across all penetration testing "
             "phases to identify potential security weaknesses in the target infrastructure."
         ),
-        "steps": [
-            ("theHarvester", "Simple scan"),
-            ("EmailFinder", "Search emails"),
-            ("EmailHarvester", "Search emails"),
-            ("Nmap", "FTP & SMB NSE scripts"),
-            ("Dirsearch", "Standard wordlist"),
-            ("Nikto", "Web scan"),
-            ("Sslscan", "SSL/TLS analysis"),
-            ("SSLyze", "SSL/TLS analysis"),
-            ("CMSeeK", "Deep scan"),
-            ("ZAP", "Active scan"),
-            ("Log4j Scan", "Log4Shell (CVE-2021-44228)"),
-            ("JoomScan", "Joomla scan"),
-            ("GitLeaks", "Dump .git and find secrets in all commits"),
-            ("SSH Audit", "SSH scan"),
-            ("SMBMap", "List shares"),
-            ("SearchSploit", "Search by technology"),
-            ("Metasploit", "Search by CVE"),
-            ("Nuclei", "All templates"),
-            ("Gobuster", "Subdomains enumeration"),
-            ("Gobuster", "VHOST enumeration"),
-            ("Gobuster", "Endpoints enumeration"),
-            ("Spring4Shell Scan", "Spring Shell (CVE-2022-22965 & CVE-2022-22963)"),
-        ],
+        "steps": [19, 30, 31, 38, 15, 21, 22, 23, 24, 25, 28, 32, 33, 34, 35, 26, 27, 39, 46, 47, 48, 42],
     },
     {
         "name": "HTTP Analysis",
@@ -50,23 +27,7 @@ DEFAULT_PROCESSES = [
             "and endpoint enumeration, SSL/TLS configuration analysis, content management system "
             "identification, and security testing of web-based attack vectors."
         ),
-        "steps": [
-            ("Nmap", "TCP ports & service versions"),
-            ("Dirsearch", "Standard wordlist"),
-            ("Nikto", "Web scan"),
-            ("Sslscan", "SSL/TLS analysis"),
-            ("SSLyze", "SSL/TLS analysis"),
-            ("CMSeeK", "Deep scan"),
-            ("ZAP", "Active scan"),
-            ("Log4j Scan", "Log4Shell (CVE-2021-44228)"),
-            ("JoomScan", "Joomla scan"),
-            ("GitLeaks", "Dump .git and find secrets in all commits"),
-            ("SearchSploit", "Search by technology"),
-            ("Metasploit", "Search by CVE"),
-            ("Nuclei", "All templates"),
-            ("Gobuster", "Endpoints enumeration"),
-            ("Spring4Shell Scan", "Spring Shell (CVE-2022-22965 & CVE-2022-22963)"),
-        ],
+        "steps": [3, 15, 21, 22, 23, 24, 25, 28, 32, 33, 26, 27, 39, 48, 42],
     },
     {
         "name": "FTP Analysis",
@@ -75,13 +36,7 @@ DEFAULT_PROCESSES = [
             "tests for anonymous access, identifies common vulnerabilities and backdoors, performs "
             "SSL/TLS analysis for secure FTP implementations, and searches for applicable exploits."
         ),
-        "steps": [
-            ("Nmap", "FTP NSE scripts"),
-            ("Sslscan", "SSL/TLS analysis"),
-            ("SSLyze", "SSL/TLS analysis"),
-            ("SearchSploit", "Search by technology"),
-            ("Metasploit", "Search by CVE"),
-        ],
+        "steps": [14, 22, 23, 26, 27],
     },
     {
         "name": "SSH Analysis",
@@ -91,12 +46,7 @@ DEFAULT_PROCESSES = [
             "weaknesses in the implementation, and searches for potential exploits related to the "
             "SSH service version."
         ),
-        "steps": [
-            ("Nmap", "TCP ports & service versions"),
-            ("SSH Audit", "SSH scan"),
-            ("SearchSploit", "Search by technology"),
-            ("Metasploit", "Search by CVE"),
-        ],
+        "steps": [3, 34, 26, 27],
     },
     {
         "name": "SMB Analysis",
@@ -105,12 +55,7 @@ DEFAULT_PROCESSES = [
             "user accounts, groups, and domain information, tests for anonymous access, identifies "
             "SMB protocol vulnerabilities, and searches for applicable exploits."
         ),
-        "steps": [
-            ("Nmap", "SMB NSE scripts"),
-            ("SearchSploit", "Search by technology"),
-            ("Metasploit", "Search by CVE"),
-            ("SMBMap", "List shares"),
-        ],
+        "steps": [37, 26, 27, 35],
     },
     {
         "name": "OSINT",
@@ -120,12 +65,7 @@ DEFAULT_PROCESSES = [
             "from various online sources without directly interacting with the target "
             "infrastructure, providing intelligence for further security assessments."
         ),
-        "steps": [
-            ("theHarvester", "Simple scan"),
-            ("EmailFinder", "Search emails"),
-            ("EmailHarvester", "Search emails"),
-            ("Gobuster", "Subdomains enumeration"),
-        ],
+        "steps": [19, 30, 31, 46],
     },
     {
         "name": "Active Analysis",
@@ -134,26 +74,7 @@ DEFAULT_PROCESSES = [
             "scanning, service enumeration, web application testing, vulnerability scanning, and "
             "exploit research."
         ),
-        "steps": [
-            ("Nmap", "FTP & SMB NSE scripts"),
-            ("Dirsearch", "Standard wordlist"),
-            ("Nikto", "Web scan"),
-            ("Sslscan", "SSL/TLS analysis"),
-            ("SSLyze", "SSL/TLS analysis"),
-            ("CMSeeK", "Deep scan"),
-            ("ZAP", "Active scan"),
-            ("Log4j Scan", "Log4Shell (CVE-2021-44228)"),
-            ("JoomScan", "Joomla scan"),
-            ("GitLeaks", "Dump .git and find secrets in all commits"),
-            ("SSH Audit", "SSH scan"),
-            ("SMBMap", "List shares"),
-            ("SearchSploit", "Search by technology"),
-            ("Metasploit", "Search by CVE"),
-            ("Nuclei", "All templates"),
-            ("Gobuster", "VHOST enumeration"),
-            ("Gobuster", "Endpoints enumeration"),
-            ("Spring4Shell Scan", "Spring Shell (CVE-2022-22965 & CVE-2022-22963)"),
-        ],
+        "steps": [38, 15, 21, 22, 23, 24, 25, 28, 32, 33, 34, 35, 26, 27, 39, 47, 48, 42],
     },
 ]
 
@@ -163,6 +84,8 @@ def create_default_processes(apps: Any, schema_editor: Any) -> None:
 
     The processes are matched by name, so the ones that a deployment already has are kept
     with the tasks that reference them, and the ones that its users removed stay removed.
+    Each step is the identifier that tools/data/3_configurations.json gives to the tool
+    configuration that it runs, so renaming a configuration doesn't reach this.
 
     Args:
         apps: Registry of the historical models, given by the migration framework.
@@ -170,16 +93,12 @@ def create_default_processes(apps: Any, schema_editor: Any) -> None:
     """
     process_model = apps.get_model("processes", "Process")
     step_model = apps.get_model("processes", "Step")
-    configuration_model = apps.get_model("tools", "Configuration")
     for process in DEFAULT_PROCESSES:
         entity, _ = process_model.objects.get_or_create(
             name=process["name"], defaults={"description": process["description"]}
         )
-        for tool, configuration in process["steps"]:
-            step_model.objects.get_or_create(
-                process=entity,
-                configuration=configuration_model.objects.get(tool__name=tool, name=configuration),
-            )
+        for configuration in process["steps"]:
+            step_model.objects.get_or_create(process=entity, configuration_id=configuration)
 
 
 class Migration(migrations.Migration):

@@ -82,7 +82,9 @@ class Command(BaseCommand, LoggingEntity):
                 continue
             with connection.cursor() as cursor:
                 # nosemgrep: python.lang.security.audit.formatted-sql-query.formatted-sql-query, python.sqlalchemy.security.sqlalchemy-execute-raw-query.sqlalchemy-execute-raw-query
-                cursor.execute(f"ALTER TABLE {connection.ops.quote_name(old_table)} RENAME TO {connection.ops.quote_name(new_table)}")
+                cursor.execute(
+                    f"ALTER TABLE {connection.ops.quote_name(old_table)} RENAME TO {connection.ops.quote_name(new_table)}"
+                )
             self.logger.info(f"[DB Upgrade] Table {old_table} renamed to {new_table}")
             renamed += 1
         return renamed
