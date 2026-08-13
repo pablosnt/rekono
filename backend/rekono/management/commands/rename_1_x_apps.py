@@ -49,36 +49,40 @@ class Command(BaseCommand, LoggingEntity):
     def handle(self, *args: Any, **options: Any) -> None:
         """Apply every rename that the version 1.x database still needs.
 
-        Each step is skipped when its version 1.x name is not found, so this is a no-op on a
-        fresh installation, and they share one transaction, since a half renamed database
-        would be migrated against the wrong names.
+        Each step is skipped when its table or its version 1.x name is not found, so this is a
+        no-op on a fresh installation, whose database is still empty when the deployment runs
+        this before migrate. They share one transaction, since a half renamed database would be
+        migrated against the wrong names.
 
         Args:
             *args: Not used, since the command takes no arguments.
             **options: Not used, since the command takes no options.
         """
+        tables = set(connection.introspection.table_names())
         with transaction.atomic():
             renames = (
-                self._rename_tables()
-                + self._rename_recorded_migrations()
-                + self._move_content_types()
-                + self._rename_permissions()
+                self._rename_tables(tables)
+                + self._rename_recorded_migrations(tables)
+                + self._move_content_types(tables)
+                + self._rename_permissions(tables)
             )
         if renames:
             self.stdout.write(self.style.SUCCESS(f"Applied {renames} version 2.x names to the database"))
         else:
             self.stdout.write("Database has no version 1.x names to rename")
 
-    def _rename_tables(self) -> int:
+    def _rename_tables(self, tables: set[str]) -> int:
         """Rename the tables whose name carries the app that owned them in version 1.x.
+
+        Args:
+            tables: Names of the tables that the database already has.
 
         Returns:
             The number of tables that were renamed.
         """
-        existing = connection.introspection.table_names()
         renamed = 0
         for old_table, new_table in RENAMED_TABLES.items():
-            if old_table not in existing or new_table in existing:
+            if old_table not in tables or new_table in tables:
                 continue
             with connection.cursor() as cursor:
                 # nosemgrep: python.lang.security.audit.formatted-sql-query.formatted-sql-query, python.sqlalchemy.security.sqlalchemy-execute-raw-query.sqlalchemy-execute-raw-query
@@ -89,12 +93,17 @@ class Command(BaseCommand, LoggingEntity):
             renamed += 1
         return renamed
 
-    def _rename_recorded_migrations(self) -> int:
+    def _rename_recorded_migrations(self, tables: set[str]) -> int:
         """Rename the apps of the migrations that version 1.x recorded as applied.
+
+        Args:
+            tables: Names of the tables that the database already has.
 
         Returns:
             The number of recorded migrations that were renamed.
         """
+        if "django_migrations" not in tables:
+            return 0
         renamed = 0
         with connection.cursor() as cursor:
             for old_app, new_app in RENAMED_APPS.items():
@@ -104,14 +113,19 @@ class Command(BaseCommand, LoggingEntity):
                 renamed += cursor.rowcount
         return renamed
 
-    def _move_content_types(self) -> int:
+    def _move_content_types(self, tables: set[str]) -> int:
         """Move the content types to the apps that own their models in version 2.x.
 
         They are updated instead of recreated, so the permissions keep pointing to them.
 
+        Args:
+            tables: Names of the tables that the database already has.
+
         Returns:
             The number of content types that were moved.
         """
+        if "django_content_type" not in tables:
+            return 0
         moved = 0
         with connection.cursor() as cursor:
             for (old_app, old_model), (new_app, new_model) in MOVED_CONTENT_TYPES.items():
@@ -130,12 +144,17 @@ class Command(BaseCommand, LoggingEntity):
                 moved += cursor.rowcount
         return moved
 
-    def _rename_permissions(self) -> int:
+    def _rename_permissions(self, tables: set[str]) -> int:
         """Rename the permissions of the models that version 2.x renamed.
+
+        Args:
+            tables: Names of the tables that the database already has.
 
         Returns:
             The number of permissions that were renamed.
         """
+        if "auth_permission" not in tables:
+            return 0
         renamed = 0
         with connection.cursor() as cursor:
             for old_model, new_model in RENAMED_PERMISSIONS.items():
