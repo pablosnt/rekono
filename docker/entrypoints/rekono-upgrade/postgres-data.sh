@@ -1,10 +1,10 @@
 #!/bin/sh
 
-# Migrates the data from the PostgreSQL version used by the previous Rekono version, since
 # PostgreSQL can't read data directories written by previous major versions. Data is dumped and
 # restored instead of using pg_upgrade, so the indexes are rebuilt. That's required when the base
 # system of the PostgreSQL image changes, like in the migration from Rekono 1.x (Alpine, musl) to
-# Rekono 2.x (Debian, glibc), because both C libraries sort text in a different way
+# Rekono 2.x (Debian, glibc), because both C libraries sort text in a different way. This needs to
+# run as the postgres user, since PostgreSQL refuses to run as root
 
 set -eu
 

@@ -24,16 +24,16 @@ services:
     security_opt:
       - no-new-privileges:true
 
-  # Migrates the PostgreSQL 14 data from Rekono 1.x to the PostgreSQL 18 used since Rekono 2.0.0
-  postgres-migrator:
+  # Upgrades from Rekono 1.x data
+  rekono-upgrade:
     restart: 'no'
     image: postgres:14-alpine
-    container_name: postgres-migrator
-    user: postgres
-    entrypoint: ["sh", "/entrypoints/postgres-migrator.sh"]
+    container_name: rekono-upgrade
+    entrypoint: ["sh", "/entrypoints/rekono-upgrade/upgrade.sh"]
     volumes:
       - postgres:/var/lib/postgresql/data
-      - ./docker/entrypoints/postgres-migrator.sh:/entrypoints/postgres-migrator.sh:ro
+      - rekono:/rekono
+      - ./docker/entrypoints/rekono-upgrade:/entrypoints/rekono-upgrade:ro
     networks:
       - internal
     depends_on:
@@ -45,6 +45,9 @@ services:
       - RKN_DB_HOST=postgres
       - RKN_DB_USER=postgres
       - PGPASSWORD=postgres
+      - REKONO_HOME=/rekono
+      - REKONO_UID=65532
+      - REKONO_GID=1000
     security_opt:
       - no-new-privileges:true
 
@@ -80,7 +83,7 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-      postgres-migrator:
+      rekono-upgrade:
         condition: service_completed_successfully
       valkey:
         condition: service_healthy

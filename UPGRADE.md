@@ -18,10 +18,10 @@ git pull
 docker-compose up -d --scale executions-worker=5
 ```
 
-The `postgres-migrator` service dumps the PostgreSQL 14 data from Rekono 1.x and restores it in the new PostgreSQL 18 database, before the Django migrations are applied. You can check it with:
+The `rekono-upgrade` service prepares everything that Rekono 1.x left behind, before the Django migrations are applied. It dumps the PostgreSQL 14 data and restores it in the new PostgreSQL 18 database, and it gives the home directory to the user that runs Rekono 2.x, which is a different one. You can check it with:
 
 ```bash
-docker-compose logs postgres-migrator
+docker-compose logs rekono-upgrade
 ```
 
 The migration is only performed once and it's skipped on new installations. If the migration fails, Rekono won't start. This is intentional: starting with an empty database would look like a successful new installation and would hide the loss of your data. The PostgreSQL 14 data isn't removed, so you can check the logs, fix the problem and start Rekono again.

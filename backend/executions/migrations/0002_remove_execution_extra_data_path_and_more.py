@@ -41,6 +41,34 @@ def revert_1x_execution_output(apps: Any, schema_editor: Any) -> None:
     )
 
 
+def migrate_1x_skipped_reason(apps: Any, schema_editor: Any) -> None:
+    """Move the output of the skipped executions to the field that explains why they were skipped.
+
+    Version 1.x wrote why an execution never ran in the output of the tool, which is misleading
+    because no tool wrote it, and version 2.x keeps it apart so the reason can be shown as such.
+    The output of a skipped execution only holds that reason, so it's moved instead of copied.
+
+    Args:
+        apps: Registry of the historical models, given by the migration framework.
+        schema_editor: Not used, since only data is migrated.
+    """
+    apps.get_model("executions", "Execution").objects.filter(status="Skipped").exclude(
+        output_plain__isnull=True
+    ).exclude(output_plain="").update(skipped_reason=models.F("output_plain"), output_plain=None)
+
+
+def revert_1x_skipped_reason(apps: Any, schema_editor: Any) -> None:
+    """Put the reason of the skipped executions back in the output where version 1.x wrote it.
+
+    Args:
+        apps: Registry of the historical models, given by the migration framework.
+        schema_editor: Not used, since only data is migrated.
+    """
+    apps.get_model("executions", "Execution").objects.filter(status="Skipped").exclude(
+        skipped_reason__isnull=True
+    ).exclude(skipped_reason="").update(output_plain=models.F("skipped_reason"), skipped_reason=None)
+
+
 def migrate_1x_execution_tool(apps: Any, schema_editor: Any) -> None:
     """Give the version 1.x executions the default configuration of their tool.
 
@@ -140,4 +168,5 @@ class Migration(migrations.Migration):
             model_name='execution',
             name='tool',
         ),
+        migrations.RunPython(migrate_1x_skipped_reason, revert_1x_skipped_reason),
     ]
