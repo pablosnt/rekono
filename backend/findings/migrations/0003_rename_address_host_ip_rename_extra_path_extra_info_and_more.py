@@ -22,7 +22,7 @@ CHOICES_MIGRATED_FROM_1X = [
 
 
 def flush_deferred_constraints(schema_editor: Any) -> None:
-    """Check the constraints left deferred by the data migrated in the same transaction.
+    """Check the constraints left deferred by data migrated in the same transaction.
 
     Changing the severity into an integer rewrites the finding table, and PostgreSQL stops
     skipping the checks of the foreign keys that point to it once it has been rewritten. Every
@@ -43,8 +43,7 @@ def migrate_1x_severities(apps: Any, schema_editor: Any) -> None:
     Version 1.x kept the severity as its label, and version 2.x orders them by keeping a number
     instead, so the labels are written as numbers while the field is still text. Without this, the
     change of the field to an integer asks PostgreSQL to read 'Low' as a number and the upgrade
-    stops. Any value out of the known ones falls back to the default severity, since it can't be
-    read as a number either.
+    stops.
 
     Args:
         apps: Registry of the historical models, given by the migration framework.
@@ -108,7 +107,7 @@ def revert_1x_choices(apps: Any, schema_editor: Any) -> None:
 
 
 def migrate_1x_findings(apps: Any, schema_editor: Any) -> None:
-    """Copy the active flag and the CWE of version 1.x into the fields that replaced them.
+    """Copy the active flag and the CWE of version 1.x into the fields replacing them.
 
     Version 1.x disabled a finding instead of deleting it, which version 2.x expresses the other
     way around, as a finding that has been fixed, so the flag is inverted rather than copied. It
