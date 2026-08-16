@@ -44,8 +44,9 @@ dev = [
 [tool.uv]
 exclude-newer = "7 days"
 constraint-dependencies = [
-    # Force a non-vulnerable version of a transitive dependency pulled by xhtml2pdf
+    # Force non-vulnerable versions of transitive dependencies pulled by xhtml2pdf
     "pillow>=12.3.0",
+    "pypdf>=6.15.0",
 ]
 
 [tool.ruff]

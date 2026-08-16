@@ -40,6 +40,9 @@ RUN mkdir -p /opt/python/ /dpkg && \
     uv python install --managed-python --install-dir /tmp/python && \
     # Save python environment
     mv $(find /tmp/python -maxdepth 1 -type d -name 'cpython-*')/* /opt/python/ && \
+    # Remove pip as uv doesn't need it
+    uv pip uninstall --python /opt/python/bin/python --break-system-packages pip && \
+    rm -rf /opt/python/lib/python*/ensurepip && \
     # Install debian dependencies required to build python dependencies
     apt update && \
     apt install --yes --no-install-recommends $BACKEND_DEBIAN_DEPENDENCIES && \
@@ -215,4 +218,3 @@ USER rekono
 
 # Pre-install nuclei templates in the rekono user's home
 RUN nuclei -update-templates
-
