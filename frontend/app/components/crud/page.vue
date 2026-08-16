@@ -373,6 +373,8 @@ onMounted(() => {
   mounted.value = true;
   if (props.config.canRead && props.config.endpoint) {
     fetch();
+  } else {
+    state.loading = false;
   }
 });
 
