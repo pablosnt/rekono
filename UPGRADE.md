@@ -65,6 +65,7 @@ psql -d rekono --single-transaction -v ON_ERROR_STOP=1 -f rekono.sql
 ```bash
 uv run --no-dev manage.py rename_1_x_apps
 uv run --no-dev manage.py migrate
+uv run --no-dev manage.py remove_stale_contenttypes --no-input
 uv run --no-dev manage.py migrate_1_x_config
 ```
 

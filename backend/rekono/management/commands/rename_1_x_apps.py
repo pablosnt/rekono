@@ -18,23 +18,18 @@ RENAMED_APPS = {
     "system": "settings",
     "telegram_bot": "telegram_app",
 }
-# The system table only loses its app prefix here; the System to Settings rename is a migration
 RENAMED_TABLES = {
     "resources_wordlist": "wordlists_wordlist",
     "resources_wordlist_liked_by": "wordlists_wordlist_liked_by",
     "system_system": "settings_system",
     "telegram_bot_telegramchat": "telegram_app_telegramchat",
 }
-# Target ports only need their content type moved: targets.0003_prepare_targetport_move renames
-# their table, since the targets app creates it on a fresh installation too
 MOVED_CONTENT_TYPES = {
     ("resources", "wordlist"): ("wordlists", "wordlist"),
     ("system", "system"): ("settings", "system"),
     ("telegram_bot", "telegramchat"): ("telegram_app", "telegramchat"),
     ("targets", "targetport"): ("target_ports", "targetport"),
 }
-# Django renames the content type of a renamed model, but never the codename of its permissions
-RENAMED_PERMISSIONS = {"system": "settings"}
 
 
 class Command(BaseCommand, LoggingEntity):
@@ -64,7 +59,6 @@ class Command(BaseCommand, LoggingEntity):
                 self._rename_tables(tables)
                 + self._rename_recorded_migrations(tables)
                 + self._move_content_types(tables)
-                + self._rename_permissions(tables)
             )
         if renames:
             self.stdout.write(self.style.SUCCESS(f"Applied {renames} version 2.x names to the database"))
@@ -143,29 +137,3 @@ class Command(BaseCommand, LoggingEntity):
                     self.logger.info(f"[DB Upgrade] Content type {old_app}.{old_model} moved to {new_app}.{new_model}")
                 moved += cursor.rowcount
         return moved
-
-    def _rename_permissions(self, tables: set[str]) -> int:
-        """Rename the permissions of the models that version 2.x renamed.
-
-        Args:
-            tables: Names of the tables that the database already has.
-
-        Returns:
-            The number of permissions that were renamed.
-        """
-        if "auth_permission" not in tables:
-            return 0
-        renamed = 0
-        with connection.cursor() as cursor:
-            for old_model, new_model in RENAMED_PERMISSIONS.items():
-                renamed_model = 0
-                for action in ["add", "change", "delete", "view"]:
-                    cursor.execute(
-                        "UPDATE auth_permission SET codename = %s WHERE codename = %s",
-                        [f"{action}_{new_model}", f"{action}_{old_model}"],
-                    )
-                    renamed_model += cursor.rowcount
-                if renamed_model:
-                    self.logger.info(f"[DB Upgrade] Permissions of {old_model} renamed to {new_model}")
-                renamed += renamed_model
-        return renamed
