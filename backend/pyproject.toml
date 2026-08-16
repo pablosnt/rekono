@@ -5,18 +5,21 @@ description = "Pentesting automation platform that combines hacking tools to com
 readme = "../../README.md"
 requires-python = ">=3.11,<4.0"
 dependencies = [
+    "beautifulsoup4==4.15.0",
     "certifi==2026.7.22",
     "cvss==3.6",
-    "cryptography==49.0.0",
+    "cryptography==50.0.0",
     "defusedxml==0.7.1",
-    "django==5.2.16",
+    "django==5.2.17",
     "django-filter==26.1",
     "django-rq==4.1.1",
     "django-taggit==6.1.0",
-    "djangorestframework==3.17.1",
+    "djangorestframework==3.18.0",
     "djangorestframework-simplejwt==5.5.1",
     "drf-spectacular==0.30.0",
     "geocoder==1.38.1",
+    "gunicorn>=26.0.0",
+    "markdown==3.10.3",
     "psycopg[binary,pool]==3.3.4",
     "pycryptodome==3.23.0",
     "pyjwt==2.13.0",
@@ -28,11 +31,8 @@ dependencies = [
     "requests==2.34.2",
     "rq==2.10.0",
     "stringcase==1.2.0",
-    "tornado==6.5.7",
+    "tornado==6.5.8",
     "xhtml2pdf==0.2.17",
-    "beautifulsoup4==4.15.0",
-    "markdown==3.10.2",
-    "gunicorn>=26.0.0",
 ]
 
 [dependency-groups]
