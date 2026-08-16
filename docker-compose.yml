@@ -33,6 +33,8 @@ services:
     volumes:
       - postgres:/var/lib/postgresql/data
       - rekono:/rekono
+      - nginx:/etc/nginx/tls
+      - ./docker/nginx:/legacy/nginx:ro
       - ./docker/entrypoints/rekono-upgrade:/entrypoints/rekono-upgrade:ro
     networks:
       - internal
@@ -48,6 +50,10 @@ services:
       - REKONO_HOME=/rekono
       - REKONO_UID=65532
       - REKONO_GID=1000
+      - LEGACY_NGINX_TLS=/legacy/nginx/tls
+      - NGINX_TLS=/etc/nginx/tls
+      - NGINX_UID=101
+      - NGINX_GID=101
     security_opt:
       - no-new-privileges:true
 

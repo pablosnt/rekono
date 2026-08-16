@@ -13,5 +13,7 @@ set -eu
 # The home directory is upgraded first, so the Rekono user can write its logs
 # This runs as root, since only root can give the home directory to the new Rekono user
 sh /entrypoints/rekono-upgrade/home-ownership.sh
+# This runs as root, since only root can give the TLS certificate to the nginx user
+sh /entrypoints/rekono-upgrade/nginx-tls.sh
 # PostgreSQL refuses to run as root, so the database is upgraded by the user that owns its data
 exec su-exec postgres sh /entrypoints/rekono-upgrade/postgres-data.sh
