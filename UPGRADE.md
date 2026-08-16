@@ -57,7 +57,7 @@ pg_dump --no-owner --no-privileges -d rekono > rekono.sql
 3. Restore the data:
 
 ```bash
-psql -d rekono --single-transaction -v ON_ERROR_STOP=1 -f rekono.sql
+PGPASSWORD=<rekono database password> psql -U <rekono database username> -d rekono --single-transaction -v ON_ERROR_STOP=1 -f rekono.sql
 ```
 
 4. Apply the Rekono migrations:
