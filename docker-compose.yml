@@ -1,7 +1,7 @@
 services:
   postgres:
     restart: always
-    image: postgres:17-bookworm
+    image: postgres:18-bookworm
     hostname: postgres
     container_name: postgres
     user: postgres
@@ -14,7 +14,7 @@ services:
       retries: 5
       start_period: 10s
     volumes:
-      - postgres:/home/postgres/pgdata/
+      - postgres_18:/var/lib/postgresql
     networks:
       - internal
     environment:
@@ -23,7 +23,40 @@ services:
       - POSTGRES_PASSWORD=postgres
     security_opt:
       - no-new-privileges:true
-  
+
+  # Upgrades from Rekono 1.x data
+  rekono-upgrade:
+    restart: 'no'
+    image: postgres:14-alpine
+    container_name: rekono-upgrade
+    entrypoint: ["sh", "/entrypoints/rekono-upgrade/upgrade.sh"]
+    volumes:
+      - postgres:/var/lib/postgresql/data
+      - rekono:/rekono
+      - nginx:/etc/nginx/tls
+      - ./docker/nginx:/legacy/nginx:ro
+      - ./docker/entrypoints/rekono-upgrade:/entrypoints/rekono-upgrade:ro
+    networks:
+      - internal
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      - LEGACY_PG_VERSION=14
+      - RKN_DB_NAME=rekono
+      - RKN_DB_HOST=postgres
+      - RKN_DB_USER=postgres
+      - PGPASSWORD=postgres
+      - REKONO_HOME=/rekono
+      - REKONO_UID=65532
+      - REKONO_GID=1000
+      - LEGACY_NGINX_TLS=/legacy/nginx/tls
+      - NGINX_TLS=/etc/nginx/tls
+      - NGINX_UID=101
+      - NGINX_GID=101
+    security_opt:
+      - no-new-privileges:true
+
   valkey:
     restart: always
     image: valkey/valkey:8-bookworm
@@ -48,7 +81,7 @@ services:
     container_name: initializer
     volumes:
       - rekono:/rekono
-      - ./config.yaml:/rekono/config.yaml:ro
+      - ./config.yaml:/rekono/config.yaml
       - wordlists_seclists:/usr/share/seclists
       - wordlists_dirb:/usr/share/dirb/wordlists
     networks:
@@ -56,6 +89,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      rekono-upgrade:
+        condition: service_completed_successfully
       valkey:
         condition: service_healthy
     environment:
@@ -280,7 +315,9 @@ services:
       - no-new-privileges:true
 
 volumes:
+  # Volume used by postgres 14 in Rekono 1.x
   postgres:
+  postgres_18:
   nginx:
   rekono:
   wordlists_seclists:

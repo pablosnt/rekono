@@ -1,5 +1,6 @@
 from functools import cached_property
 
+from django.core.management import call_command
 from django.test import TestCase
 from rest_framework.test import APIClient
 
@@ -122,14 +123,14 @@ class StepTest(ApiTestNoData, TestCase):
             endpoint="1",
         ),
         PostApiTestCase([Role.AUDITOR, Role.READER], 403, step1),
-        PostApiTestCase(["admin1"], data=step1, expected={"id": 77, **expected_step1}),
+        PostApiTestCase(["admin1"], data=step1, expected={"id": 73, **expected_step1}),
         PostApiTestCase(["admin2"], 400, step1),
-        ApiTestCase([Role.READER], 403, endpoint="77"),
-        ApiTestCase([Role.ADMIN, Role.AUDITOR], expected={"id": 77, **expected_step1}, endpoint="77"),
-        DeleteApiTestCase([Role.AUDITOR, Role.READER], 403, endpoint="77"),
-        DeleteApiTestCase(["admin2"], endpoint="77"),
-        DeleteApiTestCase(["admin1"], 404, endpoint="77"),
-        ApiTestCase([Role.ADMIN, Role.AUDITOR], 404, endpoint="77"),
+        ApiTestCase([Role.READER], 403, endpoint="73"),
+        ApiTestCase([Role.ADMIN, Role.AUDITOR], expected={"id": 73, **expected_step1}, endpoint="73"),
+        DeleteApiTestCase([Role.AUDITOR, Role.READER], 403, endpoint="73"),
+        DeleteApiTestCase(["admin2"], endpoint="73"),
+        DeleteApiTestCase(["admin1"], 404, endpoint="73"),
+        ApiTestCase([Role.ADMIN, Role.AUDITOR], 404, endpoint="73"),
     ]
 
     def setUp(self) -> None:
@@ -143,8 +144,14 @@ class StepTest(ApiTestNoData, TestCase):
     def test_endpoint_excludes_deprecated(self) -> None:
         client = APIClient()
         client.force_authenticate(self.admin1)
-        self.assertEqual(0, Step.objects.filter(configuration__deprecated=True).count())
         step = Step.objects.filter(process_id=1, configuration__deprecated=False).first()
         Configuration.objects.filter(pk=step.configuration_id).update(deprecated=True)
         self.assertEqual(404, client.get(f"/api/steps/{step.pk}/").status_code)
         self.assertNotIn(step.pk, [s["id"] for s in client.get("/api/steps/?process=1").json()["results"]])
+
+    def test_remove_deprecated_steps_command(self) -> None:
+        step = Step.objects.filter(process_id=1, configuration__deprecated=False).first()
+        Configuration.objects.filter(pk=step.configuration_id).update(deprecated=True)
+        call_command("remove_deprecated_steps")
+        self.assertEqual(0, Step.objects.filter(configuration__deprecated=True).count())
+        self.assertFalse(Step.objects.filter(pk=step.pk).exists())

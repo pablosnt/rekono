@@ -2,10 +2,8 @@
 
 from django.apps import AppConfig
 
-from framework.apps import BaseApp
 
-
-class ExecutionsConfig(BaseApp, AppConfig):
+class ExecutionsConfig(AppConfig):
     """Configuration of the executions app.
 
     Attributes:

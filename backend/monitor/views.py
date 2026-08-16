@@ -12,7 +12,7 @@ class MonitorSettingsViewSet(BaseViewSet):
     """Read and update the configuration of the monitor job.
 
     Attributes:
-        queryset: The only settings instance, created from a fixture.
+        queryset: The only settings instance, created by the migrations.
         serializer_class: Serializer of the monitor settings.
         permission_classes: Only the users that can change the settings model.
         http_method_names: GET and PUT only, since the settings are never created

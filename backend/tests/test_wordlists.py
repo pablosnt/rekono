@@ -1,5 +1,6 @@
 from functools import cached_property
 
+from django.core.management import call_command
 from django.test import TestCase
 
 from security.authorization.roles import Role
@@ -57,47 +58,47 @@ class WordlistTest(ApiTestNoData, TestCase):
             PostApiTestCase(
                 ["admin1"],
                 data={**wordlist_endpoints, "file": endpoints_path.open("rb")},
-                expected={"id": 58, **wordlist_endpoints, "size": 3, "owner": {"id": 1, "username": "admin1"}},
+                expected={"id": 55, **wordlist_endpoints, "size": 3, "owner": {"id": 1, "username": "admin1"}},
                 format="multipart",
             ),
             PostApiTestCase(
                 ["auditor1"],
                 data={**wordlist_subdomains, "file": subdomains_path.open("rb")},
-                expected={"id": 59, **wordlist_subdomains, "size": 3, "owner": {"id": 3, "username": "auditor1"}},
+                expected={"id": 56, **wordlist_subdomains, "size": 3, "owner": {"id": 3, "username": "auditor1"}},
                 format="multipart",
             ),
-            PutApiTestCase([Role.AUDITOR], 403, new_wordlist_endpoints, endpoint="58"),
+            PutApiTestCase([Role.AUDITOR], 403, new_wordlist_endpoints, endpoint="55"),
             PutApiTestCase(
-                [Role.ADMIN], data=new_wordlist_endpoints, expected={"id": 58, **new_wordlist_endpoints}, endpoint="58"
+                [Role.ADMIN], data=new_wordlist_endpoints, expected={"id": 55, **new_wordlist_endpoints}, endpoint="55"
             ),
-            PutApiTestCase(["auditor2"], 403, new_wordlist_subdomains, endpoint="59"),
+            PutApiTestCase(["auditor2"], 403, new_wordlist_subdomains, endpoint="56"),
             PutApiTestCase(
                 ["auditor1", Role.ADMIN],
                 data=new_wordlist_subdomains,
-                expected={"id": 59, **new_wordlist_subdomains},
-                endpoint="59",
+                expected={"id": 56, **new_wordlist_subdomains},
+                endpoint="56",
             ),
-            PostApiTestCase([Role.READER], 403, endpoint="58/like"),
-            DeleteApiTestCase([Role.READER], 403, endpoint="59/like"),
+            PostApiTestCase([Role.READER], 403, endpoint="55/like"),
+            DeleteApiTestCase([Role.READER], 403, endpoint="56/like"),
             ApiTestCase([Role.ADMIN, Role.AUDITOR], endpoint="{endpoint}?like=true"),
-            PostApiTestCase([Role.ADMIN, Role.AUDITOR], 204, endpoint="58/like"),
+            PostApiTestCase([Role.ADMIN, Role.AUDITOR], 204, endpoint="55/like"),
             ApiTestCase(
                 [Role.ADMIN, Role.AUDITOR],
                 expected={
-                    "id": 58,
+                    "id": 55,
                     **new_wordlist_endpoints,
                     "size": 3,
                     "owner": {"id": 1, "username": "admin1"},
                     "liked": True,
                     "likes": 4,
                 },
-                endpoint="58",
+                endpoint="55",
             ),
             ApiTestCase(
                 [Role.ADMIN, Role.AUDITOR],
                 expected=[
                     {
-                        "id": 58,
+                        "id": 55,
                         **new_wordlist_endpoints,
                         "size": 3,
                         "owner": {"id": 1, "username": "admin1"},
@@ -107,25 +108,25 @@ class WordlistTest(ApiTestNoData, TestCase):
                 ],
                 endpoint="{endpoint}?like=true",
             ),
-            DeleteApiTestCase([Role.ADMIN, Role.AUDITOR], endpoint="58/like"),
+            DeleteApiTestCase([Role.ADMIN, Role.AUDITOR], endpoint="55/like"),
             ApiTestCase(
                 [Role.ADMIN, Role.AUDITOR],
                 expected={
-                    "id": 58,
+                    "id": 55,
                     **new_wordlist_endpoints,
                     "size": 3,
                     "owner": {"id": 1, "username": "admin1"},
                     "liked": False,
                     "likes": 0,
                 },
-                endpoint="58",
+                endpoint="55",
             ),
-            DeleteApiTestCase([Role.READER, Role.AUDITOR], 403, endpoint="58"),
-            DeleteApiTestCase([Role.READER, "auditor2"], 403, endpoint="59"),
-            DeleteApiTestCase(["admin2"], endpoint="58"),
-            DeleteApiTestCase(["auditor1"], endpoint="59"),
-            ApiTestCase([Role.ADMIN, Role.AUDITOR], 404, endpoint="58"),
-            ApiTestCase([Role.ADMIN, Role.AUDITOR], 404, endpoint="59"),
+            DeleteApiTestCase([Role.READER, Role.AUDITOR], 403, endpoint="55"),
+            DeleteApiTestCase([Role.READER, "auditor2"], 403, endpoint="56"),
+            DeleteApiTestCase(["admin2"], endpoint="55"),
+            DeleteApiTestCase(["auditor1"], endpoint="56"),
+            ApiTestCase([Role.ADMIN, Role.AUDITOR], 404, endpoint="55"),
+            ApiTestCase([Role.ADMIN, Role.AUDITOR], 404, endpoint="56"),
             PostApiTestCase(
                 [Role.ADMIN, Role.AUDITOR],
                 400,
@@ -157,6 +158,15 @@ class WordlistTest(ApiTestNoData, TestCase):
         super().tearDown()
         invalid_extension_path.unlink()
         invalid_size_path.unlink()
+
+    def test_update_wordlists_size_command(self) -> None:
+        wordlist = Wordlist.objects.create(name="test size", type=WordlistType.ENDPOINT, path=str(endpoints_path))
+        missing = Wordlist.objects.create(name="test missing", type=WordlistType.ENDPOINT, path="/does/not/exist")
+        call_command("update_wordlists_size")
+        wordlist.refresh_from_db()
+        missing.refresh_from_db()
+        self.assertEqual(len(endpoints_path.read_text().splitlines()), wordlist.size)
+        self.assertIsNone(missing.size)
 
     def test_base_input_filter(self) -> None:
         wordlist = Wordlist(type=WordlistType.ENDPOINT, path=str(endpoints_path))

@@ -29,8 +29,10 @@ class IntegrationTest(ApiTestNoData, TestCase):
                 {"id": 1, "enabled": False},
             ],
         ),
-        PutApiTestCase([Role.AUDITOR, Role.READER], 403, endpoint="1"),
-        PutApiTestCase([Role.ADMIN], data={"enabled": True}, expected={"id": 1, "enabled": True}, endpoint="1"),
+        PutApiTestCase([Role.AUDITOR, Role.READER], 403, endpoint="defectdojo"),
+        PutApiTestCase(
+            [Role.ADMIN], data={"enabled": True}, expected={"id": 1, "enabled": True}, endpoint="defectdojo"
+        ),
         ApiTestCase(
             [Role.ADMIN, Role.AUDITOR, Role.READER],
             expected=[

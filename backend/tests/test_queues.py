@@ -149,7 +149,10 @@ class TasksQueueTest(QueueTest, TestCase):
             task = Task.objects.create(target=self.target, process=process, intensity=intensity)
             task.wordlists.add(self.wordlist)
             self.queue._consume_process_task(task)
-            self.assertEqual(Step.objects.filter(process=process).count(), Execution.objects.filter(task=task).count())
+            self.assertEqual(
+                Step.objects.filter(process=process, configuration__deprecated=False).count(),
+                Execution.objects.filter(task=task).count(),
+            )
             for execution in Execution.objects.filter(task=task).all():
                 self.assertTrue(Step.objects.filter(configuration=execution.configuration, process=process))
                 self.assertEqual(

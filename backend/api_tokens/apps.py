@@ -2,10 +2,8 @@
 
 from django.apps import AppConfig
 
-from framework.apps import BaseApp
 
-
-class ApiTokensConfig(BaseApp, AppConfig):
+class ApiTokensConfig(AppConfig):
     """Configuration of the API tokens app.
 
     Attributes:

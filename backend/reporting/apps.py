@@ -2,10 +2,8 @@
 
 from django.apps import AppConfig
 
-from framework.apps import BaseApp
 
-
-class ReportingConfig(BaseApp, AppConfig):
+class ReportingConfig(AppConfig):
     """Configuration of the reporting app.
 
     Attributes:

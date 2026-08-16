@@ -1,9 +1,0 @@
-[
-    {
-        "model": "vulncheck.vulnchecksettings",
-        "pk": 1,
-        "fields": {
-            "_api_token": null
-        }
-    }
-]

@@ -11,8 +11,8 @@ class TargetDenylist(BaseModel):
 
     Attributes:
         target: Value that the denied targets must match.
-        default: Whether the entry comes from the Rekono fixtures, which means that
-          it can't be updated or removed by the administrators.
+        default: Whether the entry is one of the ones that Rekono provides, which
+          means that it can't be updated or removed by the administrators.
         blocked: Number of times that this entry denied a target.
     """
 

@@ -347,7 +347,7 @@
         "model": "tools.output",
         "pk": 44,
         "fields": {
-            "configuration": 20,
+            "configuration": 51,
             "type": 1
         }
     },

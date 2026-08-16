@@ -20,8 +20,10 @@ class IntegrationViewSet(BaseViewSet):
           that can change them are able to enable or disable them.
         search_fields: Free text search over the name and the description.
         ordering_fields: Fields that the integrations can be sorted by.
-        http_method_names: GET and PUT only, since the integrations come from the
-          fixtures.
+        http_method_names: GET and PUT only, since the integrations are created by
+          the migrations.
+        lookup_field: The key identifies a platform, and it's the same one that the
+          platform code uses, unlike the identifier that the database assigns.
     """
 
     queryset = Integration.objects.all()
@@ -31,3 +33,4 @@ class IntegrationViewSet(BaseViewSet):
     search_fields = ["name", "description"]
     ordering_fields = ["id", "name", "enabled"]
     http_method_names = ["get", "put"]
+    lookup_field = "key"

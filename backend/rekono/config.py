@@ -114,6 +114,40 @@ class Property:
         with rekono_config.config_file.open("w") as _file:
             yaml.dump(config, _file, default_flow_style=False)
 
+    def remove(self, rekono_config: "RekonoConfig") -> bool:
+        """Delete this property from the configuration file.
+
+        The rest of the file is preserved, including the sections that the property leaves
+        empty, and the file is only rewritten when the property was found, so a property
+        that isn't there leaves the file untouched byte for byte.
+
+        This is not the same as writing None with ``update``: that stores an explicit null,
+        which ``read`` falls back to the default for, while this leaves no trace of the
+        property in the file. It's what a deprecated key needs, since a null would keep
+        documenting a key that Rekono doesn't read anymore.
+
+        Args:
+            rekono_config: Configuration manager that locates the file to update.
+
+        Returns:
+            Whether the property was found in the file and deleted from it.
+        """
+        config = deepcopy(rekono_config.config_from_file)
+        config_iterator = config
+        property_path = self.file.split(".")
+        deleted = False
+        for index, key in enumerate(property_path):
+            if not config_iterator or key not in config_iterator:
+                return deleted
+            if index + 1 == len(property_path):
+                del config_iterator[key]
+                deleted = True
+            else:
+                config_iterator = config_iterator[key]
+        with rekono_config.config_file.open("w") as _file:
+            yaml.dump(config, _file, default_flow_style=False)
+        return deleted
+
 
 class RekonoConfig:
     """Configuration of all the Rekono subsystems.

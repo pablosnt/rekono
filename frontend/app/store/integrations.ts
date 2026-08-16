@@ -69,7 +69,7 @@ export const useIntegrationsStore = defineStore("integrations", {
       if (this.isFresh("virustotal")) return;
       Promise.all([
         useApi("/api/integrations/")
-          .get("5/")
+          .get("virustotal/")
           .then(
             (response: Integration) => (this.virustotal.integration = response),
           ),
@@ -84,7 +84,7 @@ export const useIntegrationsStore = defineStore("integrations", {
     fetchHackTricks() {
       if (this.isFresh("hacktricks")) return;
       useApi("/api/integrations/")
-        .get("3/")
+        .get("hacktricks/")
         .then((response: Integration) => {
           this.hacktricks = response;
           this.lastFetched.hacktricks = Date.now();
@@ -94,7 +94,7 @@ export const useIntegrationsStore = defineStore("integrations", {
       if (this.isFresh("defectdojo")) return;
       Promise.all([
         useApi("/api/integrations/")
-          .get("1/")
+          .get("defectdojo/")
           .then(
             (response: Integration) => (this.defectdojo.integration = response),
           ),
@@ -119,15 +119,15 @@ export const useIntegrationsStore = defineStore("integrations", {
     updateSmtpSettings(data: SmtpSettings) {
       this.smtp = data;
     },
-    updateIntegration(id: number, updates: Partial<Integration>) {
-      if (id === 1 && this.defectdojo.integration) {
+    updateIntegration(key: string, updates: Partial<Integration>) {
+      if (key === "defectdojo" && this.defectdojo.integration) {
         this.defectdojo.integration = {
           ...this.defectdojo.integration,
           ...updates,
         };
-      } else if (id === 3 && this.hacktricks) {
+      } else if (key === "hacktricks" && this.hacktricks) {
         this.hacktricks = { ...this.hacktricks, ...updates };
-      } else if (id === 5 && this.virustotal.integration) {
+      } else if (key === "virustotal" && this.virustotal.integration) {
         this.virustotal.integration = {
           ...this.virustotal.integration,
           ...updates,

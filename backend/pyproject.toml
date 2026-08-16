@@ -49,6 +49,7 @@ constraint-dependencies = [
 ]
 
 [tool.ruff]
+exclude = ["migrations", ".venv"]
 line-length = 120
 indent-width = 4
 
@@ -64,3 +65,12 @@ ignore-var-parameters = true
 
 [tool.coverage.run]
 concurrency = ["multiprocessing", "thread"]
+
+[tool.coverage.report]
+omit = [
+    "tests/*",
+    "*/migrations/*",
+    "platforms/telegram_app/bot/*",
+    "platforms/telegram_app/framework.py",
+    "platforms/**/notifications.py",
+]

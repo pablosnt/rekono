@@ -6,6 +6,6 @@ finding types that it produces, so Rekono can chain the tools without knowing
 anything about them. The executors subpackage builds and runs the commands, and
 the parsers subpackage turns their output into findings.
 
-All this data comes from the fixtures, so the tools are never created through the
-API, only enabled or disabled by whether they are installed in the system.
+Rekono owns the whole catalog, so the tools are never created through the API, only
+enabled or disabled by whether they are installed in the system.
 """
