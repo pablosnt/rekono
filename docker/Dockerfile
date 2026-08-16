@@ -215,3 +215,4 @@ USER rekono
 
 # Pre-install nuclei templates in the rekono user's home
 RUN nuclei -update-templates
+
