@@ -219,19 +219,18 @@ export default function (
 
   function getOrError(endpoint: string, extraHeaders?: object): Promise {
     return get(endpoint, extraHeaders, [400, 401, 429]).catch((error) => {
-      if ([403, 404, 500].includes(error.statusCode)) {
-        showError({
-          statusCode: error.statusCode,
-          statusMessage:
-            error.statusCode === 403
-              ? "You are not authorized to perform this operation"
-              : error.statusCode === 404
-                ? "Resource not found"
-                : "Unexpected error",
-          fatal: true,
-        });
-      }
-      throw error;
+      if (![403, 404, 500].includes(error.statusCode)) throw error;
+      showError({
+        statusCode: error.statusCode,
+        statusMessage:
+          error.statusCode === 403
+            ? "You are not authorized to perform this operation"
+            : error.statusCode === 404
+              ? "Resource not found"
+              : "Unexpected error",
+        fatal: true,
+      });
+      return new Promise(() => {});
     });
   }
 
