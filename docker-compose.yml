@@ -27,7 +27,7 @@ services:
   # Upgrades from Rekono 1.x data
   rekono-upgrade:
     restart: 'no'
-    image: postgres:14-alpine
+    image: postgres:14.2-alpine
     container_name: rekono-upgrade
     entrypoint: ["sh", "/entrypoints/rekono-upgrade/upgrade.sh"]
     volumes:
