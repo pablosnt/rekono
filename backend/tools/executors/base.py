@@ -7,6 +7,7 @@ them.
 
 import os
 import re
+import shutil
 import subprocess
 import sys
 import uuid
@@ -26,13 +27,13 @@ from framework.enums import InputKeyword
 from framework.logging import LoggingEntity
 from http_headers.models import HttpHeader
 from parameters.models import InputTechnology, InputVulnerability
-from rekono.settings import BASE_DIR, CONFIG
+from rekono.settings import CONFIG
 from security.cryptography import Crypto
 from security.validators.enums import Regex
 from security.validators.input_validator import Validator
 from settings.models import Settings
 from target_ports.models import TargetPort
-from tools.models import Intensity
+from tools.models import Intensity, Tool
 from wordlists.models import Wordlist
 
 
@@ -307,6 +308,26 @@ class BaseExecutor(LoggingEntity):
             return False
 
     @classmethod
+    def is_installed(cls, tool: Tool) -> bool:
+        """Check if everything that this executor needs is installed.
+
+        Args:
+            tool: Tool whose command and script are checked.
+
+        Returns:
+            Whether the command and the script of the tool are available, skipping
+            the checks for the ones that the tool doesn't declare. The executors
+            that need something else check it on top of this one.
+        """
+        if tool.command and not shutil.which(tool.command):
+            return False
+        if tool.script_directory_property:
+            directory = Path(getattr(CONFIG, tool.script_directory_property.lower()))
+            if not directory.is_dir() or not (directory / tool.script).is_file():
+                return False
+        return True
+
+    @classmethod
     def get_clean_default_environment(cls) -> dict[str, Any]:
         """Get the environment variables to run a tool out of the Rekono virtualenv.
 
@@ -316,8 +337,8 @@ class BaseExecutor(LoggingEntity):
             is where their own dependencies are installed.
         """
         environment = os.environ.copy()
-        venv_bin = str(Path(sys.executable).parent)
-        if environment.get("PATH") and venv_bin.startswith(str(BASE_DIR)):
+        if environment.get("PATH") and sys.prefix != sys.base_prefix:
+            venv_bin = str(Path(sys.executable).parent)
             environment["PATH"] = os.pathsep.join(
                 path for path in environment["PATH"].split(os.pathsep) if path != venv_bin
             )
@@ -498,7 +519,8 @@ class BaseExecutor(LoggingEntity):
             # The tests exercise the whole lifecycle without running the real tools
             if not CONFIG.testing:
                 self.run_tool(self.environment)
-        except (RuntimeError, Exception):
+        except (RuntimeError, Exception) as ex:
+            self.logger.error(f"[Tool] {self.execution.configuration.tool.name} execution crashed: {str(ex)}")
             self.execution.error()
         finally:
             self.after_running()

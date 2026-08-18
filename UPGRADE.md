@@ -69,6 +69,8 @@ uv run --no-dev manage.py remove_stale_contenttypes --no-input
 uv run --no-dev manage.py migrate_1_x_config
 ```
 
+> Rekono 2.x keeps the wordlists and the reports in the same directories of the Rekono home that Rekono 1.x used, so there is nothing to migrate if your home directory doesn't change. If it does, move the `wordlists` and `reports` directories to the new home and update the database columns that point to the old one, since they store absolute paths: `wordlists_wordlist.path` and `executions_execution.output_file`.
+
 
 ## Known problems
 

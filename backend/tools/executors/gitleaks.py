@@ -9,6 +9,7 @@ from urllib.parse import urlparse
 
 from rekono.settings import CONFIG
 from tools.executors.base import BaseExecutor
+from tools.models import Tool
 
 
 class Gitleaks(BaseExecutor):
@@ -24,6 +25,19 @@ class Gitleaks(BaseExecutor):
 
     git_directory_dumped = False
     execution_directory = None
+
+    @classmethod
+    def is_installed(cls, tool: Tool) -> bool:
+        """Check if both GitLeaks and GitDumper are installed.
+
+        Args:
+            tool: Tool whose command and script are checked.
+
+        Returns:
+            Whether the GitDumper script of GitTools is available besides GitLeaks
+            itself, since without it there is no repository to search secrets in.
+        """
+        return super().is_installed(tool) and (Path(CONFIG.gittools_dir) / "Dumper" / "gitdumper.sh").is_file()
 
     def get_environment(self) -> dict[str, Any]:
         """Get the environment variables that GitLeaks will be run with.

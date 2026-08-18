@@ -8,7 +8,6 @@ discovered.
 
 import importlib
 import re
-import shutil
 import subprocess
 from functools import cached_property
 from pathlib import Path
@@ -100,24 +99,9 @@ class Tool(BaseLike):
 
     def update_status(self) -> None:
         """Check if the tool is installed and which version it runs."""
-        self.is_installed = self._is_installed()
+        self.is_installed = self.executor_class.is_installed(self)
         self.version = self._parse_version() if self.is_installed else None
         self.save(update_fields=["is_installed", "version"])
-
-    def _is_installed(self) -> bool:
-        """Check if the tool can be run in this deployment.
-
-        Returns:
-            Whether both the command and the script of the tool are available,
-            skipping the check for the ones that the tool doesn't declare.
-        """
-        if self.command and not shutil.which(self.command):
-            return False
-        if self.script_directory_property:
-            path = Path(getattr(CONFIG, self.script_directory_property.lower()))
-            if not path.is_dir() or not (path / self.script).is_file():
-                return False
-        return True  # pragma: no cover
 
     def _parse_version(self) -> str | None:  # pragma: no cover
         """Get the version that the tool reports.
