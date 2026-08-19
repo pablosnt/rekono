@@ -23,6 +23,7 @@ class Zap(BaseExecutor):
 
     def before_running(self) -> None:
         """Give this execution its own home directory and its own proxy port."""
+        super().before_running()
         self.zap_home = Path(tempfile.mkdtemp(prefix="zap-"))
         self.arguments.extend(["-dir", str(self.zap_home)])
         # The operating system assigns the port, so it's free even if something else is
@@ -35,3 +36,4 @@ class Zap(BaseExecutor):
         """Remove the home directory that this execution used."""
         if self.zap_home and self.zap_home.is_dir():
             shutil.rmtree(self.zap_home, ignore_errors=True)
+        super().after_running()

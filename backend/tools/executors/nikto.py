@@ -16,10 +16,9 @@ class Nikto(BaseExecutor):
     def after_running(self) -> None:  # pragma: no cover
         """Move the report that Nikto wrote to the path where Rekono expects it."""
         extension = self.execution.configuration.tool.output_format
-        if not extension:
-            return
-        produced = Path(f"{self.report}.{extension}")
-        if produced.is_file():
+        produced = Path(f"{self.report}.{extension}") if extension else None
+        if produced and produced.is_file():
             produced.replace(self.report)
             self.execution.output_file = self.report
             self.execution.save(update_fields=["output_file"])
+        super().after_running()

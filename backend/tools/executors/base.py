@@ -61,7 +61,10 @@ class BaseExecutor(LoggingEntity):
         intensity: Intensity that the tool is run with, which is the closest one
           below the requested intensity among the ones that the tool supports.
         report: File where the tool writes its results.
-        execution_directory: Directory where the tool is run, when it needs one.
+        execution_directory: Directory where the tool is run, which is the one the
+          tool was installed in when it declares one and a temporary one otherwise.
+        temporary_execution_directory: Execution directory when Rekono created it for
+          this execution, so it can be removed once the tool is done.
     """
 
     environment_validator = Validator(Regex.SENSITIVE_ENV, inverse_match=False)
@@ -93,6 +96,7 @@ class BaseExecutor(LoggingEntity):
             if self.execution.configuration.tool.run_directory_property
             else None
         )
+        self.temporary_execution_directory = None
 
     @cached_property
     def scanned_port(self) -> int | None:
@@ -382,9 +386,19 @@ class BaseExecutor(LoggingEntity):
                 environment[proxy.upper()] = getattr(settings, proxy)
         return environment
 
-    def before_running(self) -> None:  # pragma: no cover
-        """Prepare whatever the tool needs before being run."""
-        pass
+    def before_running(self) -> None:
+        """Prepare whatever the tool needs before being run.
+
+        The tools that don't declare a directory to run in are given a writable one,
+        so the executors that override this hook have to call it or the tools that
+        write relative to their working directory would do it wherever Rekono runs
+        from.
+        """
+        if self.execution_directory:
+            return
+        self.temporary_execution_directory = CONFIG.reports / str(uuid.uuid4())
+        self.temporary_execution_directory.mkdir(parents=True, exist_ok=True)
+        self.execution_directory = self.temporary_execution_directory
 
     def run_tool(self, environment: dict[str, Any] = os.environ.copy()) -> None:  # pragma: no cover
         """Run the tool and save its output in the execution.
@@ -430,9 +444,16 @@ class BaseExecutor(LoggingEntity):
         if not self.execution.configuration.tool.ignore_exit_code and process.returncode > 0:
             self.execution.error()
 
-    def after_running(self) -> None:  # pragma: no cover
-        """Process whatever the tool leaves behind after being run."""
-        pass
+    def after_running(self) -> None:
+        """Process whatever the tool leaves behind after being run.
+
+        The working directory is removed with everything that the tool wrote in it,
+        unless the tool was already installed in it, so the executors that override
+        this hook have to call it after taking what they need from that directory.
+        """
+        if self.temporary_execution_directory and self.temporary_execution_directory.is_dir():
+            shutil.rmtree(self.temporary_execution_directory, ignore_errors=True)
+        self.temporary_execution_directory = None
 
     def save_executed_command(self, wordlists: list[Wordlist]) -> None:
         """Save the command that was run, without the data that must stay hidden.

@@ -271,6 +271,25 @@ class ToolExecutorTest(BaseTest, TestCase):
         self.assertIsNone(self.target.get_url(self.target.target))
         self.assertEqual(set([80, 443]), set([urlparse(call.args[0]).port for call in requests_get.call_args_list]))
 
+    def test_running_hooks_handle_the_execution_directory(self) -> None:
+        self.assertIsNone(self.executor.execution_directory)
+        self.executor.before_running()
+        directory = self.executor.execution_directory
+        self.assertEqual(self.executor.temporary_execution_directory, directory)
+        self.assertTrue(os.access(directory, os.W_OK))
+        # Whatever the tool wrote relative to its working directory is removed with it
+        (directory / "reports").mkdir()
+        self.executor.after_running()
+        self.assertIsNone(self.executor.temporary_execution_directory)
+        self.assertFalse(directory.exists())
+        # The directory that a tool is installed in is used as it is and never removed
+        self.executor.execution_directory = "/opt/log4j-scan"
+        self.executor.before_running()
+        self.assertIsNone(self.executor.temporary_execution_directory)
+        self.executor.after_running()
+        self.assertEqual("/opt/log4j-scan", self.executor.execution_directory)
+        self.assertIsNone(self.executor.temporary_execution_directory)
+
 
 class ZapExecutorTest(BaseTest, TestCase):
     data = [SetupProject()]
