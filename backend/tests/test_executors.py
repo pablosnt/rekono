@@ -306,6 +306,10 @@ class ZapExecutorTest(BaseTest, TestCase):
     def test_before_running_isolates_home_and_proxy_port(self) -> None:
         self.executor.arguments = [self.fake_tool.command, "-cmd"]
         self.executor.before_running()
+        zap_home = self.executor.execution_directory
+        self.assertEqual(self.executor.temporary_execution_directory, zap_home)
         arguments = " ".join(self.executor.arguments)
-        self.assertIn(f"-dir {self.executor.zap_home}", arguments)
+        self.assertIn(f"-dir {zap_home}", arguments)
         self.assertIn("-config network.localServers.mainProxy.port=", arguments)
+        self.executor.after_running()
+        self.assertFalse(zap_home.exists())
