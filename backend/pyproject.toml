@@ -43,10 +43,14 @@ dev = [
 
 [tool.uv]
 exclude-newer = "7 days"
+# sqlparse 0.6.0 fixes several CVEs but is still inside the global quarantine window
+exclude-newer-package = { sqlparse = "5 days" }
 constraint-dependencies = [
     # Force non-vulnerable versions of transitive dependencies pulled by xhtml2pdf
     "pillow>=12.3.0",
     "pypdf>=6.15.0",
+    # Force a non-vulnerable version of the transitive dependency pulled by django
+    "sqlparse>=0.6.0",
 ]
 
 [tool.ruff]
