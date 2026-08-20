@@ -17,7 +17,7 @@ Best of all, you don't have to wait in front of it. Rekono notifies you by email
 
 Automate the recon, keep your time for the hacking.
 
-TODO: Rekono screenshot
+Rekono screenshot
 
 # Quick Start
 
@@ -78,7 +78,7 @@ The findings detected by the [hacking tools](#hacking-tools) are nothing if we d
 
 # Get Involved
 
-Join our community in [![](https://readmecodegen.vercel.app/api/social-icon?name=discord&size=10) Discord](https://discord.gg/Zyduu5C7M3) and follow us on [![](https://readmecodegen.vercel.app/api/social-icon?name=x&size=10&color=ffffff)](https://x.com/rekonosec).
+Join our community in [![](https://readmecodegen.vercel.app/api/social-icon?name=discord&size=10) Discord](https://discord.gg/Zyduu5C7M3) and follow us on [![](https://readmecodegen.vercel.app/api/social-icon?name=x&size=10)](https://x.com/rekonosec).
 
 Rekono is an open source project with only one maintainer, working in his free time and with no external funds. You can support the project or simply appreciate our work with your donations on [![](https://readmecodegen.vercel.app/api/social-icon?name=kofi&size=10) Ko-fi](https://ko-fi.com/pablosnt) or [![](https://readmecodegen.vercel.app/api/social-icon?name=buymeacoffee&size=10) Buy me a Coffee](https://buymeacoffee.com/pablosnt).
 
