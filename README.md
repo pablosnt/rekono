@@ -15,7 +15,12 @@ It's a platform, not a script. Projects for your engagements, roles for your tea
 
 Best of all, you don't have to wait in front of it. Rekono notifies you by email or Telegram as soon as something worth your attention shows up, so when you sit down you are starting from an attack surface that is already mapped, prioritized and full of leads.
 
-Rekono screenshot
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://github.com/user-attachments/assets/a04acbdf-250d-4f9d-816c-d22981dc23cf">
+    <img width="1710" height="1016" alt="screenshot" src="https://github.com/user-attachments/assets/4c9d952c-9c6f-4462-9c7d-45f43b7f5920" />
+  </picture>
+</p>
 
 # Quick Start
 
