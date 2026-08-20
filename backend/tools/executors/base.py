@@ -56,7 +56,7 @@ class BaseExecutor(LoggingEntity):
         targets_used_in_execution: Target data used as input for each type, which
           the parser turns into findings when nothing was discovered yet.
         authentication: Authentication used against the target, whose secrets are
-          masked before the command is saved.
+          masked in everything that the users can read.
         port_from_arguments: Port that the command scans, taken from its arguments.
         intensity: Intensity that the tool is run with, which is the closest one
           below the requested intensity among the ones that the tool supports.
@@ -439,7 +439,9 @@ class BaseExecutor(LoggingEntity):
         if self.execution.configuration.tool.output_format and self.report.is_file():
             self.execution.output_file = self.report
         # The colors of the output are removed, so the parsers and the users read the same
-        self.execution.output_plain = re.sub(r"(\x9B|\x1B\[)[\d]*[ -\/]*[@-~]", "", output, flags=re.IGNORECASE)
+        self.execution.output_plain = self.mask_sensitive_data(
+            re.sub(r"(\x9B|\x1B\[)[\d]*[ -\/]*[@-~]", "", output, flags=re.IGNORECASE)
+        )
         self.execution.save(update_fields=["output_plain", "output_file"])
         if not self.execution.configuration.tool.ignore_exit_code and process.returncode > 0:
             self.execution.error()
@@ -455,48 +457,47 @@ class BaseExecutor(LoggingEntity):
             shutil.rmtree(self.temporary_execution_directory, ignore_errors=True)
         self.temporary_execution_directory = None
 
-    def save_executed_command(self, wordlists: list[Wordlist]) -> None:
-        """Save the command that was run, without the data that must stay hidden.
-
-        The users read this command, so the authentication secrets are masked and
-        the paths of the Rekono files are replaced by their file names.
+    def mask_sensitive_data(self, value: str | None, wordlists: list[Wordlist] = []) -> str | None:
+        """Remove the authentication secrets and the Rekono paths from a text.
 
         Args:
-            wordlists: Wordlists used to build the command.
+            value: Text that the users will read, like the command of the execution,
+              the output of the tool, or its report.
+            wordlists: Wordlists that the execution used, needed to hide the ones
+              that are stored outside the Rekono wordlists directory.
+
+        Returns:
+            The text with every secret and token of the target masked, even the ones
+            that are part of a bigger value like a header or a Basic token, the
+            report replaced by a generic output name, the script of the tool and the
+            wordlists replaced by their file names, and the Rekono directories
+            removed from the rest of the paths. An empty text is returned as it is.
         """
-        command = " ".join(self.arguments)
+        if not value:
+            return value
+        for authentication in Authentication.objects.filter(target_port__target=self.execution.task.target).all():
+            for secret in (authentication.secret, authentication.token):
+                if secret:
+                    value = value.replace(secret, "*" * len(secret))
         if self.report:
-            command = command.replace(
+            value = value.replace(
                 str(self.report), f"output.{self.execution.configuration.tool.output_format or 'txt'}"
             )
         for wordlist in wordlists:
-            command = command.replace(wordlist.path, Path(wordlist.path).name)
+            value = value.replace(wordlist.path, Path(wordlist.path).name)
         if self.execution.configuration.tool.script and self.execution.configuration.tool.script_directory_property:
-            command = command.replace(
+            value = value.replace(
                 str(
                     Path(getattr(CONFIG, self.execution.configuration.tool.script_directory_property.lower()))
                     / self.execution.configuration.tool.script
                 ),
                 self.execution.configuration.tool.script,
             )
-        self.execution.executed_command = self.mask_sensitive_data(command)
-        self.execution.save(update_fields=["executed_command"])
-
-    def mask_sensitive_data(self, command: str) -> str:
-        """Replace the authentication secrets of the target by asterisks.
-
-        Args:
-            command: Command that may include a secret.
-
-        Returns:
-            The command with every secret and token of the target masked, even the
-            ones that are part of a bigger value, like a header or a Basic token.
-        """
-        for authentication in Authentication.objects.filter(target_port__target=self.execution.task.target).all():
-            for value in (authentication.secret, authentication.token):
-                if value:
-                    command = command.replace(value, "*" * len(value))
-        return command
+        # The Rekono directories are removed last, because the paths replaced above
+        # wouldn't match anymore once their directory is out of the text
+        for directory in [CONFIG.wordlists, CONFIG.reports]:
+            value = value.replace(f"{directory}/", "").replace(str(directory), "")
+        return value
 
     def execute(
         self,
@@ -534,7 +535,8 @@ class BaseExecutor(LoggingEntity):
             return
         self.environment = self.get_environment()
         # The command is saved before running the tool, so the users can see what is running
-        self.save_executed_command(wordlists)
+        self.execution.executed_command = self.mask_sensitive_data(" ".join(self.arguments))
+        self.execution.save(update_fields=["executed_command"])
         self.before_running()
         try:
             # The tests exercise the whole lifecycle without running the real tools

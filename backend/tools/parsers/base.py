@@ -232,27 +232,6 @@ class BaseParser:
                 return report.readlines()
         return []
 
-    def mask_sensitive_data(self, value: str | None) -> str | None:
-        """Remove the authentication secrets and the Rekono paths from a text.
-
-        Args:
-            value: Text written by the tool, which may quote the credentials that
-              it received, the path of its own report, or the ones of the
-              wordlists that it enumerated with.
-
-        Returns:
-            The text with the credentials masked, the report path replaced by a
-            generic output name, and the Rekono directories removed from the rest
-            of the paths, or the text unchanged when it's empty.
-        """
-        if not value:
-            return value
-        if self.report:
-            value = value.replace(
-                str(self.report), f"output.{self.executor.execution.configuration.tool.output_format}"
-            )
-        return self.executor.mask_sensitive_data(value).strip()
-
     def _parse(self) -> None:
         """Read the output of the tool and create the findings that it reports.
 
@@ -263,7 +242,11 @@ class BaseParser:
         pass
 
     def parse(self) -> None:
-        """Create the findings of the execution and hide its sensitive data.
+        """Create the findings of the execution and hide the sensitive data of its report.
+
+        The report is rewritten without the sensitive data once it has been parsed,
+        because the users can download it. The output of the tool is masked by the
+        executor instead, since it's saved before the parsing starts.
 
         A parsing failure is logged instead of being propagated, so the findings
         created before it are kept and the execution isn't marked as failed. The
@@ -277,10 +260,8 @@ class BaseParser:
                 f"[{self.executor.execution.configuration.tool.name}] {ex.__class__.__name__} error while parsing the output of execution {self.executor.execution.id}: {str(ex)}"
             )
         finally:
-            self.executor.execution.output_plain = self.mask_sensitive_data(self.executor.execution.output_plain)
             if self.report and self.report.is_file():
                 with self.report.open("r") as read_report:
                     data = read_report.read()
                 with self.report.open("w") as write_report:
-                    write_report.write(self.mask_sensitive_data(data))
-            self.executor.execution.save(update_fields=["output_plain"])
+                    write_report.write(self.executor.mask_sensitive_data(data))

@@ -9,9 +9,11 @@ from urllib.parse import urlparse
 from django.test import TestCase
 
 from authentications.enums import AuthenticationType
+from authentications.models import Authentication
 from findings.enums import OSINTDataType, TransportProtocol
 from findings.models import Port
 from framework.models import BaseInput
+from rekono.settings import CONFIG
 from settings.models import Settings
 from target_ports.models import TargetPort
 from tests.framework import BaseTest
@@ -270,6 +272,30 @@ class ToolExecutorTest(BaseTest, TestCase):
         TargetPort.objects.create(target=self.target, port=8080, path=None)
         self.assertIsNone(self.target.get_url(self.target.target))
         self.assertEqual(set([80, 443]), set([urlparse(call.args[0]).port for call in requests_get.call_args_list]))
+
+    def test_mask_sensitive_data(self) -> None:
+        # Nothing to mask
+        self.assertIsNone(self.executor.mask_sensitive_data(None))
+        self.assertEqual("", self.executor.mask_sensitive_data(""))
+        self.assertEqual("Nothing to hide here", self.executor.mask_sensitive_data("Nothing to hide here"))
+
+        # Sensitive and internal values to mask
+        secret = "S3cr3t P4ssw0rd"
+        self.authentication.type = AuthenticationType.BASIC
+        self.authentication.secret = secret
+        self.authentication.save(update_fields=["type", "_secret"])
+        token = Authentication.objects.get(pk=self.authentication.id).token
+        self.fake_tool.output_format = "json"
+        self.fake_tool.save(update_fields=["output_format"])
+        executor = self.fake_tool.executor_class(self.execution)
+        self.assertEqual(
+            f"Authorization: Basic {'*' * len(token)} ; secret = {'*' * len(secret)} ; "
+            "wordlist = endpoints_wordlist.txt ; report = output.json",
+            executor.mask_sensitive_data(
+                f"Authorization: Basic {token} ; secret = {secret} ; "
+                f"wordlist = {CONFIG.wordlists / 'endpoints_wordlist.txt'} ; report = {executor.report}"
+            ),
+        )
 
     def test_running_hooks_handle_the_execution_directory(self) -> None:
         self.assertIsNone(self.executor.execution_directory)
