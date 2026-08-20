@@ -20,7 +20,7 @@ docker compose up -d --scale executions-worker=5
 
 > Keep your `config.yaml` file if you customized it, since Rekono 2.x adapts it to the new schema automatically and migrates the settings to the new version schema, like the SMTP server configuration that now is managed in the database.
 
-The `rekono-upgrade` service prepares everything that Rekono 1.x left behind, before the Django migrations are applied. It dumps the PostgreSQL 14 data and restores it in the new PostgreSQL 18 database, it gives the home directory to the user that runs Rekono 2.x, which is a different one, and it keeps your TLS certificate, since Rekono 2.x stores it in a Docker volume instead of the `docker/nginx/tls` directory. You can check it with:
+The `rekono-upgrade` service prepares everything that Rekono 1.x left behind, before the Django migrations are applied. It dumps the PostgreSQL 14 data and restores it in the new PostgreSQL 18 database, it gives the home directory to the user who runs Rekono 2.x, which is a different one, and it keeps your TLS certificate, since Rekono 2.x stores it in a Docker volume instead of the `docker/nginx/tls` directory. You can check it with:
 
 ```bash
 docker compose logs rekono-upgrade

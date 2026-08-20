@@ -222,7 +222,7 @@ Integrations with external platforms live in `backend/platforms/`, and extend on
 - `BaseCveProvider` to enrich vulnerabilities with CVE data, like NVD NIST or OSV.
 - `BaseNotification` to notify the users, like SMTP or Telegram.
 
-An integration that needs nothing from the user is a single file, like `platforms/osv.py`. One that needs credentials or settings is a Django app, like `platforms/virustotal/`, with its integration, model, serializer, view, urls and migration. In any case, he new integration must be registered as so:
+An integration that needs nothing from the user is a single file, like `platforms/osv.py`. One that needs credentials or settings is a Django app, like `platforms/virustotal/`, with its integration, model, serializer, view, urls and migration. In any case, the new integration must be registered as so:
 
 1. Add its entry to the `Integration` table, in a new migration of the `integrations` app. The `key` has to be the name of your class in lowercase, since that's how the integration finds itself.
 2. Add the integration to the right list in `backend/findings/queues.py`.

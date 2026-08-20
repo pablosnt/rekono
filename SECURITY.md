@@ -24,7 +24,7 @@ Note that security fixes are only released for the latest version of Rekono. Bef
 
 ## Rules
 
-- Test only against **your own Rekono installation**. Never test against installations that belong to other people
+- Test only against Rekono installations where you are authorized to perform security tests
 - If you access data that is not yours during your research, stop there, don't store it and tell us about it in the report
 - Give us a reasonable time to release a fix before publishing any detail about the vulnerability
 
