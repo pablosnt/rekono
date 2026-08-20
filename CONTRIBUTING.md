@@ -6,7 +6,6 @@
 - **Hotfixes** for a released version go to `main`, from a `hotfix/...` branch, and are merged back into `develop`.
 
 ```mermaid
-%%{init: {"themeVariables": {"git0": "#d1242f"}}}%%
 gitGraph
     commit
     commit tag: "2.0.0"
@@ -243,4 +242,4 @@ An integration that needs nothing from the user is a single file, like `platform
 - All pull requests need to pass the CI checks and be approved before being merged
 
 
-Thank you for making Rekono greater! :heart:
+Thank you for making Rekono better! :heart:

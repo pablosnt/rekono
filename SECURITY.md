@@ -43,4 +43,5 @@ This is how we will manage your reports:
 
 Unfortunately, Rekono is maintained by a very small team in their free time with no external funds, so we can't offer any economic reward for the reports.
 
+
 Thank you for helping us to keep Rekono safe! :heart:
