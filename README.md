@@ -5,7 +5,7 @@
   </picture>
 </p>
 
-**Rekono automates the pentesting process, so you can spend your time on the part that actually needs a hacker**
+**Automate the pentesting process, so you can spend time on the part that actually needs a hacker**
 
 Think about how an assessment really starts. You gather public information about the target. You discover its hosts, enumerate their ports and identify the services behind them. Then you run a more specific tool against each service, scan for known vulnerabilities and look for public exploits. It's almost the same sequence every time, it takes hours of watching terminals waiting for executions to finish and copying results from one tool into the next, and none of it is the part where your skills make the difference.
 
