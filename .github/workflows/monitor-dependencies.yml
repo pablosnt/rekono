@@ -1,6 +1,7 @@
 name: Monitor Dependencies
 on:
   workflow_dispatch:
+  pull_request:
   schedule:
     - cron: "0 0 * * *"
 
@@ -103,7 +104,7 @@ jobs:
       matrix:
         url:
           - https://hacktricks.wiki/en/sitemap.xml
-          - https://hacktricks.wiki/en/linux-hardening/privilege-escalation/index.html
+          - https://hacktricks.wiki/en/linux-hardening/linux-basics/linux-privilege-escalation/index.html
           - https://hacktricks.wiki/en/macos-hardening/macos-security-and-privilege-escalation/index.html
           - https://hacktricks.wiki/en/windows-hardening/windows-local-privilege-escalation/index.html
           - https://hacktricks.wiki/en/mobile-pentesting/android-app-pentesting/index.html

@@ -34,7 +34,7 @@ class HackTricks(BaseIntegration):
         self.services_base_url = f"{self.url}network-services-pentesting/"
         self.web_base_url = f"{self.url}pentesting-web/"
         self.host_type_mapping = {
-            HostOS.LINUX: f"{self.url}linux-hardening/privilege-escalation/index.html",
+            HostOS.LINUX: f"{self.url}linux-hardening/linux-basics/linux-privilege-escalation/index.html",
             HostOS.MACOS: f"{self.url}macos-hardening/macos-security-and-privilege-escalation/index.html",
             HostOS.WINDOWS: f"{self.url}windows-hardening/windows-local-privilege-escalation/index.html",
             HostOS.ANDROID: f"{self.url}mobile-pentesting/android-app-pentesting/index.html",

@@ -30,7 +30,7 @@ class HackTricksTest(BaseTest, TestCase):
     def setUp(self):
         super().setUp()
         self.expected = {
-            self.host: f"{base_url}linux-hardening/privilege-escalation/index.html",
+            self.host: f"{base_url}linux-hardening/linux-basics/linux-privilege-escalation/index.html",
             self.port: f"{base_url}pentesting-web/web-vulnerabilities-methodology.html",
             self.technology: f"{base_url}network-services-pentesting/wordpress.html",
         }
