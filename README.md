@@ -1,151 +1,98 @@
 <p align="center">
-  <a href="https://github.com/pablosnt/rekono/actions/workflows/unit-tests.yml" alt="Unit tests" target="_blank">
-    <img src="https://github.com/pablosnt/rekono/actions/workflows/unit-tests.yml/badge.svg"/>
-  </a>
-  <a href="https://github.com/pablosnt/rekono/actions/workflows/desktop-ui.yml" alt="Desktop UI" target="_blank">
-    <img src="https://github.com/pablosnt/rekono/actions/workflows/desktop-ui.yml/badge.svg"/>
-  </a>
-  <a href="https://github.com/pablosnt/rekono/actions/workflows/security-sast.yml" alt="SAST" target="_blank">
-    <img src="https://github.com/pablosnt/rekono/actions/workflows/security-sast.yml/badge.svg"/>
-  </a>
-  <a href="https://snyk.io/test/github/pablosnt/rekono" alt="SCA" target="_blank">
-    <img src="https://badgen.net/snyk/pablosnt/rekono?label=SCA&labelColor=black&icon=https://snyk.io/wp-content/uploads/patch-white.svg">
-  </a>
-  <a href="https://github.com/pablosnt/rekono/actions/workflows/security-containers.yml" alt="Containers" target="_blank">
-    <img src="https://github.com/pablosnt/rekono/actions/workflows/security-containers.yml/badge.svg"/>
-  </a>
-  <a href="https://github.com/pablosnt/rekono/actions/workflows/code-style.yml" alt="Code style" target="_blank">
-    <img src="https://github.com/pablosnt/rekono/actions/workflows/code-style.yml/badge.svg"/>
-  </a>
-  <a href="https://discord.gg/Zyduu5C7M3" target="_blank">
-    <img src="https://img.shields.io/badge/Discord-Join-black?style=social&logo=discord"/>
-  </a>
-  <a href="https://ko-fi.com/pablosnt" target="_blank">
-    <img src="https://ko-fi.com/img/githubbutton_sm.svg" width="160"/>
-  </a>
-  <a href="https://www.buymeacoffee.com/pablosnt" target="_blank">
-    <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" width="75"/>
-  </a>
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="frontend/public/logo-dark.png">
+    <img src="frontend/public/logo-light.png" width="450" alt="Rekono">
+  </picture>
 </p>
 
-# <p align="center"><img src="rekono/frontend/public/static/logo-black.png" width="500"/></p>
+**Automate the recon, keep your time for the part that actually needs a hacker**
 
-**Rekono** combines other hacking tools and its results to execute complete pentesting processes against a target in an automated way. The findings obtained during the executions will be sent to the user via email or Telegram notifications and also can be imported in [Defect-Dojo](https://www.defectdojo.com) if an advanced vulnerability management is needed. Moreover, Rekono includes a Telegram bot that can be used to perform executions easily from anywhere and using any device.
+Think about how an assessment really starts. You gather public information about the target. You discover its hosts, enumerate their ports and identify the services behind them. Then you run a more specific tool against each service, scan for known vulnerabilities and look for public exploits. It's almost the same sequence every time, it takes hours of watching terminals waiting for executions to finish and copying results from one tool into the next, and none of it is the part where your skills make the difference.
 
+Rekono does that work for you. You define a target and it chains the hacking tools by itself, what one tool discovers becomes the input of the ones that come next. So, the ports found by a port scanner are attacked by the right service tools, the technologies detected are checked for known vulnerabilities, and the vulnerabilities found are matched against public exploit databases. Everything lands in one place, deduplicated, linked to the host and the port where it lives, and enriched with the information that you would otherwise look up by hand.
 
-## Why Rekono?
+It's a platform, not a script. Projects for your engagements, roles for your team, notes to write down what you think, collaborative triage, automatic resolution of findings, metrics, reports for your deliverables, and scheduled or repeated scans to keep watching an attack surface over time.
 
-Do you ever think about the steps that you follow when you start pentesting? Probably you start performing some OSINT tasks to gather public information about the target. Then, maybe you run hosts discovery and ports enumeration tools. When you know what the target exposes, you can execute more specific tools for each service, to get more information and maybe, some vulnerabilities. And finally, if you find the needed information, you will look for a public exploit to get you into the target machine. I know, I know, this is an utopic scenario, and in the most cases the vulnerabilities are found due to the pentester skills and not by scanning tools. But before using your skills, how many time do you spend trying to get as information as possible with hacking tools? Probably, too much.
+Best of all, you don't have to wait in front of it. Rekono notifies you by email or Telegram as soon as something worth your attention shows up, so when you sit down you are starting from an attack surface that is already mapped, prioritized and full of leads.
 
-Why not automate this process and focus on find vulnerabilities using your skills and the information that Rekono sends you?
-
-> The `Rekono` name comes from the Esperanto language where it means _recon_.
-
-
-## Demo
-
-[![Rekono]](https://user-images.githubusercontent.com/69458381/211694917-6738e42a-cb44-4d3a-905d-752b3fe25718.mp4)
-
-
-### Telegram Bot
-
-[![Rekono Bot]](https://user-images.githubusercontent.com/69458381/211692042-d7c38e41-19e9-44fd-842a-59a16f945b6f.mp4)
-
-
-## Quick Start
-
-### Rekono Desktop
-
-Rekono Desktop is a standalone app that can be easily installed and executed locally. Install it on **Kali Linux** with this command:
-
-```bash
-apt install rekono-kbx
-```
-
-If you are using **Parrot OS**, you can download the Debian package from the Rekono release:
-
-```bash
-wget https://github.com/pablosnt/rekono/releases/download/1.6.6/rekono-kbx_1.6.6_amd64.deb && dpkg -i rekono-kbx_1.6.6_amd64.deb || apt -f install -y
-```
-
-> Default credentials are `rekono:rekono`. For security reasons, **password should be changed** the first time you access the account
-
-
-### Docker
-
-Execute the following commands in the root directory of the project:
-
-```bash
-docker-compose build
-docker-compose up -d --scale executions-worker=5
-```
-
-Go to https://127.0.0.1/
-
-> Default credentials are `rekono:rekono`. For security reasons, **password should be changed** the first time you access the account. Moreover default user details can be changed using [environment variables](https://github.com/pablosnt/rekono/wiki/Configuration#docker).
-
-> The number of workers can be changed using `--scale` option. The number of `executions-worker` determines the number of tools that could be executed at the same time.
-
-
-Check [**full documentation**](https://github.com/pablosnt/rekono/wiki) for more installation and configuration options, user guides, integrations, Rekono Desktop, Rekono Bot and Rekono CLI details.
-
-
-## Hacking Tools
-
-Rekono supports the execution of this hacking tools:
-
-- [theHarvester](https://github.com/laramies/theHarvester)
-- [EmailHarvester](https://github.com/maldevel/EmailHarvester)
-- [Nmap](https://nmap.org/)
-- [Sslscan](https://github.com/rbsec/sslscan)
-- [SSLyze](https://nabla-c0d3.github.io/sslyze/documentation/)
-- [SSH Audit](https://github.com/jtesta/ssh-audit)
-- [SMBMap](https://github.com/ShawnDEvans/smbmap)
-- [Dirsearch](https://github.com/maurosoria/dirsearch)
-- [Gobuster](https://github.com/OJ/gobuster)
-- [GitLeaks](https://github.com/zricethezav/gitleaks) & [GitDumper](https://github.com/internetwache/GitTools/tree/master/Dumper)
-- [Log4j Scan](https://github.com/fullhunt/log4j-scan)
-- [Spring4Shell Scan](https://github.com/fullhunt/spring4shell-scan)
-- [CMSeeK](https://github.com/Tuhinshubhra/CMSeeK/)
-- [OWASP JoomScan](https://github.com/OWASP/joomscan)
-- [OWASP ZAP](https://www.zaproxy.org/)
-- [Nikto](https://github.com/sullo/nikto)
-- [Nuclei](https://github.com/projectdiscovery/nuclei)
-- [SearchSploit](https://www.exploit-db.com/searchsploit)
-- [Metasploit](https://www.metasploit.com/)
-
-Thanks to all the contributors of these amazing tools!
-
-
-## Reach Us
-
-You can get support, ask questions, solve doubts or solve problems using:
-
-<p>
-  <a href="https://github.com/pablosnt/rekono/issues/new?labels=help+wanted%2C+question&template=support.md" alt="GitHub Issue">
-    <img src="https://github.com/fluidicon.png" width="64"/>
-  </a>
-  <a href="https://discord.gg/Zyduu5C7M3" alt="Discord">
-    <img src="https://assets-global.website-files.com/6257adef93867e50d84d30e2/636e0a69f118df70ad7828d4_icon_clyde_blurple_RGB.svg" width="64"/>
-  </a>
-  <a href="mailto:rekono.project@gmail.com" alt="Mail">
-    <img src="https://www.gstatic.com/images/branding/product/2x/gmail_2020q4_512dp.png" width="64"/>
-  </a>
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://github.com/user-attachments/assets/a04acbdf-250d-4f9d-816c-d22981dc23cf">
+    <img alt="screenshot" src="https://github.com/user-attachments/assets/4c9d952c-9c6f-4462-9c7d-45f43b7f5920" />
+  </picture>
 </p>
 
-Rekono is an open source project that we really love to maintain and it's absolutely our pleasure, but we would like to offer the possibility of supporting Rekono's development via donations. At the moment, the project only needs its maintainer's time to stay up to date with new features and fix bugs. However, in the future, it could need more expensive resources like hosting, new web pages for documentation, the inclusion of premium hacking tools, etc. With the help received from our supporters, Rekono will be able to grow fastly and have the resources that it deserves. Of course, you can use the donations just to appreciate our work. Thank you for your help!
+# Quick Start
 
-<p>
-  <a href="https://ko-fi.com/pablosnt" target="_blank">
-    <img src="https://storage.ko-fi.com/cdn/brandasset/kofi_s_tag_white.png" width="130"/>
-  </a>
-  <a href="https://www.buymeacoffee.com/pablosnt" target="_blank">
-    <img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=&slug=pablosnt&button_colour=FFDD00&font_colour=000000&font_family=Cookie&outline_colour=000000&coffee_colour=ffffff"/>
-  </a>
-</p>
+```bash
+docker compose up -d --scale executions-worker=5
+```
 
-> The main differences between them are that BuyMeACoffe charges fees over each donation while Ko-fi doesn't and Ko-fi supports PayPal payments while BuyMeACoffe doesn't
+Go to https://127.0.0.1 and log in with `rekono:rekono`. **Change that password the first time you log in**
 
-## License
+> Upgrading from Rekono 1.x? Read the [upgrade guide](UPGRADE.md) first. The database migration runs on its own, but there are things that you should know
 
-Rekono is licensed under the [GNU GENERAL PUBLIC LICENSE Version 3](./LICENSE.md)
+# Features
+
+- **Pentesting processes**: Rekono runs a full assessment by itself, chaining the tools so that whatever one of them discovers is immediately attacked by the next one. Build your methodology once and launch it against any target with a single click.
+- **One attack surface, not a pile of raw outputs**: The same finding reported by three different tools is one finding in Rekono, attached to the host, the port or the technology where it was found. You get a clean inventory of what your target exposes, instead of the output of every execution.
+- **Vulnerability management**: Confirm the real vulnerabilities and dismiss the false positives once and for all. Don't waste time with findings that are gone, Rekono marks them as fixed as soon as the executions stop detecting them, brings them back with your verdict intact if they ever return, and remembers how long they were exposed.
+- **Vulnerabilities with context**: Every CVE discovered is enriched with what the security community already knows about it, so you can tell how serious it really is, how likely it is to be exploited, and how to get rid of it, without opening a single browser tab. Prioritization comes for free.
+- **Alerts that reach you**: Tell Rekono what you are hunting for and it will let you know the moment it shows up, wherever you are, so you never have to sit in front of the platform waiting for it.
+- **Metrics that tell the story**: See how exposed a project is, where the risk is concentrated and how everything evolves over time.
+- **Reports ready to deliver**: Turn a whole assessment into a deliverable in seconds, with your own template, and skip the part of the job that nobody enjoys.
+- **Notes for the whole team**: Write what you found and what you plan to do next, and share it with your teammates so nobody repeats the work that is already done and everyone works with the same knowledge.
+- **Customize your scans**: Decide how aggressive each scan is, send it through your own proxy and give the tools the headers and the credentials that your target expects.
+- **Hack from anywhere**: The Telegram bot launches scans and delivers the findings straight to your phone, and if you need the automation of the automation, everything that Rekono does is one API call away.
+
+# Hacking Tools
+
+Rekono supports the execution of 19 hacking tools:
+
+- OSINT: [theHarvester](https://github.com/laramies/theHarvester), [EmailHarvester](https://github.com/maldevel/EmailHarvester)
+- Host, ports and services enumeration: [Nmap](https://nmap.org/)
+- Enumeration: [Dirsearch](https://github.com/maurosoria/dirsearch), [Gobuster](https://github.com/OJ/gobuster)
+- SSL and TLS: [Sslscan](https://github.com/rbsec/sslscan), [SSLyze](https://nabla-c0d3.github.io/sslyze/documentation/)
+- Exposed secrets: [GitLeaks](https://github.com/zricethezav/gitleaks)
+- SSH: [SSH Audit](https://github.com/jtesta/ssh-audit)
+- SMB: [SMBMap](https://github.com/ShawnDEvans/smbmap)
+- Web: [Log4j Scan](https://github.com/fullhunt/log4j-scan), [Spring4Shell Scan](https://github.com/fullhunt/spring4shell-scan), [CMSeeK](https://github.com/Tuhinshubhra/CMSeeK/), [OWASP JoomScan](https://github.com/OWASP/joomscan), [OWASP ZAP](https://www.zaproxy.org/), [Nikto](https://github.com/sullo/nikto)
+- Vulnerability scanners: [Nuclei](https://github.com/projectdiscovery/nuclei)
+- Exploits: [SearchSploit](https://www.exploit-db.com/searchsploit), [Metasploit](https://www.metasploit.com/)
+
+# Integrations
+
+The findings detected by the [hacking tools](#hacking-tools) are nothing if we don't enrich them with information from external sources or if we don't share them with the right people at the right time. This is why Rekono supports multiple integrations:
+
+| Integration | Type | Purpose |
+| ----------- | ---- | ------- |
+| [DefectDojo](https://www.defectdojo.com/) | Vulnerability Management | Findings detected by Rekono executions are shipped to DefectDojo, to make their management and reporting easier |
+| [Virus Total](https://www.virustotal.com/) | Malware Analysis | Identified hosts are verified in VirusTotal to get metadata about their reputation and malware analysis conclusions |
+| [HackTricks](https://hacktricks.wiki/) | Hacking Wiki | The findings that have a related page in HackTricks will be linked to it, for auditors to get more information easily |
+| [CVE Crowd](https://cvecrowd.com/) | Trending CVEs | Detected CVEs are marked as trending if CVE Crowd identifies them as so |
+| [FIRST EPSS](https://first.org/epss) | EPSS provider | We get EPSS scores and percentiles for the detected CVEs from this source |
+| [NVD NIST](https://nvd.nist.gov/) | CVE provider | We get updated information for the detected CVEs from this source |
+| [VulnCheck NVD++](https://www.vulncheck.com/nvd2) | CVE provider | We get updated information for the detected CVEs from this source |
+| [OSV](https://osv.dev/) | CVE provider | We get updated information for the detected CVEs from this source |
+| [GHSA](https://github.com/advisories) | CVE provider | We get updated information for the detected CVEs from this source |
+| [EU Vulnerability Database](https://euvd.enisa.europa.eu/homepage) | CVE provider | We get updated information for the detected CVEs from this source |
+| SMTP | Notifications | Notifications about the user account, executions, alerts, etc |
+| Telegram | Notifications | Notifications about executions and alerts |
+
+# Get Involved
+
+Join our community in [![Discord](https://readmecodegen.vercel.app/api/social-icon?name=discord&size=10) Discord](https://discord.gg/Zyduu5C7M3) and follow us on [![X](https://readmecodegen.vercel.app/api/social-icon?name=x&size=10&color=6b6a69)](https://x.com/rekonosec).
+
+Rekono is an open source project with only one maintainer, working in his free time and with no external funds. You can support the project or simply appreciate our work with your donations on [![Ko-fi](https://readmecodegen.vercel.app/api/social-icon?name=kofi&size=10) Ko-fi](https://ko-fi.com/pablosnt) or [![Buy me a Coffee](https://readmecodegen.vercel.app/api/social-icon?name=buymeacoffee&size=10) Buy me a Coffee](https://buymeacoffee.com/pablosnt).
+
+![GitHub](https://readmecodegen.vercel.app/api/social-icon?name=github&size=10&color=6b6a69) Rekono is open to suggestions and improvements, don't hesitate to create an [issue](https://github.com/pablosnt/rekono/issues) or contribute something cool to the project. Check our [CONTRIBUTING](./CONTRIBUTING.md) guidelines
+
+> Do you want to know more? The Rekono name comes from Esperanto and it means _recon_
+
+# License
+
+Rekono is licensed under the [GNU GENERAL PUBLIC LICENSE Version 3](./LICENSE.txt)
+
+# Disclaimer
+
+Rekono is intended only for authorized security testing, education and research, so you must have explicit permission to test every target that you add to it. You are solely responsible for the use that you make of the project, which its authors, maintainers and contributors provide as is, without warranty of any kind, and for which they accept no liability for any damage or legal consequence arising from its misuse.
