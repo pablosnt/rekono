@@ -39,6 +39,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Users can change their email address (https://github.com/pablosnt/rekono/pull/299)
 - Administrators can check the status and the stats of the queues (https://github.com/pablosnt/rekono/pull/266)
 - Administrators can enable and disable integrations (https://github.com/pablosnt/rekono/issues/269)
+- Follow the redirections when calculating the URLs to be scanned, so the tools are executed against the final location (https://github.com/pablosnt/rekono/pull/380)
 - New default wordlists for CMS, APIs, GraphQL and specific services (https://github.com/pablosnt/rekono/issues/371)
 
 ### Changed
