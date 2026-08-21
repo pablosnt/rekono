@@ -49,7 +49,7 @@
         "pk": 6,
         "fields": {
             "tool": 2,
-            "argument": "-t 1 -s 1",
+            "argument": "-t 1",
             "value": 1
         }
     },
@@ -58,7 +58,7 @@
         "pk": 7,
         "fields": {
             "tool": 2,
-            "argument": "-t 10 -s 1",
+            "argument": "-t 10",
             "value": 2
         }
     },

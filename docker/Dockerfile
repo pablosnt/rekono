@@ -185,7 +185,8 @@ RUN apt update && \
     # Unsatisfied dirsearch dependencies (pin setuptools to a version that still ships pkg_resources)
     uv pip install --system --break-system-packages 'setuptools<82' && \
     # Install hacking tools via pip
-    uv pip install --system --break-system-packages ssh-audit dirsearch && \
+    # Dirsearch is pinned because 0.5.0 changes its CLI and it will be adopted in a future release
+    uv pip install --system --break-system-packages ssh-audit 'dirsearch==0.4.3.post1' && \
     # Install hacking tools from source
     mkdir -p /opt && \
     git clone https://github.com/fullhunt/log4j-scan.git /opt/log4j-scan && \

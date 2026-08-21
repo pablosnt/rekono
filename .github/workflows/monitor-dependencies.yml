@@ -20,23 +20,23 @@ jobs:
           - name: Nmap
             install: apt install nmap -y
             command: nmap --version
-            expected: 7.99
+            expected: 7.99 # 7.991
           - name: Dirsearch
-            install: apt install python3-dev dirsearch -y
+            install: python3 -m pip install dirsearch --break-system-packages
             command: dirsearch --version
-            expected: v0.4.3
+            expected: v0.5.0
           - name: theHarvester
             install: apt install theharvester -y
             command: theHarvester --help
-            expected: 4.11.1
+            expected: 4.10.1  # 4.11.1
           - name: Nikto
             install: apt install nikto -y
             command: nikto -Version
-            expected: 2.6.0
+            expected: 2.6.0 # 2.6.1
           - name: Sslscan
             install: apt install sslscan -y
             command: sslscan --version
-            expected: 2.2.2 # 2.1.5 kali
+            expected: 2.1.5 # 2.2.2
           - name: SSLyze
             install: apt install sslyze -y
             command: sslyze --help
@@ -52,7 +52,7 @@ jobs:
           - name: Metasploit
             install: apt install metasploit-framework -y
             command: msfconsole --version 2>&1
-            expected: 6.4.142 # 6.4.135-dev kali 
+            expected: 6.4.135-dev # 6.4.142
           - name: JoomScan
             install: apt install joomscan -y
             command: joomscan --version
@@ -60,7 +60,7 @@ jobs:
           - name: Nuclei
             install: apt install nuclei -y
             command: nuclei --version 2>&1
-            expected: v3.11.0 # v3.10.0 kali
+            expected: v3.8.0 # v3.11.1
           - name: Gobuster
             install: apt install gobuster -y
             command: gobuster --version
@@ -72,7 +72,7 @@ jobs:
           - name: SMBMap
             install: apt install smbmap -y
             command: smbmap --help
-            expected: v1.10.8 # v1.10.7 kali
+            expected: v1.10.7 # v1.10.8
     name: Detect ${{ matrix.name }} updates
     defaults:
       run:

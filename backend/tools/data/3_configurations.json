@@ -705,8 +705,8 @@
         "migration": "0004_remove_argument_unique_argument_and_more",
         "fields": {
             "tool": 3,
-            "name": "DNS lookup & Domain take over & Virtual hosts",
-            "command_template": "{target} -b all -f {output} --quiet --dns-lookup --take-over --virtual-host",
+            "name": "DNS lookup & Domain take over",
+            "command_template": "{target} -b all -f {output} --quiet --dns-lookup --take-over",
             "stage": 1,
             "default": false,
             "default_scanned_port": null,
