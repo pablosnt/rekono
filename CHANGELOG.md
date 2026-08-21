@@ -47,6 +47,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - [**BREAKING**] Upgrade required `Python` version to `3.11` (https://github.com/pablosnt/rekono/issues/222)
 - [**BREAKING**] The SMTP configuration is stored in the database, so it is removed from the configuration file and from the `RKN_EMAIL_*` environment variables (https://github.com/pablosnt/rekono/issues/222)
 - [**BREAKING**] Replace `Redis` by `Valkey` (https://github.com/pablosnt/rekono/issues/373)
+- New logo and favicon (https://github.com/pablosnt/rekono/issues/298)
 - New email templates based on `react-email` for the notifications sent through SMTP (https://github.com/pablosnt/rekono/issues/375)
 - Send emails using new threads instead of the `emails-queue` Redis queue (https://github.com/pablosnt/rekono/issues/222)
 - Input technologies and vulnerabilities are provided when a scan is created, instead of being saved in the target (https://github.com/pablosnt/rekono/issues/323)
