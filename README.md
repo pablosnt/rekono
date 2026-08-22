@@ -7,13 +7,13 @@
 
 **Automate the recon, keep your time for the part that actually needs a hacker**
 
-Think about how an assessment really starts. You gather public information about the target. You discover its hosts, enumerate their ports and identify the services behind them. Then you run a more specific tool against each service, scan for known vulnerabilities and look for public exploits. It's almost the same sequence every time, it takes hours of watching terminals waiting for executions to finish and copying results from one tool into the next, and none of it is the part where your skills make the difference.
+Think about how an assessment really starts. You gather public information about the target. You discover its hosts, enumerate their ports and identify the services behind them. Then you run a more specific tool against each service, scan for known vulnerabilities and look for public exploits. It's almost the same sequence every time, it takes hours of watching terminals, waiting for executions to finish and copying results from one tool into the next one, and none of it is the part where your skills make the difference.
 
-Rekono does that work for you. You define a target and it chains the hacking tools by itself, what one tool discovers becomes the input of the ones that come next. So, the ports found by a port scanner are attacked by the right service tools, the technologies detected are checked for known vulnerabilities, and the vulnerabilities found are matched against public exploit databases. Everything lands in one place, deduplicated, linked to the host and the port where it lives, and enriched with the information that you would otherwise look up by hand.
+Rekono does that work for you. You define a target and it chains the hacking tools by itself, what one tool discovers becomes the input of the ones that come next. So, the ports found are scanned by the right tools, the technologies detected are checked for known vulnerabilities, and the vulnerabilities are matched against public exploit databases. Everything lands in one place, deduplicated, linked to the host and the port where it lives, and enriched with the information that you would otherwise look up by hand.
 
-It's a platform, not a script. Projects for your engagements, roles for your team, notes to write down what you think, collaborative triage, automatic resolution of findings, metrics, reports for your deliverables, and scheduled or repeated scans to keep watching an attack surface over time.
+It's a platform, not a script. Projects for your engagements, roles for your team, notes to write down what you are thinking, collaborative triage, automatic resolution of findings, metrics, reports for your deliverables, and scheduled or repeated scans to keep watching an attack surface over time.
 
-Best of all, you don't have to wait in front of it. Rekono notifies you by email or Telegram as soon as something worth your attention shows up, so when you sit down you are starting from an attack surface that is already mapped, prioritized and full of leads.
+Best of all, you don't have to wait in front of it. Rekono notifies you by email or Telegram as soon as something worth your attention shows up, so when you sit down, you already have an attack surface mapped, prioritized and full of leads.
 
 <p align="center">
   <picture>
