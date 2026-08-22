@@ -76,7 +76,7 @@ services:
 
   initializer:
     restart: 'no'
-    image: pablosnt/rekono-worker:unstable
+    image: pablosnt/rekono-worker:latest
     command: bash /entrypoints/initializer.sh
     container_name: initializer
     volumes:
@@ -104,7 +104,7 @@ services:
   
   tasks-worker:
     restart: always
-    image: pablosnt/rekono-backend:unstable
+    image: pablosnt/rekono-backend:latest
     command: uv run --no-dev manage.py rqworker tasks --with-scheduler
     hostname: tasks-worker
     volumes:
@@ -132,7 +132,7 @@ services:
 
   executions-worker:
     restart: always
-    image: pablosnt/rekono-worker:unstable
+    image: pablosnt/rekono-worker:latest
     command: bash /entrypoints/executions-worker.sh
     hostname: executions-worker
     volumes:
@@ -160,7 +160,7 @@ services:
 
   findings-worker:
     restart: always
-    image: pablosnt/rekono-backend:unstable
+    image: pablosnt/rekono-backend:latest
     command: uv run --no-dev manage.py rqworker findings
     hostname: findings-worker
     volumes:
@@ -186,7 +186,7 @@ services:
 
   monitor-worker:
     restart: always
-    image: pablosnt/rekono-backend:unstable
+    image: pablosnt/rekono-backend:latest
     command: uv run --no-dev manage.py rqworker monitor --with-scheduler
     hostname: monitor-worker
     volumes:
@@ -212,7 +212,7 @@ services:
 
   telegram-bot:
     restart: always
-    image: pablosnt/rekono-backend:unstable
+    image: pablosnt/rekono-backend:latest
     command: uv run --no-dev manage.py telegram_bot
     hostname: telegram_bot
     container_name: telegram-bot
@@ -239,7 +239,7 @@ services:
 
   backend:
     restart: always
-    image: pablosnt/rekono-backend:unstable
+    image: pablosnt/rekono-backend:latest
     command: sh /entrypoints/deploy-backend.sh
     hostname: backend
     container_name: backend
@@ -276,7 +276,7 @@ services:
   
   frontend:
     restart: always
-    image: pablosnt/rekono-frontend:unstable
+    image: pablosnt/rekono-frontend:latest
     hostname: frontend
     container_name: frontend
     healthcheck:
@@ -294,7 +294,7 @@ services:
 
   nginx:
     restart: always
-    image: pablosnt/rekono-nginx:unstable
+    image: pablosnt/rekono-nginx:latest
     hostname: nginx
     container_name: nginx
     ports:
