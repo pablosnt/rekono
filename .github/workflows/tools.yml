@@ -1,0 +1,104 @@
+name: Tools
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * *'
+
+jobs:
+  latest-version:
+    runs-on: ubuntu-latest
+    container:
+      image: kalilinux/kali-last-release:latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Uncheckable: searchsploit, spring4shell-scan, log4j-scan
+          - name: Nmap
+            install: apt install nmap -y
+            command: nmap --version
+            expected: 7.95
+          - name: Dirsearch
+            install: apt install dirsearch -y
+            command: dirsearch --version
+            expected: v0.4.3
+          - name: theHarvester
+            install: apt install theharvester -y
+            command: theHarvester --help
+            expected: 4.8.0
+          - name: Nikto
+            install: apt install nikto -y
+            command: nikto -Version
+            expected: 2.5.0
+          - name: Sslscan
+            install: apt install sslscan -y
+            command: sslscan --version
+            expected: 2.1.5
+          - name: SSLyze
+            install: apt install sslyze -y
+            command: sslyze --help
+            expected: 6.1.0
+          - name: CMSeeK
+            install: apt install cmseek -y
+            command: cmseek --version
+            expected: 1.1.3
+          - name: ZAP
+            install: apt install zaproxy -y
+            command: zaproxy -version
+            expected: 2.16.1
+          - name: Metasploit
+            install: apt install metasploit-framework -y
+            command: msfconsole --version
+            expected: 6.4.64-dev
+          - name: EmailFinder
+            install: python3 -m pip install emailfinder -y
+            command: emailfinder --version
+            expected: 0.3.0b
+          - name: EmailHarvester
+            install: apt install emailharvester -y
+            command: emailharvester --help
+            expected: 1.3.2
+          - name: JoomScan
+            install: apt install joomscan -y
+            command: joomscan --version
+            expected: 0.0.7
+          - name: Nuclei
+            install: apt install nuclei -y
+            command: nuclei --version
+            expected: v3.4.4
+          - name: Gobuster
+            install: apt install gobuster -y
+            command: gobuster version
+            expected: 3.6
+          - name: SSH Audit
+            install: python3 -m pip install ssh-audit
+            command: ssh-audit --help
+            expected: v3.3.0
+          - name: SMBMap
+            install: apt install smbmap -y
+            command: smbmap --help
+            expected: v1.10.7
+          - name: GitLeaks
+            install: apt install gitleaks -y
+            command: gitleaks version
+            expected: v8.26.0 # Usually returns "version is set by build process"
+    name: ${{ matrix.name }} version
+    steps:
+      - name: Install
+        run: |
+          if [[ ${{ matrix.install }} == "apt install"* ]]
+          then
+            apt update
+          fi
+          ${{ matrix.install }}
+      
+      - name: Check version
+        run: |
+          version=$(${{ matrix.command }})
+          count=$($version | grep -o "${{ matrix.expected }} | wc -l")
+          if [ $count -eq 0 ]
+          then
+            echo "${{ matrix.name }} version '${{ matrix.expected }}' is outdated!"
+            echo $version
+            exit 1
+          fi
