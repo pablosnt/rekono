@@ -1,0 +1,51 @@
+{
+  "name": "frontend",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare",
+    "eslint": "eslint .",
+    "eslint:fix": "eslint . --fix",
+    "prettier": "prettier --check . --ignore-path=../.gitignore --ignore-path=.prettierignore",
+    "prettier:fix": "prettier --write --list-different . --ignore-path=../.gitignore --ignore-path=.prettierignore"
+  },
+  "dependencies": {
+    "@iconify-json/cif": "^1.2.7",
+    "@iconify-json/codicon": "^1.2.68",
+    "@iconify-json/lucide": "^1.2.122",
+    "@iconify-json/mdi": "^1.2.3",
+    "@iconify-json/simple-icons": "^1.2.93",
+    "@nuxt/eslint": "^1.17.0",
+    "@nuxt/ui": "^4.10.0",
+    "@pinia/nuxt": "1.0.1",
+    "@tiptap/core": "^3.29.2",
+    "@tiptap/extension-emoji": "^3.29.2",
+    "@tiptap/extension-table": "^3.29.2",
+    "@tiptap/extension-text-align": "^3.29.2",
+    "@tiptap/pm": "^3.29.2",
+    "@tiptap/starter-kit": "^3.29.2",
+    "@tiptap/vue-3": "^3.29.2",
+    "@unovis/ts": "^1.6.7",
+    "@unovis/vue": "^1.6.7",
+    "jwt-decode": "^4.0.0",
+    "nuxt": "4.5.2",
+    "nuxt-qrcode": "^0.4.10",
+    "pinia": "^4.0.2",
+    "shiki": "^4.4.2",
+    "tiptap-extension-code-block-shiki": "^1.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.2.0",
+    "eslint": "^10.8.1",
+    "eslint-config-prettier": "^10.1.8",
+    "frontend": "link:",
+    "prettier": "^3.9.6",
+    "typescript": "^6.0.3",
+    "vue": "^3.5.41",
+    "vue-tsc": "^3.3.9"
+  },
+  "packageManager": "pnpm@11.17.0"
+}

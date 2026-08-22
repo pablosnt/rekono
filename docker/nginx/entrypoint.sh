@@ -2,7 +2,7 @@
 
 if [ ! -e /etc/nginx/tls/privatekey.key ] || [ ! -e  /etc/nginx/tls/certificate.crt ]
 then
-    exec openssl req -x509 \
+    openssl req -x509 \
         -nodes \
         -days 365 \
         -newkey rsa:4096 \
@@ -12,4 +12,4 @@ then
         -subj "/C=ES/ST=Spain/L=Spain/O=Rekono/OU=Security/CN=Rekono"
 fi
 
-exec nginx -g "daemon off;"
+nginx -g "daemon off;"

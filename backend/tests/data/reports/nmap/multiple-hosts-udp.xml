@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE nmaprun>
+<nmaprun scanner="nmap" args="nmap -sS -sU -oX output.xml 10.10.10.0/24" start="1784702504" startstr="Wed Jul 22 06:41:44 2026" version="7.99" xmloutputversion="1.05">
+<scaninfo type="syn" protocol="tcp" numservices="1" services="80"/>
+<scaninfo type="udp" protocol="udp" numservices="1" services="67"/>
+<verbose level="0"/>
+<debugging level="0"/>
+<host starttime="1784702504" endtime="1784702520"><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="10.10.10.10" addrtype="ipv4"/>
+<hostnames>
+</hostnames>
+<ports><port protocol="udp" portid="67"><state state="open|filtered" reason="no-response" reason_ttl="0"/><service name="dhcps" method="table" conf="3"/></port>
+</ports>
+</host>
+<host starttime="1784702504" endtime="1784702520"><status state="up" reason="arp-response" reason_ttl="0"/>
+<address addr="10.10.10.11" addrtype="ipv4"/>
+<hostnames>
+</hostnames>
+<ports><port protocol="tcp" portid="80"><state state="open" reason="syn-ack" reason_ttl="64"/><service name="http" method="table" conf="3"/></port>
+</ports>
+</host>
+<runstats><finished time="1784702520" timestr="Wed Jul 22 06:42:00 2026" summary="Nmap done" elapsed="16.00" exit="success"/><hosts up="2" down="0" total="2"/>
+</runstats>
+</nmaprun>

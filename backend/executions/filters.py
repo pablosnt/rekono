@@ -1,0 +1,55 @@
+"""Filters of the execution endpoints."""
+
+from django_filters.filters import ChoiceFilter, ModelChoiceFilter
+from django_filters.rest_framework import FilterSet
+
+from executions.models import Execution
+from processes.models import Process
+from projects.models import Project
+from targets.models import Target
+from tools.enums import Intensity, Stage
+from tools.models import Tool
+from users.models import User
+
+
+class ExecutionFilter(FilterSet):
+    """Filters to search executions by their task, their tool, and their findings.
+
+    Attributes:
+        target: Filter by the target that the task scans.
+        project: Filter by the project that owns that target.
+        process: Filter by the process that the task executes.
+        tool: Filter by the tool that the execution runs.
+        stage: Filter by the stage of that tool.
+        intensity: Filter by the intensity of the task.
+        executor: Filter by the user that created the task.
+    """
+
+    target = ModelChoiceFilter(queryset=Target.objects.all(), field_name="task__target")
+    project = ModelChoiceFilter(queryset=Project.objects.all(), field_name="task__target__project")
+    process = ModelChoiceFilter(queryset=Process.objects.all(), field_name="task__process")
+    tool = ModelChoiceFilter(queryset=Tool.objects.all(), field_name="configuration__tool")
+    stage = ChoiceFilter(field_name="configuration__stage", choices=Stage.choices)
+    intensity = ChoiceFilter(field_name="task__intensity", choices=Intensity.choices)
+    executor = ModelChoiceFilter(queryset=User.objects.all(), field_name="task__executor")
+
+    class Meta:
+        """Filter configuration for the executions."""
+
+        model = Execution
+        fields = {
+            "task": ["exact"],
+            "configuration": ["exact"],
+            "status": ["exact"],
+            "enqueued_at": ["gte", "lte", "exact"],
+            "start": ["gte", "lte", "exact"],
+            "end": ["gte", "lte", "exact"],
+            "osint": ["exact"],
+            "host": ["exact"],
+            "port": ["exact"],
+            "path": ["exact"],
+            "technology": ["exact"],
+            "credential": ["exact"],
+            "vulnerability": ["exact"],
+            "exploit": ["exact"],
+        }

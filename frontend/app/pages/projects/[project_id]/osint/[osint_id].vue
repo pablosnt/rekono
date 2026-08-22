@@ -1,0 +1,59 @@
+<template>
+  <FindingsSingle
+    :loading="loading"
+    :icon="typeConfig?.icon"
+    :api="api"
+    :title="osint?.data || ''"
+    :finding="osint"
+    entity-name="OSINT"
+    is-triageable
+    fix-verb="Discard"
+    :custom-dropdown-actions="
+      userStore.is_auditor &&
+      osint &&
+      ['IP', 'Domain'].includes(osint?.data_type)
+        ? [getOSINTDropdownActions(osint, api)]
+        : []
+    "
+    @update="fetch()"
+  >
+    <template #metadata>
+      <div v-if="osint?.data_type" class="flex items-center gap-2 flex-wrap">
+        <span class="text-muted">Data type:</span>
+        <span class="text-base">{{ osint.data_type }}</span>
+      </div>
+      <div v-if="osint?.source" class="flex items-center gap-2 flex-wrap">
+        <span class="text-muted">Source:</span>
+        <span class="text-base">{{ osint.source }}</span>
+      </div>
+    </template>
+  </FindingsSingle>
+</template>
+
+<script setup lang="ts">
+import { osintDataTypes } from "~/constants";
+import { useUserStore } from "~/store/user";
+
+const api = useApi("/api/osint/");
+const route = useRoute();
+const userStore = useUserStore();
+const osint = ref();
+const typeConfig = ref();
+const loading = ref(true);
+
+function fetch(initial: boolean = false) {
+  loading.value = true;
+  (initial ? api.getOrError : api.get)(`${route.params.osint_id}/`)
+    .then((response) => {
+      osint.value = response;
+      typeConfig.value = osintDataTypes.find(
+        (t) => t.value === osint.value.data_type,
+      );
+    })
+    .finally(() => {
+      loading.value = false;
+    });
+}
+
+onMounted(() => fetch(true));
+</script>

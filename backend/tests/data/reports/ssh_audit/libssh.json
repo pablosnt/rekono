@@ -1,0 +1,346 @@
+{
+    "additional_notes": [],
+    "banner": {
+        "comments": null,
+        "protocol": "2.0",
+        "raw": "SSH-2.0-libssh_0.8.1",
+        "software": "libssh_0.8.1"
+    },
+    "compression": [
+        "none",
+        "zlib",
+        "zlib@openssh.com"
+    ],
+    "cves": [],
+    "enc": [
+        {
+            "algorithm": "chacha20-poly1305@openssh.com",
+            "notes": {
+                "info": [
+                    "default cipher since OpenSSH 6.9",
+                    "available since OpenSSH 6.5, Dropbear SSH 2020.79"
+                ],
+                "warn": [
+                    "vulnerable to the Terrapin attack (CVE-2023-48795), allowing message prefix truncation"
+                ]
+            }
+        },
+        {
+            "algorithm": "aes256-ctr",
+            "notes": {
+                "info": [
+                    "available since OpenSSH 3.7, Dropbear SSH 0.52"
+                ]
+            }
+        },
+        {
+            "algorithm": "aes192-ctr",
+            "notes": {
+                "info": [
+                    "available since OpenSSH 3.7"
+                ]
+            }
+        },
+        {
+            "algorithm": "aes128-ctr",
+            "notes": {
+                "info": [
+                    "available since OpenSSH 3.7, Dropbear SSH 0.52"
+                ]
+            }
+        },
+        {
+            "algorithm": "aes256-cbc",
+            "notes": {
+                "info": [
+                    "available since OpenSSH 2.3.0, Dropbear SSH 0.47"
+                ],
+                "warn": [
+                    "using weak cipher mode"
+                ]
+            }
+        },
+        {
+            "algorithm": "aes192-cbc",
+            "notes": {
+                "info": [
+                    "available since OpenSSH 2.3.0"
+                ],
+                "warn": [
+                    "using weak cipher mode"
+                ]
+            }
+        },
+        {
+            "algorithm": "aes128-cbc",
+            "notes": {
+                "info": [
+                    "available since OpenSSH 2.3.0, Dropbear SSH 0.28"
+                ],
+                "warn": [
+                    "using weak cipher mode"
+                ]
+            }
+        },
+        {
+            "algorithm": "blowfish-cbc",
+            "notes": {
+                "fail": [
+                    "using weak & deprecated Blowfish cipher"
+                ],
+                "info": [
+                    "available since OpenSSH 1.2.2, Dropbear SSH 0.28"
+                ],
+                "warn": [
+                    "using weak cipher mode",
+                    "using small 64-bit block size"
+                ]
+            }
+        },
+        {
+            "algorithm": "3des-cbc",
+            "notes": {
+                "fail": [
+                    "using broken & deprecated 3DES cipher"
+                ],
+                "info": [
+                    "available since OpenSSH 1.2.2, Dropbear SSH 0.28"
+                ],
+                "warn": [
+                    "using weak cipher mode",
+                    "using small 64-bit block size"
+                ]
+            }
+        }
+    ],
+    "fingerprints": [
+        {
+            "hash": "ytuGwbpvc9QRltCF9oSbSvyhsNOBaTCLlura//V9Gnw",
+            "hash_alg": "SHA256",
+            "hostkey": "ssh-rsa"
+        },
+        {
+            "hash": "34:f3:32:c6:e8:50:23:6a:67:23:bd:58:a3:88:e3:a6",
+            "hash_alg": "MD5",
+            "hostkey": "ssh-rsa"
+        }
+    ],
+    "kex": [
+        {
+            "algorithm": "curve25519-sha256",
+            "notes": {
+                "info": [
+                    "default key exchange from OpenSSH 7.4 to 8.9",
+                    "available since OpenSSH 7.4, Dropbear SSH 2018.76"
+                ]
+            }
+        },
+        {
+            "algorithm": "curve25519-sha256@libssh.org",
+            "notes": {
+                "info": [
+                    "default key exchange from OpenSSH 6.5 to 7.3",
+                    "available since OpenSSH 6.4, Dropbear SSH 2013.62"
+                ]
+            }
+        },
+        {
+            "algorithm": "ecdh-sha2-nistp256",
+            "notes": {
+                "fail": [
+                    "using elliptic curves that are suspected as being backdoored by the U.S. National Security Agency"
+                ],
+                "info": [
+                    "available since OpenSSH 5.7, Dropbear SSH 2013.62"
+                ]
+            }
+        },
+        {
+            "algorithm": "ecdh-sha2-nistp384",
+            "notes": {
+                "fail": [
+                    "using elliptic curves that are suspected as being backdoored by the U.S. National Security Agency"
+                ],
+                "info": [
+                    "available since OpenSSH 5.7, Dropbear SSH 2013.62"
+                ]
+            }
+        },
+        {
+            "algorithm": "ecdh-sha2-nistp521",
+            "notes": {
+                "fail": [
+                    "using elliptic curves that are suspected as being backdoored by the U.S. National Security Agency"
+                ],
+                "info": [
+                    "available since OpenSSH 5.7, Dropbear SSH 2013.62"
+                ]
+            }
+        },
+        {
+            "algorithm": "diffie-hellman-group14-sha1",
+            "notes": {
+                "fail": [
+                    "using broken SHA-1 hash algorithm"
+                ],
+                "info": [
+                    "available since OpenSSH 3.9, Dropbear SSH 0.53"
+                ],
+                "warn": [
+                    "2048-bit modulus only provides 112-bits of symmetric strength"
+                ]
+            }
+        },
+        {
+            "algorithm": "diffie-hellman-group1-sha1",
+            "notes": {
+                "fail": [
+                    "using small 1024-bit modulus",
+                    "vulnerable to the Logjam attack: https://en.wikipedia.org/wiki/Logjam_(computer_security)",
+                    "using broken SHA-1 hash algorithm"
+                ],
+                "info": [
+                    "removed in OpenSSH 6.9: https://www.openssh.com/txt/release-6.9",
+                    "available since OpenSSH 2.3.0, Dropbear SSH 0.28"
+                ]
+            }
+        }
+    ],
+    "key": [
+        {
+            "algorithm": "ssh-rsa",
+            "keysize": 2048,
+            "notes": {
+                "fail": [
+                    "using broken SHA-1 hash algorithm"
+                ],
+                "info": [
+                    "deprecated in OpenSSH 8.8: https://www.openssh.com/txt/release-8.8",
+                    "available since OpenSSH 2.5.0, Dropbear SSH 0.28"
+                ],
+                "warn": [
+                    "2048-bit modulus only provides 112-bits of symmetric strength"
+                ]
+            }
+        }
+    ],
+    "mac": [
+        {
+            "algorithm": "hmac-sha2-256",
+            "notes": {
+                "info": [
+                    "available since OpenSSH 5.9, Dropbear SSH 2013.56"
+                ],
+                "warn": [
+                    "using encrypt-and-MAC mode"
+                ]
+            }
+        },
+        {
+            "algorithm": "hmac-sha2-512",
+            "notes": {
+                "info": [
+                    "available since OpenSSH 5.9, Dropbear SSH 2013.56"
+                ],
+                "warn": [
+                    "using encrypt-and-MAC mode"
+                ]
+            }
+        },
+        {
+            "algorithm": "hmac-sha1",
+            "notes": {
+                "fail": [
+                    "using broken SHA-1 hash algorithm"
+                ],
+                "info": [
+                    "available since OpenSSH 2.1.0, Dropbear SSH 0.28"
+                ],
+                "warn": [
+                    "using encrypt-and-MAC mode"
+                ]
+            }
+        }
+    ],
+    "recommendations": {
+        "critical": {
+            "del": {
+                "enc": [
+                    {
+                        "name": "3des-cbc",
+                        "notes": ""
+                    },
+                    {
+                        "name": "blowfish-cbc",
+                        "notes": ""
+                    }
+                ],
+                "kex": [
+                    {
+                        "name": "diffie-hellman-group14-sha1",
+                        "notes": ""
+                    },
+                    {
+                        "name": "diffie-hellman-group1-sha1",
+                        "notes": ""
+                    },
+                    {
+                        "name": "ecdh-sha2-nistp256",
+                        "notes": ""
+                    }
+                ],
+                "key": [
+                    {
+                        "name": "ssh-rsa",
+                        "notes": ""
+                    }
+                ],
+                "mac": [
+                    {
+                        "name": "hmac-sha1",
+                        "notes": ""
+                    }
+                ]
+            }
+        },
+        "informational": {
+            "add": {
+                "key": [
+                    {
+                        "name": "ssh-ed25519",
+                        "notes": ""
+                    }
+                ]
+            }
+        },
+        "warning": {
+            "del": {
+                "enc": [
+                    {
+                        "name": "aes128-cbc",
+                        "notes": ""
+                    },
+                    {
+                        "name": "aes192-cbc",
+                        "notes": ""
+                    },
+                    {
+                        "name": "aes256-cbc",
+                        "notes": ""
+                    }
+                ],
+                "mac": [
+                    {
+                        "name": "hmac-sha2-256",
+                        "notes": ""
+                    },
+                    {
+                        "name": "hmac-sha2-512",
+                        "notes": ""
+                    }
+                ]
+            }
+        }
+    },
+    "target": "10.10.10.10:22"
+}

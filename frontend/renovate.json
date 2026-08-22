@@ -1,0 +1,14 @@
+{
+  "extends": ["github>nuxt/renovate-config-nuxt"],
+  "lockFileMaintenance": {
+    "enabled": true
+  },
+  "packageRules": [
+    {
+      "matchDepTypes": ["resolutions"],
+      "enabled": false,
+      "minimumReleaseAge": "7 days"
+    }
+  ],
+  "postUpdateOptions": ["pnpmDedupe"]
+}

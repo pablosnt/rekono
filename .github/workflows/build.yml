@@ -1,0 +1,47 @@
+name: Build
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "email-templates/**"
+      - "frontend/**"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Frontend
+            directory: frontend
+          - name: Email templates
+            directory: email-templates
+    name: ${{ matrix.name }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
+        with:
+          persist-credentials: false
+
+      - name: Install Node
+        uses: actions/setup-node@f4a67bbeca970f103397d3d2b9462cf787cd2980
+        with:
+          node-version: 22
+
+      - name: Install PNPM
+        uses: pnpm/action-setup@0e279bb959325dab635dd2c09392533439d90093
+        with:
+          version: 10
+
+      - name: Install dependencies
+        working-directory: ${{ matrix.directory }}
+        run: pnpm install --frozen-lockfile --ignore-scripts
+
+      - name: Build
+        working-directory: ${{ matrix.directory }}
+        run: pnpm run build

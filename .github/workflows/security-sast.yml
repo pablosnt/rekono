@@ -2,38 +2,43 @@ name: SAST
 on:
   workflow_dispatch:
   pull_request:
-    paths:
-      - '.github/workflows/**'
-      - 'rekono/**'
+
+permissions:
+  contents: read
 
 jobs:
   semgrep:
     name: Semgrep
     runs-on: ubuntu-latest
+    container:
+      image: semgrep/semgrep:1.166.0@sha256:c180f0c93a17b420c0af5006214a29d3c747c5459c732b740191adf657dd0068
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
         with:
-          fetch-depth: 0
+          persist-credentials: false
       
-      - name: Setup Python 3
-        uses: actions/setup-python@v5
-        with:
-          python-version: 3.9
-
-      - name: Install Semgrep
-        run: pip install semgrep
+      - name: Semgrep
+        run: semgrep scan --config=auto --error --json -o semgrep.json .
       
-      - name: Scan code
-        run: semgrep --config=auto --error --json -o semgrep_code.json rekono/
-      
-      - name: Scan workflows
-        run: semgrep --config=auto --error --json -o semgrep_cicd.json .github/workflows/
-      
-      - name: Upload Semgrep report as GitHub artifact
-        if: ${{ always() }}
-        uses: actions/upload-artifact@v4
+      - name: Upload report as GitHub artifact
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: Semgrep
-          path: semgrep_*.json
+          path: semgrep.json
           if-no-files-found: warn
+
+  zizmor:
+    name: Zizmor
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
+        with:
+          persist-credentials: false
+
+      - name: Run zizmor 🌈
+        uses: zizmorcore/zizmor-action@a687b25bf3aa149153e80ed5f45292e47589888c
+        with:
+          advanced-security: false

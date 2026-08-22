@@ -1,0 +1,1342 @@
+[
+    {
+        "model": "tools.input",
+        "pk": 1,
+        "fields": {
+            "argument": 1,
+            "type": 2,
+            "filter": null,
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 2,
+        "fields": {
+            "argument": 1,
+            "type": 3,
+            "filter": null,
+            "order": 2
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 3,
+        "fields": {
+            "argument": 2,
+            "type": 3,
+            "filter": null,
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 4,
+        "fields": {
+            "argument": 3,
+            "type": 2,
+            "filter": null,
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 5,
+        "fields": {
+            "argument": 3,
+            "type": 3,
+            "filter": null,
+            "order": 2
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 6,
+        "fields": {
+            "argument": 4,
+            "type": 3,
+            "filter": null,
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 7,
+        "fields": {
+            "argument": 5,
+            "type": 2,
+            "filter": null,
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 8,
+        "fields": {
+            "argument": 5,
+            "type": 3,
+            "filter": null,
+            "order": 2
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 9,
+        "fields": {
+            "argument": 6,
+            "type": 3,
+            "filter": null,
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 10,
+        "fields": {
+            "argument": 7,
+            "type": 2,
+            "filter": null,
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 11,
+        "fields": {
+            "argument": 7,
+            "type": 3,
+            "filter": null,
+            "order": 2
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 12,
+        "fields": {
+            "argument": 8,
+            "type": 3,
+            "filter": null,
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 13,
+        "fields": {
+            "argument": 9,
+            "type": 2,
+            "filter": null,
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 14,
+        "fields": {
+            "argument": 9,
+            "type": 3,
+            "filter": null,
+            "order": 2
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 15,
+        "fields": {
+            "argument": 10,
+            "type": 3,
+            "filter": null,
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 16,
+        "fields": {
+            "argument": 11,
+            "type": 2,
+            "filter": null,
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 17,
+        "fields": {
+            "argument": 11,
+            "type": 3,
+            "filter": null,
+            "order": 2
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 18,
+        "fields": {
+            "argument": 12,
+            "type": 3,
+            "filter": null,
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 19,
+        "fields": {
+            "argument": 13,
+            "type": 2,
+            "filter": null,
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 22,
+        "fields": {
+            "argument": 15,
+            "type": 2,
+            "filter": null,
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 25,
+        "fields": {
+            "argument": 17,
+            "type": 2,
+            "filter": null,
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 28,
+        "fields": {
+            "argument": 19,
+            "type": 2,
+            "filter": null,
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 31,
+        "fields": {
+            "argument": 21,
+            "type": 2,
+            "filter": null,
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 34,
+        "fields": {
+            "argument": 23,
+            "type": 2,
+            "filter": null,
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 37,
+        "fields": {
+            "argument": 25,
+            "type": 2,
+            "filter": null,
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 38,
+        "fields": {
+            "argument": 25,
+            "type": 3,
+            "filter": null,
+            "order": 2
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 39,
+        "fields": {
+            "argument": 26,
+            "type": 3,
+            "filter": null,
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 40,
+        "fields": {
+            "argument": 27,
+            "type": 2,
+            "filter": null,
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 41,
+        "fields": {
+            "argument": 27,
+            "type": 3,
+            "filter": null,
+            "order": 2
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 42,
+        "fields": {
+            "argument": 28,
+            "type": 3,
+            "filter": null,
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 43,
+        "fields": {
+            "argument": 29,
+            "type": 10,
+            "filter": "bearer or jwt",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 44,
+        "fields": {
+            "argument": 30,
+            "type": 10,
+            "filter": "cookie",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 45,
+        "fields": {
+            "argument": 31,
+            "type": 11,
+            "filter": null,
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 46,
+        "fields": {
+            "argument": 32,
+            "type": 3,
+            "filter": "http",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 47,
+        "fields": {
+            "argument": 32,
+            "type": 2,
+            "filter": "!ip_range and !network",
+            "order": 2
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 48,
+        "fields": {
+            "argument": 33,
+            "type": 9,
+            "filter": "endpoint",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 49,
+        "fields": {
+            "argument": 34,
+            "type": 10,
+            "filter": "bearer or jwt",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 50,
+        "fields": {
+            "argument": 35,
+            "type": 10,
+            "filter": "cookie",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 51,
+        "fields": {
+            "argument": 36,
+            "type": 11,
+            "filter": null,
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 52,
+        "fields": {
+            "argument": 37,
+            "type": 3,
+            "filter": "http",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 53,
+        "fields": {
+            "argument": 37,
+            "type": 2,
+            "filter": "!ip_range and !network",
+            "order": 2
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 54,
+        "fields": {
+            "argument": 38,
+            "type": 9,
+            "filter": "endpoint",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 55,
+        "fields": {
+            "argument": 39,
+            "type": 10,
+            "filter": "bearer or jwt",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 56,
+        "fields": {
+            "argument": 40,
+            "type": 10,
+            "filter": "cookie",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 57,
+        "fields": {
+            "argument": 41,
+            "type": 11,
+            "filter": null,
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 58,
+        "fields": {
+            "argument": 42,
+            "type": 3,
+            "filter": "http",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 59,
+        "fields": {
+            "argument": 42,
+            "type": 2,
+            "filter": "!ip_range and !network",
+            "order": 2
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 60,
+        "fields": {
+            "argument": 43,
+            "type": 9,
+            "filter": "endpoint",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 61,
+        "fields": {
+            "argument": 44,
+            "type": 10,
+            "filter": "bearer or jwt",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 62,
+        "fields": {
+            "argument": 45,
+            "type": 10,
+            "filter": "cookie",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 63,
+        "fields": {
+            "argument": 46,
+            "type": 11,
+            "filter": null,
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 64,
+        "fields": {
+            "argument": 47,
+            "type": 3,
+            "filter": "http",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 65,
+        "fields": {
+            "argument": 47,
+            "type": 2,
+            "filter": "!ip_range and !network",
+            "order": 2
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 66,
+        "fields": {
+            "argument": 48,
+            "type": 9,
+            "filter": "endpoint",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 67,
+        "fields": {
+            "argument": 49,
+            "type": 2,
+            "filter": "domain",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 68,
+        "fields": {
+            "argument": 50,
+            "type": 2,
+            "filter": "domain",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 69,
+        "fields": {
+            "argument": 51,
+            "type": 10,
+            "filter": "basic",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 70,
+        "fields": {
+            "argument": 52,
+            "type": 10,
+            "filter": "cookie",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 71,
+        "fields": {
+            "argument": 53,
+            "type": 11,
+            "filter": "Host",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 72,
+        "fields": {
+            "argument": 54,
+            "type": 3,
+            "filter": "http",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 73,
+        "fields": {
+            "argument": 54,
+            "type": 2,
+            "filter": "!ip_range and !network",
+            "order": 2
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 74,
+        "fields": {
+            "argument": 55,
+            "type": 3,
+            "filter": null,
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 75,
+        "fields": {
+            "argument": 55,
+            "type": 2,
+            "filter": "!ip_range and !network",
+            "order": 2
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 76,
+        "fields": {
+            "argument": 56,
+            "type": 3,
+            "filter": null,
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 77,
+        "fields": {
+            "argument": 56,
+            "type": 2,
+            "filter": "!ip_range and !network",
+            "order": 2
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 78,
+        "fields": {
+            "argument": 57,
+            "type": 3,
+            "filter": "http",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 79,
+        "fields": {
+            "argument": 57,
+            "type": 2,
+            "filter": "!ip_range and !network",
+            "order": 2
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 80,
+        "fields": {
+            "argument": 58,
+            "type": 10,
+            "filter": "!cookie",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 81,
+        "fields": {
+            "argument": 59,
+            "type": 10,
+            "filter": "cookie",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 82,
+        "fields": {
+            "argument": 60,
+            "type": 3,
+            "filter": "http",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 83,
+        "fields": {
+            "argument": 60,
+            "type": 2,
+            "filter": "!ip_range and !network",
+            "order": 2
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 84,
+        "fields": {
+            "argument": 61,
+            "type": 5,
+            "filter": null,
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 85,
+        "fields": {
+            "argument": 62,
+            "type": 6,
+            "filter": "cve",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 86,
+        "fields": {
+            "argument": 63,
+            "type": 3,
+            "filter": "http",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 87,
+        "fields": {
+            "argument": 63,
+            "type": 2,
+            "filter": "!ip_range and !network",
+            "order": 2
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 89,
+        "fields": {
+            "argument": 65,
+            "type": 2,
+            "filter": "domain",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 90,
+        "fields": {
+            "argument": 66,
+            "type": 10,
+            "filter": "cookie",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 91,
+        "fields": {
+            "argument": 67,
+            "type": 11,
+            "filter": "User-Agent",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 92,
+        "fields": {
+            "argument": 68,
+            "type": 3,
+            "filter": "http",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 93,
+        "fields": {
+            "argument": 68,
+            "type": 2,
+            "filter": "!ip_range and !network",
+            "order": 2
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 94,
+        "fields": {
+            "argument": 69,
+            "type": 3,
+            "filter": "http",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 95,
+        "fields": {
+            "argument": 69,
+            "type": 2,
+            "filter": "!ip_range and !network",
+            "order": 2
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 96,
+        "fields": {
+            "argument": 70,
+            "type": 3,
+            "filter": "ssh",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 97,
+        "fields": {
+            "argument": 70,
+            "type": 2,
+            "filter": "!ip_range and !network",
+            "order": 2
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 98,
+        "fields": {
+            "argument": 71,
+            "type": 3,
+            "filter": "ssh",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 99,
+        "fields": {
+            "argument": 72,
+            "type": 10,
+            "filter": "basic",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 100,
+        "fields": {
+            "argument": 73,
+            "type": 3,
+            "filter": "microsoft-ds or netbios-ssn",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 101,
+        "fields": {
+            "argument": 73,
+            "type": 2,
+            "filter": "!ip_range and !network",
+            "order": 2
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 102,
+        "fields": {
+            "argument": 74,
+            "type": 3,
+            "filter": "microsoft-ds or netbios-ssn",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 103,
+        "fields": {
+            "argument": 75,
+            "type": 2,
+            "filter": null,
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 104,
+        "fields": {
+            "argument": 75,
+            "type": 3,
+            "filter": null,
+            "order": 2
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 105,
+        "fields": {
+            "argument": 76,
+            "type": 3,
+            "filter": null,
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 106,
+        "fields": {
+            "argument": 77,
+            "type": 2,
+            "filter": null,
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 107,
+        "fields": {
+            "argument": 77,
+            "type": 3,
+            "filter": null,
+            "order": 2
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 108,
+        "fields": {
+            "argument": 78,
+            "type": 3,
+            "filter": null,
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 109,
+        "fields": {
+            "argument": 79,
+            "type": 10,
+            "filter": "!cookie",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 110,
+        "fields": {
+            "argument": 80,
+            "type": 10,
+            "filter": "cookie",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 111,
+        "fields": {
+            "argument": 81,
+            "type": 11,
+            "filter": null,
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 112,
+        "fields": {
+            "argument": 82,
+            "type": 3,
+            "filter": "http",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 113,
+        "fields": {
+            "argument": 82,
+            "type": 2,
+            "filter": "!ip_range and !network",
+            "order": 2
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 114,
+        "fields": {
+            "argument": 83,
+            "type": 10,
+            "filter": "!cookie",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 115,
+        "fields": {
+            "argument": 84,
+            "type": 10,
+            "filter": "cookie",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 116,
+        "fields": {
+            "argument": 85,
+            "type": 11,
+            "filter": null,
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 117,
+        "fields": {
+            "argument": 86,
+            "type": 3,
+            "filter": "http",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 118,
+        "fields": {
+            "argument": 86,
+            "type": 2,
+            "filter": "!ip_range and !network",
+            "order": 2
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 119,
+        "fields": {
+            "argument": 87,
+            "type": 10,
+            "filter": "!cookie",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 120,
+        "fields": {
+            "argument": 88,
+            "type": 10,
+            "filter": "cookie",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 121,
+        "fields": {
+            "argument": 89,
+            "type": 11,
+            "filter": null,
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 122,
+        "fields": {
+            "argument": 90,
+            "type": 3,
+            "filter": "http",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 123,
+        "fields": {
+            "argument": 90,
+            "type": 2,
+            "filter": "!ip_range and !network",
+            "order": 2
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 124,
+        "fields": {
+            "argument": 91,
+            "type": 3,
+            "filter": "http",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 125,
+        "fields": {
+            "argument": 91,
+            "type": 2,
+            "filter": "!ip_range and !network",
+            "order": 2
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 126,
+        "fields": {
+            "argument": 92,
+            "type": 9,
+            "filter": "subdomain",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 127,
+        "fields": {
+            "argument": 93,
+            "type": 2,
+            "filter": "domain",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 128,
+        "fields": {
+            "argument": 94,
+            "type": 10,
+            "filter": "basic",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 129,
+        "fields": {
+            "argument": 95,
+            "type": 10,
+            "filter": "cookie",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 130,
+        "fields": {
+            "argument": 96,
+            "type": 11,
+            "filter": null,
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 131,
+        "fields": {
+            "argument": 97,
+            "type": 9,
+            "filter": "subdomain",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 132,
+        "fields": {
+            "argument": 98,
+            "type": 2,
+            "filter": "domain",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 133,
+        "fields": {
+            "argument": 99,
+            "type": 10,
+            "filter": "!cookie and !basic",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 134,
+        "fields": {
+            "argument": 100,
+            "type": 10,
+            "filter": "basic",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 135,
+        "fields": {
+            "argument": 101,
+            "type": 10,
+            "filter": "cookie",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 136,
+        "fields": {
+            "argument": 102,
+            "type": 9,
+            "filter": "endpoint",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 137,
+        "fields": {
+            "argument": 103,
+            "type": 11,
+            "filter": null,
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 138,
+        "fields": {
+            "argument": 104,
+            "type": 10,
+            "filter": "!cookie and !basic",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 139,
+        "fields": {
+            "argument": 105,
+            "type": 3,
+            "filter": "http",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 140,
+        "fields": {
+            "argument": 105,
+            "type": 2,
+            "filter": "!ip_range and !network",
+            "order": 2
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 141,
+        "fields": {
+            "argument": 106,
+            "type": 3,
+            "filter": "http",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 142,
+        "fields": {
+            "argument": 106,
+            "type": 2,
+            "filter": "!ip_range and !network",
+            "order": 2
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 143,
+        "fields": {
+            "argument": 107,
+            "type": 6,
+            "filter": "cve",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 144,
+        "fields": {
+            "argument": 108,
+            "type": 10,
+            "filter": "basic or digest or ntlm",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 145,
+        "fields": {
+            "argument": 109,
+            "type": 10,
+            "filter": "basic or digest or ntlm",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 146,
+        "fields": {
+            "argument": 110,
+            "type": 10,
+            "filter": "basic or digest or ntlm",
+            "order": 1
+        }
+    },
+    {
+        "model": "tools.input",
+        "pk": 147,
+        "fields": {
+            "argument": 111,
+            "type": 10,
+            "filter": "basic or digest or ntlm",
+            "order": 1
+        }
+    }
+]

@@ -1,1 +1,0 @@
-'''Testing for Rekono API.'''

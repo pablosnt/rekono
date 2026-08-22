@@ -1,0 +1,2 @@
+chat.example.com 10.10.10.10,10.10.10.11
+echo.example.com 10.10.10.10,10.10.10.11

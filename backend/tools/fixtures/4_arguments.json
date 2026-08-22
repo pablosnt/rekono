@@ -1,0 +1,1146 @@
+[
+    {
+        "model": "tools.argument",
+        "pk": 1,
+        "fields": {
+            "configuration": 1,
+            "name": "host",
+            "argument": "{host}",
+            "required": true,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 2,
+        "fields": {
+            "configuration": 1,
+            "name": "ports",
+            "argument": "-p {ports_commas}",
+            "required": false,
+            "multiple": true
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 3,
+        "fields": {
+            "configuration": 2,
+            "name": "host",
+            "argument": "{host}",
+            "required": true,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 4,
+        "fields": {
+            "configuration": 2,
+            "name": "ports",
+            "argument": "-p {ports_commas}",
+            "required": false,
+            "multiple": true
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 5,
+        "fields": {
+            "configuration": 3,
+            "name": "host",
+            "argument": "{host}",
+            "required": true,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 6,
+        "fields": {
+            "configuration": 3,
+            "name": "ports",
+            "argument": "-p {ports_commas}",
+            "required": false,
+            "multiple": true
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 7,
+        "fields": {
+            "configuration": 4,
+            "name": "host",
+            "argument": "{host}",
+            "required": true,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 8,
+        "fields": {
+            "configuration": 4,
+            "name": "ports",
+            "argument": "-p {ports_commas}",
+            "required": false,
+            "multiple": true
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 9,
+        "fields": {
+            "configuration": 5,
+            "name": "host",
+            "argument": "{host}",
+            "required": true,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 10,
+        "fields": {
+            "configuration": 5,
+            "name": "ports",
+            "argument": "-p {ports_commas}",
+            "required": false,
+            "multiple": true
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 11,
+        "fields": {
+            "configuration": 6,
+            "name": "host",
+            "argument": "{host}",
+            "required": true,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 12,
+        "fields": {
+            "configuration": 6,
+            "name": "ports",
+            "argument": "-p {ports_commas}",
+            "required": false,
+            "multiple": true
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 13,
+        "fields": {
+            "configuration": 7,
+            "name": "host",
+            "argument": "{host}",
+            "required": true,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 15,
+        "fields": {
+            "configuration": 8,
+            "name": "host",
+            "argument": "{host}",
+            "required": true,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 17,
+        "fields": {
+            "configuration": 9,
+            "name": "host",
+            "argument": "{host}",
+            "required": true,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 19,
+        "fields": {
+            "configuration": 10,
+            "name": "host",
+            "argument": "{host}",
+            "required": true,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 21,
+        "fields": {
+            "configuration": 11,
+            "name": "host",
+            "argument": "{host}",
+            "required": true,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 23,
+        "fields": {
+            "configuration": 12,
+            "name": "host",
+            "argument": "{host}",
+            "required": true,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 25,
+        "fields": {
+            "configuration": 13,
+            "name": "host",
+            "argument": "{host}",
+            "required": true,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 26,
+        "fields": {
+            "configuration": 13,
+            "name": "ports",
+            "argument": "-p {ports_commas}",
+            "required": false,
+            "multiple": true
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 27,
+        "fields": {
+            "configuration": 14,
+            "name": "host",
+            "argument": "{host}",
+            "required": true,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 28,
+        "fields": {
+            "configuration": 14,
+            "name": "ports",
+            "argument": "-p {ports_commas}",
+            "required": false,
+            "multiple": true
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 29,
+        "fields": {
+            "configuration": 15,
+            "name": "token_auth",
+            "argument": "--auth='{token}' --auth-type={credential_type_lower}",
+            "required": false,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 30,
+        "fields": {
+            "configuration": 15,
+            "name": "cookie",
+            "argument": "--cookie='{cookie_name}={secret}'",
+            "required": false,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 31,
+        "fields": {
+            "configuration": 15,
+            "name": "headers",
+            "argument": "--header='{header_key}: {header_value}'",
+            "required": false,
+            "multiple": true
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 32,
+        "fields": {
+            "configuration": 15,
+            "name": "url",
+            "argument": "-u {url}",
+            "required": true,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 33,
+        "fields": {
+            "configuration": 15,
+            "name": "wordlist",
+            "argument": "--wordlists={wordlist}",
+            "required": false,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 34,
+        "fields": {
+            "configuration": 16,
+            "name": "token_auth",
+            "argument": "--auth='{token}' --auth-type={credential_type_lower}",
+            "required": false,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 35,
+        "fields": {
+            "configuration": 16,
+            "name": "cookie",
+            "argument": "--cookie='{cookie_name}={secret}'",
+            "required": false,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 36,
+        "fields": {
+            "configuration": 16,
+            "name": "headers",
+            "argument": "--header='{header_key}: {header_value}'",
+            "required": false,
+            "multiple": true
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 37,
+        "fields": {
+            "configuration": 16,
+            "name": "url",
+            "argument": "-u {url}",
+            "required": true,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 38,
+        "fields": {
+            "configuration": 16,
+            "name": "wordlist",
+            "argument": "--wordlists={wordlist}",
+            "required": false,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 39,
+        "fields": {
+            "configuration": 17,
+            "name": "token_auth",
+            "argument": "--auth='{token}' --auth-type={credential_type_lower}",
+            "required": false,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 40,
+        "fields": {
+            "configuration": 17,
+            "name": "cookie",
+            "argument": "--cookie='{cookie_name}={secret}'",
+            "required": false,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 41,
+        "fields": {
+            "configuration": 17,
+            "name": "headers",
+            "argument": "--header='{header_key}: {header_value}'",
+            "required": false,
+            "multiple": true
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 42,
+        "fields": {
+            "configuration": 17,
+            "name": "url",
+            "argument": "-u {url}",
+            "required": true,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 43,
+        "fields": {
+            "configuration": 17,
+            "name": "wordlist",
+            "argument": "--wordlists={wordlist}",
+            "required": false,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 44,
+        "fields": {
+            "configuration": 18,
+            "name": "token_auth",
+            "argument": "--auth='{token}' --auth-type={credential_type_lower}",
+            "required": false,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 45,
+        "fields": {
+            "configuration": 18,
+            "name": "cookie",
+            "argument": "--cookie='{cookie_name}={secret}'",
+            "required": false,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 46,
+        "fields": {
+            "configuration": 18,
+            "name": "headers",
+            "argument": "--header='{header_key}: {header_value}'",
+            "required": false,
+            "multiple": true
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 47,
+        "fields": {
+            "configuration": 18,
+            "name": "url",
+            "argument": "-u {url}",
+            "required": true,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 48,
+        "fields": {
+            "configuration": 18,
+            "name": "wordlist",
+            "argument": "--wordlists={wordlist}",
+            "required": false,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 49,
+        "fields": {
+            "configuration": 19,
+            "name": "target",
+            "argument": "-d {target}",
+            "required": true,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 50,
+        "fields": {
+            "configuration": 51,
+            "name": "target",
+            "argument": "-d {target}",
+            "required": true,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 51,
+        "fields": {
+            "configuration": 21,
+            "name": "authentication",
+            "argument": "-id '{username}:{secret}'",
+            "required": false,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 52,
+        "fields": {
+            "configuration": 21,
+            "name": "cookie",
+            "argument": "-Option STATIC-COOKIE=\"{cookie_name}={secret}\"",
+            "required": false,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 53,
+        "fields": {
+            "configuration": 21,
+            "name": "headers",
+            "argument": "-vhost '{header_value}'",
+            "required": false,
+            "multiple": true
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 54,
+        "fields": {
+            "configuration": 21,
+            "name": "url",
+            "argument": "-host {url}",
+            "required": true,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 55,
+        "fields": {
+            "configuration": 22,
+            "name": "target",
+            "argument": "{target}",
+            "required": true,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 56,
+        "fields": {
+            "configuration": 23,
+            "name": "target",
+            "argument": "{target}",
+            "required": true,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 57,
+        "fields": {
+            "configuration": 24,
+            "name": "url",
+            "argument": "-u {url}",
+            "required": true,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 58,
+        "fields": {
+            "configuration": 25,
+            "name": "authentication",
+            "argument": "ZAP_AUTH_HEADER=Authorization ZAP_AUTH_HEADER_VALUE='{credential_type} {token}'",
+            "required": false,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 59,
+        "fields": {
+            "configuration": 25,
+            "name": "cookie",
+            "argument": "ZAP_AUTH_HEADER=Cookie ZAP_AUTH_HEADER_VALUE='{cookie_name}={secret}'",
+            "required": false,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 60,
+        "fields": {
+            "configuration": 25,
+            "name": "url",
+            "argument": "-quickurl {url}",
+            "required": true,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 61,
+        "fields": {
+            "configuration": 26,
+            "name": "technology",
+            "argument": "'{technology}' '{version}'",
+            "required": true,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 62,
+        "fields": {
+            "configuration": 27,
+            "name": "cve",
+            "argument": "cve:{cve}",
+            "required": true,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 63,
+        "fields": {
+            "configuration": 28,
+            "name": "url",
+            "argument": "-u {url}",
+            "required": true,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 65,
+        "fields": {
+            "configuration": 31,
+            "name": "target",
+            "argument": "-d {target}",
+            "required": true,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 66,
+        "fields": {
+            "configuration": 32,
+            "name": "cookie",
+            "argument": "--cookie '{cookie_name}={secret}'",
+            "required": false,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 67,
+        "fields": {
+            "configuration": 32,
+            "name": "headers",
+            "argument": "--user-agent '{header_value}'",
+            "required": false,
+            "multiple": true
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 68,
+        "fields": {
+            "configuration": 32,
+            "name": "url",
+            "argument": "-u {url}",
+            "required": true,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 69,
+        "fields": {
+            "configuration": 33,
+            "name": "url",
+            "argument": "{url}",
+            "required": true,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 70,
+        "fields": {
+            "configuration": 34,
+            "name": "host",
+            "argument": "{host}",
+            "required": true,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 71,
+        "fields": {
+            "configuration": 34,
+            "name": "port",
+            "argument": "-p {port}",
+            "required": false,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 72,
+        "fields": {
+            "configuration": 35,
+            "name": "authentication",
+            "argument": "-u '{username}' -p '{secret}'",
+            "required": false,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 73,
+        "fields": {
+            "configuration": 35,
+            "name": "host",
+            "argument": "-H {host}",
+            "required": true,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 74,
+        "fields": {
+            "configuration": 35,
+            "name": "port",
+            "argument": "-P {port}",
+            "required": false,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 75,
+        "fields": {
+            "configuration": 37,
+            "name": "host",
+            "argument": "{host}",
+            "required": true,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 76,
+        "fields": {
+            "configuration": 37,
+            "name": "ports",
+            "argument": "-p {ports_commas}",
+            "required": false,
+            "multiple": true
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 77,
+        "fields": {
+            "configuration": 38,
+            "name": "host",
+            "argument": "{host}",
+            "required": true,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 78,
+        "fields": {
+            "configuration": 38,
+            "name": "ports",
+            "argument": "-p {ports_commas}",
+            "required": false,
+            "multiple": true
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 79,
+        "fields": {
+            "configuration": 39,
+            "name": "authentication",
+            "argument": "-header 'Authorization:{credential_type} {token}'",
+            "required": false,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 80,
+        "fields": {
+            "configuration": 39,
+            "name": "cookie",
+            "argument": "-header 'Cookie:{cookie_name}={secret}'",
+            "required": false,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 81,
+        "fields": {
+            "configuration": 39,
+            "name": "headers",
+            "argument": "-header '{header_key}:{header_value}'",
+            "required": false,
+            "multiple": true
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 82,
+        "fields": {
+            "configuration": 39,
+            "name": "url",
+            "argument": "-u {url}",
+            "required": true,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 83,
+        "fields": {
+            "configuration": 40,
+            "name": "authentication",
+            "argument": "-header 'Authorization:{credential_type} {token}'",
+            "required": false,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 84,
+        "fields": {
+            "configuration": 40,
+            "name": "cookie",
+            "argument": "-header 'Cookie:{cookie_name}={secret}'",
+            "required": false,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 85,
+        "fields": {
+            "configuration": 40,
+            "name": "headers",
+            "argument": "-header '{header_key}:{header_value}'",
+            "required": false,
+            "multiple": true
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 86,
+        "fields": {
+            "configuration": 40,
+            "name": "url",
+            "argument": "-u {url}",
+            "required": true,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 87,
+        "fields": {
+            "configuration": 41,
+            "name": "authentication",
+            "argument": "-header 'Authorization:{credential_type} {token}'",
+            "required": false,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 88,
+        "fields": {
+            "configuration": 41,
+            "name": "cookie",
+            "argument": "-header 'Cookie:{cookie_name}={secret}'",
+            "required": false,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 89,
+        "fields": {
+            "configuration": 41,
+            "name": "headers",
+            "argument": "-header '{header_key}:{header_value}'",
+            "required": false,
+            "multiple": true
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 90,
+        "fields": {
+            "configuration": 41,
+            "name": "url",
+            "argument": "-u {url}",
+            "required": true,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 91,
+        "fields": {
+            "configuration": 42,
+            "name": "url",
+            "argument": "-u {url}",
+            "required": true,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 92,
+        "fields": {
+            "configuration": 46,
+            "name": "wordlist",
+            "argument": "--wordlist {wordlist}",
+            "required": true,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 93,
+        "fields": {
+            "configuration": 46,
+            "name": "target",
+            "argument": "--domain {target}",
+            "required": true,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 94,
+        "fields": {
+            "configuration": 47,
+            "name": "basic_auth",
+            "argument": "--username '{username}' --password '{secret}'",
+            "required": false,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 95,
+        "fields": {
+            "configuration": 47,
+            "name": "cookie",
+            "argument": "--cookies '{cookie_name}={secret}'",
+            "required": false,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 96,
+        "fields": {
+            "configuration": 47,
+            "name": "headers",
+            "argument": "--headers '{header_key}: {header_value}'",
+            "required": false,
+            "multiple": true
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 97,
+        "fields": {
+            "configuration": 47,
+            "name": "wordlist",
+            "argument": "--wordlist {wordlist}",
+            "required": true,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 98,
+        "fields": {
+            "configuration": 47,
+            "name": "target",
+            "argument": "--url {target}",
+            "required": true,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 99,
+        "fields": {
+            "configuration": 47,
+            "name": "token_auth",
+            "argument": "--headers 'Authorization: {credential_type} {token}'",
+            "required": false,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 100,
+        "fields": {
+            "configuration": 48,
+            "name": "basic_auth",
+            "argument": "--username '{username}' --password '{secret}'",
+            "required": false,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 101,
+        "fields": {
+            "configuration": 48,
+            "name": "cookie",
+            "argument": "--cookies '{cookie_name}={secret}'",
+            "required": false,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 102,
+        "fields": {
+            "configuration": 48,
+            "name": "wordlist",
+            "argument": "--wordlist {wordlist}",
+            "required": true,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 103,
+        "fields": {
+            "configuration": 48,
+            "name": "headers",
+            "argument": "--headers '{header_key}: {header_value}'",
+            "required": false,
+            "multiple": true
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 104,
+        "fields": {
+            "configuration": 48,
+            "name": "token_auth",
+            "argument": "--headers 'Authorization: {credential_type} {token}'",
+            "required": false,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 105,
+        "fields": {
+            "configuration": 48,
+            "name": "url",
+            "argument": "--url {url}",
+            "required": true,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 106,
+        "fields": {
+            "configuration": 49,
+            "name": "url",
+            "argument": "-u {url}",
+            "required": true,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 107,
+        "fields": {
+            "configuration": 50,
+            "name": "cve",
+            "argument": "--cve {cve}",
+            "required": true,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 108,
+        "fields": {
+            "configuration": 15,
+            "name": "basic_auth",
+            "argument": "--auth='{username}:{secret}' --auth-type={credential_type_lower}",
+            "required": false,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 109,
+        "fields": {
+            "configuration": 16,
+            "name": "basic_auth",
+            "argument": "--auth='{username}:{secret}' --auth-type={credential_type_lower}",
+            "required": false,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 110,
+        "fields": {
+            "configuration": 17,
+            "name": "basic_auth",
+            "argument": "--auth='{username}:{secret}' --auth-type={credential_type_lower}",
+            "required": false,
+            "multiple": false
+        }
+    },
+    {
+        "model": "tools.argument",
+        "pk": 111,
+        "fields": {
+            "configuration": 18,
+            "name": "basic_auth",
+            "argument": "--auth='{username}:{secret}' --auth-type={credential_type_lower}",
+            "required": false,
+            "multiple": false
+        }
+    }
+]
