@@ -37,4 +37,5 @@ class DirsearchTest(ParserTest, TestCase):
         ParserTestCase("empty.json", []),
         ParserTestCase("2022-default.json", expected),
         ParserTestCase("2025-default.json", expected),
+        ParserTestCase("2026-default.json", expected),
     ]
