@@ -202,7 +202,7 @@
         "fields": {
             "tool": 2,
             "name": "Standard wordlist",
-            "command_template": "{url} {intensity} -o {output} --format=json --crawl --no-color --quiet-mode {headers} {wordlist} {basic_auth} {token_auth} {cookie}",
+            "command_template": "{url} {intensity} -o {output} -O json --crawl --no-color --quiet-mode {headers} {wordlist} {basic_auth} {token_auth} {cookie}",
             "stage": 4,
             "default": true,
             "default_scanned_port": null,
@@ -216,7 +216,7 @@
         "fields": {
             "tool": 2,
             "name": "Wordlist with extensions",
-            "command_template": "{url} {intensity} -o {output} --format=json --crawl --no-color --quiet-mode --force-extensions {headers} {wordlist} {basic_auth} {token_auth} {cookie}",
+            "command_template": "{url} {intensity} -o {output} -O json --crawl --no-color --quiet-mode --force-extensions {headers} {wordlist} {basic_auth} {token_auth} {cookie}",
             "stage": 4,
             "default": false,
             "default_scanned_port": null,
@@ -230,7 +230,7 @@
         "fields": {
             "tool": 2,
             "name": "Recursive",
-            "command_template": "{url} {intensity} -o {output} --format=json --crawl --no-color --quiet-mode --recursive --max-recursion-depth=10 {headers} {wordlist} {basic_auth} {token_auth} {cookie}",
+            "command_template": "{url} {intensity} -o {output} -O json --crawl --no-color --quiet-mode --recursive --max-recursion-depth=10 {headers} {wordlist} {basic_auth} {token_auth} {cookie}",
             "stage": 4,
             "default": false,
             "default_scanned_port": null,
@@ -244,7 +244,7 @@
         "fields": {
             "tool": 2,
             "name": "Deep recursive",
-            "command_template": "{url} {intensity} -o {output} --format=json --crawl --no-color --quiet-mode --deep-recursive --max-recursion-depth=10 {headers} {wordlist} {basic_auth} {token_auth} {cookie}",
+            "command_template": "{url} {intensity} -o {output} -O json --crawl --no-color --quiet-mode --deep-recursive --max-recursion-depth=10 {headers} {wordlist} {basic_auth} {token_auth} {cookie}",
             "stage": 4,
             "default": false,
             "default_scanned_port": null,

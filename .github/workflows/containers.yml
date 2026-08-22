@@ -170,8 +170,6 @@ jobs:
           output: ${{ matrix.name }}-trivy.json
           exit-code: 1
           ignore-unfixed: true
-        env:
-          TRIVY_IGNOREFILE: .trivyignore.yaml
 
       - name: Upload report
         if: always()

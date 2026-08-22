@@ -1,0 +1,184 @@
+{
+    "info": {
+        "args": "dirsearch -u http://10.10.10.10 -o backend/tests/data/reports/dirsearch/2026-default.json -O json",
+        "time": "2026-08-22 10:44:25"
+    },
+    "results": [
+        {
+            "contentLength": 277,
+            "contentType": "text/html",
+            "elapsed": 0.274,
+            "redirect": "",
+            "status": 403,
+            "url": "http://10.10.10.10:80/.ht_wsr.txt"
+        },
+        {
+            "contentLength": 277,
+            "contentType": "text/html",
+            "elapsed": 0.17,
+            "redirect": "",
+            "status": 403,
+            "url": "http://10.10.10.10:80/.htaccess.sample"
+        },
+        {
+            "contentLength": 277,
+            "contentType": "text/html",
+            "elapsed": 0.337,
+            "redirect": "",
+            "status": 403,
+            "url": "http://10.10.10.10:80/.htaccess_orig"
+        },
+        {
+            "contentLength": 277,
+            "contentType": "text/html",
+            "elapsed": 0.159,
+            "redirect": "",
+            "status": 403,
+            "url": "http://10.10.10.10:80/.htaccess.bak1"
+        },
+        {
+            "contentLength": 277,
+            "contentType": "text/html",
+            "elapsed": 0.263,
+            "redirect": "",
+            "status": 403,
+            "url": "http://10.10.10.10:80/.htaccess_sc"
+        },
+        {
+            "contentLength": 277,
+            "contentType": "text/html",
+            "elapsed": 0.487,
+            "redirect": "",
+            "status": 403,
+            "url": "http://10.10.10.10:80/.htaccess.save"
+        },
+        {
+            "contentLength": 277,
+            "contentType": "text/html",
+            "elapsed": 0.088,
+            "redirect": "",
+            "status": 403,
+            "url": "http://10.10.10.10:80/.htaccess.orig"
+        },
+        {
+            "contentLength": 277,
+            "contentType": "text/html",
+            "elapsed": 0.193,
+            "redirect": "",
+            "status": 403,
+            "url": "http://10.10.10.10:80/.htaccess_extra"
+        },
+        {
+            "contentLength": 277,
+            "contentType": "text/html",
+            "elapsed": 0.354,
+            "redirect": "",
+            "status": 403,
+            "url": "http://10.10.10.10:80/.htm"
+        },
+        {
+            "contentLength": 277,
+            "contentType": "text/html",
+            "elapsed": 0.088,
+            "redirect": "",
+            "status": 403,
+            "url": "http://10.10.10.10:80/.htaccessBAK"
+        },
+        {
+            "contentLength": 277,
+            "contentType": "text/html",
+            "elapsed": 0.119,
+            "redirect": "",
+            "status": 403,
+            "url": "http://10.10.10.10:80/.httr-oauth"
+        },
+        {
+            "contentLength": 277,
+            "contentType": "text/html",
+            "elapsed": 0.421,
+            "redirect": "",
+            "status": 403,
+            "url": "http://10.10.10.10:80/.htaccessOLD2"
+        },
+        {
+            "contentLength": 277,
+            "contentType": "text/html",
+            "elapsed": 0.491,
+            "redirect": "",
+            "status": 403,
+            "url": "http://10.10.10.10:80/.html"
+        },
+        {
+            "contentLength": 277,
+            "contentType": "text/html",
+            "elapsed": 0.194,
+            "redirect": "",
+            "status": 403,
+            "url": "http://10.10.10.10:80/.htaccessOLD"
+        },
+        {
+            "contentLength": 277,
+            "contentType": "text/html",
+            "elapsed": 0.135,
+            "redirect": "",
+            "status": 403,
+            "url": "http://10.10.10.10:80/.htpasswds"
+        },
+        {
+            "contentLength": 277,
+            "contentType": "text/html",
+            "elapsed": 0.488,
+            "redirect": "",
+            "status": 403,
+            "url": "http://10.10.10.10:80/.htpasswd_test"
+        },
+        {
+            "contentLength": 277,
+            "contentType": "text/html",
+            "elapsed": 0.198,
+            "redirect": "",
+            "status": 403,
+            "url": "http://10.10.10.10:80/.php"
+        },
+        {
+            "contentLength": 1691,
+            "contentType": "text/html",
+            "elapsed": 0.322,
+            "redirect": "",
+            "status": 200,
+            "url": "http://10.10.10.10:80/assets/"
+        },
+        {
+            "contentLength": 313,
+            "contentType": "text/html",
+            "elapsed": 0.323,
+            "redirect": "http://10.10.10.10/assets/",
+            "status": 301,
+            "url": "http://10.10.10.10:80/assets"
+        },
+        {
+            "contentLength": 33560,
+            "contentType": "text/html",
+            "elapsed": 0.336,
+            "redirect": "",
+            "status": 200,
+            "url": "http://10.10.10.10:80/index.html"
+        },
+        {
+            "contentLength": 277,
+            "contentType": "text/html",
+            "elapsed": 0.462,
+            "redirect": "",
+            "status": 403,
+            "url": "http://10.10.10.10:80/server-status"
+        },
+        {
+            "contentLength": 277,
+            "contentType": "text/html",
+            "elapsed": 0.483,
+            "redirect": "",
+            "status": 403,
+            "url": "http://10.10.10.10:80/server-status/"
+        }
+    ]
+}

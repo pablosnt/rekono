@@ -291,7 +291,7 @@
         "fields": {
             "configuration": 15,
             "name": "wordlist",
-            "argument": "--wordlist={wordlist}",
+            "argument": "--wordlists={wordlist}",
             "required": false,
             "multiple": false
         }
@@ -346,7 +346,7 @@
         "fields": {
             "configuration": 16,
             "name": "wordlist",
-            "argument": "--wordlist={wordlist}",
+            "argument": "--wordlists={wordlist}",
             "required": false,
             "multiple": false
         }
@@ -401,7 +401,7 @@
         "fields": {
             "configuration": 17,
             "name": "wordlist",
-            "argument": "--wordlist={wordlist}",
+            "argument": "--wordlists={wordlist}",
             "required": false,
             "multiple": false
         }
@@ -456,7 +456,7 @@
         "fields": {
             "configuration": 18,
             "name": "wordlist",
-            "argument": "--wordlist={wordlist}",
+            "argument": "--wordlists={wordlist}",
             "required": false,
             "multiple": false
         }
