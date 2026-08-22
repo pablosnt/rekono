@@ -8,23 +8,6 @@ on:
 permissions: {}
 
 jobs:
-  legitify:
-    name: Legitify
-    runs-on: ubuntu-latest
-    environment: github
-    permissions:
-      contents: read
-      security-events: write # Upload code scanning results
-    steps:
-      - name: Legitify
-        uses: Legit-Labs/legitify@038aa49473a6974a3ef79f6c76b949b689d23282
-        with:
-          github_token: ${{ secrets.ADMIN_PAT }}
-          analyze_self_only: true
-          upload_code_scanning: true
-          scorecard: yes
-          artifact_name: legitify
-
   chain-bench:
     name: Chain-Bench
     runs-on: ubuntu-latest
