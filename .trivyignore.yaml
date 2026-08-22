@@ -1,0 +1,24 @@
+vulnerabilities:
+  # Dirsearch pins pyopenssl==26.1.0, which caps cryptography<48
+  - id: CVE-2026-69247
+    purls:
+      - "pkg:pypi/cryptography@47.0.0"
+  - id: CVE-2026-69248
+    purls:
+      - "pkg:pypi/cryptography@47.0.0"
+  - id: CVE-2026-69249
+    purls:
+      - "pkg:pypi/cryptography@47.0.0"
+  - id: GHSA-537c-gmf6-5ccf
+    purls:
+      - "pkg:pypi/cryptography@47.0.0"
+  # Dirsearch ships the sources of its optional Rust engine
+  - id: GHSA-36hh-v3qg-5jq4
+    purls:
+      - "pkg:cargo/pyo3@0.24.1"
+  - id: GHSA-chgr-c6px-7xpp
+    purls:
+      - "pkg:cargo/pyo3@0.24.1"
+  - id: GHSA-4w2j-m93h-cj5j
+    purls:
+      - "pkg:cargo/quinn-proto@0.11.14"
