@@ -1,0 +1,7 @@
+{
+	"SEARCH": "Nothing",
+	"DB_PATH_EXPLOIT": "/usr/share/exploitdb",
+	"RESULTS_EXPLOIT": [	],
+	"DB_PATH_SHELLCODE": "/usr/share/exploitdb",
+	"RESULTS_SHELLCODE": [	]
+}

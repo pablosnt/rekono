@@ -1,2 +1,0 @@
-Found: chat.example.com [10.10.10.10,10.10.10.11]
-Found: echo.example.com [10.10.10.10,10.10.10.11]

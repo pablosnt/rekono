@@ -1,86 +1,139 @@
 services:
   postgres:
     restart: always
-    image: postgres:14.2-alpine
+    image: postgres:18-bookworm
     hostname: postgres
     container_name: postgres
     user: postgres
     expose:
       - 5432
     healthcheck:
-      test: pg_isready
-      interval: 10s
-      timeout: 3s
-      retries: 10
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
     volumes:
-      - postgres:/var/lib/postgresql/data/
+      - postgres_18:/var/lib/postgresql
     networks:
       - internal
     environment:
       - POSTGRES_DB=rekono
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
-  
-  redis:
-    restart: always
-    image: redis:6.2.6-alpine
-    hostname: redis
-    container_name: redis
-    user: redis
-    expose:
-      - 6379
-    networks:
-      - internal
+    security_opt:
+      - no-new-privileges:true
 
-  initializer:
+  # Upgrades from Rekono 1.x data
+  rekono-upgrade:
     restart: 'no'
-    image: rekono-kali:latest
-    command: bash -c "source /code/env/bin/activate && python manage.py migrate && python manage.py createsuperuser --no-input"
-    container_name: initializer
+    image: postgres:14.2-alpine
+    container_name: rekono-upgrade
+    entrypoint: ["sh", "/entrypoints/rekono-upgrade/upgrade.sh"]
     volumes:
+      - postgres:/var/lib/postgresql/data
       - rekono:/rekono
-      - ./config.yaml:/rekono/config.yaml:ro
+      - nginx:/etc/nginx/tls
+      - ./docker/nginx:/legacy/nginx:ro
+      - ./docker/entrypoints/rekono-upgrade:/entrypoints/rekono-upgrade:ro
     networks:
       - internal
     depends_on:
       postgres:
         condition: service_healthy
     environment:
+      - LEGACY_PG_VERSION=14
+      - RKN_DB_NAME=rekono
+      - RKN_DB_HOST=postgres
+      - RKN_DB_USER=postgres
+      - PGPASSWORD=postgres
+      - REKONO_HOME=/rekono
+      - REKONO_UID=65532
+      - REKONO_GID=1000
+      - LEGACY_NGINX_TLS=/legacy/nginx/tls
+      - NGINX_TLS=/etc/nginx/tls
+      - NGINX_UID=101
+      - NGINX_GID=101
+    security_opt:
+      - no-new-privileges:true
+
+  valkey:
+    restart: always
+    image: valkey/valkey:8-bookworm
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    hostname: valkey
+    container_name: valkey
+    expose:
+      - 6379
+    networks:
+      - internal
+    security_opt:
+      - no-new-privileges:true
+
+  initializer:
+    restart: 'no'
+    image: pablosnt/rekono-worker:latest
+    command: bash /entrypoints/initializer.sh
+    container_name: initializer
+    volumes:
+      - rekono:/rekono
+      - ./config.yaml:/rekono/config.yaml
+      - wordlists_seclists:/usr/share/seclists
+      - wordlists_dirb:/usr/share/dirb/wordlists
+    networks:
+      - internal
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rekono-upgrade:
+        condition: service_completed_successfully
+      valkey:
+        condition: service_healthy
+    environment:
       - RKN_DB_HOST=postgres
       - RKN_DB_USER=postgres
       - RKN_DB_PASSWORD=postgres
-      - REKONO_HOME=/rekono
-      - DJANGO_SUPERUSER_EMAIL=${RKN_EMAIL:-rekono@rekono.com}
+      - RKN_RQ_HOST=valkey
+      - DJANGO_SUPERUSER_EMAIL=${RKN_EMAIL:-rekono@rekono.dev}
       - DJANGO_SUPERUSER_USERNAME=${RKN_USERNAME:-rekono}
       - DJANGO_SUPERUSER_PASSWORD=${RKN_PASSWORD:-rekono}
   
   tasks-worker:
     restart: always
-    image: rekono-backend:latest
-    command: python manage.py rqworker tasks-queue
+    image: pablosnt/rekono-backend:latest
+    command: uv run --no-dev manage.py rqworker tasks --with-scheduler
     hostname: tasks-worker
     volumes:
       - rekono:/rekono
       - ./config.yaml:/rekono/config.yaml:ro
+      - wordlists_seclists:/usr/share/seclists
+      - wordlists_dirb:/usr/share/dirb/wordlists
     networks:
       - internal
+      - external
     depends_on:
-      - initializer
-      - redis
+      valkey:
+        condition: service_healthy
+      initializer:
+        condition: service_completed_successfully
     environment:
       - RKN_DB_HOST=postgres
       - RKN_DB_USER=postgres
       - RKN_DB_PASSWORD=postgres
-      - RKN_RQ_HOST=redis
-      - REKONO_HOME=/rekono
+      - RKN_RQ_HOST=valkey
+    security_opt:
+      - no-new-privileges:true
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   executions-worker:
     restart: always
-    build:
-      context: .
-      dockerfile: docker/Dockerfile.kali
-    image: rekono-kali:latest
-    command: bash -c "source /code/env/bin/activate && python manage.py rqworker executions-queue"
+    image: pablosnt/rekono-worker:latest
+    command: bash /entrypoints/executions-worker.sh
     hostname: executions-worker
     volumes:
       - rekono:/rekono
@@ -90,20 +143,25 @@ services:
       - external
     cap_add:
       - NET_ADMIN
+      - NET_RAW
+      - NET_BIND_SERVICE
     depends_on:
-      - initializer
-      - redis
+      valkey:
+        condition: service_healthy
+      initializer:
+        condition: service_completed_successfully
     environment:
       - RKN_DB_HOST=postgres
       - RKN_DB_USER=postgres
       - RKN_DB_PASSWORD=postgres
-      - RKN_RQ_HOST=redis
-      - REKONO_HOME=/rekono
+      - RKN_RQ_HOST=valkey
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   findings-worker:
     restart: always
-    image: rekono-backend:latest
-    command: python manage.py rqworker findings-queue
+    image: pablosnt/rekono-backend:latest
+    command: uv run --no-dev manage.py rqworker findings
     hostname: findings-worker
     volumes:
       - rekono:/rekono
@@ -112,20 +170,25 @@ services:
       - internal
       - external
     depends_on:
-      - initializer
-      - redis
+      valkey:
+        condition: service_healthy
+      initializer:
+        condition: service_completed_successfully
     environment:
       - RKN_DB_HOST=postgres
       - RKN_DB_USER=postgres
       - RKN_DB_PASSWORD=postgres
-      - RKN_RQ_HOST=redis
-      - REKONO_HOME=/rekono
-    
-  emails-worker:
+      - RKN_RQ_HOST=valkey
+    security_opt:
+      - no-new-privileges:true
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  monitor-worker:
     restart: always
-    image: rekono-backend:latest
-    command: python manage.py rqworker emails-queue
-    hostname: emails-worker
+    image: pablosnt/rekono-backend:latest
+    command: uv run --no-dev manage.py rqworker monitor --with-scheduler
+    hostname: monitor-worker
     volumes:
       - rekono:/rekono
       - ./config.yaml:/rekono/config.yaml:ro
@@ -133,19 +196,24 @@ services:
       - internal
       - external
     depends_on:
-      - initializer
-      - redis
+      valkey:
+        condition: service_healthy
+      initializer:
+        condition: service_completed_successfully
     environment:
       - RKN_DB_HOST=postgres
       - RKN_DB_USER=postgres
       - RKN_DB_PASSWORD=postgres
-      - RKN_RQ_HOST=redis
-      - REKONO_HOME=/rekono
+      - RKN_RQ_HOST=valkey
+    security_opt:
+      - no-new-privileges:true
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   telegram-bot:
     restart: always
-    image: rekono-backend:latest
-    command: python manage.py telegram_bot
+    image: pablosnt/rekono-backend:latest
+    command: uv run --no-dev manage.py telegram_bot
     hostname: telegram_bot
     container_name: telegram-bot
     volumes:
@@ -155,29 +223,32 @@ services:
       - internal
       - external
     depends_on:
-      - initializer
-      - redis
+      valkey:
+        condition: service_healthy
+      initializer:
+        condition: service_completed_successfully
     environment:
       - RKN_DB_HOST=postgres
       - RKN_DB_USER=postgres
       - RKN_DB_PASSWORD=postgres
-      - RKN_RQ_HOST=redis
-      - REKONO_HOME=/rekono
-  
+      - RKN_RQ_HOST=valkey
+    security_opt:
+      - no-new-privileges:true
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
   backend:
     restart: always
-    build:
-      context: .
-      dockerfile: docker/Dockerfile.backend
-    image: rekono-backend:latest
-    command: python manage.py runserver 0.0.0.0:8000
+    image: pablosnt/rekono-backend:latest
+    command: sh /entrypoints/deploy-backend.sh
     hostname: backend
     container_name: backend
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/api/schema/swagger-ui.html"]
-      interval: 10s
+      test: ["CMD", "uv", "run", "python", "-c", "import requests; requests.get('http://localhost:8000/api/schema/swagger-ui/', timeout=5).raise_for_status()"]
+      interval: 5s
       timeout: 5s
       retries: 10
+      start_period: 30s
     expose:
       - 8000
     volumes:
@@ -187,50 +258,51 @@ services:
       - internal
       - external
     depends_on:
-      - initializer
-      - redis
+      valkey:
+        condition: service_healthy
+      initializer:
+        condition: service_completed_successfully
     environment:
       - RKN_DB_HOST=postgres
       - RKN_DB_USER=postgres
       - RKN_DB_PASSWORD=postgres
-      - RKN_RQ_HOST=redis
-      - RKN_TRUSTED_PROXY=true
+      - RKN_RQ_HOST=valkey
+      - RKN_TRUSTED_PROXIES=1
       - RKN_ALLOWED_HOSTS=*
-      - REKONO_HOME=/rekono
+    security_opt:
+      - no-new-privileges:true
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
   
   frontend:
     restart: always
-    build:
-      context: .
-      dockerfile: docker/Dockerfile.frontend
-    image: rekono-frontend:latest
+    image: pablosnt/rekono-frontend:latest
     hostname: frontend
     container_name: frontend
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/#/login"]
-      interval: 10s
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://localhost:3000"]
+      interval: 5s
       timeout: 5s
-      retries: 30
-      start_period: 30s
+      retries: 5
+      start_period: 10s
     expose:
       - 3000
     networks:
       - internal
+    security_opt:
+      - no-new-privileges:true
 
   nginx:
     restart: always
-    build:
-      context: .
-      dockerfile: docker/nginx/Dockerfile
-    image: rekono-nginx:latest
+    image: pablosnt/rekono-nginx:latest
     hostname: nginx
     container_name: nginx
     ports:
       - 80:80
       - 443:443
     volumes:
+      - nginx:/etc/nginx/tls/
       - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./docker/nginx/tls/:/etc/nginx/tls/
     depends_on:
       backend:
         condition: service_healthy
@@ -239,10 +311,17 @@ services:
     networks:
       - internal
       - external
+    security_opt:
+      - no-new-privileges:true
 
 volumes:
+  # Volume used by postgres 14 in Rekono 1.x
   postgres:
+  postgres_18:
+  nginx:
   rekono:
+  wordlists_seclists:
+  wordlists_dirb:
 
 networks:
   internal:

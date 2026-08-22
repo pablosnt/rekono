@@ -2,59 +2,143 @@ name: Code style
 on:
   workflow_dispatch:
   pull_request:
-    paths:
-      - 'rekono/**'
+
+permissions:
+  contents: read
 
 jobs:
-  flake8:
-    runs-on: ubuntu-latest
-    steps:      
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      
-      - name: Flake8 check
-        uses: valentijnscholten/flake8-your-pr@8115e1590de049c223a7b629828cfa9354d8856e
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  mypy:
-    runs-on: ubuntu-latest
-    steps:      
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.7'
-      
-      - name: Install Python dependencies
-        run: |
-          python -m pip install -U pip
-          python -m pip install -r requirements.txt
-
-      - name: Install MyPy
-        run: python3 -m pip install mypy==0.931
-      
-      - name: MyPy check
-        run: mypy --namespace-packages --package rekono --install-types --non-interactive
-
-  eslint:
+  backend:
+    name: Backend
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - name: Check changed files
+        uses: dorny/paths-filter@f3ceefdc7ef57bc2d8560787d4b6c33e44044cec
+        id: changes
         with:
-          fetch-depth: 0
-      
-      - name: Install ESLint
-        working-directory: rekono/frontend
+          filters: |
+            backend:
+              - 'backend/**'
+
+      - name: Checkout
+        if: ${{ steps.changes.outputs.backend == 'true' || github.event_name != 'pull_request' }}
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
+        with:
+          persist-credentials: false
+
+      - name: Install UV
+        if: ${{ steps.changes.outputs.backend == 'true' || github.event_name != 'pull_request' }}
+        uses: astral-sh/setup-uv@ca5ddd015e07666cb1f1340ad6171f5e7afffb3e
+        with:
+          activate-environment: true
+          python-version: 3.12.0 # Required by pytype
+
+      - name: Install dependencies
+        working-directory: backend
+        if: ${{ steps.changes.outputs.backend == 'true' || github.event_name != 'pull_request' }}
+        run: uv sync --locked
+
+      - name: Ruff
+        if: ${{ steps.changes.outputs.backend == 'true' || github.event_name != 'pull_request' }}
+        working-directory: backend
         run: |
-          npm install .
-          npm install -g eslint
+          uvx ruff format --check
+          uvx ruff==0.15.22 check
+          uvx ruff check --select I
+
+      - name: Flake8
+        if: ${{ (steps.changes.outputs.backend == 'true' || github.event_name != 'pull_request') && !cancelled() }}
+        working-directory: backend
+        run: uvx flake8 .
+
+      - name: PyType
+        if: ${{ (steps.changes.outputs.backend == 'true' || github.event_name != 'pull_request') && !cancelled() }}
+        working-directory: backend
+        run: uvx pytype --disable "import-error,pyi-error,invalid-annotation" --exclude "**/migrations/*.py" --keep-going --jobs 100 .
+
+  frontend:
+    name: Frontend
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check changed files
+        uses: dorny/paths-filter@f3ceefdc7ef57bc2d8560787d4b6c33e44044cec
+        id: changes
+        with:
+          filters: |
+            frontend:
+              - 'frontend/**'
+
+      - name: Checkout
+        if: ${{ steps.changes.outputs.frontend == 'true' || github.event_name != 'pull_request' }}
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
+        with:
+          persist-credentials: false
       
-      - name: ESLint check
-        run: eslint rekono/frontend/ --ext .js,.jsx,.ts,.tsx
+      - name: Install Node
+        uses: actions/setup-node@f4a67bbeca970f103397d3d2b9462cf787cd2980
+        with:
+          node-version: 22
+
+      - name: Install PNPM
+        uses: pnpm/action-setup@0e279bb959325dab635dd2c09392533439d90093
+        with:
+          version: 10
+
+      - name: Install Node dependencies
+        if: ${{ steps.changes.outputs.frontend == 'true' || github.event_name != 'pull_request' }}
+        working-directory: frontend/
+        run: |
+          pnpm install --frozen-lockfile --ignore-scripts
+          pnpm nuxt prepare
+
+      - name: ESLint
+        if: ${{ steps.changes.outputs.frontend == 'true' || github.event_name != 'pull_request' }}
+        working-directory: frontend/
+        run: pnpm run eslint
+
+      - name: Prettier
+        if: ${{ (steps.changes.outputs.frontend == 'true' || github.event_name != 'pull_request') && !cancelled() }}
+        working-directory: frontend/
+        run: pnpm run prettier
+
+  email-templates:
+    name: Email Templates
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check changed files
+        uses: dorny/paths-filter@f3ceefdc7ef57bc2d8560787d4b6c33e44044cec
+        id: changes
+        with:
+          filters: |
+            templates:
+              - 'email-templates/**'
+
+      - name: Checkout
+        if: ${{ steps.changes.outputs.templates == 'true' || github.event_name != 'pull_request' }}
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
+        with:
+          persist-credentials: false
+      
+      - name: Install Node
+        uses: actions/setup-node@f4a67bbeca970f103397d3d2b9462cf787cd2980
+        with:
+          node-version: 22
+
+      - name: Install PNPM
+        uses: pnpm/action-setup@0e279bb959325dab635dd2c09392533439d90093
+        with:
+          version: 10
+
+      - name: Install Node dependencies
+        if: ${{ steps.changes.outputs.templates == 'true' || github.event_name != 'pull_request' }}
+        working-directory: email-templates/
+        run: pnpm install --frozen-lockfile --ignore-scripts
+
+      - name: ESLint
+        if: ${{ steps.changes.outputs.templates == 'true' || github.event_name != 'pull_request' }}
+        working-directory: email-templates/
+        run: pnpm run eslint
+
+      - name: Prettier
+        if: ${{ (steps.changes.outputs.templates == 'true' || github.event_name != 'pull_request') && !cancelled() }}
+        working-directory: email-templates/
+        run: pnpm run prettier

@@ -1,0 +1,18 @@
+<template>
+  <div class="flex flex-col sm:flex-row gap-6 items-start mt-6">
+    <FindingsCounterSingle
+      class="w-full sm:w-60 h-40 shrink-0"
+      :project-id="project"
+      finding-name-plural="Technologies"
+      only-active
+    />
+    <MetricsTechnologiesNames
+      :project="project"
+      class="w-full sm:flex-1 min-w-0"
+    />
+  </div>
+</template>
+
+<script setup lang="ts">
+defineProps<{ project?: number }>();
+</script>

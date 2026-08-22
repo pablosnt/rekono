@@ -1,18 +1,45 @@
 repos:
-    - repo: local
-      hooks:
-          - id: mypy
-            name: mypy
-            entry: mypy
-            language: python
-            types: [python]
-            require_serial: true
-            verbose: true
-    - repo: https://github.com/gitleaks/gitleaks
-      rev: v8.16.1
-      hooks:
-        - id: gitleaks
-    - repo: https://github.com/PyCQA/flake8
-      rev: 4.0.1
-      hooks:
-          - id: flake8
+  - repo: local
+    hooks:
+      - id: eslint-frontend
+        name: eslint (frontend)
+        entry: sh -c 'cd frontend; npm run eslint:fix'
+        language: system
+        files: ^frontend/.*\.(js|jsx|ts|tsx|vue)$
+      - id: prettier-frontend
+        name: prettier (frontend)
+        entry: sh -c 'cd frontend; npm run prettier:fix'
+        language: system
+        files: ^frontend/.*\.(js|jsx|ts|tsx|vue)$
+      - id: eslint-email-templates
+        name: eslint (email-templates)
+        entry: sh -c 'cd email-templates; npm run eslint:fix'
+        language: system
+        files: ^email-templates/.*\.(js|jsx|ts|tsx|vue)$
+      - id: prettier-email-templates
+        name: prettier (email-templates)
+        entry: sh -c 'cd email-templates; npm run prettier:fix'
+        language: system
+        files: ^email-templates/.*\.(js|jsx|ts|tsx|vue)$
+  - repo: https://github.com/gitleaks/gitleaks.git
+    rev: v8.28.0
+    hooks:
+      - id: gitleaks
+        name: GitLeaks
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.14.2
+    hooks:
+      - id: ruff-check
+        types_or: [python, pyi]
+        args: [--fix]
+      - id: ruff-check
+        types_or: [python, pyi]
+        args: [--select, I, --fix]
+      - id: ruff-format
+        types_or: [python, pyi]
+  - repo: https://github.com/pycqa/flake8
+    rev: 7.3.0
+    hooks:
+      - id: flake8
+        types_or: [python, pyi]
+        args: [--config=backend/.flake8]

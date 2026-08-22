@@ -1,0 +1,3 @@
+<template>
+  <FindingsTechnologies />
+</template>

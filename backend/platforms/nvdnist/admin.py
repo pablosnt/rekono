@@ -1,0 +1,7 @@
+"""Registration of the NVD NIST settings model in the Django admin site."""
+
+from django.contrib import admin
+
+from platforms.nvdnist.models import NvdNistSettings
+
+admin.site.register(NvdNistSettings)

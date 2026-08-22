@@ -1,0 +1,124 @@
+name: Monitor Dependencies
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0 * * *"
+
+permissions: {}
+
+jobs:
+  tools:
+    runs-on: ubuntu-latest
+    container:
+      image: kalilinux/kali-last-release:latest # zizmor: ignore[unpinned-images] Keep 'latest' to detect upstream tool updates
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Uncheckable: gitleaks, searchsploit, spring4shell-scan, log4j-scan, emailharvester
+          - name: Nmap
+            install: apt install nmap -y
+            command: nmap --version
+            expected: 7.99 # 7.991
+          - name: Dirsearch
+            install: python3 -m pip install dirsearch --break-system-packages
+            command: dirsearch --version
+            expected: v0.5.0
+          - name: theHarvester
+            install: apt install theharvester -y
+            command: theHarvester --help
+            expected: 4.10.1  # 4.11.1
+          - name: Nikto
+            install: apt install nikto -y
+            command: nikto -Version
+            expected: 2.6.0 # 2.6.1
+          - name: Sslscan
+            install: apt install sslscan -y
+            command: sslscan --version
+            expected: 2.1.5 # 2.2.2
+          - name: SSLyze
+            install: apt install sslyze -y
+            command: sslyze --help
+            expected: 6.3.1
+          - name: CMSeeK
+            install: apt install cmseek -y
+            command: cmseek --version
+            expected: 1.1.3
+          - name: ZAP
+            install: apt install zaproxy -y
+            command: zaproxy -version
+            expected: 2.17.0
+          - name: Metasploit
+            install: apt install metasploit-framework -y
+            command: msfconsole --version 2>&1
+            expected: 6.4.135-dev # 6.4.142
+          - name: JoomScan
+            install: apt install joomscan -y
+            command: joomscan --version
+            expected: 0.0.7
+          - name: Nuclei
+            install: apt install nuclei -y
+            command: nuclei --version 2>&1
+            expected: v3.8.0 # v3.11.1
+          - name: Gobuster
+            install: apt install gobuster -y
+            command: gobuster --version
+            expected: 3.8.2
+          - name: SSH Audit
+            install: python3 -m pip install ssh-audit --break-system-packages
+            command: ssh-audit --help
+            expected: v3.9.0
+          - name: SMBMap
+            install: apt install smbmap -y
+            command: smbmap --help
+            expected: v1.10.7 # v1.10.8
+    name: Detect ${{ matrix.name }} updates
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Install
+        run: |
+          apt update
+          if [[ "${{ matrix.install }}" == *"python3"* ]]
+          then
+            apt install python3-dev python3-pip -y
+          fi
+          ${{ matrix.install }}
+
+      - name: Check version
+        run: |
+          count=$(${{ matrix.command }} | grep -o "${{ matrix.expected }}" | wc -l)
+          if [ $count -eq 0 ]
+          then
+            exit 1
+          fi
+
+  hacktricks:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        url:
+          - https://hacktricks.wiki/en/sitemap.xml
+          - https://hacktricks.wiki/en/linux-hardening/linux-basics/linux-privilege-escalation/index.html
+          - https://hacktricks.wiki/en/macos-hardening/macos-security-and-privilege-escalation/index.html
+          - https://hacktricks.wiki/en/windows-hardening/windows-local-privilege-escalation/index.html
+          - https://hacktricks.wiki/en/mobile-pentesting/android-app-pentesting/index.html
+          - https://hacktricks.wiki/en/mobile-pentesting/ios-pentesting/index.html
+          - https://hacktricks.wiki/en/generic-methodologies-and-resources/pentesting-network/dhcpv6.html
+          - https://hacktricks.wiki/en/pentesting-web/sql-injection/index.html
+          - https://hacktricks.wiki/en/pentesting-web/sql-injection/mysql-injection/index.html
+          - https://hacktricks.wiki/en/pentesting-web/web-vulnerabilities-methodology.html
+          - https://hacktricks.wiki/en/windows-hardening/active-directory-methodology/kerberoast.html
+          - https://hacktricks.wiki/en/generic-methodologies-and-resources/pentesting-network/network-protocols-explained-esp.html#radius
+          - https://hacktricks.wiki/en/pentesting-web/sql-injection/oracle-injection.html
+          - https://hacktricks.wiki/en/network-services-pentesting/ipsec-ike-vpn-pentesting.html
+          - https://hacktricks.wiki/en/network-services-pentesting/pentesting-mssql-microsoft-sql-server/index.html
+    name: Verify ${{ matrix.url }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Check URL
+        run: if [ "$(curl -s -o /dev/null -w "%{http_code}" ${{ matrix.url }})" -ne 200 ]; then exit 1; fi
