@@ -13,6 +13,11 @@ jobs:
     runs-on: ubuntu-latest
     environment: github
     steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
+        with:
+          egress-policy: audit
+
       - name: Chain Bench
         uses: aquasecurity/chain-bench-action@cd35ac2e4470006fc9bbbbcd6c328edb61b72332
         with:
