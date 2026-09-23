@@ -27,11 +27,11 @@ jobs:
           - name: theHarvester
             install: apt install theharvester -y
             command: theHarvester --help
-            expected: 4.10.1  # 4.11.1
+            expected: 4.11.1
           - name: Nikto
             install: apt install nikto -y
             command: nikto -Version
-            expected: 2.6.0 # 2.6.1
+            expected: 2.6.1
           - name: Sslscan
             install: apt install sslscan -y
             command: sslscan --version
@@ -51,7 +51,7 @@ jobs:
           - name: Metasploit
             install: apt install metasploit-framework -y
             command: msfconsole --version 2>&1
-            expected: 6.4.135-dev # 6.4.142
+            expected: 6.5.3-dev
           - name: JoomScan
             install: apt install joomscan -y
             command: joomscan --version
@@ -59,7 +59,7 @@ jobs:
           - name: Nuclei
             install: apt install nuclei -y
             command: nuclei --version 2>&1
-            expected: v3.8.0 # v3.11.1
+            expected: v3.11.1
           - name: Gobuster
             install: apt install gobuster -y
             command: gobuster --version
@@ -93,9 +93,13 @@ jobs:
 
       - name: Check version
         run: |
-          count=$(${{ matrix.command }} | grep -o "${{ matrix.expected }}" | wc -l)
-          if [ $count -eq 0 ]
+          output=$(${{ matrix.command }} 2>&1 || true)
+          if ! grep -qF "${{ matrix.expected }}" <<< "$output"
           then
+            echo "::error title=${{ matrix.name }} update detected::Expected version '${{ matrix.expected }}' not found in the output of '${{ matrix.command }}'"
+            echo "----- ${{ matrix.command }} -----"
+            echo "$output"
+            echo "--------------------------------"
             exit 1
           fi
 
