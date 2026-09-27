@@ -45,6 +45,12 @@ There are some libraries that require the installation of some packages. On Debi
 sudo apt install libpq-dev libmagic1 libgcc-s1 libxml2-dev libxslt-dev python3-dev libjpeg-dev zlib1g-dev
 ```
 
+On MacOS, `libmagic` is required:
+
+```bash
+brew install libmagic
+```
+
 ### PostgreSQL & Valkey
 
 Start both services and create the empty rekono database:
