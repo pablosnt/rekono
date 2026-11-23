@@ -24,13 +24,27 @@ Best of all, you don't have to wait in front of it. Rekono notifies you by email
 
 # Quick Start
 
+> Upgrading from Rekono 1.x? Read the [upgrade guide](UPGRADE.md) first. The database migration runs on its own, but there are things that you should know
+
+## Docker Compose
+
 ```bash
 docker compose up -d --scale executions-worker=5
 ```
 
 Go to https://127.0.0.1 and log in with `rekono:rekono`. **Change that password the first time you log in**
 
-> Upgrading from Rekono 1.x? Read the [upgrade guide](UPGRADE.md) first. The database migration runs on its own, but there are things that you should know
+## Kali Linux
+
+Rekono is available as the [`rekono`](https://www.kali.org/tools/rekono/) package in Kali Linux:
+
+```bash
+sudo apt update
+sudo apt install rekono
+rekono
+```
+
+Go to https://127.0.0.1:26443 and log in with `rekono:rekono`. **Change that password the first time you log in**
 
 # Features
 
