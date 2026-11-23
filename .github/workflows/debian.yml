@@ -1,0 +1,99 @@
+name: Debian Package
+on:
+  release:
+    types: [published]
+
+permissions: {}
+
+jobs:
+  debian-package:
+    name: Update Debian package
+    if: ${{ !github.event.release.prerelease }}
+    runs-on: ubuntu-latest
+    environment: gitlab
+    permissions: {}
+    defaults:
+      run:
+        shell: bash
+    env:
+      PACKAGE_PROJECT: pablosnt%2Frekono
+      KALI_PROJECT: kalilinux%2Fpackages%2Frekono
+      DEFAULT_BRANCH: kali/master
+      VERSION: ${{ github.event.release.name }}
+      TAG: ${{ github.event.release.tag_name }}
+      RELEASE_URL: ${{ github.event.release.html_url }}
+      GITLAB_EMAIL: ${{ secrets.GITLAB_EMAIL }}
+      GITLAB_USER: ${{ secrets.GITLAB_USER }}
+      GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
+    steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
+        with:
+          egress-policy: audit
+
+      - name: Checkout GitLab repository
+        run: git clone --branch "$DEFAULT_BRANCH" https://gitlab.com/pablosnt/rekono.git rekono
+
+      - name: Update debian/watch
+        working-directory: rekono
+        run: |
+          if [[ "$TAG" != "$VERSION"* ]]; then
+            echo "Release tag '$TAG' doesn't start with release name '$VERSION'"
+            exit 1
+          fi
+          sed -i -E "s#refs/tags/.*\$#refs/tags/(${VERSION})${TAG#"$VERSION"}#" debian/watch
+          cat debian/watch
+
+      - name: Update debian/changelog
+        working-directory: rekono
+        run: |
+          {
+            echo "rekono (${VERSION}-0kali1) kali-dev; urgency=medium"
+            echo
+            echo "  * Update Rekono version to ${VERSION}"
+            echo
+            echo " -- Pablo Santiago López <${GITLAB_EMAIL}>  $(TZ=Europe/Madrid date -R)"
+            echo
+            cat debian/changelog
+          } > changelog.new
+          mv changelog.new debian/changelog
+          head -6 debian/changelog
+
+      - name: Push changes to GitLab
+        working-directory: rekono
+        run: |
+          git config user.name 'Pablo Santiago López'
+          git config user.email "$GITLAB_EMAIL"
+          git checkout -b "release/$VERSION"
+          git commit -am "Update Rekono version to $VERSION"
+          git config credential.helper '!f() { sleep 1; echo "username=${GITLAB_USER}"; echo "password=${GITLAB_TOKEN}"; }; f'
+          git push --set-upstream origin "release/$VERSION"
+
+      - name: Create GitLab merge request
+        id: merge-request
+        run: |
+          URL=$(curl --silent --show-error --fail-with-body \
+            --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}" \
+            --data-urlencode "title=Update Rekono version to ${VERSION}" \
+            --data-urlencode "source_branch=release/${VERSION}" \
+            --data-urlencode "target_branch=${BRANCH}" \
+            "https://gitlab.com/api/v4/projects/${PACKAGE_PROJECT}/merge_requests" | jq -r '.web_url')
+          echo "url=$URL" >> "$GITHUB_OUTPUT"
+
+      - name: GitLab issue in Kali Linux repository
+        env:
+          MERGE_REQUEST_URL: ${{ steps.merge-request.outputs.url }}
+        run: |
+          DESCRIPTION="Please, upgrade the \`rekono\` Kali Linux package to the latest version \`${VERSION}\`.
+
+          New version details:
+          - [GitHub release](${RELEASE_URL})
+          - [Rekono changelog](https://github.com/pablosnt/rekono/blob/main/CHANGELOG.md)
+          - [Packaging changes](${MERGE_REQUEST_URL})
+
+          Thank you very much!"
+          curl --silent --show-error --fail-with-body \
+            --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}" \
+            --data-urlencode "title=New Rekono version ${VERSION}" \
+            --data-urlencode "description=${DESCRIPTION}" \
+            "https://gitlab.com/api/v4/projects/${KALI_PROJECT}/issues"
