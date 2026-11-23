@@ -18,7 +18,7 @@
           {
             'aria-label': 'Kali Linux',
             icon: 'i-simple-icons-kalilinux',
-            to: 'https://www.kali.org/tools/rekono-kbx/',
+            to: 'https://www.kali.org/tools/rekono/',
             target: '_blank',
           },
           {
