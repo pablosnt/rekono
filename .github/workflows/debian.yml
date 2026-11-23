@@ -76,7 +76,7 @@ jobs:
             --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}" \
             --data-urlencode "title=Update Rekono version to ${VERSION}" \
             --data-urlencode "source_branch=release/${VERSION}" \
-            --data-urlencode "target_branch=${BRANCH}" \
+            --data-urlencode "target_branch=${DEFAULT_BRANCH}" \
             "https://gitlab.com/api/v4/projects/${PACKAGE_PROJECT}/merge_requests" | jq -r '.web_url')
           echo "url=$URL" >> "$GITHUB_OUTPUT"
 
