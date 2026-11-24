@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 """Django's command-line utility for administrative tasks."""
 
+import multiprocessing
 import os
 import sys
 
@@ -8,6 +9,9 @@ import sys
 def main():
     """Run administrative tasks."""
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "rekono.settings")
+    if "test" in sys.argv and multiprocessing.get_start_method() == "forkserver":
+        # Python 3.14 uses forkserver by default on Linux, but Django parallel tests only support fork and spawn
+        multiprocessing.set_start_method("fork", force=True)
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:  # pragma: no cover
