@@ -1,7 +1,7 @@
 {
   "name": "rekono-email-templates",
   "private": true,
-  "packageManager": "pnpm@11.17.0",
+  "packageManager": "pnpm@12.21.0",
   "scripts": {
     "dev": "email dev",
     "build": "email export --outDir ../backend/platforms/email/templates && node scripts/unescape-django-tags.mjs ../backend/platforms/email/templates",
