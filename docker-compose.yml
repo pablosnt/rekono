@@ -59,7 +59,7 @@ services:
 
   valkey:
     restart: always
-    image: valkey/valkey:8-bookworm
+    image: valkey/valkey:9-trixie
     healthcheck:
       test: ["CMD", "valkey-cli", "ping"]
       interval: 5s
