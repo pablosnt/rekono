@@ -54,23 +54,24 @@ jobs:
         working-directory: /mnt
     steps:
       - name: Harden the runner (Audit all outbound calls)
-        uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
+        uses: step-security/harden-runner@aebdcf6156ab6691adf63218240e476564a1ed4c
         with:
           egress-policy: audit
 
       - name: Free disk space
         if: ${{ matrix.clean-disk == true }}
-        uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be
+        uses: jlumbroso/free-disk-space@ceedf095f4ec1a097402bc6bd80831f2e1a6fde6
         with:
-          tool-cache: true
+          preinstalled-runtimes: true
+          swap-storage: true
 
       - name: Checkout
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           persist-credentials: false
 
       - name: Set up Docker
-        uses: docker/setup-docker-action@0bda481195131bcde0ee38cc081893020c27ff20
+        uses: docker/setup-docker-action@3f1ab1ab0e29231562e4db4ca600c1a49653bac6
         with:
           daemon-config: |
             {
@@ -81,14 +82,14 @@ jobs:
             }
 
       - name: Login to Docker Hub
-        uses: docker/login-action@37a9a4b3331f99f00a11099bab28fa3234301f65
+        uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550
         with:
           username: ${{ env.DOCKER_USER }}
           password: ${{ secrets.DOCKER_TOKEN }}
           logout: true
 
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@259a565a6f30a57c28f9ea913f2d359b43ff5fc9
+        uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1
 
       - name: Get metadata
         id: metadata
@@ -101,7 +102,7 @@ jobs:
       - name: Build and push unstable
         id: build-unstable
         if: ${{ github.event_name != 'release' }}
-        uses: docker/build-push-action@d2aace88c215bf1196304f5a1f372aa8384f1b54
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc
         with:
           file: ${{ matrix.dockerfile }}
           target: ${{ matrix.target }}
@@ -119,7 +120,7 @@ jobs:
       - name: Build and push release
         id: build-release
         if: ${{ github.event_name == 'release' }}
-        uses: docker/build-push-action@d2aace88c215bf1196304f5a1f372aa8384f1b54
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc
         with:
           file: ${{ matrix.dockerfile }}
           target: ${{ matrix.target }}
@@ -135,7 +136,7 @@ jobs:
             LABEL_REVISION=${{ github.sha }}
 
       - name: Attest provenance
-        uses: actions/attest@5ec407fab24e59f5df8672d92186d8c266c9b7fe
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6
         with:
           subject-name: docker.io/${{ env.DOCKER_USER }}/${{ matrix.image }}
           subject-digest: ${{ github.event_name == 'release' && steps.build-release.outputs.digest || steps.build-unstable.outputs.digest }}
@@ -162,17 +163,17 @@ jobs:
             image: rekono-worker
     steps:
       - name: Harden the runner (Audit all outbound calls)
-        uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
+        uses: step-security/harden-runner@aebdcf6156ab6691adf63218240e476564a1ed4c
         with:
           egress-policy: audit
 
       - name: Checkout
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           persist-credentials: false
 
       - name: Trivy
-        uses: aquasecurity/trivy-action@bfa4b33a029b9aa80ddb784b45574c30e072c59e
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25
         with:
           image-ref: docker.io/${{ env.DOCKER_USER }}/${{ matrix.image }}:unstable
           scanners: vuln
@@ -185,7 +186,7 @@ jobs:
 
       - name: Upload report
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
           name: ${{ matrix.name }}-trivy
           path: ${{ matrix.name }}-trivy.json
@@ -216,7 +217,7 @@ jobs:
             ignore: CIS-DI-0010,DKL-DI-0001
     steps:
       - name: Harden the runner (Audit all outbound calls)
-        uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
+        uses: step-security/harden-runner@aebdcf6156ab6691adf63218240e476564a1ed4c
         with:
           egress-policy: audit
 
@@ -233,7 +234,7 @@ jobs:
 
       - name: Upload report
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
           name: ${{ matrix.name }}-dockle
           path: ${{ matrix.name }}-dockle.json
