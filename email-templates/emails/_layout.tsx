@@ -46,7 +46,7 @@ export function Layout({ children }: LayoutProps) {
               <Row>
                 <Column className="text-center">
                   <Img
-                    src="https://raw.githubusercontent.com/pablosnt/rekono/main/frontend/public/logo-light.png"
+                    src="https://raw.githubusercontent.com/pablosnt/rekono/b5c6f1946d48c698b74a6cdd4790a0f2a468f379/frontend/public/logo-light.png"
                     alt="Rekono"
                     height={36}
                     className="mx-auto"
