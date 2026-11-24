@@ -1,53 +1,61 @@
 {
-  "version": 1,
+  "version": 2,
   "skills": {
     "accessibility": {
       "source": "addyosmani/web-quality-skills",
+      "commit": "afa8da942115f2961fdbfa80807ea0b232ff6c00",
       "sourceType": "github",
       "skillPath": "skills/accessibility/SKILL.md",
-      "computedHash": "10e83284d3395ab5ec2f2db602b663480a37a4ff404d16510eefe86b034fcc1a"
+      "computedHash": "c668809f5df57feb87cc06f1bc37fb340d1d92e26bacb6edbeab9258d22e76a5"
     },
     "frontend-design": {
       "source": "anthropics/skills",
+      "commit": "e4bb5d960d87126ff3b3a8af1a104b7db67560ba",
       "sourceType": "github",
       "skillPath": "skills/frontend-design/SKILL.md",
-      "computedHash": "4eabc66183767153e404b39d1b839b1c37f2d82d86f0a0d7e880a579d8d62336"
+      "computedHash": "83485963700bcf11d5bf78118facb301676b69d918fee2e45a95e7f1a2840f6c"
     },
     "nuxt-ui": {
       "source": "nuxt/ui",
+      "commit": "2b3635758c9c078d71060d4436f967727047fe05",
       "sourceType": "github",
       "skillPath": "skills/nuxt-ui/SKILL.md",
-      "computedHash": "ef3a731fdfa8439d3c7f0c6d497a67073216b8cb7d7fa6a3c605a6fda4ede19a"
+      "computedHash": "89a36be1af44314309cc668fab6294b566393e282e2526fa03c6dbc9ca9f2779"
     },
     "rekono-docstrings": {
       "source": "pablosnt/skills",
+      "commit": "ca4876644eb6321332ba58cd506b366069c6e9e7",
       "sourceType": "github",
       "skillPath": "skills/rekono-docstrings/SKILL.md",
-      "computedHash": "cb8792a95e7ca27d6508c4e54c83a67830f6804abc7ec249da4945e3a9cb7b20"
+      "computedHash": "03b2ffd6cc80b02f5e6c79c6d15303378c4f392695b06e5a4d347bb82defd862"
     },
     "rekono-integration": {
       "source": "pablosnt/skills",
+      "commit": "ca4876644eb6321332ba58cd506b366069c6e9e7",
       "sourceType": "github",
       "skillPath": "skills/rekono-integration/SKILL.md",
-      "computedHash": "1805e480e1395da548a509d3bbca387d42c3ff9e36d06438d790292cb45e12be"
+      "computedHash": "7f4acaa65047966b7b6f5cf05b0edc720269720bedc9d051f5486c06954f43e2"
     },
     "rekono-page": {
       "source": "pablosnt/skills",
+      "commit": "ca4876644eb6321332ba58cd506b366069c6e9e7",
       "sourceType": "github",
       "skillPath": "skills/rekono-page/SKILL.md",
-      "computedHash": "df1a4781467d557663070fff32957d6bcd1e6fe9503f6e237d5b0625efe1737c"
+      "computedHash": "e1567b1be038f39ad94eab718f50e383c455961230b8a3257088085ae4a8317a"
     },
     "rekono-unit-test": {
       "source": "pablosnt/skills",
+      "commit": "ca4876644eb6321332ba58cd506b366069c6e9e7",
       "sourceType": "github",
       "skillPath": "skills/rekono-unit-test/SKILL.md",
-      "computedHash": "59352230d4c140c572f4c2d3b475372a23cae23f660adbec86c57b2e4822a861"
+      "computedHash": "43801eee2f4460feeeffdf295404586021133b99cb36354fc4c0e0368f805e36"
     },
     "skill-creator": {
       "source": "anthropics/skills",
+      "commit": "e4bb5d960d87126ff3b3a8af1a104b7db67560ba",
       "sourceType": "github",
       "skillPath": "skills/skill-creator/SKILL.md",
-      "computedHash": "5ea13a6d9f0d4bb694405d79acd00cadec0d21bb138c4dd10fcf3c500cb835c2"
+      "computedHash": "2d7f889e6ae93c6c27d699856942c336b5b8644537496987d5571043d059b1dc"
     }
   }
 }
