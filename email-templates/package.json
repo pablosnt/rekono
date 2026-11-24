@@ -13,11 +13,11 @@
   "dependencies": {
     "react": "19.3.1",
     "react-dom": "19.3.1",
-    "react-email": "6.11.14"
+    "react-email": "6.11.16"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "@react-email/ui": "6.11.14",
+    "@react-email/ui": "6.11.16",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
     "eslint": "^10.15.0",

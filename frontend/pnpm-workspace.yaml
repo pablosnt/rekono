@@ -1,4 +1,8 @@
 minimumReleaseAge: 10080
+minimumReleaseAgeExclude:
+  - "@nuxt/ui@4.13.1"
+  - motion-v@2.13.0
+  - tailwind-merge@3.7.1
 ignoreScripts: true
 shamefullyHoist: true
 ignoredBuiltDependencies:
@@ -7,3 +11,5 @@ ignoredBuiltDependencies:
   - esbuild
   - unrs-resolver
   - vue-demi
+overrides:
+  readdir-glob>minimatch: ^11.0.1
