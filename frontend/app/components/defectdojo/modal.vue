@@ -88,7 +88,7 @@
       />
       <UButton
         v-if="!sync"
-        color="info"
+        color="primary"
         label="Enable Sync"
         :disabled="!valid"
         :loading="loading"
