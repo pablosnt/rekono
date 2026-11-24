@@ -124,7 +124,7 @@ class MfaManagerMixin:
         """
         user.secret = pyotp.random_base32()
         user.save(update_fields=["_mfa_key"])
-        return pyotp.totp.TOTP(user.secret).provisioning_uri(user.email, issuer_name="Rekono")
+        return pyotp.totp.TOTP(user.secret).provisioning_uri(name=user.email, issuer_name="Rekono")
 
     def verify_mfa(self, otp: str, user: Any) -> bool:
         """Check if a code matches the TOTP secret of a user at this moment.
