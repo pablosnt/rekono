@@ -1,4 +1,4 @@
-FROM nginx:1.30-alpine-slim
+FROM nginx:1.31-alpine-slim
 
 COPY docker/nginx/entrypoint.sh /usr/local/bin/
 COPY docker/nginx/nginx.conf /etc/nginx/nginx.conf

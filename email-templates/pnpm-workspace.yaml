@@ -1,2 +1,5 @@
 minimumReleaseAge: 10080
+minimumReleaseAgeExclude:
+  - "@react-email/ui@6.11.16"
+  - react-email@6.11.16
 ignoreScripts: true

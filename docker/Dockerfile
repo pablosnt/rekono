@@ -25,7 +25,7 @@ RUN PNPM_VERSION=$(node -p "require('./package.json').packageManager.split('@')[
     node scripts/unescape-django-tags.mjs /templates/dist
 
 
-FROM ghcr.io/astral-sh/uv:python3.13-trixie-slim AS build-backend
+FROM ghcr.io/astral-sh/uv:python3.14-trixie-slim AS build-backend
 
 ARG BACKEND_DEBIAN_DEPENDENCIES
 

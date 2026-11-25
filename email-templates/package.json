@@ -1,7 +1,7 @@
 {
   "name": "rekono-email-templates",
   "private": true,
-  "packageManager": "pnpm@11.17.0",
+  "packageManager": "pnpm@12.21.0",
   "scripts": {
     "dev": "email dev",
     "build": "email export --outDir ../backend/platforms/email/templates && node scripts/unescape-django-tags.mjs ../backend/platforms/email/templates",
@@ -11,20 +11,20 @@
     "prettier:fix": "prettier --write --list-different . --ignore-path=../.gitignore --ignore-path=.prettierignore"
   },
   "dependencies": {
-    "react": "19.2.8",
-    "react-dom": "19.2.8",
-    "react-email": "6.9.2"
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "react-email": "6.11.16"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "@react-email/ui": "6.9.2",
-    "@types/react": "19.2.18",
-    "@types/react-dom": "19.2.4",
-    "eslint": "^10.8.1",
+    "@react-email/ui": "6.11.16",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "eslint": "^10.15.0",
     "eslint-config-prettier": "^10.1.8",
-    "globals": "^17.9.0",
-    "prettier": "^3.9.6",
+    "globals": "^17.14.0",
+    "prettier": "^3.10.1",
     "typescript": "^6.0.3",
-    "typescript-eslint": "^8.66.0"
+    "typescript-eslint": "^8.73.0"
   }
 }
