@@ -184,6 +184,8 @@ RUN apt update && \
     rm -rf /var/lib/apt/lists /var/cache/apt/ && \
     # Install hacking tools via pip
     uv pip install --system --break-system-packages --exclude-newer "2 days" ssh-audit dirsearch && \
+    # Remove the sources of the Dirsearch Rust engine, since it's not built nor used
+    rm -rf /opt/python/lib/python3*/site-packages/dirsearch/native && \
     # Install hacking tools from source
     mkdir -p /opt && \
     git clone https://github.com/fullhunt/log4j-scan.git /opt/log4j-scan && \
