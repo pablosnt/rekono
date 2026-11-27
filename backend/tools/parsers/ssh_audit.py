@@ -24,7 +24,8 @@ class Sshaudit(BaseParser):
         # a bare "_" so the split still yields two empty strings when banner or software is missing
         name, version = data.get("banner", {}).get("software", "_").split("_", 1)
         technology = self.create_finding(Technology, name=name, version=version)
-        cves = set([])
+        # List instead of set, so the vulnerabilities are always created in the order of the report
+        cves = []
         for root in ["enc", "kex", "key", "mac"]:
             for item in data.get(root) or []:
                 # Notes are lowercase sentence fragments in the report, capitalized here for a
@@ -48,6 +49,7 @@ class Sshaudit(BaseParser):
                 # not as structured data on the algorithm entry, so they are pulled out with a regex
                 for note in notes:
                     for cve in re.findall(Regex.CVE.value, note):
-                        cves.add(cve)
+                        if cve not in cves:
+                            cves.append(cve)
         for cve in cves:
             self.create_finding(Vulnerability, linked_finding=True, technology=technology, name=cve, cve=cve)

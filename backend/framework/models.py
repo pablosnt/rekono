@@ -59,6 +59,21 @@ class BaseModel(Model, LoggingEntity):
                     return None
             return project
 
+    @classmethod
+    def _get_blank_query(cls, field: str) -> Q:
+        """Build the query that matches the objects without a value in a field.
+
+        Args:
+            field: Model field to check.
+
+        Returns:
+            The query matching null, and also the empty string for char/text fields.
+        """
+        query = Q(**{f"{field}__isnull": True})
+        if cls._meta.get_field(field).get_internal_type() in ["CharField", "TextField"]:
+            query |= Q(**{field: ""})
+        return query
+
     def __str__(self) -> str:
         """Return the model name, so all the models have a representation."""
         return self.__class__.__name__

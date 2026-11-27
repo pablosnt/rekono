@@ -1,7 +1,11 @@
 from django.test import TestCase
 
+from executions.models import Execution
 from findings.enums import TransportProtocol, TriageStatus
 from findings.models import Port, Technology, Vulnerability
+from targets.enums import TargetType
+from targets.models import Target
+from tasks.models import Task
 from tests.findings.base import FindingTest
 from tests.framework import ApiTest
 from tests.framework.cases import ApiTestCase
@@ -26,6 +30,7 @@ class VulnerabilityTest(FindingTest, TestCase):
     )
     sample_cve = "CVE-2025-9999"
     sample_name = "Already enriched finding"
+    sample_description = "Injection in the login form"
 
     def test_base_input_filter(self) -> None:
         vulnerability = Vulnerability(cve="CVE-2021-44228")
@@ -43,23 +48,7 @@ class VulnerabilityTest(FindingTest, TestCase):
         # Empty filter
         self.assertTrue(vulnerability.filter(Input(filter="")))
 
-    def test_deduplication_by_name(self):
-        first = Vulnerability.objects.create_finding(self.execution, technology=self.technology, name=self.sample_name)
-        second = Vulnerability.objects.create_finding(self.execution, port=self.port, name=self.sample_name)
-        self.assertEqual(first.id, second.id)
-        self.assertEqual(1, Vulnerability.objects.filter(technology=self.technology, name=self.sample_name).count())
-        self.assertIsNone(second.port)
-        self.assertEqual(self.technology, second.technology)
-
-    def test_deduplication_ignores_name_case(self):
-        first = Vulnerability.objects.create_finding(self.execution, technology=self.technology, name="SQL Injection")
-        second = Vulnerability.objects.create_finding(self.execution, technology=self.technology, name="sql injection")
-        self.assertEqual(first.id, second.id)
-        self.assertEqual(
-            1, Vulnerability.objects.filter(technology=self.technology, name__iexact="sql injection").count()
-        )
-
-    def test_deduplication_ignores_cve_case(self):
+    def test_deduplication_by_cve(self):
         first = Vulnerability.objects.create_finding(
             self.execution, technology=self.technology, name="Log4Shell", cve="CVE-2021-44228"
         )
@@ -67,9 +56,67 @@ class VulnerabilityTest(FindingTest, TestCase):
             self.execution, technology=self.technology, name="Log4Shell", cve="cve-2021-44228"
         )
         self.assertEqual(first.id, second.id)
-        self.assertEqual(
-            1, Vulnerability.objects.filter(technology=self.technology, cve__iexact="CVE-2021-44228").count()
+        third = Vulnerability.objects.create_finding(
+            self.execution, technology=self.technology, name="Log4Shell", cve=self.sample_cve
         )
+        self.assertNotEqual(first.id, third.id)
+        fourth = Vulnerability.objects.create_finding(self.execution, technology=self.technology, name="Log4Shell")
+        self.assertNotEqual(first.id, fourth.id)
+        fifth = Vulnerability.objects.create_finding(
+            self.execution, technology=self.technology, name="Log4Shell", cve="CVE-2025-8888"
+        )
+        self.assertNotEqual(fourth.id, fifth.id)
+
+    def test_deduplication_by_name_and_description(self):
+        first = Vulnerability.objects.create_finding(self.execution, technology=self.technology, name="SQL Injection")
+        second = Vulnerability.objects.create_finding(
+            self.execution, technology=self.technology, name="sql injection", description=self.sample_description
+        )
+        self.assertEqual(first.id, second.id)
+        self.assertEqual(self.sample_description, second.description)
+        third = Vulnerability.objects.create_finding(
+            self.execution, technology=self.technology, name="SQL Injection", description=self.sample_description
+        )
+        self.assertEqual(first.id, third.id)
+        fourth = Vulnerability.objects.create_finding(self.execution, technology=self.technology, name="SQL Injection")
+        self.assertEqual(first.id, fourth.id)
+        self.assertEqual(self.sample_description, fourth.description)
+        fifth = Vulnerability.objects.create_finding(
+            self.execution, technology=self.technology, name="SQL Injection", description="Blind SQL injection"
+        )
+        self.assertNotEqual(first.id, fifth.id)
+
+    def test_deduplication_with_same_port(self):
+        first = Vulnerability.objects.create_finding(
+            self.execution, port=self.port, name=self.sample_cve, cve=self.sample_cve
+        )
+        second = Vulnerability.objects.create_finding(
+            self.execution, port=self.port, name=self.sample_cve, cve=self.sample_cve
+        )
+        self.assertEqual(first.id, second.id)
+
+    def test_deduplication_with_new_port(self):
+        tech_finding = Vulnerability.objects.create_finding(
+            self.execution, technology=self.technology, name=self.sample_cve, cve=self.sample_cve
+        )
+        port_finding = Vulnerability.objects.create_finding(
+            self.execution, port=self.port, name=self.sample_cve, cve=self.sample_cve
+        )
+        self.assertEqual(tech_finding.id, port_finding.id)
+        self.assertIsNone(port_finding.port)
+        self.assertEqual(tech_finding.technology, port_finding.technology)
+
+    def test_deduplication_different_ports_not_merged(self):
+        other_port = Port.objects.create_finding(
+            self.execution, host=self.host, port=8443, protocol=TransportProtocol.TCP
+        )
+        first = Vulnerability.objects.create_finding(
+            self.execution, port=self.port, name=self.sample_cve, cve=self.sample_cve
+        )
+        second = Vulnerability.objects.create_finding(
+            self.execution, port=other_port, name=self.sample_cve, cve=self.sample_cve
+        )
+        self.assertNotEqual(first.id, second.id)
 
     def test_deduplication_with_same_technology(self):
         first = Vulnerability.objects.create_finding(
@@ -80,14 +127,46 @@ class VulnerabilityTest(FindingTest, TestCase):
         )
         self.assertEqual(first.id, second.id)
 
-    def test_deduplication_with_same_port(self):
-        first = Vulnerability.objects.create_finding(
+    def test_deduplication_with_new_technology(self):
+        port_finding = Vulnerability.objects.create_finding(
             self.execution, port=self.port, name=self.sample_cve, cve=self.sample_cve
+        )
+        tech_finding = Vulnerability.objects.create_finding(
+            self.execution, technology=self.technology, name=self.sample_cve, cve=self.sample_cve
+        )
+        self.assertEqual(port_finding.id, tech_finding.id)
+        self.assertIsNone(tech_finding.port)
+        self.assertEqual(self.technology, tech_finding.technology)
+
+    def test_deduplication_with_different_technologies_on_same_port_not_merged(self):
+        other_technology = Technology.objects.create_finding(
+            self.execution, port=self.port, name="Apache", version="2.4.1"
+        )
+        first = Vulnerability.objects.create_finding(
+            self.execution, technology=self.technology, name=self.sample_cve, cve=self.sample_cve
         )
         second = Vulnerability.objects.create_finding(
-            self.execution, port=self.port, name=self.sample_cve, cve=self.sample_cve
+            self.execution, technology=other_technology, name=self.sample_cve, cve=self.sample_cve
         )
-        self.assertEqual(first.id, second.id)
+        self.assertNotEqual(first.id, second.id)
+        self.assertEqual(2, Vulnerability.objects.filter(cve=self.sample_cve).count())
+        Vulnerability.objects.create_finding(self.execution, port=self.port, name=self.sample_cve, cve=self.sample_cve)
+        self.assertEqual(2, Vulnerability.objects.filter(cve=self.sample_cve).count())
+
+    def test_deduplication_different_technologies_on_different_ports_not_merged(self):
+        other_port = Port.objects.create_finding(
+            self.execution, host=self.host, port=8443, protocol=TransportProtocol.TCP
+        )
+        other_technology = Technology.objects.create_finding(
+            self.execution, port=other_port, name="WordPress", version="1.0.0"
+        )
+        first = Vulnerability.objects.create_finding(
+            self.execution, technology=self.technology, name=self.sample_cve, cve=self.sample_cve
+        )
+        second = Vulnerability.objects.create_finding(
+            self.execution, technology=other_technology, name=self.sample_cve, cve=self.sample_cve
+        )
+        self.assertNotEqual(first.id, second.id)
 
     def test_deduplication_with_user_input(self):
         user_finding = Vulnerability.objects.create_finding(
@@ -120,78 +199,14 @@ class VulnerabilityTest(FindingTest, TestCase):
         self.assertIsNone(user_finding.port)
         self.assertFalse(user_finding.created_from_user_input)
 
-    def test_deduplication_with_new_port(self):
-        tech_finding = Vulnerability.objects.create_finding(
-            self.execution, technology=self.technology, name=self.sample_cve, cve=self.sample_cve
-        )
-        port_finding = Vulnerability.objects.create_finding(
-            self.execution, port=self.port, name=self.sample_cve, cve=self.sample_cve
-        )
-        self.assertEqual(tech_finding.id, port_finding.id)
-        self.assertIsNone(port_finding.port)
-        self.assertEqual(tech_finding.technology, port_finding.technology)
-
-    def test_deduplication_with_new_technology(self):
-        port_finding = Vulnerability.objects.create_finding(
-            self.execution, port=self.port, name=self.sample_cve, cve=self.sample_cve
-        )
-        tech_finding = Vulnerability.objects.create_finding(
-            self.execution, technology=self.technology, name=self.sample_cve, cve=self.sample_cve
-        )
-        self.assertEqual(port_finding.id, tech_finding.id)
-        self.assertIsNone(tech_finding.port)
-        self.assertEqual(self.technology, tech_finding.technology)
-
-    def test_deduplication_with_different_technologies_from_same_port(self):
-        other_technology = Technology.objects.create_finding(
-            self.execution, port=self.port, name="Apache", version="2.4.1"
-        )
-        first = Vulnerability.objects.create_finding(
-            self.execution, technology=self.technology, name=self.sample_cve, cve=self.sample_cve
-        )
-        second = Vulnerability.objects.create_finding(
-            self.execution, technology=other_technology, name=self.sample_cve, cve=self.sample_cve
-        )
+    def test_deduplication_without_location(self):
+        first = Vulnerability.objects.create_finding(self.execution, name=self.sample_cve, cve=self.sample_cve)
+        second = Vulnerability.objects.create_finding(self.execution, name=self.sample_cve, cve=self.sample_cve)
         self.assertEqual(first.id, second.id)
-        self.assertEqual(1, Vulnerability.objects.filter(cve=self.sample_cve).count())
-        Vulnerability.objects.create_finding(self.execution, port=self.port, name=self.sample_cve, cve=self.sample_cve)
-        self.assertEqual(1, Vulnerability.objects.filter(cve=self.sample_cve).count())
-
-    def test_deduplication_not_merged(self):
-        algorithm_finding = Vulnerability.objects.create_finding(
-            self.execution, technology=self.technology, name=self.sample_name
-        )
-        cve_finding = Vulnerability.objects.create_finding(
-            self.execution, technology=self.technology, name=self.sample_cve, cve=self.sample_cve
-        )
-        self.assertNotEqual(algorithm_finding.id, cve_finding.id)
-
-    def test_deduplication_different_ports_not_merged(self):
-        other_port = Port.objects.create_finding(
-            self.execution, host=self.host, port=8443, protocol=TransportProtocol.TCP
-        )
-        first = Vulnerability.objects.create_finding(
+        third = Vulnerability.objects.create_finding(
             self.execution, port=self.port, name=self.sample_cve, cve=self.sample_cve
         )
-        second = Vulnerability.objects.create_finding(
-            self.execution, port=other_port, name=self.sample_cve, cve=self.sample_cve
-        )
-        self.assertNotEqual(first.id, second.id)
-
-    def test_deduplication_different_technologies_on_different_ports_not_merged(self):
-        other_port = Port.objects.create_finding(
-            self.execution, host=self.host, port=8443, protocol=TransportProtocol.TCP
-        )
-        other_technology = Technology.objects.create_finding(
-            self.execution, port=other_port, name="WordPress", version="1.0.0"
-        )
-        first = Vulnerability.objects.create_finding(
-            self.execution, technology=self.technology, name=self.sample_cve, cve=self.sample_cve
-        )
-        second = Vulnerability.objects.create_finding(
-            self.execution, technology=other_technology, name=self.sample_cve, cve=self.sample_cve
-        )
-        self.assertNotEqual(first.id, second.id)
+        self.assertNotEqual(first.id, third.id)
 
 
 class LatestVulnerabilitiesTest(ApiTest, TestCase):

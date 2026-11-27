@@ -177,9 +177,8 @@ class PortStatsViewSet(StatsViewSet):
     """
 
     queryset = (
-        Port.objects.filter(is_fixed=False, service__isnull=False, protocol__isnull=False, port__isnull=False)
-        .exclude(service="")
-        .exclude(protocol="")
+        Port.objects.filter(is_fixed=False, port__isnull=False)
+        .exclude(Port._get_blank_query("service") | Port._get_blank_query("protocol"))
         .values("service", "protocol", "port")
         .annotate(count=Count("id", distinct=True))
     )
