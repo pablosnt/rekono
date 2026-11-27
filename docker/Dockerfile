@@ -195,6 +195,8 @@ RUN apt update && \
     uv pip install --system --break-system-packages --python /opt/python/bin/python -r /opt/log4j-scan/requirements.txt && \
     uv pip install --system --break-system-packages --python /opt/python/bin/python -r /opt/spring4shell-scan/requirements.txt && \
     uv pip install --system --break-system-packages --python /opt/python/bin/python -r /opt/EmailHarvester/requirements.txt && \
+    # Clean uv cache, which keeps a copy of every installed package
+    uv cache clean && \
     # Update tooling resources
     searchsploit --update || true && \
     # The exploits database is updated as root via Git, so the rootless user can't have write access
