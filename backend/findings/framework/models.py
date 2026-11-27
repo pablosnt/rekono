@@ -281,6 +281,27 @@ class Finding(BaseInput):
         return cls.objects.filter(query).order_by("id").first()
 
     @classmethod
+    def _find_duplicate_in_locations(cls, execution: Execution, identity: Q, locations: list[Q]) -> "Finding | None":
+        """Find the duplicate of a finding in the closest location where there is one.
+
+        Args:
+            execution: Execution that discovered the incoming finding.
+            identity: Query matching the findings that are the same as the incoming one.
+            locations: Queries matching where the duplicate can be, from the closest to the
+              incoming finding to the farthest one.
+
+        Returns:
+            The finding that was already discovered, or None if this one is new.
+        """
+        for location in locations:
+            finding = cls.objects.filter(identity, location, executions__task__target=execution.task.target).order_by(
+                "id"
+            )
+            if finding.exists():
+                return finding.first()
+        return None
+
+    @classmethod
     def _get_deduplication_field_query(cls, unique_field: UniqueField, new_value: Any) -> Q | None:
         """Build the deduplication query fragment for a single unique field.
 
@@ -307,9 +328,7 @@ class Finding(BaseInput):
             }
         )
         if unique_field.match_null_and_empty:
-            field_query |= Q(**{f"{unique_field.field}__isnull": True})
-            if cls._meta.get_field(unique_field.field).get_internal_type() in ["CharField", "TextField"]:
-                field_query |= Q(**{unique_field.field: ""})
+            field_query |= cls._get_blank_query(unique_field.field)
         return field_query
 
     @cached_property

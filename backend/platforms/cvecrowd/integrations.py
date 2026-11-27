@@ -165,11 +165,9 @@ class CveCrowd(BaseIntegration):
         for alert in Alert.objects.filter(item=AlertItem.TRENDING_CVE, enabled=True).all():
             vulnerabilities = (
                 Vulnerability.objects.filter(
-                    executions__task__target__project=alert.project,
-                    cve__isnull=False,
-                    is_fixed=False,
-                    trending=True,
+                    executions__task__target__project=alert.project, is_fixed=False, trending=True
                 )
+                .exclude(Vulnerability._get_blank_query("cve"))
                 .exclude(triage_status=TriageStatus.FALSE_POSITIVE)
                 .exclude(cve__in=already_trending_cves)
                 .exclude(id__in=notified_vulnerabilities)

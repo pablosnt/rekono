@@ -2,7 +2,7 @@
 
 Rekono 2.0.0 changes the PostgreSQL version from 14 to 18. PostgreSQL can't read data directories written by previous major versions, so the data has to be migrated before Rekono 2.x can use it.
 
-This guide covers the two supported installation methods. Rekono Desktop is upgraded by its own package, so it isn't covered here.
+This guide covers the three supported installation methods: Docker Compose, the Kali Linux package and the installation from source.
 
 Rekono 2.0.0 also changes the data model in ways that can't always be translated from the version 1.x one. Check the [known problems](#known-problems) before upgrading, since some data is lost even when the migration succeeds.
 
@@ -40,6 +40,38 @@ If you need to recover the backup before removing it:
 docker run --rm -v rekono_postgres:/backup -v $(pwd):/output alpine \
     cp /backup/rekono-14-backup.sql.gz /output/
 ```
+
+
+## Kali Linux package
+
+Rekono 1.x was distributed in Kali Linux as the `rekono-kbx` package, which is deprecated now. Rekono 2.x is distributed as the new [`rekono`](https://www.kali.org/tools/rekono/) package, which replaces it.
+
+The migration is automatic. The first time you start Rekono 2.x, it looks in the home directory of your login accounts for the `~/.local/share/rekono` directory that `rekono-kbx` left behind, and imports your database, `config.yaml` file, wordlists and reports from it. Kali doesn't package the PostgreSQL version of that database anymore, so Rekono dumps it with a temporary Docker container of that version, which means that Docker has to be running at that point.
+
+You can point Rekono to another directory, or skip the import, with these variables of the `/etc/default/rekono` file:
+
+| Variable | Description |
+| -------- | ----------- |
+| `REKONO_KBX_HOME` | Directory to import, instead of looking for `~/.local/share/rekono` in each home directory |
+| `REKONO_KBX_SKIP` | Set it to `1` to start Rekono without importing anything |
+
+1. Install the new package. It replaces `rekono-kbx` and installs Docker as a recommended dependency, but you have to start the Docker daemon yourself:
+
+```bash
+sudo apt update
+sudo apt install rekono
+sudo systemctl start docker
+```
+
+2. If you need any of the variables above, set them first. Then start Rekono and it will ask for root privileges to import your data:
+
+```bash
+rekono
+```
+
+3. Your old directory is no longer used once the data is imported, but it stays as a backup until you remove it. The `rekono status` command shows you the command to do it.
+
+If the import fails, Rekono explains why and lets you decide how to continue. You can stop, solve the problem and run `rekono` again, or import the data manually following the [installation from source](#installation-from-source) steps. You can also continue with an empty database, in which case Rekono won't offer the import again until you remove the `.rekono-2.x-discarded` file from your old directory. Nothing in your home directory is deleted in any case.
 
 
 ## Installation from source

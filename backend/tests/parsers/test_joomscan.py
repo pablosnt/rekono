@@ -128,7 +128,7 @@ class JoomscanTest(ParserTest, TestCase):
                 {
                     "model": Vulnerability,
                     "name": "Directory listing",
-                    "description": "/error.php",
+                    "description": "/error.php, /administrator/",
                     "severity": Severity.LOW,
                     "cwes": ["CWE-548"],
                 },
