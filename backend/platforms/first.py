@@ -91,7 +91,8 @@ class First(BaseIntegration):
         # 100 CVEs in that batch. Filtering up front isolates bad data from valid CVEs.
         cves = [
             cve
-            for cve in Vulnerability.objects.filter(cve__isnull=False, is_fixed=False)
+            for cve in Vulnerability.objects.filter(is_fixed=False)
+            .exclude(Vulnerability._get_blank_query("cve"))
             .values_list("cve", flat=True)
             .distinct()
             if cve and re.fullmatch(Regex.CVE.value, cve)

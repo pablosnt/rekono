@@ -22,10 +22,11 @@ class Joomscan(BaseParser):
         # which also matches the host substring check below, does not produce a redundant
         # root Path finding
         endpoints = set(["/"])
-        backups = set()
-        configurations = set()
-        path_disclosure = set()
-        directory_listing = set()
+        # Lists instead of sets, so the paths are always joined in the order of the report
+        backups = []
+        configurations = []
+        path_disclosure = []
+        directory_listing = []
         host = urlparse(self.executor.arguments[self.executor.arguments.index("-u") + 1]).hostname
         lines = (self.output or "").split("\n")
         for index, line in enumerate(lines):
@@ -84,9 +85,11 @@ class Joomscan(BaseParser):
                 # Any remaining line mentioning the host is treated as reporting an endpoint; the
                 # endpoint itself is the text between the host and the next whitespace
                 endpoint = data.split(host, 1)[1].split(" ", 1)[0]
-                if endpoint and endpoint not in endpoints:
-                    endpoints.add(endpoint)
-                    for search, list in [
+                if endpoint:
+                    if endpoint not in endpoints:
+                        endpoints.add(endpoint)
+                        self.create_finding(Path, path=Path.clean_path(endpoint), type=PathType.ENDPOINT)
+                    for search, paths in [
                         ("Path :", backups),
                         ("config file path :", configurations),
                         ("Full Path Disclosure (FPD) in", path_disclosure),
@@ -94,9 +97,8 @@ class Joomscan(BaseParser):
                     ]:
                         # The same line that reports the endpoint also carries one of these
                         # markers when it belongs to one of the aggregated categories below
-                        if search in data:
-                            list.add(endpoint)
-                    self.create_finding(Path, path=Path.clean_path(endpoint), type=PathType.ENDPOINT)
+                        if search in data and endpoint not in paths:
+                            paths.append(endpoint)
         for name, paths, severity, cwe in [
             # CWE-530: Exposure of Backup File to an Unauthorized Control Sphere
             ("Backup files found", backups, Severity.HIGH, "CWE-530"),
