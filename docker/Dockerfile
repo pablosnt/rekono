@@ -184,6 +184,8 @@ RUN apt update && \
     rm -rf /var/lib/apt/lists /var/cache/apt/ && \
     # Install hacking tools via pip
     uv pip install --system --break-system-packages --exclude-newer "2 days" ssh-audit dirsearch && \
+    # Remove the sources of the Dirsearch Rust engine, since it's not built nor used
+    rm -rf /opt/python/lib/python3*/site-packages/dirsearch/native && \
     # Install hacking tools from source
     mkdir -p /opt && \
     git clone https://github.com/fullhunt/log4j-scan.git /opt/log4j-scan && \
@@ -193,6 +195,8 @@ RUN apt update && \
     uv pip install --system --break-system-packages --python /opt/python/bin/python -r /opt/log4j-scan/requirements.txt && \
     uv pip install --system --break-system-packages --python /opt/python/bin/python -r /opt/spring4shell-scan/requirements.txt && \
     uv pip install --system --break-system-packages --python /opt/python/bin/python -r /opt/EmailHarvester/requirements.txt && \
+    # Clean uv cache, which keeps a copy of every installed package
+    uv cache clean && \
     # Update tooling resources
     searchsploit --update || true && \
     # The exploits database is updated as root via Git, so the rootless user can't have write access

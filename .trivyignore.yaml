@@ -12,13 +12,3 @@ vulnerabilities:
   - id: GHSA-537c-gmf6-5ccf
     purls:
       - "pkg:pypi/cryptography@47.0.0"
-  # Dirsearch ships the sources of its optional Rust engine
-  - id: GHSA-36hh-v3qg-5jq4
-    purls:
-      - "pkg:cargo/pyo3@0.24.1"
-  - id: GHSA-chgr-c6px-7xpp
-    purls:
-      - "pkg:cargo/pyo3@0.24.1"
-  - id: GHSA-4w2j-m93h-cj5j
-    purls:
-      - "pkg:cargo/quinn-proto@0.11.14"

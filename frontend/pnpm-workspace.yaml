@@ -13,3 +13,4 @@ ignoredBuiltDependencies:
   - vue-demi
 overrides:
   readdir-glob>minimatch: ^11.0.1
+  json-schema-to-typescript-lite>@apidevtools/json-schema-ref-parser: ^15.3.6
